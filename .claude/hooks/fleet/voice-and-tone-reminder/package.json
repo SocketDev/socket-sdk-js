@@ -1,5 +1,5 @@
 {
-  "name": "hook-prose-antipattern-reminder",
+  "name": "hook-voice-and-tone-reminder",
   "private": true,
   "type": "module",
   "main": "./index.mts",

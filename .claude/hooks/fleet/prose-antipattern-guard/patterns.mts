@@ -1,16 +1,20 @@
-// Prose-antipattern detection patterns for prose-antipattern-reminder.
+// Prose-antipattern detection patterns for prose-antipattern-guard.
 //
 // Split out from index.mts so tests can import the pattern table without
-// triggering the hook's top-level `await runStopReminder(...)` (which
-// blocks reading stdin). The hook's index.mts and its unit test both
-// import PROSE_PATTERNS from here.
+// triggering the hook's top-level `await withEditGuard(...)` (which blocks
+// reading stdin). The hook's index.mts and its unit test both import
+// PROSE_PATTERNS from here.
 
-import type { RuleViolation } from '../_shared/stop-reminder.mts'
+export interface ProsePattern {
+  readonly label: string
+  readonly regex: RegExp
+  readonly why: string
+}
 
-export const PROSE_PATTERNS: readonly RuleViolation[] = [
+export const PROSE_PATTERNS: readonly ProsePattern[] = [
   {
     label: 'em-dash chain',
-    // Two or more ` — ` spaced-em-dash spans in the same turn. A single
+    // Two or more ` — ` spaced-em-dash spans in the same paragraph. A single
     // em-dash is fine; a chain is the AI-prose tell.
     regex: / — [^\n]*? — /,
     why: 'Em-dash chains read AI-generated. Break into separate sentences or use commas / parentheses.',
@@ -32,3 +36,18 @@ export const PROSE_PATTERNS: readonly RuleViolation[] = [
     why: 'Vague hedging adverb doing no work. Cut it or replace with the concrete fact.',
   },
 ]
+
+/**
+ * Scan `content` for prose antipatterns. Returns the matched patterns (empty
+ * when clean).
+ */
+export function findProseAntipatterns(content: string): ProsePattern[] {
+  const hits: ProsePattern[] = []
+  for (let i = 0, { length } = PROSE_PATTERNS; i < length; i += 1) {
+    const pattern = PROSE_PATTERNS[i]!
+    if (pattern.regex.test(content)) {
+      hits.push(pattern)
+    }
+  }
+  return hits
+}

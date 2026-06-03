@@ -1,4 +1,4 @@
-# prose-tone-reminder
+# voice-and-tone-reminder
 
 Stop hook. Scans the most-recent assistant turn for three prose-tone
 antipattern sets and emits an informational stderr reminder (never blocks).

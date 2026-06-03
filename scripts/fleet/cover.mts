@@ -13,7 +13,7 @@
  *   --summary hide the detailed v8 table, show only the summary.
  */
 
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
@@ -78,6 +78,127 @@ export function resolveConfig(basename: string): string | undefined {
     }
   }
   return undefined
+}
+
+// Standard fleet test-suite vocabulary. `shared` is the default shared-context
+// suite (pool: threads); `isolated` is the full-isolation suite (forks) for
+// tests that mock globals / chdir / mutate process.env. Each maps to a vitest
+// config basename resolved repo-first.
+export const SUITE_DEFAULTS: ReadonlyArray<{
+  name: string
+  configBasename: string
+}> = [
+  { name: 'shared', configBasename: 'vitest.config.mts' },
+  { name: 'isolated', configBasename: 'vitest.config.isolated.mts' },
+]
+
+export interface CoverSuiteConfig {
+  // Explicit config path override (repo-root-relative). Defaults to the
+  // repo-first resolution of the suite's standard basename.
+  config?: string | undefined
+  // Globs passed as `vitest --exclude <glob>` for THIS suite's run — skips
+  // running matching test files (e.g. a test that exercises another package
+  // and would pollute this repo's coverage denominator).
+  runExclude?: string[] | undefined
+}
+
+export interface CoverThresholds {
+  statements?: number | undefined
+  branches?: number | undefined
+  functions?: number | undefined
+  lines?: number | undefined
+}
+
+export interface CoverConfig {
+  suites?: Record<string, CoverSuiteConfig> | undefined
+  thresholds?: CoverThresholds | undefined
+}
+
+// Read the repo-owned cover config (`.config/repo/cover.json`, legacy
+// `.config/cover.json` fallback). Returns an empty config when absent so
+// callers get fleet defaults. A malformed file is reported and treated as
+// empty rather than crashing the run.
+export function readCoverConfig(): CoverConfig {
+  const configPath = [
+    path.join(rootPath, '.config', 'repo', 'cover.json'),
+    path.join(rootPath, '.config', 'cover.json'),
+  ].find(p => existsSync(p))
+  if (!configPath) {
+    return {}
+  }
+  try {
+    const parsed = JSON.parse(readFileSync(configPath, 'utf8')) as unknown
+    if (!parsed || typeof parsed !== 'object') {
+      logger.warn(
+        `${path.relative(rootPath, configPath)} must be a JSON object — ignoring`,
+      )
+      return {}
+    }
+    return parsed as CoverConfig
+  } catch (e) {
+    logger.warn(
+      `Failed to parse ${path.relative(rootPath, configPath)}: ${e instanceof Error ? e.message : String(e)} — ignoring`,
+    )
+    return {}
+  }
+}
+
+export interface ResolvedSuite {
+  name: string
+  config: string | undefined
+  runExclude: string[]
+}
+
+// Merge the fleet suite defaults with the repo's cover.json into the concrete
+// list of suites to run. A suite runs when its config resolves (repo-first or
+// explicit override). Per-suite runExclude comes from cover.json.
+export function resolveSuites(coverConfig: CoverConfig): ResolvedSuite[] {
+  const suiteConfigs = coverConfig.suites ?? {}
+  const resolved: ResolvedSuite[] = []
+  for (let i = 0, { length } = SUITE_DEFAULTS; i < length; i += 1) {
+    const def = SUITE_DEFAULTS[i]!
+    const override = suiteConfigs[def.name] ?? {}
+    const config = override.config ?? resolveConfig(def.configBasename)
+    if (!config) {
+      continue
+    }
+    resolved.push({
+      name: def.name,
+      config,
+      runExclude: override.runExclude ?? [],
+    })
+  }
+  return resolved
+}
+
+// Compare merged aggregate coverage against configured thresholds. Returns the
+// list of metrics that fell short (empty when all pass or no thresholds set).
+export function checkThresholds(
+  aggregate: AggregateCoverage | undefined,
+  thresholds: CoverThresholds | undefined,
+): string[] {
+  if (!thresholds || !aggregate) {
+    return []
+  }
+  const failures: string[] = []
+  const metrics: ReadonlyArray<keyof CoverThresholds> = [
+    'statements',
+    'branches',
+    'functions',
+    'lines',
+  ]
+  for (let i = 0, { length } = metrics; i < length; i += 1) {
+    const metric = metrics[i]!
+    const min = thresholds[metric]
+    if (min === undefined) {
+      continue
+    }
+    const actual = Number.parseFloat(aggregate[metric])
+    if (actual < min) {
+      failures.push(`${metric} ${actual.toFixed(2)}% < ${min}%`)
+    }
+  }
+  return failures
 }
 
 // Strip ANSI codes and decorative characters (✧, ︎ variation selector, ⚡) from
@@ -390,27 +511,29 @@ export async function main(): Promise<void> {
     .slice(2)
     .filter(arg => !customFlags.includes(arg))
 
-  const mainConfig = resolveConfig('vitest.config.mts')
-  const isolatedConfig = resolveConfig('vitest.config.isolated.mts')
+  const coverConfig = readCoverConfig()
+  const suites = resolveSuites(coverConfig)
 
-  const mainVitestArgs = [
+  // Build the vitest argv for a resolved suite, threading the suite's
+  // per-run --exclude globs (so a test that exercises another package is
+  // skipped in this repo's coverage run).
+  const suiteVitestArgs = (suite: ResolvedSuite): string[] => [
     'exec',
     'vitest',
     'run',
-    ...(mainConfig ? ['--config', mainConfig] : []),
+    ...(suite.config ? ['--config', suite.config] : []),
     '--coverage',
+    ...suite.runExclude.flatMap(glob => ['--exclude', glob]),
     ...passthroughArgs,
   ]
-  const isolatedVitestArgs = isolatedConfig
-    ? [
-        'exec',
-        'vitest',
-        'run',
-        '--config',
-        isolatedConfig,
-        '--coverage',
-        ...passthroughArgs,
-      ]
+
+  const sharedSuite = suites.find(s => s.name === 'shared')
+  const isolatedSuite = suites.find(s => s.name === 'isolated')
+  const mainVitestArgs = sharedSuite
+    ? suiteVitestArgs(sharedSuite)
+    : ['exec', 'vitest', 'run', '--coverage', ...passthroughArgs]
+  const isolatedVitestArgs = isolatedSuite
+    ? suiteVitestArgs(isolatedSuite)
     : undefined
   const typeCoverageArgs = ['exec', 'type-coverage']
 
@@ -469,6 +592,19 @@ export async function main(): Promise<void> {
         showDetail: !values['summary'],
         typeCoveragePercent,
       })
+
+      // Gate on configured thresholds: any metric under its minimum fails the
+      // run. Repos with no thresholds in cover.json are report-only.
+      const thresholdFailures = checkThresholds(
+        aggregateCoverage,
+        coverConfig.thresholds,
+      )
+      if (thresholdFailures.length) {
+        logger.error(
+          `Coverage below threshold: ${thresholdFailures.join(', ')}`,
+        )
+        exitCode = exitCode === 0 ? 1 : exitCode
+      }
     }
 
     if (buildFailed) {
