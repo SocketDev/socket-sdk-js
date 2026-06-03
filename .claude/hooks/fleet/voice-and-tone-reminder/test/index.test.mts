@@ -113,8 +113,10 @@ test('self-narration: flags a conversational hedge', () => {
 })
 
 test('fires all four groups in one turn', () => {
+  // Newline-separated: the self-narration "Now let me" pattern anchors on
+  // line-start (an opener tell), so each sample is its own line as in a turn.
   const { path: p, cleanup } = makeTranscript(
-    `${COMMENT_SAMPLE} ${USERS_SAMPLE} ${PERFECTIONIST_SAMPLE} ${SELF_NARRATION_SAMPLE}`,
+    `${COMMENT_SAMPLE}\n${USERS_SAMPLE}\n${PERFECTIONIST_SAMPLE}\n${SELF_NARRATION_SAMPLE}`,
   )
   try {
     const { stderr } = runHook(p)

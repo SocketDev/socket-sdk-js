@@ -14,15 +14,18 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs'
-import fs from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
+
+import type { AggregateCoverage } from './util/coverage-merge.mts'
+import { mergeCoverageFinal } from './util/coverage-merge.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // This script lives at scripts/fleet/, so the repo root is two levels up.
@@ -42,25 +45,6 @@ export interface TestSuitesResult {
   combined: SuiteResult
   isolatedResult: SuiteResult | undefined
   mainResult: SuiteResult
-}
-
-export interface CoverageLocation {
-  start: { line: number; column: number }
-  end: { line: number; column: number }
-}
-
-export interface CoverageFileFinal {
-  s?: Record<string, number> | undefined
-  b?: Record<string, number[]> | undefined
-  f?: Record<string, number> | undefined
-  statementMap?: Record<string, CoverageLocation> | undefined
-}
-
-export interface AggregateCoverage {
-  branches: string
-  functions: string
-  lines: string
-  statements: string
 }
 
 // Resolve a config basename repo-first: prefer `.config/repo/<name>`, fall back
@@ -137,7 +121,7 @@ export function readCoverConfig(): CoverConfig {
     return parsed as CoverConfig
   } catch (e) {
     logger.warn(
-      `Failed to parse ${path.relative(rootPath, configPath)}: ${e instanceof Error ? e.message : String(e)} — ignoring`,
+      `Failed to parse ${path.relative(rootPath, configPath)}: ${errorMessage(e)} — ignoring`,
     )
     return {}
   }
@@ -271,135 +255,6 @@ export async function runTestSuites(
   }
 
   return { combined, isolatedResult, mainResult }
-}
-
-// Merge coverage-final.json from the main and isolated suites using a
-// max-hit-count strategy. Returns aggregate percentages, or undefined when
-// neither report exists.
-export async function mergeCoverageFinal(): Promise<
-  AggregateCoverage | undefined
-> {
-  const mainFinalPath = path.join(rootPath, 'coverage/coverage-final.json')
-  const isolatedFinalPath = path.join(
-    rootPath,
-    'coverage-isolated/coverage-final.json',
-  )
-
-  let mainFinal: Record<string, CoverageFileFinal> = {}
-  let isolatedFinal: Record<string, CoverageFileFinal> = {}
-  try {
-    mainFinal = JSON.parse(await fs.readFile(mainFinalPath, 'utf8')) as Record<
-      string,
-      CoverageFileFinal
-    >
-  } catch (e) {
-    const err = e as NodeJS.ErrnoException | null
-    if (err?.code !== 'ENOENT') {
-      logger.warn(`Failed to read ${mainFinalPath}: ${err?.message}`)
-    }
-  }
-  try {
-    isolatedFinal = JSON.parse(
-      await fs.readFile(isolatedFinalPath, 'utf8'),
-    ) as Record<string, CoverageFileFinal>
-  } catch (e) {
-    const err = e as NodeJS.ErrnoException | null
-    if (err?.code !== 'ENOENT') {
-      logger.warn(`Failed to read ${isolatedFinalPath}: ${err?.message}`)
-    }
-  }
-
-  if (!Object.keys(mainFinal).length && !Object.keys(isolatedFinal).length) {
-    return undefined
-  }
-
-  const allFiles = [
-    ...new Set([...Object.keys(mainFinal), ...Object.keys(isolatedFinal)]),
-  ]
-  let totalStatements = 0
-  let coveredStatements = 0
-  let totalBranches = 0
-  let coveredBranches = 0
-  let totalFunctions = 0
-  let coveredFunctions = 0
-  let totalLines = 0
-  let coveredLines = 0
-
-  for (let fi = 0, { length: flen } = allFiles; fi < flen; fi += 1) {
-    const file = allFiles[fi]!
-    const main = mainFinal[file]
-    const iso = isolatedFinal[file]
-
-    const stmtMap = { ...main?.statementMap, ...iso?.statementMap }
-    const allStmtKeys = [
-      ...new Set([...Object.keys(main?.s ?? {}), ...Object.keys(iso?.s ?? {})]),
-    ]
-    const mergedS: Record<string, number> = {}
-    for (let i = 0, { length } = allStmtKeys; i < length; i += 1) {
-      const id = allStmtKeys[i]!
-      mergedS[id] = Math.max(main?.s?.[id] ?? 0, iso?.s?.[id] ?? 0)
-    }
-    totalStatements += allStmtKeys.length
-    coveredStatements += Object.values(mergedS).filter(c => c > 0).length
-
-    const allBranchKeys = [
-      ...new Set([...Object.keys(main?.b ?? {}), ...Object.keys(iso?.b ?? {})]),
-    ]
-    const mergedB: Record<string, number[]> = {}
-    for (let i = 0, { length } = allBranchKeys; i < length; i += 1) {
-      const id = allBranchKeys[i]!
-      const mainArr = main?.b?.[id] ?? []
-      const isoArr = iso?.b?.[id] ?? []
-      const len = Math.max(mainArr.length, isoArr.length)
-      mergedB[id] = Array.from({ length: len }, (value, j) =>
-        Math.max(mainArr[j] ?? 0, isoArr[j] ?? 0),
-      )
-    }
-    for (let i = 0, { length } = allBranchKeys; i < length; i += 1) {
-      const id = allBranchKeys[i]!
-      const arr = mergedB[id] || []
-      totalBranches += arr.length
-      coveredBranches += arr.filter(c => c > 0).length
-    }
-
-    const allFnKeys = [
-      ...new Set([...Object.keys(main?.f ?? {}), ...Object.keys(iso?.f ?? {})]),
-    ]
-    const mergedF: Record<string, number> = {}
-    for (let i = 0, { length } = allFnKeys; i < length; i += 1) {
-      const id = allFnKeys[i]!
-      mergedF[id] = Math.max(main?.f?.[id] ?? 0, iso?.f?.[id] ?? 0)
-    }
-    totalFunctions += allFnKeys.length
-    coveredFunctions += Object.values(mergedF).filter(c => c > 0).length
-
-    const lineSet = new Set<number>()
-    const coveredLineSet = new Set<number>()
-    const stmtEntries = Object.entries(stmtMap)
-    for (let i = 0, { length } = stmtEntries; i < length; i += 1) {
-      const entry = stmtEntries[i]!
-      const id = entry[0]
-      const loc = entry[1]
-      const line = loc.start.line
-      lineSet.add(line)
-      if ((mergedS[id] ?? 0) > 0) {
-        coveredLineSet.add(line)
-      }
-    }
-    totalLines += lineSet.size
-    coveredLines += coveredLineSet.size
-  }
-
-  function pct(covered: number, total: number): string {
-    return total > 0 ? ((covered / total) * 100).toFixed(2) : '0.00'
-  }
-
-  return {
-    branches: pct(coveredBranches, totalBranches),
-    functions: pct(coveredFunctions, totalFunctions),
-    lines: pct(coveredLines, totalLines),
-    statements: pct(coveredStatements, totalStatements),
-  }
 }
 
 // Print the test summary, optional v8 detail table, and the coverage summary.
@@ -581,7 +436,7 @@ export async function main(): Promise<void> {
 
       let aggregateCoverage: AggregateCoverage | undefined
       try {
-        aggregateCoverage = await mergeCoverageFinal()
+        aggregateCoverage = await mergeCoverageFinal({ rootPath, logger })
       } catch (e) {
         logger.warn(
           `Could not compute aggregate coverage: ${e instanceof Error ? e.message : 'Unknown error'}`,
@@ -619,11 +474,12 @@ export async function main(): Promise<void> {
 
     process.exitCode = exitCode
   } catch (e) {
-    logger.error(
-      `Coverage script failed: ${e instanceof Error ? e.message : String(e)}`,
-    )
+    logger.error(`Coverage script failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }
 
-await main()
+main().catch((e: unknown) => {
+  logger.error(`Coverage script failed: ${errorMessage(e)}`)
+  process.exitCode = 1
+})

@@ -159,10 +159,10 @@ const SELF_NARRATION: ReminderGroup = {
       why: 'Narrating the next tool call adds no signal — make the call. Open on the result or the decision, not the intent.',
     },
     {
-      label: 'conversational hedge ("honestly / to be fair / the reality is")',
+      label: 'conversational hedge ("honestly / to be fair / be straight with you")',
       regex:
-        /\b(?:honestly|to be fair|in all honesty|the reality is|truth be told)\b/i,
-      why: 'Filler hedge that softens a direct statement. State the fact or the recommendation plainly.',
+        /\b(?:honestly|to be honest|honest caveat|to be fair|in all honesty|the reality is|truth be told|be straight with you)\b/i,
+      why: 'Filler hedge that softens or pre-apologizes for a direct statement. State the fact, the limitation, or the recommendation plainly — no "honest caveat" preamble.',
     },
     {
       label: 'apology-padding ("you\'re absolutely right / my apologies")',
@@ -172,7 +172,7 @@ const SELF_NARRATION: ReminderGroup = {
     },
   ],
   closingHint:
-    'CLAUDE.md "Judgment & self-evaluation": direct imperatives get the tool call, not a tradeoff paragraph; finish queued work without mid-queue status padding. Address the user in a plain, direct voice — cut warm-up, hedges, and self-narration.',
+    'CLAUDE.md "Judgment & self-evaluation": direct imperatives get the tool call, not a tradeoff paragraph; finish queued work without mid-queue status padding. Address the user in a plain, direct voice — cut warm-up, hedges, and self-narration. These are heuristic regexes that over-fire (a line-start "let me" mid-explanation, or a warranted "you\'re right" acknowledgment) — that is why the group only reminds, never blocks. Treat a match as a prompt to re-read the sentence, not a verdict.',
 }
 
 await runStopReminders([

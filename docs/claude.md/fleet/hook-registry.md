@@ -46,7 +46,7 @@ The fleet hooks each cite their own trigger + bypass surface in their `README.md
 - `private-name-guard` — blocks private repo / company names in public surface
 - `programmatic-claude-lockdown-guard` — headless `claude`/`codex exec` must set the lockdown flags
 - `prose-antipattern-guard` — PreToolUse block on AI prose tells (em-dash chains, throat-clearing, "not X it's Y", hedging adverbs) in CHANGELOG.md / docs/**/*.md / README.md; bypass `Allow prose-antipattern bypass`
-- `voice-and-tone-reminder` — merged Stop scan: teacher-tone comments + "the user" naming + speed-vs-depth choice menus (per-group disable env vars preserved)
+- `voice-and-tone-reminder` — merged Stop scan: teacher-tone comments + "the user" naming + speed-vs-depth choice menus + self-narration (status-recap padding, "now let me" openers, hedges, apology-padding); per-group disable env vars preserved
 - `provenance-publish-reminder` — `--staged` provenance lifecycle reminder
 - `public-surface-reminder` — Linear refs / private names / external issue refs
 - `pull-request-target-guard` — `pull_request_target` + fork-head checkout pattern

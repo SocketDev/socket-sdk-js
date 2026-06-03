@@ -3,6 +3,8 @@ name: setup-repo
 description: Full repo onboarding wizard. Orchestrates all setup concerns for a new engineer or a fresh clone — API token, OS keychain, shell rc bridge, native messaging host, security tools, and repo-specific initialization. Invoke with /setup-repo.
 user-invocable: true
 allowed-tools: Read, Bash, Edit, Write
+model: claude-sonnet-4-6
+context: fork
 ---
 
 # setup-repo
