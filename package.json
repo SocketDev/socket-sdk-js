@@ -45,7 +45,7 @@
     "build": "node scripts/build.mts",
     "bump": "node scripts/bump.mts",
     "check": "node scripts/fleet/check.mts",
-    "check:paths": "node scripts/fleet/check-paths.mts",
+    "check:paths": "node scripts/fleet/check/paths-are-canonical.mts",
     "check:config-paths": "node scripts/fleet/validate-config-paths.mts",
     "check:quota-sync": "node scripts/validate-quota-sync.mts",
     "clean": "node scripts/clean.mts",
@@ -72,7 +72,7 @@
     "lockstep": "node scripts/fleet/lockstep.mts",
     "lockstep:emit-schema": "node scripts/fleet/lockstep-emit-schema.mts",
     "setup-security-tools": "node .claude/hooks/fleet/setup-security-tools/install.mts",
-    "ci:local": "agent-ci run --all"
+    "ci:local": "agent-ci run --all --quiet --pause-on-failure --github-token"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
