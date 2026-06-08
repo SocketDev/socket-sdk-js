@@ -16,7 +16,8 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 const logger = getDefaultLogger()
 
 // CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
-const traverse = ((_traverse as any).default ?? _traverse) as typeof _traverse
+const traverse = ((_traverse as { default?: typeof _traverse | undefined })
+  .default ?? _traverse) as typeof _traverse
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const packagePath = path.resolve(__dirname, '../..')
@@ -46,20 +47,21 @@ export async function checkBundledDependencies(content: string): Promise<{
   // Collect all import sources from the AST.
   const importSources = new Set<string>()
 
-  traverse(file as any, {
-    ImportDeclaration(path: any) {
-      const source = path.node.source.value
+  traverse(file as Parameters<typeof traverse>[0], {
+    ImportDeclaration(importPath) {
+      const source = importPath.node.source.value
       importSources.add(source)
     },
-    CallExpression(path: any) {
+    CallExpression(callPath) {
       // Handle require() calls
+      const { callee } = callPath.node
+      const [firstArg] = callPath.node.arguments
       if (
-        path.node.callee.name === 'require' &&
-        path.node.arguments.length > 0 &&
-        path.node.arguments[0].type === 'StringLiteral'
+        callee.type === 'Identifier' &&
+        callee.name === 'require' &&
+        firstArg?.type === 'StringLiteral'
       ) {
-        const source = path.node.arguments[0].value
-        importSources.add(source)
+        importSources.add(firstArg.value)
       }
     },
   })
@@ -87,20 +89,20 @@ export async function checkBundledDependencies(content: string): Promise<{
         // Use AST to check if it appears in any meaningful way.
         let foundInCode = false
 
-        traverse(file as any, {
-          StringLiteral(path: any) {
+        traverse(file as Parameters<typeof traverse>[0], {
+          StringLiteral(stringPath) {
             // Skip string literals - these are fine
-            if (pattern.test(path.node.value)) {
+            if (pattern.test(stringPath.node.value)) {
               // It's in a string literal, which is fine
             }
           },
 
-          Identifier(path: any) {
+          Identifier(identifierPath) {
             // Check if the package name appears in identifiers or other code
             if (
-              pattern.test(path.node.name) ||
-              (path.node.name.includes('socketsecurity') &&
-                pattern.test(path.node.name))
+              pattern.test(identifierPath.node.name) ||
+              (identifierPath.node.name.includes('socketsecurity') &&
+                pattern.test(identifierPath.node.name))
             ) {
               foundInCode = true
             }
@@ -128,20 +130,22 @@ export async function checkBundledDependencies(content: string): Promise<{
         // The bundle might include package.json as a literal object, which is fine
         let foundInBundledCode = false
 
-        traverse(file as any, {
+        traverse(file as Parameters<typeof traverse>[0], {
           // Look for actual code that imports/requires this dependency
-          CallExpression(path: any) {
+          CallExpression(callPath) {
+            const { callee } = callPath.node
+            const [firstArg] = callPath.node.arguments
             if (
-              path.node.callee.name === 'require' &&
-              path.node.arguments.length > 0 &&
-              path.node.arguments[0].type === 'StringLiteral' &&
-              path.node.arguments[0].value.startsWith(dep)
+              callee.type === 'Identifier' &&
+              callee.name === 'require' &&
+              firstArg?.type === 'StringLiteral' &&
+              firstArg.value.startsWith(dep)
             ) {
               foundInBundledCode = true
             }
           },
-          ImportDeclaration(path: any) {
-            if (path.node.source.value.startsWith(dep)) {
+          ImportDeclaration(importPath) {
+            if (importPath.node.source.value.startsWith(dep)) {
               foundInBundledCode = true
             }
           },

@@ -473,15 +473,13 @@ describe('Testing Utilities', () => {
         // The aggregator must surface each fixture group. Assert the wiring via
         // the aggregator's own keys + shape — referencing the src bindings as
         // the expected value would validate src against itself.
-        expect(Object.keys(fixtures).sort()).toEqual(
-          [
-            'issues',
-            'organizations',
-            'packages',
-            'repositories',
-            'scans',
-          ].sort(),
-        )
+        expect(Object.keys(fixtures).toSorted()).toEqual([
+          'issues',
+          'organizations',
+          'packages',
+          'repositories',
+          'scans',
+        ])
         for (const group of Object.values(fixtures)) {
           expect(group).toBeTypeOf('object')
           expect(group).not.toBeNull()

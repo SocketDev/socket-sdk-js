@@ -9,7 +9,10 @@ import { describe, expect, it } from 'vitest'
 import { SocketSdk } from '../../src/index.mts'
 import { setupTestClient } from '../utils/environment.mts'
 
-import type { SocketSdkGenericResult } from '../../src/index.mts'
+import type {
+  CustomResponseType,
+  SocketSdkGenericResult,
+} from '../../src/index.mts'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { IncomingHttpHeaders } from 'node:http'
 
@@ -687,7 +690,7 @@ describe('getApi and sendApi Methods', () => {
         .reply(200, 'fallback response')
 
       const result = (await getClient().getApi('fallback-test', {
-        responseType: 'invalid' as any,
+        responseType: 'invalid' as CustomResponseType,
         throws: false,
       })) as SocketSdkGenericResult<HttpResponse>
 
