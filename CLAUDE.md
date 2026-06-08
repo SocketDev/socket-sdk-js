@@ -255,9 +255,9 @@ Hooks under `.claude/hooks/fleet/<name>/` (fleet-canonical); host-repo-only hook
 
 ## 🏗️ SDK-Specific
 
-Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis. Layout: `src/socket-sdk-class.ts` (API methods), `src/http-client.ts` (request/response), `src/types.ts`, `src/utils.ts`, `src/constants.ts`. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover` (thresholds ≥99%).
+Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover` (≥99%).
 
-🚨 **HTTP: never `fetch()` — use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`.** `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config) and isn't interceptable by nock. For external URLs (e.g. firewall API), pass a different `baseUrl` to `createGetRequest`.
+🚨 **HTTP: never `fetch()` — use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`.** `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent) and isn't nock-interceptable. For external URLs, pass a different `baseUrl` to `createGetRequest`.
 
 🚨 **Conventions:** `.mts` extension, mandatory `@fileoverview` headers, FORBIDDEN `"use strict"` in `.mjs`/`.mts` (ES modules are strict). Semicolons (this is the one Socket project that uses them). No `any` — `unknown` or specific types. `logger.error('')` / `logger.log('')` need the empty string. 🚨 **never** `--` before vitest test paths — runs ALL tests.
 
