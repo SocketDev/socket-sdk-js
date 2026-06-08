@@ -502,7 +502,9 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
           },
         ],
       }
-      const result = reshapeArtifactForPublicPolicy(data, true)
+      const result = reshapeArtifactForPublicPolicy(data, {
+        isAuthenticated: true,
+      })
       expect(result).toEqual(data)
     })
 
@@ -527,7 +529,9 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
         ],
       }
 
-      const result = reshapeArtifactForPublicPolicy(data, false)
+      const result = reshapeArtifactForPublicPolicy(data, {
+        isAuthenticated: false,
+      })
 
       expect(result.artifacts).toBeDefined()
       expect(result.artifacts?.[0]?.alerts).toHaveLength(2)
@@ -568,7 +572,10 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
         ],
       }
 
-      const result = reshapeArtifactForPublicPolicy(data, false, 'error')
+      const result = reshapeArtifactForPublicPolicy(data, {
+        actions: 'error',
+        isAuthenticated: false,
+      })
 
       expect(result.artifacts).toBeDefined()
       expect(result.artifacts?.[0]?.alerts).toHaveLength(1)
@@ -591,7 +598,9 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
         ],
       }
 
-      const result = reshapeArtifactForPublicPolicy(data, false)
+      const result = reshapeArtifactForPublicPolicy(data, {
+        isAuthenticated: false,
+      })
 
       expect(result.alerts).toBeDefined()
       expect(result.alerts).toHaveLength(1)
@@ -623,7 +632,9 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
         ],
       }
 
-      const result = reshapeArtifactForPublicPolicy(data, false)
+      const result = reshapeArtifactForPublicPolicy(data, {
+        isAuthenticated: false,
+      })
 
       expect(result.artifacts).toBeDefined()
       const alert = result.artifacts?.[0]?.alerts?.[0]
@@ -654,7 +665,9 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
         ],
       }
 
-      const result = reshapeArtifactForPublicPolicy(data, false)
+      const result = reshapeArtifactForPublicPolicy(data, {
+        isAuthenticated: false,
+      })
 
       expect(result.artifacts).toBeDefined()
       expect(result.artifacts?.[0]?.alerts).toEqual([])
@@ -666,7 +679,9 @@ describe('HTTP Client - ResponseError Edge Cases', () => {
         value: 123,
       }
 
-      const result = reshapeArtifactForPublicPolicy(data, false)
+      const result = reshapeArtifactForPublicPolicy(data, {
+        isAuthenticated: false,
+      })
 
       expect(result).toEqual(data)
     })

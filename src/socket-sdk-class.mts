@@ -280,12 +280,11 @@ export class SocketSdk {
             yield this.#handleApiSuccess<'batchPackageFetch'>(
               /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
               isPublicToken
-                ? reshapeArtifactForPublicPolicy(
-                    artifact!,
-                    false,
-                    queryParams?.['actions'] as string,
-                    publicPolicy,
-                  )
+                ? reshapeArtifactForPublicPolicy(artifact!, {
+                    actions: queryParams?.['actions'] as string,
+                    isAuthenticated: false,
+                    policy: publicPolicy,
+                  })
                 : artifact!,
             )
           }
@@ -836,12 +835,11 @@ export class SocketSdk {
             results.push(
               /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
               isPublicToken
-                ? reshapeArtifactForPublicPolicy(
-                    artifact!,
-                    false,
-                    queryParams?.['actions'] as string,
-                    publicPolicy,
-                  )
+                ? reshapeArtifactForPublicPolicy(artifact!, {
+                    actions: queryParams?.['actions'] as string,
+                    isAuthenticated: false,
+                    policy: publicPolicy,
+                  })
                 : artifact!,
             )
           }

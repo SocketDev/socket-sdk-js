@@ -62,8 +62,8 @@ export async function createUploadRequest(
   const { hooks, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as any as RequestOptionsWithHooks
-  const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
+  } as unknown as RequestOptionsWithHooks
+  const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
   const url = new URL(urlPath, baseUrl).toString()
   const method = 'POST'
   const startTime = Date.now()

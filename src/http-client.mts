@@ -53,8 +53,8 @@ export async function createDeleteRequest(
   const { hooks, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as any as RequestOptionsWithHooks
-  const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
+  } as unknown as RequestOptionsWithHooks
+  const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
 
   if (hooks?.onRequest) {
     hooks.onRequest({
@@ -111,8 +111,8 @@ export async function createGetRequest(
   const { hooks, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as any as RequestOptionsWithHooks
-  const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
+  } as unknown as RequestOptionsWithHooks
+  const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
 
   if (hooks?.onRequest) {
     hooks.onRequest({
@@ -175,8 +175,8 @@ export async function createRequestWithJson(
   const { hooks, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as any as RequestOptionsWithHooks
-  const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
+  } as unknown as RequestOptionsWithHooks
+  const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
   const body = JSON.stringify(json)
   const headers = {
     ...opts.headers,
@@ -329,14 +329,16 @@ export function isResponseOk(response: HttpResponse): boolean {
   return response.ok
 }
 
+export interface ReshapeArtifactOptions {
+  actions?: string | undefined
+  isAuthenticated: boolean
+  policy?: Map<string, string> | undefined
+}
+
 export function reshapeArtifactForPublicPolicy<
   T extends Record<string, unknown>,
->(
-  data: T,
-  isAuthenticated: boolean,
-  actions?: string | undefined,
-  policy?: Map<string, string> | undefined,
-): T {
+>(data: T, options: ReshapeArtifactOptions): T {
+  const { actions, isAuthenticated, policy } = options
   if (!isAuthenticated) {
     const allowedActions =
       actions !== undefined && StringPrototypeTrim(actions)
