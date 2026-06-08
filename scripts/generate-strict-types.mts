@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — AST-walking codegen pipeline for strict-typed SDK surface */
+/* max-file-lines: codegen — AST-walking pipeline for strict-typed SDK surface */
 /**
  * @file Generates strict TypeScript types from OpenAPI schema using AST. Uses
  *   openapi-typescript to generate types, then acorn + acorn-typescript to

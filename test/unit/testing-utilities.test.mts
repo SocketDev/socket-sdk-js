@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — tests for the testing utilities module */
+/* max-file-lines: test — tests for the testing utilities module */
 /**
  * @file Tests for SDK testing utilities. Validates mock factories, response
  *   builders, and test helpers.

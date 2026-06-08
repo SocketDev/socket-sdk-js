@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* max-file-lines: legitimate — single-pass docs generator (extract, group, render) */
+/* max-file-lines: generator — single-pass docs generator (extract, group, render) */
 /**
  * @file Generates docs/api.md from src/socket-sdk-class.mts and
  *   data/api-method-quota-and-permissions.json. The doc is a

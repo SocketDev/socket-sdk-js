@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — error-path coverage suite */
+/* max-file-lines: test — error-path coverage suite */
 /**
  * @file Error path tests for SocketSdk class methods. Covers ~58 catch blocks
  *   in socket-sdk-class.ts that call #handleApiError. Each test triggers a 400

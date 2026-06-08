@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — tests for the getApi/sendApi pair, colocated */
+/* max-file-lines: test — getApi/sendApi pair, colocated */
 /**
  * @file Tests for generic getApi and sendApi method functionality.
  */
