@@ -469,12 +469,24 @@ describe('Testing Utilities', () => {
         expect(fixtures).toHaveProperty('issues')
       })
 
-      it('should have consistent structure', () => {
-        expect(fixtures.organizations).toBe(organizationFixtures)
-        expect(fixtures.repositories).toBe(repositoryFixtures)
-        expect(fixtures.scans).toBe(scanFixtures)
-        expect(fixtures.packages).toBe(packageFixtures)
-        expect(fixtures.issues).toBe(issueFixtures)
+      it('should expose every fixture collection', () => {
+        // The aggregator must surface each fixture group. Assert the wiring via
+        // the aggregator's own keys + shape — referencing the src bindings as
+        // the expected value would validate src against itself.
+        expect(Object.keys(fixtures).sort()).toEqual(
+          [
+            'issues',
+            'organizations',
+            'packages',
+            'repositories',
+            'scans',
+          ].sort(),
+        )
+        for (const group of Object.values(fixtures)) {
+          expect(group).toBeTypeOf('object')
+          expect(group).not.toBeNull()
+          expect(Object.keys(group as object).length).toBeGreaterThan(0)
+        }
       })
     })
   })

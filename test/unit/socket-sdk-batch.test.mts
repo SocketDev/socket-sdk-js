@@ -18,6 +18,22 @@ import {
 
 import type { IncomingHttpHeaders } from 'node:http'
 
+// The batch endpoint's mock fixtures carry reachability summaries the public
+// CompactSocketArtifact type intentionally omits. This local shape models the
+// exact fields these assertions read, so the casts stay typed without `any`.
+interface ReachabilitySummary {
+  directlyReachable?: boolean | undefined
+  reachable?: boolean | undefined
+  transitivelyReachable?: boolean | undefined
+}
+interface BatchArtifactWithReachability {
+  alertKeysToReachabilitySummaries?:
+    | Record<string, ReachabilitySummary>
+    | undefined
+  alertKeysToReachabilityTypes?: Record<string, string[]> | undefined
+  name?: string | undefined
+}
+
 describe('SocketSdk - Batch Operations', () => {
   describe('Reachability', () => {
     setupNockEnvironment()
@@ -72,18 +88,12 @@ describe('SocketSdk - Batch Operations', () => {
       expect(res.success).toBe(true)
       if (res.success) {
         expect(res.data).toHaveLength(1)
-        const artifact = (res.data as any[])[0]
-        expect(artifact.alertKeysToReachabilitySummaries).toBeDefined()
-        expect(
-          artifact.alertKeysToReachabilitySummaries.malware.reachable,
-        ).toBe(true)
-        expect(
-          artifact.alertKeysToReachabilitySummaries.malware.directlyReachable,
-        ).toBe(true)
-        expect(
-          artifact.alertKeysToReachabilitySummaries.criticalCVE
-            .transitivelyReachable,
-        ).toBe(true)
+        const artifact = (res.data as BatchArtifactWithReachability[])[0]!
+        const summaries = artifact.alertKeysToReachabilitySummaries
+        expect(summaries).toBeDefined()
+        expect(summaries!['malware']!.reachable).toBe(true)
+        expect(summaries!['malware']!.directlyReachable).toBe(true)
+        expect(summaries!['criticalCVE']!.transitivelyReachable).toBe(true)
       }
     })
 
@@ -116,7 +126,7 @@ describe('SocketSdk - Batch Operations', () => {
 
       expect(res.success).toBe(true)
       if (res.success) {
-        const artifact = (res.data as any[])[0]
+        const artifact = (res.data as BatchArtifactWithReachability[])[0]!
         expect(artifact.alertKeysToReachabilitySummaries).toEqual({})
         expect(artifact.alertKeysToReachabilityTypes).toEqual({})
       }
@@ -163,11 +173,11 @@ describe('SocketSdk - Batch Operations', () => {
       expect(res.success).toBe(true)
       if (res.success) {
         expect(res.data).toHaveLength(2)
-        const data = res.data as any[]
-        expect(data[0].alertKeysToReachabilitySummaries.cve.reachable).toBe(
-          true,
-        )
-        expect(data[1].alertKeysToReachabilitySummaries).toEqual({})
+        const data = res.data as BatchArtifactWithReachability[]
+        expect(
+          data[0]!.alertKeysToReachabilitySummaries!['cve']!.reachable,
+        ).toBe(true)
+        expect(data[1]!.alertKeysToReachabilitySummaries).toEqual({})
       }
     })
 
@@ -278,8 +288,12 @@ describe('SocketSdk - Batch Operations', () => {
       expect(res.success).toBe(true)
       if (res.success) {
         expect(res.data).toHaveLength(2)
-        expect((res.data as any[])[0].name).toBe('pkg1')
-        expect((res.data as any[])[1].name).toBe('pkg2')
+        expect((res.data as BatchArtifactWithReachability[])[0]!.name).toBe(
+          'pkg1',
+        )
+        expect((res.data as BatchArtifactWithReachability[])[1]!.name).toBe(
+          'pkg2',
+        )
       }
     })
 
@@ -306,7 +320,7 @@ describe('SocketSdk - Batch Operations', () => {
       expect(res.success).toBe(true)
       if (res.success) {
         expect(res.data).toHaveLength(1)
-        const artifact = (res.data as any[])[0]
+        const artifact = (res.data as BatchArtifactWithReachability[])[0]!
         expect(artifact.name).toBe('express')
       }
     })
@@ -337,8 +351,12 @@ describe('SocketSdk - Batch Operations', () => {
       expect(res.success).toBe(true)
       if (res.success) {
         expect(res.data).toHaveLength(2)
-        expect((res.data as any[])[0].name).toBe('pkg1')
-        expect((res.data as any[])[1].name).toBe('pkg2')
+        expect((res.data as BatchArtifactWithReachability[])[0]!.name).toBe(
+          'pkg1',
+        )
+        expect((res.data as BatchArtifactWithReachability[])[1]!.name).toBe(
+          'pkg2',
+        )
       }
     })
   })
