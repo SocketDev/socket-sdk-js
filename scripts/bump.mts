@@ -14,15 +14,12 @@ import process from 'node:process'
 import readline from 'node:readline'
 import { fileURLToPath } from 'node:url'
 
-import type { ReleaseType } from 'semver'
-
-// oxlint-disable-next-line socket/prefer-stable-external-semver -- @socketsecurity/lib 6.0.7 does not export ./external/semver (only ./sorts/semver, which lacks .valid/.inc); the rule's target subpath does not exist yet, so the bare import is required until lib ships it.
-import semver from 'semver'
-
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
+import { incrementVersion } from '@socketsecurity/lib-stable/versions/modify'
+import { isValidVersion } from '@socketsecurity/lib-stable/versions/parse'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const logger = getDefaultLogger()
@@ -575,9 +572,9 @@ export async function getCurrentVersion(pkgPath = rootPath): Promise<string> {
 export function getNewVersion(
   currentVersion: string,
   bumpType: string,
-): string | null {
+): string | undefined {
   // Check if bumpType is a valid semver version.
-  if (semver.valid(bumpType)) {
+  if (isValidVersion(bumpType)) {
     return bumpType
   }
 
@@ -590,14 +587,17 @@ export function getNewVersion(
     'preminor',
     'prepatch',
     'prerelease',
-  ]
-  if (!validTypes.includes(bumpType)) {
+  ] as const
+  if (!(validTypes as readonly string[]).includes(bumpType)) {
     throw new Error(
       `Invalid bump type: ${bumpType}. Must be one of: ${validTypes.join(', ')} or a valid semver version`,
     )
   }
 
-  return semver.inc(currentVersion, bumpType as ReleaseType)
+  return incrementVersion(
+    currentVersion,
+    bumpType as (typeof validTypes)[number],
+  )
 }
 
 /**
