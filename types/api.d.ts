@@ -144,7 +144,7 @@ export interface paths {
      * scan including all SBOM artifacts. To get a list of supported filetypes
      * that can be uploaded in a full-scan, see the [Get supported file
      * types](/reference/getsupportedfiles) endpoint. The maximum number of
-     * files you can upload at a time is 5000 and each file can be no bigger
+     * files you can upload at a time is 10000 and each file can be no bigger
      * than 268 MB. **Query Parameters:**
      *
      * - `scan_type` (optional): The type of scan to perform. Defaults to
@@ -235,7 +235,7 @@ export interface paths {
      * the scan. If you upload multiple archives in a single request, the
      * manifests from every archive are merged into one full scan. The response
      * includes any files that were ignored. The maximum combined number of
-     * files extracted from your upload is 5000 and each extracted file can be
+     * files extracted from your upload is 10000 and each extracted file can be
      * no bigger than 268 MB. This endpoint consumes 1 unit of your quota. This
      * endpoint requires the following org token scopes:
      *
@@ -384,7 +384,7 @@ export interface paths {
      * new full scan from uploaded manifest files. Returns metadata about the
      * diff scan. Once the diff scan is created, fetch the diff scan from the
      * [api_url](/reference/getDiffScanById) URL to get the contents of the
-     * diff. The maximum number of files you can upload at a time is 5000 and
+     * diff. The maximum number of files you can upload at a time is 10000 and
      * each file can be no bigger than 268 MB. This endpoint consumes 1 unit of
      * your quota. This endpoint requires the following org token scopes:
      *
@@ -442,6 +442,40 @@ export interface paths {
      * triage:alerts-update.
      */
     delete: operations['deleteOrgAlertTriage']
+  }
+  '/orgs/{org_slug}/alerts/resolutions': {
+    /**
+     * List Org Alert Resolutions.
+     *
+     * List active alert resolutions for an organization. Results are paginated
+     * via an opaque cursor and ordered by created_at. Each row includes the
+     * anchor fields (alert_type, repo, repo_label, artifact_*) that describe
+     * the resolution scope. This endpoint consumes 1 unit of your quota. This
+     * endpoint requires the following org token scopes:
+     *
+     * - Alert-resolution:list
+     */
+    get: operations['getOrgAlertResolutions']
+  }
+  '/orgs/{org_slug}/alerts/resolutions/{uuid}': {
+    /**
+     * Get Org Alert Resolution.
+     *
+     * Fetch a single active alert resolution by UUID. Returns the same row
+     * shape as the list endpoint. This endpoint consumes 1 unit of your quota.
+     * This endpoint requires the following org token scopes: -
+     * alert-resolution:read.
+     */
+    get: operations['getOrgAlertResolution']
+    /**
+     * Delete Org Alert Resolution.
+     *
+     * Delete an alert resolution by UUID. Once deleted, alerts previously
+     * hidden by this resolution will reappear after the next org snapshot. This
+     * endpoint consumes 1 unit of your quota. This endpoint requires the
+     * following org token scopes: - alert-resolution:delete.
+     */
+    delete: operations['deleteOrgAlertResolution']
   }
   '/orgs/{org_slug}/repos': {
     /**
@@ -552,20 +586,21 @@ export interface paths {
      *
      * Retrieve the setting (e.g. security/license policy) for a repository
      * label. Note that repository label settings currently only support
-     * `issueRules` and `issueRulesPolicyDefault`. A policy is considered
-     * "active" for a given repository label if the `issueRulesPolicyDefault` is
-     * set, and inactive when not set. `issueRules` can be used to further
-     * refine the alert triage strategy. This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes: -
-     * repo-label:list.
+     * `issueRules`, `issueRulesPolicyDefault`, `licensePolicy`, and
+     * `recentlyPublishedThresholdMs`. A policy is considered "active" for a
+     * given repository label if the `issueRulesPolicyDefault` is set, and
+     * inactive when not set. `issueRules` can be used to further refine the
+     * alert triage strategy. This endpoint consumes 1 unit of your quota. This
+     * endpoint requires the following org token scopes: - repo-label:list.
      */
     get: operations['getOrgRepoLabelSetting']
     /**
      * Update repository label setting (beta)
      *
      * Update the setting (e.g. security/license policy) for a repository label.
-     * Note that repository label settings currently only support `issueRules`
-     * and `issueRulesPolicyDefault`. A policy is considered "active" for a
+     * Note that repository label settings currently only support `issueRules`,
+     * `issueRulesPolicyDefault`, `licensePolicy`, and
+     * `recentlyPublishedThresholdMs`. A policy is considered "active" for a
      * given repository label if the `issueRulesPolicyDefault` is set, and
      * inactive when not set. `issueRules` can be used to further refine the
      * alert triage strategy. This endpoint consumes 1 unit of your quota. This
@@ -576,8 +611,9 @@ export interface paths {
      * Delete repository label setting (beta)
      *
      * Delete the setting (e.g. security/license policy) for a repository label.
-     * Note that repository label settings currently only support `issueRules`
-     * and `issueRulesPolicyDefault`. A policy is considered "active" for a
+     * Note that repository label settings currently only support `issueRules`,
+     * `issueRulesPolicyDefault`, `licensePolicy`, and
+     * `recentlyPublishedThresholdMs`. A policy is considered "active" for a
      * given repository label if the `issueRulesPolicyDefault` is set, and
      * inactive when not set. `issueRules` can be used to further refine the
      * alert triage strategy. This endpoint consumes 1 unit of your quota. This
@@ -1119,9 +1155,30 @@ export interface paths {
      * - `publishedAt`: string (ISO date)
      * - `kev`: boolean - Whether it's a Known Exploited Vulnerability
      * - `epss`: number | null - Exploit Prediction Scoring System score
-     * - `affectedPurls`: Array of affected packages with version ranges This
-     *   endpoint consumes 10 units of your quota. This endpoint requires the
-     *   following org token scopes:
+     * - `affectedPurls`: Array of affected packages with version ranges
+     *
+     * ### Stateful Alert IDs (when include_stateful_alert_ids=true)
+     *
+     * Top-level `statefulAlertIds` field — a map of GHSA ID → array of open
+     * stateful alert IDs (the human-readable `SOCKET-XXX-N` identifiers also
+     * returned by `/v0/orgs/{org_slug}/alerts`). The lookup is org-scoped, so
+     * the same GHSA may map to multiple alert IDs when it appears in alerts
+     * across different repos or branches. Callers that need a repo/branch
+     * filter should intersect this map with results from the alerts API. The
+     * lookup honors the same scan-type visibility as
+     * `/v0/orgs/{org_slug}/alerts` — when the `enableTier1OrgAlertApiRead`
+     * feature flag is off for the org, only `socket` scans are visible (no
+     * `socket_tier1`). Note on scopes: this field surfaces identifiers that are
+     * otherwise reachable via `/v0/orgs/{org_slug}/alerts` (which requires
+     * `alerts:list`). The fixes route is gated on `fixes:list` alone; the GHSAs
+     * the alert IDs are keyed to are already part of every `/fixes` response,
+     * and exposing the matching alert IDs through this opt-in flag is
+     * intentional — it lets a caller with only `fixes:list` complete the
+     * correlation back to /alerts on a token that already has that scope. If
+     * you require strict scope separation, do not enable this flag. This
+     * endpoint consumes 10 units of your quota. This endpoint requires the
+     * following org token scopes:
+     *
      * - Fixes:list
      */
     get: operations['fetch-fixes']
@@ -2411,8 +2468,7 @@ export interface components {
        */
       supplyChain: number
       /**
-       * Score from 0.0 to 1.0 based on known vulnerabilities and their
-       * severity.
+       * Score from 0.0 to 1.0 based on known vulnerabilities and their severity.
        *
        * @default 0
        */
@@ -4289,6 +4345,12 @@ export interface components {
                * @default
                */
               checkedAt: string
+              /**
+               * Org-configured recently published threshold in days.
+               *
+               * @default 0
+               */
+              thresholdDays: number
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -7769,7 +7831,7 @@ export interface operations {
    * scan including all SBOM artifacts. To get a list of supported filetypes
    * that can be uploaded in a full-scan, see the [Get supported file
    * types](/reference/getsupportedfiles) endpoint. The maximum number of files
-   * you can upload at a time is 5000 and each file can be no bigger than 268
+   * you can upload at a time is 10000 and each file can be no bigger than 268
    * MB. **Query Parameters:**
    *
    * - `scan_type` (optional): The type of scan to perform. Defaults to 'socket'.
@@ -8086,8 +8148,7 @@ export interface operations {
    * Delete full scan.
    *
    * Delete an existing full scan. This endpoint consumes 1 unit of your quota.
-   * This endpoint requires the following org token scopes: -
-   * full-scans:delete.
+   * This endpoint requires the following org token scopes: - full-scans:delete.
    */
   deleteOrgFullScan: {
     parameters: {
@@ -8670,7 +8731,7 @@ export interface operations {
    * scan. If you upload multiple archives in a single request, the manifests
    * from every archive are merged into one full scan. The response includes any
    * files that were ignored. The maximum combined number of files extracted
-   * from your upload is 5000 and each extracted file can be no bigger than 268
+   * from your upload is 10000 and each extracted file can be no bigger than 268
    * MB. This endpoint consumes 1 unit of your quota. This endpoint requires the
    * following org token scopes:
    *
@@ -9646,8 +9707,7 @@ export interface operations {
    * Delete diff scan.
    *
    * Delete an existing diff scan. This endpoint consumes 1 unit of your quota.
-   * This endpoint requires the following org token scopes: -
-   * diff-scans:delete.
+   * This endpoint requires the following org token scopes: - diff-scans:delete.
    */
   deleteOrgDiffScan: {
     parameters: {
@@ -9899,7 +9959,7 @@ export interface operations {
    * new full scan from uploaded manifest files. Returns metadata about the diff
    * scan. Once the diff scan is created, fetch the diff scan from the
    * [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
-   * The maximum number of files you can upload at a time is 5000 and each file
+   * The maximum number of files you can upload at a time is 10000 and each file
    * can be no bigger than 268 MB. This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
    *
@@ -10202,6 +10262,11 @@ export interface operations {
          * an open PR between unmerged commits.
          */
         merge?: boolean
+        /**
+         * Set to "redirect" to receive a 302 redirect to the existing diff scan
+         * instead of a 409 error when a duplicate is detected.
+         */
+        on_duplicate?: string
       }
       path: {
         /**
@@ -10215,6 +10280,168 @@ export interface operations {
        * The details of the created diff scan.
        */
       201: {
+        content: {
+          'application/json': {
+            diff_scan: {
+              /**
+               * @default
+               */
+              id: string
+              /**
+               * @default
+               */
+              organization_id: string
+              /**
+               * @default
+               */
+              repository_id: string
+              /**
+               * @default
+               */
+              created_at: string
+              /**
+               * @default
+               */
+              updated_at: string
+              before_full_scan: {
+                /**
+                 * @default
+                 */
+                id: string
+                /**
+                 * @default
+                 */
+                created_at: string
+                /**
+                 * @default
+                 */
+                updated_at: string
+                /**
+                 * @default
+                 */
+                organization_id: string
+                /**
+                 * @default
+                 */
+                organization_slug: string
+                /**
+                 * @default
+                 */
+                repository_id: string
+                /**
+                 * @default
+                 */
+                repository_slug: string
+                /**
+                 * @default
+                 */
+                branch: string | null
+                /**
+                 * @default
+                 */
+                commit_message: string | null
+                /**
+                 * @default
+                 */
+                commit_hash: string | null
+                /**
+                 * @default 0
+                 */
+                pull_request: number | null
+                committers: string[]
+                /**
+                 * @default
+                 */
+                html_url: string | null
+                /**
+                 * @default
+                 */
+                api_url: string | null
+              }
+              after_full_scan: {
+                /**
+                 * @default
+                 */
+                id: string
+                /**
+                 * @default
+                 */
+                created_at: string
+                /**
+                 * @default
+                 */
+                updated_at: string
+                /**
+                 * @default
+                 */
+                organization_id: string
+                /**
+                 * @default
+                 */
+                organization_slug: string
+                /**
+                 * @default
+                 */
+                repository_id: string
+                /**
+                 * @default
+                 */
+                repository_slug: string
+                /**
+                 * @default
+                 */
+                branch: string | null
+                /**
+                 * @default
+                 */
+                commit_message: string | null
+                /**
+                 * @default
+                 */
+                commit_hash: string | null
+                /**
+                 * @default 0
+                 */
+                pull_request: number | null
+                committers: string[]
+                /**
+                 * @default
+                 */
+                html_url: string | null
+                /**
+                 * @default
+                 */
+                api_url: string | null
+              }
+              /**
+               * @default
+               */
+              description: string | null
+              /**
+               * @default
+               */
+              external_href: string | null
+              /**
+               * @default false
+               */
+              merge: boolean
+              /**
+               * @default
+               */
+              html_url: string | null
+              /**
+               * @default
+               */
+              api_url: string | null
+            }
+          }
+        }
+      }
+      /**
+       * Redirects to the existing diff scan when on_duplicate=redirect is set
+       * and a duplicate is detected.
+       */
+      302: {
         content: {
           'application/json': {
             diff_scan: {
@@ -10462,8 +10689,8 @@ export interface operations {
                */
               alert_key?: string | null
               /**
-               * The alert type (e.g., criticalCVE, highCVE) associated with the
-               * triage state.
+               * The alert type (e.g., criticalCVE, highCVE) associated with
+               * the triage state.
                *
                * @default
                */
@@ -10593,15 +10820,15 @@ export interface operations {
         'application/json': {
           alertTriage: Array<{
             /**
-             * The UUID of the triage entry. Omit to create a new entry; provide
-             * to update an existing one.
+             * The UUID of the triage entry. Omit to create a new entry;
+             * provide to update an existing one.
              *
              * @default
              */
             uuid?: string | null
             /**
-             * The package ecosystem type (e.g., npm, pypi). Use null or "*" for
-             * wildcard.
+             * The package ecosystem type (e.g., npm, pypi). Use null or "*"
+             * for wildcard.
              *
              * @default
              */
@@ -10755,6 +10982,339 @@ export interface operations {
     }
   }
   /**
+   * List Org Alert Resolutions.
+   *
+   * List active alert resolutions for an organization. Results are paginated
+   * via an opaque cursor and ordered by created_at. Each row includes the
+   * anchor fields (alert_type, repo, repo_label, artifact_*) that describe the
+   * resolution scope. This endpoint consumes 1 unit of your quota. This
+   * endpoint requires the following org token scopes:
+   *
+   * - Alert-resolution:list
+   */
+  getOrgAlertResolutions: {
+    parameters: {
+      query?: {
+        /**
+         * Sort direction by `created_at`. One of: asc, desc.
+         */
+        direction?: string
+        /**
+         * Number of results per page (1–100, default 30).
+         */
+        per_page?: number
+        /**
+         * Opaque cursor returned by the previous response's `endCursor`. Omit
+         * on the first request.
+         */
+        startAfterCursor?: string
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+      }
+    }
+    responses: {
+      /**
+       * Lists alert resolutions for the specified organization.
+       */
+      200: {
+        content: {
+          'application/json': {
+            items: Array<{
+              /**
+               * The UUID of the resolution.
+               *
+               * @default
+               */
+              uuid: string
+              /**
+               * The reason the alert was resolved. One of: false_positive,
+               * remediated, tolerable_risk, other.
+               *
+               * @default other
+               *
+               * @enum {string}
+               */
+              reason:
+                | 'false_positive'
+                | 'remediated'
+                | 'tolerable_risk'
+                | 'other'
+              /**
+               * Free-form reason text when `reason` is `other`.
+               *
+               * @default
+               */
+              reason_text: string | null
+              /**
+               * Operator-provided comment.
+               *
+               * @default
+               */
+              comment: string | null
+              /**
+               * Alert type the resolution scopes to (e.g. criticalCVE). Null
+               * if the resolution applies to multiple alert types.
+               *
+               * @default
+               */
+              alert_type: string | null
+              /**
+               * Repository full name the resolution scopes to. Null if not
+               * scoped to a single repo.
+               *
+               * @default
+               */
+              repo: string | null
+              /**
+               * Repository label the resolution scopes to. Null if not scoped
+               * to a label.
+               *
+               * @default
+               */
+              repo_label: string | null
+              /**
+               * Package ecosystem the resolution scopes to (e.g. npm, pypi).
+               * Null if not scoped to a single ecosystem.
+               *
+               * @default
+               */
+              artifact_type: string | null
+              /**
+               * Package namespace/scope the resolution scopes to. Null if not
+               * scoped to a namespace.
+               *
+               * @default
+               */
+              artifact_namespace: string | null
+              /**
+               * Package name the resolution scopes to. Null if not scoped to
+               * a single package.
+               *
+               * @default
+               */
+              artifact_name: string | null
+              /**
+               * Package version the resolution scopes to. Extracted from the
+               * resolution selector at read time; null if the resolution
+               * applies to multiple versions or no single version.
+               *
+               * @default
+               */
+              artifact_version: string | null
+              /**
+               * User ID that created the resolution. Null for system-created
+               * resolutions.
+               *
+               * @default
+               */
+              resolved_by: string | null
+              /**
+               * ISO-8601 creation timestamp.
+               *
+               * @default
+               */
+              created_at: string
+              /**
+               * ISO-8601 last-update timestamp.
+               *
+               * @default
+               */
+              updated_at: string
+            }>
+            /**
+             * @default
+             */
+            endCursor: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get Org Alert Resolution.
+   *
+   * Fetch a single active alert resolution by UUID. Returns the same row shape
+   * as the list endpoint. This endpoint consumes 1 unit of your quota. This
+   * endpoint requires the following org token scopes: - alert-resolution:read.
+   */
+  getOrgAlertResolution: {
+    parameters: {
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The UUID of the alert resolution to fetch.
+         */
+        uuid: string
+      }
+    }
+    responses: {
+      /**
+       * The requested alert resolution.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * The UUID of the resolution.
+             *
+             * @default
+             */
+            uuid: string
+            /**
+             * The reason the alert was resolved. One of: false_positive,
+             * remediated, tolerable_risk, other.
+             *
+             * @default other
+             *
+             * @enum {string}
+             */
+            reason: 'false_positive' | 'remediated' | 'tolerable_risk' | 'other'
+            /**
+             * Free-form reason text when `reason` is `other`.
+             *
+             * @default
+             */
+            reason_text: string | null
+            /**
+             * Operator-provided comment.
+             *
+             * @default
+             */
+            comment: string | null
+            /**
+             * Alert type the resolution scopes to (e.g. criticalCVE). Null if
+             * the resolution applies to multiple alert types.
+             *
+             * @default
+             */
+            alert_type: string | null
+            /**
+             * Repository full name the resolution scopes to. Null if not scoped
+             * to a single repo.
+             *
+             * @default
+             */
+            repo: string | null
+            /**
+             * Repository label the resolution scopes to. Null if not scoped to
+             * a label.
+             *
+             * @default
+             */
+            repo_label: string | null
+            /**
+             * Package ecosystem the resolution scopes to (e.g. npm, pypi). Null
+             * if not scoped to a single ecosystem.
+             *
+             * @default
+             */
+            artifact_type: string | null
+            /**
+             * Package namespace/scope the resolution scopes to. Null if not
+             * scoped to a namespace.
+             *
+             * @default
+             */
+            artifact_namespace: string | null
+            /**
+             * Package name the resolution scopes to. Null if not scoped to a
+             * single package.
+             *
+             * @default
+             */
+            artifact_name: string | null
+            /**
+             * Package version the resolution scopes to. Extracted from the
+             * resolution selector at read time; null if the resolution applies
+             * to multiple versions or no single version.
+             *
+             * @default
+             */
+            artifact_version: string | null
+            /**
+             * User ID that created the resolution. Null for system-created
+             * resolutions.
+             *
+             * @default
+             */
+            resolved_by: string | null
+            /**
+             * ISO-8601 creation timestamp.
+             *
+             * @default
+             */
+            created_at: string
+            /**
+             * ISO-8601 last-update timestamp.
+             *
+             * @default
+             */
+            updated_at: string
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Delete Org Alert Resolution.
+   *
+   * Delete an alert resolution by UUID. Once deleted, alerts previously hidden
+   * by this resolution will reappear after the next org snapshot. This endpoint
+   * consumes 1 unit of your quota. This endpoint requires the following org
+   * token scopes: - alert-resolution:delete.
+   */
+  deleteOrgAlertResolution: {
+    parameters: {
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The UUID of the alert resolution to delete.
+         */
+        uuid: string
+      }
+    }
+    responses: {
+      /**
+       * Deleted Alert Resolution.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @default
+             */
+            result: string
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
    * List repositories.
    *
    * Lists repositories for the specified organization. This endpoint consumes 1
@@ -10831,8 +11391,8 @@ export interface operations {
                 type?: 'github'
                 value?: {
                   /**
-                   * The GitHub installation_id of the active associated Socket
-                   * GitHub App.
+                   * The GitHub installation_id of the active associated
+                   * Socket GitHub App.
                    *
                    * @default
                    */
@@ -12119,8 +12679,9 @@ export interface operations {
    * Get repository label setting (beta)
    *
    * Retrieve the setting (e.g. security/license policy) for a repository label.
-   * Note that repository label settings currently only support `issueRules` and
-   * `issueRulesPolicyDefault`. A policy is considered "active" for a given
+   * Note that repository label settings currently only support `issueRules`,
+   * `issueRulesPolicyDefault`, `licensePolicy`, and
+   * `recentlyPublishedThresholdMs`. A policy is considered "active" for a given
    * repository label if the `issueRulesPolicyDefault` is set, and inactive when
    * not set. `issueRules` can be used to further refine the alert triage
    * strategy. This endpoint consumes 1 unit of your quota. This endpoint
@@ -12131,7 +12692,8 @@ export interface operations {
       query: {
         /**
          * Setting key to query for in the repository label. Valid values
-         * include issueRules, issueRulesPolicyDefault, and licensePolicy.
+         * include issueRules, issueRulesPolicyDefault, licensePolicy, and
+         * recentlyPublishedThresholdMs.
          */
         setting_key: string
       }
@@ -13261,6 +13823,13 @@ export interface operations {
              * @default null
              */
             licensePolicy?: Record<string, unknown> | null
+            /**
+             * The recently published package alert threshold for the repository
+             * label, in milliseconds.
+             *
+             * @default 0
+             */
+            recentlyPublishedThresholdMs?: number | null
           }
         }
       }
@@ -13275,8 +13844,9 @@ export interface operations {
    * Update repository label setting (beta)
    *
    * Update the setting (e.g. security/license policy) for a repository label.
-   * Note that repository label settings currently only support `issueRules` and
-   * `issueRulesPolicyDefault`. A policy is considered "active" for a given
+   * Note that repository label settings currently only support `issueRules`,
+   * `issueRulesPolicyDefault`, `licensePolicy`, and
+   * `recentlyPublishedThresholdMs`. A policy is considered "active" for a given
    * repository label if the `issueRulesPolicyDefault` is set, and inactive when
    * not set. `issueRules` can be used to further refine the alert triage
    * strategy. This endpoint consumes 1 unit of your quota. This endpoint
@@ -14397,6 +14967,13 @@ export interface operations {
            */
           issueRulesPolicyDefault?: 'default' | 'low' | 'medium' | 'high'
           licensePolicy?: components['schemas']['LicenseAllowListRequest']
+          /**
+           * The recently published package alert threshold for the repository
+           * label, in milliseconds.
+           *
+           * @default 0
+           */
+          recentlyPublishedThresholdMs?: number | null
         }
       }
     }
@@ -14425,8 +15002,9 @@ export interface operations {
    * Delete repository label setting (beta)
    *
    * Delete the setting (e.g. security/license policy) for a repository label.
-   * Note that repository label settings currently only support `issueRules` and
-   * `issueRulesPolicyDefault`. A policy is considered "active" for a given
+   * Note that repository label settings currently only support `issueRules`,
+   * `issueRulesPolicyDefault`, `licensePolicy`, and
+   * `recentlyPublishedThresholdMs`. A policy is considered "active" for a given
    * repository label if the `issueRulesPolicyDefault` is set, and inactive when
    * not set. `issueRules` can be used to further refine the alert triage
    * strategy. This endpoint consumes 1 unit of your quota. This endpoint
@@ -14437,7 +15015,8 @@ export interface operations {
       query: {
         /**
          * Setting key to delete from the repository label. Valid values include
-         * issueRules, issueRulesPolicyDefault, and licensePolicy.
+         * issueRules, issueRulesPolicyDefault, licensePolicy, and
+         * recentlyPublishedThresholdMs.
          */
         setting_key: string
       }
@@ -18745,8 +19324,7 @@ export interface operations {
    * List historical alerts (Beta)
    *
    * List historical alerts. This endpoint consumes 10 units of your quota. This
-   * endpoint requires the following org token scopes: -
-   * historical:alerts-list.
+   * endpoint requires the following org token scopes: - historical:alerts-list.
    */
   historicalAlertsList: {
     parameters: {
@@ -20520,6 +21098,8 @@ export interface operations {
           | 'CoanaCliLegacyModeCutoffUpdated'
           | 'CoanaCliLegacyModeDemoteOrg'
           | 'CoanaCliLegacyModePromoteOrg'
+          | 'CreateAlertResolution'
+          | 'DeleteAlertResolution'
           | 'DeleteAlertTriage'
           | 'DeleteApiToken'
           | 'DeleteFirewallCustomRegistry'
@@ -20551,6 +21131,8 @@ export interface operations {
           | 'SendInvitation'
           | 'SessionRevokedByUser'
           | 'SetLabelSettingToDefault'
+          | 'SetSsoBypassMemberships'
+          | 'SetSsoBypassRbacRoles'
           | 'SSOEmailVerificationCompleted'
           | 'SSOLoginCompleted'
           | 'SyncOrganization'
@@ -20572,6 +21154,7 @@ export interface operations {
           | 'UpdateRepoAccessRule'
           | 'UpdateWebhook'
           | 'UpgradeOrganizationPlan'
+          | 'UserMagicLinkSent'
           | 'UserSignedIn'
           | 'UserSignedOut'
         /**
@@ -20934,8 +21517,7 @@ export interface operations {
    *
    * Create an API Token. The API Token created must use a subset of permissions
    * the API token creating them. This endpoint consumes 10 units of your quota.
-   * This endpoint requires the following org token scopes: -
-   * api-tokens:create.
+   * This endpoint requires the following org token scopes: - api-tokens:create.
    */
   postAPIToken: {
     parameters: {
@@ -21168,8 +21750,7 @@ export interface operations {
    *
    * Update an API Token. The API Token created must use a subset of permissions
    * the API token creating them. This endpoint consumes 10 units of your quota.
-   * This endpoint requires the following org token scopes: -
-   * api-tokens:create.
+   * This endpoint requires the following org token scopes: - api-tokens:create.
    */
   postAPITokenUpdate: {
     parameters: {
@@ -21396,8 +21977,8 @@ export interface operations {
       }
     }
     /**
-     * The API Token identifier to rotate. Provide uuid (recommended), token, or
-     * hash. May provide uuid+hash together for validation.
+     * The API Token identifier to rotate. Provide uuid (recommended), id,
+     * token, or hash. May provide uuid+hash together for validation.
      */
     requestBody?: {
       content: {
@@ -21410,6 +21991,12 @@ export interface operations {
            * @default
            */
           uuid?: string
+          /**
+           * The API token ID to rotate.
+           *
+           * @default
+           */
+          id?: string
           /**
            * @default
            */
@@ -21484,8 +22071,8 @@ export interface operations {
       }
     }
     /**
-     * The API token identifier to revoke. Provide uuid (recommended), token, or
-     * hash. May provide uuid+hash together for validation.
+     * The API token identifier to revoke. Provide uuid (recommended), id,
+     * token, or hash. May provide uuid+hash together for validation.
      */
     requestBody?: {
       content: {
@@ -21498,6 +22085,12 @@ export interface operations {
            * @default
            */
           uuid?: string
+          /**
+           * The API token ID to revoke.
+           *
+           * @default
+           */
+          id?: string
           /**
            * @default
            */
@@ -22227,8 +22820,7 @@ export interface operations {
     }
   }
   /**
-   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded
-   * manifest.
+   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded manifest.
    *
    * Fetches available fixes for vulnerabilities in a repository, scan, or
    * uploaded manifest. Requires exactly one of repo_slug, full_scan_id, or
@@ -22300,9 +22892,29 @@ export interface operations {
    * - `publishedAt`: string (ISO date)
    * - `kev`: boolean - Whether it's a Known Exploited Vulnerability
    * - `epss`: number | null - Exploit Prediction Scoring System score
-   * - `affectedPurls`: Array of affected packages with version ranges This
-   *   endpoint consumes 10 units of your quota. This endpoint requires the
-   *   following org token scopes:
+   * - `affectedPurls`: Array of affected packages with version ranges
+   *
+   * ### Stateful Alert IDs (when include_stateful_alert_ids=true)
+   *
+   * Top-level `statefulAlertIds` field — a map of GHSA ID → array of open
+   * stateful alert IDs (the human-readable `SOCKET-XXX-N` identifiers also
+   * returned by `/v0/orgs/{org_slug}/alerts`). The lookup is org-scoped, so the
+   * same GHSA may map to multiple alert IDs when it appears in alerts across
+   * different repos or branches. Callers that need a repo/branch filter should
+   * intersect this map with results from the alerts API. The lookup honors the
+   * same scan-type visibility as `/v0/orgs/{org_slug}/alerts` — when the
+   * `enableTier1OrgAlertApiRead` feature flag is off for the org, only `socket`
+   * scans are visible (no `socket_tier1`). Note on scopes: this field surfaces
+   * identifiers that are otherwise reachable via `/v0/orgs/{org_slug}/alerts`
+   * (which requires `alerts:list`). The fixes route is gated on `fixes:list`
+   * alone; the GHSAs the alert IDs are keyed to are already part of every
+   * `/fixes` response, and exposing the matching alert IDs through this opt-in
+   * flag is intentional — it lets a caller with only `fixes:list` complete the
+   * correlation back to /alerts on a token that already has that scope. If you
+   * require strict scope separation, do not enable this flag. This endpoint
+   * consumes 10 units of your quota. This endpoint requires the following org
+   * token scopes:
+   *
    * - Fixes:list
    */
   'fetch-fixes': {
@@ -22357,6 +22969,15 @@ export interface operations {
          */
         include_all_detected_ghsas?: boolean
         /**
+         * Set to include a statefulAlertIds map (GHSA ID → array of open
+         * stateful alert IDs detected in this organization) in the response.
+         * Lets callers correlate /fixes results back to the alert IDs surfaced
+         * by /v0/orgs/{org_slug}/alerts. Org-scoped only — multiple alerts
+         * across repos/branches may share a GHSA. Off by default to avoid an
+         * extra ClickHouse round-trip.
+         */
+        include_stateful_alert_ids?: boolean
+        /**
          * The id of an autofix-or-upgrade-cli-run record (created via
          * /fixes/register-autofix-or-upgrade-cli-run) to associate this
          * computation with. When set, the server records per-GHSA
@@ -22390,6 +23011,17 @@ export interface operations {
              * include_all_detected_ghsas=true is set.
              */
             allDetectedGhsas?: string[]
+            /**
+             * Map of GHSA ID → open stateful alert IDs detected in this
+             * organization. Lets callers correlate /fixes results back to the
+             * alert IDs they see in /v0/orgs/{org_slug}/alerts. Org-scoped, not
+             * repo/branch-scoped — the same GHSA may surface in multiple alerts
+             * across repos. Only present when include_stateful_alert_ids=true
+             * is set.
+             */
+            statefulAlertIds?: {
+              [key: string]: string[]
+            }
           }
         }
       }
@@ -23471,6 +24103,10 @@ export interface operations {
                 /**
                  * @default
                  */
+                scanType: string
+                /**
+                 * @default
+                 */
                 action: string
                 /**
                  * @default
@@ -23647,8 +24283,8 @@ export interface operations {
                      */
                     shell: boolean
                     /**
-                     * Package uses unsafe or dangerous operations that could
-                     * compromise security.
+                     * Package uses unsafe or dangerous operations that
+                     * could compromise security.
                      *
                      * @default false
                      */
