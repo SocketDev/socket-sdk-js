@@ -16,9 +16,11 @@ import { fileURLToPath } from 'node:url'
 
 import type { ReleaseType } from 'semver'
 
-import semver from '@socketsecurity/lib-stable/external/semver'
+// oxlint-disable-next-line socket/prefer-stable-external-semver -- @socketsecurity/lib 6.0.7 does not export ./external/semver (only ./sorts/semver, which lacks .valid/.inc); the rule's target subpath does not exist yet, so the bare import is required until lib ships it.
+import semver from 'semver'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
@@ -74,9 +76,15 @@ interface InteractivePrompts {
   }) => Promise<string>
 }
 
-// Conditionally import interactive prompts.
+// Conditionally import interactive prompts. Loaded lazily from main() rather
+// than at module scope: the CJS bundle target forbids top-level await, and the
+// import is only needed once the interactive flow runs.
 let prompts: InteractivePrompts | undefined
-if (hasInteractivePrompts) {
+
+export async function loadInteractivePrompts(): Promise<void> {
+  if (!hasInteractivePrompts) {
+    return
+  }
   try {
     // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- lazy-loaded interactive helper; static would force inquirer into preinstall paths.
     prompts = (await import(promptsPath!)) as InteractivePrompts
@@ -109,6 +117,7 @@ const log = {
 
 async function main(): Promise<void> {
   try {
+    await loadInteractivePrompts()
     // Parse arguments.
     const { values } = parseArgs({
       options: {
@@ -365,9 +374,7 @@ async function main(): Promise<void> {
 
     process.exitCode = 0
   } catch (e) {
-    log.error(
-      `Version bump failed: ${e instanceof Error ? e.message : String(e)}`,
-    )
+    log.error(`Version bump failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }
@@ -504,7 +511,7 @@ export async function generateChangelog(
 
   // Create a temporary file with the prompt.
   const promptPath = path.join(rootPath, '.claude-bump-prompt.tmp')
-  const prompt = `Generate a changelog entry for ${packageName} version ${newVersion}.
+  const promptText = `Generate a changelog entry for ${packageName} version ${newVersion}.
 
 Current version: ${currentVersion}
 New version: ${newVersion}
@@ -533,12 +540,12 @@ Format it like this:
 Only include sections that have actual changes. Focus on user-facing changes.
 Be concise but informative. Group related changes together.`
 
-  await fs.writeFile(promptPath, prompt)
+  await fs.writeFile(promptPath, promptText)
 
   // Call Claude to generate the changelog.
   log.progress('Asking Claude to generate changelog')
 
-  const claudeResult = await runCommandWithInput(claudeCmd, [], prompt)
+  const claudeResult = await runCommandWithInput(claudeCmd, [], promptText)
 
   // Clean up temp file.
   try {
@@ -930,7 +937,7 @@ export async function runCommand(
     const child = childSpawn(command, args, {
       stdio: 'inherit',
       cwd: rootPath,
-      ...(WIN32 && { shell: true }),
+      shell: WIN32,
       ...options,
     })
 
@@ -959,9 +966,9 @@ export async function runCommandWithInput(
     const handle = spawn(command, args, {
       cwd: rootPath,
       stdio: ['pipe', 'pipe', 'pipe'],
-      ...(WIN32 && { shell: true }),
+      shell: WIN32,
     })
-    handle.stdin?.end(input)
+    handle.process.stdin?.end(input)
     const result = await handle
     return {
       exitCode: result.code,
@@ -999,7 +1006,7 @@ export async function runCommandWithOutput(
 
     const child = childSpawn(command, args, {
       cwd: rootPath,
-      ...(WIN32 && { shell: true }),
+      shell: WIN32,
       ...options,
     })
 
