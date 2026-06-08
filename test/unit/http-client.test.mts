@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — http-client unit tests, single module under test */
+/* max-file-lines: test — http-client unit tests, single module under test */
 import { createServer } from 'node:http'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'

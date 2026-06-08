@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — gap-filling coverage suite */
+/* max-file-lines: test — gap-filling coverage suite */
 /**
  * @file Coverage gap tests for SocketSdk class methods. Targets uncovered lines
  *   in socket-sdk-class.ts including:

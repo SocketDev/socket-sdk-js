@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — method-by-method coverage, 1:1 mapping */
+/* max-file-lines: test — method-by-method coverage, 1:1 mapping */
 /**
  * @file Coverage tests for Socket SDK API methods using local HTTP server.
  *   APPROACH: Instead of nock (which bleeds state in coverage mode), we use a

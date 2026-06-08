@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — batch-API behavior tests, single feature */
+/* max-file-lines: test — batch-API behavior tests, single feature */
 /**
  * @file Tests for batch package fetch and streaming operations.
  */

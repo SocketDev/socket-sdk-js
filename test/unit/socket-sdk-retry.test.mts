@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — retry-behavior tests */
+/* max-file-lines: test — retry-behavior tests */
 /**
  * @file Tests for SocketSdk retry logic
  *

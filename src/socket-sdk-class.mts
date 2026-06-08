@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — SDK surface class, one method per API endpoint */
+/* max-file-lines: sdk — SDK surface class, one method per API endpoint */
 /**
  * @file SocketSdk class implementation for Socket security API client. Provides
  *   complete API functionality for vulnerability scanning, analysis, and

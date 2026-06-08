@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — consolidated utility tests mirroring src/utils.ts */
+/* max-file-lines: test — consolidated utility tests mirroring src/utils.ts */
 /**
  * @file Consolidated utility function tests. Tests for promise utilities, query
  *   parameters, user-agent generation, and JSON request body creation.

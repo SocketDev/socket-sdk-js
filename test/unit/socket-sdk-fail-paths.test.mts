@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — failure-path coverage suite */
+/* max-file-lines: test — failure-path coverage suite */
 /**
  * @file Failure path tests for SocketSdk class methods. Covers remaining
  *   uncovered error and edge-case branches in socket-sdk-class.ts:

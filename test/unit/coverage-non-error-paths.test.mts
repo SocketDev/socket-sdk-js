@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — coverage suite mirroring source layout */
+/* max-file-lines: test — coverage suite mirroring source layout */
 /**
  * @file Tests covering non-error-path gaps across several source files.
  *   Targets:
