@@ -33,7 +33,7 @@ Configs live under `.config/`:
 | `.config/esbuild.config.mts`         | Build orchestration (ESM, node18+) |
 | `.config/vitest.config.mts`          | Main test config                   |
 | `.config/vitest.config.isolated.mts` | Isolated tests (for `vi.doMock()`) |
-| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (≥99%)  |
+| `.config/vitest.coverage.config.mts` | Shared coverage thresholds (branches ≥82%, functions ≥98%, lines/statements ≥93%) |
 | `.config/isolated-tests.json`        | List of tests requiring isolation  |
 | `.config/taze.config.mts`            | Dependency-update policies         |
 

@@ -255,7 +255,7 @@ Hooks under `.claude/hooks/fleet/<name>/` (fleet-canonical); host-repo-only hook
 
 ## 🏗️ SDK-Specific
 
-Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover` (≥99%).
+Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover` (branches ≥82%, functions ≥98%, lines ≥93%, statements ≥93%).
 
 🚨 **HTTP: never `fetch()` — use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`.** `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent) and isn't nock-interceptable. For external URLs, pass a different `baseUrl` to `createGetRequest`.
 
