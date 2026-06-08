@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { ReleaseType } from 'semver'
 
-import semver from 'semver'
+import semver from '@socketsecurity/lib-stable/external/semver'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
