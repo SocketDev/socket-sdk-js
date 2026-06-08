@@ -8,6 +8,7 @@ import process from 'node:process'
 
 import openapiTS from 'openapi-typescript'
 
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { getRootPath } from './utils/path-helpers.mts'
@@ -32,10 +33,7 @@ async function main(): Promise<void> {
     logger.log(`  Written to ${typesPath}`)
   } catch (e) {
     process.exitCode = 1
-    logger.error(
-      'Failed with error:',
-      e instanceof Error ? e.message : String(e),
-    )
+    logger.error('Failed with error:', errorMessage(e))
   }
 }
 

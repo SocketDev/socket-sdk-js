@@ -11,17 +11,15 @@ import { readFileSync } from 'node:fs'
 import Module from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { envAsBoolean } from '@socketsecurity/lib-stable/env/boolean'
 
 import { createLibStubPlugin } from './rolldown/lib-stub.mts'
+import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 import type { OutputOptions, Plugin, RolldownOptions } from 'rolldown'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// This config lives at .config/repo/, so the repo root is two levels up.
-const rootPath = path.join(__dirname, '..', '..')
+const rootPath = REPO_ROOT
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 

@@ -19,6 +19,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 const logger = getDefaultLogger()
@@ -100,9 +101,7 @@ async function main(): Promise<void> {
 
     process.exitCode = 1
   } catch (e) {
-    logger.fail(
-      `Validation failed: ${e instanceof Error ? e.message : String(e)}`,
-    )
+    logger.fail(`Validation failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }

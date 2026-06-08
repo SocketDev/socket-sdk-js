@@ -191,6 +191,7 @@ export async function checkFirewall(
   } catch (e) {
     clearTimeout(timer)
     err(
+      // oxlint-disable-next-line socket/prefer-error-message -- preinstall runs before node_modules exists; @socketsecurity/lib-stable/errors is the package this script bootstraps and is unavailable here.
       `firewall-api: ${e instanceof Error ? e.message : String(e)} — proceeding anyway (non-fatal)`,
     )
     return true
@@ -285,6 +286,7 @@ export async function main(): Promise<number> {
       await bootstrapPackage(pkg)
     } catch (e) {
       err(
+        // oxlint-disable-next-line socket/prefer-error-message -- preinstall runs before node_modules exists; @socketsecurity/lib-stable/errors is the package this script bootstraps and is unavailable here.
         `Failed to bootstrap ${pkg}: ${e instanceof Error ? e.message : String(e)}`,
       )
       return 1

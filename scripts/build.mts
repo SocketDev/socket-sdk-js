@@ -11,6 +11,7 @@ import { rolldown, watch } from 'rolldown'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
@@ -112,7 +113,7 @@ export async function buildTypes(options: BuildOptions = {}): Promise<number> {
     args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
     command: 'pnpm',
     options: {
-      ...(process.platform === 'win32' && { shell: true }),
+      ...(WIN32 && { shell: WIN32 }),
     },
   })
 

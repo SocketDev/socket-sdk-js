@@ -12,6 +12,7 @@ import fastGlob from 'fast-glob'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { createSectionHeader } from '@socketsecurity/lib-stable/stdio/header'
 
@@ -74,7 +75,7 @@ export async function cleanDirectories(
     } catch (e) {
       if (!quiet) {
         logger.error(`Failed to clean ${name}`)
-        logger.error(e instanceof Error ? e.message : String(e))
+        logger.error(errorMessage(e))
       }
       return 1
     }
@@ -224,9 +225,7 @@ async function main(): Promise<void> {
       }
     }
   } catch (e) {
-    logger.error(
-      `Clean runner failed: ${e instanceof Error ? e.message : String(e)}`,
-    )
+    logger.error(`Clean runner failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }

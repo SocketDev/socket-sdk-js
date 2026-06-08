@@ -17,6 +17,7 @@ import _traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import MagicString from 'magic-string'
 
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { httpJson } from '@socketsecurity/lib-stable/http-request'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
@@ -25,7 +26,8 @@ import { getRootPath } from './utils/path-helpers.mts'
 import { runCommand } from './utils/run-command.mts'
 
 // CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
-const traverse = ((_traverse as any).default ?? _traverse) as typeof _traverse
+const traverse = ((_traverse as { default?: typeof _traverse | undefined })
+  .default ?? _traverse) as typeof _traverse
 
 const OPENAPI_URL = 'https://api.socket.dev/v0/openapi'
 
@@ -138,8 +140,8 @@ export async function fixArraySyntax(filePath: string): Promise<void> {
   // Traverse the AST to find array types
   // Cast needed due to @babel/types version mismatch between parser and traverse
   traverse(ast as Parameters<typeof traverse>[0], {
-    TSArrayType(path) {
-      const node = path.node
+    TSArrayType(arrayPath) {
+      const node = arrayPath.node
       const elementType = node.elementType
 
       // Check if this is a simple type array
@@ -250,10 +252,7 @@ async function main(): Promise<void> {
     logger.log('SDK generation complete')
   } catch (e) {
     logger.groupEnd()
-    logger.error(
-      'SDK generation failed:',
-      e instanceof Error ? e.message : String(e),
-    )
+    logger.error('SDK generation failed:', errorMessage(e))
     process.exitCode = 1
   }
 }

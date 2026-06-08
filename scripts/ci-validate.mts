@@ -7,6 +7,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
@@ -74,9 +75,7 @@ async function main(): Promise<void> {
 
     logger.success('CI validation completed successfully!')
   } catch (e) {
-    logger.error(
-      `CI validation failed: ${e instanceof Error ? e.message : String(e)}`,
-    )
+    logger.error(`CI validation failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }

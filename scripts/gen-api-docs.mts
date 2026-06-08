@@ -291,8 +291,8 @@ export function extractMethods(): MethodInfo[] {
     let sawCloseParen = false
     while (sigEnd < lines.length) {
       const line = lines[sigEnd]!
-      for (let i = 0, { length } = line; i < length; i += 1) {
-        const ch = line[i]!
+      for (let ci = 0, { length } = line; ci < length; ci += 1) {
+        const ch = line[ci]!
         if (ch === '(') {
           parenDepth++
         } else if (ch === ')') {

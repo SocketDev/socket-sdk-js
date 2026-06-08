@@ -92,8 +92,12 @@ export function getTestsToRun(options: TestRunOptions = {}): TestRunResult {
         runAllReason = 'core file changes'
         break
       }
-      for (let i = 0, { length } = tests; i < length; i += 1) {
-        const test = tests[i]!
+      for (
+        let j = 0, { length: testsLength } = tests;
+        j < testsLength;
+        j += 1
+      ) {
+        const test = tests[j]!
         // Skip deleted files.
         if (existsSync(path.join(rootPath, test))) {
           testFiles.add(test)

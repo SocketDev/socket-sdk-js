@@ -2,13 +2,12 @@
  * @file Utility for running shell commands with proper error handling.
  */
 
-import process from 'node:process'
-
 import type {
   SpawnOptions,
   SpawnSyncOptions,
 } from '@socketsecurity/lib-stable/process/spawn/types'
 
+import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import {
   spawn,
@@ -54,7 +53,7 @@ export async function runCommand(
   try {
     const result = await spawn(command, args, {
       stdio: 'inherit',
-      ...(process.platform === 'win32' && { shell: true }),
+      shell: WIN32,
       ...options,
     })
     return result.code
@@ -79,7 +78,7 @@ export async function runCommandQuiet(
   try {
     const result = await spawn(command, args, {
       ...options,
-      ...(process.platform === 'win32' && { shell: true }),
+      shell: WIN32,
       stdio: 'pipe',
       stdioString: true,
     })

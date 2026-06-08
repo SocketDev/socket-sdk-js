@@ -10,8 +10,8 @@ import type { CoverageOptions } from 'vitest'
  * for consistent coverage settings across regular and isolated test runs.
  */
 export const baseCoverageConfig: CoverageOptions = {
-  provider: 'v8',
-  reporter: ['text', 'json', 'json-summary', 'html', 'lcov', 'clover'],
+  all: true,
+  clean: true,
   exclude: [
     '**/*.config.*',
     '**/node_modules/**',
@@ -32,11 +32,11 @@ export const baseCoverageConfig: CoverageOptions = {
     '/scripts/**',
     '/test/**',
   ],
-  include: ['src/**/*.{ts,mts,cts}'],
-  all: true,
-  clean: true,
-  skipFull: false,
   ignoreClassMethods: ['constructor'],
+  include: ['src/**/*.{ts,mts,cts}'],
+  provider: 'v8',
+  reporter: ['text', 'json', 'json-summary', 'html', 'lcov', 'clover'],
+  skipFull: false,
 }
 
 /**

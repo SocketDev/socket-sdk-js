@@ -17,6 +17,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 const logger = getDefaultLogger()
@@ -111,15 +112,13 @@ async function main(): Promise<void> {
 
     process.exitCode = 1
   } catch (e) {
-    logger.fail(
-      `Validation failed: ${e instanceof Error ? e.message : String(e)}`,
-    )
+    logger.fail(`Validation failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }
 
 main().catch((e: unknown) => {
-  logger.fail(`Unexpected error: ${e instanceof Error ? e.message : String(e)}`)
+  logger.fail(`Unexpected error: ${errorMessage(e)}`)
   process.exitCode = 1
 })
 
@@ -146,8 +145,8 @@ export async function checkFileForCdnRefs(
       }
       const lineNumber = i + 1
 
-      for (let i = 0, { length } = CDN_PATTERNS; i < length; i += 1) {
-        const pattern = CDN_PATTERNS[i]!
+      for (let j = 0, { length } = CDN_PATTERNS; j < length; j += 1) {
+        const pattern = CDN_PATTERNS[j]!
         if (pattern.test(line)) {
           const match = line.match(pattern)
           if (match) {

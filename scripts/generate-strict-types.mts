@@ -119,28 +119,6 @@ const STRICT_TYPE_CONFIG: Record<string, StrictTypeConfig> = {
     },
   },
 
-  // Repository List Item - from getOrgRepoList results array
-  repositoryListItem: {
-    operationId: 'getOrgRepoList',
-    responseCode: 200,
-    typeName: 'RepositoryListItem',
-    sourcePath: ['results', 'Array', 'items'],
-    requiredFields: [
-      'archived',
-      'created_at',
-      'default_branch',
-      'description',
-      'head_full_scan_id',
-      'homepage',
-      'id',
-      'name',
-      'slug',
-      'updated_at',
-      'visibility',
-      'workspace',
-    ],
-  },
-
   // Repository Item - from getOrgRepo response
   repositoryItem: {
     operationId: 'getOrgRepo',
@@ -184,6 +162,28 @@ const STRICT_TYPE_CONFIG: Record<string, StrictTypeConfig> = {
     typeOverrides: {
       results: 'RepositoryLabelItem[]',
     },
+  },
+
+  // Repository List Item - from getOrgRepoList results array
+  repositoryListItem: {
+    operationId: 'getOrgRepoList',
+    responseCode: 200,
+    typeName: 'RepositoryListItem',
+    sourcePath: ['results', 'Array', 'items'],
+    requiredFields: [
+      'archived',
+      'created_at',
+      'default_branch',
+      'description',
+      'head_full_scan_id',
+      'homepage',
+      'id',
+      'name',
+      'slug',
+      'updated_at',
+      'visibility',
+      'workspace',
+    ],
   },
 }
 
@@ -633,11 +633,11 @@ export type DeleteRepositoryLabelResult = {
  */
 export function navigateToPath(
   node: AstNode,
-  path: string[],
+  nodePath: string[],
 ): AstNode | undefined {
   let current: AstNode | undefined = unwrapType(node)
-  for (let i = 0, { length } = path; i < length; i += 1) {
-    const segment = path[i]!
+  for (let i = 0, { length } = nodePath; i < length; i += 1) {
+    const segment = nodePath[i]!
     if (!current) {
       return undefined
     }
@@ -901,12 +901,11 @@ ${generateWrapperTypes()}
     // Step 7: Update index.ts exports
     await updateIndexExports()
 
-    // Step 8: Format generated files with Biome.
     // Use `pnpm exec` (CLAUDE.md forbids `npx` / `pnpm dlx`).
     logger.log('  Formatting generated files…')
     const formatResult = spawnSync(
       'pnpm',
-      ['exec', 'biome', 'format', '--write', strictTypesPath],
+      ['exec', 'oxfmt', '-c', '.config/fleet/oxfmtrc.json', strictTypesPath],
       { cwd: rootPath, encoding: 'utf8' },
     )
     if (formatResult.error) {
