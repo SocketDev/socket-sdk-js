@@ -201,7 +201,7 @@ export async function generateStrictTypes(): Promise<void> {
   const exitCode = await runCommand('pnpm', [
     'exec',
     'oxfmt',
-    'src/types-strict.ts',
+    'src/types-strict.mts',
   ])
   if (exitCode !== 0) {
     throw new Error(`Formatting strict types failed with exit code ${exitCode}`)

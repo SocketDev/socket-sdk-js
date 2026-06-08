@@ -19,8 +19,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
-} from '../../src/file-upload'
-import { SocketSdk } from '../../src/index'
+} from '../../src/file-upload.mts'
+import { SocketSdk } from '../../src/index.mts'
 import { isCoverageMode, setupNockEnvironment } from '../utils/environment.mts'
 import { FAST_TEST_CONFIG } from '../utils/fast-test-config.mts'
 

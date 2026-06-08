@@ -7,9 +7,9 @@
 import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials/map-set'
 
 import rootPkgJson from '../package.json' with { type: 'json' }
-import { createUserAgentFromPkgJson } from './user-agent'
+import { createUserAgentFromPkgJson } from './user-agent.mts'
 
-import type { ALERT_ACTION, ALERT_TYPE } from './types'
+import type { ALERT_ACTION, ALERT_TYPE } from './types.mts'
 
 // Re-export Socket.dev URL constants from @socketsecurity/lib
 export {

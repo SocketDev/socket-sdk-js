@@ -1,7 +1,7 @@
 import { parseJson } from '@socketsecurity/lib/json/parse'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getResponseJson } from '../../src/http-client.js'
+import { getResponseJson } from '../../src/http-client.mts'
 
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 

@@ -10,8 +10,8 @@ import { StringPrototypeTrim } from '@socketsecurity/lib/primordials/string'
 import {
   MAX_RESPONSE_SIZE,
   publicPolicy as defaultPublicPolicy,
-} from './constants'
-import { sanitizeHeaders } from './utils/header-sanitization'
+} from './constants.mts'
+import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
 import type {
   RequestOptions,
@@ -19,7 +19,7 @@ import type {
   SendMethod,
   SocketArtifactAlert,
   SocketArtifactWithExtras,
-} from './types'
+} from './types.mts'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
 

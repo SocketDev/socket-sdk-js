@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { setupTestClient } from '../utils/environment.mts'
 
-import type { EntitlementsResponse } from '../../src/index'
+import type { EntitlementsResponse } from '../../src/index.mts'
 
 describe('Entitlements API', () => {
   const getClient = setupTestClient('test-api-token', {

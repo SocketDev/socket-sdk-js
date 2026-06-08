@@ -11,7 +11,7 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 import { isCoverageMode, setupTestEnvironment } from '../utils/environment.mts'
 
 // Nock HTTP mocking is incompatible with vitest forks pool (used by isolated config).

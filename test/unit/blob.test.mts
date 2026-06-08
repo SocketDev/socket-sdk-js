@@ -11,7 +11,7 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { blobHashOf, fetchBlob, tryDecodeText } from '../../src/blob'
+import { blobHashOf, fetchBlob, tryDecodeText } from '../../src/blob.mts'
 
 const HOST = 'https://socketusercontent.com'
 

@@ -25,8 +25,8 @@ export const baseCoverageConfig: CoverageOptions = {
     'test/**',
     '**/*.mjs',
     '**/*.cjs',
-    'src/types.ts',
-    'src/index.ts',
+    'src/types.mts',
+    'src/index.mts',
     'perf/**',
     // Explicit root-level exclusions
     '/scripts/**',

@@ -15,12 +15,12 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
-import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
-import { SocketSdk } from '../../src/index'
+import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.mts'
+import { SocketSdk } from '../../src/index.mts'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
-import type { SocketSdkGenericResult } from '../../src/index'
+import type { SocketSdkGenericResult } from '../../src/index.mts'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
 // ---------------------------------------------------------------------------

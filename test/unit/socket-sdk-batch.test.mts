@@ -9,7 +9,7 @@ import * as path from 'node:path'
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 import { setupNockEnvironment } from '../utils/environment.mts'
 import {
   FAST_TEST_CONFIG,

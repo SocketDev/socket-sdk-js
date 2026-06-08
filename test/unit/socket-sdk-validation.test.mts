@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 
 describe('SocketSdk - Configuration Validation', () => {
   describe('API token validation', () => {

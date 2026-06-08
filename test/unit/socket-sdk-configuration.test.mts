@@ -6,8 +6,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { DEFAULT_USER_AGENT } from '../../src/constants'
-import { SocketSdk } from '../../src/index'
+import { DEFAULT_USER_AGENT } from '../../src/constants.mts'
+import { SocketSdk } from '../../src/index.mts'
 
 describe('SDK Configuration', () => {
   describe('initialization with different options', () => {

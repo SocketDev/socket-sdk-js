@@ -126,8 +126,8 @@ export const buildConfig: RolldownOptions & { output: OutputOptions } = {
   // externalized by the node-protocol plugin.
   external: externalDependencies,
   input: {
-    index: path.join(srcPath, 'index.ts'),
-    testing: path.join(srcPath, 'testing.ts'),
+    index: path.join(srcPath, 'index.mts'),
+    testing: path.join(srcPath, 'testing.mts'),
   },
   output: {
     dir: distPath,

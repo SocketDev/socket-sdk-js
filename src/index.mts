@@ -10,15 +10,15 @@ export {
   fetchChunkedBytes,
   fetchRawBytes,
   tryDecodeText,
-} from './blob'
+} from './blob.mts'
 export type {
   BlobResult,
   ChunkedFetchResult,
   FetchBlobOptions,
   RawFetchResult,
-} from './blob'
+} from './blob.mts'
 // Re-export HTTP client classes.
-export { ResponseError } from './http-client'
+export { ResponseError } from './http-client.mts'
 // Re-export quota utility functions.
 export {
   calculateTotalQuotaCost,
@@ -30,9 +30,9 @@ export {
   getQuotaUsageSummary,
   getRequiredPermissions,
   hasQuotaForMethods,
-} from './quota-utils'
+} from './quota-utils.mts'
 // Re-export the main SocketSdk class.
-export { SocketSdk } from './socket-sdk-class'
+export { SocketSdk } from './socket-sdk-class.mts'
 // Re-export types from modules.
 export type {
   ALERT_ACTION,
@@ -89,7 +89,7 @@ export type {
   UploadManifestFilesResponse,
   UploadManifestFilesReturnType,
   Vulnerability,
-} from './types'
+} from './types.mts'
 // Re-export strict types for v3 API.
 export type {
   CreateFullScanOptions,
@@ -116,7 +116,7 @@ export type {
   StreamFullScanOptions,
   StrictErrorResult,
   StrictResult,
-} from './types-strict'
+} from './types-strict.mts'
 // Re-export functions from modules.
-export { createUserAgentFromPkgJson } from './user-agent'
+export { createUserAgentFromPkgJson } from './user-agent.mts'
 /* c8 ignore stop */

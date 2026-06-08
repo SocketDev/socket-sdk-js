@@ -13,7 +13,7 @@ import {
   getQuotaUsageSummary,
   getRequiredPermissions,
   hasQuotaForMethods,
-} from '../../src/quota-utils'
+} from '../../src/quota-utils.mts'
 
 import type * as NodeFs from 'node:fs'
 import type * as MemoizeModule from '@socketsecurity/lib/memo/memoize'
@@ -290,7 +290,7 @@ describe('Quota Utils', () => {
 
       const { getQuotaCost: getQuotaCostMocked } =
         // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-        await import('../../src/quota-utils')
+        await import('../../src/quota-utils.mts')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',
@@ -318,7 +318,7 @@ describe('Quota Utils', () => {
 
       const { getQuotaCost: getQuotaCostMocked } =
         // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-        await import('../../src/quota-utils')
+        await import('../../src/quota-utils.mts')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',
@@ -346,7 +346,7 @@ describe('Quota Utils', () => {
 
       const { getQuotaCost: getQuotaCostMocked } =
         // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
-        await import('../../src/quota-utils')
+        await import('../../src/quota-utils.mts')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',

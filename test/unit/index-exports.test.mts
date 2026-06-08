@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest'
 
-import * as sdk from '../../src/index'
+import * as sdk from '../../src/index.mts'
 
 describe('index.ts exports', () => {
   it('should export ResponseError class', () => {
@@ -68,8 +68,6 @@ describe('index.ts exports', () => {
   it('should not export unexpected functions', () => {
     const sdkKeys = Object.keys(sdk)
     const expectedKeys = new Set([
-      'ResponseError',
-      'SocketSdk',
       'calculateTotalQuotaCost',
       'createUserAgentFromPkgJson',
       'fetchBlob',
@@ -83,6 +81,8 @@ describe('index.ts exports', () => {
       'getQuotaUsageSummary',
       'getRequiredPermissions',
       'hasQuotaForMethods',
+      'ResponseError',
+      'SocketSdk',
       'tryDecodeText',
     ])
 

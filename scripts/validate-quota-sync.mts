@@ -4,7 +4,7 @@
  *   of truth:
  *
  *   1. The `@quota N units` JSDoc tag on each public method in
- *      `src/socket-sdk-class.ts`.
+ *      `src/socket-sdk-class.mts`.
  *   2. The `data/api-method-quota-and-permissions.json` data file.
  *   3. The OpenAPI operation ID referenced from the method (via `@operationId`
  *      JSDoc tag, the first `<'opId'>` type generic in the body, or the method
@@ -22,7 +22,7 @@ import { getRootPath } from './utils/path-helpers.mts'
 
 const logger = getDefaultLogger()
 const rootPath = getRootPath(import.meta.url)
-const classPath = path.join(rootPath, 'src/socket-sdk-class.ts')
+const classPath = path.join(rootPath, 'src/socket-sdk-class.mts')
 const dataPath = path.join(
   rootPath,
   'data/api-method-quota-and-permissions.json',

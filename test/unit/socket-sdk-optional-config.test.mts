@@ -12,10 +12,10 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 import { isCoverageMode, setupTestClient } from '../utils/environment.mts'
 
-import type { SocketSdkGenericResult } from '../../src/index'
+import type { SocketSdkGenericResult } from '../../src/index.mts'
 
 describe.skipIf(isCoverageMode)('SocketSdk - Optional Configuration', () => {
   const getClient = setupTestClient('test-token', { retries: 0 })

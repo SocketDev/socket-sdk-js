@@ -22,7 +22,7 @@ import { getRootPath } from './utils/path-helpers.mts'
 const logger = getDefaultLogger()
 const rootPath = getRootPath(import.meta.url)
 const openApiPath = path.resolve(rootPath, 'openapi.json')
-const strictTypesPath = path.resolve(rootPath, 'src/types-strict.ts')
+const strictTypesPath = path.resolve(rootPath, 'src/types-strict.mts')
 
 // Create TypeScript-aware parser
 const TSParser = Parser.extend(tsPlugin())
@@ -724,10 +724,10 @@ export function unwrapType(node: AstNode | undefined): AstNode | undefined {
 }
 
 /**
- * Update index.ts to export all generated types.
+ * Update index.mts to export all generated types.
  */
 export async function updateIndexExports(): Promise<void> {
-  const indexPath = path.resolve(rootPath, 'src/index.ts')
+  const indexPath = path.resolve(rootPath, 'src/index.mts')
   const indexContent = await fs.readFile(indexPath, 'utf8')
 
   // Extract type names from generated types

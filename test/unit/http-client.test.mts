@@ -4,14 +4,14 @@ import { createServer } from 'node:http'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import {
-  ResponseError,
   createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
   getResponseJson,
   isResponseOk,
   reshapeArtifactForPublicPolicy,
-} from '../../src/http-client.js'
+  ResponseError,
+} from '../../src/http-client.mts'
 
 import { isError } from '@socketsecurity/lib/errors/predicates'
 

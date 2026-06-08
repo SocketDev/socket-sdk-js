@@ -8,7 +8,7 @@ import { memoize } from '@socketsecurity/lib/memo/memoize'
 import { once } from '@socketsecurity/lib/memo/once'
 import { ErrorCtor } from '@socketsecurity/lib/primordials/error'
 
-import type { SocketSdkOperations } from './types'
+import type { SocketSdkOperations } from './types.mts'
 
 interface ApiRequirement {
   quota: number

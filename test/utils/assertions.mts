@@ -5,7 +5,7 @@
 
 import { expect } from 'vitest'
 
-import type { SocketSdkGenericResult } from '../../src/index'
+import type { SocketSdkGenericResult } from '../../src/index.mts'
 
 /**
  * Assert that an SDK result is an error with Socket API format.

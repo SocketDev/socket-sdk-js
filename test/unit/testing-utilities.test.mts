@@ -20,7 +20,7 @@ import {
   packageFixtures,
   repositoryFixtures,
   scanFixtures,
-} from '../../src/testing'
+} from '../../src/testing.mts'
 
 describe('Testing Utilities', () => {
   describe('mockSuccessResponse', () => {

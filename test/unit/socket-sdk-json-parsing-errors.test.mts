@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { isCoverageMode, setupTestClient } from '../utils/environment.mts'
 
-import type { SocketSdkGenericResult } from '../../src/index'
+import type { SocketSdkGenericResult } from '../../src/index.mts'
 
 describe('SocketSdk - Branch Coverage Tests', () => {
   const getClient = setupTestClient('test-api-token', { retries: 0 })

@@ -23,14 +23,14 @@ import path from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.js'
+import { MAX_FIREWALL_COMPONENTS } from '../../src/constants.mts'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
-} from '../../src/file-upload'
-import { createGetRequest, getResponseJson } from '../../src/http-client'
-import { SocketSdk } from '../../src/index'
-import { promiseWithResolvers } from '../../src/utils.js'
+} from '../../src/file-upload.mts'
+import { createGetRequest, getResponseJson } from '../../src/http-client.mts'
+import { SocketSdk } from '../../src/index.mts'
+import { promiseWithResolvers } from '../../src/utils.mts'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'

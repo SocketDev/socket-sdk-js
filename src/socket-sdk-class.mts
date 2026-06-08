@@ -36,31 +36,31 @@ import {
   DEFAULT_RETRIES,
   DEFAULT_RETRY_DELAY,
   DEFAULT_USER_AGENT,
+  httpAgentNames,
   MAX_FIREWALL_COMPONENTS,
   MAX_HTTP_TIMEOUT,
   MAX_RESPONSE_SIZE,
   MIN_HTTP_TIMEOUT,
+  publicPolicy,
   SOCKET_API_TOKENS_URL,
   SOCKET_CONTACT_URL,
   SOCKET_DASHBOARD_URL,
   SOCKET_FIREWALL_API_URL,
   SOCKET_PUBLIC_BLOB_STORE_URL,
-  httpAgentNames,
-  publicPolicy,
-} from './constants'
+} from './constants.mts'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
-} from './file-upload'
+} from './file-upload.mts'
 import {
-  ResponseError,
   createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
   getResponseJson,
   isResponseOk,
   reshapeArtifactForPublicPolicy,
-} from './http-client'
+  ResponseError,
+} from './http-client.mts'
 import {
   filterRedundantCause,
   normalizeBaseUrl,
@@ -68,7 +68,7 @@ import {
   queryToSearchParams,
   resolveAbsPaths,
   resolveBasePath,
-} from './utils'
+} from './utils.mts'
 
 import type {
   Agent,
@@ -105,7 +105,7 @@ import type {
   UploadManifestFilesError,
   UploadManifestFilesOptions,
   UploadManifestFilesReturnType,
-} from './types'
+} from './types.mts'
 import type {
   CreateFullScanOptions,
   DeleteRepositoryLabelResult,
@@ -124,7 +124,7 @@ import type {
   RepositoryLabelsListResult,
   RepositoryResult,
   StrictErrorResult,
-} from './types-strict'
+} from './types-strict.mts'
 import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 

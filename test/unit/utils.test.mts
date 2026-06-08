@@ -16,7 +16,7 @@ import { describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { createUserAgentFromPkgJson } from '../../src/user-agent'
+import { createUserAgentFromPkgJson } from '../../src/user-agent.mts'
 import {
   calculateWordSetSimilarity,
   filterRedundantCause,
@@ -26,7 +26,7 @@ import {
   resolveAbsPaths,
   resolveBasePath,
   shouldOmitReason,
-} from '../../src/utils'
+} from '../../src/utils.mts'
 
 // =============================================================================
 // URL Normalization

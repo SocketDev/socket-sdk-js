@@ -7,11 +7,11 @@ import { isErrnoException } from '@socketsecurity/lib/errors/predicates'
 import { httpRequest } from '@socketsecurity/lib/http-request/request'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { MAX_RESPONSE_SIZE } from './constants'
+import { MAX_RESPONSE_SIZE } from './constants.mts'
 
-import { sanitizeHeaders } from './utils/header-sanitization'
+import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
-import type { RequestOptions, RequestOptionsWithHooks } from './types'
+import type { RequestOptions, RequestOptionsWithHooks } from './types.mts'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { ReadStream } from 'node:fs'
 import type { Readable } from 'node:stream'

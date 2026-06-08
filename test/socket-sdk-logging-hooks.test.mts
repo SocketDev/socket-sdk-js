@@ -5,9 +5,9 @@
 import nock from 'nock'
 import { describe, expect, it, vi } from 'vitest'
 
-import { SocketSdk } from '../src/index'
+import { SocketSdk } from '../src/index.mts'
 
-import type { RequestInfo, ResponseInfo } from '../src/index'
+import type { RequestInfo, ResponseInfo } from '../src/index.mts'
 
 describe('SocketSdk - Logging Hooks', () => {
   it('should call request and response hooks for successful API call', async () => {

@@ -20,7 +20,7 @@ import path from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 

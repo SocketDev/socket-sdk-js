@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* max-file-lines: legitimate — single-pass docs generator (extract, group, render) */
 /**
- * @file Generates docs/api.md from src/socket-sdk-class.ts and
+ * @file Generates docs/api.md from src/socket-sdk-class.mts and
  *   data/api-method-quota-and-permissions.json. The doc is a
  *   one-line-per-method reference grouped by domain. Quota costs come from the
  *   SDK's own quota API. Resolution rules for the OpenAPI operation ID (used to
@@ -24,7 +24,7 @@ import { getRootPath } from './utils/path-helpers.mts'
 
 const logger = getDefaultLogger()
 const rootPath = getRootPath(import.meta.url)
-const classPath = path.join(rootPath, 'src/socket-sdk-class.ts')
+const classPath = path.join(rootPath, 'src/socket-sdk-class.mts')
 const dataPath = path.join(
   rootPath,
   'data/api-method-quota-and-permissions.json',
