@@ -89,7 +89,8 @@ catalog:
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
   'playwright-core': 1.55.1
-  'rolldown': 1.0.3
+  'regjsparser': 0.13.1
+  'rolldown': 1.1.0
   'shell-quote': 1.8.4
   'taze': 19.11.0
   # vite 8.0.14 swaps esbuild → rolldown natively (bundles rolldown
@@ -118,23 +119,7 @@ minimumReleaseAgeExclude:
   - '@redwoodjs/agent-ci'
   - 'dtu-github-actions'
   - 'vite'
-  - 'rolldown'
   - '@rolldown/pluginutils'
-  - '@rolldown/binding-android-arm64'
-  - '@rolldown/binding-darwin-arm64'
-  - '@rolldown/binding-darwin-x64'
-  - '@rolldown/binding-freebsd-x64'
-  - '@rolldown/binding-linux-arm-gnueabihf'
-  - '@rolldown/binding-linux-arm64-gnu'
-  - '@rolldown/binding-linux-arm64-musl'
-  - '@rolldown/binding-linux-ppc64-gnu'
-  - '@rolldown/binding-linux-s390x-gnu'
-  - '@rolldown/binding-linux-x64-gnu'
-  - '@rolldown/binding-linux-x64-musl'
-  - '@rolldown/binding-openharmony-arm64'
-  - '@rolldown/binding-wasm32-wasi'
-  - '@rolldown/binding-win32-arm64-msvc'
-  - '@rolldown/binding-win32-x64-msvc'
   - '@socketdev/*'
   - 'ecc-agentshield'
   - 'sfw'
