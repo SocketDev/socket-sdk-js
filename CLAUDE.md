@@ -263,10 +263,10 @@ Hooks under `.claude/hooks/fleet/<name>/` (fleet-canonical); host-repo-only hook
 
 ## 🏗️ SDK-Specific
 
-Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover` (branches ≥82%, functions ≥98%, lines ≥93%, statements ≥93%).
+Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover`.
 
 🚨 **HTTP: never `fetch()` — use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`.** `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent) and isn't nock-interceptable. For external URLs, pass a different `baseUrl` to `createGetRequest`.
 
 🚨 **Conventions:** `.mts` extension, mandatory `@fileoverview` headers, FORBIDDEN `"use strict"` in `.mjs`/`.mts` (ES modules are strict). Semicolons (this is the one Socket project that uses them). No `any` — `unknown` or specific types. `logger.error('')` / `logger.log('')` need the empty string. 🚨 **never** `--` before vitest test paths — runs ALL tests.
 
-Full layout, command catalog, config-file table, sorting rules, testing helpers, CI mandate, SDK notes in [`docs/claude.md/repo/architecture.md`](docs/claude.md/repo/architecture.md).
+Full layout, command catalog, config-file table, sorting rules, testing helpers, CI mandate, SDK notes in [`docs/agents.md/repo/architecture.md`](docs/agents.md/repo/architecture.md).
