@@ -41,10 +41,11 @@ The fleet hooks each cite their own trigger + bypass surface in their `README.md
 - `no-pkgjson-pnpm-overrides-guard` — keeps overrides in `pnpm-workspace.yaml`
 - `no-pm-exec-guard` — blocks `<pm> exec` (wrapper overhead) + `npx`/`pnpm dlx`/`yarn dlx` (fetch+exec) Bash invocations; bypass `Allow pm-exec bypass`
 - `no-platform-import-guard` — blocks direct `/node` or `/browser` imports of platform-split modules (http-request, logger); bypass `Allow platform-http-import bypass`
+- `no-premature-commit-kill-guard` — PreToolUse Bash: blocks `run_in_background:true` on a `git commit`/`rebase`/`merge`/`cherry-pick` (its bounded ~60s pre-commit looks like a hang when backgrounded), and blocks a `pkill`/`kill` targeting a `git commit` or `vitest` (killing a mid-pre-commit run corrupts the index + leaks vitest workers); bypass `Allow background-git bypass`
 - `no-test-in-scripts-guard` — blocks `node:test` suites under `scripts/` (they never run in CI; move to `test/unit/` vitest)
 - `prefer-json-clone-guard` — `JSON.parse(JSON.stringify(x))` over `structuredClone`
 - `no-token-in-dotenv-guard` — blocks raw token writes into `.env*` / `.envrc`
-- `no-unisolated-git-fixture-guard` — blocks a test that spawns `git` against a temp-dir fixture without stripping the inherited `GIT_DIR`/`GIT_WORK_TREE` env + pinning `GIT_CONFIG_GLOBAL`, which under pre-commit leaks onto the live `.git/config` (sets `core.bare`/junk identity, stacks junk commits); bypass `Allow unisolated-git-fixture bypass`
+- `no-unisolated-git-fixture-guard` — blocks a test that spawns `git` against a temp-dir fixture without isolation. Under pre-commit the inherited `GIT_DIR`/`GIT_WORK_TREE` leaks the fixture's writes onto the live `.git/config` (sets `core.bare`/junk identity, stacks junk commits). Satisfy it with the blessed one-liner `import '.git-hooks/_shared/isolate-git-env.mts'` (strips the discovery vars on load; vitest does this via its setup) or by pinning `GIT_CONFIG_GLOBAL` per-spawn. Bypass `Allow unisolated-git-fixture bypass`
 - `node-modules-staging-guard` — blocks staging `node_modules/` into git
 - `parallel-agent-edit-guard` — blocks edits to files another agent owns this session
 - `path-guard` — blocks multi-stage paths constructed outside `paths.mts`

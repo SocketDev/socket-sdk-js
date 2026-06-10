@@ -15,6 +15,9 @@ trustPolicyExclude:
 # alongside the root. Keeps hook deps in lockstep with the main tree.
 packages:
   - .claude/hooks/*
+  - '.config/oxlint-plugin'
+  - '.config/oxlint-plugin/fleet/*'
+  - '.config/oxlint-plugin/repo/*'
 
 allowBuilds:
   cpu-features: false
