@@ -338,7 +338,10 @@ export interface ReshapeArtifactOptions {
 export function reshapeArtifactForPublicPolicy<
   T extends Record<string, unknown>,
 >(data: T, options: ReshapeArtifactOptions): T {
-  const { actions, isAuthenticated, policy } = options
+  const { actions, isAuthenticated, policy } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   if (!isAuthenticated) {
     const allowedActions =
       actions !== undefined && StringPrototypeTrim(actions)

@@ -18,6 +18,7 @@ import { isCoverageMode, setupTestEnvironment } from '../utils/environment.mts'
 // The retry logic is still tested in the main thread pool config.
 const describeRetry = isCoverageMode ? describe.skip : describe
 
+// oxlint-disable-next-line socket/require-vitest-globals-import -- describeRetry is a local const aliasing the imported describe (describe.skip in coverage mode), not a vitest global.
 describeRetry('SocketSdk - Retry Logic', () => {
   setupTestEnvironment()
 

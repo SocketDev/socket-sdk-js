@@ -102,6 +102,7 @@ export async function fetchBlob(
   hash: string,
   options: FetchBlobOptions,
 ): Promise<BlobResult> {
+  options = { __proto__: null, ...options } as typeof options
   const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES
 
   let buf: Uint8Array
@@ -227,6 +228,7 @@ export async function fetchRawBytes(
   hash: string,
   options: FetchBlobOptions,
 ): Promise<RawFetchResult> {
+  options = { __proto__: null, ...options } as typeof options
   const url = `${options.baseUrl.replace(/\/$/u, '')}/blob/${encodeURIComponent(hash)}`
 
   const headers: Record<string, string> = {}

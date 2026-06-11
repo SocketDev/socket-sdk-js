@@ -2180,6 +2180,7 @@ export class SocketSdk {
     hash: string,
     options?: { baseUrl?: string | undefined } | undefined,
   ): Promise<string> {
+    options = { __proto__: null, ...options } as typeof options
     const blobPath = `/blob/${encodeURIComponent(hash)}`
     const blobBaseUrl = options?.baseUrl || SOCKET_PUBLIC_BLOB_STORE_URL
     const url = `${blobBaseUrl}${blobPath}`
