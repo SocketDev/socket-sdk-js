@@ -80,26 +80,26 @@ catalog:
   '@types/mdast': 4.0.4
   '@types/node': 24.9.2
   '@typescript/native-preview': 7.0.0-dev.20260510.1
-  '@vitest/coverage-v8': 4.1.6
-  '@vitest/ui': 4.1.6
+  '@vitest/coverage-v8': 4.1.8
+  '@vitest/ui': 4.1.8
   'dtu-github-actions': 0.16.2
   'ecc-agentshield': 1.4.0
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
-  'npm-run-all2': 9.0.0
+  'npm-run-all2': 9.0.1
   'oxfmt': 0.48.0
   'oxlint': 1.63.0
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
-  'playwright-core': 1.55.1
+  'playwright-core': 1.60.0
   'regjsparser': 0.13.1
   'rolldown': 1.1.0
   'shell-quote': 1.8.4
-  'taze': 19.11.0
+  'taze': 19.14.1
   # vite 8.0.14 swaps esbuild → rolldown natively (bundles rolldown
   # 1.0.2), so the override below removes esbuild from the install tree.
   'vite': 8.0.14
-  'vitest': 4.1.6
+  'vitest': 4.1.8
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
 minimumReleaseAge: 10080
@@ -132,6 +132,29 @@ minimumReleaseAgeExclude:
   - '@ultrathink/*'
   - '@yuku-parser/*'
   - '@socketoverride/*'
+  - 'socket'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-darwin-arm64@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-darwin-x64@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-freebsd-x64@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-linux-arm-gnu@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-linux-arm-musl@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-linux-arm64-gnu@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-linux-arm64-musl@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-linux-x64-gnu@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-linux-x64-musl@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-win32-arm64@0.5.31'
+  # published: 2026-06-09 | removable: 2026-06-16
+  - '@yuku-parser/binding-win32-x64@0.5.31'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
