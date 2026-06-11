@@ -92,6 +92,13 @@ Get complete full scan results buffered in memory.
 async getFullScan(
   orgSlug: string,
   scanId: string,
+  options?:
+    | {
+        cached?: boolean | undefined
+        include_license_details?: boolean | undefined
+        include_scores?: boolean | undefined
+      }
+    | undefined,
 ): Promise<FullScanResult | StrictErrorResult>
 ```
 
@@ -213,6 +220,13 @@ Get details for a specific diff scan. Returns comparison between two full
 async getDiffScanById(
   orgSlug: string,
   diffScanId: string,
+  options?:
+    | {
+        cached?: boolean | undefined
+        omit_license_details?: boolean | undefined
+        omit_unchanged?: boolean | undefined
+      }
+    | undefined,
 ): Promise<SocketSdkResult<'getDiffScanById'>>
 ```
 
