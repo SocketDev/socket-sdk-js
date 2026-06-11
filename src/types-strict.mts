@@ -150,8 +150,8 @@ export type RepositoryItem = {
     value?:
       | {
           /**
-           * The GitHub installation_id of the active associated Socket
-           * GitHub App.
+           * The GitHub installation_id of the active associated Socket GitHub
+           * App.
            *
            * @default
            */
@@ -226,8 +226,8 @@ export type RepositoryListItem = {
         value?:
           | {
               /**
-               * The GitHub installation_id of the active associated
-               * Socket GitHub App.
+               * The GitHub installation_id of the active associated Socket
+               * GitHub App.
                *
                * @default
                */
