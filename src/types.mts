@@ -409,6 +409,13 @@ export interface SocketSdkOptions {
       }
     | undefined
   /**
+   * Delay in milliseconds between polls when a cached scan endpoint
+   * (getDiffScanById, getFullScan) returns 202 Accepted (default: 2000). On a
+   * cache miss the API computes the result in the background and the SDK polls
+   * until it is ready.
+   */
+  pollIntervalMs?: number | undefined
+  /**
    * Number of retry attempts on failure (default: 3). Uses exponential backoff
    * between retries.
    */

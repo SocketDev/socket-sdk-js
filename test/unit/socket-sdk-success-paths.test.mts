@@ -193,8 +193,9 @@ describe('SocketSdk - Success Path Coverage', () => {
     })
 
     it('should successfully get a full scan', async () => {
+      // getFullScan reads the cached immutable store by default (cached=true).
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/full-scans/scan-123')
+        .get('/v0/orgs/test-org/full-scans/scan-123?cached=true')
         .reply(200, { data: { id: 'scan-123' } })
 
       const result = await getClient().getFullScan('test-org', 'scan-123')

@@ -33,6 +33,7 @@ import { httpRequest } from '@socketsecurity/lib/http-request/request'
 import {
   DEFAULT_CACHE_TTL,
   DEFAULT_HTTP_TIMEOUT,
+  DEFAULT_POLL_INTERVAL,
   DEFAULT_RETRIES,
   DEFAULT_RETRY_DELAY,
   DEFAULT_USER_AGENT,
@@ -69,6 +70,7 @@ import {
   resolveAbsPaths,
   resolveBasePath,
 } from './utils.mts'
+import { pollCachedScan } from './utils/poll.mts'
 
 import type {
   Agent,
@@ -127,6 +129,7 @@ import type {
 } from './types-strict.mts'
 import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
+import type { JsonValue } from '@socketsecurity/lib/json/types'
 
 /**
  * Socket SDK for programmatic access to Socket.dev security analysis APIs.
@@ -141,6 +144,7 @@ export class SocketSdk {
   readonly #cacheTtlConfig: SocketSdkOptions['cacheTtl']
   readonly #hooks: SocketSdkOptions['hooks']
   readonly #onFileValidation: FileValidationCallback | undefined
+  readonly #pollIntervalMs: number
   readonly #reqOptions: RequestOptions
   readonly #reqOptionsWithHooks: RequestOptionsWithHooks
   readonly #retries: number
@@ -174,6 +178,7 @@ export class SocketSdk {
       cacheTtl,
       hooks,
       onFileValidation,
+      pollIntervalMs = DEFAULT_POLL_INTERVAL,
       retries = DEFAULT_RETRIES,
       retryDelay = DEFAULT_RETRY_DELAY,
       timeout = DEFAULT_HTTP_TIMEOUT,
@@ -224,6 +229,7 @@ export class SocketSdk {
     this.#cacheByTtl = new Map()
     this.#hooks = hooks
     this.#onFileValidation = onFileValidation
+    this.#pollIntervalMs = pollIntervalMs
     this.#retries = retries
     this.#retryDelay = retryDelay
     this.#reqOptions = {
@@ -472,6 +478,38 @@ export class SocketSdk {
     // Use cache with retry logic.
     return await cacheToUse.getOrFetch(cacheKey, async () => {
       return await this.#executeWithRetry(fetcher)
+    })
+  }
+
+  /**
+   * Drive the cached-scan 200/202 polling loop for a GET url path. Each poll is
+   * retry-wrapped (so 429/5xx still back off) and throws a ResponseError on a
+   * non-2xx status; a 200 resolves with parsed JSON and a 202 keeps polling
+   * until the result is ready or the wall-clock budget is exhausted. Internal
+   * shared helper for getDiffScanById and getFullScan.
+   */
+  async #pollCachedScan(
+    urlPath: string,
+    label: string,
+  ): Promise<JsonValue | undefined> {
+    return await pollCachedScan({
+      label,
+      pollIntervalMs: this.#pollIntervalMs,
+      requestFn: async () =>
+        await this.#executeWithRetry(async () => {
+          const response = await createGetRequest(
+            this.#baseUrl,
+            urlPath,
+            this.#reqOptionsWithHooks,
+          )
+          // 202 Accepted is ok (2xx); let it through for the poll loop. Any
+          // non-2xx throws so #executeWithRetry retries 429/5xx and 4xx
+          // surfaces to the caller's catch.
+          if (!isResponseOk(response)) {
+            throw new ResponseError(response, '', urlPath)
+          }
+          return response
+        }),
     })
   }
 
@@ -2432,23 +2470,67 @@ export class SocketSdk {
    * Get details for a specific diff scan. Returns comparison between two full
    * scans with artifact changes.
    *
-   * @throws {Error} When server returns 5xx status codes
+   * Reads from the immutable cached-scan store by default (`cached: true`). On
+   * a cache miss the API returns 202 Accepted and computes the result in the
+   * background; this method polls transparently until the result is ready, so
+   * callers only ever observe the final comparison. Pass `cached: false` to
+   * bypass the cache and live-compute the diff (slower, for debugging). When
+   * `cached` is true the `omit_license_details` option is ignored server-side —
+   * cached results always include license details.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getDiffScanById('my-org', 'diff-scan-id')
+   *
+   *   if (result.success) {
+   *     console.log(result.data.diff_scan.artifacts.added)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param diffScanId - Diff scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.cached - Read cached immutable results (defaults to true).
+   * @param options.omit_license_details - Omit license details (ignored when
+   *   cached).
+   * @param options.omit_unchanged - Omit unchanged artifacts from the response.
+   *
+   * @returns Diff scan comparison with artifact changes
+   *
+   * @throws {Error} When server returns 5xx status codes or polling times out
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getdiffscanbyid
    */
   async getDiffScanById(
     orgSlug: string,
     diffScanId: string,
+    options?:
+      | {
+          cached?: boolean | undefined
+          omit_license_details?: boolean | undefined
+          omit_unchanged?: boolean | undefined
+        }
+      | undefined,
   ): Promise<SocketSdkResult<'getDiffScanById'>> {
+    const { cached = true, ...rest } = { __proto__: null, ...options } as {
+      cached?: boolean | undefined
+    } & QueryParams
+    // Omit the cached param when disabled: an absent param reads as false
+    // server-side, so there's no reason to send cached=false on the wire.
+    const queryParams = {
+      __proto__: null,
+      ...(cached ? { cached: true } : undefined),
+      ...rest,
+    } as QueryParams
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}?${queryToSearchParams(queryParams)}`
     try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
-              this.#reqOptionsWithHooks,
-            ),
-          ),
-      )
+      const data = await this.#pollCachedScan(urlPath, diffScanId)
       return this.#handleApiSuccess<'getDiffScanById'>(data)
     } catch (e) {
       return await this.#handleApiError<'getDiffScanById'>(e)
@@ -2575,17 +2657,28 @@ export class SocketSdk {
    *   const result = await sdk.getFullScan('my-org', 'scan_123')
    *
    *   if (result.success) {
-   *     console.log('Scan status:', result.data.scan_state)
-   *     console.log('Repository:', result.data.repository_slug)
+   *   console.log('Scan status:', result.data.scan_state)
+   *   console.log('Repository:', result.data.repository_slug)
    *   }
    *   ```
    *
+   *   Reads from the immutable cached-scan store by default (`cached: true`). On a
+   *   cache miss the API returns 202 Accepted and computes the result in the
+   *   background; this method polls transparently until the result is ready, so
+   *   callers only ever observe the final scan. Pass `cached: false` to bypass the
+   *   cache and live-compute the scan (slower, for debugging).
+   *
    * @param orgSlug - Organization identifier.
    * @param scanId - Full scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.cached - Read cached immutable results (defaults to true).
+   * @param options.include_license_details - Include per-artifact license
+   *   details.
+   * @param options.include_scores - Include score data for each artifact.
    *
    * @returns Complete full scan data including all artifacts
    *
-   * @throws {Error} When server returns 5xx status codes
+   * @throws {Error} When server returns 5xx status codes or polling times out
    *
    * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
    *
@@ -2598,18 +2691,27 @@ export class SocketSdk {
   async getFullScan(
     orgSlug: string,
     scanId: string,
+    options?:
+      | {
+          cached?: boolean | undefined
+          include_license_details?: boolean | undefined
+          include_scores?: boolean | undefined
+        }
+      | undefined,
   ): Promise<FullScanResult | StrictErrorResult> {
+    const { cached = true, ...rest } = { __proto__: null, ...options } as {
+      cached?: boolean | undefined
+    } & QueryParams
+    // Omit the cached param when disabled: an absent param reads as false
+    // server-side, so there's no reason to send cached=false on the wire.
+    const queryParams = {
+      __proto__: null,
+      ...(cached ? { cached: true } : undefined),
+      ...rest,
+    } as QueryParams
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}?${queryToSearchParams(queryParams)}`
     try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
-              this.#reqOptionsWithHooks,
-            ),
-          ),
-      )
+      const data = await this.#pollCachedScan(urlPath, scanId)
       return {
         cause: undefined,
         data: data as FullScanItem,

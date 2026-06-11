@@ -41,6 +41,13 @@ export const MIN_HTTP_TIMEOUT = 5000
 // Maximum response body size (10MB)
 export const MAX_RESPONSE_SIZE = 10 * 1024 * 1024
 
+// Maximum wall-clock time to poll a cached scan endpoint that keeps
+// returning 202 Accepted before giving up (5 minutes).
+export const DEFAULT_POLL_TIMEOUT = 5 * 60 * 1000
+
+// Delay between polls of a cached scan endpoint that returned 202 (2 seconds).
+export const DEFAULT_POLL_INTERVAL = 2000
+
 // Public blob store URL for patch downloads
 export const SOCKET_PUBLIC_BLOB_STORE_URL = 'https://socketusercontent.com'
 
