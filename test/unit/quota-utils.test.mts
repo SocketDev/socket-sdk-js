@@ -195,7 +195,8 @@ describe('Quota Utils', () => {
       const methodsList = Object.values(summary)
       for (let i = 0, { length } = methodsList; i < length; i += 1) {
         const methods = methodsList[i]!
-        const sorted = [...methods].toSorted()
+        // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); the spread already copies so in-place sort is safe.
+        const sorted = [...methods].sort()
         expect(methods).toEqual(sorted)
       }
     })

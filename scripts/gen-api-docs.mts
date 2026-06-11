@@ -268,6 +268,8 @@ export function extractMethods(): MethodInfo[] {
 
   let i = 0
   while (i < lines.length) {
+    // Match a 2-space-indented async method declaration: group 1 = optional `*`
+    // (generator), group 2 = method name, terminated by `<` (generic) or `(`.
     const match = lines[i]!.match(/^  async (\*)?([a-zA-Z][a-zA-Z0-9_]*)[<(]/)
     if (!match) {
       i++

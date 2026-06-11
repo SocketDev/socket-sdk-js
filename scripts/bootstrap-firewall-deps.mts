@@ -238,6 +238,9 @@ export function readPinnedVersion(pkgName: string): string {
           inCatalog = false
           continue
         }
+        // Match an indented catalog entry `name: version`, where either side may
+        // be quoted: group 1 = package name (allows @scope and /), group 2 = the
+        // unquoted version value.
         const m = line.match(
           /^\s+['"]?([@A-Za-z0-9_/-]+)['"]?\s*:\s*['"]?([^'"\s]+)['"]?\s*$/,
         )

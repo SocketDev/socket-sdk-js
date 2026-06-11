@@ -60,7 +60,7 @@ export interface RawFetchResult {
   contentType: string | undefined
 }
 
-interface ChunkedManifest {
+export interface ChunkedManifest {
   _version?: string | undefined
   chunks?: unknown | undefined
   offset?: unknown | undefined

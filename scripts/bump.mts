@@ -1,4 +1,4 @@
-/* max-file-lines: legitimate — multi-phase bump tool (changelog parse, AI rewrite, interactive review, tag), one cohesive script */
+/* max-file-lines: tooling — multi-phase bump tool (changelog parse, AI rewrite, interactive review, tag), one cohesive script that must share state across phases */
 /**
  * @file Version bump script with AI-powered changelog generation. Creates
  *   version bump commits with package.json, lockfile, and changelog updates.

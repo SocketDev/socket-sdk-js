@@ -10,12 +10,12 @@ import { ErrorCtor } from '@socketsecurity/lib/primordials/error'
 
 import type { SocketSdkOperations } from './types.mts'
 
-interface ApiRequirement {
+export interface ApiRequirement {
   quota: number
   permissions: string[]
 }
 
-interface Requirements {
+export interface Requirements {
   api: Record<string, ApiRequirement>
 }
 
@@ -124,7 +124,8 @@ export const getMethodsByPermissions = memoize(
         )
       })
       .map(([methodName]) => methodName)
-      .toSorted()
+      // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); .map already returns a fresh array so in-place sort is safe.
+      .sort()
   },
   { name: 'getMethodsByPermissions' },
 )
@@ -141,7 +142,8 @@ export const getMethodsByQuotaCost = memoize(
     return Object.entries(reqs.api)
       .filter(([, requirement]) => requirement.quota === quotaCost)
       .map(([methodName]) => methodName)
-      .toSorted()
+      // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); .map already returns a fresh array so in-place sort is safe.
+      .sort()
   },
   { name: 'getMethodsByQuotaCost' },
 )

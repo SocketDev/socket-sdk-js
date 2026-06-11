@@ -473,7 +473,8 @@ describe('Testing Utilities', () => {
         // The aggregator must surface each fixture group. Assert the wiring via
         // the aggregator's own keys + shape — referencing the src bindings as
         // the expected value would validate src against itself.
-        expect(Object.keys(fixtures).toSorted()).toEqual([
+        // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); Object.keys returns a fresh array so in-place sort is safe.
+        expect(Object.keys(fixtures).sort()).toEqual([
           'issues',
           'organizations',
           'packages',
