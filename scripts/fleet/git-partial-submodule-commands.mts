@@ -26,6 +26,7 @@ import type {
 } from './git-partial-submodule-internal.mts'
 
 export async function cmdAdd(opts: AddOpts): Promise<void> {
+  opts = { __proto__: null, ...opts }
   const { repoRoot, worktreeRoot } = await getRoots()
   if (opts.verbose) {
     logger.log(`worktree root: ${worktreeRoot}`)
@@ -103,6 +104,7 @@ export async function cmdAdd(opts: AddOpts): Promise<void> {
 }
 
 export async function cmdClone(opts: CloneOpts): Promise<void> {
+  opts = { __proto__: null, ...opts }
   const { repoRoot, worktreeRoot } = await getRoots()
   if (opts.verbose) {
     logger.log(`worktree root: ${worktreeRoot}`)
@@ -231,6 +233,7 @@ export async function cmdClone(opts: CloneOpts): Promise<void> {
 }
 
 export async function cmdSaveSparse(opts: SaveOrRestoreOpts): Promise<void> {
+  opts = { __proto__: null, ...opts }
   const { worktreeRoot } = await getRoots()
   const gitmodules = await readGitmodules(opts, worktreeRoot)
   const relPaths: string[] = opts.paths.length
@@ -298,6 +301,7 @@ export async function cmdSaveSparse(opts: SaveOrRestoreOpts): Promise<void> {
 }
 
 export async function cmdRestoreSparse(opts: SaveOrRestoreOpts): Promise<void> {
+  opts = { __proto__: null, ...opts }
   const { worktreeRoot } = await getRoots()
   const gitmodules = await readGitmodules(opts, worktreeRoot)
   const relPaths: string[] = opts.paths.length

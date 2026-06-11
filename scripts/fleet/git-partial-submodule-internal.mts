@@ -58,6 +58,7 @@ export async function runGit(
   gitArgs: string[],
   options: { okReturnCodes?: number[] | undefined } = {},
 ): Promise<{ code: number | null } | undefined> {
+  opts = { __proto__: null, ...opts }
   const okReturnCodes = options.okReturnCodes ?? [0]
   if (opts.verbose || opts.dryRun) {
     logger.log(`git ${gitArgs.join(' ')}`)
@@ -132,6 +133,7 @@ export async function readGitmodules(
   opts: CommonOpts,
   worktreeRoot: string,
 ): Promise<Gitmodules> {
+  opts = { __proto__: null, ...opts }
   const gitmodulesPath = path.join(worktreeRoot, '.gitmodules')
   if (!existsSync(gitmodulesPath)) {
     logger.error("Couldn't parse .gitmodules!")

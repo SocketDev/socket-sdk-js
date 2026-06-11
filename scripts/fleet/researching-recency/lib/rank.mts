@@ -185,7 +185,8 @@ function diversifyPool(
       seen.add(candidate.candidateId)
     }
   }
-  return pool.toSorted(compareCandidates).slice(0, poolLimit)
+  // oxlint-disable-next-line unicorn/no-array-sort -- `pool` is a locally-built array (declared `const pool: Candidate[] = []` and filled via .push() above), so the in-place sort can't mutate a shared receiver; .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+  return pool.sort(compareCandidates).slice(0, poolLimit)
 }
 
 function makeCandidate(
@@ -299,7 +300,8 @@ export function weightedRrf(
     }
   }
 
-  const fused = [...candidates.values()].toSorted(compareCandidates)
+  // oxlint-disable-next-line unicorn/no-array-sort -- the spread of candidates.values() already copies into a fresh array (no shared mutation); .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+  const fused = [...candidates.values()].sort(compareCandidates)
   return diversifyPool(applyPerAuthorCap(fused), poolLimit)
 }
 

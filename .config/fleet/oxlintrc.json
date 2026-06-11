@@ -46,6 +46,7 @@
     "socket/no-vitest-standalone-expect": "error",
     "socket/no-which-for-local-bin": "error",
     "socket/optional-explicit-undefined": "error",
+    "socket/options-null-proto": "error",
     "socket/personal-path-placeholders": "error",
     "socket/prefer-async-spawn": "error",
     "socket/prefer-cached-for-loop": "error",
@@ -74,6 +75,7 @@
     "socket/prefer-windows-test-helpers": "error",
     "socket/require-async-iife-entry": "error",
     "socket/require-regex-comment": "error",
+    "socket/require-vitest-globals-import": "error",
     "socket/socket-api-token-env": "error",
     "socket/sort-array-literals": "error",
     "socket/sort-boolean-chains": "error",
@@ -192,6 +194,7 @@
     }
   ],
   "ignorePatterns": [
+    "**/.agents",
     "**/.cache",
     "**/.claude",
     "**/coverage",
@@ -208,6 +211,7 @@
     "**/*.d.ts.map",
     "**/*.tsbuildinfo",
     "#fleet-canonical-begin (managed by socket-wheelhouse sync)",
+    "**/.agents/**",
     "**/.claude/**",
     "**/.config/oxlint-plugin/**",
     "**/.config/rolldown/**",

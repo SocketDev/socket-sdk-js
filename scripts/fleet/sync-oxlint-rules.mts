@@ -116,7 +116,8 @@ function ruleIds(): string[] {
         existsSync(path.join(FLEET_RULES_DIR, d.name, 'index.mts')),
     )
     .map(d => d.name)
-    .toSorted()
+    // oxlint-disable-next-line unicorn/no-array-sort -- .map() already returns a fresh array (no shared mutation); .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+    .sort()
 }
 
 /**
@@ -195,7 +196,8 @@ function rewriteIndex(source: string, ids: readonly string[]): string {
  * or socket run can't be located (a structural assumption broke).
  */
 function rewriteOxlintrc(source: string, ids: readonly string[]): string {
-  const active = ids.filter(id => !(id in DORMANT_RULES)).toSorted()
+  // oxlint-disable-next-line unicorn/no-array-sort -- .filter() already returns a fresh array (no shared mutation); .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+  const active = ids.filter(id => !(id in DORMANT_RULES)).sort()
   // Parse to recover any array-form (rule + options) configs we must preserve
   // verbatim rather than flatten to "error".
   const parsed = JSON.parse(source) as {

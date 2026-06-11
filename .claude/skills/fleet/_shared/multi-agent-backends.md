@@ -86,7 +86,13 @@ Tokens for these providers live in env / the keychain (`FIREWORKS_API_KEY`, `SYN
 
 ## Canonical implementation
 
-`.claude/skills/reviewing-code/run.mts` is the reference implementation. New skills that need multi-agent delegation should import the same registry shape and detection function (or copy the small block until extraction is worth doing) — don't roll a parallel pattern.
+The registry, detection, and role routing live in **`@socketsecurity/lib/ai/backends`** (`BACKENDS`, `detectAvailableBackends`, `resolveBackendForRole`). New skills import those instead of re-declaring a registry — `.claude/skills/reviewing-code/run.mts` is the reference consumer (it keeps only its own role table of prompts + per-role `preferenceOrder` + timeouts and passes the order into `resolveBackendForRole`). The `backend-routing-is-legal` check (`scripts/fleet/check/`) fails `check --all` when a `preferenceOrder` names an unknown backend or lists the hybrid `opencode` (never auto-picked) — so the lib, this doc, and every skill stay aligned. Don't roll a parallel pattern.
+
+## CI vs local: what's available where
+
+CI carries the **Claude key only** (`ANTHROPIC_API_KEY` as a GitHub secret); `codex`, `kimi`, and `opencode` CLIs aren't installed there. `detectAvailableBackends()` returns only what's on PATH, so a role whose `preferenceOrder` is `['codex', 'kimi', 'claude']` resolves to `claude` in CI automatically — no CI-specific branch needed. A role that can ONLY run on an absent backend skips with a note rather than failing the job.
+
+Provider tokens resolve through **`resolveProviderCredential`** (`@socketsecurity/lib/ai/credentials`): explicit → env var → keychain. In CI pass `allowEnvOnly: true` so a missing token returns `undefined` immediately instead of blocking on a keychain prompt that can't be answered headlessly; the GitHub-secret env var (`ANTHROPIC_API_KEY`) is read by the same call. Fireworks / Synthetic / Codex stay dev-only by design — their tokens are not added to CI, so an HTTP-provider call in CI fails closed with the "set the env var" error rather than silently reaching a paid endpoint.
 
 ## When NOT to use
 

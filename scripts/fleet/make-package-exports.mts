@@ -105,7 +105,8 @@ export function privatePathMatcher(
   // Sort the configured segments (ASCII) so the alternation is stable +
   // satisfies sort-regex-alternations, then OR them with the defaults.
   const extra = [...privateSegments]
-    .toSorted()
+    // oxlint-disable-next-line unicorn/no-array-sort -- the spread already copies `privateSegments` (no shared mutation); .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+    .sort()
     .map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     .join('|')
   return new RegExp(String.raw`(\/|^)(_[^/]*|${extra}|external)($|\/)`)

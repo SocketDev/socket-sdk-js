@@ -222,7 +222,8 @@ export function listWorkflowFiles(repoRoot: string): string[] {
       out.push(path.join(dir, name))
     }
   }
-  return out.toSorted()
+  // oxlint-disable-next-line unicorn/no-array-sort -- `out` is a locally-built array (just filled via .push() in the loop above), so the in-place sort can't mutate a shared receiver; .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+  return out.sort()
 }
 
 export interface PinDrift {

@@ -87,7 +87,7 @@ There are two delegation surfaces in this fleet. They look similar but are used 
 
 ## Surface 1: CLI subprocess delegation (skills)
 
-Skills that need multi-model output spawn the agent CLIs (`codex`, `claude`, `kimi`, `opencode`) as subprocesses and fold the results into a report. The contract (backend registry, detection policy, fallback order, attribution) lives in [`_shared/multi-agent-backends.md`](../../.claude/skills/_shared/multi-agent-backends.md). The canonical implementation is [`reviewing-code/run.mts`](../../.claude/skills/reviewing-code/run.mts).
+Skills that need multi-model output spawn the agent CLIs (`codex`, `claude`, `kimi`, `opencode`) as subprocesses and fold the results into a report. The contract (backend registry, detection policy, fallback order, attribution) lives in [`_shared/multi-agent-backends.md`](../../.claude/skills/fleet/_shared/multi-agent-backends.md), and the registry itself is `@socketsecurity/lib/ai/backends`. The canonical implementation is [`reviewing-code/run.mts`](../../.claude/skills/fleet/reviewing-code/run.mts).
 
 Use this surface when _the skill itself_ is the orchestrator (multi-pass review, parallel scans, fleet-wide runs).
 
