@@ -131,64 +131,6 @@ export type RepositoriesListData = {
 }
 
 /**
- * Strict type for repository list item.
- */
-export type RepositoryListItem = {
-  archived: boolean
-  created_at: string
-  default_branch: string | null
-  description: string | null
-  head_full_scan_id: string | null
-  homepage: string | null
-  html_url?: string | undefined
-  id: string
-  integration_meta?:
-    | {
-        /**
-         * @enum {string}
-         */
-        type?: 'github' | undefined
-        value?:
-          | {
-              /**
-               * The GitHub installation_id of the active associated Socket
-               * GitHub App.
-               *
-               * @default
-               */
-              installation_id: string
-              /**
-               * The GitHub login name that the active Socket GitHub App
-               * installation is installed to.
-               *
-               * @default
-               */
-              installation_login: string
-              /**
-               * The name of the associated GitHub repo.
-               *
-               * @default
-               */
-              repo_name: string | null
-              /**
-               * The id of the associated GitHub repo.
-               *
-               * @default
-               */
-              repo_id: string | null
-            }
-          | undefined
-      }
-    | null
-    | undefined
-  name: string
-  slug: string
-  updated_at: string
-  visibility: 'public' | 'private'
-  workspace: string
-}
-
-/**
  * Strict type for repository item.
  */
 export type RepositoryItem = {
@@ -208,8 +150,8 @@ export type RepositoryItem = {
     value?:
       | {
           /**
-           * The GitHub installation_id of the active associated Socket GitHub
-           * App.
+           * The GitHub installation_id of the active associated Socket
+           * GitHub App.
            *
            * @default
            */
@@ -261,6 +203,64 @@ export type RepositoryLabelItem = {
 export type RepositoryLabelsListData = {
   nextPage?: number | null | undefined
   results: RepositoryLabelItem[]
+}
+
+/**
+ * Strict type for repository list item.
+ */
+export type RepositoryListItem = {
+  archived: boolean
+  created_at: string
+  default_branch: string | null
+  description: string | null
+  head_full_scan_id: string | null
+  homepage: string | null
+  html_url?: string | undefined
+  id: string
+  integration_meta?:
+    | {
+        /**
+         * @enum {string}
+         */
+        type?: 'github' | undefined
+        value?:
+          | {
+              /**
+               * The GitHub installation_id of the active associated
+               * Socket GitHub App.
+               *
+               * @default
+               */
+              installation_id: string
+              /**
+               * The GitHub login name that the active Socket GitHub App
+               * installation is installed to.
+               *
+               * @default
+               */
+              installation_login: string
+              /**
+               * The name of the associated GitHub repo.
+               *
+               * @default
+               */
+              repo_name: string | null
+              /**
+               * The id of the associated GitHub repo.
+               *
+               * @default
+               */
+              repo_id: string | null
+            }
+          | undefined
+      }
+    | null
+    | undefined
+  name: string
+  slug: string
+  updated_at: string
+  visibility: 'public' | 'private'
+  workspace: string
 }
 
 /**

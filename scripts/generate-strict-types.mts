@@ -372,11 +372,27 @@ ${generateWrapperTypes()}
     // Step 7: Update index.ts exports
     await updateIndexExports()
 
-    // Use `pnpm exec` (CLAUDE.md forbids `npx` / `pnpm dlx`).
+    // Apply autofixable lint rules first: the OpenAPI source emits nested
+    // optional properties as `type?: 'x'`, but socket/optional-explicit-undefined
+    // requires `type?: 'x' | undefined`. The fix is deterministic, so run it
+    // before formatting so regeneration stays lint-clean.
+    logger.log('  Applying lint autofixes…')
+    const lintResult = spawnSync(
+      'node_modules/.bin/oxlint',
+      ['-c', '.config/fleet/oxlintrc.json', '--fix', strictTypesPath],
+      { cwd: rootPath, encoding: 'utf8' },
+    )
+    if (lintResult.error) {
+      logger.log(
+        '  Warning: Could not apply lint autofixes:',
+        lintResult.error.message,
+      )
+    }
+
     logger.log('  Formatting generated files…')
     const formatResult = spawnSync(
-      'pnpm',
-      ['exec', 'oxfmt', '-c', '.config/fleet/oxfmtrc.json', strictTypesPath],
+      'node_modules/.bin/oxfmt',
+      ['-c', '.config/fleet/oxfmtrc.json', strictTypesPath],
       { cwd: rootPath, encoding: 'utf8' },
     )
     if (formatResult.error) {
