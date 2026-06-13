@@ -172,13 +172,13 @@ importers:
 
   .config/oxlint-plugin/fleet/no-cached-for-on-iterable: {}
 
+  .config/oxlint-plugin/fleet/no-comment-glob-star-slash: {}
+
   .config/oxlint-plugin/fleet/no-console-prefer-logger: {}
 
   .config/oxlint-plugin/fleet/no-default-export: {}
 
   .config/oxlint-plugin/fleet/no-dynamic-import-outside-bundle: {}
-
-  .config/oxlint-plugin/fleet/no-es2023-array-methods-below-node20: {}
 
   .config/oxlint-plugin/fleet/no-eslint-biome-config-ref: {}
 
@@ -207,6 +207,8 @@ importers:
   .config/oxlint-plugin/fleet/no-promise-race: {}
 
   .config/oxlint-plugin/fleet/no-promise-race-in-loop: {}
+
+  .config/oxlint-plugin/fleet/no-runtime-features-below-engine-floor: {}
 
   .config/oxlint-plugin/fleet/no-src-import-in-test-expect: {}
 
@@ -237,6 +239,8 @@ importers:
   .config/oxlint-plugin/fleet/optional-explicit-undefined: {}
 
   .config/oxlint-plugin/fleet/options-null-proto: {}
+
+  .config/oxlint-plugin/fleet/options-param-naming: {}
 
   .config/oxlint-plugin/fleet/personal-path-placeholders: {}
 
