@@ -35,6 +35,12 @@ const steps: Array<() => boolean> = [
   // gate asserts both explicitly and fails closed. No-op in repos with no
   // plugin.
   () => run('node', ['scripts/fleet/check/oxlint-plugin-loads.mts']),
+  // Fleet uses oxlint + oxfmt ONLY. Fail on a tracked foreign linter/formatter
+  // config (biome/eslint/prettier/dprint) or a package.json declaring one as a
+  // dep — the committed-state gate paired with the edit-time
+  // no-other-linters-guard hook. Vendored upstream (upstream/, vendor/, *-upstream)
+  // is exempt; we never touch upstream tooling.
+  () => run('node', ['scripts/fleet/check/linters-are-oxlint-oxfmt-only.mts']),
   // CLAUDE.md doc integrity: every cited hook + socket/ rule must exist (catches
   // stale citations after a rename/removal — the reverse of new-hook-claude-md-guard).
   () => run('node', ['scripts/fleet/check/claude-md-citations-resolve.mts']),
@@ -58,6 +64,11 @@ const steps: Array<() => boolean> = [
   // Global Claude config stays hardened (copyOnSelect: false → no TUI OSC-52
   // clipboard banner). setup/claude-config.mts sets it; this catches drift.
   () => run('node', ['scripts/fleet/check/claude-config-is-hardened.mts']),
+  // Structural floor: every skill dir is a well-formed skill — has a SKILL.md
+  // with frontmatter whose name matches the dir + a description. Catches a
+  // half-built skill (engine/test, no SKILL.md) that the mirror + citation
+  // gates would otherwise trip on later.
+  () => run('node', ['scripts/fleet/check/skills-are-well-formed.mts']),
   // Cost routing: every mutating (fix) skill must declare a model: tier so
   // mechanical work runs cheap. See docs/agents.md/fleet/skill-model-routing.md.
   () => run('node', ['scripts/fleet/check/mutating-skills-have-model.mts']),
@@ -72,11 +83,27 @@ const steps: Array<() => boolean> = [
   // its canonical agent-ci flag set, and the agent-ci Dockerfile (when adopted)
   // stays byte-identical to the template.
   () => run('node', ['scripts/fleet/check/ci-local-is-canonical.mts']),
+  // Agent CI can't parse a gh-aw compiled .lock.yml (GitHub's
+  // @actions/workflow-parser crashes on its agent-runtime jobs). The
+  // agent-ci-skip-locks.mts wrapper turns that cryptic crash into an
+  // informative error/skip; this gate keeps the wrapper's guard surface intact.
+  () => run('node', ['scripts/fleet/check/agent-ci-skip-locks-is-guarded.mts']),
   // Cost routing twin: a programmatic AI spawn that pins a model must also pin
   // reasoning effort (CLAUDE.md token-spend). The lib makes effort optional —
   // this gate is the enforcement the optional field can't provide. Vocab per
   // backend: .claude/skills/fleet/_shared/multi-agent-backends.md.
   () => run('node', ['scripts/fleet/check/ai-spawns-have-paired-effort.mts']),
+  // Subagent return contract twin: the SubagentStatus union in
+  // @socketsecurity/lib/ai/subagent-status and the status table in
+  // agent-delegation.md must list the same four states, so an orchestrator
+  // reading the doc routes on a contract the code honors (code is law).
+  () =>
+    run('node', ['scripts/fleet/check/subagent-status-doc-is-current.mts']),
+  // Review-pipeline ordering is a contract: the reviewing-code skill's
+  // spec-compliance pass must precede the quality passes (discovery /
+  // remediation) in ALL_ROLES, so a quality review never runs on out-of-scope
+  // code. Parses run.mts and fails if the order regressed (code is law).
+  () => run('node', ['scripts/fleet/check/review-stages-are-ordered.mts']),
   // Model-pricing data stays fresh: the cost-ladder figures in skill-model-
   // routing.md drive tier routing, and vendor prices move. Parses the doc's
   // MODEL-PRICING-SNAPSHOT date and REMINDS (non-fatal) when it's >35 days old,
@@ -223,6 +250,15 @@ const steps: Array<() => boolean> = [
   // EXPECTED_RELEASE_AGE_EXCLUDE — every fleet repo went red on the
   // next install.
   () => run('node', ['scripts/fleet/check/fleet-soak-exclude-parity.mts']),
+  // Supply-chain trust-gate floors + the pnpm trust-expansion opt-out, for
+  // the non-Claude edit path. Mirrors the trust-downgrade-guard +
+  // npmrc-trust-optout-guard hooks (shared detection via
+  // _shared/{trust-gates,npmrc-trust}.mts): asserts pnpm-workspace.yaml keeps
+  // minimumReleaseAge >= 10080 / trustPolicy: no-downgrade / blockExoticSubdeps:
+  // true, and that no tracked script/workflow/.npmrc sets
+  // PNPM_CONFIG_NPMRC_AUTH_FILE / a repo-local NPM_CONFIG_USERCONFIG or a
+  // `${ENV}` beside an auth/registry key.
+  () => run('node', ['scripts/fleet/check/trust-gates-are-not-weakened.mts']),
   // Homebrew supply-chain posture (macOS). Asserts brew >= 6.0.0 with
   // tap-trust + cask-SHA enforcement; `absent` (no brew) is a pass — CI
   // runners lack brew. Shares detection with the brew-supply-chain-guard
@@ -301,10 +337,7 @@ const steps: Array<() => boolean> = [
   // Errors when a `-guard` never blocks (→ should be `-reminder`) or a
   // `-reminder` blocks (→ should be `-guard`).
   () =>
-    run('node', [
-      'scripts/fleet/check/hook-names-match-blocking.mts',
-      '--quiet',
-    ]),
+    run('node', ['scripts/fleet/check/hook-names-are-accurate.mts', '--quiet']),
 ]
 
 for (let i = 0, { length } = steps; i < length; i += 1) {

@@ -139,6 +139,29 @@ function log(msg: string): void {
   }
 }
 
+// Assert the socket/ oxlint plugin actually loaded. A dead plugin (a rule with
+// a missing dep / bad import) makes oxlint silently disable EVERY socket/ rule
+// and still exit 0 — so a green oxlint run is meaningless until the plugin is
+// confirmed loaded. Runs the existing oxlint-plugin-loads check as a sync
+// subprocess (keeps this sync flow sync; reuses the one assertion). No-op +
+// pass when the repo has no plugin. Returns 0 on ok / no-plugin, 1 on a dead
+// or mis-wired plugin. This is what closes the silent-disable window: the
+// pre-push runs lint.mts, not check --all, so without this a dead plugin sails
+// through commit + lint + pre-push.
+function assertPluginLoaded(): number {
+  const checkPath = path.join(
+    'scripts',
+    'fleet',
+    'check',
+    'oxlint-plugin-loads.mts',
+  )
+  if (!existsSync(checkPath)) {
+    return 0
+  }
+  const res = spawnSync(process.execPath, [checkPath, '--quiet'], { stdio })
+  return res.status === 0 ? 0 : 1
+}
+
 function gitFiles(args: string[]): string[] {
   // spawnSync with array args — no shell interpolation, no injection
   // surface even if a future caller passes data into args.
@@ -267,6 +290,12 @@ function runAll(): number {
   if (lintRes.status !== 0) {
     return 1
   }
+  // A green oxlint run is vacuous if the socket/ plugin failed to load (every
+  // socket/ rule silently disabled). Fail-closed here so lint.mts — the gate
+  // the pre-push runs — never passes on a dead plugin.
+  if (assertPluginLoaded() !== 0) {
+    return 1
+  }
   // Wheelhouse-self dogfood: lint the .config/oxlint-plugin/ + template/
   // trees too. The canonical .config/fleet/oxlintrc.json ignores those paths so
   // downstream fleet repos don't waste cycles linting opaque tooling, but
@@ -357,6 +386,11 @@ function runFiles(files: string[]): number {
   oxlintArgs.push(...files)
   const lintRes = spawnSync('pnpm', oxlintArgs, { shell: useShell, stdio })
   if (lintRes.status !== 0) {
+    return 1
+  }
+  // A green oxlint run is vacuous if the socket/ plugin failed to load — see
+  // runAll(). Fail-closed on a dead plugin in the scoped path too.
+  if (assertPluginLoaded() !== 0) {
     return 1
   }
   // Markdown lint when any of the changed files is .md / .mdx. The

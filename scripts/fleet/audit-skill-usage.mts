@@ -197,7 +197,7 @@ function main(): void {
 
   const filtered = withinDays(allEntries, days ?? 0)
   const stats = aggregate(filtered)
-  // oxlint-disable-next-line unicorn/no-array-sort -- Array.from() already returns a fresh array (no shared mutation); .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+  // oxlint-disable-next-line unicorn/no-array-sort -- Array.from() already returns a fresh array (no shared mutation); .toSorted() would trip socket/no-runtime-features-below-engine-floor in cascaded Node-18 repos.
   const sorted = Array.from(stats.values()).sort((a, b) => b.count - a.count)
 
   process.stdout.write(`skill\tinvocations\tlast-seen\tunique-cwds\n`)

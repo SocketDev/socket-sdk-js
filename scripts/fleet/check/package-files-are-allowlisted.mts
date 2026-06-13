@@ -326,7 +326,7 @@ export function computeCanonicalFiles(packOut: PackOutput): string[] {
       dirs.add(p.slice(0, slash))
     }
   }
-  // oxlint-disable-next-line unicorn/no-array-sort -- the spread literal already builds a fresh array (no shared mutation); .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+  // oxlint-disable-next-line unicorn/no-array-sort -- the spread literal already builds a fresh array (no shared mutation); .toSorted() would trip socket/no-runtime-features-below-engine-floor in cascaded Node-18 repos.
   return [...dirs, ...topFiles].sort()
 }
 

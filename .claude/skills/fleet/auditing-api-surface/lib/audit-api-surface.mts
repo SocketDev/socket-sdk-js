@@ -43,22 +43,15 @@ import { isSpawnError } from '@socketsecurity/lib-stable/process/spawn/errors'
 import { naturalCompare } from '@socketsecurity/lib-stable/sorts/natural'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
+// Canonical fleet roster — the single source of truth, owned by the shared
+// _shared/scripts/fleet-roster.mts (1 path, 1 reference). Never duplicate it.
+import { readRoster } from '../../_shared/scripts/fleet-roster.mts'
+
 const logger = getDefaultLogger()
 
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
-
-// Canonical fleet roster — the single source of truth, owned by
-// cascading-fleet. Never duplicate the list here (1 path, 1 reference).
-const FLEET_REPOS_FILE = path.join(
-  SCRIPT_DIR,
-  '..',
-  '..',
-  'cascading-fleet',
-  'lib',
-  'fleet-repos.txt',
-)
-
 const PROJECTS = process.env['PROJECTS'] || path.join(os.homedir(), 'projects')
+
+export { readRoster }
 
 // Source extensions a consumer import could live in.
 const CONSUMER_GLOBS = ['*.ts', '*.mts', '*.cts', '*.js', '*.mjs', '*.cjs']
@@ -95,18 +88,6 @@ export type CliOptions = {
   readonly emit: 'json' | 'report'
   readonly repo: string | undefined
   readonly projects: string
-}
-
-export function readRoster(): string[] {
-  if (!existsSync(FLEET_REPOS_FILE)) {
-    throw new Error(
-      `fleet roster not found at ${FLEET_REPOS_FILE}. audit-api-surface reads the canonical list from cascading-fleet/lib/fleet-repos.txt; ensure the skill tree is intact.`,
-    )
-  }
-  return readFileSync(FLEET_REPOS_FILE, 'utf8')
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith('#'))
 }
 
 export function parseArgs(argv: readonly string[]): CliOptions {
@@ -330,9 +311,7 @@ export async function audit(options: CliOptions): Promise<AuditResult> {
   const findings: SubpathFinding[] = []
   for (const { sourceFile, subpath } of subpaths) {
     const consumerSet = consumerMap.get(subpath)
-    const consumers = consumerSet
-      ? [...consumerSet].sort(naturalCompare)
-      : []
+    const consumers = consumerSet ? [...consumerSet].sort(naturalCompare) : []
     const internalRefs = await countInternalRefs(hostDir, sourceFile)
     findings.push({
       classification: classify(internalRefs, consumers, anyUnscanned),
@@ -406,7 +385,8 @@ export function renderReport(result: AuditResult): string {
     consumed: '≥2 external consumers — healthy, keep',
     dead: 'no internal refs, no external consumers, all repos scanned — prune candidate',
     'internal-only': 'used inside the lib but by no other repo',
-    'single-consumer': 'exactly one external consumer — candidate to inline there',
+    'single-consumer':
+      'exactly one external consumer — candidate to inline there',
     unverifiable: 'no consumer found, but some repo was unscanned',
   }
   for (const cls of order) {

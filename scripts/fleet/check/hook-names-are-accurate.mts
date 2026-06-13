@@ -25,7 +25,7 @@
 // ERROR (exit 1): a `-guard` with no block idiom (→ rename to `-reminder`), or a
 // `-reminder` with a block idiom (→ rename to `-guard`).
 //
-// Usage: node scripts/fleet/check/hook-names-match-blocking.mts [--quiet]
+// Usage: node scripts/fleet/check/hook-names-are-accurate.mts [--quiet]
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
@@ -106,7 +106,8 @@ export function listHookNames(hooksDir: string): string[] {
 
 /**
  * Classify every `-guard` / `-reminder` hook by whether its name matches its
- * blocking behavior. Hooks ending in neither suffix (setup-*, etc.) are skipped.
+ * blocking behavior. Hooks ending in neither suffix (setup-*, etc.) are
+ * skipped.
  */
 export function findMismatches(hooksDir: string): NameBehaviorMismatch[] {
   const out: NameBehaviorMismatch[] = []
@@ -142,7 +143,7 @@ function main(): void {
 
   if (mismatches.length) {
     logger.fail(
-      '[check-hook-names-match-blocking] hook name does not match its blocking behavior:',
+      '[check-hook-names-are-accurate] hook name does not match its blocking behavior:',
     )
     for (let i = 0, { length } = mismatches; i < length; i += 1) {
       const m = mismatches[i]!
@@ -162,7 +163,7 @@ function main(): void {
 
   if (!quiet) {
     logger.success(
-      '[check-hook-names-match-blocking] every -guard blocks and every -reminder nudges.',
+      '[check-hook-names-are-accurate] every -guard blocks and every -reminder nudges.',
     )
   }
 }

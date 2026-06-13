@@ -33,19 +33,14 @@ import { fileURLToPath } from 'node:url'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
+// 1 path, 1 reference: the roster + its reader live in one shared owner.
+import { readRoster } from '../../_shared/scripts/fleet-roster.mts'
+
 const logger = getDefaultLogger()
 
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
-// 1 path, 1 reference: the roster lives in cascading-fleet — don't fork it.
-const FLEET_REPOS_FILE = path.join(
-  SCRIPT_DIR,
-  '..',
-  '..',
-  'cascading-fleet',
-  'lib',
-  'fleet-repos.txt',
-)
 const PROJECTS = process.env['PROJECTS'] || path.join(os.homedir(), 'projects')
+
+export { readRoster }
 
 export type WorktreeDecision =
   | 'keep-primary'
@@ -115,18 +110,6 @@ export function decideWorktree(facts: WorktreeFacts): {
     decision: 'keep-unlanded',
     reason: 'branch still on remote with unlanded commits',
   }
-}
-
-export function readRoster(): string[] {
-  if (!existsSync(FLEET_REPOS_FILE)) {
-    throw new Error(
-      `fleet roster not found at ${FLEET_REPOS_FILE}. The tidy sweep reads the canonical list from cascading-fleet/lib/fleet-repos.txt; ensure the skill tree is intact.`,
-    )
-  }
-  return readFileSync(FLEET_REPOS_FILE, 'utf8')
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith('#'))
 }
 
 export async function git(cwd: string, args: string[]): Promise<string> {
@@ -292,9 +275,13 @@ export interface RepoResult {
 
 export async function tidyRepo(
   repo: string,
-  options: { fix: boolean },
+  options: { fix: boolean; repoDir?: string | undefined },
 ): Promise<RepoResult> {
-  const repoDir = path.join(PROJECTS, repo)
+  // A repo on the roster lives at $PROJECTS/<repo>; an explicit repoDir (the
+  // --here path) overrides that with the current checkout's git toplevel, so
+  // the single-repo managing-worktrees Mode 3 can run the SAME engine on the
+  // checkout it is invoked from rather than only a $PROJECTS sibling.
+  const repoDir = options.repoDir ?? path.join(PROJECTS, repo)
   if (!existsSync(path.join(repoDir, '.git'))) {
     return { repo, removed: [], kept: [], missing: true }
   }
@@ -330,8 +317,44 @@ export async function tidyRepo(
 
 export async function main(): Promise<void> {
   const fix = process.argv.includes('--fix')
+  const here = process.argv.includes('--here') || process.argv.includes('--cwd')
   const repoIdx = process.argv.indexOf('--repo')
   const onlyRepo = repoIdx !== -1 ? process.argv[repoIdx + 1] : undefined
+
+  // --here: tidy ONLY the current checkout (the single-repo managing-worktrees
+  // Mode 3 path), resolving its git toplevel rather than a $PROJECTS sibling.
+  // This runs the same removability predicate (decideWorktree) the fleet sweep
+  // uses, so the single-repo case inherits the load-bearing aheadOfBase guard.
+  if (here) {
+    const toplevel = (
+      await git(process.cwd(), ['rev-parse', '--show-toplevel'])
+    ).trim()
+    const repo = path.basename(toplevel)
+    const mode = fix ? 'FIX' : 'DRY-RUN'
+    logger.info(`tidy-worktrees (${mode}) — current checkout ${repo}`)
+    const result = await tidyRepo(repo, { fix, repoDir: toplevel })
+    if (result.removed.length) {
+      const verb = fix ? 'removed' : 'would remove'
+      logger.info(`── ${repo} ──`)
+      for (let j = 0, n = result.removed.length; j < n; j += 1) {
+        logger.info(`  - ${verb} ${result.removed[j]}`)
+      }
+      if (fix) {
+        logger.success(
+          `tidy-worktrees: removed ${result.removed.length} spent worktree(s). Run \`pnpm i\` in this checkout to relink.`,
+        )
+      } else {
+        logger.info(
+          `tidy-worktrees: ${result.removed.length} spent worktree(s) would be removed. Re-run with --fix to act.`,
+        )
+      }
+    } else {
+      logger.success(
+        'tidy-worktrees: nothing to tidy — every worktree is live or primary.',
+      )
+    }
+    return
+  }
 
   const roster = onlyRepo ? [onlyRepo] : readRoster()
   const mode = fix ? 'FIX' : 'DRY-RUN'

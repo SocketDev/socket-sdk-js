@@ -1,5 +1,5 @@
 {
-  "name": "socket-oxlint-rule-no-es2023-array-methods-below-node20",
+  "name": "socket-oxlint-rule-options-param-naming",
   "private": true,
   "type": "module",
   "main": "./index.mts",

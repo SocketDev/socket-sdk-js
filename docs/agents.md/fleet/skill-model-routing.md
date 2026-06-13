@@ -58,7 +58,9 @@ No skill, workflow, agent, or programmatic `claude` call declares Fable as its d
 
 Two operational notes for Fable-targeted prompts, from Anthropic's Fable prompting guide (https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5). Never instruct it to echo or reproduce its reasoning as response text, because that trips the `reasoning_extraction` refusal and silently falls back to Opus. Expect longer turns, so structure long runs to check asynchronously rather than block. Fable's safety classifiers (offensive-cyber plus bio) can return `stop_reason: "refusal"` on benign security work, so configure fallback to Opus 4.8.
 
-The code-level encoding of this ladder is `@socketsecurity/lib`'s `AI_TIER` table (`src/ai/tier.mts`). The `fable` row pins `{ model: 'claude-fable-5', effort: 'xhigh' }`, and the `token-spend-guard` hook now nudges when Fable runs mechanical work, the same as Opus.
+Fable runs adaptive thinking only: it is always on, with no manual thinking-mode or `budget_tokens` control, so effort is the only depth dial and its recommended range tops out at `xhigh` (the `max` level belongs to Opus). The lib reflects this. `buildArgs` (`src/ai/spawn.mts`) omits `--effort` for a Fable or Mythos model rather than pass a level it ignores, and the multi-agent backend registry (`src/ai/backends.mts`) does the same.
+
+The code-level encoding of this ladder is `@socketsecurity/lib`'s `AI_TIER` table (`src/ai/tier.mts`). The `fable` row pins `{ model: 'claude-fable-5', effort: 'xhigh' }` (xhigh is Fable's recommended ceiling; the spawn layer then drops the flag for Fable anyway), and the `token-spend-guard` hook now nudges when Fable runs mechanical work, the same as Opus. Availability-gated routing (`src/ai/route.mts`) resolves a tier to its preferred engine only when that CLI exists and is keyed, falling back to a cross-engine equivalent (Codex GPT-5.5, then an open-weight provider) otherwise.
 
 ## Cost-optimized decomposition (plan high, execute cheap)
 
@@ -67,10 +69,20 @@ The economic case for the apex tier is rarely "run the whole task on Fable." It 
 Routing map across the fleet's existing delegation surfaces:
 
 - Plan, decompose, or hardest debugging → Fable (sparingly) or Opus.
-- Code-execution chunks → GPT-5.3-codex via the `codex` plugin (output about $14/MTok, below Sonnet), or Sonnet.
+- Code-execution chunks → GPT-5.5-codex via the `codex` plugin (output about $14/MTok, below Sonnet), or Sonnet.
 - Bulk, mechanical, or classify-summarize chunks → Haiku, or open-weight Kimi K2.6 / Qwen3.6 via the `delegate` agent (routing to Fireworks or synthetic.new, about $3–4/MTok output; synthetic.new is $30/mo flat for unmetered fan-out).
 
 A `Workflow` is the natural harness for this. The orchestrator (your session model) holds the plan, and each `agent()` chunk declares the cheapest `model:` that does its job. Reserve a Fable `agent()` call for a chunk that genuinely needs apex reasoning, not for the fan-out.
+
+### Plan / execute / review across two providers
+
+The strongest split keeps Claude on the two judgment phases and hands the token-heavy middle phase to Codex on its own subscription:
+
+- **Plan** → Fable 5 at `high`. Break the task down: architecture decisions, file targets, constraints, edge cases. Write a precise implementation brief for Codex that carries the project invariants (this CLAUDE.md ruleset).
+- **Execute** → Codex GPT-5.5 at `xhigh`, driven through the `codex:codex-rescue` agent. Codex does the file edits, feature work, refactors, and mechanical sweeps from the brief and hands back a complete diff. This runs on the ChatGPT-plan seat, so the generation tokens never touch the Claude weekly quota.
+- **Review** → Fable 5 at `xhigh`. Critically read the Codex diff for correctness, contract adherence, and test impact; run verification (`pnpm run check`, `pnpm test`); accept, or loop Codex with specific corrections. The cycle repeats until the diff passes review.
+
+Fable never writes the code, Codex never decides the design. A note on the Fable effort levels. Fable runs adaptive thinking only: thinking is always on, there is no manual thinking-mode or token-budget knob, so effort is the single dial. Its recommended range tops out at `xhigh` (start at `high`, step to `xhigh` for the most capability-sensitive work); `max` belongs to Opus, not to Fable's recommended ladder. So planning runs `high` and the review pass runs `xhigh`, the most thorough setting Fable's own guidance recommends. The lib does not even forward `--effort` to a Fable model (`buildArgs` in `src/ai/spawn.mts` drops it, since Fable ignores the dial), so set the tier and let Fable self-pace. Because the bulk of generation runs on the ChatGPT plan rather than Claude, this preserves a large share of the Claude weekly headroom (in practice roughly half) for the planning and review calls that genuinely need apex reasoning. That headroom, not dollars, is the binding constraint under a subscription (see below).
 
 ### Subscription vs metered API — what you are actually rationing
 

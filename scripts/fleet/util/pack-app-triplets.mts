@@ -182,7 +182,7 @@ export function resolveCurrentTriplet(
 export function parseTripletSegment(name: string): PackAppTriplet | undefined {
   // Iterate longest-suffix-first so musl forms win over their glibc
   // shortenings.
-  // oxlint-disable-next-line unicorn/no-array-sort -- `PACK_APP_TRIPLETS` is a shared module-level const, so the spread copies it first; an in-place sort would mutate the constant list every caller shares. .toSorted() would trip socket/no-es2023-array-methods-below-node20 in cascaded Node-18 repos.
+  // oxlint-disable-next-line unicorn/no-array-sort -- `PACK_APP_TRIPLETS` is a shared module-level const, so the spread copies it first; an in-place sort would mutate the constant list every caller shares. .toSorted() would trip socket/no-runtime-features-below-engine-floor in cascaded Node-18 repos.
   const ordered = [...PACK_APP_TRIPLETS].sort((a, b) => b.length - a.length)
   for (let i = 0, { length } = ordered; i < length; i += 1) {
     const triplet = ordered[i]!

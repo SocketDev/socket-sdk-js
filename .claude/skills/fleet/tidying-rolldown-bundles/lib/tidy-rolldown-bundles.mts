@@ -35,18 +35,14 @@ import { fileURLToPath } from 'node:url'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
+// 1 path, 1 reference: the roster + its reader live in one shared owner.
+import { readRoster } from '../../_shared/scripts/fleet-roster.mts'
+
 const logger = getDefaultLogger()
 
-const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
-const FLEET_REPOS_FILE = path.join(
-  SCRIPT_DIR,
-  '..',
-  '..',
-  'cascading-fleet',
-  'lib',
-  'fleet-repos.txt',
-)
 const PROJECTS = process.env['PROJECTS'] || path.join(os.homedir(), 'projects')
+
+export { readRoster }
 
 // A re-export shim is small. Past this byte size, an `external/<dep>.js` is
 // likely re-vendoring its own tree instead of delegating to a shared bundle —
@@ -70,18 +66,6 @@ export interface RepoFinding {
     | 'no-bundle'
     | 'clean'
   detail: string
-}
-
-export function readRoster(): string[] {
-  if (!existsSync(FLEET_REPOS_FILE)) {
-    throw new Error(
-      `fleet roster not found at ${FLEET_REPOS_FILE}. tidy-rolldown-bundles reads the canonical list from cascading-fleet/lib/fleet-repos.txt; ensure the skill tree is intact.`,
-    )
-  }
-  return readFileSync(FLEET_REPOS_FILE, 'utf8')
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith('#'))
 }
 
 /**

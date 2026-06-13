@@ -72,7 +72,7 @@
     "lockstep": "node scripts/fleet/lockstep.mts",
     "lockstep:emit-schema": "node scripts/fleet/lockstep-emit-schema.mts",
     "setup-security-tools": "node .claude/hooks/fleet/setup-security-tools/install.mts",
-    "ci:local": "agent-ci run --all --quiet --pause-on-failure --github-token"
+    "ci:local": "node scripts/fleet/agent-ci-skip-locks.mts run --all --quiet --pause-on-failure --github-token"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
