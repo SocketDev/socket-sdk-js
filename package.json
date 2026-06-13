@@ -125,9 +125,9 @@
   },
   "engines": {
     "node": ">=18.20.8",
-    "pnpm": ">=11.5.1"
+    "pnpm": ">=11.6.0"
   },
-  "packageManager": "pnpm@11.5.1",
+  "packageManager": "pnpm@11.6.0",
   "allowScripts": {
     "cpu-features": false,
     "protobufjs": false,
