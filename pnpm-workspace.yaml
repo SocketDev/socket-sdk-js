@@ -122,7 +122,7 @@ catalog:
   'taze': 19.14.1
   # vite 8.0.14 swaps esbuild → rolldown natively (bundles rolldown
   # 1.0.2), so the override below removes esbuild from the install tree.
-  'vite': 8.0.14
+  'vite': 8.0.16
   'vitest': 4.1.8
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
