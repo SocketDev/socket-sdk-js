@@ -29,9 +29,7 @@ allowBuilds:
 # so a future default flip can't silently change install behavior.
 autoInstallPeers: true
 
-# Run pre/post lifecycle scripts on the workspace root (e.g.
-# prepare -> husky). This is the pnpm default; declared explicitly
-# so a future default flip can't silently disable husky setup.
+# Pin pnpm's default of running root pre/post lifecycle scripts.
 enablePrePostScripts: true
 
 # Force every consumer of Socket's own packages to resolve through the
