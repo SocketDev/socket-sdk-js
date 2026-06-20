@@ -77,7 +77,7 @@
     "weekly-update:ci": "node scripts/fleet/weekly-update-workflow.mts run"
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "2.1.92",
+    "@anthropic-ai/claude-code": "2.1.163",
     "@babel/generator": "7.28.5",
     "@babel/parser": "7.26.3",
     "@babel/traverse": "7.26.4",
