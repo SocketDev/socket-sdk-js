@@ -2429,7 +2429,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens`,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens`,
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -3160,7 +3160,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/triage`,
+              `orgs/${encodeURIComponent(orgSlug)}/triage/alerts`,
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -3862,7 +3862,7 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens`,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens`,
               tokenData,
               this.#reqOptionsWithHooks,
             ),
@@ -3950,8 +3950,8 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/update`,
-              updateData,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/update`,
+              { id: tokenId, ...updateData },
               this.#reqOptionsWithHooks,
             ),
           ),
