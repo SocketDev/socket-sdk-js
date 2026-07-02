@@ -131,7 +131,7 @@ describe('SocketSdk - API Methods Coverage', () => {
               } else {
                 res.end(JSON.stringify({ data: { id: 'scan-1' } }))
               }
-            } else if (url.includes('/files.tar')) {
+            } else if (url.includes('/files/tar')) {
               // Tar download endpoint
               res.writeHead(200, { 'Content-Type': 'application/x-tar' })
               res.end(Buffer.from('test tar content'))

@@ -143,7 +143,7 @@ describe('SocketSdk - downloadOrgFullScanFilesAsTar streaming byte tracking', ()
     (req: IncomingMessage, res: ServerResponse) => {
       const url = req.url || ''
 
-      if (url.includes('/files.tar')) {
+      if (url.includes('/files/tar')) {
         res.writeHead(200, { 'Content-Type': 'application/x-tar' })
         // Send multiple chunks to exercise the data handler
         res.write(Buffer.from('chunk1'))

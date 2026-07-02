@@ -2117,7 +2117,7 @@ export class SocketSdk {
     fullScanId: string,
     outputPath: string,
   ): Promise<SocketSdkResult<'downloadOrgFullScanFilesAsTar'>> {
-    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`
+    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files/tar`
     try {
       const res = await this.#executeWithRetry(async () => {
         const response = await httpRequest(url, {
@@ -3891,8 +3891,8 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/revoke`,
-              {},
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/revoke`,
+              { id: tokenId },
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -3920,8 +3920,8 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/rotate`,
-              {},
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/rotate`,
+              { id: tokenId },
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -4302,7 +4302,7 @@ export class SocketSdk {
     orgSlug: string,
     scanId: string,
   ): Promise<ReadableStream<ArtifactPatches>> {
-    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/patches/scan?scan_id=${encodeURIComponent(scanId)}`
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/patches/scan/${encodeURIComponent(scanId)}`
     const url = `${this.#baseUrl}${urlPath}`
     const response = await this.#executeWithRetry(
       async () =>
@@ -4358,10 +4358,10 @@ export class SocketSdk {
         async () =>
           await getResponseJson(
             await createRequestWithJson(
-              'PUT',
+              'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/triage/${encodeURIComponent(alertId)}`,
-              triageData,
+              `orgs/${encodeURIComponent(orgSlug)}/triage/alerts`,
+              { alertTriage: [{ uuid: alertId, ...triageData }] },
               this.#reqOptionsWithHooks,
             ),
           ),
