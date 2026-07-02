@@ -247,7 +247,7 @@ describe('SocketSdk - Success Path Coverage', () => {
   describe('SBOM Export', () => {
     it('should successfully export SPDX', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/full-scans/scan-123/sbom/export/spdx')
+        .get('/v0/orgs/test-org/export/spdx/scan-123')
         .reply(200, { data: { spdxVersion: 'SPDX-2.3' } })
 
       const result = await getClient().exportSPDX('test-org', 'scan-123')

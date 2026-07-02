@@ -2233,7 +2233,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/cdx`,
+              `orgs/${encodeURIComponent(orgSlug)}/export/cdx/${encodeURIComponent(fullScanId)}`,
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -2326,7 +2326,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/spdx`,
+              `orgs/${encodeURIComponent(orgSlug)}/export/spdx/${encodeURIComponent(fullScanId)}`,
               this.#reqOptionsWithHooks,
             ),
           ),
