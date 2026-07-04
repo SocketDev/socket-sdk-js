@@ -6,8 +6,8 @@
  *   definitions.
  */
 
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import os from 'node:os'
+import path from 'node:path'
 
 import nock from 'nock'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -133,7 +133,7 @@ describe('SocketSdk - endpoint path contracts', () => {
       nock(API)
         .get('/v0/orgs/test-org/full-scans/scan-123/files/tar')
         .reply(200, 'tar-bytes', { 'Content-Type': 'application/x-tar' })
-      const outputPath = join(tmpdir(), 'sdk-contract-files.tar')
+      const outputPath = path.join(os.tmpdir(), 'sdk-contract-files.tar')
       const result = await getClient().downloadOrgFullScanFilesAsTar(
         'test-org',
         'scan-123',
