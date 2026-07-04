@@ -67,6 +67,12 @@ describe('full-scans-v1', () => {
       )
       expect(result.size).toBe(Buffer.byteLength(content))
     })
+
+    it('rejects when the path is a directory (EISDIR at stream time)', async () => {
+      await expect(hashFile(tempDir)).rejects.toMatchObject({
+        code: 'EISDIR',
+      })
+    })
   })
 
   describe('assembleManifest', () => {
@@ -312,6 +318,37 @@ describe('full-scans-v1', () => {
       }
       expect(capturedBody).toContain(`name="sha256:${expectedHash}"`)
       expect(capturedBody).toContain('filename="b.txt"')
+    })
+
+    it('resolves to an error envelope (never rejects) when a localPath does not exist', async () => {
+      const missingPath = path.join(tempDir, 'missing.txt')
+      const client = createTestClient('test-api-token', { retries: 0 })
+
+      const result = await client.uploadBlobs('test-org', [
+        { localPath: missingPath },
+      ])
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.status).toBe(400)
+        expect(result.error).toContain(missingPath)
+      }
+    })
+
+    it('resolves to an error envelope (never rejects) when a localPath is a directory', async () => {
+      const dirPath = path.join(tempDir, 'a-directory')
+      mkdirSync(dirPath, { recursive: true })
+      const client = createTestClient('test-api-token', { retries: 0 })
+
+      const result = await client.uploadBlobs('test-org', [
+        { localPath: dirPath },
+      ])
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.status).toBe(400)
+        expect(result.error).toContain(dirPath)
+      }
     })
   })
 

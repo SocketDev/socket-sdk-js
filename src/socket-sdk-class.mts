@@ -5431,7 +5431,23 @@ export class SocketSdk {
     }> = []
     for (let i = 0, { length } = entries; i < length; i += 1) {
       const entry = entries[i]!
-      const hash = entry.hash ?? (await hashFile(entry.localPath)).hash
+      let hash: string
+      try {
+        hash = entry.hash ?? (await hashFile(entry.localPath)).hash
+      } catch (e) {
+        return {
+          cause: getErrorMessage(e),
+          data: undefined,
+          error: [
+            'Failed to hash a blob-upload entry before uploading.',
+            `→ Where: uploadBlobs(orgSlug="${orgSlug}"), entries[${i}].localPath`,
+            `→ Saw: "${entry.localPath}" — ${getErrorMessage(e)}`,
+            '→ Fix: verify the file exists, is a regular file (not a directory), and is readable, then retry.',
+          ].join('\n'),
+          status: 400,
+          success: false,
+        }
+      }
       resolvedEntries.push({
         absPath: entry.localPath,
         hash,
