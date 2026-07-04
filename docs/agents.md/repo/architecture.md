@@ -39,8 +39,8 @@ Configs live under `.config/`:
 
 ## SDK-local conventions
 
-- File extensions: `.mts` for TypeScript modules. **Mandatory** `@fileoverview` headers. **Forbidden**: `"use strict"` in `.mjs`/`.mts` (ES modules are strict).
-- Semicolons: use them (this is the one Socket project that does).
+- File extensions: `.mts` for TypeScript modules. **Mandatory** `@file` headers. **Forbidden**: `"use strict"` in `.mjs`/`.mts` (ES modules are strict).
+- Semicolon-free, oxfmt-enforced.
 - No `any`; use `unknown` or specific types.
 - HTTP: 🚨 never `fetch()` — use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`. `fetch()` bypasses the SDK's HTTP stack (retries, timeouts, hooks, agent config) and isn't interceptable by nock. For external URLs (e.g. firewall API) pass a different `baseUrl` to `createGetRequest`.
 - Logger calls: `logger.error('')` / `logger.log('')` must include the empty string.
