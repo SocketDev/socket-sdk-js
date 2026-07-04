@@ -1,4 +1,4 @@
-/**
+/*
  * @file Enforce the canonical fleet README section list. Fires only on the
  *   repo-root `README.md` (skipped for nested READMEs under `packages/`,
  *   `docs/`, `.claude/`, etc. — those are scoped docs with their own shape).
@@ -16,6 +16,7 @@
 
 import path from 'node:path'
 
+import { isFreeformReadmeOptIn } from './_shared/freeform-readme-optin.mts'
 import { isInsideWheelhouse } from './_shared/wheelhouse-self-skip.mts'
 
 const RULE_NAME = 'socket-readme-required-sections'
@@ -53,6 +54,12 @@ const rule = {
       return
     }
     if (!isRootReadme(params.name)) {
+      return
+    }
+    // Product / marketplace repos (freeform-readme roster opt-in) carry public
+    // READMEs that don't fit the five-section infra skeleton. The universal
+    // badge / leak / sibling rules still apply; this section rule does not.
+    if (isFreeformReadmeOptIn()) {
       return
     }
     const headings = []

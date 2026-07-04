@@ -1,4 +1,4 @@
-/**
+/*
  * @file Flag commands that reference sibling repos via relative paths. `node
  *   ../socket-foo/scripts/bar.mts` in a fleet README assumes the reader has the
  *   sibling repo checked out at exactly the right level relative to the current

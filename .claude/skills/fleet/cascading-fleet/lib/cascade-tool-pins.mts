@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Tool-version layered-pin cascade orchestrator — the EXECUTABLE law for
  *   the "bump a core/security tool (pnpm, zizmor, sfw, …) and thread it through
  *   the fleet" procedure that the socket-registry `updating-workflows` SKILL
@@ -51,6 +51,7 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 const logger = getDefaultLogger()
@@ -125,8 +126,9 @@ function otherRepoEnv(): NodeJS.ProcessEnv {
 function run(
   cmd: string,
   args: string[],
-  opts?: { cwd?: string | undefined; env?: NodeJS.ProcessEnv | undefined },
+  options?: { cwd?: string | undefined; env?: NodeJS.ProcessEnv | undefined },
 ): RunResult {
+  const opts = { __proto__: null, ...options } as typeof options
   const r = spawnSync(cmd, args, {
     cwd: opts?.cwd ?? REPO_ROOT,
     env: opts?.env ?? process.env,
@@ -233,9 +235,9 @@ function ciConclusionForSha(sha: string): string {
     return `unknown (gh: ${r.stderr.trim().slice(0, 120)})`
   }
   let runs: Array<{
-    workflowName?: string
-    status?: string
-    conclusion?: string
+    workflowName?: string | undefined
+    status?: string | undefined
+    conclusion?: string | undefined
   }>
   try {
     runs = JSON.parse(r.stdout || '[]')
@@ -490,9 +492,7 @@ if (process.argv[1]?.endsWith('cascade-tool-pins.mts')) {
   try {
     main()
   } catch (e) {
-    logger.fail(
-      `cascade-tool-pins: ${e instanceof Error ? e.message : String(e)}`,
-    )
+    logger.fail(`cascade-tool-pins: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }

@@ -31,8 +31,10 @@ const isCoverageEnabled =
 // the fleet defaults). Replaces the former vitest-non-isolated.json +
 // vitest-extra-exclude.json sidecars.
 export interface VitestRepoConfig {
+  maxWorkers?: number | undefined
   nonIsolated?: string[] | undefined
   nodeTestExclude?: string[] | undefined
+  pool?: 'forks' | 'threads' | undefined
 }
 export function readNonIsolatedGlobs(): string[] {
   return resolveVitestKey('nonIsolated')
@@ -51,6 +53,20 @@ export function readVitestConfigTier(file: string): VitestRepoConfig {
 export function repoNodeTestExcludeGlobs(): string[] {
   return resolveVitestKey('nodeTestExclude')
 }
+export function resolveMaxWorkers(): number | undefined {
+  const fleet = readVitestConfigTier('.config/fleet/vitest.json').maxWorkers
+  const repo = readVitestConfigTier('.config/repo/vitest.json').maxWorkers
+  const candidates = [fleet, repo].filter(
+    (v): v is number => typeof v === 'number' && v > 0,
+  )
+  return candidates.length > 0 ? Math.min(...candidates) : undefined
+}
+export function resolvePool(): 'forks' | 'threads' {
+  const fleet = readVitestConfigTier('.config/fleet/vitest.json').pool
+  const repo = readVitestConfigTier('.config/repo/vitest.json').pool
+  const chosen = repo ?? fleet
+  return chosen === 'forks' || chosen === 'threads' ? chosen : 'threads'
+}
 export function resolveVitestKey(key: keyof VitestRepoConfig): string[] {
   const fleet = readVitestConfigTier('.config/fleet/vitest.json')[key]
   const repo = readVitestConfigTier('.config/repo/vitest.json')[key]
@@ -66,6 +82,18 @@ export default defineConfig({
     deps: {
       interopDefault: false,
     },
+    server: {
+      deps: {
+        // Treat @socketsecurity/lib-stable as external — bypass vite's
+        // transform pipeline so Node resolves it natively (CJS default
+        // condition). Without this, vite's `development` condition resolves
+        // lib-stable via its `source` exports field (TypeScript source), and
+        // the TS source files reference `./external/semver` sub-paths that are
+        // not listed in the lib-stable exports map, producing an unhandled
+        // EnvironmentPluginContainer.resolveId error that kills the test run.
+        external: [/node_modules\/@socketsecurity\/lib-stable/],
+      },
+    },
     globals: false,
     environment: 'node',
     // Test setup lives under test/scripts/{fleet,repo}/setup.mts — fleet-canonical
@@ -76,11 +104,21 @@ export default defineConfig({
       'test/scripts/fleet/setup.mts',
       'test/scripts/repo/setup.mts',
     ].filter(p => existsSync(p)),
-    include: ['test/**/*.test.{js,ts,mjs,mts,cjs}'],
+    include: [
+      'test/**/*.test.{js,ts,mjs,mts,cjs}',
+      // In-place canonical-test mode: also discover the template copies so
+      // `pnpm test template/base/…` (which sets FLEET_TEST_TEMPLATE=1) can run
+      // one before the cascade. The matching exclude of `template/**` is lifted
+      // under the same flag; a normal run keeps both, so template never runs
+      // twice in the full suite.
+      ...(process.env['FLEET_TEST_TEMPLATE'] === '1'
+        ? ['template/base/test/**/*.test.{js,ts,mjs,mts,cjs}']
+        : []),
+    ],
     // Vitest treats `test/**` as `**/test/**`, so without an explicit
     // exclude it picks up every nested `test/` directory in the repo
     // — including the `.git-hooks/test/`, the oxlint plugin's per-rule
-    // `.config/oxlint-plugin/fleet/<id>/test/` suites,
+    // `.config/fleet/oxlint-plugin/fleet/<id>/test/` suites,
     // and `scripts/**/test/` suites that run under `node --test`, not
     // vitest. Those tests use `import { test } from 'node:test'` and
     // produce zero vitest suites, which vitest reports as failures.
@@ -99,10 +137,16 @@ export default defineConfig({
       '**/test/fixtures/**',
       '**/.{idea,git,cache,output,temp}/**',
       '.git-hooks/**',
-      '.config/oxlint-plugin/**',
+      '.config/fleet/oxlint-plugin/**',
       'scripts/**/test/**',
       '.claude/hooks/**/test/**',
-      'template/**',
+      // `template/**` holds the CANONICAL copies; the cascaded LIVE copies are
+      // what the suite runs, so template is excluded to avoid double-running
+      // byte-identical files. `pnpm test template/base/…` sets
+      // FLEET_TEST_TEMPLATE=1 to lift this one exclude and verify a canonical
+      // test IN PLACE before the cascade — the blessed fast path
+      // (scripts/fleet/test.mts). A full/scoped run never sets the flag.
+      ...(process.env['FLEET_TEST_TEMPLATE'] === '1' ? [] : ['template/**']),
       // Repo-tunable node:test homes (e.g. `tools/**/test/**`) from the
       // `nodeTestExclude` key of .config/{fleet,repo}/vitest.json. The same key
       // feeds prefer-vitest-guard's allowlist so the two never drift.
@@ -115,7 +159,7 @@ export default defineConfig({
     // only affects the empty-suite case.
     passWithNoTests: true,
     reporters: ['default'],
-    pool: 'threads',
+    pool: resolvePool(),
     // Vitest 4 removed `poolOptions`; the per-pool worker knobs are now
     // top-level. `maxThreads`/`maxForks` → `maxWorkers`; `singleThread`/
     // `singleFork` → `fileParallelism: false` (forces maxWorkers to 1);
@@ -153,7 +197,9 @@ export default defineConfig({
         }
       : {}),
     fileParallelism: !isCoverageEnabled,
-    maxWorkers: isCoverageEnabled ? 1 : getCI() ? 4 : 16,
+    maxWorkers: isCoverageEnabled
+      ? 1
+      : (resolveMaxWorkers() ?? (getCI() ? 4 : 16)),
     testTimeout: 10_000,
     hookTimeout: 10_000,
     bail: getCI() ? 1 : 0,

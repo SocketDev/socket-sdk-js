@@ -1,5 +1,5 @@
 /**
- * @file sfw flavor + shim helpers for the dep-free setup-tools.mjs bootstrap.
+ * @file Sfw flavor + shim helpers for the dep-free setup-tools.mjs bootstrap.
  *   Split out to keep setup-tools.mjs under the file-size cap. Dep-free (system
  *   Node + `node:` builtins only) for the same reason as its caller: it runs
  *   before `@socketsecurity/lib` / node_modules exist.
@@ -48,7 +48,13 @@ export function hasSocketToken() {
   }
   if (process.platform === 'linux') {
     const lookup = account =>
-      ok('secret-tool', ['lookup', 'service', 'socketsecurity', 'user', account])
+      ok('secret-tool', [
+        'lookup',
+        'service',
+        'socketsecurity',
+        'user',
+        account,
+      ])
     return lookup(tokenAccount) || lookup(keyAccount)
   }
   return false

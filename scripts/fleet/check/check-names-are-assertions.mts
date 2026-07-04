@@ -60,6 +60,12 @@ const ALLOWLIST = new Set<string>([
   // Self: this gate's own name reads as an assertion ("names ARE assertions")
   // but `assertions` is a noun tail, not in the verb set.
   'check-names-are-assertions',
+  // Verb-assertion: "convention guards CONSULT the fleet-context detector" — a
+  // declarative statement, just verb-tailed (consult) rather than -are-/-resolve.
+  'convention-guards-consult-fleet-context',
+  // Verb-assertion: "lint configs PROTECT vendored paths" — declarative,
+  // verb-tailed (protect).
+  'lint-configs-protect-vendored',
 ])
 
 export function isAssertionName(basename: string): boolean {

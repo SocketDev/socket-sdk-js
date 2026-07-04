@@ -85,7 +85,7 @@ needs no key.
 
 ## The orchestrator / worker pattern
 
-`weekly-update` (haiku, the update agent) dispatches `fix-test-failures` (sonnet,
+`weekly-update` (haiku, the update agent) dispatches `get-green` (sonnet,
 the escalation worker) via `safe-outputs.dispatch-workflow` on a test failure.
 gh-aw is one engine + model per workflow, so a two-model escalation is two
 workflows. This same dispatch pattern is the substrate the fleet's planned

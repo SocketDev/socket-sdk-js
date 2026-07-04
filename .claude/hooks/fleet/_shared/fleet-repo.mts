@@ -6,12 +6,10 @@
  *   (biome, eslint, whatever) and the fleet conventions simply don't apply
  *   there, so a fleet session editing a non-fleet repo would otherwise demand
  *   `socket-lint` opt-out comments in code that isn't fleet-linted at all.
- *
  *   A repo is fleet-managed iff its root carries `.config/fleet/` (the cascaded
  *   fleet oxlint/oxfmt config tree — present in every fleet member, absent in
  *   non-fleet repos). Detection walks up from the file to the first `.git`
  *   repo root.
- *
  *   FAIL-SAFE: when the repo can't be determined (no `.git` found before the
  *   filesystem root), assume fleet-managed so a guard keeps enforcing rather
  *   than silently going quiet. Security / safety guards (secret content,

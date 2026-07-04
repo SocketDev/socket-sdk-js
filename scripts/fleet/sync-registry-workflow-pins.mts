@@ -29,6 +29,10 @@ import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import {
+  ciConclusionForSha,
+  isDeterminateFailure,
+} from './lib/registry-ci-gate.mts'
 import { REPO_ROOT } from './paths.mts'
 
 const logger = getDefaultLogger()
@@ -65,7 +69,7 @@ export function gitEnvForOtherRepo(): NodeJS.ProcessEnv {
 const REGISTRY = 'SocketDev/socket-registry'
 // The reusable workflows a fleet repo references from socket-registry. Each has
 // a matching `_local-not-for-reuse-<name>.yml` self-caller that pins the live SHA.
-export const REUSABLE_WORKFLOWS = ['ci', 'provenance', 'weekly-update']
+export const REUSABLE_WORKFLOWS = ['ci', 'publish-npm', 'weekly-update']
 
 export interface RegistryPin {
   sha: string
@@ -321,10 +325,88 @@ export function loadRegistryPins(
   return pins
 }
 
+// One CI-conclusion lookup per SHA per process. socket-registry's CI result for
+// a given commit is identical for every consumer, so a fleet-wide cascade
+// resolves each propagation SHA once.
+const conclusionCache = new Map<string, string>()
+
+/**
+ * The CI conclusion for a propagation SHA, memoized per process. Delegates to
+ * the canonical `ciConclusionForSha` (gated by `gh run list --commit <sha>` —
+ * never the latest branch run; see `lib/registry-ci-gate.mts`). Gating the
+ * EXACT SHA is the whole point: the latest `_local-*` branch run can be a
+ * DIFFERENT commit than the one being synced — the SHA-race that false-greened
+ * the fleet.
+ */
+export function conclusionForSha(sha: string): string {
+  const cached = conclusionCache.get(sha)
+  if (cached !== undefined) {
+    return cached
+  }
+  const conclusion = ciConclusionForSha(sha)
+  conclusionCache.set(sha, conclusion)
+  return conclusion
+}
+
+/**
+ * The reusable workflows THIS repo pins (a `<workflow>.yml@<sha>` line appears
+ * in one of its workflow files). The green-gate is scoped to these so a red
+ * shared workflow only fails the repos that actually consume it — not every
+ * repo that happens to run the sync.
+ */
+export function workflowsPinnedIn(files: readonly string[]): Set<string> {
+  const out = new Set<string>()
+  for (let i = 0, { length } = files; i < length; i += 1) {
+    const text = readFileSync(files[i]!, 'utf8')
+    for (let w = 0, wl = REUSABLE_WORKFLOWS.length; w < wl; w += 1) {
+      const workflow = REUSABLE_WORKFLOWS[w]!
+      if (pinLineRe(workflow).test(text)) {
+        out.add(workflow)
+      }
+    }
+  }
+  return out
+}
+
+export interface UnhealthyWorkflow {
+  conclusion: string
+  sha: string
+  workflow: string
+}
+
+/**
+ * Of the repo's PINNED reusable workflows, the ones whose `_local` propagation
+ * SHA has a DETERMINATE-failed socket-registry CI — `_local` certifies a SHA
+ * its own CI says is broken. Gates the EXACT pinned SHA (`pin.sha`), so the SHA
+ * gated is identical to the SHA synced (no race). Offline / in-progress /
+ * no-run-yet does NOT flag (best-effort — only a confirmed-red source fails
+ * loud).
+ */
+export function collectUnhealthyWorkflows(
+  pins: ReadonlyMap<string, RegistryPin>,
+  pinnedWorkflows: Iterable<string>,
+): UnhealthyWorkflow[] {
+  const out: UnhealthyWorkflow[] = []
+  for (const workflow of pinnedWorkflows) {
+    const pin = pins.get(workflow)
+    if (!pin) {
+      continue
+    }
+    const conclusion = conclusionForSha(pin.sha)
+    if (isDeterminateFailure(conclusion)) {
+      out.push({ conclusion, sha: pin.sha, workflow })
+    }
+  }
+  return out
+}
+
 function main(): void {
   const argv = process.argv.slice(2)
   const fix = argv.includes('--fix')
   const quiet = argv.includes('--quiet')
+  // `--no-gate` skips the CI green-gate (offline / CI-check-only runs). It is a
+  // CLI flag only — never an env kill-switch. The gate is otherwise mandatory.
+  const noGate = argv.includes('--no-gate')
 
   const pins = loadRegistryPins()
   if (pins.size === 0) {
@@ -337,15 +419,6 @@ function main(): void {
 
   const files = listWorkflowFiles(REPO_ROOT)
   const drift = reconcilePins(files, pins, { fix })
-
-  if (!drift.length) {
-    if (!quiet) {
-      logger.success(
-        `[sync-registry-workflow-pins] all socket-registry reusable pins match the _local SHAs.`,
-      )
-    }
-    return
-  }
 
   for (let i = 0, { length } = drift; i < length; i += 1) {
     const d = drift[i]!
@@ -360,6 +433,50 @@ function main(): void {
       )
     }
   }
+
+  // GREEN-GATE. Reconciling to `_local` is only safe when `_local` certifies a
+  // GREEN SHA. socket-registry's pin-advance has no green-gate, so `_local` can
+  // pin a SHA its own CI says is broken (the pnpm-version drift that reded CI
+  // fleet-wide). Verify the source is green and FAIL LOUD when it isn't — never
+  // report healthy pins over a red source (the false-green that strands an
+  // operator into hand-editing + bypassing). Best-effort: an unqueryable run
+  // (offline / no `gh`) does not block.
+  // GREEN-GATE (atomic, per exact SHA). Reconciling to `_local` is only safe when
+  // socket-registry's CI for the EXACT pinned SHA is green. Gating the pinned SHA
+  // — not the latest `_local-*` branch run — closes the SHA-race that false-greened
+  // the fleet (the pnpm-version drift). Fail loud on a confirmed-red source; never
+  // report healthy pins over it. Best-effort offline (unqueryable does not block).
+  const unhealthy = noGate
+    ? []
+    : collectUnhealthyWorkflows(pins, workflowsPinnedIn(files))
+  if (unhealthy.length) {
+    logger.error(
+      '[sync-registry-workflow-pins] a pinned socket-registry reusable workflow has RED CI at its ' +
+        'EXACT propagation SHA — syncing to it strands this repo on a broken shared workflow:',
+    )
+    for (let i = 0, { length } = unhealthy; i < length; i += 1) {
+      const u = unhealthy[i]!
+      logger.error(
+        `  ✗ ${u.workflow}.yml @${u.sha.slice(0, 8)}: CI is "${u.conclusion}", not "success"`,
+      )
+    }
+    logger.error(
+      '  This is an UPSTREAM socket-registry CI failure. Fix socket-registry CI so the SHA goes ' +
+        'green — do NOT hand-bump the consumer pin to dodge it. (--no-gate skips this check.)',
+    )
+    process.exitCode = 1
+    return
+  }
+
+  if (!drift.length) {
+    if (!quiet) {
+      logger.success(
+        '[sync-registry-workflow-pins] all reusable pins match _local AND every pinned SHA is CI-green.',
+      )
+    }
+    return
+  }
+
   if (!fix) {
     logger.error(
       'Run `node scripts/fleet/sync-registry-workflow-pins.mts --fix` to repin.',

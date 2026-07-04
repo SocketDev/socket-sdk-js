@@ -1,4 +1,4 @@
-/**
+/*
  * @file Flag mentions of `socket-wheelhouse` in public-facing markdown.
  *   socket-wheelhouse is a private repo. Public READMEs / docs / release notes
  *   that link to it leak the internal tooling layout to users who can't access

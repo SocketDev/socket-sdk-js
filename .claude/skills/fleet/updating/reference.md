@@ -77,10 +77,8 @@ If no `.gitmodules` exists, skip 4b.
 Resolve the default branch (per CLAUDE.md _Default branch fallback_), then compare:
 
 ```bash
-BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
-if [ -z "$BASE" ] && git show-ref --verify --quiet refs/remotes/origin/main;   then BASE=main;   fi
-if [ -z "$BASE" ] && git show-ref --verify --quiet refs/remotes/origin/master; then BASE=master; fi
-BASE="${BASE:-main}"
+# Resolved by the shared runner so the chain lives in exactly one place.
+BASE=$(node .claude/skills/fleet/_shared/scripts/git-default-branch.mts)
 
 PINNED_SHA=$(grep -ohP '(?<=@)[0-9a-f]{40}' .github/workflows/_local-not-for-reuse-ci.yml 2>/dev/null | head -1)
 DEFAULT_SHA=$(git rev-parse "origin/$BASE" 2>/dev/null || echo "")

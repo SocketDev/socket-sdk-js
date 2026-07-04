@@ -17,9 +17,11 @@
  *   - `--all` — run the full suite (`vitest run`). Used in CI and on explicit
  *     opt-in. Flags: `--quiet` / `--silent` suppress progress output. Config /
  *     infrastructure changes (`vitest.config*`, `tsconfig*`, `.oxlintrc.json`,
- *     `.oxfmtrc.json`, `pnpm-lock.yaml`, `package.json`, anything under
- *     `.config/` or `scripts/`) still escalate to `all` — module-graph
- *     traversal doesn't capture config-derived discovery + alias changes. See
+ *     `.oxfmtrc.json`, `pnpm-lock.yaml`, `package.json`, the vitest setup
+ *     files, and the test runner itself) still escalate to `all` — module-graph
+ *     traversal doesn't capture config-derived discovery + alias changes. An
+ *     ordinary source file under `scripts/` or `.config/` does NOT escalate;
+ *     its tests are reachable via `vitest related`. See
  *     https://vitest.dev/guide/cli.html#vitest-related.
  */
 
@@ -34,6 +36,8 @@ import { globSync } from '@socketsecurity/lib-stable/globs/match'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
+
+import { resolveScopeMode } from './_shared/scope-flags.mts'
 
 const logger = getDefaultLogger()
 
@@ -72,11 +76,7 @@ const ROOT_WORKSPACE_MANIFEST = 'pnpm-workspace.yaml'
 const ROOT_VITEST_CONFIG = '.config/repo/vitest.config.mts'
 
 const args = process.argv.slice(2)
-const mode: 'staged' | 'all' | 'modified' = args.includes('--all')
-  ? 'all'
-  : args.includes('--staged')
-    ? 'staged'
-    : 'modified'
+const mode = resolveScopeMode(args)
 const quiet = args.includes('--quiet') || args.includes('--silent')
 const stdio: SpawnSyncOptions['stdio'] = quiet ? 'pipe' : 'inherit'
 // On Windows, `pnpm` is a .cmd shim that Node refuses to exec directly via
@@ -86,14 +86,21 @@ const useShell = process.platform === 'win32'
 
 // Paths that, when changed, force the full suite to run.
 const ESCALATION_PATTERNS = [
-  /^\.config\//,
-  /^scripts\//,
+  // Discovery / resolution config only — a change here is invisible to the
+  // module-graph walk (no source file imports it) yet changes which tests run
+  // or how specifiers resolve, so the scoped run can't be trusted. An ordinary
+  // source file under scripts/ or .config/ is NOT here: its tests are reachable
+  // via `vitest related`, so escalating on it just runs the whole suite for
+  // nothing.
+  /(?:^|\/)vitest\.config\.(?:js|mjs|mts|ts)$/,
+  /(?:^|\/)vitest\.json$/,
+  /(?:^|\/)tsconfig.*\.json$/,
+  /(?:^|\/)package\.json$/,
   /^pnpm-lock\.yaml$/,
-  /^tsconfig.*\.json$/,
-  /^\.oxlintrc\.json$/,
-  /^\.oxfmtrc\.json$/,
-  /^vitest\.config\.(?:js|mjs|mts|ts)$/,
-  /^package\.json$/,
+  /(?:^|\/)\.oxlintrc\.json$/,
+  /(?:^|\/)\.oxfmtrc\.json$/,
+  /^scripts\/fleet\/test\.mts$/,
+  /(?:^|\/)test\/scripts\/(?:fleet|repo)\/setup\.mts$/,
   /^lockstep\.schema\.json$/,
 ]
 
@@ -127,6 +134,34 @@ function getModifiedFiles(): string[] {
   return gitFiles(['diff', '--name-only', '--diff-filter=ACMR', 'HEAD'])
 }
 
+// Untracked, non-ignored paths (git's "others"). Excluded from the staged run:
+// `vitest related` walks the module graph from the staged files and would
+// otherwise pull in a foreign, mid-write test another live actor hasn't
+// committed yet — gating a staged commit on a file outside its own scope.
+function getUntrackedFiles(): string[] {
+  return gitFiles(['ls-files', '--others', '--exclude-standard'])
+}
+
+// Build the `vitest related` argv for the staged (pre-commit) run. Every
+// untracked path is excluded so the run covers exactly the staged delta plus
+// its TRACKED related tests — never a git-status-wide changed/untracked file.
+// Pure (inputs passed in) so the scope rule is unit-tested without spawning
+// vitest. `--exclude` applies to related-mode results (verified: it drops a
+// discovered related test), so an untracked test is collected-then-dropped.
+export function buildRelatedArgs(
+  stagedFiles: readonly string[],
+  untrackedFiles: readonly string[],
+): string[] {
+  return [
+    'related',
+    ...stagedFiles,
+    '--run',
+    '--passWithNoTests',
+    '--no-file-parallelism',
+    ...untrackedFiles.flatMap(f => ['--exclude', f]),
+  ]
+}
+
 function shouldEscalate(files: string[]): boolean {
   for (let i = 0, { length } = files; i < length; i += 1) {
     const f = files[i]!
@@ -140,7 +175,14 @@ function shouldEscalate(files: string[]): boolean {
   return false
 }
 
-function runVitest(vitestArgs: string[], label: string): number {
+function runVitest(
+  vitestArgs: string[],
+  label: string,
+  options?: { env?: Record<string, string> | undefined },
+): number {
+  const opts = { __proto__: null, ...options } as {
+    env?: Record<string, string> | undefined
+  }
   log(`Test scope: ${label}`)
   const configArgs = existsSync(ROOT_VITEST_CONFIG)
     ? ['--config', ROOT_VITEST_CONFIG]
@@ -149,7 +191,11 @@ function runVitest(vitestArgs: string[], label: string): number {
     VITEST_BIN,
     [...vitestArgs, ...configArgs],
     // Windows shell-shim rationale: see useShell at file top.
-    { shell: useShell, stdio },
+    {
+      shell: useShell,
+      stdio,
+      ...(opts.env ? { env: { ...process.env, ...opts.env } } : {}),
+    },
   )
   if (r.status !== 0) {
     log('Tests failed')
@@ -242,31 +288,60 @@ function runChanged(): number {
 }
 
 function runRelated(files: string[]): number {
-  // `vitest related <files…>` defaults to watch mode; `--run` forces a
-  // single non-watch execution. Pass the staged file list as positionals;
-  // vitest walks the module graph from each.
+  // `vitest related <files…>` defaults to watch mode; `--run` (in
+  // buildRelatedArgs) forces a single non-watch execution. The staged files are
+  // positionals; vitest walks the module graph from each, and every untracked
+  // path is excluded so a foreign, mid-write test can't gate this commit.
   //
-  // `--no-file-parallelism` forces a single worker for the pre-commit (staged)
-  // run only — the root config's local default is a 16-thread pool, which is
-  // both the worker-pool-deadlock surface (a hung worker the parent waits on
-  // forever, seen as workers frozen at 0% CPU holding .git/index.lock) and a
-  // CPU bomb when several Claude sessions share one checkout and each spawns 16
-  // threads. A single worker can't inter-worker-starve, and N sessions × 1
-  // thread is survivable. CI and `--all` keep full parallelism (this flag is
-  // scoped to the staged path); the staged set is small, so one worker is fine.
+  // `--no-file-parallelism` (in buildRelatedArgs) forces a single worker for the
+  // pre-commit (staged) run only — the root config's local default is a
+  // 16-thread pool, which is both the worker-pool-deadlock surface (a hung
+  // worker the parent waits on forever, seen as workers frozen at 0% CPU holding
+  // .git/index.lock) and a CPU bomb when several Claude sessions share one
+  // checkout and each spawns 16 threads. A single worker can't inter-worker-
+  // starve, and N sessions × 1 thread is survivable. CI and `--all` keep full
+  // parallelism (this flag is scoped to the staged path); the staged set is
+  // small, so one worker is fine.
   return runVitest(
-    [
-      'related',
-      ...files,
-      '--run',
-      '--passWithNoTests',
-      '--no-file-parallelism',
-    ],
+    buildRelatedArgs(files, getUntrackedFiles()),
     `staged (${files.length} file(s))`,
   )
 }
 
+// Explicit positional file paths → the fast, file-scoped run. This is the
+// fleet-canonical replacement for a raw `node_modules/.bin/vitest run <file>`:
+// `pnpm test <file…>` runs exactly those files (vitest `run <files>`), so no
+// one ever needs to reach past the script to the bare binary. Flags (scope +
+// --quiet/--silent) are filtered out; what remains is treated as file paths.
+function fileArgs(): string[] {
+  return args.filter(a => !a.startsWith('-'))
+}
+
+function runFiles(files: string[]): number {
+  // `vitest run <files…>` executes exactly the named test files (no watch),
+  // the fast path for "test this one file". --passWithNoTests keeps a path
+  // that resolves to no test file from erroring.
+  //
+  // A template/ path is the CANONICAL copy, which the config excludes by
+  // default (the cascaded live copy is what the suite runs). Setting
+  // FLEET_TEST_TEMPLATE=1 lifts that one exclude so `pnpm test
+  // template/base/…/x.test.mts` verifies a canonical test IN PLACE — before
+  // the cascade — instead of forcing a commit + cascade just to run it.
+  const includeTemplate = files.some(f => f.startsWith('template/'))
+  return runVitest(
+    ['run', ...files, '--passWithNoTests'],
+    `files (${files.length})`,
+    includeTemplate ? { env: { FLEET_TEST_TEMPLATE: '1' } } : undefined,
+  )
+}
+
 function main(): void {
+  const explicitFiles = fileArgs()
+  if (explicitFiles.length > 0) {
+    process.exitCode = runFiles(explicitFiles)
+    return
+  }
+
   if (mode === 'all') {
     process.exitCode = runAll()
     return
@@ -286,7 +361,13 @@ function main(): void {
     return
   }
 
-  if (shouldEscalate(files)) {
+  // `--staged` (pre-commit) NEVER escalates to the full suite: it is a fast,
+  // bounded, non-blocking reminder, and escalating just burns the 60s budget
+  // running a truncated full suite that proves nothing. Config-derived
+  // discovery changes are validated by the full suite at pre-push + CI (the
+  // real gates), not in the commit hook. Only the local-dev `changed` scope
+  // escalates, where a thorough local run is worth the wait.
+  if (mode !== 'staged' && shouldEscalate(files)) {
     log('Config files changed; escalating to full test suite.')
     process.exitCode = runAll()
     return
@@ -302,4 +383,8 @@ function main(): void {
   process.exitCode = runChanged()
 }
 
-main()
+// Entrypoint-guarded so importing this module (e.g. a unit test of
+// buildRelatedArgs) doesn't kick off a vitest run.
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  main()
+}

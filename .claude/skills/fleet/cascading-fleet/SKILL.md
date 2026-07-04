@@ -40,6 +40,8 @@ The `FLEET_SYNC=1` sentinel is recognized by the wheelhouse `no-revert-guard` + 
 
 Bumping a core / security tool (pnpm, zizmor, sfw, …) threads through the fleet differently from a template cascade: socket-registry is the workspace + CI authority, so the bump flows **wheelhouse → socket-registry → fleet**. The wheelhouse normally dogfoods itself first, but for CI it _consumes_ the registry's reusable workflows — so the registry's shared-workflow pin must land (and go CI-green) before the wheelhouse can validate the CI side.
 
+🚨 **Dogfood from a place of passing locally.** Before any dogfood cascade run the local-green gate IN ORDER: `pnpm run update` → `pnpm i` → `pnpm run fix --all` → `pnpm run check --all` → `pnpm run test` (or `pnpm run cover`); if green, commit (and fix + commit), THEN dogfood. `pnpm run update` runs FIRST so pending catalog / tool drift resolves in its own commit and does not ride the feature dogfood. Canonical reference + rationale: `docs/agents.md/repo/fleet-sync-and-release-flow.md` (stage b, DOGFOOD).
+
 The executable law is **`lib/cascade-tool-pins.mts`** (the orchestrator that chains the existing pieces with the CI-green gate enforced in code):
 
 ```bash
