@@ -1420,6 +1420,11 @@ export class SocketSdk {
    * Uploads project manifest files and initiates full security analysis.
    * Returns scan metadata with guaranteed required fields.
    *
+   * Transparently attempts the v1 content-addressed blob-cache path first; that
+   * attempt may issue additional HTTP requests (manifest post, blob uploads)
+   * before the scan is created, observable through the `onRequest`/`onResponse`
+   * hooks, before falling back to the v0 multipart upload.
+   *
    * @example
    *   ;```typescript
    *   const result = await sdk.createFullScan(
@@ -1694,6 +1699,10 @@ export class SocketSdk {
         ...(workspace !== undefined ? { workspace } : {}),
       }
 
+      const entriesByRelPath = new Map(
+        assembled.entries.map(entry => [entry.relPath, entry]),
+      )
+
       let previousMissingHashes: Set<string> | undefined
       for (let attempt = 0; attempt < 3; attempt += 1) {
         const result = await this.createFullScanFromManifest(
@@ -1783,9 +1792,7 @@ export class SocketSdk {
         const missingEntries: ManifestLocalEntry[] = []
         for (let i = 0, { length } = missing; i < length; i += 1) {
           const missingBlob = missing[i]!
-          const entry = assembled.entries.find(
-            candidate => candidate.relPath === missingBlob.path,
-          )
+          const entry = entriesByRelPath.get(missingBlob.path)
           if (!entry) {
             debugLog(
               'createFullScan:v1',
