@@ -106,6 +106,9 @@ export const GROUPS: Array<{
     methods: [
       'getOrgAlertsList',
       'getOrgAlertFullScans',
+      'getOrgAlertResolutions',
+      'getOrgAlertResolution',
+      'deleteOrgAlertResolution',
       'getOrgTriage',
       'updateOrgAlertTriage',
       'getOrgFixes',

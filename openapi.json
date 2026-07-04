@@ -1677,13 +1677,22 @@
                 "description": "",
                 "default": 0
               },
+              "purl_ecosystem_not_enabled": {
+                "type": "integer",
+                "description": "",
+                "default": 0
+              },
               "package_not_found": {
                 "type": "integer",
                 "description": "",
                 "default": 0
               }
             },
-            "required": ["package_not_found", "purl_malformed"]
+            "required": [
+              "package_not_found",
+              "purl_ecosystem_not_enabled",
+              "purl_malformed"
+            ]
           }
         },
         "required": ["errors", "purl_input", "resolved"]
@@ -1773,7 +1782,7 @@
           },
           "props": {
             "type": "object",
-            "description": "Additional alert-specific properties and metadata that vary by alert type",
+            "description": "Additional alert-specific properties and metadata that vary by alert type. For vulnerability alerts this includes the `cveId` and `ghsaId` identifiers, either of which may be an empty string when GitHub has not assigned that identifier to the advisory.",
             "default": null
           },
           "action": {
@@ -4259,6 +4268,121 @@
             "properties": {
               "type": {
                 "type": "string",
+                "enum": ["missingLockfile"]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "manifestFile": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "ecosystem": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          }
+                        },
+                        "required": ["ecosystem", "manifestFile"]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": ["description", "props"]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["oversizedManifest"]
+              },
+              "value": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/SocketIssueBasics"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "type": "string",
+                        "description": "",
+                        "default": ""
+                      },
+                      "props": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "manifestFile": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "ecosystem": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "size": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          },
+                          "limit": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "ecosystem",
+                          "limit",
+                          "manifestFile",
+                          "size"
+                        ]
+                      },
+                      "usage": {
+                        "$ref": "#/components/schemas/SocketUsageRef"
+                      }
+                    },
+                    "required": ["description", "props"]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
                 "enum": ["shrinkwrap"]
               },
               "value": {
@@ -4863,9 +4987,18 @@
                             "type": "string",
                             "description": "",
                             "default": ""
+                          },
+                          "thresholdDays": {
+                            "type": "number",
+                            "description": "Org-configured recently published threshold in days.",
+                            "default": 0
                           }
                         },
-                        "required": ["checkedAt", "publishedAt"]
+                        "required": [
+                          "checkedAt",
+                          "publishedAt",
+                          "thresholdDays"
+                        ]
                       },
                       "usage": {
                         "$ref": "#/components/schemas/SocketUsageRef"
@@ -11668,7 +11801,8 @@
                           "integration_repo_url": {
                             "type": "string",
                             "description": "",
-                            "default": ""
+                            "default": "",
+                            "nullable": true
                           },
                           "integration_branch_url": {
                             "type": "string",
@@ -11910,7 +12044,7 @@
             "basicAuth": ["full-scans:create"]
           }
         ],
-        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nTo get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 268 MB.\n\n**Query Parameters:**\n- `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "description": "Create a full scan from a set of package manifest files. Returns a full scan including all SBOM artifacts.\n\nTo get a list of supported filetypes that can be uploaded in a full-scan, see the [Get supported file types](/reference/getsupportedfiles) endpoint.\n\nThe maximum number of files you can upload at a time is 10000 and each file can be no bigger than 268 MB.\n\n**Query Parameters:**\n- `scan_type` (optional): The type of scan to perform. Defaults to 'socket'. Must be 32 characters or less. Used for categorizing multiple SBOM heads per repository branch.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -12023,7 +12157,8 @@
                     "integration_repo_url": {
                       "type": "string",
                       "description": "",
-                      "default": ""
+                      "default": "",
+                      "nullable": true
                     },
                     "integration_branch_url": {
                       "type": "string",
@@ -12490,7 +12625,8 @@
                     "integration_repo_url": {
                       "type": "string",
                       "description": "",
-                      "default": ""
+                      "default": "",
+                      "nullable": true
                     },
                     "integration_branch_url": {
                       "type": "string",
@@ -12831,28 +12967,28 @@
                     "artifacts": {
                       "type": "object",
                       "additionalProperties": false,
-                      "description": "",
+                      "description": "Artifacts in the diff grouped by how they changed between the before and after scans.",
                       "properties": {
                         "added": {
                           "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/SocketDiffArtifact"
                           },
-                          "description": ""
+                          "description": "Artifacts present in the after scan but not the before scan."
                         },
                         "removed": {
                           "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/SocketDiffArtifact"
                           },
-                          "description": ""
+                          "description": "Artifacts present in the before scan but not the after scan."
                         },
                         "unchanged": {
                           "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/SocketDiffArtifact"
                           },
-                          "description": "",
+                          "description": "Artifacts present in both scans with no changes. Null when omitted via the omit_unchanged query parameter.",
                           "nullable": true
                         },
                         "replaced": {
@@ -12860,14 +12996,14 @@
                           "items": {
                             "$ref": "#/components/schemas/SocketDiffArtifact"
                           },
-                          "description": ""
+                          "description": "Artifacts replaced between the scans, e.g. the same package supplied by a different source."
                         },
                         "updated": {
                           "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/SocketDiffArtifact"
                           },
-                          "description": ""
+                          "description": "Artifacts whose version changed between the scans."
                         }
                       },
                       "required": [
@@ -13207,6 +13343,11 @@
                       },
                       "required": ["alerts", "overview"]
                     },
+                    "incomplete": {
+                      "type": "boolean",
+                      "default": false,
+                      "description": "True when either side of the diff was truncated at the plan's dependency limit. When set, the comments contain a limit-exceeded notice instead of a report rendered from the imbalanced diff."
+                    },
                     "directDependenciesChanged": {
                       "type": "boolean",
                       "default": false,
@@ -13224,7 +13365,8 @@
                     "before",
                     "comments",
                     "diff_report_url",
-                    "directDependenciesChanged"
+                    "directDependenciesChanged",
+                    "incomplete"
                   ]
                 }
               }
@@ -13478,7 +13620,7 @@
             "basicAuth": ["full-scans:create"]
           }
         ],
-        "description": "Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.\n\nEach uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.\n\nThe maximum combined number of files extracted from your upload is 5000 and each extracted file can be no bigger than 268 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
+        "description": "Create a full scan by uploading one or more archives. Supported archive formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.\n\nEach uploaded archive is extracted server-side and any supported manifest files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the scan. If you upload multiple archives in a single request, the manifests from every archive are merged into one full scan. The response includes any files that were ignored.\n\nThe maximum combined number of files extracted from your upload is 10000 and each extracted file can be no bigger than 268 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -13591,7 +13733,8 @@
                     "integration_repo_url": {
                       "type": "string",
                       "description": "",
-                      "default": ""
+                      "default": "",
+                      "nullable": true
                     },
                     "integration_branch_url": {
                       "type": "string",
@@ -14675,27 +14818,27 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the diff scan.",
                           "default": ""
                         },
                         "organization_id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the organization that owns the diff scan.",
                           "default": ""
                         },
                         "repository_id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the repository the diff scan was run against.",
                           "default": ""
                         },
                         "created_at": {
                           "type": "string",
-                          "description": "",
+                          "description": "ISO 8601 timestamp of when the diff scan was created.",
                           "default": ""
                         },
                         "updated_at": {
                           "type": "string",
-                          "description": "",
+                          "description": "ISO 8601 timestamp of when the diff scan was last updated.",
                           "default": ""
                         },
                         "before_full_scan": {
@@ -14906,58 +15049,63 @@
                         },
                         "description": {
                           "type": "string",
-                          "description": "",
+                          "description": "Human readable description of the diff scan, e.g. the pull request title.",
                           "default": "",
                           "nullable": true
                         },
                         "external_href": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the external resource the diff scan was created for, e.g. the pull request URL.",
                           "default": "",
                           "nullable": true
                         },
                         "merge": {
                           "type": "boolean",
                           "default": false,
-                          "description": ""
+                          "description": "True when the diff scan was created for a merge event rather than an open pull request."
                         },
                         "html_url": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the diff scan report in the Socket dashboard.",
                           "default": "",
                           "nullable": true
                         },
                         "api_url": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the diff scan resource in the Socket API.",
                           "default": "",
                           "nullable": true
+                        },
+                        "incomplete": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": "True when either side of the diff was truncated at the plan's dependency limit. A truncated diff is imbalanced and can report changes for artifacts the change never touched, so treat the artifact lists as unreliable when this is set."
                         },
                         "artifacts": {
                           "type": "object",
                           "additionalProperties": false,
-                          "description": "",
+                          "description": "Artifacts in the diff grouped by how they changed between the before and after scans.",
                           "properties": {
                             "added": {
                               "type": "array",
                               "items": {
                                 "$ref": "#/components/schemas/SocketDiffArtifact"
                               },
-                              "description": ""
+                              "description": "Artifacts present in the after scan but not the before scan."
                             },
                             "removed": {
                               "type": "array",
                               "items": {
                                 "$ref": "#/components/schemas/SocketDiffArtifact"
                               },
-                              "description": ""
+                              "description": "Artifacts present in the before scan but not the after scan."
                             },
                             "unchanged": {
                               "type": "array",
                               "items": {
                                 "$ref": "#/components/schemas/SocketDiffArtifact"
                               },
-                              "description": "",
+                              "description": "Artifacts present in both scans with no changes. Null when omitted via the omit_unchanged query parameter.",
                               "nullable": true
                             },
                             "replaced": {
@@ -14965,14 +15113,14 @@
                               "items": {
                                 "$ref": "#/components/schemas/SocketDiffArtifact"
                               },
-                              "description": ""
+                              "description": "Artifacts replaced between the scans, e.g. the same package supplied by a different source."
                             },
                             "updated": {
                               "type": "array",
                               "items": {
                                 "$ref": "#/components/schemas/SocketDiffArtifact"
                               },
-                              "description": ""
+                              "description": "Artifacts whose version changed between the scans."
                             }
                           },
                           "required": [
@@ -14994,6 +15142,7 @@
                         "external_href",
                         "html_url",
                         "id",
+                        "incomplete",
                         "merge",
                         "organization_id",
                         "repository_id",
@@ -15184,27 +15333,27 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the diff scan.",
                           "default": ""
                         },
                         "organization_id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the organization that owns the diff scan.",
                           "default": ""
                         },
                         "repository_id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the repository the diff scan was run against.",
                           "default": ""
                         },
                         "created_at": {
                           "type": "string",
-                          "description": "",
+                          "description": "ISO 8601 timestamp of when the diff scan was created.",
                           "default": ""
                         },
                         "updated_at": {
                           "type": "string",
-                          "description": "",
+                          "description": "ISO 8601 timestamp of when the diff scan was last updated.",
                           "default": ""
                         },
                         "before_full_scan": {
@@ -15415,46 +15564,51 @@
                         },
                         "description": {
                           "type": "string",
-                          "description": "",
+                          "description": "Human readable description of the diff scan, e.g. the pull request title.",
                           "default": "",
                           "nullable": true
                         },
                         "external_href": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the external resource the diff scan was created for, e.g. the pull request URL.",
                           "default": "",
                           "nullable": true
                         },
                         "merge": {
                           "type": "boolean",
                           "default": false,
-                          "description": ""
+                          "description": "True when the diff scan was created for a merge event rather than an open pull request."
                         },
                         "html_url": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the diff scan report in the Socket dashboard.",
                           "default": "",
                           "nullable": true
                         },
                         "api_url": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the diff scan resource in the Socket API.",
                           "default": "",
                           "nullable": true
+                        },
+                        "incomplete": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": "True when either side of the diff was truncated at the plan's dependency limit. When set, the gfm comments contain a limit-exceeded notice instead of a report rendered from the imbalanced diff."
                         },
                         "gfm": {
                           "type": "object",
                           "additionalProperties": false,
-                          "description": "",
+                          "description": "Pull request comments rendered in GitHub flavored markdown.",
                           "properties": {
                             "overview": {
                               "type": "string",
-                              "description": "",
+                              "description": "Dependency overview comment in GitHub flavored markdown. Empty when there is nothing to show; consumers should not post a comment in that case.",
                               "default": ""
                             },
                             "alerts": {
                               "type": "string",
-                              "description": "",
+                              "description": "Dependency alert comment in GitHub flavored markdown. Contains a dependency-limit-exceeded notice instead of a report when incomplete is true.",
                               "default": ""
                             }
                           },
@@ -15471,6 +15625,7 @@
                         "gfm",
                         "html_url",
                         "id",
+                        "incomplete",
                         "merge",
                         "organization_id",
                         "repository_id",
@@ -15663,7 +15818,7 @@
             "basicAuth": ["repo:list", "diff-scans:create", "full-scans:create"]
           }
         ],
-        "description": "Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.\nReturns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from\nthe [api_url](/reference/getDiffScanById) URL to get the contents of the diff.\n\nThe maximum number of files you can upload at a time is 5000 and each file can be no bigger than 268 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n      - repo:list\n- diff-scans:create\n- full-scans:create",
+        "description": "Create a diff scan between the repository's current HEAD full scan and a new full scan from uploaded manifest files.\nReturns metadata about the diff scan. Once the diff scan is created, fetch the diff scan from\nthe [api_url](/reference/getDiffScanById) URL to get the contents of the diff.\n\nThe maximum number of files you can upload at a time is 10000 and each file can be no bigger than 268 MB.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n      - repo:list\n- diff-scans:create\n- full-scans:create",
         "responses": {
           "201": {
             "content": {
@@ -15680,27 +15835,27 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the diff scan.",
                           "default": ""
                         },
                         "organization_id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the organization that owns the diff scan.",
                           "default": ""
                         },
                         "repository_id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the repository the diff scan was run against.",
                           "default": ""
                         },
                         "created_at": {
                           "type": "string",
-                          "description": "",
+                          "description": "ISO 8601 timestamp of when the diff scan was created.",
                           "default": ""
                         },
                         "updated_at": {
                           "type": "string",
-                          "description": "",
+                          "description": "ISO 8601 timestamp of when the diff scan was last updated.",
                           "default": ""
                         },
                         "before_full_scan": {
@@ -15911,30 +16066,30 @@
                         },
                         "description": {
                           "type": "string",
-                          "description": "",
+                          "description": "Human readable description of the diff scan, e.g. the pull request title.",
                           "default": "",
                           "nullable": true
                         },
                         "external_href": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the external resource the diff scan was created for, e.g. the pull request URL.",
                           "default": "",
                           "nullable": true
                         },
                         "merge": {
                           "type": "boolean",
                           "default": false,
-                          "description": ""
+                          "description": "True when the diff scan was created for a merge event rather than an open pull request."
                         },
                         "html_url": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the diff scan report in the Socket dashboard.",
                           "default": "",
                           "nullable": true
                         },
                         "api_url": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the diff scan resource in the Socket API.",
                           "default": "",
                           "nullable": true
                         }
@@ -16052,6 +16207,15 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "on_duplicate",
+            "in": "query",
+            "required": false,
+            "description": "Set to \"redirect\" to receive a 302 redirect to the existing diff scan instead of a 409 error when a duplicate is detected.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "security": [
@@ -16079,27 +16243,27 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the diff scan.",
                           "default": ""
                         },
                         "organization_id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the organization that owns the diff scan.",
                           "default": ""
                         },
                         "repository_id": {
                           "type": "string",
-                          "description": "",
+                          "description": "The ID of the repository the diff scan was run against.",
                           "default": ""
                         },
                         "created_at": {
                           "type": "string",
-                          "description": "",
+                          "description": "ISO 8601 timestamp of when the diff scan was created.",
                           "default": ""
                         },
                         "updated_at": {
                           "type": "string",
-                          "description": "",
+                          "description": "ISO 8601 timestamp of when the diff scan was last updated.",
                           "default": ""
                         },
                         "before_full_scan": {
@@ -16310,30 +16474,30 @@
                         },
                         "description": {
                           "type": "string",
-                          "description": "",
+                          "description": "Human readable description of the diff scan, e.g. the pull request title.",
                           "default": "",
                           "nullable": true
                         },
                         "external_href": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the external resource the diff scan was created for, e.g. the pull request URL.",
                           "default": "",
                           "nullable": true
                         },
                         "merge": {
                           "type": "boolean",
                           "default": false,
-                          "description": ""
+                          "description": "True when the diff scan was created for a merge event rather than an open pull request."
                         },
                         "html_url": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the diff scan report in the Socket dashboard.",
                           "default": "",
                           "nullable": true
                         },
                         "api_url": {
                           "type": "string",
-                          "description": "",
+                          "description": "Link to the diff scan resource in the Socket API.",
                           "default": "",
                           "nullable": true
                         }
@@ -16359,6 +16523,302 @@
               }
             },
             "description": "The details of the created diff scan."
+          },
+          "302": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "diff_scan": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the diff scan.",
+                          "default": ""
+                        },
+                        "organization_id": {
+                          "type": "string",
+                          "description": "The ID of the organization that owns the diff scan.",
+                          "default": ""
+                        },
+                        "repository_id": {
+                          "type": "string",
+                          "description": "The ID of the repository the diff scan was run against.",
+                          "default": ""
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "ISO 8601 timestamp of when the diff scan was created.",
+                          "default": ""
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "ISO 8601 timestamp of when the diff scan was last updated.",
+                          "default": ""
+                        },
+                        "before_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "after_full_scan": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "created_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "organization_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_id": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "repository_slug": {
+                              "type": "string",
+                              "description": "",
+                              "default": ""
+                            },
+                            "branch": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_message": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "commit_hash": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "pull_request": {
+                              "type": "integer",
+                              "description": "",
+                              "default": 0,
+                              "nullable": true
+                            },
+                            "committers": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": ""
+                            },
+                            "html_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            },
+                            "api_url": {
+                              "type": "string",
+                              "description": "",
+                              "default": "",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "api_url",
+                            "branch",
+                            "commit_hash",
+                            "commit_message",
+                            "committers",
+                            "created_at",
+                            "html_url",
+                            "id",
+                            "organization_id",
+                            "organization_slug",
+                            "pull_request",
+                            "repository_id",
+                            "repository_slug",
+                            "updated_at"
+                          ]
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "Human readable description of the diff scan, e.g. the pull request title.",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "external_href": {
+                          "type": "string",
+                          "description": "Link to the external resource the diff scan was created for, e.g. the pull request URL.",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "merge": {
+                          "type": "boolean",
+                          "default": false,
+                          "description": "True when the diff scan was created for a merge event rather than an open pull request."
+                        },
+                        "html_url": {
+                          "type": "string",
+                          "description": "Link to the diff scan report in the Socket dashboard.",
+                          "default": "",
+                          "nullable": true
+                        },
+                        "api_url": {
+                          "type": "string",
+                          "description": "Link to the diff scan resource in the Socket API.",
+                          "default": "",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "after_full_scan",
+                        "api_url",
+                        "before_full_scan",
+                        "created_at",
+                        "description",
+                        "external_href",
+                        "html_url",
+                        "id",
+                        "merge",
+                        "organization_id",
+                        "repository_id",
+                        "updated_at"
+                      ]
+                    }
+                  },
+                  "required": ["diff_scan"]
+                }
+              }
+            },
+            "description": "Redirects to the existing diff scan when on_duplicate=redirect is set and a duplicate is detected."
           },
           "400": {
             "$ref": "#/components/responses/SocketBadRequest"
@@ -16879,6 +17339,459 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/alerts/resolutions": {
+      "get": {
+        "tags": ["alerts"],
+        "summary": "List Org Alert Resolutions",
+        "operationId": "getOrgAlertResolutions",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction by `created_at`. One of: asc, desc.",
+            "schema": {
+              "type": "string",
+              "default": "desc"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Number of results per page (1–100, default 30).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 30
+            }
+          },
+          {
+            "name": "startAfterCursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor returned by the previous response's `endCursor`. Omit on the first request.",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": ["alert-resolution:list"]
+          },
+          {
+            "basicAuth": ["alert-resolution:list"]
+          }
+        ],
+        "description": "List active alert resolutions for an organization. Results are paginated via an opaque cursor and ordered by created_at. Each row includes the anchor fields (alert_type, repo, repo_label, artifact_*) that describe the resolution scope.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- alert-resolution:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "uuid": {
+                            "type": "string",
+                            "description": "The UUID of the resolution.",
+                            "default": ""
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": [
+                              "false_positive",
+                              "remediated",
+                              "tolerable_risk",
+                              "other"
+                            ],
+                            "description": "The reason the alert was resolved. One of: false_positive, remediated, tolerable_risk, other.",
+                            "default": "other"
+                          },
+                          "reason_text": {
+                            "type": "string",
+                            "description": "Free-form reason text when `reason` is `other`.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "comment": {
+                            "type": "string",
+                            "description": "Operator-provided comment.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "alert_type": {
+                            "type": "string",
+                            "description": "Alert type the resolution scopes to (e.g. criticalCVE). Null if the resolution applies to multiple alert types.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "repo": {
+                            "type": "string",
+                            "description": "Repository full name the resolution scopes to. Null if not scoped to a single repo.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "repo_label": {
+                            "type": "string",
+                            "description": "Repository label the resolution scopes to. Null if not scoped to a label.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifact_type": {
+                            "type": "string",
+                            "description": "Package ecosystem the resolution scopes to (e.g. npm, pypi). Null if not scoped to a single ecosystem.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifact_namespace": {
+                            "type": "string",
+                            "description": "Package namespace/scope the resolution scopes to. Null if not scoped to a namespace.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifact_name": {
+                            "type": "string",
+                            "description": "Package name the resolution scopes to. Null if not scoped to a single package.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifact_version": {
+                            "type": "string",
+                            "description": "Package version the resolution scopes to. Extracted from the resolution selector at read time; null if the resolution applies to multiple versions or no single version.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "resolved_by": {
+                            "type": "string",
+                            "description": "User ID that created the resolution. Null for system-created resolutions.",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "description": "ISO-8601 creation timestamp.",
+                            "default": ""
+                          },
+                          "updated_at": {
+                            "type": "string",
+                            "description": "ISO-8601 last-update timestamp.",
+                            "default": ""
+                          }
+                        },
+                        "required": [
+                          "alert_type",
+                          "artifact_name",
+                          "artifact_namespace",
+                          "artifact_type",
+                          "artifact_version",
+                          "comment",
+                          "created_at",
+                          "reason",
+                          "reason_text",
+                          "repo",
+                          "repo_label",
+                          "resolved_by",
+                          "updated_at",
+                          "uuid"
+                        ]
+                      },
+                      "description": ""
+                    },
+                    "endCursor": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    }
+                  },
+                  "required": ["endCursor", "items"]
+                }
+              }
+            },
+            "description": "Lists alert resolutions for the specified organization."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
+    "/orgs/{org_slug}/alerts/resolutions/{uuid}": {
+      "get": {
+        "tags": ["alerts"],
+        "summary": "Get Org Alert Resolution",
+        "operationId": "getOrgAlertResolution",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the alert resolution to fetch",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": ["alert-resolution:read"]
+          },
+          {
+            "basicAuth": ["alert-resolution:read"]
+          }
+        ],
+        "description": "Fetch a single active alert resolution by UUID. Returns the same row shape as the list endpoint.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- alert-resolution:read",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "description": "The UUID of the resolution.",
+                      "default": ""
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "false_positive",
+                        "remediated",
+                        "tolerable_risk",
+                        "other"
+                      ],
+                      "description": "The reason the alert was resolved. One of: false_positive, remediated, tolerable_risk, other.",
+                      "default": "other"
+                    },
+                    "reason_text": {
+                      "type": "string",
+                      "description": "Free-form reason text when `reason` is `other`.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "comment": {
+                      "type": "string",
+                      "description": "Operator-provided comment.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "alert_type": {
+                      "type": "string",
+                      "description": "Alert type the resolution scopes to (e.g. criticalCVE). Null if the resolution applies to multiple alert types.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "repo": {
+                      "type": "string",
+                      "description": "Repository full name the resolution scopes to. Null if not scoped to a single repo.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "repo_label": {
+                      "type": "string",
+                      "description": "Repository label the resolution scopes to. Null if not scoped to a label.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "artifact_type": {
+                      "type": "string",
+                      "description": "Package ecosystem the resolution scopes to (e.g. npm, pypi). Null if not scoped to a single ecosystem.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "artifact_namespace": {
+                      "type": "string",
+                      "description": "Package namespace/scope the resolution scopes to. Null if not scoped to a namespace.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "artifact_name": {
+                      "type": "string",
+                      "description": "Package name the resolution scopes to. Null if not scoped to a single package.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "artifact_version": {
+                      "type": "string",
+                      "description": "Package version the resolution scopes to. Extracted from the resolution selector at read time; null if the resolution applies to multiple versions or no single version.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "resolved_by": {
+                      "type": "string",
+                      "description": "User ID that created the resolution. Null for system-created resolutions.",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "description": "ISO-8601 creation timestamp.",
+                      "default": ""
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "description": "ISO-8601 last-update timestamp.",
+                      "default": ""
+                    }
+                  },
+                  "required": [
+                    "alert_type",
+                    "artifact_name",
+                    "artifact_namespace",
+                    "artifact_type",
+                    "artifact_version",
+                    "comment",
+                    "created_at",
+                    "reason",
+                    "reason_text",
+                    "repo",
+                    "repo_label",
+                    "resolved_by",
+                    "updated_at",
+                    "uuid"
+                  ]
+                }
+              }
+            },
+            "description": "The requested alert resolution."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      },
+      "delete": {
+        "tags": ["alerts"],
+        "summary": "Delete Org Alert Resolution",
+        "operationId": "deleteOrgAlertResolution",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the alert resolution to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": ["alert-resolution:delete"]
+          },
+          {
+            "basicAuth": ["alert-resolution:delete"]
+          }
+        ],
+        "description": "Delete an alert resolution by UUID. Once deleted, alerts previously hidden by this resolution will reappear after the next org snapshot.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- alert-resolution:delete",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "result": {
+                      "type": "string",
+                      "description": "",
+                      "default": ""
+                    }
+                  },
+                  "required": ["result"]
+                }
+              }
+            },
+            "description": "Deleted Alert Resolution"
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/orgs/{org_slug}/repos": {
       "get": {
         "tags": ["repos"],
@@ -16898,9 +17811,10 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Field to sort repositories by.",
             "schema": {
               "type": "string",
+              "enum": ["name", "updated_at", "created_at"],
               "default": "created_at"
             }
           },
@@ -16908,9 +17822,10 @@
             "name": "direction",
             "in": "query",
             "required": false,
-            "description": "",
+            "description": "Sort direction.",
             "schema": {
               "type": "string",
+              "enum": ["asc", "desc"],
               "default": "desc"
             }
           },
@@ -18774,7 +19689,7 @@
             "name": "setting_key",
             "in": "query",
             "required": true,
-            "description": "Setting key to delete from the repository label. Valid values include issueRules, issueRulesPolicyDefault, and licensePolicy",
+            "description": "Setting key to delete from the repository label. Valid values include issueRules, issueRulesPolicyDefault, licensePolicy, and recentlyPublishedThresholdMs",
             "schema": {
               "type": "string"
             }
@@ -18788,7 +19703,7 @@
             "basicAuth": ["repo-label:update"]
           }
         ],
-        "description": "Delete the setting (e.g. security/license policy) for a repository label.\n\n\nNote that repository label settings currently only support `issueRules`\nand `issueRulesPolicyDefault`. A policy is considered \"active\" for\na given repository label if the `issueRulesPolicyDefault` is set,\nand inactive when not set. `issueRules` can be used to further\nrefine the alert triage strategy.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo-label:update",
+        "description": "Delete the setting (e.g. security/license policy) for a repository label.\n\n\nNote that repository label settings currently only support `issueRules`,\n`issueRulesPolicyDefault`, `licensePolicy`, and\n`recentlyPublishedThresholdMs`. A policy is considered \"active\"\nfor a given repository label if the `issueRulesPolicyDefault` is\nset, and inactive when not set. `issueRules` can be used to further\nrefine the alert triage strategy.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo-label:update",
         "responses": {
           "200": {
             "content": {
@@ -18855,7 +19770,7 @@
             "name": "setting_key",
             "in": "query",
             "required": true,
-            "description": "Setting key to query for in the repository label. Valid values include issueRules, issueRulesPolicyDefault, and licensePolicy",
+            "description": "Setting key to query for in the repository label. Valid values include issueRules, issueRulesPolicyDefault, licensePolicy, and recentlyPublishedThresholdMs",
             "schema": {
               "type": "string"
             }
@@ -18869,7 +19784,7 @@
             "basicAuth": ["repo-label:list"]
           }
         ],
-        "description": "Retrieve the setting (e.g. security/license policy) for a repository label.\n\n\nNote that repository label settings currently only support `issueRules`\nand `issueRulesPolicyDefault`. A policy is considered \"active\" for\na given repository label if the `issueRulesPolicyDefault` is set,\nand inactive when not set. `issueRules` can be used to further\nrefine the alert triage strategy.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo-label:list",
+        "description": "Retrieve the setting (e.g. security/license policy) for a repository label.\n\n\nNote that repository label settings currently only support `issueRules`,\n`issueRulesPolicyDefault`, `licensePolicy`, and\n`recentlyPublishedThresholdMs`. A policy is considered \"active\"\nfor a given repository label if the `issueRulesPolicyDefault` is\nset, and inactive when not set. `issueRules` can be used to further\nrefine the alert triage strategy.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo-label:list",
         "responses": {
           "200": {
             "content": {
@@ -19220,6 +20135,44 @@
                                 "ignore"
                               ],
                               "description": "The action to take for noREADME issues."
+                            }
+                          },
+                          "required": ["action"]
+                        },
+                        "missingLockfile": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for missingLockfile issues."
+                            }
+                          },
+                          "required": ["action"]
+                        },
+                        "oversizedManifest": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for oversizedManifest issues."
                             }
                           },
                           "required": ["action"]
@@ -21482,6 +22435,13 @@
                       "description": "",
                       "default": null,
                       "nullable": true
+                    },
+                    "recentlyPublishedThresholdMs": {
+                      "type": "integer",
+                      "description": "The recently published package alert threshold for the repository label, in milliseconds",
+                      "default": 0,
+                      "minimum": 0,
+                      "nullable": true
                     }
                   },
                   "description": ""
@@ -21881,6 +22841,44 @@
                               "ignore"
                             ],
                             "description": "The action to take for noREADME issues."
+                          }
+                        },
+                        "required": ["action"]
+                      },
+                      "missingLockfile": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for missingLockfile issues."
+                          }
+                        },
+                        "required": ["action"]
+                      },
+                      "oversizedManifest": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for oversizedManifest issues."
                           }
                         },
                         "required": ["action"]
@@ -24138,6 +25136,13 @@
                   },
                   "licensePolicy": {
                     "$ref": "#/components/schemas/LicenseAllowListRequest"
+                  },
+                  "recentlyPublishedThresholdMs": {
+                    "type": "integer",
+                    "description": "The recently published package alert threshold for the repository label, in milliseconds",
+                    "default": 0,
+                    "minimum": 0,
+                    "nullable": true
                   }
                 },
                 "description": ""
@@ -24154,7 +25159,7 @@
             "basicAuth": ["repo-label:update"]
           }
         ],
-        "description": "Update the setting (e.g. security/license policy) for a repository label.\n\n\nNote that repository label settings currently only support `issueRules`\nand `issueRulesPolicyDefault`. A policy is considered \"active\" for\na given repository label if the `issueRulesPolicyDefault` is set,\nand inactive when not set. `issueRules` can be used to further\nrefine the alert triage strategy.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo-label:update",
+        "description": "Update the setting (e.g. security/license policy) for a repository label.\n\n\nNote that repository label settings currently only support `issueRules`,\n`issueRulesPolicyDefault`, `licensePolicy`, and\n`recentlyPublishedThresholdMs`. A policy is considered \"active\"\nfor a given repository label if the `issueRulesPolicyDefault` is\nset, and inactive when not set. `issueRules` can be used to further\nrefine the alert triage strategy.\n\nThis endpoint consumes 1 unit of your quota.\n\nThis endpoint requires the following org token scopes:\n- repo-label:update",
         "responses": {
           "200": {
             "content": {
@@ -24829,6 +25834,44 @@
                                 "ignore"
                               ],
                               "description": "The action to take for noREADME issues."
+                            }
+                          },
+                          "required": ["action"]
+                        },
+                        "missingLockfile": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for missingLockfile issues."
+                            }
+                          },
+                          "required": ["action"]
+                        },
+                        "oversizedManifest": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for oversizedManifest issues."
                             }
                           },
                           "required": ["action"]
@@ -27492,6 +28535,44 @@
                         },
                         "required": ["action"]
                       },
+                      "missingLockfile": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for missingLockfile issues."
+                          }
+                        },
+                        "required": ["action"]
+                      },
+                      "oversizedManifest": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "action": {
+                            "type": "string",
+                            "enum": [
+                              "defer",
+                              "error",
+                              "warn",
+                              "monitor",
+                              "ignore"
+                            ],
+                            "description": "The action to take for oversizedManifest issues."
+                          }
+                        },
+                        "required": ["action"]
+                      },
                       "shrinkwrap": {
                         "type": "object",
                         "additionalProperties": false,
@@ -30108,6 +31189,44 @@
                                 "ignore"
                               ],
                               "description": "The action to take for noREADME issues."
+                            }
+                          },
+                          "required": ["action"]
+                        },
+                        "missingLockfile": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for missingLockfile issues."
+                            }
+                          },
+                          "required": ["action"]
+                        },
+                        "oversizedManifest": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "",
+                          "properties": {
+                            "action": {
+                              "type": "string",
+                              "enum": [
+                                "defer",
+                                "error",
+                                "warn",
+                                "monitor",
+                                "ignore"
+                              ],
+                              "description": "The action to take for oversizedManifest issues."
                             }
                           },
                           "required": ["action"]
@@ -32878,7 +33997,7 @@
                     "socketTier1Enabled": {
                       "type": "boolean",
                       "default": false,
-                      "description": "Enable Socket Tier 1 reachability analysis"
+                      "description": "Enable Socket full application reachability analysis"
                     },
                     "socketAdditionalParams": {
                       "type": "string",
@@ -33594,7 +34713,7 @@
             "basicAuth": ["historical:alerts-list"]
           }
         ],
-        "description": "List historical alerts.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- historical:alerts-list",
+        "description": "List historical alerts.\n\nPagination: keep requesting pages (passing the previous response's `endCursor` as `startAfterCursor`) until `endCursor` is `null`. Do not stop when `items` is empty — an empty page can be returned while more results still remain on later pages, so `endCursor` being `null` is the only reliable end-of-results signal.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- historical:alerts-list",
         "responses": {
           "200": {
             "content": {
@@ -33794,7 +34913,7 @@
                               },
                               "props": {
                                 "type": "object",
-                                "description": "",
+                                "description": "Additional alert-specific properties and metadata that vary by alert type. For vulnerability alerts this includes the `cveId` and `ghsaId` identifiers, either of which may be an empty string when GitHub has not assigned that identifier to the advisory.",
                                 "default": null,
                                 "nullable": true
                               },
@@ -36454,6 +37573,7 @@
                 "ChangePlanSubscriptionSeats",
                 "CreateApiToken",
                 "CreateArtifact",
+                "CreateAlertPolicy",
                 "CreateFirewallCustomRegistry",
                 "CreateFirewallDeploymentConfig",
                 "CreateLabel",
@@ -36462,9 +37582,13 @@
                 "CreateUserWithPassword",
                 "CreateWebhook",
                 "CreateTicket",
+                "CreateTicketingConfiguration",
                 "CoanaCliLegacyModeCutoffUpdated",
                 "CoanaCliLegacyModeDemoteOrg",
                 "CoanaCliLegacyModePromoteOrg",
+                "CreateAlertResolution",
+                "DeleteAlertPolicy",
+                "DeleteAlertResolution",
                 "DeleteAlertTriage",
                 "DeleteApiToken",
                 "DeleteFirewallCustomRegistry",
@@ -36475,13 +37599,18 @@
                 "DeleteRepoAccessRule",
                 "DeleteReport",
                 "DeleteRepository",
+                "DeleteTicketingConfiguration",
                 "DeleteWebhook",
+                "DisablePythonCliRunStreamingOverride",
                 "DisassociateLabel",
                 "DisconnectJiraIntegration",
+                "DisconnectLinearIntegration",
                 "DowngradeOrganizationPlan",
+                "EnablePythonCliRunStreamingOverride",
                 "EnqueueAutopatchPrepareJob",
                 "JoinOrganization",
                 "JiraIntegrationConnected",
+                "LinearIntegrationConnected",
                 "MemberAdded",
                 "MemberRemoved",
                 "MemberRoleChanged",
@@ -36496,8 +37625,11 @@
                 "SendInvitation",
                 "SessionRevokedByUser",
                 "SetLabelSettingToDefault",
+                "SetSsoBypassMemberships",
+                "SetSsoBypassRbacRoles",
                 "SSOEmailVerificationCompleted",
                 "SSOLoginCompleted",
+                "SvdReprocessClusters",
                 "SyncOrganization",
                 "TransferOwnership",
                 "UpdateAlertTriage",
@@ -36515,8 +37647,10 @@
                 "UpdateLicenseOverlay",
                 "UpdateOrganizationSetting",
                 "UpdateRepoAccessRule",
+                "UpdateTicketingConfiguration",
                 "UpdateWebhook",
                 "UpgradeOrganizationPlan",
+                "UserMagicLinkSent",
                 "UserSignedIn",
                 "UserSignedOut"
               ]
@@ -36733,6 +37867,8 @@
                         "alert-resolution:create",
                         "alert-resolution:read",
                         "alert-resolution:delete",
+                        "threat-campaigns",
+                        "threat-campaigns:list",
                         "api-tokens",
                         "api-tokens:create",
                         "api-tokens:update",
@@ -36768,11 +37904,19 @@
                         "integration:create",
                         "integration:update",
                         "integration:delete",
+                        "access-policy",
+                        "access-policy:read",
+                        "access-policy:attach",
+                        "access-policy:update",
                         "license-policy",
                         "license-policy:update",
                         "license-policy:read",
                         "packages",
                         "packages:list",
+                        "access-policy-definition",
+                        "access-policy-definition:attach",
+                        "access-policy-definition:read",
+                        "access-policy-definition:update",
                         "report",
                         "report:list",
                         "report:read",
@@ -36809,6 +37953,9 @@
                         "webhooks:list",
                         "webhooks:update",
                         "webhooks:delete",
+                        "openid",
+                        "profile",
+                        "email",
                         "*"
                       ],
                       "description": "The scope of permissions for this API Token",
@@ -37152,6 +38299,8 @@
                                 "alert-resolution:create",
                                 "alert-resolution:read",
                                 "alert-resolution:delete",
+                                "threat-campaigns",
+                                "threat-campaigns:list",
                                 "api-tokens",
                                 "api-tokens:create",
                                 "api-tokens:update",
@@ -37187,11 +38336,19 @@
                                 "integration:create",
                                 "integration:update",
                                 "integration:delete",
+                                "access-policy",
+                                "access-policy:read",
+                                "access-policy:attach",
+                                "access-policy:update",
                                 "license-policy",
                                 "license-policy:update",
                                 "license-policy:read",
                                 "packages",
                                 "packages:list",
+                                "access-policy-definition",
+                                "access-policy-definition:attach",
+                                "access-policy-definition:read",
+                                "access-policy-definition:update",
                                 "report",
                                 "report:list",
                                 "report:read",
@@ -37228,6 +38385,9 @@
                                 "webhooks:list",
                                 "webhooks:update",
                                 "webhooks:delete",
+                                "openid",
+                                "profile",
+                                "email",
                                 "*"
                               ],
                               "description": "The scope of permissions for this API Token",
@@ -37335,6 +38495,8 @@
                         "alert-resolution:create",
                         "alert-resolution:read",
                         "alert-resolution:delete",
+                        "threat-campaigns",
+                        "threat-campaigns:list",
                         "api-tokens",
                         "api-tokens:create",
                         "api-tokens:update",
@@ -37370,11 +38532,19 @@
                         "integration:create",
                         "integration:update",
                         "integration:delete",
+                        "access-policy",
+                        "access-policy:read",
+                        "access-policy:attach",
+                        "access-policy:update",
                         "license-policy",
                         "license-policy:update",
                         "license-policy:read",
                         "packages",
                         "packages:list",
+                        "access-policy-definition",
+                        "access-policy-definition:attach",
+                        "access-policy-definition:read",
+                        "access-policy-definition:update",
                         "report",
                         "report:list",
                         "report:read",
@@ -37411,6 +38581,9 @@
                         "webhooks:list",
                         "webhooks:update",
                         "webhooks:delete",
+                        "openid",
+                        "profile",
+                        "email",
                         "*"
                       ],
                       "description": "The scope of permissions for this API Token",
@@ -37567,6 +38740,11 @@
                     "default": "",
                     "format": "uuid"
                   },
+                  "id": {
+                    "type": "string",
+                    "description": "The API token ID to rotate",
+                    "default": ""
+                  },
                   "token": {
                     "type": "string",
                     "description": "",
@@ -37578,11 +38756,11 @@
                     "default": ""
                   }
                 },
-                "description": "The API Token identifier to rotate. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation."
+                "description": "The API Token identifier to rotate. Provide uuid (recommended), id, token, or hash. May provide uuid+hash together for validation."
               }
             }
           },
-          "description": "The API Token identifier to rotate. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation.",
+          "description": "The API Token identifier to rotate. Provide uuid (recommended), id, token, or hash. May provide uuid+hash together for validation.",
           "required": false
         },
         "security": [
@@ -37689,6 +38867,11 @@
                     "default": "",
                     "format": "uuid"
                   },
+                  "id": {
+                    "type": "string",
+                    "description": "The API token ID to revoke",
+                    "default": ""
+                  },
                   "token": {
                     "type": "string",
                     "description": "",
@@ -37700,11 +38883,11 @@
                     "default": ""
                   }
                 },
-                "description": "The API token identifier to revoke. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation."
+                "description": "The API token identifier to revoke. Provide uuid (recommended), id, token, or hash. May provide uuid+hash together for validation."
               }
             }
           },
-          "description": "The API token identifier to revoke. Provide uuid (recommended), token, or hash. May provide uuid+hash together for validation.",
+          "description": "The API token identifier to revoke. Provide uuid (recommended), id, token, or hash. May provide uuid+hash together for validation.",
           "required": false
         },
         "security": [
@@ -38011,6 +39194,12 @@
                             "description": "Detailed description of the underlying threat",
                             "default": ""
                           },
+                          "fileSha256": {
+                            "type": "string",
+                            "description": "Hex-encoded SHA-256 hash of the malicious file content, usable as an indicator of compromise (IOC). Null when no file content hash is available for the threat.",
+                            "default": "",
+                            "nullable": true
+                          },
                           "id": {
                             "type": "integer",
                             "description": "Unique identifier of the threat feed entry",
@@ -38295,6 +39484,12 @@
                             "type": "string",
                             "description": "Detailed description of the underlying threat",
                             "default": ""
+                          },
+                          "fileSha256": {
+                            "type": "string",
+                            "description": "Hex-encoded SHA-256 hash of the malicious file content, usable as an indicator of compromise (IOC). Null when no file content hash is available for the threat.",
+                            "default": "",
+                            "nullable": true
                           },
                           "id": {
                             "type": "integer",
@@ -38678,6 +39873,16 @@
             }
           },
           {
+            "name": "include_stateful_alert_ids",
+            "in": "query",
+            "required": false,
+            "description": "Set to include a statefulAlertIds map (GHSA ID → array of open stateful alert IDs detected in this organization) in the response. Lets callers correlate /fixes results back to the alert IDs surfaced by /v0/orgs/{org_slug}/alerts. Org-scoped only — multiple alerts across repos/branches may share a GHSA. Off by default to avoid an extra ClickHouse round-trip.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
             "name": "autofix_run_id",
             "in": "query",
             "required": false,
@@ -38695,7 +39900,7 @@
             "basicAuth": ["fixes:list"]
           }
         ],
-        "description": "Fetches available fixes for vulnerabilities in a repository, scan, or uploaded manifest.\nRequires exactly one of repo_slug, full_scan_id, or tar_hash, as well as vulnerability_ids to be provided.\nvulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or \"*\" for all vulnerabilities.\n\n## Response Structure\n\nThe response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.\n\n### Common Fields\n\nAll response variants include:\n- `type`: Discriminator field (one of: \"fixFound\", \"partialFixFound\", \"noFixAvailable\", \"fixNotApplicable\", \"errorComputingFix\")\n- `value`: Object containing the variant-specific data\n\nThe `value` object always contains:\n- `ghsa`: string | null - The GHSA ID\n- `cve`: string | null - The CVE ID (if available)\n- `advisoryDetails`: object | null - Advisory details (only if include_details=true)\n\n### Response Variants\n\n**fixFound**: A complete fix is available for all vulnerable packages\n- `value.fixDetails.fixes`: Array of fix objects, each containing:\n  - `purl`: Package URL to upgrade\n  - `fixedVersion`: Version to upgrade to\n  - `manifestFiles`: Array of manifest files containing the package\n  - `updateType`: \"patch\" | \"minor\" | \"major\" | \"unknown\"\n- `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability\n\n**partialFixFound**: Fixes available for some but not all vulnerable packages\n- Same as fixFound, plus:\n- `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:\n  - `purl`: Package URL\n  - `manifestFiles`: Array of manifest files\n  - `reasons`: Human-readable explanations of why the package cannot be upgraded. May contain multiple distinct entries when different dependency chains are blocked for different causes (e.g. one chain has no compatible upstream version; another would require a major version bump skipped by `--no-major-updates`).\n\n**noFixAvailable**: No fix exists for this vulnerability (no patched version published)\n\n**fixNotApplicable**: A patched version of the vulnerable package exists but cannot be applied. The most common cause is that there is no upgrade path through the dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g. `pnpm overrides`). Other causes include callers passing `--no-major-updates` when the only patched version is a major bump.\n- `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files\n\n**errorComputingFix**: An error occurred while computing fixes\n- `value.message`: Error description\n\n### Advisory Details (when include_details=true)\n\n- `title`: string | null\n- `description`: string | null\n- `cwes`: string[] - CWE identifiers\n- `severity`: \"LOW\" | \"MODERATE\" | \"HIGH\" | \"CRITICAL\"\n- `cvssVector`: string | null\n- `publishedAt`: string (ISO date)\n- `kev`: boolean - Whether it's a Known Exploited Vulnerability\n- `epss`: number | null - Exploit Prediction Scoring System score\n- `affectedPurls`: Array of affected packages with version ranges\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- fixes:list",
+        "description": "Fetches available fixes for vulnerabilities in a repository, scan, or uploaded manifest.\nRequires exactly one of repo_slug, full_scan_id, or tar_hash, as well as vulnerability_ids to be provided.\nvulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or \"*\" for all vulnerabilities.\n\n## Response Structure\n\nThe response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.\n\n### Common Fields\n\nAll response variants include:\n- `type`: Discriminator field (one of: \"fixFound\", \"partialFixFound\", \"noFixAvailable\", \"fixNotApplicable\", \"errorComputingFix\")\n- `value`: Object containing the variant-specific data\n\nThe `value` object always contains:\n- `ghsa`: string | null - The GHSA ID\n- `cve`: string | null - The CVE ID (if available)\n- `advisoryDetails`: object | null - Advisory details (only if include_details=true)\n\n### Response Variants\n\n**fixFound**: A complete fix is available for all vulnerable packages\n- `value.fixDetails.fixes`: Array of fix objects, each containing:\n  - `purl`: Package URL to upgrade\n  - `fixedVersion`: Version to upgrade to\n  - `manifestFiles`: Array of manifest files containing the package\n  - `updateType`: \"patch\" | \"minor\" | \"major\" | \"unknown\"\n- `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability\n\n**partialFixFound**: Fixes available for some but not all vulnerable packages\n- Same as fixFound, plus:\n- `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:\n  - `purl`: Package URL\n  - `manifestFiles`: Array of manifest files\n  - `reasons`: Human-readable explanations of why the package cannot be upgraded. May contain multiple distinct entries when different dependency chains are blocked for different causes (e.g. one chain has no compatible upstream version; another would require a major version bump skipped by `--no-major-updates`).\n\n**noFixAvailable**: No fix exists for this vulnerability (no patched version published)\n\n**fixNotApplicable**: A patched version of the vulnerable package exists but cannot be applied. The most common cause is that there is no upgrade path through the dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g. `pnpm overrides`). Other causes include callers passing `--no-major-updates` when the only patched version is a major bump.\n- `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files\n\n**errorComputingFix**: An error occurred while computing fixes\n- `value.message`: Error description\n\n### Advisory Details (when include_details=true)\n\n- `title`: string | null\n- `description`: string | null\n- `cwes`: string[] - CWE identifiers\n- `severity`: \"LOW\" | \"MODERATE\" | \"HIGH\" | \"CRITICAL\"\n- `cvssVector`: string | null\n- `publishedAt`: string (ISO date)\n- `kev`: boolean - Whether it's a Known Exploited Vulnerability\n- `epss`: number | null - Exploit Prediction Scoring System score\n- `affectedPurls`: Array of affected packages with version ranges\n\n### Stateful Alert IDs (when include_stateful_alert_ids=true)\n\nTop-level `statefulAlertIds` field — a map of GHSA ID → array of open stateful alert IDs (the human-readable `SOCKET-XXX-N` identifiers also returned by `/v0/orgs/{org_slug}/alerts`). The lookup is org-scoped, so the same GHSA may map to multiple alert IDs when it appears in alerts across different repos or branches. Callers that need a repo/branch filter should intersect this map with results from the alerts API.\n\nThe lookup honors the same scan-type visibility as `/v0/orgs/{org_slug}/alerts` — when the `enableTier1OrgAlertApiRead` feature flag is off for the org, only `socket` scans are visible (no `socket_tier1`).\n\nNote on scopes: this field surfaces identifiers that are otherwise reachable via `/v0/orgs/{org_slug}/alerts` (which requires `alerts:list`). The fixes route is gated on `fixes:list` alone; the GHSAs the alert IDs are keyed to are already part of every `/fixes` response, and exposing the matching alert IDs through this opt-in flag is intentional — it lets a caller with only `fixes:list` complete the correlation back to /alerts on a token that already has that scope. If you require strict scope separation, do not enable this flag.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- fixes:list",
         "responses": {
           "200": {
             "content": {
@@ -38722,6 +39927,20 @@
                         "default": "GHSA ID of a vulnerability detected in the project"
                       },
                       "description": "All vulnerability GHSA IDs detected in the project, regardless of the vulnerability_ids filter. Only present when include_all_detected_ghsas=true is set."
+                    },
+                    "statefulAlertIds": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "description": "",
+                          "default": "Stateful alert ID (the human-readable SOCKET-XXX-N identifier from /v0/orgs/{org_slug}/alerts)"
+                        },
+                        "description": ""
+                      },
+                      "properties": {},
+                      "description": "Map of GHSA ID → open stateful alert IDs detected in this organization. Lets callers correlate /fixes results back to the alert IDs they see in /v0/orgs/{org_slug}/alerts. Org-scoped, not repo/branch-scoped — the same GHSA may surface in multiple alerts across repos. Only present when include_stateful_alert_ids=true is set."
                     }
                   },
                   "required": ["fixDetails"]
@@ -40443,7 +41662,7 @@
             "basicAuth": ["alerts:list"]
           }
         ],
-        "description": "List latest alerts.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- alerts:list",
+        "description": "List latest alerts.\n\nPagination: keep requesting pages (passing the previous response's `endCursor` as `startAfterCursor`) until `endCursor` is `null`. Do not stop when `items` is empty — an empty page can be returned while more results still remain on later pages, so `endCursor` being `null` is the only reliable end-of-results signal.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- alerts:list",
         "responses": {
           "200": {
             "content": {
@@ -40671,6 +41890,11 @@
                               "additionalProperties": false,
                               "description": "",
                               "properties": {
+                                "scanType": {
+                                  "type": "string",
+                                  "description": "",
+                                  "default": ""
+                                },
                                 "action": {
                                   "type": "string",
                                   "description": "",
@@ -41039,7 +42263,8 @@
                                 "patch",
                                 "prioritization",
                                 "reachability",
-                                "repository"
+                                "repository",
+                                "scanType"
                               ]
                             },
                             "description": ""

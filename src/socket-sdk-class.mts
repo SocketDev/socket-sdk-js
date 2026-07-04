@@ -1855,6 +1855,9 @@ export class SocketSdk {
    *   scan.
    * @param options.merge - Set true for merged commits, false for open PR
    *   diffs.
+   * @param options.on_duplicate - Set to "redirect" to receive a 302 redirect
+   *   to the existing diff scan instead of a 409 error when a duplicate is
+   *   detected.
    *
    * @returns Diff scan details
    *
@@ -1876,6 +1879,7 @@ export class SocketSdk {
       description?: string | undefined
       external_href?: string | undefined
       merge?: boolean | undefined
+      on_duplicate?: string | undefined
     },
   ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>> {
     try {
@@ -2213,6 +2217,44 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
+    }
+  }
+
+  /**
+   * Delete an alert resolution by UUID. Once deleted, alerts previously
+   * hidden by this resolution reappear after the next org snapshot.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param uuid - UUID of the alert resolution to delete.
+   *
+   * @returns Success confirmation
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/alerts/resolutions/{uuid}
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:delete
+   */
+  async deleteOrgAlertResolution(
+    orgSlug: string,
+    uuid: string,
+  ): Promise<SocketSdkResult<'deleteOrgAlertResolution'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgAlertResolution'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgAlertResolution'>(e)
     }
   }
 
@@ -3200,6 +3242,90 @@ export class SocketSdk {
   }
 
   /**
+   * Fetch a single active alert resolution by UUID. Returns the same row
+   * shape as the list endpoint.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param uuid - UUID of the alert resolution to fetch.
+   *
+   * @returns The requested alert resolution.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alerts/resolutions/{uuid}
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:read
+   */
+  async getOrgAlertResolution(
+    orgSlug: string,
+    uuid: string,
+  ): Promise<SocketSdkResult<'getOrgAlertResolution'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgAlertResolution'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgAlertResolution'>(e)
+    }
+  }
+
+  /**
+   * List active alert resolutions for an organization. Results are
+   * paginated via an opaque cursor and ordered by created_at.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for sort direction and
+   *   pagination.
+   *
+   * @returns Paginated list of alert resolutions with cursor-based
+   * pagination.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alerts/resolutions
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:list
+   */
+  async getOrgAlertResolutions(
+    orgSlug: string,
+    options?:
+      | {
+          direction?: string | undefined
+          per_page?: number | undefined
+          startAfterCursor?: string | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'getOrgAlertResolutions'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgAlertResolutions'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgAlertResolutions'>(e)
+    }
+  }
+
+  /**
    * List latest alerts for an organization (Beta). Returns paginated alerts
    * with comprehensive filtering options.
    *
@@ -3308,6 +3434,9 @@ export class SocketSdk {
    * @param orgSlug - Organization identifier.
    * @param options - Fix query options including repo_slug or full_scan_id,
    *   vulnerability IDs, and preferences.
+   * @param options.include_stateful_alert_ids - Set to include a
+   *   statefulAlertIds map (GHSA ID → open stateful alert IDs) in the
+   *   response, org-scoped only.
    *
    * @returns Fix details for requested vulnerabilities with upgrade
    *   recommendations.
@@ -3323,6 +3452,7 @@ export class SocketSdk {
       full_scan_id?: string | undefined
       include_details?: boolean | undefined
       include_responsible_direct_dependencies?: boolean | undefined
+      include_stateful_alert_ids?: boolean | undefined
       minimum_release_age?: string | undefined
       repo_slug?: string | undefined
       vulnerability_ids: string

@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **76** public methods.
+There are **79** public methods.
 
 ## Contents
 
@@ -233,6 +233,7 @@ async createOrgDiffScanFromIds(
     description?: string | undefined
     external_href?: string | undefined
     merge?: boolean | undefined
+    on_duplicate?: string | undefined
   },
 ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>>
 ```
@@ -589,6 +590,51 @@ async getOrgAlertFullScans(
 
 **Quota:** _not tracked_ · **OpenAPI:** `alertFullScans`
 
+### `getOrgAlertResolutions`
+
+List active alert resolutions for an organization. Results are
+
+```typescript
+async getOrgAlertResolutions(
+  orgSlug: string,
+  options?:
+    | {
+        direction?: string | undefined
+        per_page?: number | undefined
+        startAfterCursor?: string | undefined
+      }
+    | undefined,
+): Promise<SocketSdkResult<'getOrgAlertResolutions'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgAlertResolutions` · **Permissions:** `alert-resolution:list`
+
+### `getOrgAlertResolution`
+
+Fetch a single active alert resolution by UUID. Returns the same row
+
+```typescript
+async getOrgAlertResolution(
+  orgSlug: string,
+  uuid: string,
+): Promise<SocketSdkResult<'getOrgAlertResolution'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgAlertResolution` · **Permissions:** `alert-resolution:read`
+
+### `deleteOrgAlertResolution`
+
+Delete an alert resolution by UUID. Once deleted, alerts previously
+
+```typescript
+async deleteOrgAlertResolution(
+  orgSlug: string,
+  uuid: string,
+): Promise<SocketSdkResult<'deleteOrgAlertResolution'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `deleteOrgAlertResolution` · **Permissions:** `alert-resolution:delete`
+
 ### `getOrgTriage`
 
 Get organization triage settings and status. Returns alert triage
@@ -627,6 +673,7 @@ async getOrgFixes(
     full_scan_id?: string | undefined
     include_details?: boolean | undefined
     include_responsible_direct_dependencies?: boolean | undefined
+    include_stateful_alert_ids?: boolean | undefined
     minimum_release_age?: string | undefined
     repo_slug?: string | undefined
     vulnerability_ids: string

@@ -252,6 +252,18 @@
       "quota": 10,
       "permissions": ["alerts:list"]
     },
+    "getOrgAlertResolution": {
+      "quota": 1,
+      "permissions": ["alert-resolution:read"]
+    },
+    "getOrgAlertResolutions": {
+      "quota": 1,
+      "permissions": ["alert-resolution:list"]
+    },
+    "deleteOrgAlertResolution": {
+      "quota": 1,
+      "permissions": ["alert-resolution:delete"]
+    },
     "rescanFullScan": {
       "quota": 0,
       "permissions": ["full-scans:create"]

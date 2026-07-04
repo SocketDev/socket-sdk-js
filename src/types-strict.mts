@@ -50,7 +50,7 @@ export type FullScanItem = {
   integration_branch_url?: string | null | undefined
   integration_commit_url?: string | null | undefined
   integration_pull_request_url?: string | null | undefined
-  integration_repo_url: string
+  integration_repo_url: string | null
   integration_type: string | null
   organization_id: string
   organization_slug: string
@@ -103,11 +103,11 @@ export type ListFullScansOptions = {
  * Options for list repositories.
  */
 export type ListRepositoriesOptions = {
-  direction?: string | undefined
+  direction?: 'asc' | 'desc' | undefined
   include_archived?: boolean | undefined
   page?: number | undefined
   per_page?: number | undefined
-  sort?: string | undefined
+  sort?: 'name' | 'updated_at' | 'created_at' | undefined
   workspace?: string | undefined
 }
 
@@ -150,8 +150,8 @@ export type RepositoryItem = {
     value?:
       | {
           /**
-           * The GitHub installation_id of the active associated Socket GitHub
-           * App.
+           * The GitHub installation_id of the active associated Socket
+           * GitHub App.
            *
            * @default
            */
@@ -226,8 +226,8 @@ export type RepositoryListItem = {
         value?:
           | {
               /**
-               * The GitHub installation_id of the active associated Socket
-               * GitHub App.
+               * The GitHub installation_id of the active associated
+               * Socket GitHub App.
                *
                * @default
                */
