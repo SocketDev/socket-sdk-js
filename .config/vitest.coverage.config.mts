@@ -49,13 +49,8 @@ export const mainCoverageThresholds = {
   statements: 93,
 }
 
-/**
- * Relaxed coverage thresholds for isolated tests (lower bar for specialized
- * tests).
- */
-export const isolatedCoverageThresholds = {
-  branches: 49,
-  functions: 35,
-  lines: 35,
-  statements: 35,
-}
+// The isolated tier carries no coverage thresholds of its own: its 12-test
+// roster covers a narrow slice of src/ while the coverage denominator is all
+// of src/, so any tier-level global threshold fails whenever unrelated code
+// grows. The enforced gate is the merged main+isolated aggregate in
+// `.config/repo/cover.json`, checked by `scripts/fleet/cover.mts`.

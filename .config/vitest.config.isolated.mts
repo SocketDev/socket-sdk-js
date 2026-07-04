@@ -9,10 +9,7 @@ import { fileURLToPath } from 'node:url'
 
 import { defineConfig } from 'vitest/config'
 
-import {
-  baseCoverageConfig,
-  isolatedCoverageThresholds,
-} from './vitest.coverage.config.mts'
+import { baseCoverageConfig } from './vitest.coverage.config.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -49,11 +46,12 @@ export default defineConfig({
     },
     testTimeout: 10_000,
     hookTimeout: 10_000,
-    // Share coverage settings with main config
+    // Share coverage settings with main config. No tier-level thresholds:
+    // the merged aggregate gate in .config/repo/cover.json is the enforcer
+    // (see vitest.coverage.config.mts).
     coverage: {
       ...baseCoverageConfig,
       reportsDirectory: './coverage-isolated',
-      thresholds: isolatedCoverageThresholds,
     },
   },
 })
