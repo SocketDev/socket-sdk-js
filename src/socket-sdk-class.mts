@@ -145,6 +145,21 @@ import type {
   ManifestLocalEntry,
   UploadBlobsResult,
 } from './full-scans-v1.mts'
+import type {
+  PostEventsData,
+  PostEventsResult,
+  SocketEvent,
+} from './events-v1.mts'
+import type {
+  GetThreatCampaignResult,
+  ListThreatCampaignPackagesOptions,
+  ListThreatCampaignPackagesResult,
+  ListThreatCampaignsOptions,
+  ListThreatCampaignsResult,
+  ThreatCampaign,
+  ThreatCampaignPackagesData,
+  ThreatCampaignsListData,
+} from './threat-campaigns-v1.mts'
 import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
@@ -3961,6 +3976,70 @@ export class SocketSdk {
   }
 
   /**
+   * Get a single threat campaign by ID (v1 API, public route). Same shape as
+   * one item from `listThreatCampaigns`; package PURLs are not inlined —
+   * fetch them via `listThreatCampaignPackages`. Requires an Enterprise plan
+   * with the Threat Feed add-on and the `threat-campaigns:list` token scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param campaignId - Campaign identifier.
+   *
+   * @returns The campaign
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns/{campaign_id} (v1)
+   *
+   * @operationId none
+   */
+  async getThreatCampaign(
+    orgSlug: string,
+    campaignId: string,
+  ): Promise<GetThreatCampaignResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns/${encodeURIComponent(campaignId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaign,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
    * List threat-feed items across all organizations the token can see. Returns
    * recently observed malicious / suspicious packages, paginated and filterable
    * by ecosystem, name, version, and review state.
@@ -4289,6 +4368,139 @@ export class SocketSdk {
   }
 
   /**
+   * List package PURLs affected by a single threat campaign (v1 API, public
+   * route), cursor-paginated. Pass the previous response's `endCursor` back
+   * as `options.cursor` to fetch the next page. Requires an Enterprise plan
+   * with the Threat Feed add-on and the `threat-campaigns:list` token scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param campaignId - Campaign identifier.
+   * @param options - Pagination options (`per_page`, `cursor`).
+   *
+   * @returns `{ items, endCursor }` — opaque PURL strings and the next cursor
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns/{campaign_id}/packages (v1)
+   *
+   * @operationId none
+   */
+  async listThreatCampaignPackages(
+    orgSlug: string,
+    campaignId: string,
+    options?: ListThreatCampaignPackagesOptions | undefined,
+  ): Promise<ListThreatCampaignPackagesResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns/${encodeURIComponent(campaignId)}/packages?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaignPackagesData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List threat campaigns for an organization (v1 API, public route),
+   * paginated and filterable by status, ecosystem, and an incremental sync
+   * parameter (`updated_after`). Package PURLs are not inlined — fetch them
+   * per campaign via `listThreatCampaignPackages`. Requires an Enterprise
+   * plan with the Threat Feed add-on and the `threat-campaigns:list` token
+   * scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Filter and pagination options; `status` defaults to
+   *   `'ongoing'` server-side when omitted.
+   *
+   * @returns `{ items, endCursor }` — campaigns and the next cursor
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns (v1)
+   *
+   * @operationId none
+   */
+  async listThreatCampaigns(
+    orgSlug: string,
+    options?: ListThreatCampaignsOptions | undefined,
+  ): Promise<ListThreatCampaignsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaignsListData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
    * Create a new API token for an organization. Generates API token with
    * specified scopes and metadata.
    *
@@ -4402,6 +4614,77 @@ export class SocketSdk {
       return this.#handleApiSuccess<'postAPITokenUpdate'>(data)
     } catch (e) {
       return await this.#handleApiError<'postAPITokenUpdate'>(e)
+    }
+  }
+
+  /**
+   * Post organization events for telemetry ingestion (v1 API, public route).
+   * Send events directly to Socket; an empty batch is accepted as a no-op.
+   * Requires an organization API token (any scope).
+   *
+   * @param orgSlug - Organization identifier.
+   * @param events - Event payloads to ingest (max 1000 per call).
+   *
+   * @returns Empty object envelope on success
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/events (v1)
+   *
+   * @operationId none
+   */
+  async postEvents(
+    orgSlug: string,
+    events: SocketEvent[],
+  ): Promise<PostEventsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          v1BaseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/events`,
+          events,
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(
+            res,
+            '',
+            `${v1BaseUrl}orgs/${encodeURIComponent(orgSlug)}/events`,
+          )
+        }
+        return res
+      })
+      const data = await getResponseJson(response)
+      return {
+        cause: undefined,
+        data: data as PostEventsData,
+        error: undefined,
+        status: response.status as 200 | 201,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
     }
   }
 

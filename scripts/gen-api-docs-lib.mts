@@ -168,6 +168,21 @@ export const GROUPS: Array<{
     methods: ['getAuditLogEvents'],
   },
   {
+    title: 'Threat campaigns',
+    description:
+      'Browse supply chain attack campaigns and the packages they affect.',
+    methods: [
+      'listThreatCampaigns',
+      'getThreatCampaign',
+      'listThreatCampaignPackages',
+    ],
+  },
+  {
+    title: 'Events',
+    description: 'Ingest organization telemetry events.',
+    methods: ['postEvents'],
+  },
+  {
     title: 'Packages',
     description: 'Per-package and batch package analysis.',
     methods: [

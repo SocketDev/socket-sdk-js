@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **79** public methods.
+There are **83** public methods.
 
 ## Contents
 
@@ -24,6 +24,8 @@ There are **79** public methods.
 - [Policies](#policies)
 - [Telemetry](#telemetry)
 - [Audit log](#audit-log)
+- [Threat campaigns](#threat-campaigns)
+- [Events](#events)
 - [Packages](#packages)
 - [Dependencies & manifests](#dependencies-manifests)
 - [Exports](#exports)
@@ -1010,6 +1012,67 @@ async getAuditLogEvents(
 ```
 
 **Quota:** `10` (Standard) · **OpenAPI:** `getAuditLogEvents` · **Permissions:** `audit-log:list`
+
+## Threat campaigns
+
+Browse supply chain attack campaigns and the packages they affect.
+
+### `listThreatCampaigns`
+
+List threat campaigns for an organization (v1 API, public route),
+
+```typescript
+async listThreatCampaigns(
+  orgSlug: string,
+  options?: ListThreatCampaignsOptions | undefined,
+): Promise<ListThreatCampaignsResult | StrictErrorResult>
+```
+
+**Quota:** _not tracked_
+
+### `getThreatCampaign`
+
+Get a single threat campaign by ID (v1 API, public route). Same shape as
+
+```typescript
+async getThreatCampaign(
+  orgSlug: string,
+  campaignId: string,
+): Promise<GetThreatCampaignResult | StrictErrorResult>
+```
+
+**Quota:** _not tracked_
+
+### `listThreatCampaignPackages`
+
+List package PURLs affected by a single threat campaign (v1 API, public
+
+```typescript
+async listThreatCampaignPackages(
+  orgSlug: string,
+  campaignId: string,
+  options?: ListThreatCampaignPackagesOptions | undefined,
+): Promise<ListThreatCampaignPackagesResult | StrictErrorResult>
+```
+
+**Quota:** _not tracked_
+
+## Events
+
+Ingest organization telemetry events.
+
+### `postEvents`
+
+Post organization events for telemetry ingestion (v1 API, public route).
+
+```typescript
+async postEvents(
+  orgSlug: string,
+  events: SocketEvent[],
+): Promise<PostEventsResult | StrictErrorResult>
+```
+
+**Quota:** _not tracked_
 
 ## Packages
 

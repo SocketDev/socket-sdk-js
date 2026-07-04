@@ -39,6 +39,24 @@ export type {
   SkippedManifestPath,
   UploadBlobsResult,
 } from './full-scans-v1.mts'
+// Re-export types for the v1 events endpoint.
+export type {
+  PostEventsData,
+  PostEventsResult,
+  SocketEvent,
+} from './events-v1.mts'
+// Re-export types for the v1 threat-campaigns endpoints.
+export type {
+  GetThreatCampaignResult,
+  ListThreatCampaignPackagesOptions,
+  ListThreatCampaignPackagesResult,
+  ListThreatCampaignsOptions,
+  ListThreatCampaignsResult,
+  ThreatCampaign,
+  ThreatCampaignPackagesData,
+  ThreatCampaignsListData,
+  ThreatCampaignStatus,
+} from './threat-campaigns-v1.mts'
 // Re-export HTTP client classes.
 export { ResponseError } from './http-client.mts'
 // Re-export quota utility functions.
