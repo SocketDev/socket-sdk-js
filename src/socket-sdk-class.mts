@@ -13,6 +13,7 @@ import { getAbortSignal } from '@socketsecurity/lib/process/abort'
 import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
 import { isDebugNs } from '@socketsecurity/lib/debug/namespace'
 import { debugLog } from '@socketsecurity/lib/debug/output'
+import { errorMessage as getErrorMessage } from '@socketsecurity/lib/errors/message'
 import { validateFiles } from '@socketsecurity/lib/fs/validate'
 import { parseJson } from '@socketsecurity/lib/json/parse'
 import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
@@ -50,9 +51,11 @@ import {
   SOCKET_PUBLIC_BLOB_STORE_URL,
 } from './constants.mts'
 import {
+  createRequestBodyForBlobs,
   createRequestBodyForFilepaths,
   createUploadRequest,
 } from './file-upload.mts'
+import { deriveApiV1BaseUrl, hashFile } from './full-scans-v1.mts'
 import {
   createDeleteRequest,
   createGetRequest,
@@ -127,6 +130,16 @@ import type {
   RepositoryResult,
   StrictErrorResult,
 } from './types-strict.mts'
+import type {
+  BlobsUploadData,
+  BlobUploadEntry,
+  CreateFullScanFromManifestParams,
+  CreateFullScanFromManifestResult,
+  FullScanManifest,
+  FullScanV1CreatedData,
+  FullScanV1PendingData,
+  UploadBlobsResult,
+} from './full-scans-v1.mts'
 import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
@@ -734,6 +747,26 @@ export class SocketSdk {
     }
 
     return undefined
+  }
+
+  /**
+   * Resolve the v1 API base URL for the v1 content-addressed full-scan and
+   * blob endpoints. Throws when this SDK instance's configured base URL has
+   * no known v1 counterpart.
+   */
+  #requireApiV1BaseUrl(): string {
+    const v1BaseUrl = deriveApiV1BaseUrl(this.#baseUrl)
+    if (v1BaseUrl === undefined) {
+      throw new ErrorCtor(
+        [
+          'v1 endpoint requires a v1 base URL derived from this SDK instance.',
+          `→ Where: baseUrl is "${this.#baseUrl}"`,
+          `→ Saw: "${this.#baseUrl}"; wanted a base URL ending in "/v0/" (v1 is derived by swapping the trailing "v0/" for "v1/")`,
+          '→ Fix: construct the SDK with the default "https://api.socket.dev/v0/" base, or a custom base whose version segment is "v0"',
+        ].join('\n'),
+      )
+    }
+    return v1BaseUrl
   }
 
   /**
@@ -1505,6 +1538,90 @@ export class SocketSdk {
       }
     } catch (e) {
       const errorResult = await this.#handleApiError<'CreateOrgFullScan'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Create a full scan from a pre-built content-addressed manifest (v1 API,
+   * internal preview — hidden from the public OpenAPI spec). A 201 means the
+   * scan was created outright; a 202 means one or more manifest entries are
+   * unknown to the org's blob store — upload the blobs named in
+   * `data.missing` via `uploadBlobs`, then re-post the same manifest.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param manifest - Content-addressed manifest (see `assembleManifest`).
+   * @param params - Scan metadata; only defined keys are sent.
+   *
+   * @returns 201 full-scan details, or 202 with the blob-presence breakdown
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans (v1)
+   *
+   * @operationId none
+   */
+  async createFullScanFromManifest(
+    orgSlug: string,
+    manifest: FullScanManifest,
+    params: CreateFullScanFromManifestParams,
+  ): Promise<CreateFullScanFromManifestResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          v1BaseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans`,
+          { manifest, ...params },
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(
+            res,
+            '',
+            `${v1BaseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans`,
+          )
+        }
+        return res
+      })
+      const data = await getResponseJson(response)
+      if (response.status === 202) {
+        return {
+          cause: undefined,
+          data: data as FullScanV1PendingData,
+          error: undefined,
+          status: 202,
+          success: true,
+        }
+      }
+      return {
+        cause: undefined,
+        data: data as FullScanV1CreatedData,
+        error: undefined,
+        status: 201,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
       return {
         cause: errorResult.cause,
         data: undefined,
@@ -4652,6 +4769,88 @@ export class SocketSdk {
       }
     } catch (e) {
       const errorResult = await this.#handleApiError<'updateOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Upload blobs to an organization's content-addressed blob store (v1 API,
+   * internal preview — hidden from the public OpenAPI spec). Each entry's
+   * hash is computed from `localPath` when omitted; `name` is diagnostics-
+   * only metadata (defaults to the file's basename). Idempotent: re-uploading
+   * an already-stored digest reports it under `already_existed`.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param entries - Files to upload; see `BlobUploadEntry`.
+   *
+   * @returns Digests grouped into `stored` (newly written) and
+   *   `already_existed`
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/blobs (v1)
+   *
+   * @operationId none
+   */
+  async uploadBlobs(
+    orgSlug: string,
+    entries: BlobUploadEntry[],
+  ): Promise<UploadBlobsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    const resolvedEntries: Array<{
+      absPath: string
+      hash: string
+      name: string
+    }> = []
+    for (let i = 0, { length } = entries; i < length; i += 1) {
+      const entry = entries[i]!
+      const hash = entry.hash ?? (await hashFile(entry.localPath)).hash
+      resolvedEntries.push({
+        absPath: entry.localPath,
+        hash,
+        name: entry.name ?? path.basename(entry.localPath),
+      })
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/blobs`,
+              createRequestBodyForBlobs(resolvedEntries),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as BlobsUploadData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
       return {
         cause: errorResult.cause,
         data: undefined,

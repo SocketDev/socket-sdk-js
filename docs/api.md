@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **74** public methods.
+There are **76** public methods.
 
 ## Contents
 
@@ -49,6 +49,20 @@ async createFullScan(
 
 **Quota:** `0` (Free) · **OpenAPI:** `CreateOrgFullScan` · **Permissions:** `full-scans:create`
 
+### `createFullScanFromManifest`
+
+Create a full scan from a pre-built content-addressed manifest (v1 API,
+
+```typescript
+async createFullScanFromManifest(
+  orgSlug: string,
+  manifest: FullScanManifest,
+  params: CreateFullScanFromManifestParams,
+): Promise<CreateFullScanFromManifestResult | StrictErrorResult>
+```
+
+**Quota:** _not tracked_
+
 ### `createOrgFullScanFromArchive`
 
 Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
@@ -83,6 +97,19 @@ async createOrgFullScanFromArchive(
 ```
 
 **Quota:** _not tracked_ · **OpenAPI:** `CreateOrgFullScanArchive`
+
+### `uploadBlobs`
+
+Upload blobs to an organization's content-addressed blob store (v1 API,
+
+```typescript
+async uploadBlobs(
+  orgSlug: string,
+  entries: BlobUploadEntry[],
+): Promise<UploadBlobsResult | StrictErrorResult>
+```
+
+**Quota:** _not tracked_
 
 ### `getFullScan`
 

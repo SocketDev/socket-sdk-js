@@ -16,6 +16,21 @@ import type { HttpResponse } from '@socketsecurity/lib/http-request/response-typ
 import type { ReadStream } from 'node:fs'
 import type { Readable } from 'node:stream'
 
+export function createRequestBodyForBlobs(
+  entries: Array<{ absPath: string; hash: string; name: string }>,
+): FormData {
+  const form = new FormData()
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]!
+    const stream = openFileReadStreamOrThrow(entry.absPath)
+    form.append(`sha256:${entry.hash}`, stream, {
+      contentType: 'application/octet-stream',
+      filename: entry.name,
+    })
+  }
+  return form
+}
+
 export function createRequestBodyForFilepaths(
   filepaths: string[],
   basePath: string,
@@ -25,26 +40,7 @@ export function createRequestBodyForFilepaths(
     const absPath = filepaths[i]!
     const relPath = normalizePath(path.relative(basePath, absPath))
     const filename = path.basename(absPath)
-    let stream: ReadStream
-    try {
-      stream = createReadStream(absPath, { highWaterMark: 1024 * 1024 })
-      /* c8 ignore next 13 - createReadStream throws synchronously only for type validation errors; file system errors (ENOENT, EISDIR) are emitted asynchronously */
-    } catch (e) {
-      let message = `Failed to read file: ${absPath}`
-      if (isErrnoException(e)) {
-        if (e.code === 'ENOENT') {
-          message +=
-            '\n→ File does not exist. Check the file path and try again.'
-        } else if (e.code === 'EACCES') {
-          message += `\n→ Permission denied. Run: chmod +r "${absPath}"`
-        } else if (e.code === 'EISDIR') {
-          message += '\n→ Expected a file but found a directory.'
-        } else if (e.code) {
-          message += `\n→ Error code: ${e.code}`
-        }
-      }
-      throw new Error(message, { cause: e })
-    }
+    const stream = openFileReadStreamOrThrow(absPath)
     form.append(relPath, stream, {
       contentType: 'application/octet-stream',
       filename,
@@ -112,5 +108,33 @@ export async function createUploadRequest(
       })
     }
     throw e
+  }
+}
+
+/**
+ * Open a read stream for `absPath`, translating a synchronous open failure
+ * into an actionable error message. Shared by both multipart body builders so
+ * the error-message shape (and the coverage-ignore justification) lives in
+ * one place.
+ */
+export function openFileReadStreamOrThrow(absPath: string): ReadStream {
+  try {
+    return createReadStream(absPath, { highWaterMark: 1024 * 1024 })
+  } catch (e) {
+    /* c8 ignore start - createReadStream throws synchronously only for type validation errors; file system errors (ENOENT, EISDIR) are emitted asynchronously */
+    let message = `Failed to read file: ${absPath}`
+    if (isErrnoException(e)) {
+      if (e.code === 'ENOENT') {
+        message += '\n→ File does not exist. Check the file path and try again.'
+      } else if (e.code === 'EACCES') {
+        message += `\n→ Permission denied. Run: chmod +r "${absPath}"`
+      } else if (e.code === 'EISDIR') {
+        message += '\n→ Expected a file but found a directory.'
+      } else if (e.code) {
+        message += `\n→ Error code: ${e.code}`
+      }
+    }
+    throw new Error(message, { cause: e })
+    /* c8 ignore stop */
   }
 }

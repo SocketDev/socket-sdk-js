@@ -44,7 +44,9 @@ export const GROUPS: Array<{
       'Create, fetch, list, and delete organization-level full security scans.',
     methods: [
       'createFullScan',
+      'createFullScanFromManifest',
       'createOrgFullScanFromArchive',
+      'uploadBlobs',
       'getFullScan',
       'getFullScanMetadata',
       'listFullScans',

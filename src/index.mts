@@ -17,6 +17,28 @@ export type {
   FetchBlobOptions,
   RawFetchResult,
 } from './blob.mts'
+// Re-export the v1 content-addressed full-scan and blob-upload primitives.
+export {
+  assembleManifest,
+  deriveApiV1BaseUrl,
+  hashFile,
+} from './full-scans-v1.mts'
+export type {
+  AssembledManifest,
+  BlobRef,
+  BlobUploadEntry,
+  BlobsUploadData,
+  CreateFullScanFromManifestParams,
+  CreateFullScanFromManifestResult,
+  FileHashResult,
+  FullScanManifest,
+  FullScanManifestEntry,
+  FullScanV1CreatedData,
+  FullScanV1PendingData,
+  ManifestLocalEntry,
+  SkippedManifestPath,
+  UploadBlobsResult,
+} from './full-scans-v1.mts'
 // Re-export HTTP client classes.
 export { ResponseError } from './http-client.mts'
 // Re-export quota utility functions.

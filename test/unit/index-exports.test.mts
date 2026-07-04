@@ -57,6 +57,11 @@ describe('index.ts exports', () => {
       'fetchChunkedBytes',
       'fetchRawBytes',
       'tryDecodeText',
+
+      // v1 full-scan and blob-upload primitives
+      'assembleManifest',
+      'deriveApiV1BaseUrl',
+      'hashFile',
     ]
 
     for (let i = 0, { length } = expectedExports; i < length; i += 1) {
@@ -68,8 +73,10 @@ describe('index.ts exports', () => {
   it('should not export unexpected functions', () => {
     const sdkKeys = Object.keys(sdk)
     const expectedKeys = new Set([
+      'assembleManifest',
       'calculateTotalQuotaCost',
       'createUserAgentFromPkgJson',
+      'deriveApiV1BaseUrl',
       'fetchBlob',
       'fetchChunkedBytes',
       'fetchRawBytes',
@@ -80,6 +87,7 @@ describe('index.ts exports', () => {
       'getQuotaCost',
       'getQuotaUsageSummary',
       'getRequiredPermissions',
+      'hashFile',
       'hasQuotaForMethods',
       'ResponseError',
       'SocketSdk',
