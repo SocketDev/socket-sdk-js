@@ -1684,12 +1684,44 @@ export class SocketSdk {
 
         if (result.status === 201) {
           const created = result.data
+          // Mirror the exact key set the deployed v0 create endpoint's
+          // schema serializer emits (additionalProperties: false): fields
+          // known from the v1 body, fields synthesized from this call's own
+          // arguments, and schema defaults (null for nullable, '' for
+          // non-nullable string) for everything else. See openapi.json's
+          // `CreateOrgFullScan` 201 schema for the full 25-key set.
+          // oxlint-disable-next-line socket/prefer-undefined-over-null -- external API requirement: mirrors the v0 wire contract's literal JSON `null` schema default for an unset nullable field, not an internal unset sentinel.
+          const WIRE_NULL: null = null
+          const v0Shaped = {
+            api_url: WIRE_NULL,
+            branch: created.branch,
+            commit_hash: created.commit_hash,
+            commit_message: created.commit_message,
+            committers: created.committers,
+            created_at: created.created_at,
+            html_report_url: created.html_report_url,
+            html_url: WIRE_NULL,
+            id: created.id,
+            integration_branch_url: WIRE_NULL,
+            integration_commit_url: WIRE_NULL,
+            integration_pull_request_url: WIRE_NULL,
+            integration_repo_url: WIRE_NULL,
+            integration_type: WIRE_NULL,
+            organization_id: created.organization_id,
+            organization_slug: orgSlug,
+            pull_request: created.pull_request,
+            repo,
+            repository_id: created.repository_id,
+            repository_slug: repo,
+            scan_state: WIRE_NULL,
+            scan_type: created.scan_type,
+            unmatchedFiles: created.unsupported_files.map(f => f.path),
+            updated_at: created.updated_at,
+            workspace: workspace ?? '',
+          }
           return {
             cause: undefined,
-            data: {
-              ...created,
-              unmatchedFiles: created.unsupported_files.map(f => f.path),
-            } as unknown as FullScanItem,
+            data: v0Shaped,
             error: undefined,
             status: 200,
             success: true,
