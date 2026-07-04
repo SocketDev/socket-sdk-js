@@ -224,7 +224,7 @@ export async function generateTypes(): Promise<void> {
     'exec',
     'oxfmt',
     '-c',
-    '.config/oxfmtrc.json',
+    '.config/fleet/oxfmtrc.json',
     'types/api.d.ts',
   ])
   if (exitCode !== 0) {
