@@ -1625,11 +1625,17 @@ export class SocketSdk {
       const branch = queryParams['branch'] as string | undefined
       const commitHash = queryParams['commit_hash'] as string | undefined
       const commitMessage = queryParams['commit_message'] as string | undefined
-      const committers = queryParams['committers'] as string | undefined
+      const committersRaw = queryParams['committers'] as
+        | string
+        | string[]
+        | undefined
       const makeDefaultBranch = queryParams['make_default_branch'] as
         | boolean
         | undefined
-      const pullRequest = queryParams['pull_request'] as number | undefined
+      const pullRequestRaw = queryParams['pull_request'] as
+        | number
+        | string
+        | undefined
       const repo = queryParams['repo'] as string
       const scanType = queryParams['scan_type'] as string | undefined
       const setAsPendingHead = queryParams['set_as_pending_head'] as
@@ -1638,13 +1644,43 @@ export class SocketSdk {
       const tmp = queryParams['tmp'] as boolean | undefined
       const workspace = queryParams['workspace'] as string | undefined
 
+      // `committers` is documented as a single string, but callers casting
+      // options `as any` (e.g. socket-cli) may pass an array through — accept
+      // either shape and drop non-string/empty entries.
+      const committers =
+        committersRaw === undefined
+          ? undefined
+          : (Array.isArray(committersRaw)
+              ? committersRaw
+              : [committersRaw]
+            ).filter(
+              (entry): entry is string =>
+                typeof entry === 'string' && entry.length > 0,
+            )
+
+      // `pull_request` may arrive as a number, a numeric string (socket-cli
+      // sends `String(pullRequest)`), or `0` (the no-PR sentinel). The v1
+      // schema requires a minimum of 1, so only forward a safe integer ≥ 1 —
+      // anything else (including 0) is omitted rather than shipping a request
+      // that's guaranteed to 400 and pay the v0 fallback tax.
+      const pullRequestNum =
+        typeof pullRequestRaw === 'string'
+          ? Number(pullRequestRaw)
+          : pullRequestRaw
+      const pullRequest =
+        pullRequestNum !== undefined &&
+        Number.isSafeInteger(pullRequestNum) &&
+        pullRequestNum >= 1
+          ? pullRequestNum
+          : undefined
+
       const params: CreateFullScanFromManifestParams = {
         ...(branch !== undefined ? { branch } : {}),
         ...(commitHash !== undefined ? { commit_hash: commitHash } : {}),
         ...(commitMessage !== undefined
           ? { commit_message: commitMessage }
           : {}),
-        ...(committers !== undefined ? { committers: [committers] } : {}),
+        ...(committers !== undefined ? { committers } : {}),
         ...(tmp !== undefined ? { ephemeral: tmp } : {}),
         ...(makeDefaultBranch !== undefined
           ? { make_default_branch: makeDefaultBranch }
