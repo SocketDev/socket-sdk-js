@@ -55,7 +55,11 @@ import {
   createRequestBodyForFilepaths,
   createUploadRequest,
 } from './file-upload.mts'
-import { deriveApiV1BaseUrl, hashFile } from './full-scans-v1.mts'
+import {
+  assembleManifest,
+  deriveApiV1BaseUrl,
+  hashFile,
+} from './full-scans-v1.mts'
 import {
   createDeleteRequest,
   createGetRequest,
@@ -138,6 +142,7 @@ import type {
   FullScanManifest,
   FullScanV1CreatedData,
   FullScanV1PendingData,
+  ManifestLocalEntry,
   UploadBlobsResult,
 } from './full-scans-v1.mts'
 import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
@@ -162,6 +167,7 @@ export class SocketSdk {
   readonly #reqOptionsWithHooks: RequestOptionsWithHooks
   readonly #retries: number
   readonly #retryDelay: number
+  #v1FullScansUnavailable = false
 
   /**
    * Initialize Socket SDK with API token and configuration options. Sets up
@@ -1516,6 +1522,19 @@ export class SocketSdk {
       } as StrictErrorResult
     }
 
+    // Try the v1 content-addressed manifest flow first; every failure mode
+    // (unavailable route, unrepresentable path, retry exhaustion) falls back
+    // to the v0 multipart upload below rather than surfacing to the caller.
+    const v1Result = await this.#tryCreateFullScanViaManifest(
+      orgSlug,
+      validPaths,
+      basePath,
+      queryParams as QueryParams,
+    )
+    if (v1Result) {
+      return v1Result
+    }
+
     // Continue with validated files.
     try {
       const data = await this.#executeWithRetry(
@@ -1545,6 +1564,183 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
+    }
+  }
+
+  /**
+   * Attempt `createFullScan` via the v1 content-addressed manifest flow.
+   * Returns the v0-shaped success envelope on a 201, or undefined when the
+   * caller should fall back to the v0 multipart upload — an unavailable v1
+   * route, a path the manifest can't represent, a genuine request error, or
+   * retry exhaustion all fall back rather than surfacing to the caller, so
+   * `createFullScan`'s caller-visible behavior never regresses.
+   */
+  async #tryCreateFullScanViaManifest(
+    orgSlug: string,
+    validPaths: string[],
+    basePath: string,
+    queryParams: QueryParams,
+  ): Promise<FullScanResult | undefined> {
+    if (this.#v1FullScansUnavailable) {
+      return undefined
+    }
+    const v1BaseUrl = deriveApiV1BaseUrl(this.#baseUrl)
+    if (v1BaseUrl === undefined) {
+      return undefined
+    }
+    // The v1 body schema is `additionalProperties: false` — integration-linked
+    // scans have no v1 equivalent yet, so they stay on v0.
+    if (
+      queryParams['integration_type'] !== undefined ||
+      queryParams['integration_org_slug'] !== undefined
+    ) {
+      return undefined
+    }
+
+    try {
+      const assembled = await assembleManifest(basePath, validPaths)
+      if (assembled.skipped.length > 0 || assembled.entries.length === 0) {
+        debugLog(
+          'createFullScan:v1',
+          `manifest cannot represent every path (${assembled.skipped.length} skipped) — falling back to v0`,
+        )
+        return undefined
+      }
+
+      const branch = queryParams['branch'] as string | undefined
+      const commitHash = queryParams['commit_hash'] as string | undefined
+      const commitMessage = queryParams['commit_message'] as string | undefined
+      const committers = queryParams['committers'] as string | undefined
+      const makeDefaultBranch = queryParams['make_default_branch'] as
+        | boolean
+        | undefined
+      const pullRequest = queryParams['pull_request'] as number | undefined
+      const repo = queryParams['repo'] as string
+      const scanType = queryParams['scan_type'] as string | undefined
+      const setAsPendingHead = queryParams['set_as_pending_head'] as
+        | boolean
+        | undefined
+      const tmp = queryParams['tmp'] as boolean | undefined
+      const workspace = queryParams['workspace'] as string | undefined
+
+      const params: CreateFullScanFromManifestParams = {
+        ...(branch !== undefined ? { branch } : {}),
+        ...(commitHash !== undefined ? { commit_hash: commitHash } : {}),
+        ...(commitMessage !== undefined
+          ? { commit_message: commitMessage }
+          : {}),
+        ...(committers !== undefined ? { committers: [committers] } : {}),
+        ...(tmp !== undefined ? { ephemeral: tmp } : {}),
+        ...(makeDefaultBranch !== undefined
+          ? { make_default_branch: makeDefaultBranch }
+          : {}),
+        ...(pullRequest !== undefined ? { pull_request: pullRequest } : {}),
+        repo,
+        ...(scanType !== undefined ? { scan_type: scanType } : {}),
+        ...(setAsPendingHead !== undefined
+          ? { set_as_pending_head: setAsPendingHead }
+          : {}),
+        ...(workspace !== undefined ? { workspace } : {}),
+      }
+
+      let previousMissingHashes: Set<string> | undefined
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const result = await this.createFullScanFromManifest(
+          orgSlug,
+          assembled.manifest,
+          params,
+        )
+
+        if (!result.success) {
+          if (result.status === 404) {
+            this.#v1FullScansUnavailable = true
+            debugLog(
+              'createFullScan:v1',
+              `v1 full-scans route is unavailable (404) — memoizing and falling back to v0: ${result.error}`,
+            )
+          } else {
+            debugLog(
+              'createFullScan:v1',
+              `v1 full-scans create failed (status ${result.status}) — falling back to v0: ${result.error}`,
+            )
+          }
+          return undefined
+        }
+
+        if (result.status === 201) {
+          const created = result.data
+          return {
+            cause: undefined,
+            data: {
+              ...created,
+              unmatchedFiles: created.unsupported_files.map(f => f.path),
+            } as unknown as FullScanItem,
+            error: undefined,
+            status: 200,
+            success: true,
+          }
+        }
+
+        const { missing } = result.data
+        const missingHashes = new Set(missing.map(m => m.hash))
+        const previous = previousMissingHashes
+        if (
+          previous !== undefined &&
+          missingHashes.size === previous.size &&
+          Array.from(missingHashes).every(hash => previous.has(hash))
+        ) {
+          debugLog(
+            'createFullScan:v1',
+            'no progress across manifest retries (same blobs still missing) — falling back to v0',
+          )
+          return undefined
+        }
+        previousMissingHashes = missingHashes
+
+        const missingEntries: ManifestLocalEntry[] = []
+        for (let i = 0, { length } = missing; i < length; i += 1) {
+          const missingBlob = missing[i]!
+          const entry = assembled.entries.find(
+            candidate => candidate.relPath === missingBlob.path,
+          )
+          if (!entry) {
+            debugLog(
+              'createFullScan:v1',
+              `server reported a missing blob with no local match ("${missingBlob.path}") — falling back to v0`,
+            )
+            return undefined
+          }
+          missingEntries.push(entry)
+        }
+
+        const uploadResult = await this.uploadBlobs(
+          orgSlug,
+          missingEntries.map(entry => ({
+            hash: entry.hash,
+            localPath: entry.absPath,
+            name: entry.relPath,
+          })),
+        )
+        if (!uploadResult.success) {
+          debugLog(
+            'createFullScan:v1',
+            `blob upload failed (status ${uploadResult.status}) — falling back to v0: ${uploadResult.error}`,
+          )
+          return undefined
+        }
+      }
+
+      debugLog(
+        'createFullScan:v1',
+        'exhausted manifest retry attempts without a 201 — falling back to v0',
+      )
+      return undefined
+    } catch (e) {
+      debugLog(
+        'createFullScan:v1',
+        `unexpected error in the v1 manifest flow — falling back to v0: ${getErrorMessage(e)}`,
+      )
+      return undefined
     }
   }
 
