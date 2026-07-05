@@ -11,13 +11,11 @@ import path from 'node:path'
 import { isAbsolute, normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 export type FileHashResult = {
-  // oxlint-disable-next-line socket/no-bare-crypto-named-usage -- TS type-literal property key, not a value-level reference to node:crypto's `hash` export.
   hash: string
   size: number
 }
 
 export type FullScanManifestEntry = {
-  // oxlint-disable-next-line socket/no-bare-crypto-named-usage -- TS type-literal property key; also the literal wire-contract JSON field name.
   hash: string
   size: number
 }
@@ -28,7 +26,6 @@ export type FullScanManifest = {
 }
 
 export type BlobRef = {
-  // oxlint-disable-next-line socket/no-bare-crypto-named-usage -- TS type-literal property key; also the literal wire-contract JSON field name.
   hash: string
   path: string
   size: number
@@ -101,7 +98,6 @@ export type UploadBlobsResult = {
 }
 
 export type BlobUploadEntry = {
-  // oxlint-disable-next-line socket/no-bare-crypto-named-usage -- TS type-literal property key, not a value-level reference to node:crypto's `hash` export.
   hash?: string | undefined
   localPath: string
   name?: string | undefined
@@ -109,7 +105,6 @@ export type BlobUploadEntry = {
 
 export type ManifestLocalEntry = {
   absPath: string
-  // oxlint-disable-next-line socket/no-bare-crypto-named-usage -- TS type-literal property key, not a value-level reference to node:crypto's `hash` export.
   hash: string
   relPath: string
   size: number
