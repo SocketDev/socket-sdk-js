@@ -38,8 +38,9 @@ const BUNDLER_CONFIG_FILENAME_RE =
   /(?:^|\/)(?:esbuild|rolldown|rollup|vite|webpack)[.-][^/]*config[^/]*\.[cm]?[jt]sx?$/i
 
 // A path inside a `rolldown/` directory — the fleet keeps its rolldown configs
-// under `.config/repo/rolldown/` (the hook-bundle config has no bundler token
-// in its basename, so it relies on this signal).
+// under `.config/repo/rolldown/` (per-repo opt-in bundler configs) and
+// `.config/fleet/rolldown/` (the mandatory hook-bundle config); neither has a
+// bundler token in its basename, so this signal covers both tiers.
 const ROLLDOWN_DIR_RE = /\/rolldown\//
 
 function isBundlerImportSource(source: string): boolean {

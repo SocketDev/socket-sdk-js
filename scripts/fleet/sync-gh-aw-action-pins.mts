@@ -4,8 +4,8 @@
  *   compile` to re-resolve the latest SHA for every pinned action version +
  *   refresh container image digests, updating the sibling `.lock.yml` and the
  *   shared `.github/aw/actions-lock.json` in one pass. Mirrors the evergreen
- *   pattern of `sync-registry-workflow-pins.mts` (reusable workflow SHAs) and
- *   `action-pins-are-current.mts --fix` (internal action pins). Usage: node
+ *   pattern of `action-pins-are-current.mts --fix` (internal action pins).
+ *   Usage: node
  *   scripts/fleet/sync-gh-aw-action-pins.mts # recompile all .md workflows node
  *   scripts/fleet/sync-gh-aw-action-pins.mts --quiet # suppress the clean-state
  *   line Fails loud (exit 1) when:

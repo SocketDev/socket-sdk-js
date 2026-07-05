@@ -3,7 +3,7 @@
  * @file Build the fleet hook dispatch bundle. Regenerates the STATIC dispatch
  *   table (`make-hook-dispatch.mts`) so the bundle reflects the current
  *   bundle-safe hook set, then runs rolldown with
- *   `.config/repo/rolldown/hook-bundle.config.mts` to emit the minified CJS
+ *   `.config/fleet/rolldown/hook-bundle.config.mts` to emit the minified CJS
  *   `_dispatch/bundle.cjs`.
  *   The hand-written `_dispatch/index.cjs` loader (NOT bundled) turns on the V8
  *   compile cache, then `require()`s the bundle. Output is CJS so the compile
@@ -34,7 +34,7 @@ const logger = getDefaultLogger()
 export const ROLLDOWN_CONFIG = path.join(
   REPO_ROOT,
   '.config',
-  'repo',
+  'fleet',
   'rolldown',
   'hook-bundle.config.mts',
 )

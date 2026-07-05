@@ -16,8 +16,6 @@
  *   drift (actionable), exit 1 = schema error (stop), exit 0 = clean.
  * - submodules — `.gitmodules` entries that are un-pinned or behind their
  *   recorded gitlink (a superproject SHA newer than the checked-out one).
- * - registry SHA pins — `sync-registry-workflow-pins.mts` (report mode, no
- *   --fix) reports drift via exit 1; surfaced as the `updating-workflows` work.
  * - coverage — whether the repo declares a coverage script at all.
  * - pricing — whether the model-pricing snapshot is stale per the same marker
  *   the `pricing-data-is-current` check reads.
@@ -51,7 +49,6 @@ export type DiscoveryCategory =
   | 'coverage'
   | 'lockstep'
   | 'pricing'
-  | 'registry-pins'
   | 'submodules'
 
 export interface DiscoveryItem {
@@ -212,38 +209,6 @@ export async function probePricing(cwd: string): Promise<DiscoveryItem> {
   })
 }
 
-export async function probeRegistryPins(cwd: string): Promise<DiscoveryItem> {
-  const script = path.join(
-    cwd,
-    'scripts',
-    'fleet',
-    'sync-registry-workflow-pins.mts',
-  )
-  if (!existsSync(script)) {
-    return makeItem({ applies: false })
-  }
-  try {
-    await spawn('node', [script, '--quiet'], { cwd, stdioString: true })
-    // Exit 0 — pins current.
-    return makeItem({ applies: true })
-  } catch (e) {
-    if (isSpawnError(e) && typeof e.code === 'number' && e.code === 1) {
-      return makeItem({
-        actionable: true,
-        applies: true,
-        items: [
-          'registry workflow SHA pins are stale — run updating-workflows',
-        ],
-      })
-    }
-    return makeItem({
-      applies: true,
-      blocked: true,
-      items: [errorMessage(e)],
-    })
-  }
-}
-
 export async function probeSubmodules(
   cwd: string,
   base: string,
@@ -295,14 +260,12 @@ export async function probeSubmodules(
 
 export async function discover(cwd: string): Promise<DiscoveryResult> {
   const base = await resolveDefaultBranch({ cwd })
-  const [coverage, lockstep, pricing, registryPins, submodules] =
-    await Promise.all([
-      probeCoverage(cwd),
-      probeLockstep(cwd),
-      probePricing(cwd),
-      probeRegistryPins(cwd),
-      probeSubmodules(cwd, base),
-    ])
+  const [coverage, lockstep, pricing, submodules] = await Promise.all([
+    probeCoverage(cwd),
+    probeLockstep(cwd),
+    probePricing(cwd),
+    probeSubmodules(cwd, base),
+  ])
   return {
     __proto__: null,
     base,
@@ -311,7 +274,6 @@ export async function discover(cwd: string): Promise<DiscoveryResult> {
       coverage,
       lockstep,
       pricing,
-      'registry-pins': registryPins,
       submodules,
     },
     cwd,

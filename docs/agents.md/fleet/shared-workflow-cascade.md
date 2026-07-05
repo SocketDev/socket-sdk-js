@@ -27,15 +27,12 @@ pinned file looks like, not the propagation mechanics:
    point; it pins the Layer-3 reusable to the **propagation SHA** and passes
    inputs + secrets through.
 
-## Propagation SHA + the pin reconciler
+## Propagation SHA
 
 The propagation SHA is the socket-registry merge commit that carries a given
-`.lock.yml`. `scripts/fleet/sync-registry-workflow-pins.mts` reads each repo's
-`_local` pin (via the local checkout, else the public API) and repins delegators
-to it. `pinLineRe` / `parseLocalPin` tolerate an optional `.lock` segment, so
-the reconciler repins both the legacy `<workflow>.yml@<sha>` and the gh-aw
-`<workflow>.lock.yml@<sha>` forms during the migration without caring which a
-member is on.
+`.lock.yml`. Each repo's `_local` delegator pins the Layer-3 reusable to that
+SHA; keeping every delegator in step with it is a drift-watch concern (see
+[`drift-watch.md`](drift-watch.md)).
 
 ## Comment-stamp exemption
 

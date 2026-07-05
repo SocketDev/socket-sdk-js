@@ -97,6 +97,7 @@ template/.claude/hooks/fleet/_shared/acorn/acorn.wasm binary
 .config/fleet/oxlint-plugin/package.json linguist-generated=true
 .config/fleet/oxlint.config.mts linguist-generated=true
 .config/fleet/oxlintrc.json linguist-generated=true
+.config/fleet/rolldown/hook-bundle.config.mts linguist-generated=true
 .config/fleet/sfw-bypass-list.txt linguist-generated=true
 .config/fleet/taze.config.mts linguist-generated=true
 .config/fleet/tsconfig.base.json linguist-generated=true
@@ -104,7 +105,6 @@ template/.claude/hooks/fleet/_shared/acorn/acorn.wasm binary
 .config/fleet/vitest.coverage.fleet.config.mts linguist-generated=true
 .config/lockstep.schema.json linguist-generated=true
 .config/repo/rolldown/define-guarded.mts linguist-generated=true
-.config/repo/rolldown/hook-bundle.config.mts linguist-generated=true
 .config/repo/rolldown/lib-stub.mts linguist-generated=true
 .config/repo/vitest.config.mts linguist-generated=true
 .config/socket-wheelhouse-schema.json linguist-generated=true

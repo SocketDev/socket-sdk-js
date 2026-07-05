@@ -27,8 +27,9 @@
 // LOCAL — so it no-ops in repos without internal action pins (the wheelhouse,
 // pure consumers). NO repo tree paths are hard-coded. The repo whose name
 // appears in the internal-ref `uses:` lines is read from those lines, not
-// assumed. Consumer-side drift (pins to a remote producer's HEAD) is the twin
-// concern of sync-registry-workflow-pins.mts, not this producer-internal gate.
+// assumed. Consumer-side drift (pins to a remote producer's HEAD) is the
+// wheelhouse tool-pin cascade orchestrator's job (`scripts/repo/pipeline.mts`
+// Stage 4 Propagate), not this producer-internal gate.
 //
 // Usage: node scripts/fleet/check/action-pins-are-current.mts [--fix] [--quiet]
 
@@ -334,9 +335,9 @@ export function findUndeclared(units: ReadonlyMap<string, Unit>): string[] {
 
 // Classify every SELF-REPO internal pin whose dep is a local unit. A pin to a
 // different repo is a consumer-side pin to a remote producer (its history is
-// not local) — skipped here; that drift is sync-registry-workflow-pins.mts's
-// concern. A self-repo pin to a local dep is the producer-internal edge this
-// gate owns.
+// not local) — skipped here; that drift is the wheelhouse tool-pin cascade
+// orchestrator's concern (`scripts/repo/pipeline.mts` Stage 4 Propagate). A
+// self-repo pin to a local dep is the producer-internal edge this gate owns.
 export function findStalePins(
   units: ReadonlyMap<string, Unit>,
   base: string,

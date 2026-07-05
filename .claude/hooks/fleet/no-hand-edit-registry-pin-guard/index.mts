@@ -8,8 +8,9 @@
 //   uses: SocketDev/socket-registry/.github/actions/setup-and-install@<40-hex>
 //
 // Those pins are OWNED by the cascade: `cascade-workflows.mts` (in
-// socket-registry) sets them and `sync-registry-workflow-pins.mts` repins them
-// downstream, behind the layered drift-watch order + the green-gate. A
+// socket-registry) sets them upstream and the wheelhouse's tool-pin cascade
+// orchestrator (`scripts/repo/pipeline.mts` Stage 4 Propagate) repins them
+// downstream, behind the layered drift-watch order + its own CI-green gate. A
 // hand-edit skips both — it can land a SHA that the cascade then fights, or one
 // that was never green-gated. The cascade scripts write via fs (not the Edit
 // tool), so ANY Edit/Write that flips one of these pins is, by definition, a
@@ -104,11 +105,11 @@ export function formatBlock(c: PinChange): string {
       `  From : ${c.from}`,
       `  To   : ${c.to}`,
       '',
-      '  These pins are cascade-owned. Repin through the scripts that set them',
-      '  behind the drift-watch order + green-gate — never by hand:',
+      '  These pins are cascade-owned, never hand-edited. socket-registry sets',
+      '  the canonical SHA (cascade-workflows.mts); socket-wheelhouse propagates',
+      '  it here behind the drift-watch order + green-gate:',
       '',
-      '    node scripts/fleet/sync-registry-workflow-pins.mts --fix',
-      '    # (the registry cascade-workflows.mts sets the canonical SHA upstream)',
+      '    node scripts/repo/pipeline.mts …   # (run from socket-wheelhouse; Stage 4 Propagate)',
       '',
       `  Bypass: type "${BYPASS_PHRASE}" to allow this edit.`,
     ].join('\n') + '\n'

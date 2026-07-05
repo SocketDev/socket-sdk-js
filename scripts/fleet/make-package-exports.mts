@@ -342,8 +342,10 @@ export function applyAliases(
 
 // The Node builtin set the engine stubs in the browser field. Sourced from the
 // running Node's `builtinModules` (authoritative + dependency-free) rather than
-// a vendored list. Deprecated `_stream_*` ghosts that aren't importable in
-// modern Node are correctly absent.
+// a vendored list, so it tracks whatever the running Node actually reports —
+// including legacy `_stream_*` / `_http_*` internals that `builtinModules`
+// still lists; `buildBrowserField` stubs those bare-only (no `node:` twin,
+// since they have no real `node:`-prefixed form).
 export const NODE_BUILTINS: readonly string[] = builtinModules
 
 // Build the top-level package.json `browser` field (each entry → false =

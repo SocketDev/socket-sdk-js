@@ -14,7 +14,7 @@
  *      gh-aw workflow's gate job calls THIS, not an inline bash port.
  *   2. deterministic chain (ALWAYS, IN ORDER) — lockstep version-pin auto-bumps,
  *      submodule remainder note, npm deps (`update.mts`), package-manager pins,
- *      registry workflow pins. The judgment-free part — see
+ *      gh-aw action pins. The judgment-free part — see
  *      `weekly-update/deterministic-chain.mts`.
  *   3. agentic update (OPTIONAL) — if a Claude agent is reachable, invoke the
  *      `/updating` umbrella via the locked-down `spawnAiAgent` (AI_PROFILE.full
@@ -193,7 +193,7 @@ export async function agentAvailable(): Promise<boolean> {
   }
 }
 
-const UPDATING_PROMPT = `You are the fleet's weekly dependency-update agent, running outside gh-aw as a plain job. The deterministic chain has ALREADY run and committed the mechanical updates: npm dependencies (update.mts), lockstep version-pin auto-bumps, package-manager pins, and registry workflow SHA pins. Do NOT redo any of those.
+const UPDATING_PROMPT = `You are the fleet's weekly dependency-update agent, running outside gh-aw as a plain job. The deterministic chain has ALREADY run and committed the mechanical updates: npm dependencies (update.mts), lockstep version-pin auto-bumps, package-manager pins, and gh-aw action pins. Do NOT redo any of those.
 
 Run the /updating umbrella skill ONLY for the advisory remainder that needs judgment: lockstep file-fork / feature-parity / spec-conformance / lang-parity rows, non-lockstep submodule bumps, open Dependabot security advisories, the coverage badge, model pricing, and GitHub settings drift. Work in CI mode: skip builds/tests during the update. Make atomic commits (one logical change per commit) so the PR history is reviewable. Do NOT push or open a PR — the runner handles that.`
 
@@ -221,7 +221,7 @@ async function main(): Promise<void> {
 
   // Deterministic chain — always, IN ORDER, before the AI advisory pass:
   // lockstep version-pin bumps → submodule remainder note → npm deps
-  // (update.mts) → package-manager pins → registry workflow pins. The chain is
+  // (update.mts) → package-manager pins → gh-aw action pins. The chain is
   // best-effort: a non-zero step warns, the chain + run continue.
   logger.info('[weekly-update] running the deterministic chain…')
   await runDeterministicChain()

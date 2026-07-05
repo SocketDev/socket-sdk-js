@@ -85,7 +85,7 @@ DEFAULT_SHA=$(git rev-parse "origin/$BASE" 2>/dev/null || echo "")
 
 if [ -n "$PINNED_SHA" ] && [ -n "$DEFAULT_SHA" ] && [ "$PINNED_SHA" != "$DEFAULT_SHA" ]; then
   echo "Workflow SHA pins are stale: $PINNED_SHA → $DEFAULT_SHA (origin/$BASE)"
-  echo "Run the updating-workflows skill to cascade."
+  echo "Repin .github/workflows/_local-not-for-reuse-*.yml manually before merging."
 else
   echo "Workflow SHA pins are up to date (or no _local-not-for-reuse-*.yml pins in this repo)"
 fi
@@ -180,4 +180,4 @@ fi
 
 - **Phase 3 exit 1 (schema error):** stop. Read `scripts/lockstep-schema.mts` output and the offending row's `local_*` / `upstream` fields. Fix the manifest, then re-run.
 - **Phase 4a (lockstep drift) commits but Phase 6 tests fail:** the per-row commits are atomic — `git revert <sha>` for the offending row, leave the others, file an advisory.
-- **Phase 5 stale SHA pin:** run `/updating-workflows` to cascade the bump.
+- **Phase 5 stale SHA pin:** repin `.github/workflows/_local-not-for-reuse-*.yml` manually against `origin/$BASE`, then re-run the check.

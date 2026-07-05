@@ -32,6 +32,29 @@
  *   flagged. Test files (`*.test.*`, `/test/`) are skipped — they mock
  *   options-shaped literals, not production readers. Bypass: a `socket-lint:
  *   allow options-null-proto` comment.
+ *   The member-access fix is ALSO withheld (reported without a fix, same as
+ *   the `opts`-name collision above) when the `options` binding is reassigned
+ *   anywhere in the function body — `isReassignedInBody` walks the whole body
+ *   for an `options = …` assignment, a destructuring-assignment target
+ *   (`({ options } = x)`), an `options++`/`--options` update, or a
+ *   `for (options of/in …)` loop. The hoisted `const opts = { __proto__: null,
+ *   ...options }` snapshot is inserted as the FIRST statement of the function,
+ *   capturing whatever `options` holds at that instant; every later
+ *   `options.x` read in the body then gets repointed at `opts.x`. When
+ *   `options` is reassigned partway through the body — the acorn `core.ts`
+ *   constructor shape `this.options = options = getOptions(options)`, which
+ *   normalizes `options` in place — the hoisted `opts` is stuck holding the
+ *   PRE-normalization value while every rewritten `opts.x` read downstream of
+ *   the reassignment silently reads stale data. Confirmed in production: a
+ *   `parse(src, { ecmaVersion: 'latest' })` constructor snapshotted the raw
+ *   `options` (still the string `'latest'`) into `opts` before
+ *   `getOptions()` normalized `ecmaVersion` to a number, so the later
+ *   `opts.ecmaVersion >= 6` check compared the string and read false —
+ *   `const` was rejected as a pre-ES6 token, 75 Test262 failures, no lint/type
+ *   error, only a runtime behavior change. The walk is deliberately
+ *   scope-naive (no binding resolution) — a same-named binding inside a
+ *   NESTED function reads as a hit too, which only makes the guard bail more
+ *   often, never miss a real reassignment.
  */
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
@@ -60,6 +83,116 @@ function optionsParamName(params: AstNode[]): string | undefined {
 // rule simple and avoids deep AST matching of the spread.
 function hasNullProtoNormalization(bodyText: string, name: string): boolean {
   return bodyText.includes('__proto__: null') && bodyText.includes(`...${name}`)
+}
+
+// Does an assignment/binding target (an Identifier, or a
+// destructuring ObjectPattern/ArrayPattern) write to `name` anywhere inside
+// it? Handles shorthand + keyed properties, computed-key values, rest
+// elements, defaulted elements (`AssignmentPattern`), and nested patterns —
+// every shape `({ options } = x)` / `([options] = x)` / `({ a: options } = x)`
+// can take.
+function patternWrites(pattern: AstNode | undefined, name: string): boolean {
+  if (!pattern || typeof pattern !== 'object') {
+    return false
+  }
+  if (pattern.type === 'Identifier') {
+    return pattern.name === name
+  }
+  if (pattern.type === 'ObjectPattern') {
+    const props = pattern.properties
+    if (!Array.isArray(props)) {
+      return false
+    }
+    for (let i = 0, { length } = props; i < length; i += 1) {
+      const prop = props[i]
+      const target = prop?.type === 'RestElement' ? prop.argument : prop?.value
+      if (patternWrites(target, name)) {
+        return true
+      }
+    }
+    return false
+  }
+  if (pattern.type === 'ArrayPattern') {
+    const elements = pattern.elements
+    if (!Array.isArray(elements)) {
+      return false
+    }
+    for (let i = 0, { length } = elements; i < length; i += 1) {
+      if (patternWrites(elements[i], name)) {
+        return true
+      }
+    }
+    return false
+  }
+  if (pattern.type === 'AssignmentPattern') {
+    return patternWrites(pattern.left, name)
+  }
+  if (pattern.type === 'RestElement') {
+    return patternWrites(pattern.argument, name)
+  }
+  return false
+}
+
+// Is `name` (the options-bag param) reassigned anywhere in `body`? A hoisted
+// snapshot taken at the top of the function is only safe when nothing between
+// the snapshot and a rewritten read can change what `name` refers to — see the
+// file-level doc for the production corruption this guards against. Detects:
+// a direct or destructuring assignment (`options = …`, `({ options } = …)`),
+// an update expression (`options++`, `--options`), and a `for (options of/in
+// …)` loop whose left side is the bare binding (not a fresh `let`/`const`
+// declaration). Deliberately scope-naive: it does not resolve whether a
+// same-named identifier belongs to a nested function's own binding, so a
+// shadowed `options` in a closure still counts as a hit. That only makes the
+// guard bail more often than strictly necessary — never less — which is the
+// safe direction for a check whose job is to withhold an autofix.
+function isReassignedInBody(body: AstNode, name: string): boolean {
+  let found = false
+  const visit = (n: AstNode | undefined): void => {
+    if (found || !n || typeof n !== 'object') {
+      return
+    }
+    if (n.type === 'AssignmentExpression' && patternWrites(n.left, name)) {
+      found = true
+      return
+    }
+    if (
+      n.type === 'UpdateExpression' &&
+      n.argument?.type === 'Identifier' &&
+      n.argument.name === name
+    ) {
+      found = true
+      return
+    }
+    if (
+      (n.type === 'ForOfStatement' || n.type === 'ForInStatement') &&
+      n.left?.type !== 'VariableDeclaration' &&
+      patternWrites(n.left, name)
+    ) {
+      found = true
+      return
+    }
+    for (const key of Object.keys(n)) {
+      if (key === 'parent') {
+        continue
+      }
+      const child = (n as Record<string, unknown>)[key]
+      if (Array.isArray(child)) {
+        for (let i = 0, { length } = child; i < length; i += 1) {
+          visit(child[i] as AstNode)
+          if (found) {
+            return
+          }
+        }
+      } else if (child && typeof child === 'object') {
+        visit(child as AstNode)
+      }
+      if (found) {
+        return
+      }
+    }
+  }
+  visit(body)
+  return found
 }
 
 const rule = {
@@ -190,6 +323,10 @@ const rule = {
       //     `options`; a param already named `opts` would collide with the new
       //     local, so that case is reported WITHOUT a fix — options-param-naming
       //     renames the param `opts`→`options` first, then this fix applies.
+      //     It's ALSO withheld when `isReassignedInBody` finds `options`
+      //     written to anywhere in the function — see the file-level doc for
+      //     the stale-snapshot corruption a hoisted-then-reassigned `options`
+      //     produces.
       const body = node.body
       const canInsert =
         body?.type === 'BlockStatement' && Array.isArray(body.body)
@@ -213,6 +350,14 @@ const rule = {
           // Member-access fix requires a block body to host the new statement
           // AND a param named `options` (so the `opts` local can't shadow it).
           if (!first || name !== 'options') {
+            return undefined
+          }
+          // A hoisted-to-the-top snapshot is unsafe when `options` is
+          // reassigned later in the body — every rewritten `opts.x` read
+          // downstream of the reassignment would silently see the STALE
+          // pre-reassignment value instead of the normalized one. See the
+          // file-level doc for the production corruption this withholds.
+          if (isReassignedInBody(node.body, name)) {
             return undefined
           }
           const indent = '  '

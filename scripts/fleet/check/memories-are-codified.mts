@@ -60,16 +60,24 @@ const CODIFIABLE_TYPES = new Set(['feedback', 'project'])
  * A memory is codified when its frontmatter carries a non-empty `enforcement:`
  * line (top-level or nested under `metadata:`). Presence-only for report mode;
  * ref resolution is a strict-mode refinement.
+ *
+ * The value must sit on the SAME line as the key: `\s` (used for the gap
+ * between `enforcement:` and its value) matches newlines too, so a naive
+ * `\s*\S+` reads straight through an EMPTY `enforcement:` line into whatever
+ * non-whitespace starts the next line (the closing `---` fence, or the next
+ * frontmatter key) and reports it as codified. `[ \t]*` restricts the gap to
+ * horizontal whitespace, so an empty stamp correctly reads as uncodified.
  */
 export function isCodified(content: string): boolean {
-  return /^\s*enforcement:\s*\S+/m.test(content)
+  return /^[ \t]*enforcement:[ \t]*\S+/m.test(content)
 }
 
 /**
  * The `type:` of a memory (top-level or under `metadata:`), or undefined.
+ * Same same-line restriction as `isCodified` — see its comment.
  */
 export function memoryType(content: string): string | undefined {
-  const match = content.match(/^\s*type:\s*([A-Za-z]+)/m)
+  const match = content.match(/^[ \t]*type:[ \t]*([A-Za-z]+)/m)
   return match?.[1]
 }
 

@@ -22,9 +22,7 @@
  *   3. npm deps — `update.mts` (taze 2-pass + lockfile). Mechanical.
  *   4. package-manager pins — `sync-package-manager-pins.mts` rewrites the
  *      `package.json` pnpm/npm pins from `external-tools.json`.
- *   5. registry workflow pins — `sync-registry-workflow-pins.mts --fix` repins
- *      the delegator `uses:` SHAs to the local socket-registry checkout.
- *   6. gh-aw action pins — `sync-gh-aw-action-pins.mts` recompiles every tracked
+ *   5. gh-aw action pins — `sync-gh-aw-action-pins.mts` recompiles every tracked
  *      `*.github/workflows/*.md` via `gh aw compile --approve`, refreshing action
  *      SHAs and container image digests in the sibling `.lock.yml` +
  *      `.github/aw/actions-lock.json`. Best-effort when `gh aw` is not installed.
@@ -265,24 +263,6 @@ export async function syncPackageManagerPins(): Promise<ChainStepResult> {
   }
 }
 
-// Registry workflow SHA pins (--fix rewrites in place).
-export async function syncRegistryWorkflowPins(): Promise<ChainStepResult> {
-  const script = path.join(
-    REPO_ROOT,
-    'scripts',
-    'fleet',
-    'sync-registry-workflow-pins.mts',
-  )
-  const ok = await run(process.execPath, [script, '--fix'])
-  return {
-    name: 'registry-workflow-pins',
-    note: ok
-      ? undefined
-      : 'sync-registry-workflow-pins.mts --fix exited non-zero',
-    ok,
-  }
-}
-
 // gh-aw action/container SHA pins — recompiles every tracked
 // `*.github/workflows/*.md` source via `gh aw compile --approve`, refreshing
 // action SHAs and container image digests in the sibling `.lock.yml` +
@@ -314,7 +294,6 @@ export async function runDeterministicChain(): Promise<ChainStepResult[]> {
   steps.push(noteSubmoduleRemainder())
   steps.push(await bumpNpmDeps())
   steps.push(await syncPackageManagerPins())
-  steps.push(await syncRegistryWorkflowPins())
   steps.push(await syncGhAwActionPins())
   for (let i = 0, { length } = steps; i < length; i += 1) {
     const step = steps[i]!

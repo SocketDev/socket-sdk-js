@@ -80,8 +80,8 @@ export function readPackageJson(pkgDir: string): PackageJson | undefined {
 /**
  * Evaluate one parsed `package.json`. Returns a finding when the package is
  * publishable (not private, has a name) and declares no `files` field, and is
- * not in the allowlist. Returns `undefined` when the package is clean or exempt.
- * Pure + side-effect-free so unit tests can exercise it directly.
+ * not in the allowlist. Returns `undefined` when the package is clean or
+ * exempt. Pure + side-effect-free so unit tests can exercise it directly.
  */
 export function checkFilesField(
   pkg: PackageJson,
@@ -129,13 +129,19 @@ export function collectFindings(repoRoot: string): FilesFieldFinding[] {
   return findings
 }
 
-function main(): void {
-  const findings = collectFindings(REPO_ROOT)
+/**
+ * Scan + report for `repoRoot`, returning the process exit code. Split from
+ * `main()` (which is not import-safe — it calls `process.exit()`) so a test
+ * can drive the full report against a fixture repo without killing the test
+ * runner or fighting the fixed `REPO_ROOT` constant.
+ */
+export function runCheck(repoRoot: string): number {
+  const findings = collectFindings(repoRoot)
   if (findings.length === 0) {
     logger.log(
       '[check-published-packages-have-files-field] all publishable packages declare `files`.',
     )
-    process.exit(0)
+    return 0
   }
 
   const isStrict = MODE === 'strict'
@@ -157,7 +163,11 @@ function main(): void {
       'See scripts/fleet/check/package-files-are-allowlisted.mts for ' +
       'deeper allowlist hygiene.\n',
   )
-  process.exit(isStrict ? 1 : 0)
+  return isStrict ? 1 : 0
+}
+
+function main(): void {
+  process.exit(runCheck(REPO_ROOT))
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

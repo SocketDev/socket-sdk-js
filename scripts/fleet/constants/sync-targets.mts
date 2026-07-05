@@ -124,7 +124,6 @@ export const KNOWN_CATEGORIES: ReadonlySet<string> = new Set([
   'script_smoke_failure',
   'settings_merge_drift',
   'settings_repo_hook_missing',
-  'stale_registry_pin',
   'thin_wiring_missing',
   'tombstone_orphan',
   'tsconfig_base_missing',
@@ -150,7 +149,7 @@ const ALL_SCOPES: readonly SyncScope[] = ['dogfood', 'fleet', 'repo']
 /**
  * The named-sync target registry. Keys are the vocabulary an operator calls out
  * ("cascade pnpm-workspace", "dogfood foundationals", "cascade
- * registry-workflows to socket-registry"). Sorted by key (socket/sort) except
+ * lint-config to socket-registry"). Sorted by key (socket/sort) except
  * the composites, which sort after the leaves for readability (a composite
  * references leaves, so grouping it last keeps the dependency direction
  * obvious).
@@ -286,13 +285,6 @@ export const SYNC_TARGETS: Readonly<Record<string, SyncTarget>> = {
       'workspace_trust_exclude',
     ],
   },
-  'registry-workflows': {
-    description:
-      'socket-registry reusable-workflow `uses:` SHA pins — repins from the ' +
-      "registry's _local-* self-caller. Override scope: one repo at a time.",
-    scopes: ['fleet', 'repo'],
-    categories: ['stale_registry_pin'],
-  },
   // --- Composite targets (expand into other targets) ---
   all: {
     description:
@@ -310,7 +302,6 @@ export const SYNC_TARGETS: Readonly<Record<string, SyncTarget>> = {
       'package-baseline',
       'package-manager',
       'pnpm-workspace',
-      'registry-workflows',
     ],
   },
   dogfood: {

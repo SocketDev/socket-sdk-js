@@ -7,7 +7,7 @@ substitute for running (or fixing) the script.
 ## The rule
 
 - **Run the script, don't hand-do it.** If an operation has a script — release
-  bump + CHANGELOG (`bump.mts`), registry-pin sync (`sync-registry-workflow-pins.mts`),
+  bump + CHANGELOG (`bump.mts`), gh-aw action-pin sync (`sync-gh-aw-action-pins.mts`),
   cascade (`sync-scaffolding`), lint-fix (`pnpm run fix`), lockfile regen — run
   that script. Do not perform the operation by hand or with an AI step the script
   already owns.

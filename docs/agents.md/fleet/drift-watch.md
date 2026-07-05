@@ -49,8 +49,9 @@ its declared `# cascade-data-deps:` paths. A pin `(file, dep, sha)` is **STALE**
 when `git rev-list --count <sha>..<base>` over the closure paths is non-zero,
 **UNREACHABLE** when `<sha>` is not an ancestor of the base. The check is
 producer-internal — it only classifies a pin whose `repo` is the repo it runs in
-(so consumers and the wheelhouse no-op; consumer-side repinning is
-`sync-registry-workflow-pins.mts`'s job). Self-enforcing: every escaping read it
+(so consumers and the wheelhouse no-op; consumer-side repinning is the
+wheelhouse tool-pin cascade orchestrator's job — `scripts/repo/pipeline.mts`
+Stage 4 Propagate). Self-enforcing: every escaping read it
 detects in an action MUST be covered by a `# cascade-data-deps:` declaration, so
 a new data edge cannot be added without the staleness analysis seeing it. Run
 `--fix` to repin stale entries to the base HEAD with a refreshed
