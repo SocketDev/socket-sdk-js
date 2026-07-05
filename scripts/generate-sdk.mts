@@ -12,9 +12,17 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import type { Node } from '@babel/types'
 import { parse } from '@babel/parser'
 import _traverse from '@babel/traverse'
-import * as t from '@babel/types'
+import {
+  isTSStringKeyword,
+  isTSNumberKeyword,
+  isTSBooleanKeyword,
+  isTSTypeReference,
+  isIdentifier,
+  isTSArrayType,
+} from '@babel/types'
 import MagicString from 'magic-string'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors'
@@ -108,26 +116,26 @@ export async function fixArraySyntax(filePath: string): Promise<void> {
   })
 
   // Helper to determine if a type is simple
-  const isSimpleType = (node: t.Node): boolean => {
+  const isSimpleType = (node: Node): boolean => {
     // Check for keyword types
     if (
-      t.isTSStringKeyword(node) ||
-      t.isTSNumberKeyword(node) ||
-      t.isTSBooleanKeyword(node)
+      isTSStringKeyword(node) ||
+      isTSNumberKeyword(node) ||
+      isTSBooleanKeyword(node)
     ) {
       return true
     }
 
     // Check for type references to simple types
-    if (t.isTSTypeReference(node)) {
-      if (t.isIdentifier(node.typeName)) {
+    if (isTSTypeReference(node)) {
+      if (isIdentifier(node.typeName)) {
         const name = node.typeName.name
         return name === 'boolean' || name === 'number' || name === 'string'
       }
     }
 
     // Arrays of simple types are also considered simple for nested array purposes
-    if (t.isTSArrayType(node)) {
+    if (isTSArrayType(node)) {
       return isSimpleType(node.elementType)
     }
 
@@ -145,7 +153,7 @@ export async function fixArraySyntax(filePath: string): Promise<void> {
       const elementType = node.elementType
 
       // Check if this is a simple type array
-      if (isSimpleType(elementType as unknown as t.Node)) {
+      if (isSimpleType(elementType as unknown as Node)) {
         // For simple types (e.g., string[], number[])
         // we keep them as-is
         return
