@@ -18,6 +18,8 @@ packages:
   - '.config/oxlint-plugin'
   - '.config/oxlint-plugin/fleet/*'
   - '.config/oxlint-plugin/repo/*'
+  - '.config/fleet/oxlint-plugin'
+  - '.config/fleet/oxlint-plugin/fleet/*'
 
 allowBuilds:
   cpu-features: false
@@ -117,7 +119,7 @@ catalog:
   'neosanitize': 0.3.0
   'nock': 15.0.0
   'npm-run-all2': 9.0.2
-  'oxfmt': 0.48.0
+  'oxfmt': 0.56.0
   'oxlint': 1.71.0
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
@@ -159,7 +161,6 @@ minimumReleaseAgeExclude:
   - 'ecc-agentshield'
   - 'sfw'
   - 'socket-*'
-  - 'shell-quote'
   - '@stuie/*'
   - '@ultrathink/*'
   - '@yuku-parser/*'
@@ -202,6 +203,10 @@ minimumReleaseAgeExclude:
   - '@rolldown/binding-win32-x64-msvc@1.1.4'
   # published: 2026-07-01 | removable: 2026-07-08
   - 'rolldown@1.1.4'
+  # published: 2026-06-30 | removable: 2026-07-07
+  - '@anthropic-ai/claude-code@2.1.197'
+  # published: 2026-07-01 | removable: 2026-07-08
+  - 'markdownlint-cli2@0.23.0'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we

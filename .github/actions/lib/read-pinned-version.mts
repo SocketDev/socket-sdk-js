@@ -14,11 +14,11 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 
-import { argv, exit, stdout } from 'node:process'
+import { argv, exit, stderr, stdout } from 'node:process'
 
 const pkgName = argv[2]
 if (!pkgName) {
-  process.stderr.write('Usage: node read-pinned-version.mts <package-name>\n') // socket-hook: allow logger -- composite action helper, raw stderr for usage
+  stderr.write('Usage: node read-pinned-version.mts <package-name>\n') // socket-hook: allow logger -- composite action helper, raw stderr for usage
   exit(2)
 }
 

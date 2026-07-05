@@ -16,6 +16,8 @@
 
 import { isInsideWheelhouse } from './_shared/wheelhouse-self-skip.mts'
 
+import type { MarkdownlintRule } from './_shared/rule-types.mts'
+
 const RULE_NAME = 'socket-no-relative-sibling-script'
 const SIBLING_PATH_RES = [
   // Detect `<runner> ../<sibling>/...` where runner is one of the common
@@ -29,10 +31,7 @@ const SIBLING_PATH_RES = [
   /(?:^|\s)\.\.\/stuie\//,
 ]
 
-/**
- * @type {import('markdownlint').Rule}
- */
-const rule = {
+const rule: MarkdownlintRule = {
   description:
     'Commands referencing sibling fleet repos via relative paths fail for outside readers',
   function(params, onError) {

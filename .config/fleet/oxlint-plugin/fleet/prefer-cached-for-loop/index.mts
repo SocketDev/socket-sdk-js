@@ -13,11 +13,17 @@
  *      (let i = 0, { length } = arr; i < length; i += 1)` form repeatedly.
  *      Encoding the preference as a rule prevents drift back to the more
  *      idiomatic forms in subsequent edits. Canonical shape emitted by the
- *      autofix: for (let i = 0, { length } = arr; i < length; i += 1) { const
- *      item = arr[i]!
+ *      autofix on a TypeScript file (`.ts`/`.tsx`/`.mts`/`.cts`): for (let i =
+ *      0, { length } = arr; i < length; i += 1) { const item = arr[i]!
  *
  *   <body>
  *   }
+ *   On a plain JS file (`.js`/`.mjs`/`.cjs`/…) the same shape is emitted
+ *   WITHOUT the trailing `!` (`const item = arr[i]`) — the non-null assertion
+ *   is TypeScript-only syntax and would be a SyntaxError in plain JS. The
+ *   rule detects the file kind via `context.filename`, the same
+ *   `/\.(?:cts|mts|tsx?)$/` extension check `optional-explicit-undefined`
+ *   uses.
  *   Notes on the shape:
  *   - `i += 1` instead of `i++` — postfix `++` returns the
  *   pre-increment value, which is a common source of off-by-one
@@ -26,11 +32,11 @@
  *   so the test `i < length` doesn't re-read `arr.length` per
  *   iteration. Equivalent to `const len = arr.length` but pairs
  *   with `let i = 0` in a single `let` head.
- *   - `arr[i]!` non-null assertion — under `noUncheckedIndexedAccess`
- *   the lookup type is `T | undefined`, and the bound `i` is
- *   provably in `[0, length)`. The assertion suppresses TS18048
- *   at every read of `item` downstream. No-op for tsconfigs
- *   without the strict flag.
+ *   - `arr[i]!` non-null assertion, TypeScript files only — under
+ *   `noUncheckedIndexedAccess` the lookup type is `T | undefined`,
+ *   and the bound `i` is provably in `[0, length)`. The assertion
+ *   suppresses TS18048 at every read of `item` downstream. No-op
+ *   for tsconfigs without the strict flag.
  *   Autofix scope (deterministic only):
  *   - `arr.forEach((item) => { body })` →
  *   ```
@@ -127,6 +133,16 @@ const rule = {
     const sourceCode = context.getSourceCode
       ? context.getSourceCode()
       : context.sourceCode
+
+    // The `!` non-null assertion on the rewritten indexed access is
+    // TypeScript-only syntax — emitting it into a `.js`/`.mjs`/`.cjs` file
+    // produces a SyntaxError. Same extension check `optional-explicit-undefined`
+    // uses. An unresolvable filename (e.g. a bare mock context in a unit
+    // test) is treated as non-TypeScript — the safe default, since emitting
+    // valid-everywhere JS is never wrong, while emitting `!` into an unknown
+    // file kind can be.
+    const filename = context.filename ?? context.getFilename?.() ?? ''
+    const nonNullAssertion = /\.(?:cts|mts|tsx?)$/.test(filename) ? '!' : ''
 
     // Scope-aware kind resolver. Shared with no-cached-for-on-iterable
     // via lib/iterable-kind.mts. We use it to SKIP rewriting
@@ -293,13 +309,14 @@ const rule = {
             )
             const indent = leadingIndent(sourceCode, parent)
             const innerIndent = `${indent}  `
-            // `!` non-null assertion on the indexed access — under
+            // `!` non-null assertion on the indexed access, TypeScript
+            // files only (see `nonNullAssertion` above) — under
             // `noUncheckedIndexedAccess` the lookup returns `T |
             // undefined`, and every read of `${itemName}` downstream
-            // would trip TS18048. The assertion is a no-op for
-            // tsconfigs that don't enable the strict flag, so it's
-            // safe to emit unconditionally.
-            const replacement = `for (let ${indexName} = 0, { length } = ${iterText}; ${indexName} < length; ${indexName} += 1) {\n${innerIndent}${itemKind} ${itemName} = ${iterText}[${indexName}]!;${bodyInner}\n${indent}}`
+            // would trip TS18048. Emitting it into a plain JS file would
+            // be a SyntaxError, so JS files get the same rewrite without
+            // the assertion.
+            const replacement = `for (let ${indexName} = 0, { length } = ${iterText}; ${indexName} < length; ${indexName} += 1) {\n${innerIndent}${itemKind} ${itemName} = ${iterText}[${indexName}]${nonNullAssertion};${bodyInner}\n${indent}}`
             return fixer.replaceText(parent, replacement)
           },
         })
@@ -384,9 +401,9 @@ const rule = {
             )
             const indent = leadingIndent(sourceCode, node)
             const innerIndent = `${indent}  `
-            // `!` non-null assertion on the indexed access — see the
+            // `!` non-null assertion, TypeScript files only — see the
             // sibling .forEach branch for the rationale.
-            const replacement = `for (let ${counterName} = 0, { length } = ${iterText}; ${counterName} < length; ${counterName} += 1) {\n${innerIndent}${itemKind} ${itemName} = ${iterText}[${counterName}]!;${bodyInner}\n${indent}}`
+            const replacement = `for (let ${counterName} = 0, { length } = ${iterText}; ${counterName} < length; ${counterName} += 1) {\n${innerIndent}${itemKind} ${itemName} = ${iterText}[${counterName}]${nonNullAssertion};${bodyInner}\n${indent}}`
             return fixer.replaceText(node, replacement)
           },
         })

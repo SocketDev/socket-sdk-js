@@ -154,5 +154,8 @@
     "protobufjs": false,
     "rolldown": true,
     "ssh2": false
+  },
+  "npm-run-all2": {
+    "nodeRun": true
   }
 }

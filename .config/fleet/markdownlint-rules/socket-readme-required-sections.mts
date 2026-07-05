@@ -16,6 +16,8 @@
 
 import path from 'node:path'
 
+import type { MarkdownlintRule } from './_shared/rule-types.mts'
+
 import { isFreeformReadmeOptIn } from './_shared/freeform-readme-optin.mts'
 import { isInsideWheelhouse } from './_shared/wheelhouse-self-skip.mts'
 
@@ -43,10 +45,7 @@ export function isRootReadme(filePath) {
   return dir === '.' || dir === '' || dir === process.cwd()
 }
 
-/**
- * @type {import('markdownlint').Rule}
- */
-const rule = {
+const rule: MarkdownlintRule = {
   description:
     'Fleet root README must contain the canonical five sections in order',
   function(params, onError) {

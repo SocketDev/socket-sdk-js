@@ -2,26 +2,35 @@
  * @file Per CLAUDE.md "null vs undefined": use `undefined`. `null` is allowed
  *   only for `__proto__: null` (object-literal prototype null) or external API
  *   requirements (e.g., JSON encoding, `Object.create(null)`, listener-error
- *   sinks, third-party callbacks). Autofix scope:
+ *   sinks, third-party callbacks). Fix scope:
  *
- *   - **Deterministic**: rewrites `null` → `undefined` ONLY when context is
- *     demonstrably safe. Earlier versions had a context-blind autofix that
- *     produced fleet-wide regressions; the current set of skip predicates
- *     covers every regression seen in the rollout:
- *   - `__proto__: null` (with or without `as` cast) — the null-prototype-object
- *     contract.
- *   - `Object.create(null)`, `Object.setPrototypeOf(o, null)`,
- *     `Reflect.setPrototypeOf(o, null)` — prototype-aware callsites that throw
- *     / reject `undefined`.
- *   - `JSON.stringify(value, null, space)` — replacer-slot convention.
- *   - `=== null` / `!== null` comparisons — semantically distinct.
+ *   - **Skip predicates (deterministic, no report at all)**: the rule never
+ *     even flags `null` when the immediate AST shape proves it's required —
+ *     `__proto__: null` (with or without `as` cast), `Object.create(null)` /
+ *     `Object.setPrototypeOf(o, null)` / `Reflect.setPrototypeOf(o, null)`,
+ *     `JSON.stringify(value, null, space)`, `=== null` / `!== null`
+ *     comparisons, assertion-library matcher args (`expect(x).toBe(null)`),
+ *     and a `let x: T | null = null` initializer.
+ *   - **Suggestion only, never auto-applied** (`meta.hasSuggestions`, no
+ *     `meta.fixable`): every remaining `null` literal is reported with a
+ *     `suggest` fix, not a `fix`. `--fix` / `pnpm run fix` never touches it;
+ *     the rewrite only lands via an explicit `--fix-suggestions` pass or an
+ *     editor code action. The skip predicates above only see the literal's
+ *     immediate parent — they can't see a `!== null` guard on the same
+ *     binding elsewhere in the file (a different statement, a different
+ *     method on the same class). Proving that no such guard exists anywhere
+ *     downstream is a whole-file/whole-class flow analysis this per-literal
+ *     visitor doesn't do, so the safe default is report-only: a rollout that
+ *     auto-applied this rewrite flipped `this.preTokens = null` to
+ *     `= undefined` while an unrelated `if (this.preTokens !== null)` kept
+ *     comparing against `null`, producing 793 test failures across ~127 swap
+ *     sites once the guard silently stopped matching.
  *   - **AI-handled** (Step 4 of `pnpm run fix`): literals whose surrounding type
  *     annotation mentions `null` (e.g. `let x: string | null = null`). The
  *     annotation is the contract; flipping just the value creates type errors.
  *     The AI step flips BOTH the value and the annotation in lockstep and
  *     traces through the function signatures / interfaces / return types that
- *     depend on it — exactly the refactor that blew up socket-stuie when the
- *     deterministic autofix was context-blind.
+ *     depend on it.
  */
 
 /**
@@ -39,7 +48,8 @@ const rule = {
       category: 'Stylistic Issues',
       recommended: true,
     },
-    fixable: 'code',
+    fixable: undefined,
+    hasSuggestions: true,
     messages: {
       preferUndefined:
         'Use `undefined` instead of `null` (allowed exceptions: `__proto__: null`, `Object.create(null)`, external API requirements like JSON.stringify replacer / third-party callbacks).',
@@ -423,9 +433,18 @@ const rule = {
         context.report({
           node,
           messageId: 'preferUndefined',
-          fix(fixer: RuleFixer) {
-            return fixer.replaceText(node, 'undefined')
-          },
+          // `suggest`, not `fix` — see the file-level doc for why this can't
+          // be a safe auto-apply: the skip predicates above only see the
+          // literal's immediate parent, not a `!== null` guard elsewhere in
+          // the file/class.
+          suggest: [
+            {
+              messageId: 'preferUndefined',
+              fix(fixer: RuleFixer) {
+                return fixer.replaceText(node, 'undefined')
+              },
+            },
+          ],
         })
       },
     }

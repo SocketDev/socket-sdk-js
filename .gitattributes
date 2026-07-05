@@ -151,7 +151,6 @@ packages/build-infra/lib/release-checksums/producer.mts linguist-generated=true
 packages/build-infra/release-assets.schema.json linguist-generated=true
 pnpm-workspace.fleet.yaml linguist-generated=true
 scripts/fleet linguist-generated=true
-scripts/fleet/lib/registry-ci-gate.mts linguist-generated=true
 scripts/fleet/lib/registry-pin-cascade.mts linguist-generated=true
 test/_shared/fleet/lib linguist-generated=true
 test/scripts/fleet/setup.mts linguist-generated=true

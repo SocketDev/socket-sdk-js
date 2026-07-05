@@ -26,6 +26,16 @@
  *     config-entrypoint filename short-circuits the rule. This mirrors how the
  *     plugin's own rule files carry a per-file disable for the same "the tool's
  *     contract requires a default export" reason.
+ *
+ *   Both fixable shapes above are `suggest`-only (`meta.hasSuggestions`, no
+ *   `meta.fixable`) — `--fix` / `pnpm run fix` never auto-applies them. The
+ *   rewrite only changes the export statement; it can't see or update every
+ *   importer, and a default-import site (`import x from './mod'`) breaks the
+ *   moment the export becomes named. A rollout that auto-applied this fix
+ *   rewrote the export while every importer still used default-import syntax,
+ *   producing module-resolution errors at runtime. The rule still reports;
+ *   the rewrite lands only via an explicit `--fix-suggestions` pass or an
+ *   editor code action, after the importers are updated in lockstep.
  */
 
 /**
@@ -54,7 +64,8 @@ const rule = {
       category: 'Stylistic Issues',
       recommended: true,
     },
-    fixable: 'code',
+    fixable: undefined,
+    hasSuggestions: true,
     messages: {
       noDefaultExport:
         'Avoid `export default` — use a named export so the export name is stable across imports, greppable, and composable with `export * from`.',
@@ -93,10 +104,18 @@ const rule = {
           context.report({
             node,
             messageId: 'noDefaultExport',
-            fix(fixer: RuleFixer) {
-              const declText = sourceCode.getText(decl)
-              return fixer.replaceText(node, `export ${declText}`)
-            },
+            // `suggest`, not `fix` — see the file-level doc. Every
+            // default-import site needs updating in lockstep; auto-applying
+            // this leaves importers broken until they're fixed by hand.
+            suggest: [
+              {
+                messageId: 'noDefaultExport',
+                fix(fixer: RuleFixer) {
+                  const declText = sourceCode.getText(decl)
+                  return fixer.replaceText(node, `export ${declText}`)
+                },
+              },
+            ],
           })
           return
         }
@@ -105,14 +124,19 @@ const rule = {
         // `export { someIdentifier }`. Only safe when the identifier
         // is declared in the same module; we don't try to verify that
         // here because the import side will fail loudly if not, and
-        // the autofix never strips a declaration.
+        // the fix never strips a declaration.
         if (decl.type === 'Identifier') {
           context.report({
             node,
             messageId: 'noDefaultExport',
-            fix(fixer: RuleFixer) {
-              return fixer.replaceText(node, `export { ${decl.name} }`)
-            },
+            suggest: [
+              {
+                messageId: 'noDefaultExport',
+                fix(fixer: RuleFixer) {
+                  return fixer.replaceText(node, `export { ${decl.name} }`)
+                },
+              },
+            ],
           })
           return
         }

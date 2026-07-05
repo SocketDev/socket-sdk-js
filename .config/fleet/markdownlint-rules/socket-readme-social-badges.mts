@@ -16,6 +16,8 @@
 
 import path from 'node:path'
 
+import type { MarkdownlintRule } from './_shared/rule-types.mts'
+
 const RULE_NAME = 'socket-readme-social-badges'
 const SOCIAL_BADGES = [
   { name: 'Bluesky follow', signature: /bsky\.app\/profile\/socket\.dev/ },
@@ -37,10 +39,7 @@ export function isRootReadme(filePath) {
   return dir === '.' || dir === '' || dir === process.cwd()
 }
 
-/**
- * @type {import('markdownlint').Rule}
- */
-const rule = {
+const rule: MarkdownlintRule = {
   description:
     'Fleet root README must carry both canonical social-follow badges (X / Twitter + Bluesky)',
   function(params, onError) {

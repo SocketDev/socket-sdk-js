@@ -37,7 +37,6 @@ catalog:
   # ships; then flip to a plain version + npm deprecate the old name.
   '@ultrathink/acorn.wasm': 'npm:@ultrathink/acorn-wasm@0.0.1'
   'magic-string': 0.30.21
-  'markdownlint': 0.41.0
   'markdownlint-cli2': 0.23.0
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
