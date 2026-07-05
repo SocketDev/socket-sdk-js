@@ -3,19 +3,18 @@
  *   dispatcher entry (`_dispatch/dispatch-entry.mts`), the generated static
  *   dispatch table, every bundle-safe hook it imports, the `_shared/` helpers,
  *   and only the reachable slices of `@socketsecurity/lib-stable` into a single
- *   CJS `_dispatch/bundle.cjs`.
- *   Lives under `.config/fleet/rolldown/` (mandatory tier), not
- *   `.config/repo/rolldown/` (opt-in tier): `scripts/fleet/build-hook-bundle.mts`
- *   is a mandatory `scripts/fleet` script every fleet repo carries, so it needs
- *   this config unconditionally — cascading it opt-in left members unable to
- *   resolve the rolldown entry.
+ *   CJS `_dispatch/bundle.cjs`. Lives under `.config/fleet/rolldown/`
+ *   (mandatory tier), not `.config/repo/rolldown/` (opt-in tier):
+ *   `scripts/fleet/build-hook-bundle.mts` is a mandatory `scripts/fleet` script
+ *   every fleet repo carries, so it needs this config unconditionally —
+ *   cascading it opt-in left members unable to resolve the rolldown entry.
  *   Output is CJS (not type-stripped ESM .mts) on purpose: V8's compile cache
  *   reliably caches AND auto-flushes plain CJS, so the hand-written `index.cjs`
  *   loader's `enableCompileCache` actually persists between spawns. Not
  *   minified (fleet hard rule), no source maps, no `.d.ts`. node: built-ins
- *   stay external (the bundle runs
- *   under Node, which has them). Heavy unreachable lib subgraphs are stubbed
- *   via the fleet-canonical `createLibStubPlugin`.
+ *   stay external (the bundle runs under Node, which has them). Heavy
+ *   unreachable lib subgraphs are stubbed via the fleet-canonical
+ *   `createLibStubPlugin`.
  */
 
 import type { RolldownOptions } from 'rolldown'

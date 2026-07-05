@@ -33,7 +33,10 @@ import { fileURLToPath } from 'node:url'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import type { EligibleHook } from '../make-hook-dispatch.mts'
-import { FLEET_HOOKS_DIR, collectEligibleHooks } from '../make-hook-dispatch.mts'
+import {
+  FLEET_HOOKS_DIR,
+  collectEligibleHooks,
+} from '../make-hook-dispatch.mts'
 import { CLAUDE_SETTINGS_JSON, REPO_ROOT } from '../paths.mts'
 
 const logger = getDefaultLogger()
@@ -82,10 +85,9 @@ export function matcherCoversAll(matcher: string | undefined): boolean {
 export function extractDispatcherEntries(
   settings: SettingsShape,
 ): Record<string, DispatcherEntry> {
-  const out: Record<string, DispatcherEntry> = { __proto__: null } as Record<
-    string,
-    DispatcherEntry
-  >
+  const out: Record<string, DispatcherEntry> = {
+    __proto__: null,
+  } as unknown as Record<string, DispatcherEntry>
   const hooks = settings.hooks
   if (!hooks) {
     return out
@@ -107,7 +109,11 @@ export function extractDispatcherEntries(
         }
       }
       if (isDispatcher) {
-        out[event] = { __proto__: null, matcher: entry.matcher, present: true }
+        out[event] = {
+          __proto__: null,
+          matcher: entry.matcher,
+          present: true,
+        } as DispatcherEntry
         break
       }
     }
@@ -117,8 +123,8 @@ export function extractDispatcherEntries(
 
 /**
  * Diagnose per-event coverage: does each event's dispatcher matcher route every
- * tool its bundled hooks handle? Pure — takes the eligible hooks + the extracted
- * dispatcher entries, returns findings (empty = fully covered).
+ * tool its bundled hooks handle? Pure — takes the eligible hooks + the
+ * extracted dispatcher entries, returns findings (empty = fully covered).
  */
 export function diagnoseDispatcherCoverage(
   hooks: readonly EligibleHook[],

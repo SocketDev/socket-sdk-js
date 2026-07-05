@@ -23,7 +23,6 @@
  *     semantics: ultrathink/acorn/scripts/xlang-harness.mts.
  */
 
-import path from 'node:path'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'

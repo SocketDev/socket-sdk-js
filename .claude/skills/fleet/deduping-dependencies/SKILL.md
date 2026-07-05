@@ -67,7 +67,7 @@ Patches are **fleet-canonical**: the `.patch` lives under `template/patches/` an
 
 - **`@socketregistry` redirects + version overrides** → `FLEET_CANONICAL_OVERRIDES` in `scripts/repo/sync-scaffolding/manifest/catalog.mts`. `catalog:` overrides are valid **only** where the member's catalog carries that entry — bare names with no fleet-wide catalog entry (e.g. `rolldown`/`vite`/`magic-string`) must be a direct version pin or stay repo-specific, or pnpm trips `ERR_PNPM_CATALOG_IN_OVERRIDES`.
 - **Compat patches** → `template/patches/<pkg>@<ver>.patch` + `patchedDependencies` (cascaded).
-- After editing: dogfood-cascade (`node scripts/repo/sync-scaffolding/cli.mts --target . --fix`), then the fleet wave. Validate the bundled-output repos with an actual build (bundling makes format safe; the build proves the API is too).
+- After editing: from `socket-wheelhouse`, run `socket-wheelhouse/scripts/repo/sync-scaffolding/cli.mts --target . --fix` to dogfood-cascade, then the fleet wave. Validate the bundled-output repos with an actual build (bundling makes format safe; the build proves the API is too).
 
 ## Cadence & wiring
 
