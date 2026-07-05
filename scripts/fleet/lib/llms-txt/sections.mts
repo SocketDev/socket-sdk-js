@@ -1,4 +1,4 @@
-/**
+/*
  * @file Deterministic section builder for the llms.txt generator. Discovers
  *   docs, public API entry points, packages, key commands, and conventions from
  *   the repo FS. No AI calls; no network. All link URLs are relative.

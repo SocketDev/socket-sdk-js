@@ -32,7 +32,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "AskUserQuestion|Bash|Edit|MultiEdit|NotebookEdit|Task|Write",
+        "matcher": "AskUserQuestion|Bash|Edit|MultiEdit|NotebookEdit|Task|Workflow|Write",
         "hooks": [
           {
             "type": "command",

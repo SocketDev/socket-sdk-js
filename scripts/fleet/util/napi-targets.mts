@@ -1,4 +1,4 @@
-/**
+/*
  * @file Canonical ABI/NAPI target identifiers, matching napi-rs's naming rules
  *   (`platform-arch[-abi]` derived from the Rust target triple; darwin carries
  *   no ABI segment, linux carries an EXPLICIT `-gnu` or `-musl`, windows

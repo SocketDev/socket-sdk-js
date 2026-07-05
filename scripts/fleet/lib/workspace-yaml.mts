@@ -214,3 +214,35 @@ export function spliceCatalogEntry(
   next.splice(insertAt, 0, newLine)
   return next.join('\n')
 }
+
+/**
+ * Remove the `'<name>': <version>` entry from the `catalog:` block, keyed on
+ * the NAME only — any version/spec matches, quoted or bare. No-op when the
+ * block or the entry is absent.
+ */
+export function removeCatalogEntry(content: string, name: string): string {
+  const lines = content.split('\n')
+  const catalogIdx = lines.findIndex(line => line.trimEnd() === 'catalog:')
+  if (catalogIdx === -1) {
+    return content
+  }
+  let end = catalogIdx + 1
+  while (end < lines.length) {
+    const ln = lines[end]
+    if (ln === undefined || ln === '' || (ln.length > 0 && !/^\s/.test(ln))) {
+      break
+    }
+    end += 1
+  }
+  const needle = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const entryRe = new RegExp(`^\\s*['"]?${needle}['"]?\\s*:`)
+  const idx = lines.findIndex(
+    (line, i) => i > catalogIdx && i < end && entryRe.test(line),
+  )
+  if (idx === -1) {
+    return content
+  }
+  const next = [...lines]
+  next.splice(idx, 1)
+  return next.join('\n')
+}

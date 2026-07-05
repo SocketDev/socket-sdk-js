@@ -1,4 +1,4 @@
-/**
+/*
  * @file Print the pinned version of a Socket package to stdout, reading from
  *   (in order):
  *

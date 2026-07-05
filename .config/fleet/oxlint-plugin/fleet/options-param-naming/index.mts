@@ -25,10 +25,27 @@
  *     would diverge from the upstream type it documents.
  *   - Test files (`*.test.*`, `/test/`) are skipped: they author throwaway
  *     option-shaped helpers, not production option readers.
- *   - The rename is suppressed (report-only) when the same function ALSO has a
- *     param literally named `options` — renaming `opts`→`options` there would
- *     collide. The author must resolve the two-name clash by hand. Bypass: a
- *     `socket-lint: allow options-param-naming` comment.
+ *   - The rename is suppressed (report-only, no suggestion either) when the
+ *     same function ALSO has a param literally named `options` — renaming
+ *     `opts`→`options` there would collide. The author must resolve the
+ *     two-name clash by hand. Bypass: a `socket-lint: allow
+ *     options-param-naming` comment.
+ *
+ *   The remaining rename is `suggest`-only (`meta.hasSuggestions`, no
+ *   `meta.fixable`) — `--fix` / `pnpm run fix` never auto-applies it.
+ *   `hasCanonicalParam` only sees a SIBLING PARAM named `options`; it's blind
+ *   to a pre-existing LOCAL `options` binding elsewhere in the same function
+ *   body, which the mechanical param-only rename can't detect. A rollout that
+ *   auto-applied this rewrite hit exactly that shape in acorn-style code —
+ *   `export function getOptions(opts) { const options: any = {}; ... }` — and
+ *   renamed the param `opts` → `options`, colliding with the function's own
+ *   `const options` and producing `TS2300: Duplicate identifier 'options'`.
+ *   Proving no such local exists anywhere in the function (including inside
+ *   nested scopes the mechanical rename also walks) is a whole-function
+ *   binding-resolution problem this per-param check doesn't do, so the safe
+ *   default is report-only: the rewrite lands via an explicit
+ *   `--fix-suggestions` pass or an editor code action, after a human confirms
+ *   there's no colliding `options` binding in scope.
  */
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
@@ -161,7 +178,8 @@ const rule = {
       category: 'Stylistic Issues',
       recommended: true,
     },
-    fixable: 'code',
+    fixable: undefined,
+    hasSuggestions: true,
     messages: {
       banned:
         'name the options-bag param `options`, not `opts` — `opts` is reserved for the normalized local (`const opts = { __proto__: null, ...options }`). Bypass: add a `socket-lint: allow options-param-naming` comment.',
@@ -220,15 +238,24 @@ const rule = {
       context.report({
         node: banned,
         messageId: 'banned',
-        fix(fixer: RuleFixer) {
-          return refs.map(ref => {
-            const start = ref.range?.[0] ?? ref.start
-            return fixer.replaceTextRange(
-              [start, start + BANNED_PARAM_NAME.length],
-              CANONICAL_PARAM_NAME,
-            )
-          })
-        },
+        // `suggest`, not `fix` — see the file-level doc. `hasCanonicalParam`
+        // only rules out a sibling PARAM named `options`; it can't see a
+        // pre-existing LOCAL `options` binding in the function body, and
+        // renaming into that collides (`TS2300: Duplicate identifier`).
+        suggest: [
+          {
+            messageId: 'banned',
+            fix(fixer: RuleFixer) {
+              return refs.map(ref => {
+                const start = ref.range?.[0] ?? ref.start
+                return fixer.replaceTextRange(
+                  [start, start + BANNED_PARAM_NAME.length],
+                  CANONICAL_PARAM_NAME,
+                )
+              })
+            },
+          },
+        ],
       })
     }
 

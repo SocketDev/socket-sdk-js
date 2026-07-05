@@ -60,6 +60,7 @@ export const KNOWN_CATEGORIES: ReadonlySet<string> = new Set([
   'agents_mirror_tracked',
   'allow_scripts_drift',
   'catalog_drift',
+  'catalog_retired',
   'claude_md_fleet_block_size_warn',
   'claude_md_fleet_drift',
   'claude_md_fleet_missing',
@@ -277,6 +278,7 @@ export const SYNC_TARGETS: Readonly<Record<string, SyncTarget>> = {
     scopes: ALL_SCOPES,
     categories: [
       'catalog_drift',
+      'catalog_retired',
       'workspace_exclude',
       'workspace_exclude_expired',
       'workspace_exclude_glob',
