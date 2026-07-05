@@ -8,6 +8,8 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')
 
@@ -34,9 +36,10 @@ export function resolve(
 ): ResolveResult {
   // Rewrite @socketsecurity/lib-stable imports to local dist if available
   if (useLocalLib && specifier.startsWith('@socketsecurity/lib-stable')) {
-    const subpath =
-      specifier.slice('@socketsecurity/lib-stable'.length) || '/index.js'
-    // Map @socketsecurity/lib-stable to ../socket-lib/dist/
+    const subpath = normalizePath(
+      specifier.slice('@socketsecurity/lib-stable'.length) || '/index.js',
+    )
+    // Rewrite the subpath onto the local lib build root.
     const localPath = path.join(
       libPath,
       subpath.startsWith('/') ? subpath.slice(1) : subpath,

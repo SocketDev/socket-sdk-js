@@ -16,12 +16,12 @@ import type { Node } from '@babel/types'
 import { parse } from '@babel/parser'
 import _traverse from '@babel/traverse'
 import {
-  isTSStringKeyword,
-  isTSNumberKeyword,
-  isTSBooleanKeyword,
-  isTSTypeReference,
   isIdentifier,
   isTSArrayType,
+  isTSBooleanKeyword,
+  isTSNumberKeyword,
+  isTSStringKeyword,
+  isTSTypeReference,
 } from '@babel/types'
 import MagicString from 'magic-string'
 

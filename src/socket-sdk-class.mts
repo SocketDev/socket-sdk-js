@@ -26,8 +26,15 @@ import { pRetry } from '@socketsecurity/lib/promises/retry'
 import { setMaxEventTargetListeners } from '@socketsecurity/lib/events/warning/handler'
 import { urlSearchParamsAsBoolean } from '@socketsecurity/lib/url/search-params'
 
-const abortSignal = getAbortSignal()
 const logger = getDefaultLogger()
+
+let cachedAbortSignal: AbortSignal | undefined
+export function getSdkAbortSignal(): AbortSignal {
+  if (cachedAbortSignal === undefined) {
+    cachedAbortSignal = getAbortSignal()
+  }
+  return cachedAbortSignal
+}
 
 import { httpRequest } from '@socketsecurity/lib/http-request/request'
 
@@ -272,7 +279,7 @@ export class SocketSdk {
         Authorization: `Basic ${btoa(`${trimmedToken}:`)}`,
         'User-Agent': userAgent ?? DEFAULT_USER_AGENT,
       },
-      signal: abortSignal,
+      signal: getSdkAbortSignal(),
       /* c8 ignore next - Optional timeout parameter, tested implicitly through method calls */
       ...(timeout ? { timeout } : {}),
     }
@@ -981,7 +988,7 @@ export class SocketSdk {
     const neededMaxListeners = concurrencyLimit * 2
     // Increase abortSignal max listeners count to avoid Node's MaxListenersExceededWarning.
     /* c8 ignore start - EventTarget max listeners adjustment for high concurrency batch operations, difficult to test reliably. */
-    setMaxEventTargetListeners(abortSignal, neededMaxListeners)
+    setMaxEventTargetListeners(getSdkAbortSignal(), neededMaxListeners)
     /* c8 ignore stop */
     const { components } = componentsObj
     const { length: componentsCount } = components
