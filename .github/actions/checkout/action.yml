@@ -2,7 +2,7 @@
 # `setup-and-install` (Layer 2b) + `_local-not-for-reuse-*.yml` (Layer 4).
 # When this file bumps, the cascade is: 2b → 3 → 4 → external repos.
 # See updating-workflows skill at .claude/skills/updating-workflows/.
-# cascade-data-deps: external-tools.json, .github/actions/lib
+# cascade-data-deps: ., .github, .github/actions/lib, external-tools.json
 # (read at runtime via ${GITHUB_ACTION_PATH}/../… — implicit edges with no
 # `uses:` line; action-pins-are-current.mts tracks them for staleness.)
 
