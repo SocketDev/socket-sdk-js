@@ -42,6 +42,10 @@
       "default": "./types/api-helpers.d.ts"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "node scripts/build.mts",
     "bump": "node scripts/bump.mts",
@@ -156,9 +160,5 @@
   },
   "npm-run-all2": {
     "nodeRun": true
-  },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
   }
 }
