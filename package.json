@@ -156,5 +156,9 @@
   },
   "npm-run-all2": {
     "nodeRun": true
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }
