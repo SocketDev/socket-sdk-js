@@ -30,7 +30,9 @@ describe('cached scan polling', () => {
       expect(result.success).toBe(true)
       expect(nock.isDone()).toBe(true)
       if (result.success) {
-        expect((result.data as typeof body).diff_scan.id).toBe('diff-1')
+        expect((result.data as unknown as typeof body).diff_scan.id).toBe(
+          'diff-1',
+        )
       }
     })
 
