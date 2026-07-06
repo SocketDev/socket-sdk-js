@@ -85,7 +85,7 @@
     "gen:llms-txt": "node scripts/fleet/make-llms-txt.mts --no-ai"
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "2.1.92",
+    "@anthropic-ai/claude-code": "2.1.195",
     "@babel/generator": "7.28.5",
     "@babel/parser": "7.26.3",
     "@babel/traverse": "7.26.4",
@@ -114,7 +114,7 @@
     "dev-null-cli": "2.0.0",
     "ecc-agentshield": "1.4.0",
     "fast-glob": "3.3.3",
-    "form-data": "4.0.5",
+    "form-data": "4.0.6",
     "magic-string": "0.30.14",
     "markdownlint-cli2": "catalog:",
     "mdast-util-from-markdown": "catalog:",

@@ -16,6 +16,7 @@ packages:
   - '.config/fleet/oxlint-plugin/fleet/*'
 
 allowBuilds:
+  '@anthropic-ai/claude-code': true
   cpu-features: false
   protobufjs: false
   rolldown: true
@@ -69,8 +70,10 @@ overrides:
 
   # Repo-specific overrides below.
   'defu': '>=6.1.7'
+  'js-yaml': '4.2.0'
+  'protobufjs': '7.6.3'
   # advisories #51 / #54 (medium) — bump to latest 6.x patch
-  'undici': '6.25.0'
+  'undici': '6.27.0'
   'vite': 'catalog:'
   'which@>=4': '7.0.0'
 
@@ -81,7 +84,7 @@ overrides:
 pmOnFail: warn
 
 catalog:
-  '@anthropic-ai/claude-code': 2.1.197
+  '@anthropic-ai/claude-code': 2.1.195
   '@redwoodjs/agent-ci': 0.16.2
   '@sinclair/typebox': 0.34.49
   '@socketregistry/packageurl-js': 1.4.2
@@ -186,8 +189,6 @@ minimumReleaseAgeExclude:
   - '@rolldown/binding-win32-arm64-msvc@1.1.4'
   # published: 2026-07-01 | removable: 2026-07-08
   - '@rolldown/binding-win32-x64-msvc@1.1.4'
-  # published: 2026-06-30 | removable: 2026-07-07
-  - '@anthropic-ai/claude-code@2.1.197'
   # published: 2026-07-01 | removable: 2026-07-08
   - 'markdownlint-cli2@0.23.0'
   # published: 2026-07-01 | removable: 2026-07-08
