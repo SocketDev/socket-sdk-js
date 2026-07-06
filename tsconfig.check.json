@@ -5,5 +5,5 @@
     "verbatimModuleSyntax": false
   },
   "include": ["./**/*.ts", "./**/*.mts"],
-  "exclude": ["./**/.cache/**", "./**/node_modules/**/*"]
+  "exclude": ["./**/.cache/**", "./**/node_modules/**/*", "./bootstrap/**"]
 }
