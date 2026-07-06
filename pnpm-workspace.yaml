@@ -1,12 +1,6 @@
 loglevel: error
 trustPolicy: no-downgrade
 trustPolicyExclude:
-  # Transitive dep of @vitest/coverage-v8@4.1.6. Same maintainer
-  # (ariperkkio) + same repo + provenance attestation as earlier
-  # versions; the downgrade flag reflects a trusted-publisher ->
-  # provenance evidence-class change, not a takeover.
-  # published: 2026-05-25 | removable: 2026-06-01
-  - 'ast-v8-to-istanbul@1.0.2'
   - 'compromise@14.15.0'
   - 'undici@5.29.0'
 
@@ -145,24 +139,16 @@ minimumReleaseAgeExclude:
   # trust-downgrade flag on 14.15.0. The catalog bump cascaded from the
   # wheelhouse without its matching soak-exclude, leaving frozen installs
   # broken; scoped to the exact tag so a future 14.15.2 still soaks.
-  # vite 8.0.14 ships rolldown 1.0.2 natively (no esbuild transitive).
-  # Scoped to the exact tag so a future vite 8.0.15 still soaks.
   # rolldown 1.0.2 is vite 8.0.14's bundled native rolldown release; the
   # per-platform bindings share its pin. `@rolldown/pluginutils` versions
   # independently — rolldown 1.0.2 depends on `^1.0.0` → resolves to 1.0.1.
   # Listed explicitly per the fleet "no scope globs in soak excludes" rule.
   # rolldown's AST/types layer. rolldown 1.0.3 pins `=0.133.0`.
   - '@redwoodjs/agent-ci'
-  - 'dtu-github-actions'
-  - 'vite'
   - '@rolldown/pluginutils'
-  - '@socketdev/*'
-  - 'ecc-agentshield'
   - 'sfw'
-  - 'socket-*'
   - '@stuie/*'
   - '@ultrathink/*'
-  - '@yuku-parser/*'
   - '@socketoverride/*'
   - 'socket'
   - '@sdxgen/*'
@@ -200,12 +186,12 @@ minimumReleaseAgeExclude:
   - '@rolldown/binding-win32-arm64-msvc@1.1.4'
   # published: 2026-07-01 | removable: 2026-07-08
   - '@rolldown/binding-win32-x64-msvc@1.1.4'
-  # published: 2026-07-01 | removable: 2026-07-08
-  - 'rolldown@1.1.4'
   # published: 2026-06-30 | removable: 2026-07-07
   - '@anthropic-ai/claude-code@2.1.197'
   # published: 2026-07-01 | removable: 2026-07-08
   - 'markdownlint-cli2@0.23.0'
+  # published: 2026-07-01 | removable: 2026-07-08
+  - 'rolldown@1.1.4'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
