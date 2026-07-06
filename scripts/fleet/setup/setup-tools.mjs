@@ -310,17 +310,19 @@ function main() {
   // Self-heal any racked/shimmed package manager whose rack is missing or below
   // its external-tools.json floor (e.g. a Homebrew uv shadowing the racked pin)
   // BEFORE the shims are written — so regenerateShims → resolveReal wraps the
-  // PINNED racked binary, not the below-floor stray. uv is racked here (ahead of
-  // its later installUv) precisely so the uv shim wraps the pinned binary.
+  // PINNED racked binary, not the below-floor stray.
   refreshStaleRacks(platform)
+  // uv BEFORE regenerateShims: installUv writes a plain exec-the-rack shim
+  // (its standalone-bootstrap form), and regenerateShims must run after it so
+  // the sfw-wrapped shim is the one that survives — the firewall wrap on uv is
+  // the contract (docs/references/sfw-local-install.md §3). uv here also
+  // guarantees a hash-locked install for the uv-project tools (SkillSpector's
+  // uv.lock) that run after the bootstrap.
+  installUv(platform)
   regenerateShims(sfwBin, enterprise)
   installCodedb(platform)
   installFff(platform)
   installJanus(platform)
-  // uv before smithers/security-tools: a hash-locked uv install must exist for
-  // the uv-project tools (SkillSpector's uv.lock) that run after the bootstrap.
-  // Idempotent — refreshStaleRacks above may already have racked it.
-  installUv(platform)
   installSmithers()
   bootstrapZeroDepPackages()
   // CI: pnpm + the tool shims live in BIN_DIR, which is NOT on PATH for the

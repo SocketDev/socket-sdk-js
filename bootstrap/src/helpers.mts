@@ -177,8 +177,8 @@ export function spliceFleetBlock(options: SpliceOptions): string {
   }
   if (commentStyle === 'html') {
     let insertIdx = lines.length
-    for (let i = 1; i < lines.length; i += 1) {
-      if (lines[i]!.startsWith('## ')) {
+    for (const [i, line] of lines.entries()) {
+      if (i > 0 && line.startsWith('## ')) {
         insertIdx = i
         break
       }
@@ -205,8 +205,7 @@ export function parseYamlKeyBlocks(
   const lines = yaml.split('\n')
   const blocks: Array<{ key: string; lines: string[] }> = []
   let current: { key: string; lines: string[] } | undefined
-  for (let i = 0, { length } = lines; i < length; i += 1) {
-    const line = lines[i]!
+  for (const line of lines) {
     if (COL0_KEY_RE.test(line)) {
       if (current !== undefined) {
         blocks.push(current)
@@ -238,8 +237,7 @@ export function mergeWorkspaceYaml(options: MergeWorkspaceOptions): string {
   // Fail-closed: check for duplicate fleet keys in consumer.
   const fleetKeySet = new Set(fleetKeys)
   const consumerKeyCounts = new Map<string, number>()
-  for (let i = 0, { length } = consumerBlocks; i < length; i += 1) {
-    const block = consumerBlocks[i]!
+  for (const block of consumerBlocks) {
     if (fleetKeySet.has(block.key)) {
       consumerKeyCounts.set(
         block.key,
@@ -257,16 +255,14 @@ export function mergeWorkspaceYaml(options: MergeWorkspaceOptions): string {
 
   // Build a map of bundle blocks keyed by name.
   const bundleMap = new Map<string, { key: string; lines: string[] }>()
-  for (let i = 0, { length } = bundleBlocks; i < length; i += 1) {
-    const block = bundleBlocks[i]!
+  for (const block of bundleBlocks) {
     bundleMap.set(block.key, block)
   }
 
   // Build result: iterate consumer blocks, replacing fleet-managed ones.
   const resultBlocks: Array<{ key: string; lines: string[] }> = []
   const handledFleetKeys = new Set<string>()
-  for (let i = 0, { length } = consumerBlocks; i < length; i += 1) {
-    const block = consumerBlocks[i]!
+  for (const block of consumerBlocks) {
     if (fleetKeySet.has(block.key)) {
       const bundleBlock = bundleMap.get(block.key)
       if (bundleBlock !== undefined) {
@@ -281,8 +277,7 @@ export function mergeWorkspaceYaml(options: MergeWorkspaceOptions): string {
   }
 
   // Append any fleet keys from the bundle that don't exist in the consumer.
-  for (let i = 0, { length } = fleetKeys; i < length; i += 1) {
-    const key = fleetKeys[i]!
+  for (const key of fleetKeys) {
     if (!handledFleetKeys.has(key)) {
       const bundleBlock = bundleMap.get(key)
       if (bundleBlock !== undefined) {
@@ -329,14 +324,13 @@ export function verifyBundleFiles(
   manifest: BundleManifest,
 ): string[] {
   const problems: string[] = []
-  for (const rel of Object.keys(manifest.files)) {
+  for (const [rel, expected] of Object.entries(manifest.files)) {
     const abs = path.join(filesDir, rel)
     if (!existsSync(abs)) {
       problems.push(`missing from bundle: ${rel}`)
       continue
     }
     const actual = computeSha256(readFileSync(abs))
-    const expected = manifest.files[rel]!
     if (actual !== expected) {
       problems.push(`sha256 mismatch: ${rel} (got ${actual}, want ${expected})`)
     }

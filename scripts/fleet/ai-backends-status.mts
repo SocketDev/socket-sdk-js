@@ -89,7 +89,7 @@ export function summarizeAiBackends(probe: BackendProbe): BackendStatus[] {
     {
       key: 'synthetic',
       label:
-        'Synthetic via opencode (cross-provider backup — Kimi-K2.6 / GLM-5.1)',
+        'Synthetic via opencode (cross-provider backup — Kimi-K2.7-Code / GLM-5.2)',
       ready: hasOpencode && probe.opencodeProviders.has('synthetic'),
       fix: !hasOpencode
         ? 'install opencode (per-developer), then: opencode auth login'

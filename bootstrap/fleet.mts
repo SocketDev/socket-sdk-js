@@ -9,7 +9,63 @@ import { getDefaultLogger } from "@socketsecurity/lib-stable/logger/default";
 import crypto from "node:crypto";
 
 //#region template/base/bootstrap/src/helpers.mts
-function errorMessage(e) {
+type FleetCommentStyle = "hash" | "html" | "slash";
+
+interface BundleManifest {
+	readonly files: Record<string, string>;
+	readonly segments?: readonly SegmentEntry[] | undefined;
+	readonly templateSha: string;
+	readonly version: string;
+	readonly workspaceSegment?: WorkspaceSegmentEntry | undefined;
+}
+
+interface InstallOptions {
+	readonly bundle?: string | undefined;
+	readonly dest?: string | undefined;
+	readonly dryRun?: boolean | undefined;
+	readonly exitCode?: boolean | undefined;
+	readonly ifCurrent?: boolean | undefined;
+	readonly json?: boolean | undefined;
+	readonly manifest?: string | undefined;
+	readonly noHeader?: boolean | undefined;
+	readonly quiet?: boolean | undefined;
+	readonly ref: string;
+	readonly repo?: string | undefined;
+	readonly status?: boolean | undefined;
+	readonly thin?: boolean | undefined;
+	readonly wire?: boolean | undefined;
+}
+
+interface MergeWorkspaceOptions {
+	readonly bundleFleetSections: string;
+	readonly consumerYaml: string;
+	readonly fleetKeys: readonly string[];
+}
+
+interface ThinOptions {
+	readonly dest: string;
+	readonly manifest: BundleManifest;
+}
+
+interface WorkspaceSegmentEntry {
+	readonly fleetKeys: readonly string[];
+	readonly path: string;
+	readonly sha256: string;
+}
+
+interface SegmentEntry {
+	readonly commentStyle: FleetCommentStyle;
+	readonly path: string;
+	readonly sha256: string;
+}
+
+interface SpliceOptions {
+	readonly commentStyle: FleetCommentStyle;
+	readonly fleetBlock: string;
+	readonly target: string;
+}
+
+function errorMessage(e: unknown): string {
 	if (e instanceof Error) return e.message;
 	return String(e);
 }
@@ -17,7 +73,7 @@ function errorMessage(e) {
 * Compute the SHA-256 hex digest of a Buffer — used for both files (byte-
 * identical verification) and fleet-block segments.
 */
-function computeSha256(buf) {
+function computeSha256(buf: Buffer): string {
 	return crypto.createHash("sha256").update(buf).digest("hex");
 }
 /**
@@ -26,7 +82,7 @@ function computeSha256(buf) {
 * here so this file stays dep-0 — it cannot import the wheelhouse's
 * fleet-markers module.
 */
-function beginMarker(style) {
+function beginMarker(style: FleetCommentStyle): string {
 	if (style === "html") return "<!-- <fleet-canonical> -->";
 	if (style === "slash") return "// <fleet-canonical>";
 	return "# <fleet-canonical>";
@@ -34,7 +90,7 @@ function beginMarker(style) {
 /**
 * The close marker line for a given comment style — canonical bare-tag form.
 */
-function endMarker(style) {
+function endMarker(style: FleetCommentStyle): string {
 	if (style === "html") return "<!-- </fleet-canonical> -->";
 	if (style === "slash") return "// </fleet-canonical>";
 	return "# </fleet-canonical>";
@@ -44,12 +100,12 @@ function endMarker(style) {
 * alongside the bare-tag form, so a file carrying either form is re-spliced in
 * one pass.
 */
-function legacyBeginMarker(style) {
+function legacyBeginMarker(style: FleetCommentStyle): string {
 	if (style === "html") return "<!-- BEGIN <fleet-canonical> -->";
 	if (style === "slash") return "// BEGIN <fleet-canonical>";
 	return "# BEGIN <fleet-canonical>";
 }
-function legacyEndMarker(style) {
+function legacyEndMarker(style: FleetCommentStyle): string {
 	if (style === "html") return "<!-- END </fleet-canonical> -->";
 	if (style === "slash") return "// END </fleet-canonical>";
 	return "# END </fleet-canonical>";
@@ -62,11 +118,9 @@ function legacyEndMarker(style) {
 * (`## `) with i > 0, or append at end.
 * - other styles: append with a leading blank line separator.
 */
-function spliceFleetBlock(options) {
-	const { commentStyle, fleetBlock, target } = {
-		__proto__: null,
-		...options
-	};
+function spliceFleetBlock(options: SpliceOptions): string {
+	const opts = { __proto__: null, ...options } as SpliceOptions;
+	const { commentStyle, fleetBlock, target } = opts;
 	const begin = beginMarker(commentStyle);
 	const end = endMarker(commentStyle);
 	const legacy0 = legacyBeginMarker(commentStyle);
@@ -85,7 +139,7 @@ function spliceFleetBlock(options) {
 	}
 	if (commentStyle === "html") {
 		let insertIdx = lines.length;
-		for (let i = 1; i < lines.length; i += 1) if (lines[i].startsWith("## ")) {
+		for (const [i, line] of lines.entries()) if (i > 0 && line.startsWith("## ")) {
 			insertIdx = i;
 			break;
 		}
@@ -106,21 +160,18 @@ const COL0_KEY_RE = /^[A-Za-z][\w-]*:/;
 * owns all lines from the key line up to (not including) the next column-0 key
 * line or EOF.
 */
-function parseYamlKeyBlocks(yaml) {
+function parseYamlKeyBlocks(yaml: string): Array<{ key: string; lines: string[] }> {
 	const lines = yaml.split("\n");
-	const blocks = [];
-	let current;
-	for (let i = 0, { length } = lines; i < length; i += 1) {
-		const line = lines[i];
-		if (COL0_KEY_RE.test(line)) {
-			if (current !== void 0) blocks.push(current);
-			const colonIdx = line.indexOf(":");
-			current = {
-				key: line.slice(0, colonIdx),
-				lines: [line]
-			};
-		} else if (current !== void 0) current.lines.push(line);
-	}
+	const blocks: Array<{ key: string; lines: string[] }> = [];
+	let current: { key: string; lines: string[] } | undefined;
+	for (const line of lines) if (COL0_KEY_RE.test(line)) {
+		if (current !== void 0) blocks.push(current);
+		const colonIdx = line.indexOf(":");
+		current = {
+			key: line.slice(0, colonIdx),
+			lines: [line]
+		};
+	} else if (current !== void 0) current.lines.push(line);
 	if (current !== void 0) blocks.push(current);
 	return blocks;
 }
@@ -129,53 +180,39 @@ function parseYamlKeyBlocks(yaml) {
 * `consumerYaml`, replacing only the keys listed in `fleetKeys`. Non-fleet keys
 * (including `packages:`) are preserved byte-exact. Throws on ambiguous input.
 */
-function mergeWorkspaceYaml(options) {
-	const { bundleFleetSections, consumerYaml, fleetKeys } = {
-		__proto__: null,
-		...options
-	};
+function mergeWorkspaceYaml(options: MergeWorkspaceOptions): string {
+	const opts = { __proto__: null, ...options } as MergeWorkspaceOptions;
+	const { bundleFleetSections, consumerYaml, fleetKeys } = opts;
 	const consumerBlocks = parseYamlKeyBlocks(consumerYaml);
 	const bundleBlocks = parseYamlKeyBlocks(bundleFleetSections);
 	const fleetKeySet = new Set(fleetKeys);
-	const consumerKeyCounts = /* @__PURE__ */ new Map();
-	for (let i = 0, { length } = consumerBlocks; i < length; i += 1) {
-		const block = consumerBlocks[i];
-		if (fleetKeySet.has(block.key)) consumerKeyCounts.set(block.key, (consumerKeyCounts.get(block.key) ?? 0) + 1);
-	}
+	const consumerKeyCounts = new Map<string, number>();
+	for (const block of consumerBlocks) if (fleetKeySet.has(block.key)) consumerKeyCounts.set(block.key, (consumerKeyCounts.get(block.key) ?? 0) + 1);
 	for (const [key, count] of consumerKeyCounts) if (count > 1) throw new Error(`mergeWorkspaceYaml: fleet key "${key}" appears ${count} times at column 0 in consumerYaml — cannot merge safely`);
-	const bundleMap = /* @__PURE__ */ new Map();
-	for (let i = 0, { length } = bundleBlocks; i < length; i += 1) {
-		const block = bundleBlocks[i];
-		bundleMap.set(block.key, block);
-	}
-	const resultBlocks = [];
-	const handledFleetKeys = /* @__PURE__ */ new Set();
-	for (let i = 0, { length } = consumerBlocks; i < length; i += 1) {
-		const block = consumerBlocks[i];
-		if (fleetKeySet.has(block.key)) {
-			const bundleBlock = bundleMap.get(block.key);
-			if (bundleBlock !== void 0) resultBlocks.push(bundleBlock);
-			else resultBlocks.push(block);
-			handledFleetKeys.add(block.key);
-		} else resultBlocks.push(block);
-	}
-	for (let i = 0, { length } = fleetKeys; i < length; i += 1) {
-		const key = fleetKeys[i];
-		if (!handledFleetKeys.has(key)) {
-			const bundleBlock = bundleMap.get(key);
-			if (bundleBlock !== void 0) resultBlocks.push(bundleBlock);
-		}
+	const bundleMap = new Map<string, { key: string; lines: string[] }>();
+	for (const block of bundleBlocks) bundleMap.set(block.key, block);
+	const resultBlocks: Array<{ key: string; lines: string[] }> = [];
+	const handledFleetKeys = new Set<string>();
+	for (const block of consumerBlocks) if (fleetKeySet.has(block.key)) {
+		const bundleBlock = bundleMap.get(block.key);
+		if (bundleBlock !== void 0) resultBlocks.push(bundleBlock);
+		else resultBlocks.push(block);
+		handledFleetKeys.add(block.key);
+	} else resultBlocks.push(block);
+	for (const key of fleetKeys) if (!handledFleetKeys.has(key)) {
+		const bundleBlock = bundleMap.get(key);
+		if (bundleBlock !== void 0) resultBlocks.push(bundleBlock);
 	}
 	return `${resultBlocks.map((b) => b.lines.join("\n")).join("\n").replace(/\n+$/, "")}\n`;
 }
-function run(cmd, args) {
-	execFileSync(cmd, args, { stdio: "inherit" });
+function run(cmd: string, args: readonly string[]): void {
+	execFileSync(cmd, args as string[], { stdio: "inherit" });
 }
-function readManifest(manifestPath) {
-	return JSON.parse(readFileSync(manifestPath, "utf8"));
+function readManifest(manifestPath: string): BundleManifest {
+	return JSON.parse(readFileSync(manifestPath, "utf8")) as BundleManifest;
 }
-function walkFiles(dir, base) {
-	const out = [];
+function walkFiles(dir: string, base: string): string[] {
+	const out: string[] = [];
 	for (const entry of readdirSync(dir, { withFileTypes: true })) {
 		const abs = path.join(dir, entry.name);
 		if (entry.isDirectory()) out.push(...walkFiles(abs, base));
@@ -188,16 +225,15 @@ function walkFiles(dir, base) {
 * Returns a list of problem descriptions — empty means all verified. A single
 * mismatch must abort the whole install (fail closed).
 */
-function verifyBundleFiles(filesDir, manifest) {
-	const problems = [];
-	for (const rel of Object.keys(manifest.files)) {
+function verifyBundleFiles(filesDir: string, manifest: BundleManifest): string[] {
+	const problems: string[] = [];
+	for (const [rel, expected] of Object.entries(manifest.files)) {
 		const abs = path.join(filesDir, rel);
 		if (!existsSync(abs)) {
 			problems.push(`missing from bundle: ${rel}`);
 			continue;
 		}
 		const actual = computeSha256(readFileSync(abs));
-		const expected = manifest.files[rel];
 		if (actual !== expected) problems.push(`sha256 mismatch: ${rel} (got ${actual}, want ${expected})`);
 	}
 	return problems;
@@ -207,10 +243,10 @@ function verifyBundleFiles(filesDir, manifest) {
 * segment mismatch is just as fatal as a file mismatch — the splice result
 * would silently differ from the producer's intent.
 */
-function verifySegments(segmentsDir, manifest) {
+function verifySegments(segmentsDir: string, manifest: BundleManifest): string[] {
 	const segments = manifest.segments;
 	if (!segments || segments.length === 0) return [];
-	const problems = [];
+	const problems: string[] = [];
 	for (const entry of segments) {
 		const destName = `${entry.path.replace(/^\./, "dot-")}.fleetblock`;
 		const abs = path.join(segmentsDir, destName);
@@ -231,7 +267,7 @@ const logger$1 = getDefaultLogger();
 * Copy every verified byte-identical file from `filesDir` into `dest`,
 * creating parent directories as needed.
 */
-function installFiles(filesDir, dest, manifest) {
+function installFiles(filesDir: string, dest: string, manifest: BundleManifest): void {
 	for (const rel of Object.keys(manifest.files)) {
 		const target = path.join(dest, rel);
 		mkdirSync(path.dirname(target), { recursive: true });
@@ -243,7 +279,7 @@ function installFiles(filesDir, dest, manifest) {
 * consumer's existing file (or start with an empty string), splice the block
 * in, and write back.
 */
-function installSegments(segmentsDir, dest, manifest) {
+function installSegments(segmentsDir: string, dest: string, manifest: BundleManifest): void {
 	const segments = manifest.segments;
 	if (!segments || segments.length === 0) return;
 	for (const entry of segments) {
@@ -265,7 +301,7 @@ function installSegments(segmentsDir, dest, manifest) {
 * sections into the consumer's `pnpm-workspace.yaml`. Returns 0 on success,
 * 1 on any error (fail-closed).
 */
-function installWorkspaceSegment(segmentsDir, dest, manifest) {
+function installWorkspaceSegment(segmentsDir: string, dest: string, manifest: BundleManifest): number {
 	const ws = manifest.workspaceSegment;
 	if (ws === void 0) return 0;
 	const fleetFile = path.join(segmentsDir, "pnpm-workspace.yaml.fleet");
@@ -277,11 +313,12 @@ function installWorkspaceSegment(segmentsDir, dest, manifest) {
 	const targetPath = path.join(dest, "pnpm-workspace.yaml");
 	const consumerYaml = existsSync(targetPath) ? readFileSync(targetPath, "utf8") : "";
 	try {
-		writeFileSync(targetPath, mergeWorkspaceYaml({
+		const merged = mergeWorkspaceYaml({
 			bundleFleetSections,
 			consumerYaml,
 			fleetKeys: ws.fleetKeys
-		}));
+		});
+		writeFileSync(targetPath, merged);
 	} catch (e) {
 		logger$1.log(`install-fleet: pnpm-workspace.yaml merge failed — ${errorMessage(e)}. Nothing written.`);
 		return 1;
@@ -299,20 +336,20 @@ const FLEET_STATUS_SCRIPT = "node bootstrap/fleet.mts --status";
 * chained build runs. Idempotent: skips when both are already in place. No-ops
 * if package.json is absent. (Dep-0 file — raw JSON, not EditablePackageJson.)
 */
-function wirePackageJson(dest) {
+function wirePackageJson(dest: string): void {
 	const pkgPath = path.join(dest, "package.json");
 	if (!existsSync(pkgPath)) {
 		logger$1.log(`install-fleet: --wire: no package.json at ${pkgPath} — skipping`);
 		return;
 	}
-	const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-	const scripts = pkg["scripts"] ?? {};
+	const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as Record<string, unknown>;
+	const scripts = (pkg["scripts"] ?? {}) as Record<string, string>;
 	let changed = false;
-	if (scripts["sync-fleet"] !== "node bootstrap/fleet.mts") {
+	if (scripts["sync-fleet"] !== SYNC_FLEET_SCRIPT) {
 		scripts["sync-fleet"] = SYNC_FLEET_SCRIPT;
 		changed = true;
 	}
-	if (scripts["fleet:status"] !== "node bootstrap/fleet.mts --status") {
+	if (scripts["fleet:status"] !== FLEET_STATUS_SCRIPT) {
 		scripts["fleet:status"] = FLEET_STATUS_SCRIPT;
 		changed = true;
 	}
@@ -320,7 +357,7 @@ function wirePackageJson(dest) {
 	if (!prepare) {
 		scripts["prepare"] = PREPARE_FETCH;
 		changed = true;
-	} else if (!prepare.startsWith("node bootstrap/prepare.mts")) {
+	} else if (!prepare.startsWith(PREPARE_FETCH)) {
 		scripts["prepare"] = `${PREPARE_FETCH} && ${prepare}`;
 		changed = true;
 	}
@@ -346,9 +383,12 @@ function wirePackageJson(dest) {
 * A blind 2-segment collapse would gitignore `.github/workflows/` (member CI),
 * `.claude/hooks/repo/`, `.config/repo/` — repo-owned. This never does that.
 */
-function thinIgnoreEntries(manifest) {
+function thinIgnoreEntries(manifest: {
+	files: Record<string, string>;
+	segments?: ReadonlyArray<{ path: string }> | undefined;
+}): string[] {
 	const hybridPaths = new Set((manifest.segments ?? []).map((s) => s.path));
-	const entries = /* @__PURE__ */ new Set();
+	const entries = new Set<string>();
 	for (const p of Object.keys(manifest.files)) {
 		if (hybridPaths.has(p)) continue;
 		const parts = p.split("/");
@@ -362,11 +402,9 @@ function thinIgnoreEntries(manifest) {
 * wholly-fleet bundle paths (see thinIgnoreEntries) plus `.agents/`, then
 * untrack them from git so the fetch action repopulates them going forward.
 */
-function applyThinMode(options) {
-	const { dest, manifest } = {
-		__proto__: null,
-		...options
-	};
+function applyThinMode(options: ThinOptions): void {
+	const opts = { __proto__: null, ...options } as ThinOptions;
+	const { dest, manifest } = opts;
 	const sortedRoots = thinIgnoreEntries(manifest);
 	const blockLines = [".agents/", ...sortedRoots];
 	const fleetBlock = [
@@ -375,11 +413,13 @@ function applyThinMode(options) {
 		endMarker("hash")
 	].join("\n");
 	const gitignorePath = path.join(dest, ".gitignore");
-	writeFileSync(gitignorePath, spliceFleetBlock({
+	const existing = existsSync(gitignorePath) ? readFileSync(gitignorePath, "utf8") : "";
+	const updated = spliceFleetBlock({
 		commentStyle: "hash",
 		fleetBlock,
-		target: existsSync(gitignorePath) ? readFileSync(gitignorePath, "utf8") : ""
-	}));
+		target: existing
+	});
+	writeFileSync(gitignorePath, updated);
 	const rmTargets = [".agents/", ...sortedRoots];
 	if (rmTargets.length > 0) try {
 		execFileSync("git", [
@@ -396,7 +436,7 @@ function applyThinMode(options) {
 		logger$1.log(`install-fleet: --thin: git rm --cached failed (non-fatal) — ${errorMessage(e)}`);
 	}
 }
-const PRUNE_SKIP_NAMES = /* @__PURE__ */ new Set([
+const PRUNE_SKIP_NAMES = new Set([
 	"._.DS_Store",
 	".DS_Store",
 	"Thumbs.db"
@@ -411,7 +451,10 @@ const PRUNE_SKIP_NAMES = /* @__PURE__ */ new Set([
 * files live outside them and are never touched. Normal-ignore files
 * (PRUNE_SKIP_NAMES) are left alone — they are local, not bundle payload.
 */
-function pruneStaleFleetFiles(dest, manifest) {
+function pruneStaleFleetFiles(dest: string, manifest: {
+	files: Record<string, string>;
+	segments?: ReadonlyArray<{ path: string }> | undefined;
+}): number {
 	const kept = new Set(Object.keys(manifest.files));
 	for (const segment of manifest.segments ?? []) kept.add(segment.path);
 	let pruned = 0;
@@ -438,29 +481,38 @@ const LEGACY_APPLIED_MARKER = ".config/fleet/.bundle-applied";
 * file. Lets install-fleet (and the prepare/CI wires) omit an explicit --ref so
 * the pin lives in exactly one place. Returns undefined when absent/malformed.
 */
-function readBundleRef(dest) {
+function readBundleRef(dest: string): string | undefined {
 	const p = path.join(dest, SETTINGS_PATH);
-	if (!existsSync(p)) return;
+	if (!existsSync(p)) return void 0;
 	try {
-		return JSON.parse(readFileSync(p, "utf8")).bundle?.ref;
+		const json = JSON.parse(readFileSync(p, "utf8")) as { bundle?: { ref?: string | undefined } | undefined };
+		return json.bundle?.ref;
 	} catch {
-		return;
+		return void 0;
 	}
 }
+
+interface BundleConfig {
+	readonly ref: string | undefined;
+	readonly cascadeSha: string | undefined;
+}
+
 /**
 * Read the member's full pinned `bundle` block (ref + cascadeSha) from the
 * wheelhouse settings file. The lock-step verify + the `fleet:status` verb need
 * BOTH halves — `readBundleRef` returns only the ref for the fetch default.
 * Returns both as undefined when the file is absent / malformed.
 */
-function readBundleConfig(dest) {
+function readBundleConfig(dest: string): BundleConfig {
 	const p = path.join(dest, SETTINGS_PATH);
 	if (!existsSync(p)) return {
 		ref: void 0,
 		cascadeSha: void 0
 	};
 	try {
-		const json = JSON.parse(readFileSync(p, "utf8"));
+		const json = JSON.parse(readFileSync(p, "utf8")) as {
+			bundle?: { ref?: string | undefined; cascadeSha?: string | undefined } | undefined;
+		};
 		return {
 			cascadeSha: json.bundle?.cascadeSha,
 			ref: json.bundle?.ref
@@ -472,11 +524,11 @@ function readBundleConfig(dest) {
 		};
 	}
 }
-function readAppliedRef(dest) {
+function readAppliedRef(dest: string): string | undefined {
 	const p = path.join(dest, APPLIED_MARKER);
 	return existsSync(p) ? readFileSync(p, "utf8").trim() : void 0;
 }
-function writeAppliedRef(dest, ref) {
+function writeAppliedRef(dest: string, ref: string): void {
 	const p = path.join(dest, APPLIED_MARKER);
 	mkdirSync(path.dirname(p), { recursive: true });
 	writeFileSync(p, `${ref}\n`);
@@ -489,13 +541,43 @@ function writeAppliedRef(dest, ref) {
 const FLEET_REF_RE = /^fleet-[0-9a-f]{7,}$/;
 const FULL_SHA_RE = /^[0-9a-f]{40}$/;
 const FUZZY_REF_RE = /[\^~*]|\b(?:canary|head|latest|lts|main|master|next)\b/i;
+
+type LockStepStateName = "current" | "out-of-sync" | "update-available";
+
+interface LockStepConfig {
+	readonly ref: string;
+	readonly cascadeSha: string;
+}
+
+interface LockStepInputs {
+	readonly config: LockStepConfig;
+	readonly pinnedTemplateSha: string | undefined;
+	readonly newestTemplateSha: string | undefined;
+	readonly newestRef: string | undefined;
+}
+
+interface LockStepState {
+	readonly state: LockStepStateName;
+	readonly inLockStep: boolean;
+	readonly updateAvailable: boolean;
+	readonly config: LockStepConfig;
+	readonly pinnedTemplateSha: string | undefined;
+	readonly newestTemplateSha: string | undefined;
+	readonly newestRef: string | undefined;
+}
+
+interface RefValidation {
+	readonly ok: boolean;
+	readonly errors: readonly string[];
+}
+
 /**
 * Validate a `bundle.ref` value at WRITE time. Rejects an empty, fuzzy, ranged,
 * or aliased ref — only an exact `fleet-<hex>` tag is legal. Returns the list
 * of problems (empty === valid).
 */
-function validateRef(ref) {
-	const errors = [];
+function validateRef(ref: unknown): RefValidation {
+	const errors: string[] = [];
 	if (typeof ref !== "string" || ref.length === 0) {
 		errors.push("`bundle.ref` must be a non-empty string.");
 		return {
@@ -514,8 +596,8 @@ function validateRef(ref) {
 * Validate a `bundle.cascadeSha` value at WRITE time. Rejects anything that is
 * not a bare 40-char lowercase hex SHA (no `v` prefix, no range, no alias).
 */
-function validateCascadeSha(cascadeSha) {
-	const errors = [];
+function validateCascadeSha(cascadeSha: unknown): RefValidation {
+	const errors: string[] = [];
 	if (typeof cascadeSha !== "string" || cascadeSha.length === 0) {
 		errors.push("`bundle.cascadeSha` must be a non-empty string.");
 		return {
@@ -533,12 +615,12 @@ function validateCascadeSha(cascadeSha) {
 * Validate a complete `bundle` block (both fields together). Used by the
 * write-time gate in the config reader + the cascade stamper.
 */
-function validateBundleBlock(bundle) {
+function validateBundleBlock(bundle: unknown): RefValidation {
 	if (typeof bundle !== "object" || bundle === null || Array.isArray(bundle)) return {
 		ok: false,
 		errors: ["`bundle` must be an object."]
 	};
-	const b = bundle;
+	const b = bundle as { ref?: unknown; cascadeSha?: unknown };
 	const refResult = validateRef(b.ref);
 	const shaResult = validateCascadeSha(b.cascadeSha);
 	const errors = [...refResult.errors, ...shaResult.errors];
@@ -559,11 +641,11 @@ function validateBundleBlock(bundle) {
 * invariant cannot be confirmed, so the state is OUT-OF-SYNC — fail loud rather
 * than assume current.
 */
-function resolveLockStepState(inputs) {
+function resolveLockStepState(inputs: LockStepInputs): LockStepState {
 	const { config, newestRef, newestTemplateSha, pinnedTemplateSha } = inputs;
 	const inLockStep = pinnedTemplateSha !== void 0 && config.cascadeSha === pinnedTemplateSha;
 	const updateAvailable = inLockStep && newestTemplateSha !== void 0 && newestTemplateSha !== pinnedTemplateSha;
-	let state;
+	let state: LockStepStateName;
 	if (!inLockStep) state = "out-of-sync";
 	else if (updateAvailable) state = "update-available";
 	else state = "current";
@@ -583,19 +665,26 @@ function resolveLockStepState(inputs) {
 * 10 UPDATE-AVAILABLE WITH --exit-code (a clean "drift detected" signal).
 * 1  OUT-OF-SYNC — ALWAYS (broken invariant, fail loud regardless of flags).
 */
-function lockStepExitCode(state, options) {
+function lockStepExitCode(state: LockStepState, options?: { exitCode?: boolean | undefined } | undefined): number {
 	if (state.state === "out-of-sync") return 1;
 	if (state.state === "update-available") return options?.exitCode ? 10 : 0;
 	return 0;
 }
 const ERR_LOCKSTEP_MISMATCH = "ERR_WHEELHOUSE_LOCKSTEP_MISMATCH";
+
+interface LockStepErrorParts {
+	readonly ref: string;
+	readonly pinnedTemplateSha: string | undefined;
+	readonly cascadeSha: string;
+}
+
 /**
 * Build the pnpm-style lock-step mismatch error from the PARSED fields (never
 * stitched from substrings). Lines: code + What / Where / Wanted / Saw / Fix.
 * Prints BOTH the raw ref and the resolved release templateSha so the operator
 * can see which side drifted.
 */
-function formatLockStepError(parts) {
+function formatLockStepError(parts: LockStepErrorParts): string {
 	const { cascadeSha, pinnedTemplateSha, ref } = parts;
 	const sawTemplate = pinnedTemplateSha === void 0 ? "no release found at that ref" : `release templateSha ${pinnedTemplateSha}`;
 	return [
@@ -610,20 +699,26 @@ function formatLockStepError(parts) {
 const NOTICE_STORE_REL = "node_modules/.cache/socket-wheelhouse/update-notice.json";
 const TWENTY_FOUR_HOURS_MS = 1440 * 60 * 1e3;
 const UPDATE_NOTIFIER_OPT_OUT_ENV = "WHEELHOUSE_NO_UPDATE_NOTIFIER";
-function readNoticeStore(dest) {
+
+interface NoticeStore {
+	readonly lastCheckMs: number;
+	readonly lastSeenRef: string | undefined;
+}
+
+function readNoticeStore(dest: string): NoticeStore | undefined {
 	const p = path.join(dest, NOTICE_STORE_REL);
-	if (!existsSync(p)) return;
+	if (!existsSync(p)) return void 0;
 	try {
-		const json = JSON.parse(readFileSync(p, "utf8"));
+		const json = JSON.parse(readFileSync(p, "utf8")) as { lastCheckMs?: unknown; lastSeenRef?: unknown };
 		return {
 			lastCheckMs: typeof json.lastCheckMs === "number" ? json.lastCheckMs : 0,
 			lastSeenRef: typeof json.lastSeenRef === "string" ? json.lastSeenRef : void 0
 		};
 	} catch {
-		return;
+		return void 0;
 	}
 }
-function writeNoticeStore(dest, store) {
+function writeNoticeStore(dest: string, store: NoticeStore): void {
 	const p = path.join(dest, NOTICE_STORE_REL);
 	mkdirSync(path.dirname(p), { recursive: true });
 	writeFileSync(p, `${JSON.stringify({
@@ -631,6 +726,16 @@ function writeNoticeStore(dest, store) {
 		lastSeenRef: store.lastSeenRef
 	}, void 0, 2)}\n`);
 }
+
+interface NoticeDecisionInputs {
+	readonly updateAvailable: boolean;
+	readonly newestRef: string | undefined;
+	readonly store: NoticeStore | undefined;
+	readonly nowMs: number;
+	readonly ci: boolean;
+	readonly optedOut: boolean;
+}
+
 /**
 * Decide whether the passive update notice should print. Pure so the throttle +
 * CI-suppress + opt-out unit-test offline. The notice fires only when: a newer
@@ -638,7 +743,7 @@ function writeNoticeStore(dest, store) {
 * empty, ≥24h have passed since the last check, OR the newest ref changed since
 * last seen (a fresh release jumps the throttle).
 */
-function shouldShowNotice(inputs) {
+function shouldShowNotice(inputs: NoticeDecisionInputs): boolean {
 	const { ci, newestRef, nowMs, optedOut, store, updateAvailable } = inputs;
 	if (!updateAvailable || ci || optedOut || newestRef === void 0) return false;
 	if (store === void 0) return true;
@@ -650,7 +755,7 @@ function shouldShowNotice(inputs) {
 * bare re-fetch). Honors NO_COLOR by dropping the box-drawing emphasis to plain
 * ASCII when `color` is false.
 */
-function formatUpdateNotice(options) {
+function formatUpdateNotice(options: { readonly newestRef: string; readonly color: boolean }): string {
 	const { color, newestRef } = options;
 	const lines = [
 		"A newer fleet scaffolding release is available.",
@@ -674,7 +779,7 @@ const logger = getDefaultLogger();
 const DEFAULT_REPO = "SocketDev/socket-wheelhouse";
 const MANIFEST_NAME = "release-bundle-manifest.json";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-function parseArgs(argv) {
+function parseArgs(argv: readonly string[]): InstallOptions {
 	const opts = {
 		__proto__: null,
 		bundle: void 0,
@@ -691,9 +796,25 @@ function parseArgs(argv) {
 		status: false,
 		thin: false,
 		wire: false
+	} as unknown as {
+		bundle: string | undefined;
+		dest: string;
+		dryRun: boolean;
+		exitCode: boolean;
+		ifCurrent: boolean;
+		json: boolean;
+		manifest: string | undefined;
+		noHeader: boolean;
+		quiet: boolean;
+		ref: string;
+		repo: string;
+		status: boolean;
+		thin: boolean;
+		wire: boolean;
 	};
 	for (let i = 0, { length } = argv; i < length; i += 1) {
 		const arg = argv[i];
+		if (arg === void 0) break;
 		if (arg === "--dest") opts.dest = argv[++i] ?? repoRoot;
 		else if (arg === "--bundle") opts.bundle = argv[++i];
 		else if (arg === "--dry-run") opts.dryRun = true;
@@ -709,7 +830,7 @@ function parseArgs(argv) {
 		else if (arg === "--thin") opts.thin = true;
 		else if (arg === "--wire") opts.wire = true;
 	}
-	return opts;
+	return opts as InstallOptions;
 }
 /**
 * Resolve a release's `templateSha` from its manifest asset via gh. Dep-0:
@@ -717,8 +838,8 @@ function parseArgs(argv) {
 * reads the stamped field. Returns undefined when the release / asset / field
 * is absent (offline, no such tag) — the caller decides whether that's fatal.
 */
-function resolveReleaseTemplateSha(ref, repo) {
-	if (!ref) return;
+function resolveReleaseTemplateSha(ref: string, repo: string): string | undefined {
+	if (!ref) return void 0;
 	const tmp = mkdtempSync(path.join(os.tmpdir(), "fleet-status-"));
 	try {
 		execFileSync("gh", [
@@ -737,11 +858,11 @@ function resolveReleaseTemplateSha(ref, repo) {
 			"ignore"
 		] });
 		const manifestPath = path.join(tmp, MANIFEST_NAME);
-		if (!existsSync(manifestPath)) return;
-		const json = JSON.parse(readFileSync(manifestPath, "utf8"));
+		if (!existsSync(manifestPath)) return void 0;
+		const json = JSON.parse(readFileSync(manifestPath, "utf8")) as { templateSha?: unknown };
 		return typeof json.templateSha === "string" ? json.templateSha : void 0;
 	} catch {
-		return;
+		return void 0;
 	} finally {
 		rmSync(tmp, {
 			recursive: true,
@@ -753,7 +874,7 @@ function resolveReleaseTemplateSha(ref, repo) {
 * Resolve the NEWEST `fleet-*` release tag via `gh release list`. Returns the
 * latest tag, or undefined when none / offline. The list is newest-first.
 */
-function resolveNewestRef(repo) {
+function resolveNewestRef(repo: string): string | undefined {
 	try {
 		const out = execFileSync("gh", [
 			"release",
@@ -772,11 +893,11 @@ function resolveNewestRef(repo) {
 				"ignore"
 			]
 		});
-		const rows = JSON.parse(out);
+		const rows = JSON.parse(out) as Array<{ tagName?: unknown; createdAt?: unknown }>;
 		for (const row of rows) if (typeof row.tagName === "string" && row.tagName.startsWith("fleet-")) return row.tagName;
-		return;
+		return void 0;
 	} catch {
-		return;
+		return void 0;
 	}
 }
 /**
@@ -787,7 +908,11 @@ function resolveNewestRef(repo) {
 * `cascadeSha` (a non-lock-step member — the legacy ref-only pin still
 * fetches). Logs the parsed error + returns false on mismatch.
 */
-function assertLockStep(options) {
+function assertLockStep(options: {
+	readonly cascadeSha: string | undefined;
+	readonly manifestTemplateSha: string;
+	readonly ref: string;
+}): boolean {
 	const { cascadeSha, manifestTemplateSha, ref } = options;
 	if (cascadeSha === void 0) return true;
 	if (cascadeSha === manifestTemplateSha) return true;
@@ -804,11 +929,8 @@ function assertLockStep(options) {
 * state, prints the table / JSON / line, and returns the terraform-style exit
 * code (0 CURRENT, 0|10 UPDATE-AVAILABLE, 1 OUT-OF-SYNC).
 */
-function runStatus(options) {
-	const opts = {
-		__proto__: null,
-		...options
-	};
+function runStatus(options: InstallOptions): number {
+	const opts = { __proto__: null, ...options } as InstallOptions;
 	const dest = path.resolve(opts.dest ?? repoRoot);
 	const repo = opts.repo ?? DEFAULT_REPO;
 	const cfg = readBundleConfig(dest);
@@ -817,16 +939,17 @@ function runStatus(options) {
 		if (!opts.quiet) logger.log("fleet:status: no bundle.ref pinned in .config/socket-wheelhouse.json — not a thin consumer.");
 		return 0;
 	}
-	const config = {
+	const config: LockStepConfig = {
 		cascadeSha: cfg.cascadeSha ?? "",
 		ref
 	};
 	const pinnedTemplateSha = resolveReleaseTemplateSha(ref, repo);
 	const newestRef = resolveNewestRef(repo);
+	const newestTemplateSha = newestRef === void 0 ? void 0 : newestRef === ref ? pinnedTemplateSha : resolveReleaseTemplateSha(newestRef, repo);
 	const state = resolveLockStepState({
 		config,
 		newestRef,
-		newestTemplateSha: newestRef === void 0 ? void 0 : newestRef === ref ? pinnedTemplateSha : resolveReleaseTemplateSha(newestRef, repo),
+		newestTemplateSha,
 		pinnedTemplateSha
 	});
 	if (opts.json) {
@@ -838,7 +961,7 @@ function runStatus(options) {
 * Stable-keyed JSON shape for `fleet:status --json`. Keys never change between
 * states so a script can read them unconditionally.
 */
-function statusJson(state) {
+function statusJson(state: LockStepState): Record<string, unknown> {
 	return {
 		cascadeSha: state.config.cascadeSha,
 		inLockStep: state.inLockStep,
@@ -850,7 +973,7 @@ function statusJson(state) {
 		updateAvailable: state.updateAvailable
 	};
 }
-function printStatusReport(state, options) {
+function printStatusReport(state: LockStepState, options: { noHeader: boolean }): void {
 	const pinnedCell = `${state.config.ref} (${state.pinnedTemplateSha ?? "—"})`;
 	const landedCell = state.config.cascadeSha || "—";
 	const newestCell = state.newestRef === void 0 ? "—" : `${state.newestRef} (${state.newestTemplateSha ?? "—"})`;
@@ -879,7 +1002,11 @@ function printStatusReport(state, options) {
 * the status hard-fail — it only silences the box. Returns true when a notice
 * was printed.
 */
-function maybeShowUpdateNotice(options) {
+function maybeShowUpdateNotice(options: {
+	readonly dest: string;
+	readonly updateAvailable: boolean;
+	readonly newestRef: string | undefined;
+}): boolean {
 	const { dest, newestRef, updateAvailable } = options;
 	const store = readNoticeStore(dest);
 	if (!shouldShowNotice({
@@ -905,11 +1032,8 @@ function maybeShowUpdateNotice(options) {
 * Download, verify, and apply the fleet bundle identified by `options.ref`.
 * Returns 0 on success, 1 on any error.
 */
-async function installFleet(options) {
-	const opts = {
-		__proto__: null,
-		...options
-	};
+async function installFleet(options: InstallOptions): Promise<number> {
+	const opts = { __proto__: null, ...options } as InstallOptions;
 	const dest = path.resolve(opts.dest ?? repoRoot);
 	const bundlePath = opts.bundle !== void 0 ? path.resolve(opts.bundle) : void 0;
 	const manifestPath = opts.manifest !== void 0 ? path.resolve(opts.manifest) : void 0;
@@ -929,8 +1053,8 @@ async function installFleet(options) {
 	const repo = opts.repo ?? DEFAULT_REPO;
 	const tmp = mkdtempSync(path.join(os.tmpdir(), "fleet-install-"));
 	try {
-		let sourceTarball;
-		let sourceManifest;
+		let sourceTarball: string;
+		let sourceManifest: string;
 		if (bundlePath !== void 0) {
 			sourceTarball = bundlePath;
 			sourceManifest = manifestPath ?? path.join(path.dirname(bundlePath), MANIFEST_NAME);

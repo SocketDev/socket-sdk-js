@@ -129,7 +129,10 @@ export function parseArgs(argv: readonly string[]): InstallOptions {
     wire: boolean
   }
   for (let i = 0, { length } = argv; i < length; i += 1) {
-    const arg = argv[i]!
+    const arg = argv[i]
+    if (arg === undefined) {
+      break
+    }
     if (arg === '--dest') {
       opts.dest = argv[++i] ?? repoRoot
     } else if (arg === '--bundle') {

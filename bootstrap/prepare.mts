@@ -164,27 +164,19 @@ export async function maybeNotifyUpdate(): Promise<void> {
     return
   }
   try {
-    const {
-      maybeShowUpdateNotice,
-      readBundleConfig,
-      resolveNewestRef,
-      resolveReleaseTemplateSha,
-    } = (await import(pathToFileURL(fleet).href)) as {
-      maybeShowUpdateNotice: (o: {
-        dest: string
-        updateAvailable: boolean
-        newestRef: string | undefined
-      }) => boolean
-      readBundleConfig: (dest: string) => {
-        ref: string | undefined
-        cascadeSha: string | undefined
+    const { maybeShowUpdateNotice, readBundleConfig, resolveNewestRef } =
+      (await import(pathToFileURL(fleet).href)) as {
+        maybeShowUpdateNotice: (o: {
+          dest: string
+          updateAvailable: boolean
+          newestRef: string | undefined
+        }) => boolean
+        readBundleConfig: (dest: string) => {
+          ref: string | undefined
+          cascadeSha: string | undefined
+        }
+        resolveNewestRef: (repo: string) => string | undefined
       }
-      resolveNewestRef: (repo: string) => string | undefined
-      resolveReleaseTemplateSha: (
-        ref: string,
-        repo: string,
-      ) => string | undefined
-    }
     const cfg = readBundleConfig(REPO_ROOT)
     if (!cfg.ref) {
       return

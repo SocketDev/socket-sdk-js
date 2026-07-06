@@ -77,7 +77,7 @@ Fireworks (`api.fireworks.ai/inference/v1`) and Synthetic (`api.synthetic.new/op
 | ------------ | ----------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | anthropic    | `anthropic/<model>`                             | `claude-opus-4-8`, `claude-haiku-4-5`                                                     |
 | fireworks-ai | `fireworks-ai/accounts/fireworks/models/<id>`   | `glm-5p2` (quality leader), `kimi-k2p7-code` (code specialist), `deepseek-v4-pro`         |
-| synthetic    | `synthetic/hf:<org>/<model>`                    | `hf:moonshotai/Kimi-K2.6`, `hf:zai-org/GLM-5.1`, `hf:Qwen/Qwen3-Coder-480B-A35B-Instruct` |
+| synthetic    | `synthetic/hf:<org>/<model>`                    | `hf:moonshotai/Kimi-K2.7-Code`, `hf:zai-org/GLM-5.2`, `hf:Qwen/Qwen3-Coder-480B-A35B-Instruct` |
 | moonshotai   | `moonshotai/<model>` (or the `kimi` direct CLI) | `Kimi-K2.6`, `Kimi-K2-Thinking`                                                           |
 
 Model choice by job (research-backed, as of 2026-06):
@@ -85,7 +85,7 @@ Model choice by job (research-backed, as of 2026-06):
 - **Quality code + reasoning fall-over → `glm-5p2`** (GLM-5.2, Fireworks). The strongest open-weight on the one shared independent benchmark — Artificial Analysis Intelligence Index 51 vs Kimi-K2.7's 42 — and ahead on published SWE-bench Pro / Terminal-Bench. This is the default stand-in when Anthropic is unavailable for plan execution or quality code.
 - **Cost-sensitive / long-autonomous code → `kimi-k2p7-code`** (Kimi-K2.7-Code, Fireworks). A code SPECIALIST, not a generalist: ~$0.95/Mtok input + ~30% fewer reasoning tokens per accepted change, and the week-one edge on multi-hour autonomous bug-fix loops. Reach for it when cost or a long agent run dominates, not for general reasoning.
 - **Cheap bulk / mechanical → `deepseek-v4-flash` or `gpt-oss-20b`** (Fireworks). Classification, summarization, drafting — don't spend a flagship on grunt work (token-spend floor).
-- **Cross-provider backup (Fireworks itself down) → Synthetic**, flat-rate: `hf:moonshotai/Kimi-K2.6` + `hf:zai-org/GLM-5.1` (Synthetic trails Fireworks by one version — it carries no 5.2 / 2.7), or `hf:Qwen/Qwen3-Coder-480B-A35B-Instruct` for code.
+- **Cross-provider backup (Fireworks itself down) → Synthetic**, flat-rate: `hf:moonshotai/Kimi-K2.7-Code` + `hf:zai-org/GLM-5.2`, or `hf:Qwen/Qwen3-Coder-480B-A35B-Instruct` for code.
 - **Reserve Anthropic for planning + deep reasoning.** The live roster is `opencode models` — it drifts; re-run it rather than trusting this list.
 
 Reasoning effort on the HTTP providers is per-model (the OpenAI `reasoning_effort` field where the model supports it) — only set it for a model that accepts it.

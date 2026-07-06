@@ -38,6 +38,8 @@ The `FLEET_SYNC=1` sentinel is recognized by the wheelhouse `no-revert-guard` + 
 
 ### Mode 2: `registry-pins` (tool-version layered-pin cascade)
 
+> **Migration-terminal.** Mode 2's registry leg exists only while fleet CI consumes socket-registry's reusable workflows. The workflow-inlining migration (D1/D2, 2026-07-04) removes that consumption; when the last reusable reference is inlined, delete this mode and `lib/cascade-tool-pins.mts`, and route tool-pin propagation solely through `scripts/repo/pipeline.mts` (decision 2026-07-05, tracked as the pin-cascade arbitration task).
+
 Bumping a core / security tool (pnpm, zizmor, sfw, …) threads through the fleet differently from a template cascade: socket-registry is the workspace + CI authority, so the bump flows **wheelhouse → socket-registry → fleet**. The wheelhouse normally dogfoods itself first, but for CI it _consumes_ the registry's reusable workflows — so the registry's shared-workflow pin must land (and go CI-green) before the wheelhouse can validate the CI side.
 
 🚨 **Dogfood from a place of passing locally.** Before any dogfood cascade run the local-green gate IN ORDER: `pnpm run update` → `pnpm i` → `pnpm run fix --all` → `pnpm run check --all` → `pnpm run test` (or `pnpm run cover`); if green, commit (and fix + commit), THEN dogfood. `pnpm run update` runs FIRST so pending catalog / tool drift resolves in its own commit and does not ride the feature dogfood. Canonical reference + rationale: `docs/agents.md/repo/fleet-sync-and-release-flow.md` (stage b, DOGFOOD).
