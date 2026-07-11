@@ -1,4 +1,6 @@
-/** @fileoverview Tests for quota utility functions. */
+/**
+ * @file Tests for quota utility functions.
+ */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
@@ -11,7 +13,10 @@ import {
   getQuotaUsageSummary,
   getRequiredPermissions,
   hasQuotaForMethods,
-} from '../../src/quota-utils'
+} from '../../src/quota-utils.mts'
+
+import type * as NodeFs from 'node:fs'
+import type * as MemoizeModule from '@socketsecurity/lib/memo/memoize'
 
 describe('Quota Utils', () => {
   describe('getQuotaCost', () => {
@@ -187,10 +192,13 @@ describe('Quota Utils', () => {
     it('should have sorted method names within each cost level', () => {
       const summary = getQuotaUsageSummary()
 
-      Object.values(summary).forEach(methods => {
+      const methodsList = Object.values(summary)
+      for (let i = 0, { length } = methodsList; i < length; i += 1) {
+        const methods = methodsList[i]!
+        // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); the spread already copies so in-place sort is safe.
         const sorted = [...methods].sort()
         expect(methods).toEqual(sorted)
-      })
+      }
     })
   })
 
@@ -261,20 +269,29 @@ describe('Quota Utils', () => {
     })
 
     it('should throw error when requirements.json file cannot be read', async () => {
-      vi.doMock('node:fs', () => ({
-        existsSync: vi.fn(() => true),
-        readFileSync: vi.fn(() => {
-          throw new Error('ENOENT: no such file or directory')
-        }),
-      }))
+      vi.doMock(
+        import('node:fs'),
+        () =>
+          ({
+            existsSync: vi.fn(() => true),
+            readFileSync: vi.fn(() => {
+              throw new Error('ENOENT: no such file or directory')
+            }),
+          }) as unknown as typeof NodeFs,
+      )
 
-      vi.doMock('@socketsecurity/lib/memoization', () => ({
-        memoize: (fn: unknown) => fn,
-        once: (fn: unknown) => fn,
-      }))
+      vi.doMock(
+        import('@socketsecurity/lib/memo/memoize'),
+        () =>
+          ({
+            memoize: (fn: unknown) => fn,
+            once: (fn: unknown) => fn,
+          }) as unknown as typeof MemoizeModule,
+      )
 
       const { getQuotaCost: getQuotaCostMocked } =
-        await import('../../src/quota-utils')
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
+        await import('../../src/quota-utils.mts')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',
@@ -282,18 +299,27 @@ describe('Quota Utils', () => {
     })
 
     it('should throw error when requirements.json contains invalid JSON', async () => {
-      vi.doMock('node:fs', () => ({
-        existsSync: vi.fn(() => true),
-        readFileSync: vi.fn(() => 'invalid json content {'),
-      }))
+      vi.doMock(
+        import('node:fs'),
+        () =>
+          ({
+            existsSync: vi.fn(() => true),
+            readFileSync: vi.fn(() => 'invalid json content {'),
+          }) as unknown as typeof NodeFs,
+      )
 
-      vi.doMock('@socketsecurity/lib/memoization', () => ({
-        memoize: (fn: unknown) => fn,
-        once: (fn: unknown) => fn,
-      }))
+      vi.doMock(
+        import('@socketsecurity/lib/memo/memoize'),
+        () =>
+          ({
+            memoize: (fn: unknown) => fn,
+            once: (fn: unknown) => fn,
+          }) as unknown as typeof MemoizeModule,
+      )
 
       const { getQuotaCost: getQuotaCostMocked } =
-        await import('../../src/quota-utils')
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
+        await import('../../src/quota-utils.mts')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',
@@ -301,18 +327,27 @@ describe('Quota Utils', () => {
     })
 
     it('should throw error when requirements.json file does not exist', async () => {
-      vi.doMock('node:fs', () => ({
-        existsSync: vi.fn(() => false),
-        readFileSync: vi.fn(),
-      }))
+      vi.doMock(
+        import('node:fs'),
+        () =>
+          ({
+            existsSync: vi.fn(() => false),
+            readFileSync: vi.fn(),
+          }) as unknown as typeof NodeFs,
+      )
 
-      vi.doMock('@socketsecurity/lib/memoization', () => ({
-        memoize: (fn: unknown) => fn,
-        once: (fn: unknown) => fn,
-      }))
+      vi.doMock(
+        import('@socketsecurity/lib/memo/memoize'),
+        () =>
+          ({
+            memoize: (fn: unknown) => fn,
+            once: (fn: unknown) => fn,
+          }) as unknown as typeof MemoizeModule,
+      )
 
       const { getQuotaCost: getQuotaCostMocked } =
-        await import('../../src/quota-utils')
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
+        await import('../../src/quota-utils.mts')
 
       expect(() => getQuotaCostMocked('someMethod')).toThrow(
         'Failed to load SDK method requirements',

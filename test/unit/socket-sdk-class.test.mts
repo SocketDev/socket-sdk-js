@@ -1,14 +1,14 @@
-/** @fileoverview Tests for streaming behavior in SocketSdk download/stream methods. */
+/**
+ * @file Tests for streaming behavior in SocketSdk download/stream methods.
+ */
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-const { SocketSdk } = await import('../../src/socket-sdk-class.js')
-
-const { setupLocalHttpServer } =
-  await import('../utils/local-server-helpers.mts')
+import { SocketSdk } from '../../src/socket-sdk-class.mts'
+import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
@@ -27,7 +27,7 @@ describe('SocketSdk - Streaming downloads', () => {
   )
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(path.join(tmpdir(), 'sdk-stream-test-'))
+    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'sdk-stream-test-'))
   })
 
   afterEach(() => {
@@ -77,7 +77,9 @@ describe('SocketSdk - Streaming downloads', () => {
     const chunks: Buffer[] = []
     const origWrite = process.stdout.write
     process.stdout.write = ((chunk: unknown): boolean => {
-      if (Buffer.isBuffer(chunk)) chunks.push(chunk)
+      if (Buffer.isBuffer(chunk)) {
+        chunks.push(chunk)
+      }
       return true
     }) as typeof process.stdout.write
 

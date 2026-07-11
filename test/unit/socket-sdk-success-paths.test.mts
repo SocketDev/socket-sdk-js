@@ -1,4 +1,6 @@
-/** @fileoverview Tests for SDK method success paths to increase coverage. */
+/**
+ * @file Tests for SDK method success paths to increase coverage.
+ */
 
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
@@ -191,8 +193,9 @@ describe('SocketSdk - Success Path Coverage', () => {
     })
 
     it('should successfully get a full scan', async () => {
+      // getFullScan reads the cached immutable store by default (cached=true).
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/full-scans/scan-123')
+        .get('/v0/orgs/test-org/full-scans/scan-123?cached=true')
         .reply(200, { data: { id: 'scan-123' } })
 
       const result = await getClient().getFullScan('test-org', 'scan-123')
@@ -244,7 +247,7 @@ describe('SocketSdk - Success Path Coverage', () => {
   describe('SBOM Export', () => {
     it('should successfully export SPDX', async () => {
       nock('https://api.socket.dev')
-        .get('/v0/orgs/test-org/full-scans/scan-123/sbom/export/spdx')
+        .get('/v0/orgs/test-org/export/spdx/scan-123')
         .reply(200, { data: { spdxVersion: 'SPDX-2.3' } })
 
       const result = await getClient().exportSPDX('test-org', 'scan-123')
@@ -269,7 +272,7 @@ describe('SocketSdk - Success Path Coverage', () => {
             // Missing enabled property
             { key: 'no-enabled-prop' },
             // Null item
-            null,
+            undefined,
             // Missing key property
             { enabled: true },
           ],

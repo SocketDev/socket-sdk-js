@@ -1,10 +1,10 @@
 /**
- * @fileoverview Tests for v3.0 strict type system.
- * Validates that new strict types properly reflect API responses.
+ * @file Tests for v3.0 strict type system. Validates that new strict types
+ *   properly reflect API responses.
  */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import os from 'node:os'
+import path from 'node:path'
 
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
@@ -16,7 +16,7 @@ import type {
   FullScanListResult,
   FullScanResult,
   OrganizationsResult,
-} from '../../src/types-strict'
+} from '../../src/types-strict.mts'
 
 describe.sequential('Strict Types - v3.0', () => {
   const getClient = setupTestClient('test-token', { retries: 0 })
@@ -41,17 +41,22 @@ describe.sequential('Strict Types - v3.0', () => {
             branch: 'main',
             commit_message: 'Test commit',
             commit_hash: 'abc123',
+            // oxlint-disable-next-line socket/prefer-undefined-over-null -- wire data: the API returns null for a scan with no associated pull request.
             pull_request: null,
             committers: [],
-            html_url: null,
-            integration_branch_url: null,
-            integration_commit_url: null,
-            integration_pull_request_url: null,
+            html_url: undefined,
+            integration_branch_url: undefined,
+            integration_commit_url: undefined,
+            integration_pull_request_url: undefined,
             scan_state: 'pending',
           },
         ],
-        nextPageCursor: null,
-        nextPage: null,
+        // Wire data: the API returns JSON null (not undefined) for absent
+        // pagination cursors, and JSON.stringify would drop undefined keys.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- API returns null for absent pagination cursors.
+        nextPage: null as number | null,
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- API returns null for absent pagination cursors.
+        nextPageCursor: null as string | null,
       }
 
       nock('https://api.socket.dev')
@@ -136,21 +141,21 @@ describe.sequential('Strict Types - v3.0', () => {
         api_url: 'https://api.socket.dev/v0/scans/new',
         integration_type: 'api',
         integration_repo_url: 'https://github.com/org/repo',
-        branch: null,
-        commit_message: null,
-        commit_hash: null,
-        pull_request: null,
+        branch: undefined,
+        commit_message: undefined,
+        commit_hash: undefined,
+        pull_request: undefined,
         committers: [],
-        html_url: null,
-        integration_branch_url: null,
-        integration_commit_url: null,
-        integration_pull_request_url: null,
+        html_url: undefined,
+        integration_branch_url: undefined,
+        integration_commit_url: undefined,
+        integration_pull_request_url: undefined,
         scan_state: 'pending',
       }
 
       // Create temporary directory and test file
-      const tempDir = mkdtempSync(join(tmpdir(), 'socket-sdk-test-'))
-      const testFile = join(tempDir, 'package.json')
+      const tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-sdk-test-'))
+      const testFile = path.join(tempDir, 'package.json')
       writeFileSync(
         testFile,
         JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
@@ -268,13 +273,15 @@ describe.sequential('Strict Types - v3.0', () => {
 
         expect(typedResult.data.organizations).toHaveLength(2)
 
-        typedResult.data.organizations.forEach(org => {
+        const orgs = typedResult.data.organizations
+        for (let i = 0, { length } = orgs; i < length; i += 1) {
+          const org = orgs[i]!
           // All fields should be present and correctly typed
           expect(typeof org.id).toBe('string')
           expect(typeof org.name).toBe('string')
           expect(typeof org.slug).toBe('string')
           expect(typeof org.plan).toBe('string')
-        })
+        }
 
         // Specific value checks
         const firstOrg = typedResult.data.organizations[0]
@@ -329,16 +336,16 @@ describe.sequential('Strict Types - v3.0', () => {
         api_url: 'https://api.example.com',
         integration_type: 'api',
         integration_repo_url: 'https://example.com',
-        branch: null,
-        commit_message: null,
-        commit_hash: null,
-        pull_request: null,
+        branch: undefined,
+        commit_message: undefined,
+        commit_hash: undefined,
+        pull_request: undefined,
         committers: [],
-        html_url: null,
-        integration_branch_url: null,
-        integration_commit_url: null,
-        integration_pull_request_url: null,
-        scan_state: null,
+        html_url: undefined,
+        integration_branch_url: undefined,
+        integration_commit_url: undefined,
+        integration_pull_request_url: undefined,
+        scan_state: undefined,
       }
 
       // TypeScript will catch if required fields are missing

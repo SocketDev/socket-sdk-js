@@ -1,21 +1,21 @@
 /**
- * @fileoverview Tests for Socket SDK optional configuration parameters.
+ * @file Tests for Socket SDK optional configuration parameters. This test suite
+ *   covers optional parameters and configurations that are not covered in the
+ *   main test files, including:
  *
- * This test suite covers optional parameters and configurations that
- * are not covered in the main test files, including:
- * - Agent configuration
- * - Cache configuration
- * - Timeout configuration
- * - IssueRules parameter
- * - Empty response handling
+ *   - Agent configuration
+ *   - Cache configuration
+ *   - Timeout configuration
+ *   - IssueRules parameter
+ *   - Empty response handling
  */
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 import { isCoverageMode, setupTestClient } from '../utils/environment.mts'
 
-import type { SocketSdkGenericResult } from '../../src/index'
+import type { SocketSdkGenericResult } from '../../src/index.mts'
 
 describe.skipIf(isCoverageMode)('SocketSdk - Optional Configuration', () => {
   const getClient = setupTestClient('test-token', { retries: 0 })

@@ -1,6 +1,6 @@
 /**
- * @fileoverview Bundle validation tests to ensure build output quality.
- * Verifies that dist files don't contain absolute paths or external dependencies.
+ * @file Bundle validation tests to ensure build output quality. Verifies that
+ *   dist files don't contain absolute paths or external dependencies.
  */
 
 import { promises as fs } from 'node:fs'
@@ -8,48 +8,26 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
-import { default as traverse } from '@babel/traverse'
+import _traverse from '@babel/traverse'
 import { describe, expect, it } from 'vitest'
+
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+
+const logger = getDefaultLogger()
+
+// CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
+const traverse = ((_traverse as { default?: typeof _traverse | undefined })
+  .default ?? _traverse) as typeof _traverse
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const packagePath = path.resolve(__dirname, '../..')
 const distPath = path.join(packagePath, 'dist')
 
 /**
- * Check if content contains absolute paths.
- * Detects paths like /Users/, C:\, /home/, etc.
+ * Check if bundle contains inlined dependencies using AST analysis. Reads
+ * package.json dependencies and ensures they are NOT bundled inline.
  */
-function hasAbsolutePaths(content: string): {
-  hasIssue: boolean
-  matches: string[]
-} {
-  // Match absolute paths but exclude URLs and node: protocol.
-  const patterns = [
-    // Match require('/abs/path') or require('C:\\path').
-    /require\(["'](?:\/[^"'\n]+|[A-Z]:\\[^"'\n]+)["']\)/g,
-    // Match import from '/abs/path'.
-    /import\s+.*?from\s+["'](?:\/[^"'\n]+|[A-Z]:\\[^"'\n]+)["']/g,
-  ]
-
-  const matches: string[] = []
-  for (const pattern of patterns) {
-    const found = content.match(pattern)
-    if (found) {
-      matches.push(...found)
-    }
-  }
-
-  return {
-    hasIssue: matches.length > 0,
-    matches,
-  }
-}
-
-/**
- * Check if bundle contains inlined dependencies using AST analysis.
- * Reads package.json dependencies and ensures they are NOT bundled inline.
- */
-async function checkBundledDependencies(content: string): Promise<{
+export async function checkBundledDependencies(content: string): Promise<{
   bundledDeps: string[]
   hasNoBundledDeps: boolean
 }> {
@@ -69,20 +47,21 @@ async function checkBundledDependencies(content: string): Promise<{
   // Collect all import sources from the AST.
   const importSources = new Set<string>()
 
-  traverse(file as any, {
-    ImportDeclaration(path: any) {
-      const source = path.node.source.value
+  traverse(file as Parameters<typeof traverse>[0], {
+    ImportDeclaration(importPath) {
+      const source = importPath.node.source.value
       importSources.add(source)
     },
-    CallExpression(path: any) {
+    CallExpression(callPath) {
       // Handle require() calls
+      const { callee } = callPath.node
+      const [firstArg] = callPath.node.arguments
       if (
-        path.node.callee.name === 'require' &&
-        path.node.arguments.length > 0 &&
-        path.node.arguments[0].type === 'StringLiteral'
+        callee.type === 'Identifier' &&
+        callee.name === 'require' &&
+        firstArg?.type === 'StringLiteral'
       ) {
-        const source = path.node.arguments[0].value
-        importSources.add(source)
+        importSources.add(firstArg.value)
       }
     },
   })
@@ -98,7 +77,8 @@ async function checkBundledDependencies(content: string): Promise<{
   // Check if we have runtime dependencies.
   if (Object.keys(dependencies).length === 0) {
     // No runtime dependencies - check that Socket packages aren't bundled.
-    for (const pattern of socketPackagePatterns) {
+    for (let i = 0, { length } = socketPackagePatterns; i < length; i += 1) {
+      const pattern = socketPackagePatterns[i]!
       const hasExternalImport = Array.from(importSources).some(source =>
         pattern.test(source),
       )
@@ -109,20 +89,20 @@ async function checkBundledDependencies(content: string): Promise<{
         // Use AST to check if it appears in any meaningful way.
         let foundInCode = false
 
-        traverse(file as any, {
-          StringLiteral(path: any) {
+        traverse(file as Parameters<typeof traverse>[0], {
+          StringLiteral(stringPath) {
             // Skip string literals - these are fine
-            if (pattern.test(path.node.value)) {
+            if (pattern.test(stringPath.node.value)) {
               // It's in a string literal, which is fine
             }
           },
 
-          Identifier(path: any) {
+          Identifier(identifierPath) {
             // Check if the package name appears in identifiers or other code
             if (
-              pattern.test(path.node.name) ||
-              (path.node.name.includes('socketsecurity') &&
-                pattern.test(path.node.name))
+              pattern.test(identifierPath.node.name) ||
+              (identifierPath.node.name.includes('socketsecurity') &&
+                pattern.test(identifierPath.node.name))
             ) {
               foundInCode = true
             }
@@ -137,7 +117,9 @@ async function checkBundledDependencies(content: string): Promise<{
     }
   } else {
     // We have runtime dependencies - check that they remain external.
-    for (const dep of Object.keys(dependencies)) {
+    const depKeys = Object.keys(dependencies)
+    for (let di = 0, { length: dlen } = depKeys; di < dlen; di += 1) {
+      const dep = depKeys[di]!
       // Check for exact match or subpath imports (e.g., '@socketsecurity/lib/path')
       const hasExternalImport = Array.from(importSources).some(
         source => source === dep || source.startsWith(`${dep}/`),
@@ -148,20 +130,22 @@ async function checkBundledDependencies(content: string): Promise<{
         // The bundle might include package.json as a literal object, which is fine
         let foundInBundledCode = false
 
-        traverse(file as any, {
+        traverse(file as Parameters<typeof traverse>[0], {
           // Look for actual code that imports/requires this dependency
-          CallExpression(path: any) {
+          CallExpression(callPath) {
+            const { callee } = callPath.node
+            const [firstArg] = callPath.node.arguments
             if (
-              path.node.callee.name === 'require' &&
-              path.node.arguments.length > 0 &&
-              path.node.arguments[0].type === 'StringLiteral' &&
-              path.node.arguments[0].value.startsWith(dep)
+              callee.type === 'Identifier' &&
+              callee.name === 'require' &&
+              firstArg?.type === 'StringLiteral' &&
+              firstArg.value.startsWith(dep)
             ) {
               foundInBundledCode = true
             }
           },
-          ImportDeclaration(path: any) {
-            if (path.node.source.value.startsWith(dep)) {
+          ImportDeclaration(importPath) {
+            if (importPath.node.source.value.startsWith(dep)) {
               foundInBundledCode = true
             }
           },
@@ -181,6 +165,37 @@ async function checkBundledDependencies(content: string): Promise<{
   }
 }
 
+/**
+ * Check if content contains absolute paths. Detects paths like /Users/, C:,
+ * /home/, etc.
+ */
+export function hasAbsolutePaths(content: string): {
+  hasIssue: boolean
+  matches: string[]
+} {
+  // Match absolute paths but exclude URLs and node: protocol.
+  const patterns = [
+    // Match require('/abs/path') or require('C:\\path').
+    /require\(["'](?:[A-Z]:\\[^"'\n]+|\/[^"'\n]+)["']\)/g,
+    // Match import from '/abs/path'.
+    /import\s+.*?from\s+["'](?:[A-Z]:\\[^"'\n]+|\/[^"'\n]+)["']/g,
+  ]
+
+  const matches: string[] = []
+  for (let i = 0, { length } = patterns; i < length; i += 1) {
+    const pattern = patterns[i]!
+    const found = content.match(pattern)
+    if (found) {
+      matches.push(...found)
+    }
+  }
+
+  return {
+    hasIssue: matches.length > 0,
+    matches,
+  }
+}
+
 describe('Bundle validation', () => {
   it('should not contain absolute paths in dist/index.js', async () => {
     const indexPath = path.join(distPath, 'index.js')
@@ -189,9 +204,10 @@ describe('Bundle validation', () => {
     const result = hasAbsolutePaths(content)
 
     if (result.hasIssue) {
-      console.error('Found absolute paths in bundle:')
-      for (const match of result.matches) {
-        console.error(`  - ${match}`)
+      logger.fail('Found absolute paths in bundle:')
+      const matches = result.matches
+      for (let i = 0, { length } = matches; i < length; i += 1) {
+        logger.fail(`  - ${matches[i]!}`)
       }
     }
 
@@ -207,9 +223,10 @@ describe('Bundle validation', () => {
     const result = await checkBundledDependencies(content)
 
     if (!result.hasNoBundledDeps) {
-      console.error('Found bundled dependencies (should be external):')
-      for (const dep of result.bundledDeps) {
-        console.error(`  - ${dep}`)
+      logger.fail('Found bundled dependencies (should be external):')
+      const deps = result.bundledDeps
+      for (let i = 0, { length } = deps; i < length; i += 1) {
+        logger.fail(`  - ${deps[i]!}`)
       }
     }
 

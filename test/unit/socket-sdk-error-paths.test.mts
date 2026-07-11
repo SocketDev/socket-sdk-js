@@ -1,13 +1,12 @@
 /**
- * @fileoverview Error path tests for SocketSdk class methods.
- *
- * Covers ~58 catch blocks in socket-sdk-class.ts that call #handleApiError.
- * Each test triggers a 400 error response from a local HTTP server and asserts
- * the method returns { success: false }.
- *
- * Uses setupLocalHttpServer from test/utils/local-server-helpers.mts with a
- * handler that returns 400 for all requests, so every SDK method hits its
- * catch block and exercises #handleApiError with a client error.
+ * @file Error path tests for SocketSdk class methods (batch, create, delete,
+ *   download/stream, export, post, rescan/search, update, upload, and throwing
+ *   methods). Each test triggers a 400 error response from a local HTTP server
+ *   and asserts the method returns { success: false }. Uses
+ *   setupLocalHttpServer from test/utils/local-server-helpers.mts with a
+ *   handler that returns 400 for all requests, so every SDK method hits its
+ *   catch block and exercises #handleApiError with a client error. Get and List
+ *   read-method error paths live in socket-sdk-error-paths-read.test.mts.
  */
 
 import os from 'node:os'
@@ -16,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
@@ -30,9 +29,9 @@ const thisFile = fileURLToPath(import.meta.url)
 const getBaseUrl = setupLocalHttpServer(
   (req: IncomingMessage, res: ServerResponse) => {
     // Consume request body for POST/PUT/DELETE before responding.
-    let _body = ''
+    let body = ''
     req.on('data', (chunk: Buffer) => {
-      _body += chunk.toString()
+      body += chunk.toString()
     })
     req.on('end', () => {
       res.writeHead(400, { 'Content-Type': 'application/json' })
@@ -43,7 +42,7 @@ const getBaseUrl = setupLocalHttpServer(
   },
 )
 
-function createClient(): SocketSdk {
+export function createClient(): SocketSdk {
   return new SocketSdk('test-token', {
     baseUrl: `${getBaseUrl()}/v0/`,
     retries: 0,
@@ -51,14 +50,13 @@ function createClient(): SocketSdk {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: assert an error result from methods that return { success: false }.
+// Helper: shape of an error result from methods that return { success: false }.
+// Assertions live inline in each test case so they run as test assertions
+// (socket/no-vitest-standalone-expect).
 // ---------------------------------------------------------------------------
-function expectErrorResult(result: {
-  status?: number
+export interface ErrorResult {
+  status?: number | undefined
   success: boolean
-}): void {
-  expect(result.success).toBe(false)
-  expect(result.status).toBe(400)
 }
 
 // ===========================================================================
@@ -70,7 +68,8 @@ describe('SocketSdk error paths - Batch methods', () => {
     const result = await client.batchOrgPackageFetch('test-org', {
       components: [{ purl: 'pkg:npm/lodash@4.17.21' }],
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('batchPackageFetch returns error on 400', async () => {
@@ -78,7 +77,8 @@ describe('SocketSdk error paths - Batch methods', () => {
     const result = await client.batchPackageFetch({
       components: [{ purl: 'pkg:npm/lodash@4.17.21' }],
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
@@ -91,7 +91,8 @@ describe('SocketSdk error paths - Create methods', () => {
     const result = await client.createDependenciesSnapshot([thisFile], {
       pathsRelativeTo: '/',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('createFullScan returns error on 400', async () => {
@@ -99,7 +100,8 @@ describe('SocketSdk error paths - Create methods', () => {
     const result = await client.createFullScan('test-org', [thisFile], {
       repo: 'test-repo',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('createOrgDiffScanFromIds returns error on 400', async () => {
@@ -108,7 +110,8 @@ describe('SocketSdk error paths - Create methods', () => {
       after: 'scan-2',
       before: 'scan-1',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('createOrgFullScanFromArchive returns error on 400', async () => {
@@ -118,7 +121,8 @@ describe('SocketSdk error paths - Create methods', () => {
       thisFile,
       { repo: 'test-repo' },
     )
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('createOrgWebhook returns error on 400', async () => {
@@ -129,13 +133,15 @@ describe('SocketSdk error paths - Create methods', () => {
       secret: 'secret',
       url: 'https://example.com/webhook',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('createRepository returns error on 400', async () => {
     const client = createClient()
     const result = await client.createRepository('test-org', 'test-repo')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('createRepositoryLabel returns error on 400', async () => {
@@ -143,7 +149,8 @@ describe('SocketSdk error paths - Create methods', () => {
     const result = await client.createRepositoryLabel('test-org', {
       name: 'test-label',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
@@ -154,31 +161,36 @@ describe('SocketSdk error paths - Delete methods', () => {
   it('deleteFullScan returns error on 400', async () => {
     const client = createClient()
     const result = await client.deleteFullScan('test-org', 'scan-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('deleteOrgDiffScan returns error on 400', async () => {
     const client = createClient()
     const result = await client.deleteOrgDiffScan('test-org', 'diff-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('deleteOrgWebhook returns error on 400', async () => {
     const client = createClient()
     const result = await client.deleteOrgWebhook('test-org', 'webhook-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('deleteRepository returns error on 400', async () => {
     const client = createClient()
     const result = await client.deleteRepository('test-org', 'test-repo')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('deleteRepositoryLabel returns error on 400', async () => {
     const client = createClient()
     const result = await client.deleteRepositoryLabel('test-org', 'label-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
@@ -193,13 +205,15 @@ describe('SocketSdk error paths - Download and stream methods', () => {
       'scan-123',
       path.join(os.tmpdir(), 'test-output.tar'),
     )
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('streamFullScan returns error on 400', async () => {
     const client = createClient()
     const result = await client.streamFullScan('test-org', 'scan-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
@@ -210,202 +224,22 @@ describe('SocketSdk error paths - Export methods', () => {
   it('exportCDX returns error on 400', async () => {
     const client = createClient()
     const result = await client.exportCDX('test-org', 'scan-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('exportOpenVEX returns error on 400', async () => {
     const client = createClient()
     const result = await client.exportOpenVEX('test-org', 'scan-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('exportSPDX returns error on 400', async () => {
     const client = createClient()
     const result = await client.exportSPDX('test-org', 'scan-123')
-    expectErrorResult(result)
-  })
-})
-
-// ===========================================================================
-// Get methods (simple org-scoped)
-// ===========================================================================
-describe('SocketSdk error paths - Get methods', () => {
-  it('getAPITokens returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getAPITokens('test-org')
-    expectErrorResult(result)
-  })
-
-  it('getAuditLogEvents returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getAuditLogEvents('test-org')
-    expectErrorResult(result)
-  })
-
-  it('getDiffScanById returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getDiffScanById('test-org', 'diff-123')
-    expectErrorResult(result)
-  })
-
-  it('getDiffScanGfm returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getDiffScanGfm('test-org', 'diff-123')
-    expectErrorResult(result)
-  })
-
-  it('getFullScan returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getFullScan('test-org', 'scan-123')
-    expectErrorResult(result)
-  })
-
-  it('getFullScanMetadata returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getFullScanMetadata('test-org', 'scan-123')
-    expectErrorResult(result)
-  })
-
-  it('getIssuesByNpmPackage returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getIssuesByNpmPackage('lodash', '4.17.21')
-    expectErrorResult(result)
-  })
-
-  it('getOrgAlertFullScans returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgAlertFullScans('test-org', {
-      alertKey: 'npm/lodash/cve-2021-23337',
-    })
-    expectErrorResult(result)
-  })
-
-  it('getOrgAlertsList returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgAlertsList('test-org')
-    expectErrorResult(result)
-  })
-
-  it('getOrgAnalytics returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgAnalytics('30d')
-    expectErrorResult(result)
-  })
-
-  it('getOrgFixes returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgFixes('test-org', {
-      allow_major_updates: false,
-      vulnerability_ids: 'CVE-2021-23337',
-    })
-    expectErrorResult(result)
-  })
-
-  it('getOrgLicensePolicy returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgLicensePolicy('test-org')
-    expectErrorResult(result)
-  })
-
-  it('getOrgSecurityPolicy returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgSecurityPolicy('test-org')
-    expectErrorResult(result)
-  })
-
-  it('getOrgTelemetryConfig returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgTelemetryConfig('test-org')
-    expectErrorResult(result)
-  })
-
-  it('getOrgTriage returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgTriage('test-org')
-    expectErrorResult(result)
-  })
-
-  it('getOrgWebhook returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgWebhook('test-org', 'webhook-123')
-    expectErrorResult(result)
-  })
-
-  it('getOrgWebhooksList returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getOrgWebhooksList('test-org')
-    expectErrorResult(result)
-  })
-
-  it('getQuota returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getQuota()
-    expectErrorResult(result)
-  })
-
-  it('getRepoAnalytics returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getRepoAnalytics('test-org/test-repo', '30d')
-    expectErrorResult(result)
-  })
-
-  it('getRepository returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getRepository('test-org', 'test-repo')
-    expectErrorResult(result)
-  })
-
-  it('getRepositoryLabel returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getRepositoryLabel('test-org', 'label-123')
-    expectErrorResult(result)
-  })
-
-  it('getScoreByNpmPackage returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getScoreByNpmPackage('lodash', '4.17.21')
-    expectErrorResult(result)
-  })
-
-  it('getSupportedFiles returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.getSupportedFiles('test-org')
-    expectErrorResult(result)
-  })
-})
-
-// ===========================================================================
-// List methods
-// ===========================================================================
-describe('SocketSdk error paths - List methods', () => {
-  it('listFullScans returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.listFullScans('test-org')
-    expectErrorResult(result)
-  })
-
-  it('listOrganizations returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.listOrganizations()
-    expectErrorResult(result)
-  })
-
-  it('listOrgDiffScans returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.listOrgDiffScans('test-org')
-    expectErrorResult(result)
-  })
-
-  it('listRepositories returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.listRepositories('test-org')
-    expectErrorResult(result)
-  })
-
-  it('listRepositoryLabels returns error on 400', async () => {
-    const client = createClient()
-    const result = await client.listRepositoryLabels('test-org')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
@@ -418,19 +252,22 @@ describe('SocketSdk error paths - Post methods', () => {
     const result = await client.postAPIToken('test-org', {
       name: 'test-token',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('postAPITokensRevoke returns error on 400', async () => {
     const client = createClient()
     const result = await client.postAPITokensRevoke('test-org', 'token-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('postAPITokensRotate returns error on 400', async () => {
     const client = createClient()
     const result = await client.postAPITokensRotate('test-org', 'token-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('postAPITokenUpdate returns error on 400', async () => {
@@ -438,7 +275,8 @@ describe('SocketSdk error paths - Post methods', () => {
     const result = await client.postAPITokenUpdate('test-org', 'token-123', {
       name: 'updated-name',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('postOrgTelemetry returns error on 400', async () => {
@@ -446,13 +284,15 @@ describe('SocketSdk error paths - Post methods', () => {
     const result = await client.postOrgTelemetry('test-org', {
       events: [],
     } as Parameters<SocketSdk['postOrgTelemetry']>[1])
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('postSettings returns error on 400', async () => {
     const client = createClient()
     const result = await client.postSettings([{ organization: 'test-org' }])
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
@@ -463,13 +303,15 @@ describe('SocketSdk error paths - Rescan and search', () => {
   it('rescanFullScan returns error on 400', async () => {
     const client = createClient()
     const result = await client.rescanFullScan('test-org', 'scan-123')
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('searchDependencies returns error on 400', async () => {
     const client = createClient()
     const result = await client.searchDependencies({ q: 'lodash' })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
@@ -482,7 +324,8 @@ describe('SocketSdk error paths - Update methods', () => {
     const result = await client.updateOrgAlertTriage('test-org', 'alert-123', {
       status: 'resolved',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('updateOrgLicensePolicy returns error on 400', async () => {
@@ -490,7 +333,8 @@ describe('SocketSdk error paths - Update methods', () => {
     const result = await client.updateOrgLicensePolicy('test-org', {
       policy: 'strict',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('updateOrgSecurityPolicy returns error on 400', async () => {
@@ -498,7 +342,8 @@ describe('SocketSdk error paths - Update methods', () => {
     const result = await client.updateOrgSecurityPolicy('test-org', {
       policy: 'strict',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('updateOrgTelemetryConfig returns error on 400', async () => {
@@ -506,7 +351,8 @@ describe('SocketSdk error paths - Update methods', () => {
     const result = await client.updateOrgTelemetryConfig('test-org', {
       enabled: true,
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('updateOrgWebhook returns error on 400', async () => {
@@ -514,7 +360,8 @@ describe('SocketSdk error paths - Update methods', () => {
     const result = await client.updateOrgWebhook('test-org', 'webhook-123', {
       name: 'updated-webhook',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('updateRepository returns error on 400', async () => {
@@ -522,7 +369,8 @@ describe('SocketSdk error paths - Update methods', () => {
     const result = await client.updateRepository('test-org', 'test-repo', {
       description: 'updated',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 
   it('updateRepositoryLabel returns error on 400', async () => {
@@ -530,7 +378,8 @@ describe('SocketSdk error paths - Update methods', () => {
     const result = await client.updateRepositoryLabel('test-org', 'label-123', {
       name: 'updated-label',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
@@ -543,7 +392,8 @@ describe('SocketSdk error paths - Upload methods', () => {
     const result = await client.uploadManifestFiles('test-org', [thisFile], {
       pathsRelativeTo: '/',
     })
-    expectErrorResult(result)
+    expect(result.success).toBe(false)
+    expect((result as ErrorResult).status).toBe(400)
   })
 })
 
