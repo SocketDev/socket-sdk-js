@@ -425,9 +425,13 @@ runs:
         # cross-step) — always exported. The SOCKET_TOOL_SFW_* provenance has
         # no required consumer; disabled-seam-gated off unless extended-env
         # opts in. See disabled-seam-pattern (fleet docs).
+        # SFW_SILENT keeps the firewall's stdout banners out of every
+        # wrapped command — scripts that parse a tool's stdout (pack --json,
+        # the format pipe) would otherwise ingest banner lines as data.
         {
           echo "SFW_BIN=$SFW_BIN"
           echo "SFW_IS_ENTERPRISE=$SFW_IS_ENTERPRISE"
+          echo "SFW_SILENT=true"
         } >> "${GITHUB_ENV:-/dev/null}"
         if [ "$EXTENDED_ENV" = "true" ]; then
           {
