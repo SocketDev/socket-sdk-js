@@ -1,5 +1,6 @@
 {
   "tests": [
+    "test/unit/blob.test.mts",
     "test/unit/entitlements.test.mts",
     "test/unit/getapi-sendapi-methods.test.mts",
     "test/unit/json-parsing-edge-cases.test.mts",
