@@ -1,13 +1,13 @@
 /**
- * @fileoverview Tests for header sanitization utilities.
+ * @file Tests for header sanitization utilities.
  */
 
 import { describe, expect, it } from 'vitest'
 
 import {
-  SENSITIVE_HEADERS,
   sanitizeHeaders,
-} from '../../src/utils/header-sanitization'
+  SENSITIVE_HEADERS,
+} from '../../src/utils/header-sanitization.mts'
 
 describe('header-sanitization', () => {
   describe('SENSITIVE_HEADERS', () => {

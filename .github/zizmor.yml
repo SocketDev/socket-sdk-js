@@ -1,3 +1,15 @@
 rules:
   secrets-outside-env:
     disable: true
+  # socket-registry is a monorepo that publishes many packages but
+  # never tags itself — per-package tags would multiply unboundedly,
+  # and the fleet pins reusable workflows by SHA reachable from main
+  # (annotated `# main (YYYY-MM-DD)`). zizmor's impostor-commit audit
+  # requires the SHA to be reachable from a TAG, which by design
+  # doesn't apply here. Suppress for the three workflows that
+  # reference socket-registry's reusable workflows.
+  impostor-commit:
+    ignore:
+      - ci.yml
+      - provenance.yml
+      - weekly-update.yml

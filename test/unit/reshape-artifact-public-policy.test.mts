@@ -1,8 +1,10 @@
-/** @fileoverview Tests for reshapeArtifactForPublicPolicy function edge cases. */
+/**
+ * @file Tests for reshapeArtifactForPublicPolicy function edge cases.
+ */
 
 import { describe, expect, it } from 'vitest'
 
-import { reshapeArtifactForPublicPolicy } from '../../src/http-client.js'
+import { reshapeArtifactForPublicPolicy } from '../../src/http-client.mts'
 
 describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
   describe('when user is authenticated', () => {
@@ -11,7 +13,9 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
         artifacts: [{ name: 'test', alerts: [{ severity: 'high' }] }],
       }
 
-      const result = reshapeArtifactForPublicPolicy(data, true)
+      const result = reshapeArtifactForPublicPolicy(data, {
+        isAuthenticated: true,
+      })
 
       expect(result).toBe(data)
     })
@@ -55,7 +59,9 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           metadata: 'should-remain',
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false)
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
 
         expect(result).toEqual({
           artifacts: [
@@ -115,7 +121,10 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           ],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false, 'error,warn')
+        const result = reshapeArtifactForPublicPolicy(data, {
+          actions: 'error,warn',
+          isAuthenticated: false,
+        })
 
         expect(result.artifacts?.[0]?.alerts).toEqual([
           { action: 'error', key: 'alert1', severity: 'high', type: 'malware' },
@@ -151,11 +160,10 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
         }
 
         // ' warn' (with leading space) should NOT match the 'warn' action
-        const result = reshapeArtifactForPublicPolicy(
-          data,
-          false,
-          'error, warn',
-        )
+        const result = reshapeArtifactForPublicPolicy(data, {
+          actions: 'error, warn',
+          isAuthenticated: false,
+        })
 
         // Only 'error' should match exactly; ' warn' (with space) does not match 'warn'
         expect(result.artifacts?.[0]?.alerts).toEqual([
@@ -178,7 +186,9 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           ],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false)
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
 
         expect(result.artifacts?.[0]).toEqual({
           name: 'test-package',
@@ -209,7 +219,9 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           ],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false)
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
 
         expect(result).toEqual({
           name: 'single-package',
@@ -245,7 +257,10 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           ],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false, 'error')
+        const result = reshapeArtifactForPublicPolicy(data, {
+          actions: 'error',
+          isAuthenticated: false,
+        })
 
         expect(result.alerts).toEqual([
           {
@@ -265,7 +280,9 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           info: 'other-info',
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false)
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
 
         expect(result).toBe(data)
       })
@@ -277,7 +294,10 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           alerts: [{ severity: 'high', type: 'criticalCVE', key: 'alert1' }],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false, '')
+        const result = reshapeArtifactForPublicPolicy(data, {
+          actions: '',
+          isAuthenticated: false,
+        })
 
         expect(result.alerts).toEqual([
           {
@@ -294,7 +314,10 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           alerts: [{ severity: 'high', type: 'criticalCVE', key: 'alert1' }],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false, undefined)
+        const result = reshapeArtifactForPublicPolicy(data, {
+          actions: undefined,
+          isAuthenticated: false,
+        })
 
         expect(result.alerts).toEqual([
           {
@@ -311,7 +334,9 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
           alerts: [{ severity: 'high', type: 'unknownType', key: 'alert1' }],
         }
 
-        const result = reshapeArtifactForPublicPolicy(data, false)
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
 
         expect(result.alerts).toEqual([
           {

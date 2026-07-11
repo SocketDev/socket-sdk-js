@@ -1,0 +1,5720 @@
+/* max-file-lines: sdk — SDK surface class, one method per API endpoint */
+/**
+ * @file SocketSdk class implementation for Socket security API client. Provides
+ *   complete API functionality for vulnerability scanning, analysis, and
+ *   reporting.
+ */
+import path from 'node:path'
+import process from 'node:process'
+
+import { createTtlCache } from '@socketsecurity/lib/cache/ttl/store'
+import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/sentinels'
+import { getAbortSignal } from '@socketsecurity/lib/process/abort'
+import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
+import { isDebugNs } from '@socketsecurity/lib/debug/namespace'
+import { debugLog } from '@socketsecurity/lib/debug/output'
+import { errorMessage as getErrorMessage } from '@socketsecurity/lib/errors/message'
+import { validateFiles } from '@socketsecurity/lib/fs/validate'
+import { parseJson } from '@socketsecurity/lib/json/parse'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { getOwn } from '@socketsecurity/lib/objects/inspect'
+import { isObject } from '@socketsecurity/lib/objects/predicates'
+import { ArrayIsArray } from '@socketsecurity/lib/primordials/array'
+import { ErrorCtor, TypeErrorCtor } from '@socketsecurity/lib/primordials/error'
+import { StringPrototypeTrim } from '@socketsecurity/lib/primordials/string'
+import { pRetry } from '@socketsecurity/lib/promises/retry'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib/events/warning/handler'
+import { urlSearchParamsAsBoolean } from '@socketsecurity/lib/url/search-params'
+
+const logger = getDefaultLogger()
+
+let cachedAbortSignal: AbortSignal | undefined
+export function getSdkAbortSignal(): AbortSignal {
+  if (cachedAbortSignal === undefined) {
+    cachedAbortSignal = getAbortSignal()
+  }
+  return cachedAbortSignal
+}
+
+import { httpRequest } from '@socketsecurity/lib/http-request/request'
+
+import {
+  DEFAULT_CACHE_TTL,
+  DEFAULT_HTTP_TIMEOUT,
+  DEFAULT_POLL_INTERVAL,
+  DEFAULT_RETRIES,
+  DEFAULT_RETRY_DELAY,
+  DEFAULT_USER_AGENT,
+  httpAgentNames,
+  MAX_FIREWALL_COMPONENTS,
+  MAX_HTTP_TIMEOUT,
+  MAX_RESPONSE_SIZE,
+  MIN_HTTP_TIMEOUT,
+  publicPolicy,
+  SOCKET_API_TOKENS_URL,
+  SOCKET_CONTACT_URL,
+  SOCKET_DASHBOARD_URL,
+  SOCKET_FIREWALL_API_URL,
+  SOCKET_PUBLIC_BLOB_STORE_URL,
+} from './constants.mts'
+import {
+  createRequestBodyForBlobs,
+  createRequestBodyForFilepaths,
+  createUploadRequest,
+} from './file-upload.mts'
+import {
+  assembleManifest,
+  deriveApiV1BaseUrl,
+  hashFile,
+} from './full-scans-v1.mts'
+import {
+  createDeleteRequest,
+  createGetRequest,
+  createRequestWithJson,
+  getResponseJson,
+  isResponseOk,
+  reshapeArtifactForPublicPolicy,
+  ResponseError,
+} from './http-client.mts'
+import {
+  filterRedundantCause,
+  normalizeBaseUrl,
+  promiseWithResolvers,
+  queryToSearchParams,
+  resolveAbsPaths,
+  resolveBasePath,
+} from './utils.mts'
+import { pollCachedScan } from './utils/poll.mts'
+
+import type {
+  Agent,
+  ArtifactPatches,
+  BatchPackageFetchResultType,
+  BatchPackageStreamOptions,
+  CompactSocketArtifact,
+  CreateDependenciesSnapshotOptions,
+  CustomResponseType,
+  Entitlement,
+  EntitlementsResponse,
+  FileValidationCallback,
+  GetOptions,
+  GotOptions,
+  MalwareCheckAlert,
+  MalwareCheckPackage,
+  MalwareCheckResult,
+  MalwareCheckScore,
+  PatchViewResponse,
+  PostOrgTelemetryPayload,
+  PostOrgTelemetryResponse,
+  QueryParams,
+  RequestOptions,
+  RequestOptionsWithHooks,
+  SendOptions,
+  SocketArtifact,
+  SocketSdkErrorResult,
+  SocketSdkGenericResult,
+  SocketSdkOperations,
+  SocketSdkOptions,
+  SocketSdkResult,
+  SocketSdkSuccessResult,
+  StreamOrgFullScanOptions,
+  UploadManifestFilesError,
+  UploadManifestFilesOptions,
+  UploadManifestFilesReturnType,
+} from './types.mts'
+import type {
+  CreateFullScanOptions,
+  DeleteRepositoryLabelResult,
+  DeleteResult,
+  FullScanItem,
+  FullScanListResult,
+  FullScanResult,
+  GetRepositoryOptions,
+  ListFullScansOptions,
+  ListRepositoriesOptions,
+  OrganizationsResult,
+  RepositoriesListResult,
+  RepositoryItem,
+  RepositoryLabelItem,
+  RepositoryLabelResult,
+  RepositoryLabelsListResult,
+  RepositoryResult,
+  StrictErrorResult,
+} from './types-strict.mts'
+import type {
+  BlobsUploadData,
+  BlobUploadEntry,
+  CreateFullScanFromManifestParams,
+  CreateFullScanFromManifestResult,
+  FullScanManifest,
+  FullScanV1CreatedData,
+  FullScanV1PendingData,
+  ManifestLocalEntry,
+  UploadBlobsResult,
+} from './full-scans-v1.mts'
+import type {
+  PostEventsData,
+  PostEventsResult,
+  SocketEvent,
+} from './events-v1.mts'
+import type {
+  GetThreatCampaignResult,
+  ListThreatCampaignPackagesOptions,
+  ListThreatCampaignPackagesResult,
+  ListThreatCampaignsOptions,
+  ListThreatCampaignsResult,
+  ThreatCampaign,
+  ThreatCampaignPackagesData,
+  ThreatCampaignsListData,
+} from './threat-campaigns-v1.mts'
+import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
+import type { JsonValue } from '@socketsecurity/lib/json/types'
+
+/**
+ * Socket SDK for programmatic access to Socket.dev security analysis APIs.
+ * Provides methods for package scanning, organization management, and security
+ * analysis.
+ */
+export class SocketSdk {
+  readonly #apiToken: string
+  readonly #baseUrl: string
+  readonly #cache: TtlCache | undefined
+  readonly #cacheByTtl: Map<number, TtlCache>
+  readonly #cacheTtlConfig: SocketSdkOptions['cacheTtl']
+  readonly #hooks: SocketSdkOptions['hooks']
+  readonly #onFileValidation: FileValidationCallback | undefined
+  readonly #pollIntervalMs: number
+  readonly #reqOptions: RequestOptions
+  readonly #reqOptionsWithHooks: RequestOptionsWithHooks
+  readonly #retries: number
+  readonly #retryDelay: number
+  #v1FullScansUnavailable = false
+
+  /**
+   * Initialize Socket SDK with API token and configuration options. Sets up
+   * authentication, base URL, HTTP client options, retry behavior, and
+   * caching.
+   */
+  constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
+    // Input validation for API token.
+    const MAX_API_TOKEN_LENGTH = 1024
+    if (typeof apiToken !== 'string') {
+      throw new TypeErrorCtor('"apiToken" is required and must be a string')
+    }
+    const trimmedToken = StringPrototypeTrim(apiToken)
+    if (!trimmedToken) {
+      throw new ErrorCtor('"apiToken" cannot be empty or whitespace-only')
+    }
+    if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
+      throw new ErrorCtor(
+        `"apiToken" exceeds maximum length of ${MAX_API_TOKEN_LENGTH} characters`,
+      )
+    }
+
+    const {
+      agent: agentOrObj,
+      baseUrl = 'https://api.socket.dev/v0/',
+      cache = false,
+      cacheTtl,
+      hooks,
+      onFileValidation,
+      pollIntervalMs = DEFAULT_POLL_INTERVAL,
+      retries = DEFAULT_RETRIES,
+      retryDelay = DEFAULT_RETRY_DELAY,
+      timeout = DEFAULT_HTTP_TIMEOUT,
+      userAgent,
+    } = { __proto__: null, ...options } as SocketSdkOptions
+
+    // Validate timeout parameter.
+    if (timeout !== undefined) {
+      if (
+        typeof timeout !== 'number' ||
+        Number.isNaN(timeout) ||
+        timeout < MIN_HTTP_TIMEOUT ||
+        timeout > MAX_HTTP_TIMEOUT
+      ) {
+        throw new TypeErrorCtor(
+          `"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`,
+        )
+      }
+    }
+
+    const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
+    const agentAsGotOptions = agentOrObj as GotOptions
+    const agent = (
+      agentKeys.length && agentKeys.every(k => httpAgentNames.has(k))
+        ? /* c8 ignore next 3 - Got-style agent options compatibility layer */
+          agentAsGotOptions.https ||
+          agentAsGotOptions.http ||
+          agentAsGotOptions.http2
+        : agentOrObj
+    ) as Agent | undefined
+    this.#apiToken = trimmedToken
+    this.#baseUrl = normalizeBaseUrl(baseUrl)
+    this.#cacheTtlConfig = cacheTtl
+    // For backward compatibility, if cacheTtl is a number, use it as default TTL.
+    // If it's an object, use the default property or fallback to DEFAULT_CACHE_TTL.
+    const defaultTtl =
+      typeof cacheTtl === 'number'
+        ? cacheTtl
+        : (cacheTtl?.default ?? DEFAULT_CACHE_TTL)
+    this.#cache = cache
+      ? createTtlCache({
+          memoize: true,
+          prefix: 'socket-sdk',
+          ttl: defaultTtl,
+        })
+      : /* c8 ignore next - cache disabled by default */ undefined
+    // Map of TTL values to cache instances for per-endpoint caching.
+    this.#cacheByTtl = new Map()
+    this.#hooks = hooks
+    this.#onFileValidation = onFileValidation
+    this.#pollIntervalMs = pollIntervalMs
+    this.#retries = retries
+    this.#retryDelay = retryDelay
+    this.#reqOptions = {
+      ...(agent ? { agent } : {}),
+      headers: {
+        Authorization: `Basic ${btoa(`${trimmedToken}:`)}`,
+        'User-Agent': userAgent ?? DEFAULT_USER_AGENT,
+      },
+      signal: getSdkAbortSignal(),
+      /* c8 ignore next - Optional timeout parameter, tested implicitly through method calls */
+      ...(timeout ? { timeout } : {}),
+    }
+    this.#reqOptionsWithHooks = {
+      ...this.#reqOptions,
+      hooks: this.#hooks,
+    }
+  }
+
+  /**
+   * Create async generator for streaming batch package URL processing. Internal
+   * method for handling chunked PURL responses with error handling.
+   */
+  async *#createBatchPurlGenerator(
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): AsyncGenerator<BatchPackageFetchResultType> {
+    let res: HttpResponse | undefined
+    try {
+      res = await this.#executeWithRetry(() =>
+        this.#createBatchPurlRequest(componentsObj, queryParams),
+      )
+      /* c8 ignore next 4 - c8 ignored: because async generator catch+yield requires the caller to consume the generator during a network failure, which nock cannot simulate in threads pool */
+    } catch (e) {
+      yield await this.#handleApiError<'batchPackageFetch'>(e)
+      return
+    }
+    // Validate response before processing.
+    /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
+    if (!res) {
+      throw new ErrorCtor('Failed to get response from batch PURL request')
+    }
+    // Parse the newline delimited JSON response.
+    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
+    const text = res.text()
+    let start = 0
+    for (let i = 0; i <= text.length; i++) {
+      if (i === text.length || text.charCodeAt(i) === 10) {
+        if (i > start) {
+          const line = text.slice(start, i)
+          const artifact = parseJson(line, {
+            throws: false,
+          }) as SocketArtifact | null
+          if (isObject(artifact)) {
+            yield this.#handleApiSuccess<'batchPackageFetch'>(
+              /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
+              isPublicToken
+                ? reshapeArtifactForPublicPolicy(artifact!, {
+                    actions: queryParams?.['actions'] as string,
+                    isAuthenticated: false,
+                    policy: publicPolicy,
+                  })
+                : artifact!,
+            )
+          }
+        }
+        start = i + 1
+      }
+    }
+  }
+
+  /**
+   * Create HTTP request for batch package URL processing. Internal method for
+   * handling PURL batch API calls with retry logic.
+   */
+  async #createBatchPurlRequest(
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): Promise<HttpResponse> {
+    const url = `${this.#baseUrl}purl?${queryToSearchParams(queryParams)}`
+    const response = await httpRequest(url, {
+      method: 'POST',
+      body: JSON.stringify(componentsObj),
+      headers: this.#reqOptions.headers as Record<string, string>,
+      timeout: this.#reqOptions.timeout,
+      maxResponseSize: MAX_RESPONSE_SIZE,
+    })
+
+    // Throw ResponseError for non-2xx status codes so retry logic works properly.
+    /* c8 ignore next 3 - Error response handling for batch requests, requires API to return errors */
+    if (!isResponseOk(response)) {
+      throw new ResponseError(response, '', url)
+    }
+
+    return response
+  }
+
+  /**
+   * Create standardized error result from query operation exceptions. Internal
+   * error handling for non-throwing query API methods.
+   */
+  #createQueryErrorResult<T>(e: unknown): SocketSdkGenericResult<T> {
+    if (e instanceof SyntaxError) {
+      // Try to get response text from enhanced error, fall back to regex pattern for compatibility.
+      const enhancedError = e as SyntaxError & {
+        originalResponse?: string | undefined
+      }
+      let responseText = enhancedError.originalResponse || ''
+
+      /* c8 ignore next 4 - c8 ignored: because getResponseJson always attaches originalResponse to SyntaxErrors; this regex fallback exists for third-party JSON parsers that may not */
+      if (!responseText) {
+        const match = e.message.match(/Invalid JSON response:\n([\s\S]*?)\n→/)
+        responseText = match?.[1] || ''
+      }
+
+      const preview = responseText.slice(0, 100) || ''
+      return {
+        cause: `Please report this. JSON.parse threw an error over the following response: \`${StringPrototypeTrim(preview)}${responseText.length > 100 ? '…' : ''}\``,
+        data: undefined,
+        error: 'Server returned invalid JSON',
+        status: 0,
+        success: false,
+      }
+    }
+
+    const errStr = e ? StringPrototypeTrim(String(e)) : ''
+    return {
+      cause: errStr || UNKNOWN_ERROR,
+      data: undefined,
+      error: 'API request failed',
+      status: 0,
+      success: false,
+    }
+  }
+
+  /**
+   * Execute an HTTP request with retry logic. Internal method for wrapping HTTP
+   * operations with exponential backoff.
+   */
+  async #executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
+    const result = await pRetry(operation, {
+      baseDelayMs: this.#retryDelay,
+      onRetry: (
+        _attempt: number,
+        error: unknown,
+        _delay: number,
+      ): boolean | number | undefined => {
+        /* c8 ignore next 3 - c8 ignored: because all SDK HTTP operations throw ResponseError on failure; non-ResponseError types (e.g. DNS, timeout) use pRetry's default retry behavior */
+        if (!(error instanceof ResponseError)) {
+          return undefined
+        }
+        const { status } = error.response
+        // Rate limiting (429) is always retried; use custom delay from Retry-After if present.
+        if (status === 429) {
+          const retryAfter = this.#parseRetryAfter(
+            error.response.headers['retry-after'],
+          )
+          if (retryAfter !== undefined) {
+            return retryAfter
+          }
+          return undefined
+        }
+        // Don't retry other client errors (4xx) - they won't succeed on retry.
+        if (status >= 400 && status < 500) {
+          throw error
+        }
+        return undefined
+      },
+      onRetryRethrow: true,
+      retries: this.#retries,
+    })
+    /* c8 ignore next 3 - c8 ignored: because pRetry always returns a value or throws; undefined is only possible if the abort signal fires between attempts, which requires precise timing */
+    if (result === undefined) {
+      throw new ErrorCtor('Request aborted')
+    }
+    return result
+  }
+
+  /**
+   * Get the TTL for a specific endpoint. Returns endpoint-specific TTL if
+   * configured, otherwise returns default TTL.
+   */
+  #getTtlForEndpoint(endpoint: string): number | undefined {
+    const cacheTtl = this.#cacheTtlConfig
+    if (typeof cacheTtl === 'number') {
+      return cacheTtl
+    }
+    if (cacheTtl && typeof cacheTtl === 'object') {
+      // Check for endpoint-specific TTL first.
+      const endpointTtl = (cacheTtl as Record<string, number | undefined>)[
+        endpoint
+      ]
+      if (typeof endpointTtl === 'number') {
+        return endpointTtl
+      }
+      // Fall back to default.
+      return cacheTtl.default
+    }
+    return undefined
+  }
+
+  /**
+   * Get or create a cache instance with the specified TTL. Reuses existing
+   * cache instances to avoid creating duplicates.
+   */
+  #getCacheForTtl(ttl: number): TtlCache {
+    let cache = this.#cacheByTtl.get(ttl)
+    if (!cache) {
+      cache = createTtlCache({
+        memoize: true,
+        prefix: 'socket-sdk',
+        ttl,
+      })
+      this.#cacheByTtl.set(ttl, cache)
+    }
+    return cache
+  }
+
+  /**
+   * Execute a GET request with optional caching. Internal method for handling
+   * cached GET requests with retry logic. Supports per-endpoint TTL
+   * configuration.
+   */
+  async #getCached<T>(
+    cacheKey: string,
+    fetcher: () => Promise<T>,
+    endpointName?: string | undefined,
+  ): Promise<T> {
+    // If caching is disabled, just execute the request.
+    if (!this.#cache) {
+      return await this.#executeWithRetry(fetcher)
+    }
+
+    // Get endpoint-specific TTL if provided.
+    const endpointTtl = endpointName
+      ? this.#getTtlForEndpoint(endpointName)
+      : undefined
+
+    // Select the appropriate cache instance.
+    // If endpoint has custom TTL, get/create cache for that TTL.
+    // Otherwise use the default cache.
+    const cacheToUse =
+      endpointTtl !== undefined
+        ? this.#getCacheForTtl(endpointTtl)
+        : this.#cache
+
+    // Use cache with retry logic.
+    return await cacheToUse.getOrFetch(cacheKey, async () => {
+      return await this.#executeWithRetry(fetcher)
+    })
+  }
+
+  /**
+   * Drive the cached-scan 200/202 polling loop for a GET url path. Each poll is
+   * retry-wrapped (so 429/5xx still back off) and throws a ResponseError on a
+   * non-2xx status; a 200 resolves with parsed JSON and a 202 keeps polling
+   * until the result is ready or the wall-clock budget is exhausted. Internal
+   * shared helper for getDiffScanById and getFullScan.
+   */
+  async #pollCachedScan(
+    urlPath: string,
+    label: string,
+  ): Promise<JsonValue | undefined> {
+    return await pollCachedScan({
+      label,
+      pollIntervalMs: this.#pollIntervalMs,
+      requestFn: async () =>
+        await this.#executeWithRetry(async () => {
+          const response = await createGetRequest(
+            this.#baseUrl,
+            urlPath,
+            this.#reqOptionsWithHooks,
+          )
+          // 202 Accepted is ok (2xx); let it through for the poll loop. Any
+          // non-2xx throws so #executeWithRetry retries 429/5xx and 4xx
+          // surfaces to the caller's catch.
+          if (!isResponseOk(response)) {
+            throw new ResponseError(response, '', urlPath)
+          }
+          return response
+        }),
+    })
+  }
+
+  /**
+   * Handle API error responses and convert to standardized error result.
+   * Internal error handling with status code analysis and message formatting.
+   */
+  async #handleApiError<T extends SocketSdkOperations>(
+    error: unknown,
+  ): Promise<SocketSdkErrorResult<T>> {
+    // Handle JSON parsing errors (SyntaxError from invalid API responses)
+    if (error instanceof SyntaxError) {
+      return {
+        success: false as const,
+        error: error.message,
+        // Response was HTTP 200 but body was not valid JSON
+        status: 200,
+      }
+    }
+    if (!(error instanceof ResponseError)) {
+      throw new ErrorCtor('Unexpected Socket API error', {
+        cause: error,
+      })
+    }
+    const { status: statusCode } = error.response
+    // Throw server errors (5xx) immediately - these are not recoverable client-side.
+    if (statusCode && statusCode >= 500) {
+      throw new ErrorCtor(`Socket API server error (${statusCode})`, {
+        cause: error,
+      })
+    }
+    // The error payload may give a meaningful hint as to what went wrong.
+    const bodyStr = error.response.text()
+    // Try to parse the body as JSON, fallback to treating as plain text.
+    let body: string | undefined
+    try {
+      const parsed: {
+        error?:
+          | { message?: string | undefined; details?: unknown | undefined }
+          | undefined
+      } = JSON.parse(bodyStr)
+      // Client errors (4xx) should return actionable error messages.
+      // Extract both message and details from error response for better context.
+      if (typeof parsed?.error?.message === 'string') {
+        body = parsed.error.message
+
+        // Include details if present for additional error context.
+        if (parsed.error.details) {
+          const detailsStr: string =
+            typeof parsed.error.details === 'string'
+              ? parsed.error.details
+              : JSON.stringify(parsed.error.details)
+          body = `${body} - Details: ${detailsStr}`
+        }
+      }
+    } catch {
+      body = bodyStr
+    }
+    // Build error message that includes the body content if available.
+    /* c8 ignore next - Fallback error message when error.message is undefined */
+    let errorMessage =
+      error.message ??
+      /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
+    const trimmedBody =
+      body !== undefined ? StringPrototypeTrim(body) : undefined
+    if (trimmedBody && !errorMessage.includes(trimmedBody)) {
+      // Replace generic status message with actual error body if present,
+      // otherwise append the body to the error message.
+      const statusMessage = error.response?.statusText
+      if (statusMessage && errorMessage.includes(statusMessage)) {
+        errorMessage = errorMessage.replace(statusMessage, trimmedBody)
+        /* c8 ignore next 2 - c8 ignored: because Node.js http always sets statusText; this else branch handles custom servers or proxies that omit it */
+      } else {
+        errorMessage = `${errorMessage}: ${trimmedBody}`
+      }
+    }
+
+    // Add actionable guidance based on status code.
+    let actionableGuidance: string | undefined
+    if (statusCode === 401) {
+      actionableGuidance = [
+        '→ Authentication failed. API token is invalid or expired.',
+        '→ Check: Your API token is correct and active.',
+        `→ Generate a new token at: ${SOCKET_API_TOKENS_URL}`,
+      ].join('\n')
+    } else if (statusCode === 403) {
+      actionableGuidance = [
+        '→ Authorization failed. Insufficient permissions.',
+        '→ Check: Your API token has required permissions for this operation.',
+        '→ Check: You have access to the specified organization/repository.',
+        `→ Verify: Organization settings at ${SOCKET_DASHBOARD_URL}`,
+      ].join('\n')
+    } else if (statusCode === 404) {
+      actionableGuidance = [
+        '→ Resource not found.',
+        '→ Verify: Package name, version, or resource ID is correct.',
+        '→ Check: Organization or repository exists and is accessible.',
+      ].join('\n')
+    } else if (statusCode === 429) {
+      const retryAfter = error.response.headers['retry-after']
+      const retryMsg = retryAfter
+        ? `Retry after ${retryAfter} seconds.`
+        : 'Wait before retrying.'
+      actionableGuidance = [
+        '→ Rate limit exceeded. Too many requests.',
+        `→ ${retryMsg}`,
+        '→ Try: Implement exponential backoff or enable SDK retry option.',
+        `→ Contact support to increase rate limits: ${SOCKET_CONTACT_URL}`,
+      ].join('\n')
+    } else if (statusCode === 400) {
+      actionableGuidance = [
+        '→ Bad request. Invalid parameters or request body.',
+        '→ Check: All required parameters are provided and correctly formatted.',
+        '→ Verify: Package URLs (PURLs) follow correct format.',
+      ].join('\n')
+    } else if (statusCode === 413) {
+      actionableGuidance = [
+        '→ Payload too large. Request exceeds size limits.',
+        '→ Try: Reduce the number of files or packages in a single request.',
+        '→ Try: Use batch operations with smaller chunks.',
+      ].join('\n')
+    }
+
+    // Append actionable guidance to cause if available.
+    const causeWithGuidance = actionableGuidance
+      ? [trimmedBody, '', actionableGuidance].filter(Boolean).join('\n')
+      : body
+
+    // Omit cause if it's too similar to the error message (redundant).
+    // This prevents repeating essentially the same information twice.
+    const finalCause = filterRedundantCause(errorMessage, causeWithGuidance)
+
+    return {
+      cause: finalCause,
+      data: undefined,
+      error: errorMessage,
+      /* c8 ignore next - fallback for missing status code in edge cases. */
+      status: statusCode ?? 0,
+      success: false,
+      url: error.url,
+    } as SocketSdkErrorResult<T>
+  }
+
+  /**
+   * Handle successful API responses and convert to standardized success result.
+   * Internal success handling with consistent response formatting.
+   */
+  #handleApiSuccess<T extends SocketSdkOperations>(
+    data: unknown,
+  ): SocketSdkSuccessResult<T> {
+    return {
+      cause: undefined,
+      data: data as SocketSdkSuccessResult<T>['data'],
+      error: undefined,
+      // Use generic 200 OK status for all successful API responses.
+      status: 200,
+      success: true,
+    } satisfies SocketSdkSuccessResult<T>
+  }
+
+  /**
+   * Handle query API response data based on requested response type. Internal
+   * method for processing different response formats (json, text, response).
+   */
+  async #handleQueryResponseData<T>(
+    response: HttpResponse,
+    responseType: CustomResponseType,
+  ): Promise<T> {
+    if (responseType === 'response') {
+      return response as T
+    }
+
+    if (responseType === 'text') {
+      return response.text() as T
+    }
+
+    if (responseType === 'json') {
+      return (await getResponseJson(response)) as T
+    }
+
+    /* c8 ignore next - c8 ignored: because getApi always passes 'response', 'text', or 'json'; this is the default fallback for responseType='response' */
+    return response as T
+  }
+
+  /**
+   * Parse Retry-After header value and return delay in milliseconds. Supports
+   * both delay-seconds (integer) and HTTP-date formats.
+   */
+  #parseRetryAfter(
+    retryAfterValue: string | string[] | undefined,
+  ): number | undefined {
+    /* c8 ignore next 3 - c8 ignored: because #parseRetryAfter is only called when retry-after header exists; the undefined check guards against type-level callers */
+    if (!retryAfterValue) {
+      return undefined
+    }
+
+    // Handle array of values (take first).
+    const value: string | undefined = ArrayIsArray(retryAfterValue)
+      ? (retryAfterValue[0] as string | undefined)
+      : (retryAfterValue as string | undefined)
+
+    /* c8 ignore next 3 - c8 ignored: because HTTP headers are always strings; empty array[0] returns undefined which is guarded here for safety */
+    // Return if value is empty after extracting from array.
+    if (!value) {
+      return undefined
+    }
+
+    // Try parsing as seconds (integer).
+    const seconds = Number.parseInt(value, 10)
+    if (!Number.isNaN(seconds) && seconds >= 0) {
+      return seconds * 1000
+    }
+
+    // Try parsing as HTTP date.
+    const date = new Date(value)
+    if (!Number.isNaN(date.getTime())) {
+      const delayMs = date.getTime() - Date.now()
+      // Only use if date is in the future.
+      if (delayMs > 0) {
+        return delayMs
+      }
+    }
+
+    return undefined
+  }
+
+  /**
+   * Resolve the v1 API base URL for the v1 content-addressed full-scan and
+   * blob endpoints. Throws when this SDK instance's configured base URL has
+   * no known v1 counterpart.
+   */
+  #requireApiV1BaseUrl(): string {
+    const v1BaseUrl = deriveApiV1BaseUrl(this.#baseUrl)
+    if (v1BaseUrl === undefined) {
+      throw new ErrorCtor(
+        [
+          'v1 endpoint requires a v1 base URL derived from this SDK instance.',
+          `→ Where: baseUrl is "${this.#baseUrl}"`,
+          `→ Saw: "${this.#baseUrl}"; wanted a base URL ending in "/v0/" (v1 is derived by swapping the trailing "v0/" for "v1/")`,
+          '→ Fix: construct the SDK with the default "https://api.socket.dev/v0/" base, or a custom base whose version segment is "v0"',
+        ].join('\n'),
+      )
+    }
+    return v1BaseUrl
+  }
+
+  /**
+   * Get package metadata and alerts by PURL strings for a specific
+   * organization. Organization-scoped version of batchPackageFetch with
+   * security policy label support.
+   *
+   * @example
+   *   ```typescript
+   *   const result = await sdk.batchOrgPackageFetch(
+   *   'my-org',
+   *   {
+   *   components: [
+   *   { purl: 'pkg:npm/express@4.19.2' },
+   *   { purl: 'pkg:pypi/django@5.0.6' },
+   *   ],
+   *   },
+   *   { labels: ['production'], alerts: true },
+   *   )
+   *
+   *   if (result.success) {
+   *   for (const artifact of result.data) {
+   *   console.log(`${artifact.name}@${artifact.version}`)
+   *   }
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param componentsObj - Object containing array of components with PURL
+   *   strings.
+   * @param queryParams - Optional query parameters including labels, alerts,
+   *   compact, etc.
+   *
+   * @returns Package metadata and alerts for the requested PURLs
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/purl
+   *
+   * @quota 100 units
+   *
+   * @scopes packages:list
+   *
+   * @see https://docs.socket.dev/reference/batchpackagefetchbyorg
+   */
+  async batchOrgPackageFetch(
+    orgSlug: string,
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'batchPackageFetchByOrg'>> {
+    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/purl?${queryToSearchParams(queryParams)}`
+    let res: HttpResponse | undefined
+    try {
+      res = await this.#executeWithRetry(async () => {
+        const response = await httpRequest(url, {
+          method: 'POST',
+          body: JSON.stringify(componentsObj),
+          headers: this.#reqOptions.headers as Record<string, string>,
+          timeout: this.#reqOptions.timeout,
+          maxResponseSize: MAX_RESPONSE_SIZE,
+        })
+
+        // Throw ResponseError for non-2xx status codes so retry logic works properly.
+        if (!isResponseOk(response)) {
+          throw new ResponseError(response, 'POST Request failed', url)
+        }
+        return response
+      })
+    } catch (e) {
+      return await this.#handleApiError<'batchPackageFetchByOrg'>(e)
+    }
+    // Validate response before processing.
+    /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
+    if (!res) {
+      throw new ErrorCtor('Failed to get response from batch PURL request')
+    }
+    // Parse the newline delimited JSON response.
+    const results: SocketArtifact[] = []
+    const text = res.text()
+    let start = 0
+    for (let i = 0; i <= text.length; i++) {
+      if (i === text.length || text.charCodeAt(i) === 10) {
+        if (i > start) {
+          const line = text.slice(start, i)
+          const artifact = parseJson(line, {
+            throws: false,
+          }) as SocketArtifact | null
+          if (isObject(artifact)) {
+            results.push(artifact!)
+          }
+        }
+        start = i + 1
+      }
+    }
+    const compact = urlSearchParamsAsBoolean(
+      getOwn(queryParams, 'compact') as string | null | undefined,
+    )
+    return this.#handleApiSuccess<'batchPackageFetchByOrg'>(
+      compact ? (results as CompactSocketArtifact[]) : results,
+    )
+  }
+
+  /**
+   * Fetch package analysis data for multiple packages in a single batch
+   * request. Returns all results at once after processing is complete.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async batchPackageFetch(
+    componentsObj: { components: Array<{ purl: string }> },
+    queryParams?: QueryParams | undefined,
+  ): Promise<BatchPackageFetchResultType> {
+    let res: HttpResponse | undefined
+    try {
+      res = await this.#createBatchPurlRequest(componentsObj, queryParams)
+    } catch (e) {
+      return await this.#handleApiError<'batchPackageFetch'>(e)
+    }
+    // Validate response before processing.
+    /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
+    if (!res) {
+      throw new ErrorCtor('Failed to get response from batch PURL request')
+    }
+    // Parse the newline delimited JSON response.
+    const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
+    const results: SocketArtifact[] = []
+    const text = res.text()
+    let start = 0
+    for (let i = 0; i <= text.length; i++) {
+      if (i === text.length || text.charCodeAt(i) === 10) {
+        if (i > start) {
+          const line = text.slice(start, i)
+          const artifact = parseJson(line, {
+            throws: false,
+          }) as SocketArtifact | null
+          if (isObject(artifact)) {
+            results.push(
+              /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
+              isPublicToken
+                ? reshapeArtifactForPublicPolicy(artifact!, {
+                    actions: queryParams?.['actions'] as string,
+                    isAuthenticated: false,
+                    policy: publicPolicy,
+                  })
+                : artifact!,
+            )
+          }
+        }
+        start = i + 1
+      }
+    }
+    const compact = urlSearchParamsAsBoolean(
+      getOwn(queryParams, 'compact') as string | null | undefined,
+    )
+    return this.#handleApiSuccess<'batchPackageFetch'>(
+      compact ? (results as CompactSocketArtifact[]) : results,
+    )
+  }
+
+  /**
+   * Stream package analysis data for multiple packages with chunked processing
+   * and concurrency control. Returns results as they become available via async
+   * generator.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId batchPackageStream
+   *
+   * @quota 100 units
+   */
+  async *batchPackageStream(
+    componentsObj: { components: Array<{ purl: string }> },
+    options?: BatchPackageStreamOptions | undefined,
+  ): AsyncGenerator<BatchPackageFetchResultType> {
+    const {
+      chunkSize = 100,
+      concurrencyLimit = 10,
+      queryParams,
+    } = {
+      __proto__: null,
+      ...options,
+    } as BatchPackageStreamOptions
+
+    type GeneratorStep = {
+      generator: AsyncGenerator<BatchPackageFetchResultType>
+      iteratorResult: IteratorResult<BatchPackageFetchResultType>
+    }
+
+    // The createBatchPurlGenerator method will add 2 'abort' event listeners to
+    // abortSignal so we multiply the concurrencyLimit by 2.
+    const neededMaxListeners = concurrencyLimit * 2
+    // Increase abortSignal max listeners count to avoid Node's MaxListenersExceededWarning.
+    /* c8 ignore start - EventTarget max listeners adjustment for high concurrency batch operations, difficult to test reliably. */
+    setMaxEventTargetListeners(getSdkAbortSignal(), neededMaxListeners)
+    /* c8 ignore stop */
+    const { components } = componentsObj
+    const { length: componentsCount } = components
+    // ─────────────────────────────────────────────────────────────────────
+    // Why this isn't `Promise.race(running.values())` in a loop.
+    //
+    // The old version kept a Map<generator, promise> of every in-flight
+    // generator step, then each iteration did:
+    //
+    //   await Promise.race(running.values())
+    //
+    // That looks fine, but here's the trap: `Promise.race` attaches a
+    // *fresh* pair of `.then(resolve, reject)` handlers to EVERY promise
+    // it's passed — every single time it's called. Those handlers stay
+    // attached until the promise they're on settles. The race itself
+    // settling doesn't detach them from the losers.
+    //
+    // So imagine 10 generators running, and one finishes quickly while
+    // the other 9 are slow. Each loop iteration:
+    //   - race returns (say) generator #3's step
+    //   - we kick off generator #3's next step → new race over 10 promises
+    //   - BUT the 9 slow ones still have handlers from the PREVIOUS race
+    //     hanging off them, plus the 9 new ones we just added
+    //
+    // After N iterations on a long-running generator's promise, that
+    // single promise has ~N dead handler closures queued on it, each
+    // holding references to closure state. For a batch of thousands of
+    // components this adds up to a real memory leak, and the GC can't
+    // help until every last generator in the pool settles.
+    //
+    // See https://github.com/nodejs/node/issues/17469 for the canonical
+    // write-up, and the `@watchable/unpromise` package for the
+    // one-shot-handler pattern we're adopting here.
+    //
+    // The fix: flip the direction. Instead of the main loop repeatedly
+    // racing the pool, each generator's `.then` pushes its result into a
+    // tiny queue (`completed`), and the main loop awaits one promise at
+    // a time via `takeStep()`. Each generator attaches its handlers
+    // exactly ONCE per step — no stacking, nothing to leak.
+    // ─────────────────────────────────────────────────────────────────────
+
+    // `running` is now just a Set for pool-size accounting (how many
+    // generators are still in flight). We no longer store promises here
+    // because we don't race them — see the block comment above.
+    const running = new Set<AsyncGenerator<BatchPackageFetchResultType>>()
+
+    // Buffer of steps that finished while the main loop wasn't waiting.
+    // Happens when multiple generators resolve in the same microtask tick:
+    // the first one wakes the waiter, the rest land here until takeStep()
+    // drains them.
+    const completed: GeneratorStep[] = []
+
+    // At most ONE waiter at a time, because the main loop awaits one step
+    // per iteration. `undefined` means "nobody is currently awaiting".
+    // When a step arrives and a waiter exists, we hand it the step and
+    // clear the slot. When a step arrives and no waiter exists, we queue
+    // it in `completed` above.
+    let waiter:
+      | {
+          reject: (err: unknown) => void
+          resolve: (step: GeneratorStep) => void
+        }
+      | undefined
+
+    // If a generator rejects while nobody is awaiting, we stash the error
+    // here so the NEXT takeStep() call can surface it. We only keep the
+    // first error (matches the old Promise.race behavior — first rejection
+    // wins, later ones are swallowed). Wrapped in an object so we can
+    // distinguish "no error" (undefined) from "error was literally
+    // undefined" (a `{ err: undefined }` object).
+    let pendingError: { err: unknown } | undefined
+
+    // Called from a generator's `.then` success path. Two cases:
+    //   1. The main loop is parked in takeStep() → wake it directly.
+    //   2. The main loop is busy → buffer the step for later.
+    // Either way, `.then` fires exactly once per generator step, so no
+    // handlers pile up on long-lived promises.
+    const deliverStep = (step: GeneratorStep) => {
+      if (waiter) {
+        // Snapshot + clear before calling resolve, in case resolve
+        // synchronously triggers another deliverStep/takeStep cycle and
+        // we don't want to hand the next step to a stale waiter.
+        const w = waiter
+        waiter = undefined
+        w.resolve(step)
+      } else {
+        completed.push(step)
+      }
+    }
+
+    // Mirror of deliverStep for the rejection path. Same snapshot-then-
+    // clear dance. If no waiter and no prior pendingError, remember this
+    // one so the next takeStep() can throw it.
+    const deliverError = (err: unknown) => {
+      if (waiter) {
+        const w = waiter
+        waiter = undefined
+        w.reject(err)
+      } else if (!pendingError) {
+        pendingError = { err }
+      }
+    }
+
+    // The main loop's only way to wait for progress. Priority:
+    //   1. Surface any stashed error immediately (fail-fast).
+    //   2. Return a buffered step if one is queued (no await needed —
+    //      `Promise.resolve(x)` still yields a microtask, but no new
+    //      handler chains get attached to long-lived promises).
+    //   3. Otherwise register ourselves as THE waiter and park on a
+    //      fresh promise. Because only one slot exists, there's never
+    //      more than one handler outstanding.
+    const takeStep = (): Promise<GeneratorStep> => {
+      if (pendingError) {
+        const { err } = pendingError
+        pendingError = undefined
+        return Promise.reject(err)
+      }
+      if (completed.length) {
+        return Promise.resolve(completed.shift()!)
+      }
+      const { promise, reject, resolve } = promiseWithResolvers<GeneratorStep>()
+      waiter = { reject, resolve }
+      return promise
+    }
+    let index = 0
+    const enqueueGen = () => {
+      if (index >= componentsCount) {
+        return
+      }
+      const generator = this.#createBatchPurlGenerator(
+        {
+          components: components.slice(index, index + chunkSize),
+        },
+        queryParams,
+      )
+      continueGen(generator)
+      index += chunkSize
+    }
+    // Kick off (or continue) a single generator. The key detail: we
+    // attach `.then` to the `.next()` promise EXACTLY ONCE. That promise
+    // will settle once, our handlers fire once, and nothing else is ever
+    // chained on top of it. This is the whole point of the refactor —
+    // no `Promise.race` loop means no re-attaching handlers every tick.
+    const continueGen = (
+      generator: AsyncGenerator<BatchPackageFetchResultType>,
+    ) => {
+      running.add(generator)
+      void generator
+        .next()
+        .then(
+          iteratorResult => deliverStep({ generator, iteratorResult }),
+          deliverError,
+        )
+    }
+    // Start initial batch of generators.
+    while (running.size < concurrencyLimit && index < componentsCount) {
+      enqueueGen()
+    }
+    while (running.size > 0) {
+      // eslint-disable-next-line no-await-in-loop
+      const { generator, iteratorResult }: GeneratorStep = await takeStep()
+      running.delete(generator)
+      // Yield the value if one is given, even when done:true.
+      if (iteratorResult.value) {
+        yield iteratorResult.value
+      }
+      if (iteratorResult.done) {
+        // Start a new generator if available.
+        enqueueGen()
+      } else {
+        // Keep fetching values from this generator.
+        continueGen(generator)
+      }
+    }
+  }
+
+  /**
+   * Check packages for malware and security alerts.
+   *
+   * For small sets (≤ MAX_FIREWALL_COMPONENTS), uses parallel firewall API
+   * requests which return full artifact data including score and alert
+   * details.
+   *
+   * For larger sets, uses the batch PURL API for efficiency.
+   *
+   * Both paths normalize alerts through publicPolicy and only return
+   * malware-relevant results.
+   *
+   * @param components - Array of package URLs to check.
+   *
+   * @returns Normalized results with policy-filtered alerts per package
+   *
+   * @operationId none
+   */
+  async checkMalware(
+    components: Array<{ purl: string }>,
+  ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
+    if (components.length <= MAX_FIREWALL_COMPONENTS) {
+      return this.#checkMalwareFirewall(components)
+    }
+    return this.#checkMalwareBatch(components)
+  }
+
+  // Small-set path: parallel firewall API requests per PURL.
+  // Returns full artifact data (score, alert props, categories, fix info).
+  async #checkMalwareFirewall(
+    components: Array<{ purl: string }>,
+  ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
+    const packages: MalwareCheckPackage[] = []
+    const results = await Promise.allSettled(
+      components.map(async ({ purl }) => {
+        const urlPath = `/${encodeURIComponent(purl)}`
+        // Public endpoint — copy all headers except Authorization
+        // (case-insensitive per RFC 7230 §3.2), keep agent/signal/timeout.
+        const publicHeaders: Record<string, string> = {
+          __proto__: null,
+        } as unknown as Record<string, string>
+        const srcHeaders = this.#reqOptions.headers as
+          | Record<string, string>
+          | undefined
+        if (srcHeaders) {
+          const keys = Object.keys(srcHeaders)
+          for (let i = 0, { length } = keys; i < length; i += 1) {
+            const key = keys[i]!
+            if (key.toLowerCase() !== 'authorization') {
+              publicHeaders[key] = srcHeaders[key]!
+            }
+          }
+        }
+        const response = await createGetRequest(
+          SOCKET_FIREWALL_API_URL,
+          urlPath,
+          {
+            ...this.#reqOptions,
+            headers: publicHeaders,
+          },
+        )
+        if (!isResponseOk(response)) {
+          return undefined
+        }
+        const json = await getResponseJson(response)
+        return json as unknown as SocketArtifact
+      }),
+    )
+    for (let i = 0, { length } = results; i < length; i += 1) {
+      const settled = results[i]!
+      if (settled.status === 'rejected' || !settled.value) {
+        continue
+      }
+      packages.push(SocketSdk.#normalizeArtifact(settled.value, publicPolicy))
+    }
+    return {
+      cause: undefined,
+      data: packages,
+      error: undefined,
+      status: 200,
+      success: true,
+    }
+  }
+
+  // Multi-component path: batch PURL API request, normalized to publicPolicy.
+  async #checkMalwareBatch(
+    components: Array<{ purl: string }>,
+  ): Promise<SocketSdkGenericResult<MalwareCheckResult>> {
+    const result = await this.batchPackageFetch(
+      { components },
+      { alerts: true, cachedResultsOnly: true },
+    )
+    if (!result.success) {
+      return {
+        cause: result.cause,
+        data: undefined,
+        error: result.error,
+        status: result.status,
+        success: false,
+      }
+    }
+    const packages: MalwareCheckPackage[] = []
+    const artifacts = result.data as SocketArtifact[]
+    for (let i = 0, { length } = artifacts; i < length; i += 1) {
+      packages.push(SocketSdk.#normalizeArtifact(artifacts[i]!, publicPolicy))
+    }
+    return {
+      cause: undefined,
+      data: packages,
+      error: undefined,
+      status: 200,
+      success: true,
+    }
+  }
+
+  // Normalize an artifact into MalwareCheckPackage.
+  // When policy is provided, derive action from the map.
+  // When policy is undefined, use server-assigned alert.action.
+  static #normalizeArtifact(
+    artifact: SocketArtifact,
+    policy?: Map<string, string> | undefined,
+  ): MalwareCheckPackage {
+    const alerts: MalwareCheckAlert[] = []
+    if (artifact.alerts) {
+      const artifactAlerts = artifact.alerts
+      for (let i = 0, { length } = artifactAlerts; i < length; i += 1) {
+        const alert = artifactAlerts[i]!
+        const action = policy
+          ? (policy.get(alert.type) ?? 'ignore')
+          : (alert.action ?? 'ignore')
+        if (action === 'error' || action === 'warn') {
+          alerts.push({
+            category: alert.category,
+            fix: alert.fix
+              ? { description: alert.fix.description, type: alert.fix.type }
+              : undefined,
+            key: alert.key,
+            props: alert.props,
+            severity: alert.severity,
+            type: alert.type,
+          })
+        }
+      }
+    }
+    return {
+      alerts,
+      name: artifact.name,
+      namespace: artifact.namespace,
+      score: artifact.score as MalwareCheckScore | undefined,
+      type: artifact.type,
+      version: artifact.version,
+    }
+  }
+
+  /**
+   * Create a snapshot of project dependencies by uploading manifest files.
+   * Analyzes dependency files to generate a comprehensive security report.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createDependenciesSnapshot(
+    filepaths: string[],
+    options?: CreateDependenciesSnapshotOptions | undefined,
+  ): Promise<SocketSdkResult<'createDependenciesSnapshot'>> {
+    const { pathsRelativeTo = '.', queryParams } = {
+      __proto__: null,
+      ...options,
+    } as CreateDependenciesSnapshotOptions
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+
+    // Validate file readability before upload.
+    const { invalidPaths, validPaths } = validateFiles(absFilepaths)
+
+    // If callback provided and files were invalid, invoke it.
+    if (this.#onFileValidation && invalidPaths.length > 0) {
+      const result = await this.#onFileValidation(validPaths, invalidPaths, {
+        operation: 'createDependenciesSnapshot',
+      })
+
+      if (!result.shouldContinue) {
+        const errorMsg = result.errorMessage ?? 'File validation failed'
+        return {
+          cause: filterRedundantCause(errorMsg, result.errorCause),
+          data: undefined,
+          error: errorMsg,
+          status: 400,
+          success: false,
+        } as SocketSdkErrorResult<'createDependenciesSnapshot'>
+      }
+    }
+
+    // Default behavior if no callback: warn and continue.
+    if (!this.#onFileValidation && invalidPaths.length > 0) {
+      const samplePaths = invalidPaths.slice(0, 3).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 3
+          ? `\n  ... and ${invalidPaths.length - 3} more`
+          : ''
+      logger.warn(
+        `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
+          '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
+          '→ Try: Run installation command to ensure files are accessible.',
+      )
+    }
+
+    // Fail if all files were invalid.
+    if (validPaths.length === 0) {
+      const samplePaths = invalidPaths.slice(0, 5).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 5
+          ? `\n  ... and ${invalidPaths.length - 5} more`
+          : ''
+      return {
+        cause: [
+          `All ${invalidPaths.length} files failed validation:`,
+          `  - ${samplePaths}${remaining}`,
+          '',
+          '→ Common causes:',
+          '  ·Yarn Berry PnP virtual filesystem (files are not on disk)',
+          '  ·pnpm symlinks pointing to inaccessible locations',
+          '  ·Incorrect file permissions',
+          '  ·Files were deleted after discovery',
+          '',
+          '→ Solutions:',
+          '  ·Yarn Berry: Use `nodeLinker: node-modules` in .yarnrc.yml',
+          '  ·pnpm: Use `node-linker=hoisted` in .npmrc',
+          '  ·Check file permissions with: ls -la <file>',
+          '  ·Run package manager install command',
+        ].join('\n'),
+        data: undefined,
+        error: 'No readable manifest files found',
+        status: 400,
+        success: false,
+      } as SocketSdkErrorResult<'createDependenciesSnapshot'>
+    }
+
+    // Continue with validated files.
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `dependencies/upload?${queryToSearchParams(queryParams)}`,
+              createRequestBodyForFilepaths(validPaths, basePath),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'createDependenciesSnapshot'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createDependenciesSnapshot'>(e)
+    }
+  }
+
+  /**
+   * Create a full security scan for an organization.
+   *
+   * Uploads project manifest files and initiates full security analysis.
+   * Returns scan metadata with guaranteed required fields.
+   *
+   * Transparently attempts the v1 content-addressed blob-cache path first; that
+   * attempt may issue additional HTTP requests (manifest post, blob uploads)
+   * before the scan is created, observable through the `onRequest`/`onResponse`
+   * hooks, before falling back to the v0 multipart upload.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.createFullScan(
+   *     'my-org',
+   *     ['package.json', 'package-lock.json'],
+   *     {
+   *       repo: 'my-repo',
+   *       branch: 'main',
+   *       commit_message: 'Update dependencies',
+   *       commit_hash: 'abc123',
+   *       pathsRelativeTo: './my-project',
+   *     },
+   *   )
+   *
+   *   if (result.success) {
+   *     console.log('Scan ID:', result.data.id)
+   *     console.log('Report URL:', result.data.html_report_url)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param filepaths - Array of file paths to upload (package.json,
+   *   package-lock.json, etc.)
+   * @param options - Scan configuration including repository, branch, and
+   *   commit details.
+   *
+   * @returns Full scan metadata including ID and URLs
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:create
+   *
+   * @see https://docs.socket.dev/reference/createorgfullscan
+   */
+  async createFullScan(
+    orgSlug: string,
+    filepaths: string[],
+    options: CreateFullScanOptions,
+  ): Promise<FullScanResult | StrictErrorResult> {
+    const { pathsRelativeTo = '.', ...queryParams } = {
+      __proto__: null,
+      ...options,
+    } as CreateFullScanOptions
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+
+    // Validate file readability before upload.
+    const { invalidPaths, validPaths } = validateFiles(absFilepaths)
+
+    // If callback provided and files were invalid, invoke it.
+    if (this.#onFileValidation && invalidPaths.length > 0) {
+      const result = await this.#onFileValidation(validPaths, invalidPaths, {
+        operation: 'createFullScan',
+        orgSlug,
+      })
+
+      if (!result.shouldContinue) {
+        const errorMsg = result.errorMessage ?? 'File validation failed'
+        return {
+          cause: filterRedundantCause(errorMsg, result.errorCause),
+          data: undefined,
+          error: errorMsg,
+          status: 400,
+          success: false,
+        } as StrictErrorResult
+      }
+    }
+
+    // Default behavior if no callback: warn and continue.
+    if (!this.#onFileValidation && invalidPaths.length > 0) {
+      const samplePaths = invalidPaths.slice(0, 3).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 3
+          ? `\n  ... and ${invalidPaths.length - 3} more`
+          : ''
+      logger.warn(
+        `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
+          '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
+          '→ Try: Run installation command to ensure files are accessible.',
+      )
+    }
+
+    // Fail if all files were invalid.
+    if (validPaths.length === 0) {
+      const samplePaths = invalidPaths.slice(0, 5).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 5
+          ? `\n  ... and ${invalidPaths.length - 5} more`
+          : ''
+      return {
+        cause: [
+          `All ${invalidPaths.length} files failed validation:`,
+          `  - ${samplePaths}${remaining}`,
+          '',
+          '→ Common causes:',
+          '  ·Yarn Berry PnP virtual filesystem (files are not on disk)',
+          '  ·pnpm symlinks pointing to inaccessible locations',
+          '  ·Incorrect file permissions',
+          '  ·Files were deleted after discovery',
+          '',
+          '→ Solutions:',
+          '  ·Yarn Berry: Use `nodeLinker: node-modules` in .yarnrc.yml',
+          '  ·pnpm: Use `node-linker=hoisted` in .npmrc',
+          '  ·Check file permissions with: ls -la <file>',
+          '  ·Run package manager install command',
+        ].join('\n'),
+        data: undefined,
+        error: 'No readable manifest files found',
+        status: 400,
+        success: false,
+      } as StrictErrorResult
+    }
+
+    // Try the v1 content-addressed manifest flow first; every failure mode
+    // (unavailable route, unrepresentable path, retry exhaustion) falls back
+    // to the v0 multipart upload below rather than surfacing to the caller.
+    const v1Result = await this.#tryCreateFullScanViaManifest(
+      orgSlug,
+      validPaths,
+      basePath,
+      queryParams as QueryParams,
+    )
+    if (v1Result) {
+      return v1Result
+    }
+
+    // Continue with validated files.
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(queryParams as QueryParams)}`,
+              createRequestBodyForFilepaths(validPaths, basePath),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as FullScanItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'CreateOrgFullScan'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Attempt `createFullScan` via the v1 content-addressed manifest flow.
+   * Returns the v0-shaped success envelope on a 201, or undefined when the
+   * caller should fall back to the v0 multipart upload — an unavailable v1
+   * route, a path the manifest can't represent, a genuine request error, or
+   * retry exhaustion all fall back rather than surfacing to the caller, so
+   * `createFullScan`'s caller-visible behavior never regresses.
+   */
+  async #tryCreateFullScanViaManifest(
+    orgSlug: string,
+    validPaths: string[],
+    basePath: string,
+    queryParams: QueryParams,
+  ): Promise<FullScanResult | undefined> {
+    if (this.#v1FullScansUnavailable) {
+      return undefined
+    }
+    const v1BaseUrl = deriveApiV1BaseUrl(this.#baseUrl)
+    if (v1BaseUrl === undefined) {
+      return undefined
+    }
+    // The v1 body schema is `additionalProperties: false` — integration-linked
+    // scans have no v1 equivalent yet, so they stay on v0.
+    if (
+      queryParams['integration_type'] !== undefined ||
+      queryParams['integration_org_slug'] !== undefined
+    ) {
+      return undefined
+    }
+
+    try {
+      const assembled = await assembleManifest(basePath, validPaths)
+      if (assembled.skipped.length > 0 || assembled.entries.length === 0) {
+        debugLog(
+          'createFullScan:v1',
+          `manifest cannot represent every path (${assembled.skipped.length} skipped) — falling back to v0`,
+        )
+        return undefined
+      }
+
+      const branch = queryParams['branch'] as string | undefined
+      const commitHash = queryParams['commit_hash'] as string | undefined
+      const commitMessage = queryParams['commit_message'] as string | undefined
+      const committersRaw = queryParams['committers'] as
+        | string
+        | string[]
+        | undefined
+      const makeDefaultBranch = queryParams['make_default_branch'] as
+        | boolean
+        | undefined
+      const pullRequestRaw = queryParams['pull_request'] as
+        | number
+        | string
+        | undefined
+      const repo = queryParams['repo'] as string
+      const scanType = queryParams['scan_type'] as string | undefined
+      const setAsPendingHead = queryParams['set_as_pending_head'] as
+        | boolean
+        | undefined
+      const tmp = queryParams['tmp'] as boolean | undefined
+      const workspace = queryParams['workspace'] as string | undefined
+
+      // `committers` is documented as a single string, but callers casting
+      // options `as any` (e.g. socket-cli) may pass an array through — accept
+      // either shape and drop non-string/empty entries.
+      const committers =
+        committersRaw === undefined
+          ? undefined
+          : (Array.isArray(committersRaw)
+              ? committersRaw
+              : [committersRaw]
+            ).filter(
+              (entry): entry is string =>
+                typeof entry === 'string' && entry.length > 0,
+            )
+
+      // `pull_request` may arrive as a number, a numeric string (socket-cli
+      // sends `String(pullRequest)`), or `0` (the no-PR sentinel). The v1
+      // schema requires a minimum of 1, so only forward a safe integer ≥ 1 —
+      // anything else (including 0) is omitted rather than shipping a request
+      // that's guaranteed to 400 and pay the v0 fallback tax.
+      const pullRequestNum =
+        typeof pullRequestRaw === 'string'
+          ? Number(pullRequestRaw)
+          : pullRequestRaw
+      const pullRequest =
+        pullRequestNum !== undefined &&
+        Number.isSafeInteger(pullRequestNum) &&
+        pullRequestNum >= 1
+          ? pullRequestNum
+          : undefined
+
+      const params: CreateFullScanFromManifestParams = {
+        ...(branch !== undefined ? { branch } : {}),
+        ...(commitHash !== undefined ? { commit_hash: commitHash } : {}),
+        ...(commitMessage !== undefined
+          ? { commit_message: commitMessage }
+          : {}),
+        ...(committers !== undefined ? { committers } : {}),
+        ...(tmp !== undefined ? { ephemeral: tmp } : {}),
+        ...(makeDefaultBranch !== undefined
+          ? { make_default_branch: makeDefaultBranch }
+          : {}),
+        ...(pullRequest !== undefined ? { pull_request: pullRequest } : {}),
+        repo,
+        ...(scanType !== undefined ? { scan_type: scanType } : {}),
+        ...(setAsPendingHead !== undefined
+          ? { set_as_pending_head: setAsPendingHead }
+          : {}),
+        ...(workspace !== undefined ? { workspace } : {}),
+      }
+
+      const entriesByRelPath = new Map(
+        assembled.entries.map(entry => [entry.relPath, entry]),
+      )
+
+      let previousMissingHashes: Set<string> | undefined
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const result = await this.createFullScanFromManifest(
+          orgSlug,
+          assembled.manifest,
+          params,
+        )
+
+        if (!result.success) {
+          if (result.status === 404) {
+            this.#v1FullScansUnavailable = true
+            debugLog(
+              'createFullScan:v1',
+              `v1 full-scans route is unavailable (404) — memoizing and falling back to v0: ${result.error}`,
+            )
+          } else {
+            debugLog(
+              'createFullScan:v1',
+              `v1 full-scans create failed (status ${result.status}) — falling back to v0: ${result.error}`,
+            )
+          }
+          return undefined
+        }
+
+        if (result.status === 201) {
+          const created = result.data
+          // Mirror the exact key set the deployed v0 create endpoint's
+          // schema serializer emits (additionalProperties: false): fields
+          // known from the v1 body, fields synthesized from this call's own
+          // arguments, and schema defaults (null for nullable, '' for
+          // non-nullable string) for everything else. See openapi.json's
+          // `CreateOrgFullScan` 201 schema for the full 25-key set.
+          // oxlint-disable-next-line socket/prefer-undefined-over-null -- external API requirement: mirrors the v0 wire contract's literal JSON `null` schema default for an unset nullable field, not an internal unset sentinel.
+          const WIRE_NULL: null = null
+          const v0Shaped = {
+            api_url: WIRE_NULL,
+            branch: created.branch,
+            commit_hash: created.commit_hash,
+            commit_message: created.commit_message,
+            committers: created.committers,
+            created_at: created.created_at,
+            html_report_url: created.html_report_url,
+            html_url: WIRE_NULL,
+            id: created.id,
+            integration_branch_url: WIRE_NULL,
+            integration_commit_url: WIRE_NULL,
+            integration_pull_request_url: WIRE_NULL,
+            integration_repo_url: WIRE_NULL,
+            integration_type: WIRE_NULL,
+            organization_id: created.organization_id,
+            organization_slug: orgSlug,
+            pull_request: created.pull_request,
+            repo,
+            repository_id: created.repository_id,
+            repository_slug: repo,
+            scan_state: WIRE_NULL,
+            scan_type: created.scan_type,
+            unmatchedFiles: created.unsupported_files.map(f => f.path),
+            updated_at: created.updated_at,
+            workspace: workspace ?? '',
+          }
+          return {
+            cause: undefined,
+            data: v0Shaped,
+            error: undefined,
+            status: 200,
+            success: true,
+          }
+        }
+
+        const { missing } = result.data
+        const missingHashes = new Set(missing.map(m => m.hash))
+        const previous = previousMissingHashes
+        if (
+          previous !== undefined &&
+          missingHashes.size === previous.size &&
+          Array.from(missingHashes).every(hash => previous.has(hash))
+        ) {
+          debugLog(
+            'createFullScan:v1',
+            'no progress across manifest retries (same blobs still missing) — falling back to v0',
+          )
+          return undefined
+        }
+        previousMissingHashes = missingHashes
+
+        const missingEntries: ManifestLocalEntry[] = []
+        for (let i = 0, { length } = missing; i < length; i += 1) {
+          const missingBlob = missing[i]!
+          const entry = entriesByRelPath.get(missingBlob.path)
+          if (!entry) {
+            debugLog(
+              'createFullScan:v1',
+              `server reported a missing blob with no local match ("${missingBlob.path}") — falling back to v0`,
+            )
+            return undefined
+          }
+          missingEntries.push(entry)
+        }
+
+        const uploadResult = await this.uploadBlobs(
+          orgSlug,
+          missingEntries.map(entry => ({
+            hash: entry.hash,
+            localPath: entry.absPath,
+            name: entry.relPath,
+          })),
+        )
+        if (!uploadResult.success) {
+          debugLog(
+            'createFullScan:v1',
+            `blob upload failed (status ${uploadResult.status}) — falling back to v0: ${uploadResult.error}`,
+          )
+          return undefined
+        }
+      }
+
+      debugLog(
+        'createFullScan:v1',
+        'exhausted manifest retry attempts without a 201 — falling back to v0',
+      )
+      return undefined
+    } catch (e) {
+      debugLog(
+        'createFullScan:v1',
+        `unexpected error in the v1 manifest flow — falling back to v0: ${getErrorMessage(e)}`,
+      )
+      return undefined
+    }
+  }
+
+  /**
+   * Create a full scan from a pre-built content-addressed manifest (v1 API,
+   * internal preview — hidden from the public OpenAPI spec). A 201 means the
+   * scan was created outright; a 202 means one or more manifest entries are
+   * unknown to the org's blob store — upload the blobs named in
+   * `data.missing` via `uploadBlobs`, then re-post the same manifest.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param manifest - Content-addressed manifest (see `assembleManifest`).
+   * @param params - Scan metadata; only defined keys are sent.
+   *
+   * @returns 201 full-scan details, or 202 with the blob-presence breakdown
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans (v1)
+   *
+   * @operationId none
+   */
+  async createFullScanFromManifest(
+    orgSlug: string,
+    manifest: FullScanManifest,
+    params: CreateFullScanFromManifestParams,
+  ): Promise<CreateFullScanFromManifestResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          v1BaseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans`,
+          { manifest, ...params },
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(
+            res,
+            '',
+            `${v1BaseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans`,
+          )
+        }
+        return res
+      })
+      const data = await getResponseJson(response)
+      if (response.status === 202) {
+        return {
+          cause: undefined,
+          data: data as FullScanV1PendingData,
+          error: undefined,
+          status: 202,
+          success: true,
+        }
+      }
+      return {
+        cause: undefined,
+        data: data as FullScanV1CreatedData,
+        error: undefined,
+        status: 201,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Create a diff scan from two full scan IDs. Compares two existing full scans
+   * to identify changes.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.createOrgDiffScanFromIds('my-org', {
+   *     before: 'scan-id-1',
+   *     after: 'scan-id-2',
+   *     description: 'Compare versions',
+   *     merge: false,
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('Diff scan created:', result.data.diff_scan.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Diff scan creation options.
+   * @param options.after - ID of the after/head full scan (newer)
+   * @param options.before - ID of the before/base full scan (older)
+   * @param options.description - Description of the diff scan.
+   * @param options.external_href - External URL to associate with the diff
+   *   scan.
+   * @param options.merge - Set true for merged commits, false for open PR
+   *   diffs.
+   * @param options.on_duplicate - Set to "redirect" to receive a 302 redirect
+   *   to the existing diff scan instead of a 409 error when a duplicate is
+   *   detected.
+   *
+   * @returns Diff scan details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-ids
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:create, full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/createorgdiffscanfromids
+   */
+  async createOrgDiffScanFromIds(
+    orgSlug: string,
+    options: {
+      after: string
+      before: string
+      description?: string | undefined
+      external_href?: string | undefined
+      merge?: boolean | undefined
+      on_duplicate?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/from-ids?${queryToSearchParams(options)}`,
+              {},
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'createOrgDiffScanFromIds'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createOrgDiffScanFromIds'>(e)
+    }
+  }
+
+  /**
+   * Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
+   * Uploads and scans a compressed archive of project files.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param archivePath - Path to the archive file to upload.
+   * @param options - Scan configuration options including repo, branch, and
+   *   metadata.
+   *
+   * @returns Created full scan details with scan ID and status
+   *
+   * @throws {Error} When server returns 5xx status codes or file cannot be read
+   */
+  async createOrgFullScanFromArchive(
+    orgSlug: string,
+    archivePath: string,
+    options: {
+      branch?: string | undefined
+      commit_hash?: string | undefined
+      commit_message?: string | undefined
+      committers?: string | undefined
+      integration_org_slug?: string | undefined
+      integration_type?:
+        | 'api'
+        | 'azure'
+        | 'bitbucket'
+        | 'github'
+        | 'gitlab'
+        | 'web'
+        | undefined
+      make_default_branch?: boolean | undefined
+      pull_request?: number | undefined
+      repo: string
+      scan_type?: string | undefined
+      set_as_pending_head?: boolean | undefined
+      tmp?: boolean | undefined
+      workspace?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'CreateOrgFullScanArchive'>> {
+    const basePath = path.dirname(archivePath)
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/archive?${queryToSearchParams(options as QueryParams)}`,
+              createRequestBodyForFilepaths([archivePath], basePath),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'CreateOrgFullScanArchive'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'CreateOrgFullScanArchive'>(e)
+    }
+  }
+
+  /**
+   * Create a new webhook for an organization. Webhooks allow you to receive
+   * HTTP POST notifications when specific events occur.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param webhookData - Webhook configuration including name, URL, secret, and
+   *   events.
+   *
+   * @returns Created webhook details including webhook ID
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async createOrgWebhook(
+    orgSlug: string,
+    webhookData: {
+      description?: null | string | undefined
+      events: string[]
+      filters?: { repositoryIds: null | string[] } | null | undefined
+      headers?: null | Record<string, unknown> | undefined
+      name: string
+      secret: string
+      url: string
+    },
+  ): Promise<SocketSdkResult<'createOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks`,
+              webhookData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'createOrgWebhook'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createOrgWebhook'>(e)
+    }
+  }
+
+  /**
+   * Create a new repository in an organization.
+   *
+   * Registers a repository for monitoring and security scanning.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.createRepository('my-org', 'my-repo', {
+   *     description: 'My project repository',
+   *     homepage: 'https://example.com',
+   *     visibility: 'private',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('Repository created:', result.data.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository name/slug.
+   * @param params - Additional repository configuration.
+   * @param params.archived - Whether the repository is archived.
+   * @param params.default_branch - Default branch of the repository.
+   * @param params.description - Description of the repository.
+   * @param params.homepage - Homepage URL of the repository.
+   * @param params.visibility - Visibility setting ('public' or 'private')
+   * @param params.workspace - Workspace of the repository.
+   *
+   * @returns Created repository details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
+   *
+   * @see https://docs.socket.dev/reference/createorgrepo
+   */
+  async createRepository(
+    orgSlug: string,
+    repoSlug: string,
+    params?:
+      | {
+          archived?: boolean | undefined
+          default_branch?: null | string | undefined
+          description?: null | string | undefined
+          homepage?: null | string | undefined
+          visibility?: 'private' | 'public' | undefined
+          workspace?: string | undefined
+        }
+      | undefined,
+  ): Promise<RepositoryResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos`,
+              { ...params, name: repoSlug },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as RepositoryItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'createOrgRepo'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Create a new repository label for an organization.
+   *
+   * Labels can be used to group and organize repositories and apply
+   * security/license policies.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.createRepositoryLabel('my-org', {
+   *     name: 'production',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('Label created:', result.data.id)
+   *     console.log('Label name:', result.data.name)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelData - Label configuration (must include name property)
+   *
+   * @returns Created label with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos/labels
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:create
+   *
+   * @see https://docs.socket.dev/reference/createorgrepolabel
+   */
+  async createRepositoryLabel(
+    orgSlug: string,
+    labelData: QueryParams,
+  ): Promise<RepositoryLabelResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels`,
+              labelData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelItem,
+        error: undefined,
+        status: 201,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'createOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Delete a full scan from an organization.
+   *
+   * Permanently removes scan data and results.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.deleteFullScan('my-org', 'scan_123')
+   *
+   *   if (result.success) {
+   *     console.log('Scan deleted successfully')
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier to delete.
+   *
+   * @returns Success confirmation
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:delete
+   *
+   * @see https://docs.socket.dev/reference/deleteorgfullscan
+   */
+  async deleteFullScan(
+    orgSlug: string,
+    scanId: string,
+  ): Promise<DeleteResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as DeleteResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'deleteOrgFullScan'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Delete an alert resolution by UUID. Once deleted, alerts previously
+   * hidden by this resolution reappear after the next org snapshot.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param uuid - UUID of the alert resolution to delete.
+   *
+   * @returns Success confirmation
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/alerts/resolutions/{uuid}
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:delete
+   */
+  async deleteOrgAlertResolution(
+    orgSlug: string,
+    uuid: string,
+  ): Promise<SocketSdkResult<'deleteOrgAlertResolution'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgAlertResolution'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgAlertResolution'>(e)
+    }
+  }
+
+  /**
+   * Delete a diff scan from an organization. Permanently removes diff scan data
+   * and results.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgDiffScan(
+    orgSlug: string,
+    diffScanId: string,
+  ): Promise<SocketSdkResult<'deleteOrgDiffScan'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgDiffScan'>(e)
+    }
+  }
+
+  /**
+   * Delete a webhook from an organization. This will stop all future webhook
+   * deliveries to the webhook URL.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to delete.
+   *
+   * @returns Success status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async deleteOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+  ): Promise<SocketSdkResult<'deleteOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgWebhook'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgWebhook'>(e)
+    }
+  }
+
+  /**
+   * Delete a repository from an organization.
+   *
+   * Removes repository monitoring and associated scan data.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.deleteRepository('my-org', 'old-repo')
+   *
+   *   if (result.success) {
+   *     console.log('Repository deleted')
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name to delete.
+   * @param options - Optional parameters including workspace.
+   *
+   * @returns Success confirmation
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
+   *
+   * @see https://docs.socket.dev/reference/deleteorgrepo
+   */
+  async deleteRepository(
+    orgSlug: string,
+    repoSlug: string,
+    options?: GetRepositoryOptions | undefined,
+  ): Promise<DeleteResult | StrictErrorResult> {
+    const { workspace } = {
+      __proto__: null,
+      ...options,
+    } as GetRepositoryOptions
+    const queryString = workspace
+      ? `?${queryToSearchParams({ workspace } as QueryParams)}`
+      : ''
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}${queryString}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as DeleteResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'deleteOrgRepo'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Delete a repository label from an organization.
+   *
+   * Removes label and all its associations (repositories, security policy,
+   * license policy, etc.).
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.deleteRepositoryLabel('my-org', 'label-id-123')
+   *
+   *   if (result.success) {
+   *     console.log('Label deleted:', result.data.status)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   *
+   * @returns Deletion confirmation
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:delete
+   *
+   * @see https://docs.socket.dev/reference/deleteorgrepolabel
+   */
+  async deleteRepositoryLabel(
+    orgSlug: string,
+    labelId: string,
+  ): Promise<DeleteRepositoryLabelResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as DeleteRepositoryLabelResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'deleteOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Download full scan files as a tar archive.
+   *
+   * Streams the full scan file contents to the specified output path as a tar
+   * file. Includes size limit enforcement to prevent excessive disk usage.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan identifier.
+   * @param outputPath - Local file path to write the tar archive.
+   *
+   * @returns Download result with success/error status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async downloadOrgFullScanFilesAsTar(
+    orgSlug: string,
+    fullScanId: string,
+    outputPath: string,
+  ): Promise<SocketSdkResult<'downloadOrgFullScanFilesAsTar'>> {
+    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files/tar`
+    try {
+      const res = await this.#executeWithRetry(async () => {
+        const response = await httpRequest(url, {
+          method: 'GET',
+          headers: this.#reqOptions.headers as Record<string, string>,
+          stream: true,
+          timeout: this.#reqOptions.timeout,
+        })
+
+        if (!isResponseOk(response)) {
+          throw new ResponseError(response, '', url)
+        }
+        return response
+      })
+
+      // Stream response directly to file. Use pipeline() so errors from the
+      // source response stream propagate (a bare .pipe() leaves the source
+      // without an 'error' listener and crashes the process on network
+      // failure).
+      const { createWriteStream } = await import('node:fs')
+      const { pipeline } = await import('node:stream/promises')
+      await pipeline(res.rawResponse!, createWriteStream(outputPath))
+
+      return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
+    } catch (e) {
+      return await this.#handleApiError<'downloadOrgFullScanFilesAsTar'>(e)
+    }
+  }
+
+  /**
+   * Download patch file content from Socket blob storage. Retrieves patched
+   * file contents using SSRI hash or hex hash.
+   *
+   * This is a low-level utility method - you'll typically use this after
+   * calling `viewPatch()` to get patch metadata, then download individual
+   * patched files.
+   *
+   * @example
+   *   ;```typescript
+   *   const sdk = new SocketSdk('your-api-token')
+   *   // First get patch metadata
+   *   const patch = await sdk.viewPatch('my-org', 'patch-uuid')
+   *   // Then download the actual patched file
+   *   const fileContent = await sdk.downloadPatch(
+   *     patch.files['index.js'].socketBlob,
+   *   )
+   *   ```
+   *
+   * @param hash - The blob hash in SSRI (sha256-base64) or hex format.
+   * @param options - Optional configuration.
+   * @param options.baseUrl - Override blob store URL (for testing)
+   *
+   * @returns Promise<string> - The patch file content as UTF-8 string
+   *
+   * @throws Error if blob not found (404) or download fails
+   *
+   * @operationId none
+   */
+  async downloadPatch(
+    hash: string,
+    options?: { baseUrl?: string | undefined } | undefined,
+  ): Promise<string> {
+    options = { __proto__: null, ...options } as typeof options
+    const blobPath = `/blob/${encodeURIComponent(hash)}`
+    const blobBaseUrl = options?.baseUrl || SOCKET_PUBLIC_BLOB_STORE_URL
+    const url = `${blobBaseUrl}${blobPath}`
+    // 50MB limit
+    const MAX_PATCH_SIZE = 50 * 1024 * 1024
+
+    const res = await httpRequest(url, {
+      maxResponseSize: MAX_PATCH_SIZE,
+    })
+
+    if (res.status === 404) {
+      const message = [
+        `Blob not found: ${hash}`,
+        `→ URL: ${url}`,
+        '→ The patch file may have expired or the hash is incorrect.',
+        '→ Verify: The blob hash is correct.',
+        '→ Note: Blob URLs may expire after a certain time period.',
+      ].join('\n')
+      throw new ErrorCtor(message)
+    }
+    if (res.status !== 200) {
+      const message = [
+        `Failed to download blob: ${res.status} ${res.statusText}`,
+        `→ Hash: ${hash}`,
+        `→ URL: ${url}`,
+        '→ The blob storage service may be temporarily unavailable.',
+        res.status >= 500
+          ? '→ Try: Retry the download after a short delay.'
+          : '→ Verify: The blob hash and URL are correct.',
+      ].join('\n')
+      throw new ErrorCtor(message)
+    }
+
+    return res.text()
+  }
+
+  /**
+   * Export scan results in CycloneDX SBOM format. Returns Software Bill of
+   * Materials compliant with CycloneDX standard.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async exportCDX(
+    orgSlug: string,
+    fullScanId: string,
+  ): Promise<SocketSdkResult<'exportCDX'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/export/cdx/${encodeURIComponent(fullScanId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'exportCDX'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'exportCDX'>(e)
+    }
+  }
+
+  /**
+   * Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
+   * Includes patch data and reachability analysis for vulnerability
+   * assessment.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.exportOpenVEX('my-org', 'scan-id', {
+   *     author: 'Security Team',
+   *     role: 'VEX Generator',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('VEX Version:', result.data.version)
+   *     console.log('Statements:', result.data.statements.length)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param id - Full scan or SBOM report ID.
+   * @param options - Optional parameters including author, role, and
+   *   document_id.
+   *
+   * @returns OpenVEX document with vulnerability exploitability information
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/export/openvex/{id}
+   *
+   * @quota 0 units
+   *
+   * @scopes report:read
+   *
+   * @see https://docs.socket.dev/reference/exportopenvex
+   */
+  async exportOpenVEX(
+    orgSlug: string,
+    id: string,
+    options?:
+      | {
+          author?: string | undefined
+          document_id?: string | undefined
+          role?: string | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'exportOpenVEX'>> {
+    const queryString = options
+      ? `?${queryToSearchParams(options as QueryParams)}`
+      : ''
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/export/openvex/${encodeURIComponent(id)}${queryString}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'exportOpenVEX'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'exportOpenVEX'>(e)
+    }
+  }
+
+  /**
+   * Export scan results in SPDX SBOM format. Returns Software Bill of Materials
+   * compliant with SPDX standard.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async exportSPDX(
+    orgSlug: string,
+    fullScanId: string,
+  ): Promise<SocketSdkResult<'exportSPDX'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/export/spdx/${encodeURIComponent(fullScanId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'exportSPDX'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'exportSPDX'>(e)
+    }
+  }
+
+  /**
+   * Execute a raw GET request to any API endpoint with configurable response
+   * type. Supports both throwing (default) and non-throwing modes.
+   *
+   * @param urlPath - API endpoint path (e.g., 'organizations')
+   * @param options - Request options including responseType and throws
+   *   behavior.
+   *
+   * @returns Raw response, parsed data, or SocketSdkGenericResult based on
+   *   options.
+   *
+   * @operationId getApi
+   *
+   * @quota 0 units
+   */
+  async getApi<T = HttpResponse>(
+    urlPath: string,
+    options?: GetOptions | undefined,
+  ): Promise<T | SocketSdkGenericResult<T>> {
+    const { responseType = 'response', throws = true } = {
+      __proto__: null,
+      ...options,
+    } as GetOptions
+
+    const url = `${this.#baseUrl}${urlPath}`
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createGetRequest(
+          this.#baseUrl,
+          urlPath,
+          this.#reqOptionsWithHooks,
+        )
+        // Check for HTTP error status codes first.
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
+
+      const data = await this.#handleQueryResponseData<T>(
+        response,
+        responseType,
+      )
+
+      if (throws) {
+        return data as T
+      }
+
+      return {
+        cause: undefined,
+        data,
+        error: undefined,
+        status: response.status,
+        success: true,
+      }
+    } catch (e) {
+      if (throws) {
+        throw e
+      }
+
+      if (e instanceof ResponseError) {
+        // Re-use existing error handling logic from the SDK
+        const errorResult = await this.#handleApiError<never>(e)
+        return {
+          cause: errorResult.cause,
+          data: undefined,
+          error: errorResult.error,
+          status: errorResult.status,
+          success: false,
+          url: errorResult.url,
+        }
+      }
+
+      return this.#createQueryErrorResult<T>(e)
+    }
+  }
+
+  /**
+   * Get list of API tokens for an organization. Returns organization API tokens
+   * with metadata and permissions.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getAPITokens(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getAPITokens'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getAPITokens'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getAPITokens'>(e)
+    }
+  }
+
+  /**
+   * Retrieve audit log events for an organization. Returns chronological log of
+   * security and administrative actions.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getAuditLogEvents(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getAuditLogEvents'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/audit-log?${queryToSearchParams(queryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getAuditLogEvents'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getAuditLogEvents'>(e)
+    }
+  }
+
+  /**
+   * Get details for a specific diff scan. Returns comparison between two full
+   * scans with artifact changes.
+   *
+   * Reads from the immutable cached-scan store by default (`cached: true`). On
+   * a cache miss the API returns 202 Accepted and computes the result in the
+   * background; this method polls transparently until the result is ready, so
+   * callers only ever observe the final comparison. Pass `cached: false` to
+   * bypass the cache and live-compute the diff (slower, for debugging). When
+   * `cached` is true the `omit_license_details` option is ignored server-side —
+   * cached results always include license details.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getDiffScanById('my-org', 'diff-scan-id')
+   *
+   *   if (result.success) {
+   *     console.log(result.data.diff_scan.artifacts.added)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param diffScanId - Diff scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.cached - Read cached immutable results (defaults to true).
+   * @param options.omit_license_details - Omit license details (ignored when
+   *   cached).
+   * @param options.omit_unchanged - Omit unchanged artifacts from the response.
+   *
+   * @returns Diff scan comparison with artifact changes
+   *
+   * @throws {Error} When server returns 5xx status codes or polling times out
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getdiffscanbyid
+   */
+  async getDiffScanById(
+    orgSlug: string,
+    diffScanId: string,
+    options?:
+      | {
+          cached?: boolean | undefined
+          omit_license_details?: boolean | undefined
+          omit_unchanged?: boolean | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'getDiffScanById'>> {
+    const { cached = true, ...rest } = { __proto__: null, ...options } as {
+      cached?: boolean | undefined
+    } & QueryParams
+    // Omit the cached param when disabled: an absent param reads as false
+    // server-side, so there's no reason to send cached=false on the wire.
+    const queryParams = {
+      __proto__: null,
+      ...(cached ? { cached: true } : undefined),
+      ...rest,
+    } as QueryParams
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}?${queryToSearchParams(queryParams)}`
+    try {
+      const data = await this.#pollCachedScan(urlPath, diffScanId)
+      return this.#handleApiSuccess<'getDiffScanById'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getDiffScanById'>(e)
+    }
+  }
+
+  /**
+   * Get GitHub-flavored markdown comments for a diff scan. Returns dependency
+   * overview and alert comments suitable for pull requests.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getDiffScanGfm('my-org', 'diff-scan-id')
+   *
+   *   if (result.success) {
+   *     console.log(result.data.dependency_overview_comment)
+   *     console.log(result.data.dependency_alert_comment)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param diffScanId - Diff scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.github_installation_id - GitHub installation ID for
+   *   settings.
+   *
+   * @returns Diff scan metadata with formatted markdown comments
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getdiffscangfm
+   */
+  async getDiffScanGfm(
+    orgSlug: string,
+    diffScanId: string,
+    options?: { github_installation_id?: string | undefined } | undefined,
+  ): Promise<SocketSdkResult<'GetDiffScanGfm'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}/gfm${options ? `?${queryToSearchParams(options)}` : ''}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'GetDiffScanGfm'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'GetDiffScanGfm'>(e)
+    }
+  }
+
+  /**
+   * Retrieve the enabled entitlements for an organization.
+   *
+   * This method fetches the organization's entitlements and filters for only
+   * the enabled ones, returning their keys. Entitlements represent Socket
+   * Products that the organization has access to use.
+   *
+   * @operationId getEnabledEntitlements
+   *
+   * @quota 0 units
+   */
+  async getEnabledEntitlements(orgSlug: string): Promise<string[]> {
+    const data = await this.#executeWithRetry(
+      async () =>
+        await getResponseJson(
+          await createGetRequest(
+            this.#baseUrl,
+            `orgs/${encodeURIComponent(orgSlug)}/entitlements`,
+            this.#reqOptionsWithHooks,
+          ),
+        ),
+    )
+
+    // Extract enabled products from the response.
+    const items = (data as EntitlementsResponse)?.items || []
+    return items
+      .filter((item: Entitlement) => item && item.enabled === true && item.key)
+      .map((item: Entitlement) => item.key)
+  }
+
+  /**
+   * Retrieve all entitlements for an organization.
+   *
+   * This method fetches all entitlements (both enabled and disabled) for an
+   * organization, returning the complete list with their status.
+   *
+   * @operationId getEntitlements
+   *
+   * @quota 0 units
+   */
+  async getEntitlements(orgSlug: string): Promise<Entitlement[]> {
+    const data = await this.#executeWithRetry(
+      async () =>
+        await getResponseJson(
+          await createGetRequest(
+            this.#baseUrl,
+            `orgs/${encodeURIComponent(orgSlug)}/entitlements`,
+            this.#reqOptionsWithHooks,
+          ),
+        ),
+    )
+
+    return (data as EntitlementsResponse)?.items || []
+  }
+
+  /**
+   * Get complete full scan results buffered in memory.
+   *
+   * Returns entire scan data as JSON for programmatic processing. For large
+   * scans, consider using streamFullScan() instead.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getFullScan('my-org', 'scan_123')
+   *
+   *   if (result.success) {
+   *   console.log('Scan status:', result.data.scan_state)
+   *   console.log('Repository:', result.data.repository_slug)
+   *   }
+   *   ```
+   *
+   *   Reads from the immutable cached-scan store by default (`cached: true`). On a
+   *   cache miss the API returns 202 Accepted and computes the result in the
+   *   background; this method polls transparently until the result is ready, so
+   *   callers only ever observe the final scan. Pass `cached: false` to bypass the
+   *   cache and live-compute the scan (slower, for debugging).
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.cached - Read cached immutable results (defaults to true).
+   * @param options.include_license_details - Include per-artifact license
+   *   details.
+   * @param options.include_scores - Include score data for each artifact.
+   *
+   * @returns Complete full scan data including all artifacts
+   *
+   * @throws {Error} When server returns 5xx status codes or polling times out
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscan
+   */
+  async getFullScan(
+    orgSlug: string,
+    scanId: string,
+    options?:
+      | {
+          cached?: boolean | undefined
+          include_license_details?: boolean | undefined
+          include_scores?: boolean | undefined
+        }
+      | undefined,
+  ): Promise<FullScanResult | StrictErrorResult> {
+    const { cached = true, ...rest } = { __proto__: null, ...options } as {
+      cached?: boolean | undefined
+    } & QueryParams
+    // Omit the cached param when disabled: an absent param reads as false
+    // server-side, so there's no reason to send cached=false on the wire.
+    const queryParams = {
+      __proto__: null,
+      ...(cached ? { cached: true } : undefined),
+      ...rest,
+    } as QueryParams
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}?${queryToSearchParams(queryParams)}`
+    try {
+      const data = await this.#pollCachedScan(urlPath, scanId)
+      return {
+        cause: undefined,
+        data: data as FullScanItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgFullScan'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Get metadata for a specific full scan.
+   *
+   * Returns scan configuration, status, and summary information without full
+   * artifact data. Useful for checking scan status without downloading complete
+   * results.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
+   *
+   *   if (result.success) {
+   *     console.log('Scan state:', result.data.scan_state)
+   *     console.log('Branch:', result.data.branch)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   *
+   * @returns Scan metadata including status and configuration
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscanmetadata
+   */
+  async getFullScanMetadata(
+    orgSlug: string,
+    scanId: string,
+  ): Promise<FullScanResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}/metadata`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as FullScanItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult =
+        await this.#handleApiError<'getOrgFullScanMetadata'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Get security issues for a specific npm package and version. Returns
+   * detailed vulnerability and security alert information.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getIssuesByNpmPackage(
+    pkgName: string,
+    version: string,
+  ): Promise<SocketSdkResult<'getIssuesByNPMPackage'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/issues`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getIssuesByNPMPackage'>(e)
+    }
+  }
+
+  /**
+   * List full scans associated with a specific alert. Returns paginated full
+   * scan references for alert investigation.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getOrgAlertFullScans('my-org', {
+   *     alertKey: 'npm/lodash/cve-2021-23337',
+   *     range: '-7d',
+   *     per_page: 50,
+   *   })
+   *
+   *   if (result.success) {
+   *     for (const item of result.data.items) {
+   *       console.log('Full Scan ID:', item.fullScanId)
+   *     }
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Query parameters including alertKey, range, pagination.
+   *
+   * @returns Paginated array of full scans associated with the alert
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alert-full-scan-search
+   *
+   * @quota 10 units
+   *
+   * @scopes alerts:list
+   *
+   * @see https://docs.socket.dev/reference/alertfullscans
+   */
+  async getOrgAlertFullScans(
+    orgSlug: string,
+    options: {
+      alertKey: string
+      per_page?: number | undefined
+      range?: string | undefined
+      startAfterCursor?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'alertFullScans'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alert-full-scan-search?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'alertFullScans'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'alertFullScans'>(e)
+    }
+  }
+
+  /**
+   * Fetch a single active alert resolution by UUID. Returns the same row
+   * shape as the list endpoint.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param uuid - UUID of the alert resolution to fetch.
+   *
+   * @returns The requested alert resolution.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alerts/resolutions/{uuid}
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:read
+   */
+  async getOrgAlertResolution(
+    orgSlug: string,
+    uuid: string,
+  ): Promise<SocketSdkResult<'getOrgAlertResolution'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgAlertResolution'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgAlertResolution'>(e)
+    }
+  }
+
+  /**
+   * List active alert resolutions for an organization. Results are
+   * paginated via an opaque cursor and ordered by created_at.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for sort direction and
+   *   pagination.
+   *
+   * @returns Paginated list of alert resolutions with cursor-based
+   * pagination.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alerts/resolutions
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:list
+   */
+  async getOrgAlertResolutions(
+    orgSlug: string,
+    options?:
+      | {
+          direction?: string | undefined
+          per_page?: number | undefined
+          startAfterCursor?: string | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'getOrgAlertResolutions'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgAlertResolutions'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgAlertResolutions'>(e)
+    }
+  }
+
+  /**
+   * List latest alerts for an organization (Beta). Returns paginated alerts
+   * with comprehensive filtering options.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for pagination and filtering.
+   *
+   * @returns Paginated list of alerts with cursor-based pagination
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgAlertsList(
+    orgSlug: string,
+    options?:
+      | {
+          'filters.alertAction'?: string | undefined
+          'filters.alertAction.notIn'?: string | undefined
+          'filters.alertCategory'?: string | undefined
+          'filters.alertCategory.notIn'?: string | undefined
+          'filters.alertCveId'?: string | undefined
+          'filters.alertCveId.notIn'?: string | undefined
+          'filters.alertCveTitle'?: string | undefined
+          'filters.alertCveTitle.notIn'?: string | undefined
+          'filters.alertCweId'?: string | undefined
+          'filters.alertCweId.notIn'?: string | undefined
+          'filters.alertCweName'?: string | undefined
+          'filters.alertCweName.notIn'?: string | undefined
+          'filters.alertEPSS'?: string | undefined
+          'filters.alertEPSS.notIn'?: string | undefined
+          'filters.alertFixType'?: string | undefined
+          'filters.alertFixType.notIn'?: string | undefined
+          'filters.alertKEV'?: boolean | undefined
+          'filters.alertKEV.notIn'?: boolean | undefined
+          'filters.alertPriority'?: string | undefined
+          'filters.alertPriority.notIn'?: string | undefined
+          'filters.alertReachabilityType'?: string | undefined
+          'filters.alertReachabilityType.notIn'?: string | undefined
+          'filters.alertSeverity'?: string | undefined
+          'filters.alertSeverity.notIn'?: string | undefined
+          'filters.alertStatus'?: string | undefined
+          'filters.alertStatus.notIn'?: string | undefined
+          'filters.alertType'?: string | undefined
+          'filters.alertType.notIn'?: string | undefined
+          'filters.alertUpdatedAt.eq'?: string | undefined
+          'filters.alertUpdatedAt.gt'?: string | undefined
+          'filters.alertUpdatedAt.gte'?: string | undefined
+          'filters.alertUpdatedAt.lt'?: string | undefined
+          'filters.alertUpdatedAt.lte'?: string | undefined
+          'filters.repoFullName'?: string | undefined
+          'filters.repoFullName.notIn'?: string | undefined
+          'filters.repoLabels'?: string | undefined
+          'filters.repoLabels.notIn'?: string | undefined
+          'filters.repoSlug'?: string | undefined
+          'filters.repoSlug.notIn'?: string | undefined
+          per_page?: number | undefined
+          startAfterCursor?: string | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'alertsList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'alertsList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'alertsList'>(e)
+    }
+  }
+
+  /**
+   * Get analytics data for organization usage patterns and security metrics.
+   * Returns statistical analysis for specified time period.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgAnalytics(
+    time: string,
+  ): Promise<SocketSdkResult<'getOrgAnalytics'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `analytics/org/${encodeURIComponent(time)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgAnalytics'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgAnalytics'>(e)
+    }
+  }
+
+  /**
+   * Fetch available fixes for vulnerabilities in a repository or scan. Returns
+   * fix recommendations including version upgrades and update types.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Fix query options including repo_slug or full_scan_id,
+   *   vulnerability IDs, and preferences.
+   * @param options.include_stateful_alert_ids - Set to include a
+   *   statefulAlertIds map (GHSA ID → open stateful alert IDs) in the
+   *   response, org-scoped only.
+   *
+   * @returns Fix details for requested vulnerabilities with upgrade
+   *   recommendations.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId none
+   */
+  async getOrgFixes(
+    orgSlug: string,
+    options: {
+      allow_major_updates: boolean
+      full_scan_id?: string | undefined
+      include_details?: boolean | undefined
+      include_responsible_direct_dependencies?: boolean | undefined
+      include_stateful_alert_ids?: boolean | undefined
+      minimum_release_age?: string | undefined
+      repo_slug?: string | undefined
+      vulnerability_ids: string
+    },
+  ): Promise<SocketSdkResult<'fetch-fixes'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/fixes?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'fetch-fixes'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'fetch-fixes'>(e)
+    }
+  }
+
+  /**
+   * Get organization's license policy configuration. Returns allowed,
+   * restricted, and monitored license types.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgLicensePolicy(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgLicensePolicy'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgLicensePolicy'>(e)
+    }
+  }
+
+  /**
+   * Get organization's security policy configuration. Returns alert rules,
+   * severity thresholds, and enforcement settings.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgSecurityPolicy(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgSecurityPolicy'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgSecurityPolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgSecurityPolicy'>(e)
+    }
+  }
+
+  /**
+   * Get organization's telemetry configuration. Returns whether telemetry is
+   * enabled for the organization.
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns Telemetry configuration with enabled status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgTelemetryConfig(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgTelemetryConfig'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgTelemetryConfig'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgTelemetryConfig'>(e)
+    }
+  }
+
+  /**
+   * List threat-feed items for an organization. Returns recently observed
+   * malicious / suspicious packages, paginated and filterable by ecosystem,
+   * name, version, and review state. Requires an Enterprise plan with the
+   * Threat Feed add-on and the `threat-feed:list` scope.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @quota 1 units
+   */
+  async getOrgThreatFeedItems(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getOrgThreatFeedItems'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-feed?${queryToSearchParams(queryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgThreatFeedItems'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgThreatFeedItems'>(e)
+    }
+  }
+
+  /**
+   * Get organization triage settings and status. Returns alert triage
+   * configuration and current state.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgTriage(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getOrgTriage'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/triage/alerts`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgTriage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgTriage'>(e)
+    }
+  }
+
+  /**
+   * Get details of a specific webhook. Returns webhook configuration including
+   * events, URL, and filters.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to retrieve.
+   *
+   * @returns Webhook details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+  ): Promise<SocketSdkResult<'getOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgWebhook'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgWebhook'>(e)
+    }
+  }
+
+  /**
+   * List all webhooks for an organization. Supports pagination and sorting
+   * options.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for pagination and sorting.
+   *
+   * @returns List of webhooks with pagination info
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getOrgWebhooksList(
+    orgSlug: string,
+    options?:
+      | {
+          direction?: string | undefined
+          page?: number | undefined
+          per_page?: number | undefined
+          sort?: string | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'getOrgWebhooksList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgWebhooksList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgWebhooksList'>(e)
+    }
+  }
+
+  /**
+   * Get current API quota usage and limits. Returns remaining requests, rate
+   * limits, and quota reset times.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getQuota(): Promise<SocketSdkResult<'getQuota'>> {
+    try {
+      const data = await this.#getCached(
+        'quota',
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              'quota',
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+        'quota',
+      )
+      return this.#handleApiSuccess<'getQuota'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getQuota'>(e)
+    }
+  }
+
+  /**
+   * Get analytics data for a specific repository. Returns security metrics,
+   * dependency trends, and vulnerability statistics.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getRepoAnalytics(
+    repo: string,
+    time: string,
+  ): Promise<SocketSdkResult<'getRepoAnalytics'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `analytics/repo/${encodeURIComponent(repo)}/${encodeURIComponent(time)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getRepoAnalytics'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getRepoAnalytics'>(e)
+    }
+  }
+
+  /**
+   * Get details for a specific repository.
+   *
+   * Returns repository configuration, monitoring status, and metadata.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getRepository('my-org', 'my-repo')
+   *
+   *   if (result.success) {
+   *     console.log('Repository:', result.data.name)
+   *     console.log('Visibility:', result.data.visibility)
+   *     console.log('Default branch:', result.data.default_branch)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name.
+   * @param options - Optional parameters including workspace.
+   *
+   * @returns Repository details with configuration
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:read
+   *
+   * @see https://docs.socket.dev/reference/getorgrepo
+   */
+  async getRepository(
+    orgSlug: string,
+    repoSlug: string,
+    options?: GetRepositoryOptions | undefined,
+  ): Promise<RepositoryResult | StrictErrorResult> {
+    const orgSlugParam = encodeURIComponent(orgSlug)
+    const repoSlugParam = encodeURIComponent(repoSlug)
+    const { workspace } = {
+      __proto__: null,
+      ...options,
+    } as GetRepositoryOptions
+    const queryString = workspace
+      ? `?${queryToSearchParams({ workspace } as QueryParams)}`
+      : ''
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${orgSlugParam}/repos/${repoSlugParam}${queryString}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as RepositoryItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgRepo'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Get details for a specific repository label.
+   *
+   * Returns label configuration, associated repositories, and policy settings.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getRepositoryLabel('my-org', 'label-id-123')
+   *
+   *   if (result.success) {
+   *     console.log('Label name:', result.data.name)
+   *     console.log('Associated repos:', result.data.repository_ids)
+   *     console.log('Has security policy:', result.data.has_security_policy)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   *
+   * @returns Label details with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:list
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolabel
+   */
+  async getRepositoryLabel(
+    orgSlug: string,
+    labelId: string,
+  ): Promise<RepositoryLabelResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Get security score for a specific npm package and version. Returns
+   * numerical security rating and scoring breakdown.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async getScoreByNpmPackage(
+    pkgName: string,
+    version: string,
+  ): Promise<SocketSdkResult<'getScoreByNPMPackage'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `npm/${encodeURIComponent(pkgName)}/${encodeURIComponent(version)}/score`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getScoreByNPMPackage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getScoreByNPMPackage'>(e)
+    }
+  }
+
+  /**
+   * Get list of supported file types for full scan generation. Returns glob
+   * patterns for supported manifest files, lockfiles, and configuration
+   * formats.
+   *
+   * Files whose names match the patterns returned by this endpoint can be
+   * uploaded for report generation. Examples include `package.json`,
+   * `package-lock.json`, and `yarn.lock`.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getSupportedFiles('my-org')
+   *
+   *   if (result.success) {
+   *     console.log('NPM patterns:', result.data.NPM)
+   *     console.log('PyPI patterns:', result.data.PyPI)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns Nested object with environment and file type patterns
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/supported-files
+   *
+   * @quota 0 units
+   *
+   * @scopes No scopes required, but authentication is required
+   *
+   * @see https://docs.socket.dev/reference/getsupportedfiles
+   */
+  async getSupportedFiles(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getSupportedFiles'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/supported-files`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getSupportedFiles'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getSupportedFiles'>(e)
+    }
+  }
+
+  /**
+   * Get a single threat campaign by ID (v1 API, public route). Same shape as
+   * one item from `listThreatCampaigns`; package PURLs are not inlined —
+   * fetch them via `listThreatCampaignPackages`. Requires an Enterprise plan
+   * with the Threat Feed add-on and the `threat-campaigns:list` token scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param campaignId - Campaign identifier.
+   *
+   * @returns The campaign
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns/{campaign_id} (v1)
+   *
+   * @operationId none
+   */
+  async getThreatCampaign(
+    orgSlug: string,
+    campaignId: string,
+  ): Promise<GetThreatCampaignResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns/${encodeURIComponent(campaignId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaign,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List threat-feed items across all organizations the token can see. Returns
+   * recently observed malicious / suspicious packages, paginated and filterable
+   * by ecosystem, name, version, and review state.
+   *
+   * @deprecated The backend marks the top-level `/threat-feed` route as the
+   *   deprecated form; prefer the org-scoped {@link getOrgThreatFeedItems}.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @quota 1 units
+   */
+  async getThreatFeedItems(
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getThreatFeedItems'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `threat-feed?${queryToSearchParams(queryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getThreatFeedItems'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getThreatFeedItems'>(e)
+    }
+  }
+
+  /**
+   * List all full scans for an organization.
+   *
+   * Returns paginated list of full scan metadata with guaranteed required
+   * fields for improved TypeScript autocomplete.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.listFullScans('my-org', {
+   *     branch: 'main',
+   *     per_page: 50,
+   *     use_cursor: true,
+   *   })
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(scan => {
+   *       console.log(scan.id, scan.created_at) // Guaranteed fields
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Filtering and pagination options.
+   *
+   * @returns List of full scans with metadata
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscanlist
+   */
+  async listFullScans(
+    orgSlug: string,
+    options?: ListFullScansOptions | undefined,
+  ): Promise<FullScanListResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as FullScanListResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgFullScanList'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List all organizations accessible to the current user.
+   *
+   * Returns organization details and access permissions with guaranteed
+   * required fields.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.listOrganizations()
+   *
+   *   if (result.success) {
+   *     result.data.organizations.forEach(org => {
+   *       console.log(org.name, org.slug) // Guaranteed fields
+   *     })
+   *   }
+   *   ```
+   *
+   * @returns List of organizations with metadata
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /organizations
+   *
+   * @quota 0 units
+   *
+   * @see https://docs.socket.dev/reference/getorganizations
+   */
+  async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult> {
+    try {
+      const data = await this.#getCached(
+        'organizations',
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              'organizations',
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+        'organizations',
+      )
+      return {
+        cause: undefined,
+        data: data as OrganizationsResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrganizations'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List all diff scans for an organization. Returns paginated list of diff
+   * scan metadata and status.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async listOrgDiffScans(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'listOrgDiffScans'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'listOrgDiffScans'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'listOrgDiffScans'>(e)
+    }
+  }
+
+  /**
+   * List all repositories in an organization.
+   *
+   * Returns paginated list of repository metadata with guaranteed required
+   * fields.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.listRepositories('my-org', {
+   *     per_page: 50,
+   *     sort: 'name',
+   *     direction: 'asc',
+   *   })
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(repo => {
+   *       console.log(repo.name, repo.visibility)
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Pagination and filtering options.
+   *
+   * @returns List of repositories with metadata
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:list
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolist
+   */
+  async listRepositories(
+    orgSlug: string,
+    options?: ListRepositoriesOptions | undefined,
+  ): Promise<RepositoriesListResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as RepositoriesListResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgRepoList'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List all repository labels for an organization.
+   *
+   * Returns paginated list of labels configured for repository organization and
+   * policy management.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.listRepositoryLabels('my-org', {
+   *     per_page: 50,
+   *     page: 1,
+   *   })
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(label => {
+   *       console.log('Label:', label.name)
+   *       console.log('Associated repos:', label.repository_ids?.length || 0)
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Pagination options.
+   *
+   * @returns List of labels with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:list
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolabellist
+   */
+  async listRepositoryLabels(
+    orgSlug: string,
+    options?: QueryParams | undefined,
+  ): Promise<RepositoryLabelsListResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelsListResult['data'],
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgRepoLabelList'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List package PURLs affected by a single threat campaign (v1 API, public
+   * route), cursor-paginated. Pass the previous response's `endCursor` back
+   * as `options.cursor` to fetch the next page. Requires an Enterprise plan
+   * with the Threat Feed add-on and the `threat-campaigns:list` token scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param campaignId - Campaign identifier.
+   * @param options - Pagination options (`per_page`, `cursor`).
+   *
+   * @returns `{ items, endCursor }` — opaque PURL strings and the next cursor
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns/{campaign_id}/packages (v1)
+   *
+   * @operationId none
+   */
+  async listThreatCampaignPackages(
+    orgSlug: string,
+    campaignId: string,
+    options?: ListThreatCampaignPackagesOptions | undefined,
+  ): Promise<ListThreatCampaignPackagesResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns/${encodeURIComponent(campaignId)}/packages?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaignPackagesData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List threat campaigns for an organization (v1 API, public route),
+   * paginated and filterable by status, ecosystem, and an incremental sync
+   * parameter (`updated_after`). Package PURLs are not inlined — fetch them
+   * per campaign via `listThreatCampaignPackages`. Requires an Enterprise
+   * plan with the Threat Feed add-on and the `threat-campaigns:list` token
+   * scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Filter and pagination options; `status` defaults to
+   *   `'ongoing'` server-side when omitted.
+   *
+   * @returns `{ items, endCursor }` — campaigns and the next cursor
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns (v1)
+   *
+   * @operationId none
+   */
+  async listThreatCampaigns(
+    orgSlug: string,
+    options?: ListThreatCampaignsOptions | undefined,
+  ): Promise<ListThreatCampaignsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaignsListData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Create a new API token for an organization. Generates API token with
+   * specified scopes and metadata.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postAPIToken(
+    orgSlug: string,
+    tokenData: QueryParams,
+  ): Promise<SocketSdkResult<'postAPIToken'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens`,
+              tokenData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'postAPIToken'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postAPIToken'>(e)
+    }
+  }
+
+  /**
+   * Revoke an API token for an organization. Permanently disables the token and
+   * removes access.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postAPITokensRevoke(
+    orgSlug: string,
+    tokenId: string,
+  ): Promise<SocketSdkResult<'postAPITokensRevoke'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/revoke`,
+              { id: tokenId },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'postAPITokensRevoke'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postAPITokensRevoke'>(e)
+    }
+  }
+
+  /**
+   * Rotate an API token for an organization. Generates new token value while
+   * preserving token metadata.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postAPITokensRotate(
+    orgSlug: string,
+    tokenId: string,
+  ): Promise<SocketSdkResult<'postAPITokensRotate'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/rotate`,
+              { id: tokenId },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'postAPITokensRotate'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postAPITokensRotate'>(e)
+    }
+  }
+
+  /**
+   * Update an existing API token for an organization. Modifies token metadata,
+   * scopes, or other properties.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postAPITokenUpdate(
+    orgSlug: string,
+    tokenId: string,
+    updateData: QueryParams,
+  ): Promise<SocketSdkResult<'postAPITokenUpdate'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/update`,
+              { id: tokenId, ...updateData },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'postAPITokenUpdate'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postAPITokenUpdate'>(e)
+    }
+  }
+
+  /**
+   * Post organization events for telemetry ingestion (v1 API, public route).
+   * Send events directly to Socket; an empty batch is accepted as a no-op.
+   * Requires an organization API token (any scope).
+   *
+   * @param orgSlug - Organization identifier.
+   * @param events - Event payloads to ingest (max 1000 per call).
+   *
+   * @returns Empty object envelope on success
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/events (v1)
+   *
+   * @operationId none
+   */
+  async postEvents(
+    orgSlug: string,
+    events: SocketEvent[],
+  ): Promise<PostEventsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          v1BaseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/events`,
+          events,
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(
+            res,
+            '',
+            `${v1BaseUrl}orgs/${encodeURIComponent(orgSlug)}/events`,
+          )
+        }
+        return res
+      })
+      const data = await getResponseJson(response)
+      return {
+        cause: undefined,
+        data: data as PostEventsData,
+        error: undefined,
+        status: response.status as 200 | 201,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Post telemetry data for an organization. Sends telemetry events and
+   * analytics data for monitoring and analysis.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param telemetryData - Telemetry payload containing events and metrics.
+   *
+   * @returns Empty object on successful submission
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId none
+   */
+  async postOrgTelemetry(
+    orgSlug: string,
+    telemetryData: PostOrgTelemetryPayload,
+  ): Promise<SocketSdkGenericResult<PostOrgTelemetryResponse>> {
+    try {
+      const data = (await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry`,
+              telemetryData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )) as PostOrgTelemetryResponse
+      return {
+        cause: undefined,
+        data,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      return await this.#handleApiError<never>(e)
+    }
+  }
+
+  /**
+   * Update user or organization settings. Configures preferences,
+   * notifications, and security policies.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async postSettings(
+    selectors: Array<{ organization?: string | undefined }>,
+  ): Promise<SocketSdkResult<'postSettings'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              'settings',
+              { json: selectors },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'postSettings'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'postSettings'>(e)
+    }
+  }
+
+  /**
+   * Create a new full scan by rescanning an existing scan. Supports shallow
+   * (policy reapplication) and deep (dependency resolution rerun) modes.
+   *
+   * @example
+   *   ;```typescript
+   *   // Shallow rescan (reapply policies to cached data)
+   *   const result = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *     mode: 'shallow',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('New Scan ID:', result.data.id)
+   *     console.log('Status:', result.data.status)
+   *   }
+   *
+   *   // Deep rescan (rerun dependency resolution)
+   *   const deepResult = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *     mode: 'deep',
+   *   })
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan ID to rescan.
+   * @param options - Rescan options including mode (shallow or deep)
+   *
+   * @returns New scan ID and status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:create
+   *
+   * @see https://docs.socket.dev/reference/rescanorgfullscan
+   */
+  async rescanFullScan(
+    orgSlug: string,
+    fullScanId: string,
+    options?:
+      | {
+          mode?: 'shallow' | 'deep' | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'rescanOrgFullScan'>> {
+    const queryString = options
+      ? `?${queryToSearchParams(options as QueryParams)}`
+      : ''
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/rescan${queryString}`,
+              {},
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'rescanOrgFullScan'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'rescanOrgFullScan'>(e)
+    }
+  }
+
+  /**
+   * Search for dependencies across monitored projects. Returns matching
+   * packages with security information and usage patterns.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async searchDependencies(
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'searchDependencies'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              'dependencies/search',
+              queryParams,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'searchDependencies'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'searchDependencies'>(e)
+    }
+  }
+
+  /**
+   * Send POST or PUT request with JSON body and return parsed JSON response.
+   * Supports both throwing (default) and non-throwing modes.
+   *
+   * @param urlPath - API endpoint path (e.g., 'organizations')
+   * @param options - Request options including method, body, and throws
+   *   behavior.
+   *
+   * @returns Parsed JSON response or SocketSdkGenericResult based on options
+   *
+   * @operationId sendApi
+   *
+   * @quota 0 units
+   */
+  async sendApi<T>(
+    urlPath: string,
+    options?: SendOptions | undefined,
+  ): Promise<T | SocketSdkGenericResult<T>> {
+    const {
+      body,
+      // Default to POST method for JSON API requests.
+      method = 'POST',
+      throws = true,
+    } = { __proto__: null, ...options } as SendOptions
+
+    const url = `${this.#baseUrl}${urlPath}`
+    try {
+      // Route to appropriate HTTP method handler (POST or PUT).
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          method,
+          this.#baseUrl,
+          urlPath,
+          body,
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
+
+      const data = (await getResponseJson(response)) as T
+
+      if (throws) {
+        return data
+      }
+
+      return {
+        cause: undefined,
+        data,
+        error: undefined,
+        status: response.status,
+        success: true,
+      }
+    } catch (e) {
+      if (throws) {
+        throw e
+      }
+
+      if (e instanceof ResponseError) {
+        const errorResult = await this.#handleApiError<never>(e)
+        return {
+          cause: errorResult.cause,
+          data: undefined,
+          error: errorResult.error,
+          status: errorResult.status,
+          success: false,
+          url: errorResult.url,
+        }
+      }
+
+      return this.#createQueryErrorResult<T>(e)
+    }
+  }
+
+  /**
+   * Stream a full scan's results to file or stdout.
+   *
+   * Provides efficient streaming for large scan datasets without loading entire
+   * response into memory. Useful for processing large SBOMs.
+   *
+   * @example
+   *   ;```typescript
+   *   // Stream to file
+   *   await sdk.streamFullScan('my-org', 'scan_123', {
+   *     output: './scan-results.json',
+   *   })
+   *
+   *   // Stream to stdout
+   *   await sdk.streamFullScan('my-org', 'scan_123', {
+   *     output: true,
+   *   })
+   *
+   *   // Get buffered response
+   *   const result = await sdk.streamFullScan('my-org', 'scan_123')
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   * @param options - Streaming options (output file path, stdout, or buffered)
+   *
+   * @returns Scan result with streaming response
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscan
+   */
+  async streamFullScan(
+    orgSlug: string,
+    scanId: string,
+    options?: StreamOrgFullScanOptions | undefined,
+  ): Promise<SocketSdkResult<'getOrgFullScan'>> {
+    const { output } = {
+      __proto__: null,
+      ...options,
+    } as StreamOrgFullScanOptions
+    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`
+    try {
+      const needsStream = typeof output === 'string' || output === true
+      const res = await this.#executeWithRetry(async () => {
+        const response = await httpRequest(url, {
+          method: 'GET',
+          headers: this.#reqOptions.headers as Record<string, string>,
+          stream: needsStream,
+          timeout: this.#reqOptions.timeout,
+          ...(!needsStream && { maxResponseSize: MAX_RESPONSE_SIZE }),
+        })
+
+        if (!isResponseOk(response)) {
+          throw new ResponseError(response, '', url)
+        }
+        return response
+      })
+
+      if (typeof output === 'string') {
+        const { createWriteStream } = await import('node:fs')
+        const { pipeline } = await import('node:stream/promises')
+        await pipeline(res.rawResponse!, createWriteStream(output))
+      } else if (output === true) {
+        const { pipeline } = await import('node:stream/promises')
+        // Pipe to stdout but don't end stdout when the source ends.
+        await pipeline(res.rawResponse!, process.stdout, { end: false })
+      }
+
+      return this.#handleApiSuccess<'getOrgFullScan'>(res)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgFullScan'>(e)
+    }
+  }
+
+  /**
+   * Stream patches for artifacts in a scan report.
+   *
+   * This method streams all available patches for artifacts in a scan. Free
+   * tier users will only receive free patches.
+   *
+   * Note: This method returns a ReadableStream for processing large datasets.
+   *
+   * @operationId streamPatchesFromScan
+   *
+   * @quota 0 units
+   */
+  async streamPatchesFromScan(
+    orgSlug: string,
+    scanId: string,
+  ): Promise<ReadableStream<ArtifactPatches>> {
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/patches/scan/${encodeURIComponent(scanId)}`
+    const url = `${this.#baseUrl}${urlPath}`
+    const response = await this.#executeWithRetry(
+      async () =>
+        await createGetRequest(
+          this.#baseUrl,
+          urlPath,
+          this.#reqOptionsWithHooks,
+        ),
+    )
+
+    // Check for HTTP error status codes.
+    if (!isResponseOk(response)) {
+      throw new ResponseError(response, 'GET Request failed', url)
+    }
+
+    // Parse the buffered NDJSON response into a ReadableStream.
+    const text = response.text()
+    return new ReadableStream<ArtifactPatches>({
+      start(controller) {
+        let start = 0
+        for (let i = 0; i <= text.length; i++) {
+          if (i === text.length || text.charCodeAt(i) === 10) {
+            if (i > start) {
+              const line = text.slice(start, i)
+              try {
+                const data = JSON.parse(line) as ArtifactPatches
+                controller.enqueue(data)
+              } catch (e) {
+                debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
+              }
+            }
+            start = i + 1
+          }
+        }
+        controller.close()
+      },
+    })
+  }
+
+  /**
+   * Update alert triage status for an organization. Modifies alert resolution
+   * status and triage decisions.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgAlertTriage(
+    orgSlug: string,
+    alertId: string,
+    triageData: QueryParams,
+  ): Promise<SocketSdkResult<'updateOrgAlertTriage'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/triage/alerts`,
+              { alertTriage: [{ uuid: alertId, ...triageData }] },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgAlertTriage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgAlertTriage'>(e)
+    }
+  }
+
+  /**
+   * Update organization's license policy configuration. Modifies allowed,
+   * restricted, and monitored license types.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgLicensePolicy(
+    orgSlug: string,
+    policyData: QueryParams,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'updateOrgLicensePolicy'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy?${queryToSearchParams(queryParams)}`,
+              policyData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgLicensePolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgLicensePolicy'>(e)
+    }
+  }
+
+  /**
+   * Update organization's security policy configuration. Modifies alert rules,
+   * severity thresholds, and enforcement settings.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgSecurityPolicy(
+    orgSlug: string,
+    policyData: QueryParams,
+  ): Promise<SocketSdkResult<'updateOrgSecurityPolicy'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/security-policy`,
+              policyData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgSecurityPolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgSecurityPolicy'>(e)
+    }
+  }
+
+  /**
+   * Update organization's telemetry configuration. Enables or disables
+   * telemetry for the organization.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param telemetryData - Telemetry configuration with enabled flag.
+   *
+   * @returns Updated telemetry configuration
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgTelemetryConfig(
+    orgSlug: string,
+    telemetryData: { enabled?: boolean | undefined },
+  ): Promise<SocketSdkResult<'updateOrgTelemetryConfig'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/telemetry/config`,
+              telemetryData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgTelemetryConfig'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgTelemetryConfig'>(e)
+    }
+  }
+
+  /**
+   * Update an existing webhook's configuration. All fields are optional - only
+   * provided fields will be updated.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to update.
+   * @param webhookData - Updated webhook configuration.
+   *
+   * @returns Updated webhook details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   */
+  async updateOrgWebhook(
+    orgSlug: string,
+    webhookId: string,
+    webhookData: {
+      description?: null | string | undefined
+      events?: string[] | undefined
+      filters?: { repositoryIds: null | string[] } | null | undefined
+      headers?: null | Record<string, unknown> | undefined
+      name?: string | undefined
+      secret?: null | string | undefined
+      url?: string | undefined
+    },
+  ): Promise<SocketSdkResult<'updateOrgWebhook'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/webhooks/${encodeURIComponent(webhookId)}`,
+              webhookData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgWebhook'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgWebhook'>(e)
+    }
+  }
+
+  /**
+   * Update configuration for a repository.
+   *
+   * Modifies monitoring settings, branch configuration, and scan preferences.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.updateRepository('my-org', 'my-repo', {
+   *     description: 'Updated description',
+   *     default_branch: 'develop',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('Repository updated:', result.data.name)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name.
+   * @param params - Configuration updates (description, homepage,
+   *   default_branch, etc.)
+   * @param options - Optional parameters including workspace.
+   *
+   * @returns Updated repository details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
+   *
+   * @see https://docs.socket.dev/reference/updateorgrepo
+   */
+  async updateRepository(
+    orgSlug: string,
+    repoSlug: string,
+    params?: QueryParams | undefined,
+    options?: GetRepositoryOptions | undefined,
+  ): Promise<RepositoryResult | StrictErrorResult> {
+    const { workspace } = {
+      __proto__: null,
+      ...options,
+    } as GetRepositoryOptions
+    const queryString = workspace
+      ? `?${queryToSearchParams({ workspace } as QueryParams)}`
+      : ''
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/${encodeURIComponent(repoSlug)}${queryString}`,
+              params,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as RepositoryItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'updateOrgRepo'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Update a repository label for an organization.
+   *
+   * Modifies label properties like name. Label names must be non-empty and less
+   * than 1000 characters.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.updateRepositoryLabel(
+   *     'my-org',
+   *     'label-id-123',
+   *     { name: 'staging' },
+   *   )
+   *
+   *   if (result.success) {
+   *     console.log('Label updated:', result.data.name)
+   *     console.log('Label ID:', result.data.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param labelData - Label updates (typically name property)
+   *
+   * @returns Updated label with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/updateorgrepolabel
+   */
+  async updateRepositoryLabel(
+    orgSlug: string,
+    labelId: string,
+    labelData: QueryParams,
+  ): Promise<RepositoryLabelResult | StrictErrorResult> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}`,
+              labelData,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as RepositoryLabelItem,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'updateOrgRepoLabel'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Upload blobs to an organization's content-addressed blob store (v1 API,
+   * internal preview — hidden from the public OpenAPI spec). Each entry's
+   * hash is computed from `localPath` when omitted; `name` is diagnostics-
+   * only metadata (defaults to the file's basename). Idempotent: re-uploading
+   * an already-stored digest reports it under `already_existed`.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param entries - Files to upload; see `BlobUploadEntry`.
+   *
+   * @returns Digests grouped into `stored` (newly written) and
+   *   `already_existed`
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/blobs (v1)
+   *
+   * @operationId none
+   */
+  async uploadBlobs(
+    orgSlug: string,
+    entries: BlobUploadEntry[],
+  ): Promise<UploadBlobsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    const resolvedEntries: Array<{
+      absPath: string
+      hash: string
+      name: string
+    }> = []
+    for (let i = 0, { length } = entries; i < length; i += 1) {
+      const entry = entries[i]!
+      let hash: string
+      try {
+        hash = entry.hash ?? (await hashFile(entry.localPath)).hash
+      } catch (e) {
+        return {
+          cause: getErrorMessage(e),
+          data: undefined,
+          error: [
+            'Failed to hash a blob-upload entry before uploading.',
+            `→ Where: uploadBlobs(orgSlug="${orgSlug}"), entries[${i}].localPath`,
+            `→ Saw: "${entry.localPath}" — ${getErrorMessage(e)}`,
+            '→ Fix: verify the file exists, is a regular file (not a directory), and is readable, then retry.',
+          ].join('\n'),
+          status: 400,
+          success: false,
+        }
+      }
+      resolvedEntries.push({
+        absPath: entry.localPath,
+        hash,
+        name: entry.name ?? path.basename(entry.localPath),
+      })
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/blobs`,
+              createRequestBodyForBlobs(resolvedEntries),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as BlobsUploadData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Upload manifest files for dependency analysis. Processes package files to
+   * create dependency snapshots and security analysis.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId uploadManifestFiles
+   *
+   * @quota 100 units
+   */
+  async uploadManifestFiles(
+    orgSlug: string,
+    filepaths: string[],
+    options?: UploadManifestFilesOptions | undefined,
+  ): Promise<UploadManifestFilesReturnType | UploadManifestFilesError> {
+    const { pathsRelativeTo = '.' } = {
+      __proto__: null,
+      ...options,
+    } as UploadManifestFilesOptions
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+
+    // Validate file readability before upload.
+    const { invalidPaths, validPaths } = validateFiles(absFilepaths)
+
+    // If callback provided and files were invalid, invoke it.
+    if (this.#onFileValidation && invalidPaths.length > 0) {
+      const result = await this.#onFileValidation(validPaths, invalidPaths, {
+        operation: 'uploadManifestFiles',
+        orgSlug,
+      })
+
+      if (!result.shouldContinue) {
+        const errorMsg = result.errorMessage ?? 'File validation failed'
+        const finalCause = filterRedundantCause(errorMsg, result.errorCause)
+        return {
+          error: errorMsg,
+          status: 400,
+          success: false,
+          ...(finalCause ? { cause: finalCause } : {}),
+        } as UploadManifestFilesError
+      }
+    }
+
+    // Default behavior if no callback: warn and continue.
+    if (!this.#onFileValidation && invalidPaths.length > 0) {
+      const samplePaths = invalidPaths.slice(0, 3).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 3
+          ? `\n  ... and ${invalidPaths.length - 3} more`
+          : ''
+      logger.warn(
+        `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
+          '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
+          '→ Try: Run installation command to ensure files are accessible.',
+      )
+    }
+
+    // Fail if all files were invalid.
+    if (validPaths.length === 0) {
+      const samplePaths = invalidPaths.slice(0, 5).join('\n  - ')
+      const remaining =
+        invalidPaths.length > 5
+          ? `\n  ... and ${invalidPaths.length - 5} more`
+          : ''
+      return {
+        cause: [
+          `All ${invalidPaths.length} files failed validation:`,
+          `  - ${samplePaths}${remaining}`,
+          '',
+          '→ Common causes:',
+          '  ·Yarn Berry PnP virtual filesystem (files are not on disk)',
+          '  ·pnpm symlinks pointing to inaccessible locations',
+          '  ·Incorrect file permissions',
+          '  ·Files were deleted after discovery',
+          '',
+          '→ Solutions:',
+          '  ·Yarn Berry: Use `nodeLinker: node-modules` in .yarnrc.yml',
+          '  ·pnpm: Use `node-linker=hoisted` in .npmrc',
+          '  ·Check file permissions with: ls -la <file>',
+          '  ·Run package manager install command',
+        ].join('\n'),
+        error: 'No readable manifest files found',
+        status: 400,
+        success: false,
+      } as UploadManifestFilesError
+    }
+
+    // Continue with validated files.
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/upload-manifest-files`,
+              createRequestBodyForFilepaths(validPaths, basePath),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<never>(
+        data,
+      ) as unknown as UploadManifestFilesReturnType
+    } catch (e) {
+      /* c8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
+      return (await this.#handleApiError<never>(
+        e,
+      )) as unknown as UploadManifestFilesError
+      /* c8 ignore stop */
+    }
+  }
+
+  /**
+   * View detailed information about a specific patch by its UUID.
+   *
+   * This method retrieves comprehensive patch details including files,
+   * vulnerabilities, description, license, and tier information.
+   *
+   * @operationId viewPatch
+   *
+   * @quota 0 units
+   */
+  async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/view/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as PatchViewResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+}
+
+// Optional live heap trace.
+/* c8 ignore start - optional debug logging for heap monitoring */
+if (isDebugNs('heap')) {
+  const used = process.memoryUsage()
+  debugLog('heap', `heap used: ${Math.round(used.heapUsed / 1024 / 1024)}MB`)
+}
+/* c8 ignore stop - end debug logging */

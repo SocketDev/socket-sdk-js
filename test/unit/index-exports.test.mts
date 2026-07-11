@@ -1,7 +1,9 @@
-/** @fileoverview Tests for main module exports and public API surface. */
+/**
+ * @file Tests for main module exports and public API surface.
+ */
 import { describe, expect, it } from 'vitest'
 
-import * as sdk from '../../src/index'
+import * as sdk from '../../src/index.mts'
 
 describe('index.ts exports', () => {
   it('should export ResponseError class', () => {
@@ -49,9 +51,21 @@ describe('index.ts exports', () => {
 
       // User agent function
       'createUserAgentFromPkgJson',
+
+      // Blob helpers
+      'fetchBlob',
+      'fetchChunkedBytes',
+      'fetchRawBytes',
+      'tryDecodeText',
+
+      // v1 full-scan and blob-upload primitives
+      'assembleManifest',
+      'deriveApiV1BaseUrl',
+      'hashFile',
     ]
 
-    for (const exportName of expectedExports) {
+    for (let i = 0, { length } = expectedExports; i < length; i += 1) {
+      const exportName = expectedExports[i]!
       expect(sdk).toHaveProperty(exportName)
     }
   })
@@ -59,10 +73,13 @@ describe('index.ts exports', () => {
   it('should not export unexpected functions', () => {
     const sdkKeys = Object.keys(sdk)
     const expectedKeys = new Set([
-      'ResponseError',
-      'SocketSdk',
+      'assembleManifest',
       'calculateTotalQuotaCost',
       'createUserAgentFromPkgJson',
+      'deriveApiV1BaseUrl',
+      'fetchBlob',
+      'fetchChunkedBytes',
+      'fetchRawBytes',
       'getAllMethodRequirements',
       'getMethodRequirements',
       'getMethodsByPermissions',
@@ -70,7 +87,11 @@ describe('index.ts exports', () => {
       'getQuotaCost',
       'getQuotaUsageSummary',
       'getRequiredPermissions',
+      'hashFile',
       'hasQuotaForMethods',
+      'ResponseError',
+      'SocketSdk',
+      'tryDecodeText',
     ])
 
     // Check that we don't have unexpected exports (CommonJS build adds 'default')

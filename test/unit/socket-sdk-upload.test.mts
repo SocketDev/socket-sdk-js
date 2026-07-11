@@ -1,14 +1,13 @@
 /**
- * @fileoverview Consolidated tests for file upload functionality.
- * Tests file-upload utilities and SDK upload methods.
+ * @file Consolidated tests for file upload functionality. Tests file-upload
+ *   utilities and SDK upload methods. Consolidates:
  *
- * Consolidates:
- * - file-upload-errors.test.mts
- * - socket-sdk-upload-simple.test.mts
+ *   - file-upload-errors.test.mts
+ *   - socket-sdk-upload-simple.test.mts
  */
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import * as path from 'node:path'
 import { Readable } from 'node:stream'
 import { setTimeout as sleep } from 'node:timers/promises'
@@ -20,8 +19,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
-} from '../../src/file-upload'
-import { SocketSdk } from '../../src/index'
+} from '../../src/file-upload.mts'
+import { SocketSdk } from '../../src/index.mts'
 import { isCoverageMode, setupNockEnvironment } from '../utils/environment.mts'
 import { FAST_TEST_CONFIG } from '../utils/fast-test-config.mts'
 
@@ -33,7 +32,9 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
   let tempDir: string
 
   beforeEach(() => {
-    tempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-file-upload-test-'))
+    tempDir = mkdtempSync(
+      path.join(os.tmpdir(), 'socket-sdk-file-upload-test-'),
+    )
   })
 
   afterEach(async () => {
@@ -116,8 +117,8 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
       path.join(tempDir, 'emoji-🚀-file.txt'),
     ]
 
-    for (const file of files) {
-      writeFileSync(file, 'content')
+    for (let i = 0, { length } = files; i < length; i += 1) {
+      writeFileSync(files[i]!, 'content')
     }
 
     const result = createRequestBodyForFilepaths(files, tempDir)
@@ -131,7 +132,7 @@ describe('File Upload - createUploadRequest', () => {
   let tempDir: string
 
   beforeEach(() => {
-    tempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-upload-request-'))
+    tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-sdk-upload-request-'))
   })
 
   afterEach(async () => {
@@ -329,7 +330,7 @@ describe('SocketSdk - Upload Manifest', () => {
   let packageJsonPath: string
 
   beforeEach(() => {
-    tempDir = mkdtempSync(path.join(tmpdir(), 'socket-sdk-upload-coverage-'))
+    tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-sdk-upload-coverage-'))
     packageJsonPath = path.join(tempDir, 'package.json')
 
     writeFileSync(

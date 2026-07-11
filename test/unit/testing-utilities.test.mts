@@ -1,25 +1,20 @@
 /**
- * @fileoverview Tests for SDK testing utilities.
- * Validates mock factories, response builders, and test helpers.
+ * @file Tests for SDK testing utilities. Validates mock factories, response
+ *   builders, and test helpers.
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
-  fixtures,
   isErrorResult,
   isSuccessResult,
-  issueFixtures,
   mockApiErrorBody,
   mockErrorResponse,
   mockSdkError,
   mockSdkResult,
   mockSuccessResponse,
-  organizationFixtures,
-  packageFixtures,
   repositoryFixtures,
-  scanFixtures,
-} from '../../src/testing'
+} from '../../src/testing.mts'
 
 describe('Testing Utilities', () => {
   describe('mockSuccessResponse', () => {
@@ -52,11 +47,11 @@ describe('Testing Utilities', () => {
       expect(Array.isArray(response.data)).toBe(true)
     })
 
-    it('should handle null data', () => {
-      const response = mockSuccessResponse(null)
+    it('should handle undefined data', () => {
+      const response = mockSuccessResponse(undefined)
 
       expect(response.success).toBe(true)
-      expect(response.data).toBeNull()
+      expect(response.data).toBeUndefined()
     })
   })
 
@@ -308,179 +303,8 @@ describe('Testing Utilities', () => {
     })
   })
 
-  describe('Fixtures', () => {
-    describe('organizationFixtures', () => {
-      it('should have basic organization', () => {
-        expect(organizationFixtures.basic).toMatchObject({
-          id: expect.any(String),
-          name: expect.any(String),
-          plan: expect.any(String),
-        })
-      })
-
-      it('should have full organization', () => {
-        expect(organizationFixtures.full).toMatchObject({
-          created_at: expect.any(String),
-          id: expect.any(String),
-          name: expect.any(String),
-          plan: expect.any(String),
-          updated_at: expect.any(String),
-        })
-      })
-    })
-
-    describe('repositoryFixtures', () => {
-      it('should have basic repository', () => {
-        expect(repositoryFixtures.basic).toMatchObject({
-          archived: false,
-          default_branch: expect.any(String),
-          id: expect.any(String),
-          name: expect.any(String),
-        })
-      })
-
-      it('should have archived repository', () => {
-        expect(repositoryFixtures.archived).toMatchObject({
-          archived: true,
-          default_branch: expect.any(String),
-          id: expect.any(String),
-          name: expect.any(String),
-        })
-      })
-
-      it('should have full repository', () => {
-        expect(repositoryFixtures.full).toMatchObject({
-          archived: expect.any(Boolean),
-          created_at: expect.any(String),
-          default_branch: expect.any(String),
-          homepage: expect.any(String),
-          id: expect.any(String),
-          name: expect.any(String),
-          updated_at: expect.any(String),
-          visibility: expect.any(String),
-        })
-      })
-    })
-
-    describe('scanFixtures', () => {
-      it('should have pending scan', () => {
-        expect(scanFixtures.pending).toMatchObject({
-          created_at: expect.any(String),
-          id: expect.any(String),
-          status: 'pending',
-        })
-      })
-
-      it('should have completed scan', () => {
-        expect(scanFixtures.completed).toMatchObject({
-          completed_at: expect.any(String),
-          created_at: expect.any(String),
-          id: expect.any(String),
-          issues_found: 0,
-          status: 'completed',
-        })
-      })
-
-      it('should have scan with issues', () => {
-        expect(scanFixtures.withIssues).toMatchObject({
-          issues_found: expect.any(Number),
-          status: 'completed',
-        })
-        expect(scanFixtures.withIssues.issues_found).toBeGreaterThan(0)
-      })
-
-      it('should have failed scan', () => {
-        expect(scanFixtures.failed).toMatchObject({
-          created_at: expect.any(String),
-          error: expect.any(String),
-          id: expect.any(String),
-          status: 'failed',
-        })
-      })
-    })
-
-    describe('packageFixtures', () => {
-      it('should have safe package', () => {
-        expect(packageFixtures.safe).toMatchObject({
-          id: expect.any(String),
-          name: expect.any(String),
-          score: expect.any(Number),
-          version: expect.any(String),
-        })
-        expect(packageFixtures.safe.score).toBeGreaterThanOrEqual(90)
-      })
-
-      it('should have vulnerable package', () => {
-        expect(packageFixtures.vulnerable).toMatchObject({
-          id: expect.any(String),
-          issues: expect.any(Array),
-          name: expect.any(String),
-          score: expect.any(Number),
-          version: expect.any(String),
-        })
-        expect(packageFixtures.vulnerable.score).toBeLessThan(50)
-      })
-
-      it('should have malware package', () => {
-        expect(packageFixtures.malware).toMatchObject({
-          id: expect.any(String),
-          issues: expect.arrayContaining(['malware']),
-          name: expect.any(String),
-          score: 0,
-          version: expect.any(String),
-        })
-      })
-    })
-
-    describe('issueFixtures', () => {
-      it('should have vulnerability issue', () => {
-        expect(issueFixtures.vulnerability).toMatchObject({
-          description: expect.any(String),
-          key: expect.any(String),
-          severity: expect.any(String),
-          type: 'vulnerability',
-        })
-      })
-
-      it('should have malware issue', () => {
-        expect(issueFixtures.malware).toMatchObject({
-          description: expect.any(String),
-          severity: 'critical',
-          type: 'malware',
-        })
-      })
-
-      it('should have license issue', () => {
-        expect(issueFixtures.license).toMatchObject({
-          description: expect.any(String),
-          severity: expect.any(String),
-          type: 'license',
-        })
-      })
-    })
-
-    describe('fixtures object', () => {
-      it('should export all fixture categories', () => {
-        expect(fixtures).toHaveProperty('organizations')
-        expect(fixtures).toHaveProperty('repositories')
-        expect(fixtures).toHaveProperty('scans')
-        expect(fixtures).toHaveProperty('packages')
-        expect(fixtures).toHaveProperty('issues')
-      })
-
-      it('should have consistent structure', () => {
-        expect(fixtures.organizations).toBe(organizationFixtures)
-        expect(fixtures.repositories).toBe(repositoryFixtures)
-        expect(fixtures.scans).toBe(scanFixtures)
-        expect(fixtures.packages).toBe(packageFixtures)
-        expect(fixtures.issues).toBe(issueFixtures)
-      })
-    })
-  })
-
   describe('Integration Examples', () => {
     it('should work with vi.fn() for mocking SDK methods', async () => {
-      const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()
         .mockResolvedValue(mockSuccessResponse(repositoryFixtures.basic, 200))
@@ -495,7 +319,6 @@ describe('Testing Utilities', () => {
     })
 
     it('should work with error scenarios', async () => {
-      const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()
         .mockResolvedValue(mockErrorResponse('Not found', 404))
@@ -510,7 +333,6 @@ describe('Testing Utilities', () => {
     })
 
     it('should work with rejected promises', async () => {
-      const { vi } = await import('vitest')
       const mockMethod = vi
         .fn()
         .mockRejectedValue(mockSdkError('TIMEOUT', { message: 'Timed out' }))

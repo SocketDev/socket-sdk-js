@@ -1,0 +1,8 @@
+{
+  "thresholds": {
+    "branches": 90,
+    "functions": 98,
+    "lines": 97,
+    "statements": 97
+  }
+}

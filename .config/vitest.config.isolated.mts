@@ -1,6 +1,6 @@
 /**
- * @fileoverview Vitest configuration for tests requiring full isolation.
- * Used for tests that need vi.doMock() or other module-level mocking.
+ * @file Vitest configuration for tests requiring full isolation. Used for tests
+ *   that need vi.doMock() or other module-level mocking.
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -9,10 +9,7 @@ import { fileURLToPath } from 'node:url'
 
 import { defineConfig } from 'vitest/config'
 
-import {
-  baseCoverageConfig,
-  isolatedCoverageThresholds,
-} from './vitest.coverage.config.mts'
+import { baseCoverageConfig } from './vitest.coverage.config.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -27,8 +24,9 @@ const isCoverageEnabled =
   process.env.npm_lifecycle_event?.includes('coverage') ||
   process.argv.some(arg => arg.includes('coverage'))
 
+// oxlint-disable-next-line socket/no-default-export -- vitest config loader requires the default export.
 export default defineConfig({
-  cacheDir: './.cache/vitest',
+  cacheDir: './node_modules/.cache/vitest',
   test: {
     globals: false,
     environment: 'node',
@@ -48,11 +46,12 @@ export default defineConfig({
     },
     testTimeout: 10_000,
     hookTimeout: 10_000,
-    // Share coverage settings with main config
+    // Share coverage settings with main config. No tier-level thresholds:
+    // the merged aggregate gate in .config/repo/cover.json is the enforcer
+    // (see vitest.coverage.config.mts).
     coverage: {
       ...baseCoverageConfig,
       reportsDirectory: './coverage-isolated',
-      thresholds: isolatedCoverageThresholds,
     },
   },
 })

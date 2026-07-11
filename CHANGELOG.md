@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+
+- `getFullScan()` and `getDiffScanById()` now read cached scan results by default and poll automatically while a result is still computing, so callers get the finished scan without handling intermediate responses. Pass `{ cached: false }` to recompute on demand.
+
+### Added
+
+- `getDiffScanById()` accepts an options object (`cached`, `omit_license_details`, `omit_unchanged`); `getFullScan()` accepts an options object (`cached`, `include_scores`, `include_license_details`).
+- `pollIntervalMs` client option sets the wait between polls while a cached scan is still computing (default 2 seconds).
+
 ## [4.0.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.1) - 2026-04-14
 
 ### Changed — build

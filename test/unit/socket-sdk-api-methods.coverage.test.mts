@@ -1,9 +1,9 @@
+/* max-file-lines: test — method-by-method coverage, 1:1 mapping */
 /**
- * @fileoverview Coverage tests for Socket SDK API methods using local HTTP server.
- *
- * APPROACH: Instead of nock (which bleeds state in coverage mode), we use a real
- * HTTP server that starts/stops cleanly. This works in coverage mode because we're
- * using actual HTTP, not module patching.
+ * @file Coverage tests for Socket SDK API methods using local HTTP server.
+ *   APPROACH: Instead of nock (which bleeds state in coverage mode), we use a
+ *   real HTTP server that starts/stops cleanly. This works in coverage mode
+ *   because we're using actual HTTP, not module patching.
  */
 
 import {
@@ -20,7 +20,7 @@ import path from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 
@@ -37,13 +37,13 @@ describe('SocketSdk - API Methods Coverage', () => {
 
       // Consume request body for POST/PUT/PATCH requests
       if (
+        req.method === 'PATCH' ||
         req.method === 'POST' ||
-        req.method === 'PUT' ||
-        req.method === 'PATCH'
+        req.method === 'PUT'
       ) {
-        let _body = ''
+        let body = ''
         req.on('data', chunk => {
-          _body += chunk.toString()
+          body += chunk.toString()
         })
         req.on('end', () => {
           // Body consumed, now respond
@@ -88,7 +88,7 @@ describe('SocketSdk - API Methods Coverage', () => {
           if (url.includes('/repos')) {
             if (req.method === 'DELETE') {
               res.end(JSON.stringify({ success: true }))
-            } else if (req.method === 'PUT' || req.method === 'POST') {
+            } else if (req.method === 'POST' || req.method === 'PUT') {
               res.end(
                 JSON.stringify({ data: { id: 'repo-1', name: 'test-repo' } }),
               )
@@ -103,23 +103,23 @@ describe('SocketSdk - API Methods Coverage', () => {
                 // Archive upload endpoint
                 res.end(
                   JSON.stringify({
-                    api_url: null,
+                    api_url: undefined,
                     branch: 'main',
                     commit_hash: 'abc123',
                     commit_message: 'Test commit',
                     committers: [],
                     created_at: '2024-01-01T00:00:00Z',
                     html_report_url: 'https://socket.dev/report/scan-1',
-                    html_url: null,
+                    html_url: undefined,
                     id: 'scan-1',
-                    integration_branch_url: null,
-                    integration_commit_url: null,
-                    integration_pull_request_url: null,
+                    integration_branch_url: undefined,
+                    integration_commit_url: undefined,
+                    integration_pull_request_url: undefined,
                     integration_repo_url: '',
                     integration_type: 'api',
                     organization_id: 'org-1',
                     organization_slug: 'test-org',
-                    pull_request: null,
+                    pull_request: undefined,
                     repo: 'test-repo',
                     repository_id: 'repo-1',
                     repository_slug: 'test-repo',
@@ -131,7 +131,7 @@ describe('SocketSdk - API Methods Coverage', () => {
               } else {
                 res.end(JSON.stringify({ data: { id: 'scan-1' } }))
               }
-            } else if (url.includes('/files.tar')) {
+            } else if (url.includes('/files/tar')) {
               // Tar download endpoint
               res.writeHead(200, { 'Content-Type': 'application/x-tar' })
               res.end(Buffer.from('test tar content'))
@@ -153,7 +153,7 @@ describe('SocketSdk - API Methods Coverage', () => {
           } else if (url.includes('/labels')) {
             if (req.method === 'DELETE') {
               res.end(JSON.stringify({ success: true }))
-            } else if (req.method === 'PUT' || req.method === 'POST') {
+            } else if (req.method === 'POST' || req.method === 'PUT') {
               res.end(JSON.stringify({ data: { id: 'label-1', name: 'test' } }))
             } else {
               res.end(JSON.stringify({ data: [] }))
@@ -211,15 +211,42 @@ describe('SocketSdk - API Methods Coverage', () => {
           } else {
             res.end(JSON.stringify({}))
           }
+        } else if (url.includes('/threat-feed')) {
+          // Threat-feed endpoint (org-scoped + top-level share a shape).
+          // Mirrors the depscan api-v0 threatFeedResults schema: id +
+          // threatInstanceId are integers, and publishedAt / removedAt /
+          // nextPageCursor are JSON null on the wire (SNullable in the source).
+          // Emitted as a raw JSON string so the wire `null`s stay verbatim.
+          res.end(
+            `{
+              "nextPageCursor": null,
+              "results": [
+                {
+                  "createdAt": "2024-01-01T00:00:00Z",
+                  "description": "Known malware in the postinstall script.",
+                  "id": 1,
+                  "locationHtmlUrl": "https://socket.dev/threat/1",
+                  "needsHumanReview": false,
+                  "packageHtmlUrl": "https://socket.dev/npm/package/evil",
+                  "publishedAt": null,
+                  "purl": "pkg:npm/evil@1.0.0",
+                  "removedAt": null,
+                  "threatInstanceId": 42,
+                  "threatType": "malware",
+                  "updatedAt": "2024-01-02T00:00:00Z"
+                }
+              ]
+            }`,
+          )
         } else if (url.includes('/alerts')) {
           // Alerts endpoint
           res.end(
             JSON.stringify({
-              endCursor: null,
+              endCursor: undefined,
               items: [
                 {
                   category: 'vulnerability',
-                  clearedAt: null,
+                  clearedAt: undefined,
                   createdAt: '2024-01-01T00:00:00Z',
                   dashboardUrl: 'https://socket.dev/alerts/alert-1',
                   fix: {
@@ -284,8 +311,8 @@ describe('SocketSdk - API Methods Coverage', () => {
                 created_at: '2024-01-01T00:00:00Z',
                 description: 'Test webhook',
                 events: ['full_scan.completed'],
-                filters: null,
-                headers: null,
+                filters: undefined,
+                headers: undefined,
                 id: 'webhook-1',
                 name: 'test-webhook',
                 secret: 'test-secret',
@@ -299,8 +326,8 @@ describe('SocketSdk - API Methods Coverage', () => {
                 created_at: '2024-01-01T00:00:00Z',
                 description: 'Updated webhook',
                 events: ['full_scan.completed'],
-                filters: null,
-                headers: null,
+                filters: undefined,
+                headers: undefined,
                 id: 'webhook-1',
                 name: 'updated-webhook',
                 secret: 'test-secret',
@@ -317,8 +344,8 @@ describe('SocketSdk - API Methods Coverage', () => {
                 created_at: '2024-01-01T00:00:00Z',
                 description: 'Test webhook',
                 events: ['full_scan.completed'],
-                filters: null,
-                headers: null,
+                filters: undefined,
+                headers: undefined,
                 id: 'webhook-1',
                 name: 'test-webhook',
                 secret: 'test-secret',
@@ -330,14 +357,14 @@ describe('SocketSdk - API Methods Coverage', () => {
             // GET list of webhooks
             res.end(
               JSON.stringify({
-                nextPage: null,
+                nextPage: undefined,
                 results: [
                   {
                     created_at: '2024-01-01T00:00:00Z',
                     description: 'Test webhook',
                     events: ['full_scan.completed'],
-                    filters: null,
-                    headers: null,
+                    filters: undefined,
+                    headers: undefined,
                     id: 'webhook-1',
                     name: 'test-webhook',
                     secret: 'test-secret',
@@ -771,7 +798,7 @@ describe('SocketSdk - API Methods Coverage', () => {
           expect(result.data.items[0].category).toBe('vulnerability')
           expect(result.data.items[0].severity).toBe('high')
         }
-        expect(result.data.endCursor).toBeNull()
+        expect(result.data.endCursor).toBeUndefined()
       }
     })
 
@@ -796,6 +823,40 @@ describe('SocketSdk - API Methods Coverage', () => {
             expect(result.data.items[0].vulnerability.cvssScore).toBe(7.5)
           }
         }
+      }
+    })
+  })
+
+  describe('Threat Feed Methods', () => {
+    it('covers getOrgThreatFeedItems without query params', async () => {
+      const result = await client.getOrgThreatFeedItems('test-org')
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.results).toBeInstanceOf(Array)
+        expect(result.data.results[0]?.id).toBe(1)
+        expect(result.data.results[0]?.threatType).toBe('malware')
+        expect(result.data.results[0]?.needsHumanReview).toBe(false)
+        expect(result.data.nextPageCursor).toBeNull()
+      }
+    })
+
+    it('covers getOrgThreatFeedItems with query params', async () => {
+      const result = await client.getOrgThreatFeedItems('test-org', {
+        ecosystem: 'npm',
+        per_page: 50,
+      })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.results).toBeInstanceOf(Array)
+      }
+    })
+
+    it('covers getThreatFeedItems (top-level)', async () => {
+      const result = await client.getThreatFeedItems({ per_page: 10 })
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.results).toBeInstanceOf(Array)
+        expect(result.data.results[0]?.purl).toBe('pkg:npm/evil@1.0.0')
       }
     })
   })
@@ -949,7 +1010,7 @@ describe('SocketSdk - API Methods Coverage', () => {
         if (result.data.results[0]) {
           expect(result.data.results[0].id).toBe('webhook-1')
         }
-        expect(result.data.nextPage).toBeNull()
+        expect(result.data.nextPage).toBeUndefined()
       }
     })
 

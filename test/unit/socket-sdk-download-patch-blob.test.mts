@@ -1,13 +1,12 @@
 /**
- * @fileoverview Tests for downloadPatch method using local HTTP server.
- *
- * This test suite validates the downloadPatch method which downloads
- * patch files from the public Socket blob store.
+ * @file Tests for downloadPatch method using local HTTP server. This test suite
+ *   validates the downloadPatch method which downloads patch files from the
+ *   public Socket blob store.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { SocketSdk } from '../../src/index'
+import { SocketSdk } from '../../src/index.mts'
 import { setupLocalHttpServer } from '../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'

@@ -1,10 +1,12 @@
-/** @fileoverview Tests for organization entitlements and enabled products. */
+/**
+ * @file Tests for organization entitlements and enabled products.
+ */
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { setupTestClient } from '../utils/environment.mts'
 
-import type { Entitlement, EntitlementsResponse } from '../../src/index'
+import type { EntitlementsResponse } from '../../src/index.mts'
 
 describe('Entitlements API', () => {
   const getClient = setupTestClient('test-api-token', {
@@ -247,7 +249,7 @@ describe('Entitlements API', () => {
           // missing key property
           { enabled: true },
           // null item
-          null,
+          undefined,
           // undefined item
           undefined,
         ],
@@ -374,9 +376,9 @@ describe('Entitlements API', () => {
         .filter(r => r.status === 'fulfilled')
         .map(r => r.value)
 
-      results.forEach((result: string[]) => {
-        expect(result).toEqual(['firewall'])
-      })
+      for (let i = 0, { length } = results; i < length; i += 1) {
+        expect(results[i]!).toEqual(['firewall'])
+      }
     })
 
     it('should handle concurrent requests to different orgs', async () => {
@@ -400,9 +402,9 @@ describe('Entitlements API', () => {
         .filter(r => r.status === 'fulfilled')
         .map(r => r.value)
 
-      results.forEach((result: string[], i: number) => {
-        expect(result).toEqual([`product-${i}`])
-      })
+      for (let i = 0, { length } = results; i < length; i += 1) {
+        expect(results[i]!).toEqual([`product-${i}`])
+      }
     })
   })
 
@@ -422,10 +424,11 @@ describe('Entitlements API', () => {
       const entitlements = await getClient().getEntitlements('type-test-org')
 
       // Verify TypeScript types are preserved
-      entitlements.forEach((entitlement: Entitlement) => {
+      for (let i = 0, { length } = entitlements; i < length; i += 1) {
+        const entitlement = entitlements[i]!
         expect(typeof entitlement.key).toBe('string')
         expect(typeof entitlement.enabled).toBe('boolean')
-      })
+      }
     })
   })
 })

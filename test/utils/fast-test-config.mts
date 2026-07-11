@@ -1,8 +1,10 @@
-/** @fileoverview Fast test configuration to speed up tests that use retry logic. */
+/**
+ * @file Fast test configuration to speed up tests that use retry logic.
+ */
 
 /**
- * Fast test configuration that reduces delays and timeouts.
- * Use this for all tests unless specifically testing timeout/retry behavior.
+ * Fast test configuration that reduces delays and timeouts. Use this for all
+ * tests unless specifically testing timeout/retry behavior.
  */
 export const FAST_TEST_CONFIG = {
   retries: 5,

@@ -1,16 +1,17 @@
+import { parseJson } from '@socketsecurity/lib/json/parse'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+import { getResponseJson } from '../../src/http-client.mts'
 
-vi.mock('@socketsecurity/lib/json/parse', () => ({
-  jsonParse: vi.fn(),
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
+
+vi.mock(import('@socketsecurity/lib/json/parse'), () => ({
+  parseJson: vi.fn(),
 }))
 
-const { getResponseJson } = await import('../../src/http-client.js')
-const { jsonParse } = await import('@socketsecurity/lib/json/parse')
-const mockJsonParse = vi.mocked(jsonParse)
+const mockJsonParse = vi.mocked(parseJson)
 
-function mockHttpResponse(bodyText: string, ok = true): HttpResponse {
+export function mockHttpResponse(bodyText: string, ok = true): HttpResponse {
   const body = Buffer.from(bodyText)
   return {
     arrayBuffer: () =>
