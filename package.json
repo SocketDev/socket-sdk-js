@@ -16,7 +16,8 @@
   "files": [
     "CHANGELOG.md",
     "data/*.json",
-    "dist/*.d.ts",
+    "dist/*.d.mts",
+    "dist/utils/*.d.mts",
     "dist/*.js",
     "types/*.d.ts"
   ],
@@ -24,12 +25,12 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/index.d.mts",
       "default": "./dist/index.js"
     },
     "./package.json": "./package.json",
     "./testing": {
-      "types": "./dist/testing.d.ts",
+      "types": "./dist/testing.d.mts",
       "default": "./dist/testing.js"
     },
     "./types/api": {
@@ -41,60 +42,99 @@
       "default": "./types/api-helpers.d.ts"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "bump": "node scripts/bump.mjs",
-    "check": "node scripts/check.mjs",
-    "clean": "node scripts/clean.mjs",
-    "cover": "node scripts/cover.mjs",
-    "fix": "node scripts/fix.mjs",
-    "format": "oxfmt --write .",
-    "format:check": "oxfmt --check .",
-    "generate-sdk": "node scripts/generate-sdk.mjs",
-    "lint": "node scripts/lint.mjs",
+    "build": "node scripts/build.mts",
+    "bump": "node scripts/bump.mts",
+    "check": "node scripts/fleet/check.mts",
+    "check:paths": "node scripts/fleet/check/paths-are-canonical.mts",
+    "check:quota-sync": "node scripts/validate-quota-sync.mts",
+    "clean": "node -e \"require('node:fs').rmSync('node_modules/.cache', { recursive: true, force: true })\"",
+    "cover": "node scripts/fleet/cover.mts",
+    "docs:api": "node scripts/gen-api-docs.mts",
+    "docs:api:check": "node scripts/gen-api-docs.mts --check",
+    "fix": "node scripts/fleet/fix.mts",
+    "format": "node scripts/fleet/format.mts",
+    "format:check": "node scripts/fleet/format.mts --check",
+    "generate-sdk": "node scripts/generate-sdk.mts",
+    "lint": "node scripts/fleet/lint.mts",
     "precommit": "pnpm run check --lint --staged",
-    "prepare": "husky",
-    "ci:validate": "node scripts/ci-validate.mjs",
+    "preinstall": "node scripts/bootstrap-firewall-deps.mts",
+    "prepare": "node scripts/fleet/install-git-hooks.mts",
+    "ci:validate": "node scripts/ci-validate.mts",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
-    "publish": "node scripts/publish.mjs",
-    "publish:ci": "node scripts/publish.mjs --tag ${DIST_TAG:-latest}",
-    "claude": "node scripts/claude.mjs",
-    "security": "agentshield scan && { command -v zizmor >/dev/null && zizmor .github/ || echo 'zizmor not installed — run pnpm run setup to install'; }",
-    "test": "node scripts/test.mjs",
-    "type": "tsgo --noEmit -p .config/tsconfig.check.json",
-    "update": "node scripts/update.mjs"
+    "publish:approve": "node scripts/fleet/npm-publish.mts --approve",
+    "publish:staged": "node scripts/fleet/npm-publish.mts --staged --tag ${DIST_TAG:-latest}",
+    "security": "node scripts/fleet/security.mts",
+    "test": "node scripts/fleet/test.mts",
+    "type": "tsgo --noEmit -p tsconfig.check.json",
+    "update": "node scripts/fleet/update.mts",
+    "lockstep": "node scripts/fleet/lockstep.mts",
+    "lockstep:emit-schema": "node scripts/fleet/lockstep-emit-schema.mts",
+    "setup-security-tools": "node .claude/hooks/fleet/setup-security-tools/install.mts",
+    "ci:local": "node scripts/fleet/agent-ci-skip-locks.mts run --all --quiet --pause-on-failure --github-token",
+    "weekly-update": "node scripts/fleet/weekly-update.mts",
+    "weekly-update:ci": "node scripts/fleet/weekly-update-workflow.mts run",
+    "doctor:auth": "node scripts/fleet/check/setup-is-prompt-less.mts",
+    "sync-oxlint-rules": "node scripts/fleet/sync-oxlint-rules.mts",
+    "sync-package-manager-pins": "node scripts/fleet/sync-package-manager-pins.mts",
+    "doctor": "node scripts/fleet/doctor.mts",
+    "gen:llms-txt": "node scripts/fleet/make-llms-txt.mts --no-ai"
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "2.1.92",
-    "@socketsecurity/lib": "5.18.2",
+    "@anthropic-ai/claude-code": "catalog:",
     "@babel/generator": "7.28.5",
     "@babel/parser": "7.26.3",
     "@babel/traverse": "7.26.4",
     "@babel/types": "7.26.3",
-    "@dotenvx/dotenvx": "1.54.1",
     "@oxlint/migrate": "1.52.0",
+    "@redwoodjs/agent-ci": "catalog:",
+    "@sinclair/typebox": "catalog:",
+    "@socketregistry/packageurl-js": "catalog:",
+    "@socketregistry/packageurl-js-stable": "catalog:",
+    "@socketsecurity/lib": "catalog:",
+    "@socketsecurity/lib-stable": "catalog:",
+    "@socketsecurity/registry-stable": "catalog:",
+    "@socketsecurity/sdk": "catalog:",
+    "@socketsecurity/sdk-stable": "catalog:",
     "@sveltejs/acorn-typescript": "1.0.8",
     "@types/babel__traverse": "7.28.0",
-    "@types/node": "24.9.2",
-    "@typescript/native-preview": "7.0.0-dev.20250926.1",
-    "@vitest/coverage-v8": "4.0.3",
+    "@types/mdast": "catalog:",
+    "@types/node": "catalog:",
+    "@types/semver": "catalog:",
+    "@types/shell-quote": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/ui": "catalog:",
     "acorn": "8.15.0",
     "del": "8.0.1",
     "dev-null-cli": "2.0.0",
-    "ecc-agentshield": "1.4.0",
-    "esbuild": "0.25.11",
+    "ecc-agentshield": "catalog:",
     "fast-glob": "3.3.3",
-    "form-data": "4.0.5",
-    "husky": "9.1.7",
+    "form-data": "4.0.6",
     "magic-string": "0.30.14",
+    "markdownlint-cli2": "catalog:",
+    "mdast-util-from-markdown": "catalog:",
+    "micromark": "catalog:",
+    "neosanitize": "catalog:",
     "nock": "14.0.10",
+    "npm-run-all2": "catalog:",
     "openapi-typescript": "6.7.6",
-    "oxfmt": "0.37.0",
-    "oxlint": "1.52.0",
-    "semver": "7.7.2",
-    "taze": "19.9.2",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "playwright-core": "catalog:",
+    "regjsparser": "catalog:",
+    "rolldown": "catalog:",
+    "semver": "catalog:",
+    "shell-quote": "catalog:",
+    "svgo": "catalog:",
+    "taze": "catalog:",
     "type-coverage": "2.29.7",
-    "vitest": "4.0.3"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "typeCoverage": {
     "atLeast": 99,
@@ -107,9 +147,25 @@
     "ignoreEmptyType": true,
     "strict": true
   },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": ">=11.0.0 <12.0.0",
+      "onFail": "error"
+    }
+  },
   "engines": {
     "node": ">=18.20.8",
-    "pnpm": ">=11.0.0-rc.0"
+    "npm": ">=12.0.0",
+    "pnpm": ">=11.0.5"
   },
-  "packageManager": "pnpm@11.0.0-rc.0"
+  "allowScripts": {
+    "cpu-features": false,
+    "protobufjs": false,
+    "rolldown": true,
+    "ssh2": false
+  },
+  "npm-run-all2": {
+    "nodeRun": true
+  }
 }
