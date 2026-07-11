@@ -91,8 +91,10 @@ export async function fetchOpenApi(): Promise<void> {
     await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
     // Format through the package.json wrapper so the artifact passes the
     // same gate the pre-push fast lint runs — JSON.stringify's wrapping
-    // differs from oxfmt's on fresh spec content.
-    const exitCode = await runCommand('pnpm', ['run', 'fix', 'openapi.json'])
+    // differs from oxfmt's on fresh spec content. `run format` (not `run
+    // fix`): the fix lane filters to code extensions and silently skips
+    // .json, a false-green that shipped an unformatted spec to CI.
+    const exitCode = await runCommand('pnpm', ['run', 'format', 'openapi.json'])
     if (exitCode !== 0) {
       throw new Error(
         `Formatting openapi.json failed with exit code ${exitCode}`,
