@@ -204,18 +204,13 @@ export async function fixArraySyntax(filePath: string): Promise<void> {
 }
 
 export async function generateStrictTypes(): Promise<void> {
+  // The child script owns lint + format of everything it writes, through the
+  // `pnpm run fix` wrapper — a second format pass here under different
+  // settings is what shipped gate-failing output to CI.
   await spawn('node', ['scripts/generate-strict-types.mts'], {
     cwd: rootPath,
     stdio: 'inherit',
   })
-  const exitCode = await runCommand('pnpm', [
-    'exec',
-    'oxfmt',
-    'src/types-strict.mts',
-  ])
-  if (exitCode !== 0) {
-    throw new Error(`Formatting strict types failed with exit code ${exitCode}`)
-  }
 }
 
 export async function generateTypes(): Promise<void> {
@@ -227,14 +222,9 @@ export async function generateTypes(): Promise<void> {
   await fixArraySyntax(typesPath)
   // Add SDK v3 method name aliases
   await addSdkMethodAliases(typesPath)
-  // Format generated types
-  const exitCode = await runCommand('pnpm', [
-    'exec',
-    'oxfmt',
-    '-c',
-    '.config/fleet/oxfmtrc.json',
-    'types/api.d.ts',
-  ])
+  // Lint + format through the package.json wrapper — it owns the configs
+  // and ignore set; never a bare oxlint/oxfmt invocation.
+  const exitCode = await runCommand('pnpm', ['run', 'fix', 'types/api.d.ts'])
   if (exitCode !== 0) {
     throw new Error(`Formatting types failed with exit code ${exitCode}`)
   }
