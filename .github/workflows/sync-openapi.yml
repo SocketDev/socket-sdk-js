@@ -86,28 +86,33 @@ jobs:
       - name: Commit and push changes
         if: steps.check.outputs.has_changes == 'true'
         run: |
-          # Branch from main~1 so the PR is behind main, making the
-          # "Update branch" button available to trigger enterprise checks.
-          # Carry the generated files across the branch switch via a
-          # detached worktree (CLAUDE.md forbids `git stash` in the
-          # primary checkout — shared store, parallel-Claude rule).
+          # Build the PR branch in an ISOLATED worktree at main~1 (so the PR
+          # sits behind main and the "Update branch" button can trigger
+          # enterprise checks). The main checkout never switches branches —
+          # the old checkout-in-place dance aborted whenever a generated
+          # file differed between HEAD and HEAD~1, and `git stash` is
+          # forbidden here (shared store, parallel-Claude rule).
           tmp_worktree="$(mktemp -d)"
-          git worktree add --detach "$tmp_worktree" HEAD
-          cp openapi.json "$tmp_worktree/openapi.json"
-          cp types/api.d.ts "$tmp_worktree/types/api.d.ts"
-          cp src/types-strict.mts "$tmp_worktree/src/types-strict.mts"
-          cp src/index.mts "$tmp_worktree/src/index.mts"
-          git checkout -b automated/open-api HEAD~1
-          cp "$tmp_worktree/openapi.json" openapi.json
-          cp "$tmp_worktree/types/api.d.ts" types/api.d.ts
-          cp "$tmp_worktree/src/types-strict.mts" src/types-strict.mts
-          cp "$tmp_worktree/src/index.mts" src/index.mts
+          git worktree add -B automated/open-api "$tmp_worktree" HEAD~1
+          # The generated-file set is DERIVED from git state, never a
+          # hand-kept list — a generator emitting a new or renamed artifact
+          # ships it automatically (a stale hard-coded list broke this
+          # workflow across the .ts→.mts migration).
+          files="$(git ls-files --modified --others --exclude-standard)"
+          if [ -z "$files" ]; then
+            echo "::error title=Sync OpenAPI::has_changes was true but no modified/untracked files found — inspect the generate step."
+            exit 1
+          fi
+          echo "Generated files:"
+          printf '%s\n' "$files"
+          printf '%s\n' "$files" | while IFS= read -r f; do
+            mkdir -p "$tmp_worktree/$(dirname "$f")"
+            cp "$f" "$tmp_worktree/$f"
+          done
+          printf '%s\n' "$files" | git -C "$tmp_worktree" add --pathspec-from-file=-
+          git -C "$tmp_worktree" commit -m "fix(openapi): sync with openapi definition"
+          git -C "$tmp_worktree" push origin automated/open-api -fu
           git worktree remove --force "$tmp_worktree"
-          # Stage only the generated files explicitly — never `git add .`
-          # (sweeps hook side-effects from other sessions).
-          git add openapi.json types/api.d.ts src/types-strict.mts src/index.mts
-          git commit -m "fix(openapi): sync with openapi definition"
-          git push origin automated/open-api -fu
 
       - name: Create Pull Request
         if: steps.check.outputs.has_changes == 'true'
