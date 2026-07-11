@@ -176,11 +176,15 @@ describe('SocketSdk#createFullScan cache-aware v1 path', () => {
     })
 
     let blobBody = ''
-    scope.post('/v1/orgs/test-org/blobs').reply(function (_uri, requestBody) {
-      requestOrder.push('blobs')
-      blobBody = String(requestBody)
-      return [200, { already_existed: [], stored: [`sha256:${fileHash}`] }]
+    scope.on('request', (_req, interceptor, body) => {
+      if (interceptor.path === '/v1/orgs/test-org/blobs') {
+        requestOrder.push('blobs')
+        blobBody = body
+      }
     })
+    scope
+      .post('/v1/orgs/test-org/blobs')
+      .reply(200, { already_existed: [], stored: [`sha256:${fileHash}`] })
 
     scope.post('/v1/orgs/test-org/full-scans').reply(function () {
       requestOrder.push('full-scans-2')

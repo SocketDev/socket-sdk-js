@@ -43,12 +43,12 @@ describe('SocketSdk#createFullScan cache-aware v1 path — v1-body param normali
 
   it('maps tmp:true to ephemeral:true and drops the tmp key', async () => {
     let capturedBody: JsonRecord | undefined
-    nock('https://api.socket.dev')
-      .post('/v1/orgs/test-org/full-scans')
-      .reply(function (_uri, requestBody: unknown) {
-        capturedBody = requestBody as JsonRecord
-        return [201, buildV1CreatedBody()]
-      })
+
+    const scope = nock('https://api.socket.dev')
+    scope.on('request', (_req, _interceptor, body) => {
+      capturedBody = JSON.parse(body) as JsonRecord
+    })
+    scope.post('/v1/orgs/test-org/full-scans').reply(201, buildV1CreatedBody())
 
     const client = createTestClient('test-api-token', { retries: 0 })
     const result = await client.createFullScan('test-org', [filePath], {
@@ -65,12 +65,12 @@ describe('SocketSdk#createFullScan cache-aware v1 path — v1-body param normali
 
   it('maps a single committers string to a one-element array', async () => {
     let capturedBody: JsonRecord | undefined
-    nock('https://api.socket.dev')
-      .post('/v1/orgs/test-org/full-scans')
-      .reply(function (_uri, requestBody: unknown) {
-        capturedBody = requestBody as JsonRecord
-        return [201, buildV1CreatedBody()]
-      })
+
+    const scope = nock('https://api.socket.dev')
+    scope.on('request', (_req, _interceptor, body) => {
+      capturedBody = JSON.parse(body) as JsonRecord
+    })
+    scope.post('/v1/orgs/test-org/full-scans').reply(201, buildV1CreatedBody())
 
     const client = createTestClient('test-api-token', { retries: 0 })
     const result = await client.createFullScan('test-org', [filePath], {
@@ -86,12 +86,12 @@ describe('SocketSdk#createFullScan cache-aware v1 path — v1-body param normali
 
   it('passes an array of committers through flat', async () => {
     let capturedBody: JsonRecord | undefined
-    nock('https://api.socket.dev')
-      .post('/v1/orgs/test-org/full-scans')
-      .reply(function (_uri, requestBody: unknown) {
-        capturedBody = requestBody as JsonRecord
-        return [201, buildV1CreatedBody()]
-      })
+
+    const scope = nock('https://api.socket.dev')
+    scope.on('request', (_req, _interceptor, body) => {
+      capturedBody = JSON.parse(body) as JsonRecord
+    })
+    scope.post('/v1/orgs/test-org/full-scans').reply(201, buildV1CreatedBody())
 
     const client = createTestClient('test-api-token', { retries: 0 })
     const result = await client.createFullScan('test-org', [filePath], {
@@ -111,12 +111,12 @@ describe('SocketSdk#createFullScan cache-aware v1 path — v1-body param normali
 
   it('normalizes a numeric-string pull_request to a number', async () => {
     let capturedBody: JsonRecord | undefined
-    nock('https://api.socket.dev')
-      .post('/v1/orgs/test-org/full-scans')
-      .reply(function (_uri, requestBody: unknown) {
-        capturedBody = requestBody as JsonRecord
-        return [201, buildV1CreatedBody()]
-      })
+
+    const scope = nock('https://api.socket.dev')
+    scope.on('request', (_req, _interceptor, body) => {
+      capturedBody = JSON.parse(body) as JsonRecord
+    })
+    scope.post('/v1/orgs/test-org/full-scans').reply(201, buildV1CreatedBody())
 
     const client = createTestClient('test-api-token', { retries: 0 })
     const result = await client.createFullScan('test-org', [filePath], {
@@ -133,12 +133,12 @@ describe('SocketSdk#createFullScan cache-aware v1 path — v1-body param normali
 
   it('omits pull_request from the v1 body when it is the 0 no-PR sentinel', async () => {
     let capturedBody: JsonRecord | undefined
-    nock('https://api.socket.dev')
-      .post('/v1/orgs/test-org/full-scans')
-      .reply(function (_uri, requestBody: unknown) {
-        capturedBody = requestBody as JsonRecord
-        return [201, buildV1CreatedBody()]
-      })
+
+    const scope = nock('https://api.socket.dev')
+    scope.on('request', (_req, _interceptor, body) => {
+      capturedBody = JSON.parse(body) as JsonRecord
+    })
+    scope.post('/v1/orgs/test-org/full-scans').reply(201, buildV1CreatedBody())
 
     const client = createTestClient('test-api-token', { retries: 0 })
     const result = await client.createFullScan('test-org', [filePath], {

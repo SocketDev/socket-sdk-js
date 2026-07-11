@@ -82,20 +82,15 @@ describe('SocketSdk - Batch Operations', () => {
     it('should upload files with createDependenciesSnapshot', async () => {
       let capturedHeaders: IncomingHttpHeaders = {}
 
-      nock('https://api.socket.dev')
-        .post('/v0/dependencies/upload')
-        // oxlint-disable-next-line @typescript-eslint/no-explicit-any -- nock reply context
-        .reply(function (this: any) {
-          capturedHeaders = this.req.headers
-          return [
-            200,
-            {
-              id: 'snapshot-123',
-              status: 'complete',
-              files: ['package.json', 'package-lock.json'],
-            },
-          ]
-        })
+      const scope1 = nock('https://api.socket.dev')
+      scope1.on('request', req => {
+        capturedHeaders = Object.fromEntries(req.headers.entries())
+      })
+      scope1.post('/v0/dependencies/upload').reply(200, {
+        id: 'snapshot-123',
+        status: 'complete',
+        files: ['package.json', 'package-lock.json'],
+      })
 
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.createDependenciesSnapshot(
@@ -122,21 +117,18 @@ describe('SocketSdk - Batch Operations', () => {
     it('should upload files with createFullScan', async () => {
       let capturedHeaders: IncomingHttpHeaders = {}
 
-      nock('https://api.socket.dev')
+      const scope2 = nock('https://api.socket.dev')
+      scope2.on('request', req => {
+        capturedHeaders = Object.fromEntries(req.headers.entries())
+      })
+      scope2
         .post('/v0/orgs/test-org/full-scans')
         .query({ repo: 'test-repo' })
-        // oxlint-disable-next-line @typescript-eslint/no-explicit-any -- nock reply context
-        .reply(function (this: any) {
-          capturedHeaders = this.req.headers
-          return [
-            200,
-            {
-              id: 'org-scan-456',
-              organization_slug: 'test-org',
-              status: 'complete',
-              files: ['package.json', 'package-lock.json'],
-            },
-          ]
+        .reply(200, {
+          id: 'org-scan-456',
+          organization_slug: 'test-org',
+          status: 'complete',
+          files: ['package.json', 'package-lock.json'],
         })
 
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)

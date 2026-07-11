@@ -219,29 +219,25 @@ describe('full-scans-v1', () => {
     it('sends only the defined params keys in the JSON body', async () => {
       let capturedBody: Record<string, unknown> | undefined
 
-      nock('https://api.socket.dev')
-        .post('/v1/orgs/test-org/full-scans')
-        .reply(function (_uri, requestBody: unknown) {
-          capturedBody = requestBody as Record<string, unknown>
-          return [
-            201,
-            {
-              branch: 'main',
-              commit_hash: '',
-              commit_message: '',
-              committers: [],
-              created_at: '2026-01-01T00:00:00Z',
-              html_report_url: 'https://socket.dev/report/scan-1',
-              id: 'scan-1',
-              organization_id: 'org-1',
-              pull_request: 0,
-              repository_id: 'repo-1',
-              scan_type: 'full',
-              unsupported_files: [],
-              updated_at: '2026-01-01T00:00:00Z',
-            },
-          ]
-        })
+      const scope = nock('https://api.socket.dev')
+      scope.on('request', (_req, _interceptor, body) => {
+        capturedBody = JSON.parse(body) as Record<string, unknown>
+      })
+      scope.post('/v1/orgs/test-org/full-scans').reply(201, {
+        branch: 'main',
+        commit_hash: '',
+        commit_message: '',
+        committers: [],
+        created_at: '2026-01-01T00:00:00Z',
+        html_report_url: 'https://socket.dev/report/scan-1',
+        id: 'scan-1',
+        organization_id: 'org-1',
+        pull_request: 0,
+        repository_id: 'repo-1',
+        scan_type: 'full',
+        unsupported_files: [],
+        updated_at: '2026-01-01T00:00:00Z',
+      })
 
       const client = createTestClient('test-api-token', { retries: 0 })
       await client.createFullScanFromManifest('test-org', manifest, {
@@ -267,12 +263,13 @@ describe('full-scans-v1', () => {
         .digest('hex')
 
       let capturedBody = ''
-      nock('https://api.socket.dev')
+      const blobScope1 = nock('https://api.socket.dev')
+      blobScope1.on('request', (_req, _interceptor, body) => {
+        capturedBody = decodeMultipartBody(body)
+      })
+      blobScope1
         .post('/v1/orgs/test-org/blobs')
-        .reply(function (_uri, requestBody) {
-          capturedBody = decodeMultipartBody(String(requestBody))
-          return [200, { already_existed: [], stored: [`sha256:${hash}`] }]
-        })
+        .reply(200, { already_existed: [], stored: [`sha256:${hash}`] })
 
       const client = createTestClient('test-api-token', { retries: 0 })
       const result = await client.uploadBlobs('test-org', [
@@ -297,15 +294,13 @@ describe('full-scans-v1', () => {
         .digest('hex')
 
       let capturedBody = ''
-      nock('https://api.socket.dev')
+      const blobScope2 = nock('https://api.socket.dev')
+      blobScope2.on('request', (_req, _interceptor, body) => {
+        capturedBody = decodeMultipartBody(body)
+      })
+      blobScope2
         .post('/v1/orgs/test-org/blobs')
-        .reply(function (_uri, requestBody) {
-          capturedBody = decodeMultipartBody(String(requestBody))
-          return [
-            200,
-            { already_existed: [`sha256:${expectedHash}`], stored: [] },
-          ]
-        })
+        .reply(200, { already_existed: [`sha256:${expectedHash}`], stored: [] })
 
       const client = createTestClient('test-api-token', { retries: 0 })
       const result = await client.uploadBlobs('test-org', [

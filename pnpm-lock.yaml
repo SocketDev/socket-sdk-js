@@ -265,6 +265,9 @@ catalogs:
     neosanitize:
       specifier: 0.3.0
       version: 0.3.0
+    nock:
+      specifier: 15.0.0
+      version: 15.0.0
     npm-run-all2:
       specifier: 9.0.2
       version: 9.0.2
@@ -451,8 +454,8 @@ importers:
         specifier: 'catalog:'
         version: 0.3.0
       nock:
-        specifier: 14.0.10
-        version: 14.0.10
+        specifier: 'catalog:'
+        version: 15.0.0
       npm-run-all2:
         specifier: 'catalog:'
         version: 9.0.2
@@ -2631,9 +2634,10 @@ packages:
       parse5:
         optional: true
 
-  nock@14.0.10:
-    resolution: {integrity: sha512-Q7HjkpyPeLa0ZVZC5qpxBt5EyLczFJ91MEewQiIi9taWuA0KB/MDJlUWtON+7dGouVdADTQsf9RA7TZk6D8VMw==}
+  nock@15.0.0:
+    resolution: {integrity: sha512-EoAVk4Y8Yv4JUQz62sv8zmv+DoBblD/pht/q7aW/td1WietaFWrivzhMGGCLmx2qjpLcOrbyammedW8IRUU5TA==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
+    deprecated: v15.0.0 was released accidentally and is unstable. Please use v14.x until v15 is officially ready.
 
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
@@ -2805,10 +2809,6 @@ packages:
   presentable-error@0.0.1:
     resolution: {integrity: sha512-E6rsNU1QNJgB3sjj7OANinGncFKuK+164sLXw1/CqBjj/EkXSoSdHCtWQGBNlREIGLnL7IEUEGa08YFVUbrhVg==}
     engines: {node: '>=16'}
-
-  propagate@2.0.1:
-    resolution: {integrity: sha512-vGrhOavPSTz4QVNuBNdcNXePNdNMaO1xj9yBeH1ScQPjk/rhg9sSlCXPhMkFuaNNW/syTvYqsnbIJxMBfRbbag==}
-    engines: {node: '>= 8'}
 
   protobufjs@7.6.3:
     resolution: {integrity: sha512-+k0vdJKNdW+Vu+dYe8tZA/VvQb6XKNWexC6URwBFXxNnjLJz9nQJCemGyNgRAWD+B7+nGNc9qMPGwcD7s4nzUw==}
@@ -4974,11 +4974,10 @@ snapshots:
 
   neosanitize@0.3.0: {}
 
-  nock@14.0.10:
+  nock@15.0.0:
     dependencies:
       '@mswjs/interceptors': 0.39.8
       json-stringify-safe: 5.0.1
-      propagate: 2.0.1
 
   node-domexception@1.0.0: {}
 
@@ -5189,8 +5188,6 @@ snapshots:
       source-map-js: 1.2.1
 
   presentable-error@0.0.1: {}
-
-  propagate@2.0.1: {}
 
   protobufjs@7.6.3:
     dependencies:
