@@ -1183,18 +1183,32 @@ export interface paths {
      *   no compatible upstream version; another would require a major version
      *   bump skipped by `--no-major-updates`). **noFixAvailable**: No fix
      *   exists for this vulnerability (no patched version published)
-     *   **fixNotApplicable**: A patched version of the vulnerable package
-     *   exists but cannot be applied. The most common cause is that there is no
-     *   upgrade path through the dependency tree — for example, given a chain
-     *   `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no
-     *   version of `A` accepts `B@2.0.0` the fix cannot be applied without a
-     *   manual override (e.g. `pnpm overrides`). Other causes include callers
-     *   passing `--no-major-updates` when the only patched version is a major
-     *   bump.
      * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
-     *   manifest files **errorComputingFix**: An error occurred while computing
-     *   fixes
+     *   manifest files; each carries a static `reasons` entry stating that no
+     *   patched version has been published **fixNotApplicable**: A patched
+     *   version of the vulnerable package exists but cannot be applied. The
+     *   most common cause is that there is no upgrade path through the
+     *   dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0`
+     *   where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0`
+     *   the fix cannot be applied without a manual override (e.g. `pnpm
+     *   overrides`). Other causes include callers passing `--no-major-updates`
+     *   when the only patched version is a major bump.
+     * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
+     *   manifest files, each with per-artifact `reasons` explaining why the fix
+     *   could not be applied (omitted when no explanation is available)
+     *   **errorComputingFix**: An error occurred while computing fixes
      * - `value.message`: Error description
+     *
+     * ### Fix version alignment
+     *
+     * When several requested vulnerabilities are fixed by upgrading the same
+     * package, their fix entries carry the SAME `fixedVersion` — the server
+     * computes a version that clears all of them together and verifies it
+     * against each advisory's affected ranges. Clients can apply the fixes per
+     * package without reconciling versions. Only when no single in-policy
+     * version fixes all advisories on a package (non-monotonic affected ranges)
+     * can entries differ; each is then the minimal upgrade for its own
+     * advisory.
      *
      * ### Advisory Details (when include_details=true)
      *
@@ -11282,6 +11296,7 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -11324,6 +11339,7 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -15388,6 +15404,7 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -15444,6 +15461,7 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -19019,6 +19037,7 @@ export interface operations {
       401: components['responses']['SocketUnauthorized']
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
   }
@@ -19813,15 +19832,17 @@ export interface operations {
          */
         'filters.alertAction.notIn'?: string
         /**
-         * Comma-separated list of alert action source types ("fallback",
-         * "injected-alert", "org-policy", "reachability", "repo-label-policy",
-         * "socket-yml", or "triage") that should be included.
+         * Comma-separated list of alert action source types ("resolution",
+         * "alert-policy", "fallback", "injected-alert", "org-policy",
+         * "reachability", "repo-label-policy", "socket-yml", or "triage") that
+         * should be included.
          */
         'filters.alertActionSourceType'?: string
         /**
-         * Comma-separated list of alert action source types ("fallback",
-         * "injected-alert", "org-policy", "reachability", "repo-label-policy",
-         * "socket-yml", or "triage") that should be excluded.
+         * Comma-separated list of alert action source types ("resolution",
+         * "alert-policy", "fallback", "injected-alert", "org-policy",
+         * "reachability", "repo-label-policy", "socket-yml", or "triage") that
+         * should be excluded.
          */
         'filters.alertActionSourceType.notIn'?: string
         /**
@@ -20242,16 +20263,16 @@ export interface operations {
                 'alertAction.notIn'?: string[]
                 /**
                  * Comma-separated list of alert action source types
-                 * ("fallback", "injected-alert", "org-policy", "reachability",
-                 * "repo-label-policy", "socket-yml", or "triage") that should
-                 * be included.
+                 * ("resolution", "alert-policy", "fallback", "injected-alert",
+                 * "org-policy", "reachability", "repo-label-policy",
+                 * "socket-yml", or "triage") that should be included.
                  */
                 alertActionSourceType?: string[]
                 /**
                  * Comma-separated list of alert action source types
-                 * ("fallback", "injected-alert", "org-policy", "reachability",
-                 * "repo-label-policy", "socket-yml", or "triage") that should
-                 * be excluded.
+                 * ("resolution", "alert-policy", "fallback", "injected-alert",
+                 * "org-policy", "reachability", "repo-label-policy",
+                 * "socket-yml", or "triage") that should be excluded.
                  */
                 'alertActionSourceType.notIn'?: string[]
                 /**
@@ -20500,15 +20521,17 @@ export interface operations {
          */
         'filters.alertAction.notIn'?: string
         /**
-         * Comma-separated list of alert action source types ("fallback",
-         * "injected-alert", "org-policy", "reachability", "repo-label-policy",
-         * "socket-yml", or "triage") that should be included.
+         * Comma-separated list of alert action source types ("resolution",
+         * "alert-policy", "fallback", "injected-alert", "org-policy",
+         * "reachability", "repo-label-policy", "socket-yml", or "triage") that
+         * should be included.
          */
         'filters.alertActionSourceType'?: string
         /**
-         * Comma-separated list of alert action source types ("fallback",
-         * "injected-alert", "org-policy", "reachability", "repo-label-policy",
-         * "socket-yml", or "triage") that should be excluded.
+         * Comma-separated list of alert action source types ("resolution",
+         * "alert-policy", "fallback", "injected-alert", "org-policy",
+         * "reachability", "repo-label-policy", "socket-yml", or "triage") that
+         * should be excluded.
          */
         'filters.alertActionSourceType.notIn'?: string
         /**
@@ -20768,16 +20791,16 @@ export interface operations {
                 'alertAction.notIn'?: string[]
                 /**
                  * Comma-separated list of alert action source types
-                 * ("fallback", "injected-alert", "org-policy", "reachability",
-                 * "repo-label-policy", "socket-yml", or "triage") that should
-                 * be included.
+                 * ("resolution", "alert-policy", "fallback", "injected-alert",
+                 * "org-policy", "reachability", "repo-label-policy",
+                 * "socket-yml", or "triage") that should be included.
                  */
                 alertActionSourceType?: string[]
                 /**
                  * Comma-separated list of alert action source types
-                 * ("fallback", "injected-alert", "org-policy", "reachability",
-                 * "repo-label-policy", "socket-yml", or "triage") that should
-                 * be excluded.
+                 * ("resolution", "alert-policy", "fallback", "injected-alert",
+                 * "org-policy", "reachability", "repo-label-policy",
+                 * "socket-yml", or "triage") that should be excluded.
                  */
                 'alertActionSourceType.notIn'?: string[]
                 /**
@@ -21577,12 +21600,16 @@ export interface operations {
           | 'DeleteWebhook'
           | 'DisablePythonCliRunStreamingOverride'
           | 'DisassociateLabel'
+          | 'DisconnectAsanaIntegration'
           | 'DisconnectJiraIntegration'
           | 'DisconnectLinearIntegration'
           | 'DowngradeOrganizationPlan'
           | 'EnablePythonCliRunStreamingOverride'
+          | 'EnqueueAutopatchMergeRun'
           | 'EnqueueAutopatchPrepareJob'
+          | 'FinalizeAlertPolicyMigration'
           | 'JoinOrganization'
+          | 'AsanaIntegrationConnected'
           | 'JiraIntegrationConnected'
           | 'LinearIntegrationConnected'
           | 'MemberAdded'
@@ -21590,6 +21617,7 @@ export interface operations {
           | 'MemberRoleChanged'
           | 'RemoveLicenseOverlay'
           | 'RemoveMember'
+          | 'RollbackAlertPolicyMigration'
           | 'ResetInvitationLink'
           | 'ResetOrganizationSettingToDefault'
           | 'RevokeOauthToken'
@@ -21603,6 +21631,7 @@ export interface operations {
           | 'SetSsoBypassRbacRoles'
           | 'SSOEmailVerificationCompleted'
           | 'SSOLoginCompleted'
+          | 'SvdBackfillLegacyOverlay'
           | 'SvdReprocessClusters'
           | 'SyncOrganization'
           | 'TransferOwnership'
@@ -23401,18 +23430,32 @@ export interface operations {
    *   chains are blocked for different causes (e.g. one chain has no compatible
    *   upstream version; another would require a major version bump skipped by
    *   `--no-major-updates`). **noFixAvailable**: No fix exists for this
-   *   vulnerability (no patched version published) **fixNotApplicable**: A
-   *   patched version of the vulnerable package exists but cannot be applied.
-   *   The most common cause is that there is no upgrade path through the
-   *   dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0`
-   *   where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0`
-   *   the fix cannot be applied without a manual override (e.g. `pnpm
-   *   overrides`). Other causes include callers passing `--no-major-updates`
-   *   when the only patched version is a major bump.
+   *   vulnerability (no patched version published)
    * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
-   *   manifest files **errorComputingFix**: An error occurred while computing
-   *   fixes
+   *   manifest files; each carries a static `reasons` entry stating that no
+   *   patched version has been published **fixNotApplicable**: A patched
+   *   version of the vulnerable package exists but cannot be applied. The most
+   *   common cause is that there is no upgrade path through the dependency tree
+   *   — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0`
+   *   is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be
+   *   applied without a manual override (e.g. `pnpm overrides`). Other causes
+   *   include callers passing `--no-major-updates` when the only patched
+   *   version is a major bump.
+   * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
+   *   manifest files, each with per-artifact `reasons` explaining why the fix
+   *   could not be applied (omitted when no explanation is available)
+   *   **errorComputingFix**: An error occurred while computing fixes
    * - `value.message`: Error description
+   *
+   * ### Fix version alignment
+   *
+   * When several requested vulnerabilities are fixed by upgrading the same
+   * package, their fix entries carry the SAME `fixedVersion` — the server
+   * computes a version that clears all of them together and verifies it against
+   * each advisory's affected ranges. Clients can apply the fixes per package
+   * without reconciling versions. Only when no single in-policy version fixes
+   * all advisories on a package (non-monotonic affected ranges) can entries
+   * differ; each is then the minimal upgrade for its own advisory.
    *
    * ### Advisory Details (when include_details=true)
    *
@@ -24223,15 +24266,17 @@ export interface operations {
          */
         'filters.alertAction.notIn'?: string
         /**
-         * Comma-separated list of alert action source types ("fallback",
-         * "injected-alert", "org-policy", "reachability", "repo-label-policy",
-         * "socket-yml", or "triage") that should be included.
+         * Comma-separated list of alert action source types ("resolution",
+         * "alert-policy", "fallback", "injected-alert", "org-policy",
+         * "reachability", "repo-label-policy", "socket-yml", or "triage") that
+         * should be included.
          */
         'filters.alertActionSourceType'?: string
         /**
-         * Comma-separated list of alert action source types ("fallback",
-         * "injected-alert", "org-policy", "reachability", "repo-label-policy",
-         * "socket-yml", or "triage") that should be excluded.
+         * Comma-separated list of alert action source types ("resolution",
+         * "alert-policy", "fallback", "injected-alert", "org-policy",
+         * "reachability", "repo-label-policy", "socket-yml", or "triage") that
+         * should be excluded.
          */
         'filters.alertActionSourceType.notIn'?: string
         /**
@@ -24864,16 +24909,16 @@ export interface operations {
                 'alertAction.notIn'?: string[]
                 /**
                  * Comma-separated list of alert action source types
-                 * ("fallback", "injected-alert", "org-policy", "reachability",
-                 * "repo-label-policy", "socket-yml", or "triage") that should
-                 * be included.
+                 * ("resolution", "alert-policy", "fallback", "injected-alert",
+                 * "org-policy", "reachability", "repo-label-policy",
+                 * "socket-yml", or "triage") that should be included.
                  */
                 alertActionSourceType?: string[]
                 /**
                  * Comma-separated list of alert action source types
-                 * ("fallback", "injected-alert", "org-policy", "reachability",
-                 * "repo-label-policy", "socket-yml", or "triage") that should
-                 * be excluded.
+                 * ("resolution", "alert-policy", "fallback", "injected-alert",
+                 * "org-policy", "reachability", "repo-label-policy",
+                 * "socket-yml", or "triage") that should be excluded.
                  */
                 'alertActionSourceType.notIn'?: string[]
                 /**
