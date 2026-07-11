@@ -294,13 +294,11 @@ describe('getApi and sendApi Methods', () => {
       })
       let capturedHeaders: IncomingHttpHeaders = {}
 
-      nock('https://api.socket.dev')
-        .get('/v0/user-agent-test')
-        // oxlint-disable-next-line @typescript-eslint/no-explicit-any -- nock reply context
-        .reply(function (this: any) {
-          capturedHeaders = this.req.headers
-          return [200, 'ok']
-        })
+      const scope = nock('https://api.socket.dev')
+      scope.on('request', req => {
+        capturedHeaders = Object.fromEntries(req.headers.entries())
+      })
+      scope.get('/v0/user-agent-test').reply(200, 'ok')
 
       await customClient.getApi<string>('user-agent-test', {
         responseType: 'text',

@@ -150,13 +150,11 @@ describe('getApi and sendApi Methods', () => {
       const requestData = { test: true }
       let capturedHeaders: IncomingHttpHeaders = {}
 
-      nock('https://api.socket.dev')
-        .post('/v0/headers-test', requestData)
-        // oxlint-disable-next-line @typescript-eslint/no-explicit-any -- nock reply context
-        .reply(function (this: any) {
-          capturedHeaders = this.req.headers
-          return [200, { received: true }]
-        })
+      const scope = nock('https://api.socket.dev')
+      scope.on('request', req => {
+        capturedHeaders = Object.fromEntries(req.headers.entries())
+      })
+      scope.post('/v0/headers-test', requestData).reply(200, { received: true })
 
       await getClient().sendApi('headers-test', {
         body: requestData,
