@@ -50,6 +50,26 @@ export function generateTypeDefinition(
 }
 
 /**
+ * The wrapper type names generateWrapperTypes() emits, derived from the
+ * template itself. Single source for consumers that re-export them
+ * (updateIndexExports in generate-strict-types.mts) — deriving here means
+ * adding or renaming a wrapper type can never silently drop its
+ * src/index.mts export.
+ */
+export function wrapperTypeNames(): string[] {
+  const names = [...generateWrapperTypes().matchAll(/^export type (\w+)/gm)]
+    .map(m => m[1]!)
+    // oxlint-disable-next-line unicorn/no-array-sort -- fresh copy
+    .sort()
+  if (!names.length) {
+    throw new Error(
+      'wrapperTypeNames: no `export type` declarations found in generateWrapperTypes() output — the emit template changed shape.',
+    )
+  }
+  return names
+}
+
+/**
  * Generate wrapper result types.
  */
 export function generateWrapperTypes(): string {

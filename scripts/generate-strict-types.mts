@@ -17,6 +17,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import {
   generateTypeDefinition,
   generateWrapperTypes,
+  wrapperTypeNames,
 } from './generate-strict-types-emit.mts'
 import {
   extractQueryParams,
@@ -33,6 +34,7 @@ const logger = getDefaultLogger()
 const rootPath = getRootPath(import.meta.url)
 const openApiPath = path.resolve(rootPath, 'openapi.json')
 const strictTypesPath = path.resolve(rootPath, 'src/types-strict.mts')
+const indexExportsPath = path.resolve(rootPath, 'src/index.mts')
 
 /**
  * Configuration for strict type generation. Maps OpenAPI operations to strict
@@ -198,7 +200,7 @@ const STRICT_TYPE_CONFIG: Record<string, StrictTypeConfig> = {
  * Update index.mts to export all generated types.
  */
 export async function updateIndexExports(): Promise<void> {
-  const indexPath = path.resolve(rootPath, 'src/index.mts')
+  const indexPath = indexExportsPath
   const indexContent = await fs.readFile(indexPath, 'utf8')
 
   // Extract type names from generated types
@@ -208,22 +210,9 @@ export async function updateIndexExports(): Promise<void> {
     typeNames.push(configs[i]!.typeName)
   }
 
-  // Also add wrapper types
-  const wrapperTypes = [
-    'DeleteRepositoryLabelResult',
-    'DeleteResult',
-    'FullScanListResult',
-    'FullScanResult',
-    'OrganizationsResult',
-    'RepositoriesListResult',
-    'RepositoryLabelResult',
-    'RepositoryLabelsListResult',
-    'RepositoryResult',
-    'StrictErrorResult',
-    'StrictResult',
-    'StreamFullScanOptions',
-  ]
-  typeNames.push(...wrapperTypes)
+  // Also add wrapper types — derived from the emit template so a wrapper
+  // added or renamed there can never silently miss its index export.
+  typeNames.push(...wrapperTypeNames())
 
   // Sort alphabetically
   typeNames.sort()
@@ -377,28 +366,21 @@ ${generateWrapperTypes()}
     // requires `type?: 'x' | undefined`. The fix is deterministic, so run it
     // before formatting so regeneration stays lint-clean.
     logger.log('  Applying lint autofixes…')
-    const lintResult = spawnSync(
-      'node_modules/.bin/oxlint',
-      ['-c', '.config/fleet/oxlintrc.json', '--fix', strictTypesPath],
+    // Both generated/rewritten files must leave here ALREADY passing the
+    // fleet gates — the CI branch commit runs the same staged lint, and an
+    // unformatted artifact fails there instead of here. The `pnpm run fix`
+    // wrapper owns lint + format (config, ignore set, convergence looping);
+    // never a bare oxlint/oxfmt binary. Fail loud on any non-zero exit — a
+    // swallowed status shipped unformatted output to CI.
+    logger.substep('Fixing + formatting generated files…')
+    const fixResult = spawnSync(
+      'pnpm',
+      ['run', 'fix', strictTypesPath, indexExportsPath],
       { cwd: rootPath, encoding: 'utf8' },
     )
-    if (lintResult.error) {
-      logger.log(
-        '  Warning: Could not apply lint autofixes:',
-        lintResult.error.message,
-      )
-    }
-
-    logger.log('  Formatting generated files…')
-    const formatResult = spawnSync(
-      'node_modules/.bin/oxfmt',
-      ['-c', '.config/fleet/oxfmtrc.json', strictTypesPath],
-      { cwd: rootPath, encoding: 'utf8' },
-    )
-    if (formatResult.error) {
-      logger.log(
-        '  Warning: Could not format files:',
-        formatResult.error.message,
+    if (fixResult.error || fixResult.status !== 0) {
+      throw new Error(
+        `pnpm run fix on generated files failed (${fixResult.error?.message ?? `exit ${fixResult.status}`}) — repair the generator output, do not hand-format.`,
       )
     }
 

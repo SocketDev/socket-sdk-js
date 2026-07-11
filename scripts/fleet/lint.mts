@@ -289,12 +289,14 @@ function runOxlint(baseArgs: readonly string[]): number {
 }
 
 function runAll(): number {
-  log('Formatting all files…')
-  if (runOxfmt() !== 0) {
-    return 1
-  }
+  // oxlint before oxfmt — same rationale as runFiles(): the format pass is
+  // the last writer, so oxlint autofixes can never land unformatted.
   log('Running oxlint on all files…')
   if (runOxlint(['exec', 'oxlint', '-c', pickOxlintConfig()]) !== 0) {
+    return 1
+  }
+  log('Formatting all files…')
+  if (runOxfmt() !== 0) {
     return 1
   }
   // A green oxlint run is vacuous if the socket/ plugin failed to load (every
@@ -371,11 +373,12 @@ function runFiles(files: string[]): number {
     log('No lintable files; skipping.')
     return 0
   }
-  log(`Formatting ${files.length} file(s)...`)
-  if (runOxfmt(files) !== 0) {
-    return 1
-  }
   log(`Running oxlint on ${files.length} file(s)...`)
+  // oxlint (whose --fix rewrites code) runs BEFORE the format pass so
+  // formatting has the last word — the reverse order left oxlint autofixes
+  // unformatted, so a `pnpm run fix <file>` exited green while the file
+  // still failed `format:check` (hit live: a generator's fixed output
+  // red-lit the very next staged lint).
   // --no-error-on-unmatched-pattern keeps the command exit-0 when
   // every listed file falls inside the config's ignorePatterns (e.g.
   // touching just .claude/ files, which the canonical config excludes).
@@ -390,6 +393,10 @@ function runFiles(files: string[]): number {
     ...files,
   ]
   if (runOxlint(baseArgs) !== 0) {
+    return 1
+  }
+  log(`Formatting ${files.length} file(s)...`)
+  if (runOxfmt(files) !== 0) {
     return 1
   }
   // A green oxlint run is vacuous if the socket/ plugin failed to load — see

@@ -17258,6 +17258,9 @@
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
           },
+          "409": {
+            "$ref": "#/components/responses/SocketConflict"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -17331,6 +17334,9 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/SocketConflict"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -19736,6 +19742,9 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/SocketConflict"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -25192,6 +25201,9 @@
           },
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/SocketConflict"
           },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
@@ -33501,6 +33513,9 @@
           "404": {
             "$ref": "#/components/responses/SocketNotFoundResponse"
           },
+          "409": {
+            "$ref": "#/components/responses/SocketConflict"
+          },
           "429": {
             "$ref": "#/components/responses/SocketTooManyRequestsResponse"
           }
@@ -34268,7 +34283,7 @@
             "name": "filters.alertActionSourceType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
+            "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
             "schema": {
               "type": "string"
             }
@@ -34277,7 +34292,7 @@
             "name": "filters.alertActionSourceType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
+            "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -35078,7 +35093,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
+                              "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
                             },
                             "alertActionSourceType.notIn": {
                               "type": "array",
@@ -35087,7 +35102,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertCategory": {
                               "type": "array",
@@ -35573,7 +35588,7 @@
             "name": "filters.alertActionSourceType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
+            "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
             "schema": {
               "type": "string"
             }
@@ -35582,7 +35597,7 @@
             "name": "filters.alertActionSourceType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
+            "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -36112,7 +36127,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
+                              "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
                             },
                             "alertActionSourceType.notIn": {
                               "type": "array",
@@ -36121,7 +36136,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertCategory": {
                               "type": "array",
@@ -37603,12 +37618,16 @@
                 "DeleteWebhook",
                 "DisablePythonCliRunStreamingOverride",
                 "DisassociateLabel",
+                "DisconnectAsanaIntegration",
                 "DisconnectJiraIntegration",
                 "DisconnectLinearIntegration",
                 "DowngradeOrganizationPlan",
                 "EnablePythonCliRunStreamingOverride",
+                "EnqueueAutopatchMergeRun",
                 "EnqueueAutopatchPrepareJob",
+                "FinalizeAlertPolicyMigration",
                 "JoinOrganization",
+                "AsanaIntegrationConnected",
                 "JiraIntegrationConnected",
                 "LinearIntegrationConnected",
                 "MemberAdded",
@@ -37616,6 +37635,7 @@
                 "MemberRoleChanged",
                 "RemoveLicenseOverlay",
                 "RemoveMember",
+                "RollbackAlertPolicyMigration",
                 "ResetInvitationLink",
                 "ResetOrganizationSettingToDefault",
                 "RevokeOauthToken",
@@ -37629,6 +37649,7 @@
                 "SetSsoBypassRbacRoles",
                 "SSOEmailVerificationCompleted",
                 "SSOLoginCompleted",
+                "SvdBackfillLegacyOverlay",
                 "SvdReprocessClusters",
                 "SyncOrganization",
                 "TransferOwnership",
@@ -39900,7 +39921,7 @@
             "basicAuth": ["fixes:list"]
           }
         ],
-        "description": "Fetches available fixes for vulnerabilities in a repository, scan, or uploaded manifest.\nRequires exactly one of repo_slug, full_scan_id, or tar_hash, as well as vulnerability_ids to be provided.\nvulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or \"*\" for all vulnerabilities.\n\n## Response Structure\n\nThe response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.\n\n### Common Fields\n\nAll response variants include:\n- `type`: Discriminator field (one of: \"fixFound\", \"partialFixFound\", \"noFixAvailable\", \"fixNotApplicable\", \"errorComputingFix\")\n- `value`: Object containing the variant-specific data\n\nThe `value` object always contains:\n- `ghsa`: string | null - The GHSA ID\n- `cve`: string | null - The CVE ID (if available)\n- `advisoryDetails`: object | null - Advisory details (only if include_details=true)\n\n### Response Variants\n\n**fixFound**: A complete fix is available for all vulnerable packages\n- `value.fixDetails.fixes`: Array of fix objects, each containing:\n  - `purl`: Package URL to upgrade\n  - `fixedVersion`: Version to upgrade to\n  - `manifestFiles`: Array of manifest files containing the package\n  - `updateType`: \"patch\" | \"minor\" | \"major\" | \"unknown\"\n- `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability\n\n**partialFixFound**: Fixes available for some but not all vulnerable packages\n- Same as fixFound, plus:\n- `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:\n  - `purl`: Package URL\n  - `manifestFiles`: Array of manifest files\n  - `reasons`: Human-readable explanations of why the package cannot be upgraded. May contain multiple distinct entries when different dependency chains are blocked for different causes (e.g. one chain has no compatible upstream version; another would require a major version bump skipped by `--no-major-updates`).\n\n**noFixAvailable**: No fix exists for this vulnerability (no patched version published)\n\n**fixNotApplicable**: A patched version of the vulnerable package exists but cannot be applied. The most common cause is that there is no upgrade path through the dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g. `pnpm overrides`). Other causes include callers passing `--no-major-updates` when the only patched version is a major bump.\n- `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files\n\n**errorComputingFix**: An error occurred while computing fixes\n- `value.message`: Error description\n\n### Advisory Details (when include_details=true)\n\n- `title`: string | null\n- `description`: string | null\n- `cwes`: string[] - CWE identifiers\n- `severity`: \"LOW\" | \"MODERATE\" | \"HIGH\" | \"CRITICAL\"\n- `cvssVector`: string | null\n- `publishedAt`: string (ISO date)\n- `kev`: boolean - Whether it's a Known Exploited Vulnerability\n- `epss`: number | null - Exploit Prediction Scoring System score\n- `affectedPurls`: Array of affected packages with version ranges\n\n### Stateful Alert IDs (when include_stateful_alert_ids=true)\n\nTop-level `statefulAlertIds` field — a map of GHSA ID → array of open stateful alert IDs (the human-readable `SOCKET-XXX-N` identifiers also returned by `/v0/orgs/{org_slug}/alerts`). The lookup is org-scoped, so the same GHSA may map to multiple alert IDs when it appears in alerts across different repos or branches. Callers that need a repo/branch filter should intersect this map with results from the alerts API.\n\nThe lookup honors the same scan-type visibility as `/v0/orgs/{org_slug}/alerts` — when the `enableTier1OrgAlertApiRead` feature flag is off for the org, only `socket` scans are visible (no `socket_tier1`).\n\nNote on scopes: this field surfaces identifiers that are otherwise reachable via `/v0/orgs/{org_slug}/alerts` (which requires `alerts:list`). The fixes route is gated on `fixes:list` alone; the GHSAs the alert IDs are keyed to are already part of every `/fixes` response, and exposing the matching alert IDs through this opt-in flag is intentional — it lets a caller with only `fixes:list` complete the correlation back to /alerts on a token that already has that scope. If you require strict scope separation, do not enable this flag.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- fixes:list",
+        "description": "Fetches available fixes for vulnerabilities in a repository, scan, or uploaded manifest.\nRequires exactly one of repo_slug, full_scan_id, or tar_hash, as well as vulnerability_ids to be provided.\nvulnerability_ids can be a comma-separated list of GHSA or CVE IDs, or \"*\" for all vulnerabilities.\n\n## Response Structure\n\nThe response contains a `fixDetails` object where each key is a vulnerability ID (GHSA or CVE) and the value is a discriminated union based on the `type` field.\n\n### Common Fields\n\nAll response variants include:\n- `type`: Discriminator field (one of: \"fixFound\", \"partialFixFound\", \"noFixAvailable\", \"fixNotApplicable\", \"errorComputingFix\")\n- `value`: Object containing the variant-specific data\n\nThe `value` object always contains:\n- `ghsa`: string | null - The GHSA ID\n- `cve`: string | null - The CVE ID (if available)\n- `advisoryDetails`: object | null - Advisory details (only if include_details=true)\n\n### Response Variants\n\n**fixFound**: A complete fix is available for all vulnerable packages\n- `value.fixDetails.fixes`: Array of fix objects, each containing:\n  - `purl`: Package URL to upgrade\n  - `fixedVersion`: Version to upgrade to\n  - `manifestFiles`: Array of manifest files containing the package\n  - `updateType`: \"patch\" | \"minor\" | \"major\" | \"unknown\"\n- `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct dependencies responsible for the vulnerability\n\n**partialFixFound**: Fixes available for some but not all vulnerable packages\n- Same as fixFound, plus:\n- `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed, each containing:\n  - `purl`: Package URL\n  - `manifestFiles`: Array of manifest files\n  - `reasons`: Human-readable explanations of why the package cannot be upgraded. May contain multiple distinct entries when different dependency chains are blocked for different causes (e.g. one chain has no compatible upstream version; another would require a major version bump skipped by `--no-major-updates`).\n\n**noFixAvailable**: No fix exists for this vulnerability (no patched version published)\n- `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files; each carries a static `reasons` entry stating that no patched version has been published\n\n**fixNotApplicable**: A patched version of the vulnerable package exists but cannot be applied. The most common cause is that there is no upgrade path through the dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g. `pnpm overrides`). Other causes include callers passing `--no-major-updates` when the only patched version is a major bump.\n- `value.vulnerableArtifacts`: Array of vulnerable packages with their manifest files, each with per-artifact `reasons` explaining why the fix could not be applied (omitted when no explanation is available)\n\n**errorComputingFix**: An error occurred while computing fixes\n- `value.message`: Error description\n\n### Fix version alignment\n\nWhen several requested vulnerabilities are fixed by upgrading the same package, their fix entries carry the SAME `fixedVersion` — the server computes a version that clears all of them together and verifies it against each advisory's affected ranges. Clients can apply the fixes per package without reconciling versions. Only when no single in-policy version fixes all advisories on a package (non-monotonic affected ranges) can entries differ; each is then the minimal upgrade for its own advisory.\n\n### Advisory Details (when include_details=true)\n\n- `title`: string | null\n- `description`: string | null\n- `cwes`: string[] - CWE identifiers\n- `severity`: \"LOW\" | \"MODERATE\" | \"HIGH\" | \"CRITICAL\"\n- `cvssVector`: string | null\n- `publishedAt`: string (ISO date)\n- `kev`: boolean - Whether it's a Known Exploited Vulnerability\n- `epss`: number | null - Exploit Prediction Scoring System score\n- `affectedPurls`: Array of affected packages with version ranges\n\n### Stateful Alert IDs (when include_stateful_alert_ids=true)\n\nTop-level `statefulAlertIds` field — a map of GHSA ID → array of open stateful alert IDs (the human-readable `SOCKET-XXX-N` identifiers also returned by `/v0/orgs/{org_slug}/alerts`). The lookup is org-scoped, so the same GHSA may map to multiple alert IDs when it appears in alerts across different repos or branches. Callers that need a repo/branch filter should intersect this map with results from the alerts API.\n\nThe lookup honors the same scan-type visibility as `/v0/orgs/{org_slug}/alerts` — when the `enableTier1OrgAlertApiRead` feature flag is off for the org, only `socket` scans are visible (no `socket_tier1`).\n\nNote on scopes: this field surfaces identifiers that are otherwise reachable via `/v0/orgs/{org_slug}/alerts` (which requires `alerts:list`). The fixes route is gated on `fixes:list` alone; the GHSAs the alert IDs are keyed to are already part of every `/fixes` response, and exposing the matching alert IDs through this opt-in flag is intentional — it lets a caller with only `fixes:list` complete the correlation back to /alerts on a token that already has that scope. If you require strict scope separation, do not enable this flag.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- fixes:list",
         "responses": {
           "200": {
             "content": {
@@ -41064,7 +41085,7 @@
             "name": "filters.alertActionSourceType",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
+            "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included",
             "schema": {
               "type": "string"
             }
@@ -41073,7 +41094,7 @@
             "name": "filters.alertActionSourceType.notIn",
             "in": "query",
             "required": false,
-            "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
+            "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded",
             "schema": {
               "type": "string"
             }
@@ -42335,7 +42356,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
+                              "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be included"
                             },
                             "alertActionSourceType.notIn": {
                               "type": "array",
@@ -42344,7 +42365,7 @@
                                 "description": "",
                                 "default": ""
                               },
-                              "description": "Comma-separated list of alert action source types (\"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
+                              "description": "Comma-separated list of alert action source types (\"resolution\", \"alert-policy\", \"fallback\", \"injected-alert\", \"org-policy\", \"reachability\", \"repo-label-policy\", \"socket-yml\", or \"triage\") that should be excluded"
                             },
                             "alertCategory": {
                               "type": "array",
