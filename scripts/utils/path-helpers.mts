@@ -1,17 +1,19 @@
-/** @fileoverview Path utility helpers for script operations. */
+/**
+ * @file Path utility helpers for script operations.
+ */
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 /**
  * Get directory name from import.meta.url.
  */
-export function getDirname(importMetaUrl) {
+export function getDirname(importMetaUrl: string): string {
   return path.dirname(fileURLToPath(importMetaUrl))
 }
 
 /**
  * Get root directory path from current script location.
  */
-export function getRootPath(importMetaUrl) {
+export function getRootPath(importMetaUrl: string): string {
   return path.join(getDirname(importMetaUrl), '..')
 }

@@ -1,0 +1,63 @@
+/**
+ * @file Node.js loader to alias @socketsecurity/lib-stable to local socket-lib
+ *   build when available. This allows scripts to use the latest local version
+ *   during development.
+ */
+
+import { existsSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootPath = path.resolve(__dirname, '..')
+
+// Check for local socket-lib build
+const libPath = path.join(rootPath, '..', 'socket-lib', 'dist')
+const useLocalLib = existsSync(libPath)
+
+interface ResolveContext {
+  conditions: string[]
+  parentURL?: string | undefined
+}
+
+interface ResolveResult {
+  url: string
+  shortCircuit?: boolean | undefined
+}
+
+type NextResolve = (specifier: string, context: ResolveContext) => ResolveResult
+
+export function resolve(
+  specifier: string,
+  context: ResolveContext,
+  nextResolve: NextResolve,
+): ResolveResult {
+  // Rewrite @socketsecurity/lib-stable imports to local dist if available
+  if (useLocalLib && specifier.startsWith('@socketsecurity/lib-stable')) {
+    const subpath = normalizePath(
+      specifier.slice('@socketsecurity/lib-stable'.length) || '/index.js',
+    )
+    // Rewrite the subpath onto the local lib build root.
+    const localPath = path.join(
+      libPath,
+      subpath.startsWith('/') ? subpath.slice(1) : subpath,
+    )
+
+    // Add .js extension if not present
+    const resolvedPath = localPath.endsWith('.js')
+      ? localPath
+      : `${localPath}.js`
+
+    // Only use local path if file actually exists
+    if (existsSync(resolvedPath)) {
+      return {
+        url: `file://${resolvedPath}`,
+        shortCircuit: true,
+      }
+    }
+  }
+
+  return nextResolve(specifier, context)
+}

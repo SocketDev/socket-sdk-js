@@ -1,6 +1,6 @@
 /**
- * @fileoverview Unified clean runner with flag-based configuration.
- * Removes build artifacts, caches, and other generated files.
+ * @file Unified clean runner with flag-based configuration. Removes build
+ *   artifacts, caches, and other generated files.
  */
 
 import path from 'node:path'
@@ -10,10 +10,11 @@ import { fileURLToPath } from 'node:url'
 import { deleteAsync } from 'del'
 import fastGlob from 'fast-glob'
 
-import { isQuiet } from '@socketsecurity/lib/argv/flags'
-import { parseArgs } from '@socketsecurity/lib/argv/parse'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { createSectionHeader } from '@socketsecurity/lib/stdio/header'
+import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { createSectionHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -23,15 +24,29 @@ const rootPath = path.resolve(
 // Initialize logger
 const logger = getDefaultLogger()
 
+interface CleanTask {
+  name: string
+  pattern?: string | undefined
+  patterns?: string[] | undefined
+}
+
+interface CleanOptions {
+  quiet?: boolean | undefined
+}
+
 /**
  * Clean specific directories.
  */
-async function cleanDirectories(tasks, options = {}) {
+export async function cleanDirectories(
+  tasks: CleanTask[],
+  options: CleanOptions = {},
+): Promise<number> {
   const { quiet = false } = options
 
-  for (const task of tasks) {
+  for (let i = 0, { length } = tasks; i < length; i += 1) {
+    const task = tasks[i]!
     const { name, pattern, patterns } = task
-    const patternsToDelete = patterns || [pattern]
+    const patternsToDelete = patterns || (pattern ? [pattern] : [])
 
     if (!quiet) {
       logger.progress(`Cleaning ${name}`)
@@ -57,10 +72,10 @@ async function cleanDirectories(tasks, options = {}) {
           logger.done(`Cleaned ${name} (already clean)`)
         }
       }
-    } catch (error) {
+    } catch (e) {
       if (!quiet) {
         logger.error(`Failed to clean ${name}`)
-        logger.error(error.message)
+        logger.error(errorMessage(e))
       }
       return 1
     }
@@ -69,7 +84,7 @@ async function cleanDirectories(tasks, options = {}) {
   return 0
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
     // Parse arguments
     const { values } = parseArgs({
@@ -116,10 +131,12 @@ async function main() {
     })
 
     // Show help if requested
-    if (values.help) {
+    if (values['help']) {
       logger.log('Clean Runner')
-      logger.log('\nUsage: pnpm clean [options]')
-      logger.log('\nOptions:')
+      logger.log('')
+      logger.log('Usage: pnpm clean [options]')
+      logger.log('')
+      logger.log('Options:')
       logger.log('  --help              Show this help message')
       logger.log('  --all               Clean everything (default if no flags)')
       logger.log('  --cache             Clean cache directories')
@@ -128,7 +145,8 @@ async function main() {
       logger.log('  --types             Clean TypeScript declarations only')
       logger.log('  --modules           Clean node_modules')
       logger.log('  --quiet, --silent   Suppress progress messages')
-      logger.log('\nExamples:')
+      logger.log('')
+      logger.log('Examples:')
       logger.log(
         '  pnpm clean                  # Clean everything except node_modules',
       )
@@ -145,34 +163,35 @@ async function main() {
 
     // Determine what to clean
     const cleanAll =
-      values.all ||
-      (!values.cache &&
-        !values.coverage &&
-        !values.dist &&
-        !values.types &&
-        !values.modules)
+      values['all'] ||
+      (!values['cache'] &&
+        !values['coverage'] &&
+        !values['dist'] &&
+        !values['types'] &&
+        !values['modules'])
 
     const tasks = []
 
     // Build task list
-    if (cleanAll || values.cache) {
+    if (cleanAll || values['cache']) {
+      // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- deletion-target glob, not a cache location.
       tasks.push({ name: 'cache', pattern: '**/.cache' })
     }
 
-    if (cleanAll || values.coverage) {
+    if (cleanAll || values['coverage']) {
       tasks.push({ name: 'coverage', pattern: 'coverage' })
     }
 
-    if (cleanAll || values.dist) {
+    if (cleanAll || values['dist']) {
       tasks.push({
         name: 'dist',
         patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
       })
-    } else if (values.types) {
+    } else if (values['types']) {
       tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
     }
 
-    if (values.modules) {
+    if (values['modules']) {
       tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
     }
 
@@ -205,13 +224,13 @@ async function main() {
         logger.success('Clean completed successfully!')
       }
     }
-  } catch (error) {
-    logger.error(`Clean runner failed: ${error.message}`)
+  } catch (e) {
+    logger.error(`Clean runner failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })

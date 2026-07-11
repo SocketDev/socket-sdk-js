@@ -1,30 +1,41 @@
 #!/usr/bin/env node
 /**
- * @fileoverview SDK generation script.
- * Orchestrates the complete SDK generation process:
- * 1. Fetches and formats OpenAPI JSON
- * 2. Generates TypeScript types from OpenAPI
- * 3. Generates strict types from OpenAPI
+ * @file SDK generation script. Orchestrates the complete SDK generation
+ *   process:
  *
- * Usage:
- *   node scripts/generate-sdk.mjs
+ *   1. Fetches and formats OpenAPI JSON
+ *   2. Generates TypeScript types from OpenAPI
+ *   3. Generates strict types from OpenAPI Usage: node scripts/generate-sdk.mts
  */
 
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import type { Node } from '@babel/types'
 import { parse } from '@babel/parser'
-import { default as traverse } from '@babel/traverse'
-import * as t from '@babel/types'
+import _traverse from '@babel/traverse'
+import {
+  isIdentifier,
+  isTSArrayType,
+  isTSBooleanKeyword,
+  isTSNumberKeyword,
+  isTSStringKeyword,
+  isTSTypeReference,
+} from '@babel/types'
 import MagicString from 'magic-string'
 
-import { httpJson } from '@socketsecurity/lib/http-request'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { errorMessage } from '@socketsecurity/lib-stable/errors'
+import { httpJson } from '@socketsecurity/lib-stable/http-request'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
-import { getRootPath } from './utils/path-helpers.mjs'
-import { runCommand } from './utils/run-command.mjs'
+import { getRootPath } from './utils/path-helpers.mts'
+import { runCommand } from './utils/run-command.mts'
+
+// CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
+const traverse = ((_traverse as { default?: typeof _traverse | undefined })
+  .default ?? _traverse) as typeof _traverse
 
 const OPENAPI_URL = 'https://api.socket.dev/v0/openapi'
 
@@ -35,58 +46,11 @@ const typesPath = path.resolve(rootPath, 'types/api.d.ts')
 // Initialize logger
 const logger = getDefaultLogger()
 
-async function fetchOpenApi() {
-  try {
-    const data = await httpJson(OPENAPI_URL)
-    await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
-    logger.log(`Downloaded from ${OPENAPI_URL}`)
-  } catch (error) {
-    logger.error(`Failed to fetch OpenAPI definition from ${OPENAPI_URL}`)
-    logger.error(`Network error: ${error.message}`)
-    logger.info(
-      'Ensure the API endpoint is accessible and try again. If the issue persists, check your network connection.',
-    )
-    throw error
-  }
-}
-
-async function generateStrictTypes() {
-  await spawn('node', ['scripts/generate-strict-types.mjs'], {
-    cwd: rootPath,
-    stdio: 'inherit',
-  })
-  const exitCode = await runCommand('pnpm', [
-    'exec',
-    'oxfmt',
-    'src/types-strict.ts',
-  ])
-  if (exitCode !== 0) {
-    throw new Error(`Formatting strict types failed with exit code ${exitCode}`)
-  }
-}
-
-async function generateTypes() {
-  await spawn('node', ['scripts/generate-types.mjs'], {
-    cwd: rootPath,
-    stdio: 'inherit',
-  })
-  // Fix array syntax after writing to disk
-  await fixArraySyntax(typesPath)
-  // Add SDK v3 method name aliases
-  await addSdkMethodAliases(typesPath)
-  // Format generated types
-  const exitCode = await runCommand('pnpm', ['exec', 'oxfmt', 'types/api.d.ts'])
-  if (exitCode !== 0) {
-    throw new Error(`Formatting types failed with exit code ${exitCode}`)
-  }
-}
-
-/**
+export /**
  * Adds SDK v3 method name aliases to the operations interface.
  * These aliases map the new SDK method names to their underlying OpenAPI operation names.
- * @param {string} filePath - The path to the TypeScript file to update
  */
-async function addSdkMethodAliases(filePath) {
+async function addSdkMethodAliases(filePath: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf8')
 
   // Find the closing brace of the operations interface
@@ -121,13 +85,27 @@ async function addSdkMethodAliases(filePath) {
   logger.log('Added SDK v3 method name aliases')
 }
 
+export async function fetchOpenApi(): Promise<void> {
+  try {
+    const data = await httpJson(OPENAPI_URL)
+    await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
+    logger.log(`Downloaded from ${OPENAPI_URL}`)
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e))
+    logger.error(`Failed to fetch OpenAPI definition from ${OPENAPI_URL}`)
+    logger.error(`Network error: ${error.message}`)
+    logger.info(
+      'Ensure the API endpoint is accessible and try again. If the issue persists, check your network connection.',
+    )
+    throw e
+  }
+}
+
 /**
- * Fixes array syntax to comply with ESLint array-simple rules.
- * Simple types (string, number, boolean) use T[] syntax.
- * Complex types use Array<T> syntax.
- * @param {string} filePath - The path to the TypeScript file to fix
+ * Fixes array syntax to comply with ESLint array-simple rules. Simple types
+ * (string, number, boolean) use T[] syntax. Complex types use Array<T> syntax.
  */
-async function fixArraySyntax(filePath) {
+export async function fixArraySyntax(filePath: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf8')
   const magicString = new MagicString(content)
 
@@ -138,26 +116,26 @@ async function fixArraySyntax(filePath) {
   })
 
   // Helper to determine if a type is simple
-  const isSimpleType = node => {
+  const isSimpleType = (node: Node): boolean => {
     // Check for keyword types
     if (
-      t.isTSStringKeyword(node) ||
-      t.isTSNumberKeyword(node) ||
-      t.isTSBooleanKeyword(node)
+      isTSStringKeyword(node) ||
+      isTSNumberKeyword(node) ||
+      isTSBooleanKeyword(node)
     ) {
       return true
     }
 
     // Check for type references to simple types
-    if (t.isTSTypeReference(node)) {
-      if (t.isIdentifier(node.typeName)) {
+    if (isTSTypeReference(node)) {
+      if (isIdentifier(node.typeName)) {
         const name = node.typeName.name
-        return name === 'string' || name === 'number' || name === 'boolean'
+        return name === 'boolean' || name === 'number' || name === 'string'
       }
     }
 
     // Arrays of simple types are also considered simple for nested array purposes
-    if (t.isTSArrayType(node)) {
+    if (isTSArrayType(node)) {
       return isSimpleType(node.elementType)
     }
 
@@ -168,13 +146,14 @@ async function fixArraySyntax(filePath) {
   let skipCount = 0
 
   // Traverse the AST to find array types
-  traverse.default(ast, {
-    TSArrayType(path) {
-      const node = path.node
+  // Cast needed due to @babel/types version mismatch between parser and traverse
+  traverse(ast as Parameters<typeof traverse>[0], {
+    TSArrayType(arrayPath) {
+      const node = arrayPath.node
       const elementType = node.elementType
 
       // Check if this is a simple type array
-      if (isSimpleType(elementType)) {
+      if (isSimpleType(elementType as unknown as Node)) {
         // For simple types (e.g., string[], number[])
         // we keep them as-is
         return
@@ -184,12 +163,12 @@ async function fixArraySyntax(filePath) {
       const start = node.start
       const end = node.end
 
-      if (start === null || end === null) {
+      if (start == null || end == null) {
         return
       }
 
       // Check elementType positions before accessing
-      if (elementType.start === null || elementType.end === null) {
+      if (elementType.start == null || elementType.end == null) {
         return
       }
 
@@ -224,7 +203,44 @@ async function fixArraySyntax(filePath) {
   }
 }
 
-async function main() {
+export async function generateStrictTypes(): Promise<void> {
+  await spawn('node', ['scripts/generate-strict-types.mts'], {
+    cwd: rootPath,
+    stdio: 'inherit',
+  })
+  const exitCode = await runCommand('pnpm', [
+    'exec',
+    'oxfmt',
+    'src/types-strict.mts',
+  ])
+  if (exitCode !== 0) {
+    throw new Error(`Formatting strict types failed with exit code ${exitCode}`)
+  }
+}
+
+export async function generateTypes(): Promise<void> {
+  await spawn('node', ['scripts/generate-types.mts'], {
+    cwd: rootPath,
+    stdio: 'inherit',
+  })
+  // Fix array syntax after writing to disk
+  await fixArraySyntax(typesPath)
+  // Add SDK v3 method name aliases
+  await addSdkMethodAliases(typesPath)
+  // Format generated types
+  const exitCode = await runCommand('pnpm', [
+    'exec',
+    'oxfmt',
+    '-c',
+    '.config/fleet/oxfmtrc.json',
+    'types/api.d.ts',
+  ])
+  if (exitCode !== 0) {
+    throw new Error(`Formatting types failed with exit code ${exitCode}`)
+  }
+}
+
+async function main(): Promise<void> {
   try {
     logger.group('Generating SDK from OpenAPI…')
 
@@ -242,14 +258,14 @@ async function main() {
 
     logger.groupEnd()
     logger.log('SDK generation complete')
-  } catch (error) {
+  } catch (e) {
     logger.groupEnd()
-    logger.error('SDK generation failed:', error.message)
+    logger.error('SDK generation failed:', errorMessage(e))
     process.exitCode = 1
   }
 }
 
-main().catch(e => {
+main().catch((e: unknown) => {
   logger.error(e)
   process.exitCode = 1
 })
