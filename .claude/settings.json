@@ -1,0 +1,137 @@
+{
+  "env": {
+    "//": [
+      "Deliberately NOT setting CLAUDE_CODE_NO_FLICKER: that enables fullscreen",
+      "(alternate-screen) rendering, which does not write to the terminal's",
+      "scrollback — fast output scrolls past and is unrecoverable. Classic",
+      "rendering keeps all output in real scrollback so it can be reviewed.",
+      "settings.json is strict JSON (no JSONC/JSON5), so this is a dummy '//'",
+      "key — Claude Code ignores unknown keys."
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Edit|MultiEdit|NotebookEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/_dispatch/index.cjs PostToolUse"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion|Bash|Edit|MultiEdit|NotebookEdit|Task|Workflow|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/_dispatch/index.cjs PreToolUse"
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/skill-usage-logger/index.mts"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/_dispatch/index.cjs SessionStart"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/broken-hook-detector/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/headroom-proxy-start/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/bundle-stale-reminder/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/oxlint-plugin-load-nudge/index.mts"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/enterprise-push-nudge/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/stale-node-modules-nudge/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/dirty-lockfile-nudge/index.mts"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/_dispatch/index.cjs Stop"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/setup-security-tools/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/stale-process-sweeper/index.mts"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/sweep-ds-store/index.mts"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(gh release create:*)",
+      "SendMessage"
+    ],
+    "deny": [
+      "Bash(gh release delete:*)",
+      "Bash(npm publish:*)",
+      "Bash(pnpm publish:*)",
+      "Bash(yarn publish:*)"
+    ],
+    "ask": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)"
+    ]
+  }
+}
