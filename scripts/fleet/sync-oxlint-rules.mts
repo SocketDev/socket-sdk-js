@@ -77,30 +77,37 @@ const TEMPLATE_OXLINTRC_PATH = path.join(
   'fleet',
   'oxlintrc.json',
 )
-const OXFMT_BIN = path.join(REPO_ROOT, 'node_modules', '.bin', 'oxfmt')
-const OXFMT_CONFIG = path.join(REPO_ROOT, '.config', 'fleet', 'oxfmtrc.json')
-
 const SOCKET_PREFIX = 'socket/'
 
-// Run a generated source string through oxfmt (stdin → stdout) so the
-// regenerated text matches the committed, oxfmt-formatted style. Without this,
-// the generator's own line-wrapping differs from oxfmt's, so a freshly
-// regenerated index.mts/oxlintrc.json reports as drift on every run even when no
-// rule changed (and a write commits a 100+-line reformat). Applied to BOTH the
-// write path and the `--check` comparison so the two never diverge. `filename`
-// only tells oxfmt which parser to use (.mts vs .json); the file isn't read.
-// Returns the input unchanged if oxfmt is unavailable or errors, so a missing
-// binary degrades to the prior (unformatted) behavior rather than crashing.
+// Run a generated source string through the format wrapper's pipe mode
+// (stdin → stdout) so the regenerated text matches the committed,
+// oxfmt-formatted style. Without this, the generator's own line-wrapping
+// differs from oxfmt's, so a freshly regenerated index.mts/oxlintrc.json
+// reports as drift on every run even when no rule changed (and a write
+// commits a 100+-line reformat). Applied to BOTH the write path and the
+// `--check` comparison so the two never diverge. Routed through
+// `pnpm run format --stdin-filepath=<name>` — the package.json script owns
+// the binary + config; no bare oxfmt invocation. `filename` only tells the
+// parser which grammar to use (.mts vs .json); the file isn't read. Returns
+// the input unchanged on any failure, so a broken formatter degrades to the
+// prior (unformatted) behavior rather than crashing the sync.
 function formatViaOxfmt(source: string, filename: string): string {
-  if (!existsSync(OXFMT_BIN)) {
-    return source
-  }
   const result = spawnSync(
-    OXFMT_BIN,
-    [`--stdin-filepath=${filename}`, '-c', OXFMT_CONFIG],
-    { input: source, encoding: 'utf8' },
+    'pnpm',
+    ['run', '--silent', 'format', `--stdin-filepath=${filename}`],
+    { cwd: REPO_ROOT, input: source, encoding: 'utf8' },
   )
+  // Wrapper layers (pnpm's `> script` banner, the Socket Firewall shim's
+  // "Protected by …" header and "=== Socket Firewall ===" trailer) write
+  // noise to the SAME stdout stream as the formatted text, on both ends —
+  // strip known banner lines so they can never be written into a
+  // regenerated source file.
+  const BANNER_LINE_RE =
+    /^(?:>.*|\$ .*|Protected by Socket Firewall.*|=+ *Socket Firewall *=+.*)$/
   const formatted = String(result.stdout ?? '')
+    .split('\n')
+    .filter(line => !BANNER_LINE_RE.test(line))
+    .join('\n')
   if (result.status !== 0 || !formatted) {
     return source
   }

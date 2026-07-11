@@ -23,6 +23,7 @@ import {
   buildOxfmtArgs,
   getModifiedFiles,
   getStagedFiles,
+  pickConfig,
 } from './_shared/format-scope.mts'
 
 // On Windows, `pnpm` is a .cmd shim Node refuses to exec directly via spawnSync
@@ -33,6 +34,28 @@ const useShell = process.platform === 'win32'
 function main(): void {
   const argv = process.argv.slice(2)
   const check = argv.includes('--check')
+
+  // Pipe mode: format stdin → stdout with the fleet config. Generators that
+  // format an in-memory string (sync-oxlint-rules) route through here so no
+  // script ever invokes a bare oxfmt binary. The filename only selects the
+  // parser (.mts vs .json); nothing is read from disk.
+  const stdinArg = argv.find(arg => arg.startsWith('--stdin-filepath='))
+  if (stdinArg) {
+    const res = spawnSync(
+      'pnpm',
+      ['exec', 'oxfmt', '-c', pickConfig('oxfmtrc.json'), stdinArg],
+      {
+        // Pipe consumers parse this stdout as source text — SFW_SILENT stops
+        // the firewall shim from writing banner lines into the same stream.
+        env: { ...process.env, SFW_SILENT: 'true' },
+        shell: useShell,
+        stdio: 'inherit',
+      },
+    )
+    process.exitCode = res.status ?? 1
+    return
+  }
+
   let files = argv.filter(arg => !arg.startsWith('--'))
   if (argv.includes('--staged') || argv.includes('--modified')) {
     files = argv.includes('--staged') ? getStagedFiles() : getModifiedFiles()
