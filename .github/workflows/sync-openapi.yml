@@ -1,0 +1,173 @@
+name: 🔄 Sync OpenAPI
+
+# Fetches the upstream OpenAPI spec from api.socket.dev and regenerates
+# the SDK types (`api.d.ts`, `types-strict.ts`, `index.ts`) to match.
+# Pushes a PR if anything changed, otherwise no-ops.
+#
+# Trigger model:
+#   - cron Mon-Fri 07:23 UTC — daily drift check.
+#   - push to main on the generator scripts — re-emit when the
+#     generators themselves change (otherwise the existing artifacts
+#     would diverge from what the new generator produces).
+#   - workflow_dispatch — manual trigger for hot-fix flows; `force:
+#     true` skips the unchanged-input shortcut.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/sync-openapi.yml'
+      - 'scripts/generate-sdk.mts'
+      - 'scripts/generate-types.mts'
+      - 'scripts/generate-strict-types.mts'
+  schedule:
+    # At 07:23 on every day-of-week from Monday through Friday.
+    - cron: '23 7 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force regeneration even if no changes detected'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  fetch_and_update:
+    name: Sync OpenAPI definition
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write # To trigger CI workflow via workflow_dispatch
+      contents: write # To push generated SDK code
+      pull-requests: write # To create PRs for review
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    steps:
+      - name: Random delay
+        if: github.event_name == 'schedule'
+        run: |
+          # Add random delay between 0-10 minutes for scheduled runs
+          delay=$((RANDOM % 600))
+          echo "Sleeping for $delay seconds..."
+          sleep $delay
+
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@c4b120c34fa95a9974ffb3f407fa58f4d167c844 # main (2026-05-15)
+      - name: Configure push credentials
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+
+      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@f09a1cd39868ae45d304cfcead2d4f19a5325d8a # main (2026-05-15)
+        with:
+          gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
+
+      - name: Generate SDK
+        # Fetches OpenAPI, generates types/api.d.ts and src/types-strict.ts
+        run: pnpm run generate-sdk
+
+      - name: Check for changes
+        id: check
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          # Branch from main~1 so the PR is behind main, making the
+          # "Update branch" button available to trigger enterprise checks.
+          # Carry the generated files across the branch switch via a
+          # detached worktree (CLAUDE.md forbids `git stash` in the
+          # primary checkout — shared store, parallel-Claude rule).
+          tmp_worktree="$(mktemp -d)"
+          git worktree add --detach "$tmp_worktree" HEAD
+          cp openapi.json "$tmp_worktree/openapi.json"
+          cp types/api.d.ts "$tmp_worktree/types/api.d.ts"
+          cp src/types-strict.ts "$tmp_worktree/src/types-strict.ts"
+          cp src/index.ts "$tmp_worktree/src/index.ts"
+          git checkout -b automated/open-api HEAD~1
+          cp "$tmp_worktree/openapi.json" openapi.json
+          cp "$tmp_worktree/types/api.d.ts" types/api.d.ts
+          cp "$tmp_worktree/src/types-strict.ts" src/types-strict.ts
+          cp "$tmp_worktree/src/index.ts" src/index.ts
+          git worktree remove --force "$tmp_worktree"
+          # Stage only the generated files explicitly — never `git add .`
+          # (sweeps hook side-effects from other sessions).
+          git add openapi.json types/api.d.ts src/types-strict.ts src/index.ts
+          git commit -m "fix(openapi): sync with openapi definition"
+          git push origin automated/open-api -fu
+
+      - name: Create Pull Request
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Check if PR already exists
+          existing_pr=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
+
+          if [ -z "$existing_pr" ]; then
+            gh pr create \
+              --head automated/open-api \
+              --base main \
+              --title "Sync with OpenAPI definition" \
+              --body "## OpenAPI Sync
+
+          The OpenAPI definition in the API has been updated. This PR automatically:
+          - Downloads the latest OpenAPI specification
+          - Regenerates TypeScript types (types/api.d.ts)
+          - Regenerates strict TypeScript types (src/types-strict.ts)
+          - Updates SDK method signatures if needed
+
+          ### What's Changed
+          See the file changes below for specific updates to the API types, strict types, and methods.
+
+          **Please review carefully for any breaking changes in the API.**" \
+              --label "dependencies" \
+              --label "automated"
+          else
+            echo "PR #$existing_pr already exists, skipping creation"
+          fi
+
+      # Pushes made with GITHUB_TOKEN don't trigger other workflows.
+      # Use workflow_dispatch to directly trigger CI on the PR branch.
+      - name: Trigger CI checks
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ci.yml --ref automated/open-api
+
+      - name: Add job summary
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pr_number=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
+          pr_url="https://github.com/${{ github.repository }}/pull/${pr_number}"
+
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## OpenAPI Sync Complete
+
+          **PR:** [#${pr_number}](${pr_url})
+
+          > **Note:** Enterprise required workflows (e.g. Audit GHA Workflows) won't trigger
+          > automatically on bot PRs. Click **"Update branch"** on the PR to trigger them,
+          > or push an empty commit to the branch:
+          >
+          > \`\`\`sh
+          > git fetch origin automated/open-api && git checkout automated/open-api
+          > git commit --allow-empty -m "chore: trigger enterprise checks"
+          > git push origin automated/open-api
+          > \`\`\`
+          EOF
+
+      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@f09a1cd39868ae45d304cfcead2d4f19a5325d8a # main (2026-05-15)
+        if: always()
