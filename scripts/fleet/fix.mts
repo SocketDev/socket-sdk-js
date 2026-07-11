@@ -1,0 +1,154 @@
+/*
+ * @file Auto-fix script — runs linters with --fix, then security tools (zizmor,
+ *   agentshield) if available, then the fleet doctor for member-health fixes,
+ *   then an AI-assisted pass for the lint findings the deterministic fixer
+ *   can't safely handle. Steps:
+ *
+ *   1. pnpm run lint --fix — oxlint + oxfmt (forwards extra argv like --all)
+ *   2. zizmor --fix .github/ — GitHub Actions workflow fixes (skipped if .github/
+ *      doesn't exist)
+ *   3. agentshield scan --fix — Claude config fixes (skipped if .claude/ or
+ *      agentshield isn't installed)
+ *   4. Fleet doctor --fix — auto-fixes catalog: refs missing their catalog entry
+ *      from the cascaded fleet catalog (pnpm-workspace.fleet.yaml); reports
+ *      soak-window install failures loud with the exact annotated exclude.
+ *      Runs only when --all is passed (member-health fix, not staged-only).
+ *   5. AI-assisted lint fix — headless claude (Sonnet) with a restricted toolset
+ *      for judgment-call rules. Skipped silently when the claude CLI isn't
+ *      installed, when SKIP_AI_FIX=1, or when --no-ai is passed. See
+ *      scripts/fleet/ai-lint-fix.mts. Forwards `process.argv.slice(2)` to the
+ *      lint step, so `pnpm run fix --all` runs `pnpm run lint --fix --all`
+ *      (full-tree fix), and `pnpm run fix --staged` does the staged-only flow.
+ */
+
+import { existsSync } from 'node:fs'
+import process from 'node:process'
+
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
+
+const WIN32 = process.platform === 'win32'
+const logger = getDefaultLogger()
+
+// Pull the numeric exit code out of a lib-spawn rejection. The rejection
+// carries `{ code }` — a number for a normal non-zero exit, a string (e.g.
+// 'ENOENT') for a spawn failure. Non-numeric → 1 (treat as a generic failure).
+function exitCodeOf(e: unknown): number {
+  if (e && typeof e === 'object' && 'code' in e) {
+    const { code } = e as { code: unknown }
+    if (typeof code === 'number') {
+      return code
+    }
+  }
+  return 1
+}
+
+async function run(
+  cmd: string,
+  args: string[],
+  {
+    label,
+    required = true,
+  }: { label?: string | undefined; required?: boolean | undefined } = {},
+): Promise<number> {
+  try {
+    const result = await spawn(cmd, args, {
+      shell: WIN32,
+      stdio: 'inherit',
+    })
+    return result.code ?? 0
+  } catch (e) {
+    // The lib `spawn` REJECTS on a non-zero exit (carrying `{ code }`), so a
+    // "failing" command lands here, not the resolved branch. Surface the real
+    // exit code instead of throwing — the caller decides what non-zero means.
+    // Throwing here would abort the pipeline and skip later steps (notably
+    // ai-lint-fix after `lint --fix` exits non-zero with AI-fixable errors).
+    const code = exitCodeOf(e)
+    if (required) {
+      logger.error(`${label || cmd} failed (exit ${code})`)
+    } else {
+      logger.warn(`${label || cmd}: exited ${code} (non-blocking)`)
+    }
+    return code
+  }
+}
+
+async function main(): Promise<void> {
+  // Lint fix (oxfmt + oxlint via scripts/fleet/lint.mts). Forward extra argv so
+  // `--all` / `--staged` / explicit file paths reach the runner unchanged.
+  // NON-required: oxlint can't autofix custom socket/* JS-plugin rules, so a
+  // non-zero exit is the EXPECTED case — those violations are what ai-lint-fix
+  // (below) handles, and gating the pipeline here would skip it when it's needed
+  // most. The real pass/fail is the verify run at the end of this function.
+  await run('pnpm', ['run', 'lint', '--fix', ...process.argv.slice(2)], {
+    label: 'lint --fix',
+    required: false,
+  })
+
+  // zizmor — fixes GitHub Actions workflow security issues. Only runs when
+  // .github/ exists (some repos don't have workflows).
+  if (existsSync('.github')) {
+    await run('zizmor', ['--fix', '.github/'], {
+      label: 'zizmor --fix',
+      required: false,
+    })
+  }
+
+  // AgentShield — fixes Claude config security findings. Only runs when
+  // .claude/ exists and agentshield binary is installed.
+  if (existsSync('.claude') && existsSync('node_modules/.bin/agentshield')) {
+    await run('pnpm', ['exec', 'agentshield', 'scan', '--fix'], {
+      label: 'agentshield --fix',
+      required: false,
+    })
+  }
+
+  // Fleet doctor — member-health fixes. Runs after the deterministic
+  // lint/security fixers and before AI (code-first-then-ai ordering). Scans
+  // workspace package.jsons for catalog: refs missing their catalog entry and
+  // splices the version from the cascaded fleet catalog. Reports soak-window
+  // install failures loud with the exact annotated fix. Runs only when --all
+  // is passed so staged-only flows are unaffected.
+  let doctorCode = 0
+  if (process.argv.slice(2).includes('--all')) {
+    doctorCode = await run('node', ['scripts/fleet/doctor.mts', '--fix'], {
+      label: 'doctor --fix',
+      required: false,
+    })
+  }
+
+  // AI-assisted lint fix. Most lint rules ship a deterministic autofix and
+  // the lint --fix step above handled them. What remains is the judgment-call
+  // set — rule violations whose right rewrite depends on surrounding context
+  // that a regex / AST rewrite can't safely infer. This step shells out to a
+  // headless Claude (Sonnet, four-flag lockdown per CLAUDE.md "Programmatic
+  // Claude calls", restricted toolset) to handle just those rules.
+  //
+  // Skipped silently when the claude CLI isn't on PATH, when
+  // SKIP_AI_FIX=1, or when --no-ai is passed. CI sets SKIP_AI_FIX=1
+  // because the fleet rule is "no AI in CI for code changes."
+  await run(
+    'node',
+    ['scripts/fleet/ai-lint-fix.mts', ...process.argv.slice(2)],
+    {
+      label: 'ai-lint-fix',
+      required: false,
+    },
+  )
+
+  // Verify: re-run lint (no --fix) to set the real exit code. `fix` succeeds
+  // only when nothing remains after the deterministic + AI passes; a lingering
+  // violation (or a genuine lint crash) surfaces here as a non-zero exit.
+  const verifyCode = await run(
+    'pnpm',
+    ['run', 'lint', ...process.argv.slice(2)],
+    { label: 'lint (verify)', required: false },
+  )
+  process.exitCode = verifyCode !== 0 ? verifyCode : doctorCode
+}
+
+main().catch((e: unknown) => {
+  logger.error(errorMessage(e))
+  process.exitCode = 1
+})
