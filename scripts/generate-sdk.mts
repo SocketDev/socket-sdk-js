@@ -89,6 +89,15 @@ export async function fetchOpenApi(): Promise<void> {
   try {
     const data = await httpJson(OPENAPI_URL)
     await fs.writeFile(openApiPath, JSON.stringify(data, null, 2), 'utf8')
+    // Format through the package.json wrapper so the artifact passes the
+    // same gate the pre-push fast lint runs — JSON.stringify's wrapping
+    // differs from oxfmt's on fresh spec content.
+    const exitCode = await runCommand('pnpm', ['run', 'fix', 'openapi.json'])
+    if (exitCode !== 0) {
+      throw new Error(
+        `Formatting openapi.json failed with exit code ${exitCode}`,
+      )
+    }
     logger.log(`Downloaded from ${OPENAPI_URL}`)
   } catch (e) {
     const error = e instanceof Error ? e : new Error(String(e))
