@@ -96,6 +96,10 @@
       "quota": 0,
       "permissions": ["settings:read"]
     },
+    "getOrgThreatFeedItems": {
+      "quota": 1,
+      "permissions": ["threat-feed:list"]
+    },
     "getQuota": {
       "quota": 0,
       "permissions": []
@@ -119,6 +123,10 @@
     "getScoreByNpmPackage": {
       "quota": 10,
       "permissions": []
+    },
+    "getThreatFeedItems": {
+      "quota": 1,
+      "permissions": ["threat-feed:list"]
     },
     "postSettings": {
       "quota": 0,
@@ -243,6 +251,18 @@
     "getOrgAlertFullScans": {
       "quota": 10,
       "permissions": ["alerts:list"]
+    },
+    "getOrgAlertResolution": {
+      "quota": 1,
+      "permissions": ["alert-resolution:read"]
+    },
+    "getOrgAlertResolutions": {
+      "quota": 1,
+      "permissions": ["alert-resolution:list"]
+    },
+    "deleteOrgAlertResolution": {
+      "quota": 1,
+      "permissions": ["alert-resolution:delete"]
     },
     "rescanFullScan": {
       "quota": 0,
