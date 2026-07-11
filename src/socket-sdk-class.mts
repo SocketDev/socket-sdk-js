@@ -1,29 +1,47 @@
+/* max-file-lines: sdk — SDK surface class, one method per API endpoint */
 /**
- * @fileoverview SocketSdk class implementation for Socket security API client.
- * Provides complete API functionality for vulnerability scanning, analysis, and reporting.
+ * @file SocketSdk class implementation for Socket security API client. Provides
+ *   complete API functionality for vulnerability scanning, analysis, and
+ *   reporting.
  */
 import path from 'node:path'
 import process from 'node:process'
 
-import { createTtlCache } from '@socketsecurity/lib/cache-with-ttl'
-import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/core'
-import { getAbortSignal } from '@socketsecurity/lib/constants/process'
+import { createTtlCache } from '@socketsecurity/lib/cache/ttl/store'
+import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/sentinels'
+import { getAbortSignal } from '@socketsecurity/lib/process/abort'
 import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
-import { debugLog, isDebugNs } from '@socketsecurity/lib/debug'
-import { validateFiles } from '@socketsecurity/lib/fs'
-import { jsonParse } from '@socketsecurity/lib/json/parse'
-import { getOwn, isObjectObject } from '@socketsecurity/lib/objects'
-import { pRetry } from '@socketsecurity/lib/promises'
-import { setMaxEventTargetListeners } from '@socketsecurity/lib/suppress-warnings'
-import { urlSearchParamAsBoolean } from '@socketsecurity/lib/url'
+import { isDebugNs } from '@socketsecurity/lib/debug/namespace'
+import { debugLog } from '@socketsecurity/lib/debug/output'
+import { errorMessage as getErrorMessage } from '@socketsecurity/lib/errors/message'
+import { validateFiles } from '@socketsecurity/lib/fs/validate'
+import { parseJson } from '@socketsecurity/lib/json/parse'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { getOwn } from '@socketsecurity/lib/objects/inspect'
+import { isObject } from '@socketsecurity/lib/objects/predicates'
+import { ArrayIsArray } from '@socketsecurity/lib/primordials/array'
+import { ErrorCtor, TypeErrorCtor } from '@socketsecurity/lib/primordials/error'
+import { StringPrototypeTrim } from '@socketsecurity/lib/primordials/string'
+import { pRetry } from '@socketsecurity/lib/promises/retry'
+import { setMaxEventTargetListeners } from '@socketsecurity/lib/events/warning/handler'
+import { urlSearchParamsAsBoolean } from '@socketsecurity/lib/url/search-params'
 
-const abortSignal = getAbortSignal()
+const logger = getDefaultLogger()
 
-import { httpRequest } from '@socketsecurity/lib/http-request'
+let cachedAbortSignal: AbortSignal | undefined
+export function getSdkAbortSignal(): AbortSignal {
+  if (cachedAbortSignal === undefined) {
+    cachedAbortSignal = getAbortSignal()
+  }
+  return cachedAbortSignal
+}
+
+import { httpRequest } from '@socketsecurity/lib/http-request/request'
 
 import {
   DEFAULT_CACHE_TTL,
   DEFAULT_HTTP_TIMEOUT,
+  DEFAULT_POLL_INTERVAL,
   DEFAULT_RETRIES,
   DEFAULT_RETRY_DELAY,
   DEFAULT_USER_AGENT,
@@ -38,20 +56,26 @@ import {
   SOCKET_DASHBOARD_URL,
   SOCKET_FIREWALL_API_URL,
   SOCKET_PUBLIC_BLOB_STORE_URL,
-} from './constants'
+} from './constants.mts'
 import {
+  createRequestBodyForBlobs,
   createRequestBodyForFilepaths,
   createUploadRequest,
-} from './file-upload'
+} from './file-upload.mts'
+import {
+  assembleManifest,
+  deriveApiV1BaseUrl,
+  hashFile,
+} from './full-scans-v1.mts'
 import {
   createDeleteRequest,
   createGetRequest,
   createRequestWithJson,
   getResponseJson,
   isResponseOk,
-  ResponseError,
   reshapeArtifactForPublicPolicy,
-} from './http-client'
+  ResponseError,
+} from './http-client.mts'
 import {
   filterRedundantCause,
   normalizeBaseUrl,
@@ -59,7 +83,8 @@ import {
   queryToSearchParams,
   resolveAbsPaths,
   resolveBasePath,
-} from './utils'
+} from './utils.mts'
+import { pollCachedScan } from './utils/poll.mts'
 
 import type {
   Agent,
@@ -96,7 +121,7 @@ import type {
   UploadManifestFilesError,
   UploadManifestFilesOptions,
   UploadManifestFilesReturnType,
-} from './types'
+} from './types.mts'
 import type {
   CreateFullScanOptions,
   DeleteRepositoryLabelResult,
@@ -115,13 +140,41 @@ import type {
   RepositoryLabelsListResult,
   RepositoryResult,
   StrictErrorResult,
-} from './types-strict'
-import type { TtlCache } from '@socketsecurity/lib/cache-with-ttl'
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+} from './types-strict.mts'
+import type {
+  BlobsUploadData,
+  BlobUploadEntry,
+  CreateFullScanFromManifestParams,
+  CreateFullScanFromManifestResult,
+  FullScanManifest,
+  FullScanV1CreatedData,
+  FullScanV1PendingData,
+  ManifestLocalEntry,
+  UploadBlobsResult,
+} from './full-scans-v1.mts'
+import type {
+  PostEventsData,
+  PostEventsResult,
+  SocketEvent,
+} from './events-v1.mts'
+import type {
+  GetThreatCampaignResult,
+  ListThreatCampaignPackagesOptions,
+  ListThreatCampaignPackagesResult,
+  ListThreatCampaignsOptions,
+  ListThreatCampaignsResult,
+  ThreatCampaign,
+  ThreatCampaignPackagesData,
+  ThreatCampaignsListData,
+} from './threat-campaigns-v1.mts'
+import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
+import type { JsonValue } from '@socketsecurity/lib/json/types'
 
 /**
  * Socket SDK for programmatic access to Socket.dev security analysis APIs.
- * Provides methods for package scanning, organization management, and security analysis.
+ * Provides methods for package scanning, organization management, and security
+ * analysis.
  */
 export class SocketSdk {
   readonly #apiToken: string
@@ -131,27 +184,30 @@ export class SocketSdk {
   readonly #cacheTtlConfig: SocketSdkOptions['cacheTtl']
   readonly #hooks: SocketSdkOptions['hooks']
   readonly #onFileValidation: FileValidationCallback | undefined
+  readonly #pollIntervalMs: number
   readonly #reqOptions: RequestOptions
   readonly #reqOptionsWithHooks: RequestOptionsWithHooks
   readonly #retries: number
   readonly #retryDelay: number
+  #v1FullScansUnavailable = false
 
   /**
-   * Initialize Socket SDK with API token and configuration options.
-   * Sets up authentication, base URL, HTTP client options, retry behavior, and caching.
+   * Initialize Socket SDK with API token and configuration options. Sets up
+   * authentication, base URL, HTTP client options, retry behavior, and
+   * caching.
    */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
     // Input validation for API token.
     const MAX_API_TOKEN_LENGTH = 1024
     if (typeof apiToken !== 'string') {
-      throw new TypeError('"apiToken" is required and must be a string')
+      throw new TypeErrorCtor('"apiToken" is required and must be a string')
     }
-    const trimmedToken = apiToken.trim()
+    const trimmedToken = StringPrototypeTrim(apiToken)
     if (!trimmedToken) {
-      throw new Error('"apiToken" cannot be empty or whitespace-only')
+      throw new ErrorCtor('"apiToken" cannot be empty or whitespace-only')
     }
     if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
-      throw new Error(
+      throw new ErrorCtor(
         `"apiToken" exceeds maximum length of ${MAX_API_TOKEN_LENGTH} characters`,
       )
     }
@@ -163,6 +219,7 @@ export class SocketSdk {
       cacheTtl,
       hooks,
       onFileValidation,
+      pollIntervalMs = DEFAULT_POLL_INTERVAL,
       retries = DEFAULT_RETRIES,
       retryDelay = DEFAULT_RETRY_DELAY,
       timeout = DEFAULT_HTTP_TIMEOUT,
@@ -177,7 +234,7 @@ export class SocketSdk {
         timeout < MIN_HTTP_TIMEOUT ||
         timeout > MAX_HTTP_TIMEOUT
       ) {
-        throw new TypeError(
+        throw new TypeErrorCtor(
           `"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`,
         )
       }
@@ -213,6 +270,7 @@ export class SocketSdk {
     this.#cacheByTtl = new Map()
     this.#hooks = hooks
     this.#onFileValidation = onFileValidation
+    this.#pollIntervalMs = pollIntervalMs
     this.#retries = retries
     this.#retryDelay = retryDelay
     this.#reqOptions = {
@@ -221,7 +279,7 @@ export class SocketSdk {
         Authorization: `Basic ${btoa(`${trimmedToken}:`)}`,
         'User-Agent': userAgent ?? DEFAULT_USER_AGENT,
       },
-      signal: abortSignal,
+      signal: getSdkAbortSignal(),
       /* c8 ignore next - Optional timeout parameter, tested implicitly through method calls */
       ...(timeout ? { timeout } : {}),
     }
@@ -232,8 +290,8 @@ export class SocketSdk {
   }
 
   /**
-   * Create async generator for streaming batch package URL processing.
-   * Internal method for handling chunked PURL responses with error handling.
+   * Create async generator for streaming batch package URL processing. Internal
+   * method for handling chunked PURL responses with error handling.
    */
   async *#createBatchPurlGenerator(
     componentsObj: { components: Array<{ purl: string }> },
@@ -252,7 +310,7 @@ export class SocketSdk {
     // Validate response before processing.
     /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
-      throw new Error('Failed to get response from batch PURL request')
+      throw new ErrorCtor('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
@@ -262,19 +320,18 @@ export class SocketSdk {
       if (i === text.length || text.charCodeAt(i) === 10) {
         if (i > start) {
           const line = text.slice(start, i)
-          const artifact = jsonParse(line, {
+          const artifact = parseJson(line, {
             throws: false,
           }) as SocketArtifact | null
-          if (isObjectObject(artifact)) {
+          if (isObject(artifact)) {
             yield this.#handleApiSuccess<'batchPackageFetch'>(
               /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
               isPublicToken
-                ? reshapeArtifactForPublicPolicy(
-                    artifact!,
-                    false,
-                    queryParams?.['actions'] as string,
-                    publicPolicy,
-                  )
+                ? reshapeArtifactForPublicPolicy(artifact!, {
+                    actions: queryParams?.['actions'] as string,
+                    isAuthenticated: false,
+                    policy: publicPolicy,
+                  })
                 : artifact!,
             )
           }
@@ -285,8 +342,8 @@ export class SocketSdk {
   }
 
   /**
-   * Create HTTP request for batch package URL processing.
-   * Internal method for handling PURL batch API calls with retry logic.
+   * Create HTTP request for batch package URL processing. Internal method for
+   * handling PURL batch API calls with retry logic.
    */
   async #createBatchPurlRequest(
     componentsObj: { components: Array<{ purl: string }> },
@@ -311,8 +368,8 @@ export class SocketSdk {
   }
 
   /**
-   * Create standardized error result from query operation exceptions.
-   * Internal error handling for non-throwing query API methods.
+   * Create standardized error result from query operation exceptions. Internal
+   * error handling for non-throwing query API methods.
    */
   #createQueryErrorResult<T>(e: unknown): SocketSdkGenericResult<T> {
     if (e instanceof SyntaxError) {
@@ -330,7 +387,7 @@ export class SocketSdk {
 
       const preview = responseText.slice(0, 100) || ''
       return {
-        cause: `Please report this. JSON.parse threw an error over the following response: \`${preview.trim()}${responseText.length > 100 ? '…' : ''}\``,
+        cause: `Please report this. JSON.parse threw an error over the following response: \`${StringPrototypeTrim(preview)}${responseText.length > 100 ? '…' : ''}\``,
         data: undefined,
         error: 'Server returned invalid JSON',
         status: 0,
@@ -338,7 +395,7 @@ export class SocketSdk {
       }
     }
 
-    const errStr = e ? String(e).trim() : ''
+    const errStr = e ? StringPrototypeTrim(String(e)) : ''
     return {
       cause: errStr || UNKNOWN_ERROR,
       data: undefined,
@@ -349,8 +406,8 @@ export class SocketSdk {
   }
 
   /**
-   * Execute an HTTP request with retry logic.
-   * Internal method for wrapping HTTP operations with exponential backoff.
+   * Execute an HTTP request with retry logic. Internal method for wrapping HTTP
+   * operations with exponential backoff.
    */
   async #executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
     const result = await pRetry(operation, {
@@ -386,14 +443,14 @@ export class SocketSdk {
     })
     /* c8 ignore next 3 - c8 ignored: because pRetry always returns a value or throws; undefined is only possible if the abort signal fires between attempts, which requires precise timing */
     if (result === undefined) {
-      throw new Error('Request aborted')
+      throw new ErrorCtor('Request aborted')
     }
     return result
   }
 
   /**
-   * Get the TTL for a specific endpoint.
-   * Returns endpoint-specific TTL if configured, otherwise returns default TTL.
+   * Get the TTL for a specific endpoint. Returns endpoint-specific TTL if
+   * configured, otherwise returns default TTL.
    */
   #getTtlForEndpoint(endpoint: string): number | undefined {
     const cacheTtl = this.#cacheTtlConfig
@@ -402,7 +459,9 @@ export class SocketSdk {
     }
     if (cacheTtl && typeof cacheTtl === 'object') {
       // Check for endpoint-specific TTL first.
-      const endpointTtl = (cacheTtl as any)[endpoint]
+      const endpointTtl = (cacheTtl as Record<string, number | undefined>)[
+        endpoint
+      ]
       if (typeof endpointTtl === 'number') {
         return endpointTtl
       }
@@ -413,8 +472,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get or create a cache instance with the specified TTL.
-   * Reuses existing cache instances to avoid creating duplicates.
+   * Get or create a cache instance with the specified TTL. Reuses existing
+   * cache instances to avoid creating duplicates.
    */
   #getCacheForTtl(ttl: number): TtlCache {
     let cache = this.#cacheByTtl.get(ttl)
@@ -430,9 +489,9 @@ export class SocketSdk {
   }
 
   /**
-   * Execute a GET request with optional caching.
-   * Internal method for handling cached GET requests with retry logic.
-   * Supports per-endpoint TTL configuration.
+   * Execute a GET request with optional caching. Internal method for handling
+   * cached GET requests with retry logic. Supports per-endpoint TTL
+   * configuration.
    */
   async #getCached<T>(
     cacheKey: string,
@@ -464,6 +523,38 @@ export class SocketSdk {
   }
 
   /**
+   * Drive the cached-scan 200/202 polling loop for a GET url path. Each poll is
+   * retry-wrapped (so 429/5xx still back off) and throws a ResponseError on a
+   * non-2xx status; a 200 resolves with parsed JSON and a 202 keeps polling
+   * until the result is ready or the wall-clock budget is exhausted. Internal
+   * shared helper for getDiffScanById and getFullScan.
+   */
+  async #pollCachedScan(
+    urlPath: string,
+    label: string,
+  ): Promise<JsonValue | undefined> {
+    return await pollCachedScan({
+      label,
+      pollIntervalMs: this.#pollIntervalMs,
+      requestFn: async () =>
+        await this.#executeWithRetry(async () => {
+          const response = await createGetRequest(
+            this.#baseUrl,
+            urlPath,
+            this.#reqOptionsWithHooks,
+          )
+          // 202 Accepted is ok (2xx); let it through for the poll loop. Any
+          // non-2xx throws so #executeWithRetry retries 429/5xx and 4xx
+          // surfaces to the caller's catch.
+          if (!isResponseOk(response)) {
+            throw new ResponseError(response, '', urlPath)
+          }
+          return response
+        }),
+    })
+  }
+
+  /**
    * Handle API error responses and convert to standardized error result.
    * Internal error handling with status code analysis and message formatting.
    */
@@ -480,14 +571,14 @@ export class SocketSdk {
       }
     }
     if (!(error instanceof ResponseError)) {
-      throw new Error('Unexpected Socket API error', {
+      throw new ErrorCtor('Unexpected Socket API error', {
         cause: error,
       })
     }
     const { status: statusCode } = error.response
     // Throw server errors (5xx) immediately - these are not recoverable client-side.
     if (statusCode && statusCode >= 500) {
-      throw new Error(`Socket API server error (${statusCode})`, {
+      throw new ErrorCtor(`Socket API server error (${statusCode})`, {
         cause: error,
       })
     }
@@ -523,7 +614,8 @@ export class SocketSdk {
     let errorMessage =
       error.message ??
       /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
-    const trimmedBody = body?.trim()
+    const trimmedBody =
+      body !== undefined ? StringPrototypeTrim(body) : undefined
     if (trimmedBody && !errorMessage.includes(trimmedBody)) {
       // Replace generic status message with actual error body if present,
       // otherwise append the body to the error message.
@@ -620,8 +712,8 @@ export class SocketSdk {
   }
 
   /**
-   * Handle query API response data based on requested response type.
-   * Internal method for processing different response formats (json, text, response).
+   * Handle query API response data based on requested response type. Internal
+   * method for processing different response formats (json, text, response).
    */
   async #handleQueryResponseData<T>(
     response: HttpResponse,
@@ -644,8 +736,8 @@ export class SocketSdk {
   }
 
   /**
-   * Parse Retry-After header value and return delay in milliseconds.
-   * Supports both delay-seconds (integer) and HTTP-date formats.
+   * Parse Retry-After header value and return delay in milliseconds. Supports
+   * both delay-seconds (integer) and HTTP-date formats.
    */
   #parseRetryAfter(
     retryAfterValue: string | string[] | undefined,
@@ -656,9 +748,9 @@ export class SocketSdk {
     }
 
     // Handle array of values (take first).
-    const value = Array.isArray(retryAfterValue)
-      ? retryAfterValue[0]
-      : retryAfterValue
+    const value: string | undefined = ArrayIsArray(retryAfterValue)
+      ? (retryAfterValue[0] as string | undefined)
+      : (retryAfterValue as string | undefined)
 
     /* c8 ignore next 3 - c8 ignored: because HTTP headers are always strings; empty array[0] returns undefined which is guarded here for safety */
     // Return if value is empty after extracting from array.
@@ -686,38 +778,67 @@ export class SocketSdk {
   }
 
   /**
-   * Get package metadata and alerts by PURL strings for a specific organization.
-   * Organization-scoped version of batchPackageFetch with security policy label support.
-   *
-   * @param orgSlug - Organization identifier
-   * @param componentsObj - Object containing array of components with PURL strings
-   * @param queryParams - Optional query parameters including labels, alerts, compact, etc.
-   * @returns Package metadata and alerts for the requested PURLs
+   * Resolve the v1 API base URL for the v1 content-addressed full-scan and
+   * blob endpoints. Throws when this SDK instance's configured base URL has
+   * no known v1 counterpart.
+   */
+  #requireApiV1BaseUrl(): string {
+    const v1BaseUrl = deriveApiV1BaseUrl(this.#baseUrl)
+    if (v1BaseUrl === undefined) {
+      throw new ErrorCtor(
+        [
+          'v1 endpoint requires a v1 base URL derived from this SDK instance.',
+          `→ Where: baseUrl is "${this.#baseUrl}"`,
+          `→ Saw: "${this.#baseUrl}"; wanted a base URL ending in "/v0/" (v1 is derived by swapping the trailing "v0/" for "v1/")`,
+          '→ Fix: construct the SDK with the default "https://api.socket.dev/v0/" base, or a custom base whose version segment is "v0"',
+        ].join('\n'),
+      )
+    }
+    return v1BaseUrl
+  }
+
+  /**
+   * Get package metadata and alerts by PURL strings for a specific
+   * organization. Organization-scoped version of batchPackageFetch with
+   * security policy label support.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.batchOrgPackageFetch('my-org',
+   *   ```typescript
+   *   const result = await sdk.batchOrgPackageFetch(
+   *   'my-org',
    *   {
-   *     components: [
-   *       { purl: 'pkg:npm/express@4.19.2' },
-   *       { purl: 'pkg:pypi/django@5.0.6' }
-   *     ]
+   *   components: [
+   *   { purl: 'pkg:npm/express@4.19.2' },
+   *   { purl: 'pkg:pypi/django@5.0.6' },
+   *   ],
    *   },
-   *   { labels: ['production'], alerts: true }
-   * )
+   *   { labels: ['production'], alerts: true },
+   *   )
    *
-   * if (result.success) {
+   *   if (result.success) {
    *   for (const artifact of result.data) {
-   *     console.log(`${artifact.name}@${artifact.version}`)
+   *   console.log(`${artifact.name}@${artifact.version}`)
    *   }
-   * }
-   * ```
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param componentsObj - Object containing array of components with PURL
+   *   strings.
+   * @param queryParams - Optional query parameters including labels, alerts,
+   *   compact, etc.
+   *
+   * @returns Package metadata and alerts for the requested PURLs
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/purl
+   *
+   * @quota 100 units
+   *
+   * @scopes packages:list
    *
    * @see https://docs.socket.dev/reference/batchpackagefetchbyorg
-   * @apiEndpoint POST /orgs/{org_slug}/purl
-   * @quota 100 units
-   * @scopes packages:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async batchOrgPackageFetch(
     orgSlug: string,
@@ -748,7 +869,7 @@ export class SocketSdk {
     // Validate response before processing.
     /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
-      throw new Error('Failed to get response from batch PURL request')
+      throw new ErrorCtor('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
     const results: SocketArtifact[] = []
@@ -758,17 +879,17 @@ export class SocketSdk {
       if (i === text.length || text.charCodeAt(i) === 10) {
         if (i > start) {
           const line = text.slice(start, i)
-          const artifact = jsonParse(line, {
+          const artifact = parseJson(line, {
             throws: false,
           }) as SocketArtifact | null
-          if (isObjectObject(artifact)) {
+          if (isObject(artifact)) {
             results.push(artifact!)
           }
         }
         start = i + 1
       }
     }
-    const compact = urlSearchParamAsBoolean(
+    const compact = urlSearchParamsAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
     )
     return this.#handleApiSuccess<'batchPackageFetchByOrg'>(
@@ -777,8 +898,8 @@ export class SocketSdk {
   }
 
   /**
-   * Fetch package analysis data for multiple packages in a single batch request.
-   * Returns all results at once after processing is complete.
+   * Fetch package analysis data for multiple packages in a single batch
+   * request. Returns all results at once after processing is complete.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -795,7 +916,7 @@ export class SocketSdk {
     // Validate response before processing.
     /* c8 ignore next 3 - c8 ignored: because #executeWithRetry always returns a value or throws; res is never undefined in practice */
     if (!res) {
-      throw new Error('Failed to get response from batch PURL request')
+      throw new ErrorCtor('Failed to get response from batch PURL request')
     }
     // Parse the newline delimited JSON response.
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
@@ -806,19 +927,18 @@ export class SocketSdk {
       if (i === text.length || text.charCodeAt(i) === 10) {
         if (i > start) {
           const line = text.slice(start, i)
-          const artifact = jsonParse(line, {
+          const artifact = parseJson(line, {
             throws: false,
           }) as SocketArtifact | null
-          if (isObjectObject(artifact)) {
+          if (isObject(artifact)) {
             results.push(
               /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
               isPublicToken
-                ? reshapeArtifactForPublicPolicy(
-                    artifact!,
-                    false,
-                    queryParams?.['actions'] as string,
-                    publicPolicy,
-                  )
+                ? reshapeArtifactForPublicPolicy(artifact!, {
+                    actions: queryParams?.['actions'] as string,
+                    isAuthenticated: false,
+                    policy: publicPolicy,
+                  })
                 : artifact!,
             )
           }
@@ -826,7 +946,7 @@ export class SocketSdk {
         start = i + 1
       }
     }
-    const compact = urlSearchParamAsBoolean(
+    const compact = urlSearchParamsAsBoolean(
       getOwn(queryParams, 'compact') as string | null | undefined,
     )
     return this.#handleApiSuccess<'batchPackageFetch'>(
@@ -835,10 +955,15 @@ export class SocketSdk {
   }
 
   /**
-   * Stream package analysis data for multiple packages with chunked processing and concurrency control.
-   * Returns results as they become available via async generator.
+   * Stream package analysis data for multiple packages with chunked processing
+   * and concurrency control. Returns results as they become available via async
+   * generator.
    *
    * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId batchPackageStream
+   *
+   * @quota 100 units
    */
   async *batchPackageStream(
     componentsObj: { components: Array<{ purl: string }> },
@@ -863,14 +988,131 @@ export class SocketSdk {
     const neededMaxListeners = concurrencyLimit * 2
     // Increase abortSignal max listeners count to avoid Node's MaxListenersExceededWarning.
     /* c8 ignore start - EventTarget max listeners adjustment for high concurrency batch operations, difficult to test reliably. */
-    setMaxEventTargetListeners(abortSignal, neededMaxListeners)
+    setMaxEventTargetListeners(getSdkAbortSignal(), neededMaxListeners)
     /* c8 ignore stop */
     const { components } = componentsObj
     const { length: componentsCount } = components
-    const running = new Map<
-      AsyncGenerator<BatchPackageFetchResultType>,
-      Promise<GeneratorStep>
-    >()
+    // ─────────────────────────────────────────────────────────────────────
+    // Why this isn't `Promise.race(running.values())` in a loop.
+    //
+    // The old version kept a Map<generator, promise> of every in-flight
+    // generator step, then each iteration did:
+    //
+    //   await Promise.race(running.values())
+    //
+    // That looks fine, but here's the trap: `Promise.race` attaches a
+    // *fresh* pair of `.then(resolve, reject)` handlers to EVERY promise
+    // it's passed — every single time it's called. Those handlers stay
+    // attached until the promise they're on settles. The race itself
+    // settling doesn't detach them from the losers.
+    //
+    // So imagine 10 generators running, and one finishes quickly while
+    // the other 9 are slow. Each loop iteration:
+    //   - race returns (say) generator #3's step
+    //   - we kick off generator #3's next step → new race over 10 promises
+    //   - BUT the 9 slow ones still have handlers from the PREVIOUS race
+    //     hanging off them, plus the 9 new ones we just added
+    //
+    // After N iterations on a long-running generator's promise, that
+    // single promise has ~N dead handler closures queued on it, each
+    // holding references to closure state. For a batch of thousands of
+    // components this adds up to a real memory leak, and the GC can't
+    // help until every last generator in the pool settles.
+    //
+    // See https://github.com/nodejs/node/issues/17469 for the canonical
+    // write-up, and the `@watchable/unpromise` package for the
+    // one-shot-handler pattern we're adopting here.
+    //
+    // The fix: flip the direction. Instead of the main loop repeatedly
+    // racing the pool, each generator's `.then` pushes its result into a
+    // tiny queue (`completed`), and the main loop awaits one promise at
+    // a time via `takeStep()`. Each generator attaches its handlers
+    // exactly ONCE per step — no stacking, nothing to leak.
+    // ─────────────────────────────────────────────────────────────────────
+
+    // `running` is now just a Set for pool-size accounting (how many
+    // generators are still in flight). We no longer store promises here
+    // because we don't race them — see the block comment above.
+    const running = new Set<AsyncGenerator<BatchPackageFetchResultType>>()
+
+    // Buffer of steps that finished while the main loop wasn't waiting.
+    // Happens when multiple generators resolve in the same microtask tick:
+    // the first one wakes the waiter, the rest land here until takeStep()
+    // drains them.
+    const completed: GeneratorStep[] = []
+
+    // At most ONE waiter at a time, because the main loop awaits one step
+    // per iteration. `undefined` means "nobody is currently awaiting".
+    // When a step arrives and a waiter exists, we hand it the step and
+    // clear the slot. When a step arrives and no waiter exists, we queue
+    // it in `completed` above.
+    let waiter:
+      | {
+          reject: (err: unknown) => void
+          resolve: (step: GeneratorStep) => void
+        }
+      | undefined
+
+    // If a generator rejects while nobody is awaiting, we stash the error
+    // here so the NEXT takeStep() call can surface it. We only keep the
+    // first error (matches the old Promise.race behavior — first rejection
+    // wins, later ones are swallowed). Wrapped in an object so we can
+    // distinguish "no error" (undefined) from "error was literally
+    // undefined" (a `{ err: undefined }` object).
+    let pendingError: { err: unknown } | undefined
+
+    // Called from a generator's `.then` success path. Two cases:
+    //   1. The main loop is parked in takeStep() → wake it directly.
+    //   2. The main loop is busy → buffer the step for later.
+    // Either way, `.then` fires exactly once per generator step, so no
+    // handlers pile up on long-lived promises.
+    const deliverStep = (step: GeneratorStep) => {
+      if (waiter) {
+        // Snapshot + clear before calling resolve, in case resolve
+        // synchronously triggers another deliverStep/takeStep cycle and
+        // we don't want to hand the next step to a stale waiter.
+        const w = waiter
+        waiter = undefined
+        w.resolve(step)
+      } else {
+        completed.push(step)
+      }
+    }
+
+    // Mirror of deliverStep for the rejection path. Same snapshot-then-
+    // clear dance. If no waiter and no prior pendingError, remember this
+    // one so the next takeStep() can throw it.
+    const deliverError = (err: unknown) => {
+      if (waiter) {
+        const w = waiter
+        waiter = undefined
+        w.reject(err)
+      } else if (!pendingError) {
+        pendingError = { err }
+      }
+    }
+
+    // The main loop's only way to wait for progress. Priority:
+    //   1. Surface any stashed error immediately (fail-fast).
+    //   2. Return a buffered step if one is queued (no await needed —
+    //      `Promise.resolve(x)` still yields a microtask, but no new
+    //      handler chains get attached to long-lived promises).
+    //   3. Otherwise register ourselves as THE waiter and park on a
+    //      fresh promise. Because only one slot exists, there's never
+    //      more than one handler outstanding.
+    const takeStep = (): Promise<GeneratorStep> => {
+      if (pendingError) {
+        const { err } = pendingError
+        pendingError = undefined
+        return Promise.reject(err)
+      }
+      if (completed.length) {
+        return Promise.resolve(completed.shift()!)
+      }
+      const { promise, reject, resolve } = promiseWithResolvers<GeneratorStep>()
+      waiter = { reject, resolve }
+      return promise
+    }
     let index = 0
     const enqueueGen = () => {
       if (index >= componentsCount) {
@@ -885,20 +1127,20 @@ export class SocketSdk {
       continueGen(generator)
       index += chunkSize
     }
+    // Kick off (or continue) a single generator. The key detail: we
+    // attach `.then` to the `.next()` promise EXACTLY ONCE. That promise
+    // will settle once, our handlers fire once, and nothing else is ever
+    // chained on top of it. This is the whole point of the refactor —
+    // no `Promise.race` loop means no re-attaching handlers every tick.
     const continueGen = (
       generator: AsyncGenerator<BatchPackageFetchResultType>,
     ) => {
-      const {
-        promise,
-        reject: rejectFn,
-        resolve: resolveFn,
-      } = promiseWithResolvers<GeneratorStep>()
-      running.set(generator, promise)
+      running.add(generator)
       void generator
         .next()
         .then(
-          iteratorResult => resolveFn({ generator, iteratorResult }),
-          rejectFn,
+          iteratorResult => deliverStep({ generator, iteratorResult }),
+          deliverError,
         )
     }
     // Start initial batch of generators.
@@ -907,9 +1149,7 @@ export class SocketSdk {
     }
     while (running.size > 0) {
       // eslint-disable-next-line no-await-in-loop
-      const { generator, iteratorResult }: GeneratorStep = await Promise.race(
-        running.values(),
-      )
+      const { generator, iteratorResult }: GeneratorStep = await takeStep()
       running.delete(generator)
       // Yield the value if one is given, even when done:true.
       if (iteratorResult.value) {
@@ -929,15 +1169,19 @@ export class SocketSdk {
    * Check packages for malware and security alerts.
    *
    * For small sets (≤ MAX_FIREWALL_COMPONENTS), uses parallel firewall API
-   * requests which return full artifact data including score and alert details.
+   * requests which return full artifact data including score and alert
+   * details.
    *
    * For larger sets, uses the batch PURL API for efficiency.
    *
    * Both paths normalize alerts through publicPolicy and only return
    * malware-relevant results.
    *
-   * @param components - Array of package URLs to check
+   * @param components - Array of package URLs to check.
+   *
    * @returns Normalized results with policy-filtered alerts per package
+   *
+   * @operationId none
    */
   async checkMalware(
     components: Array<{ purl: string }>,
@@ -977,15 +1221,23 @@ export class SocketSdk {
         const response = await createGetRequest(
           SOCKET_FIREWALL_API_URL,
           urlPath,
-          { ...this.#reqOptions, headers: publicHeaders },
+          {
+            ...this.#reqOptions,
+            headers: publicHeaders,
+          },
         )
-        if (!isResponseOk(response)) return undefined
+        if (!isResponseOk(response)) {
+          return undefined
+        }
         const json = await getResponseJson(response)
         return json as unknown as SocketArtifact
       }),
     )
-    for (const settled of results) {
-      if (settled.status === 'rejected' || !settled.value) continue
+    for (let i = 0, { length } = results; i < length; i += 1) {
+      const settled = results[i]!
+      if (settled.status === 'rejected' || !settled.value) {
+        continue
+      }
       packages.push(SocketSdk.#normalizeArtifact(settled.value, publicPolicy))
     }
     return {
@@ -1015,8 +1267,9 @@ export class SocketSdk {
       }
     }
     const packages: MalwareCheckPackage[] = []
-    for (const artifact of result.data as SocketArtifact[]) {
-      packages.push(SocketSdk.#normalizeArtifact(artifact, publicPolicy))
+    const artifacts = result.data as SocketArtifact[]
+    for (let i = 0, { length } = artifacts; i < length; i += 1) {
+      packages.push(SocketSdk.#normalizeArtifact(artifacts[i]!, publicPolicy))
     }
     return {
       cause: undefined,
@@ -1036,7 +1289,9 @@ export class SocketSdk {
   ): MalwareCheckPackage {
     const alerts: MalwareCheckAlert[] = []
     if (artifact.alerts) {
-      for (const alert of artifact.alerts) {
+      const artifactAlerts = artifact.alerts
+      for (let i = 0, { length } = artifactAlerts; i < length; i += 1) {
+        const alert = artifactAlerts[i]!
         const action = policy
           ? (policy.get(alert.type) ?? 'ignore')
           : (alert.action ?? 'ignore')
@@ -1109,7 +1364,7 @@ export class SocketSdk {
         invalidPaths.length > 3
           ? `\n  ... and ${invalidPaths.length - 3} more`
           : ''
-      console.warn(
+      logger.warn(
         `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
           '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
           '→ Try: Run installation command to ensure files are accessible.',
@@ -1172,35 +1427,48 @@ export class SocketSdk {
    * Uploads project manifest files and initiates full security analysis.
    * Returns scan metadata with guaranteed required fields.
    *
-   * @param orgSlug - Organization identifier
-   * @param filepaths - Array of file paths to upload (package.json, package-lock.json, etc.)
-   * @param options - Scan configuration including repository, branch, and commit details
-   * @returns Full scan metadata including ID and URLs
+   * Transparently attempts the v1 content-addressed blob-cache path first; that
+   * attempt may issue additional HTTP requests (manifest post, blob uploads)
+   * before the scan is created, observable through the `onRequest`/`onResponse`
+   * hooks, before falling back to the v0 multipart upload.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.createFullScan('my-org',
-   *   ['package.json', 'package-lock.json'],
-   *   {
-   *     repo: 'my-repo',
-   *     branch: 'main',
-   *     commit_message: 'Update dependencies',
-   *     commit_hash: 'abc123',
-   *     pathsRelativeTo: './my-project'
-   *   }
-   * )
+   *   ;```typescript
+   *   const result = await sdk.createFullScan(
+   *     'my-org',
+   *     ['package.json', 'package-lock.json'],
+   *     {
+   *       repo: 'my-repo',
+   *       branch: 'main',
+   *       commit_message: 'Update dependencies',
+   *       commit_hash: 'abc123',
+   *       pathsRelativeTo: './my-project',
+   *     },
+   *   )
    *
-   * if (result.success) {
-   *   console.log('Scan ID:', result.data.id)
-   *   console.log('Report URL:', result.data.html_report_url)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Scan ID:', result.data.id)
+   *     console.log('Report URL:', result.data.html_report_url)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param filepaths - Array of file paths to upload (package.json,
+   *   package-lock.json, etc.)
+   * @param options - Scan configuration including repository, branch, and
+   *   commit details.
+   *
+   * @returns Full scan metadata including ID and URLs
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:create
    *
    * @see https://docs.socket.dev/reference/createorgfullscan
-   * @apiEndpoint POST /orgs/{org_slug}/full-scans
-   * @quota 0 units
-   * @scopes full-scans:create
-   * @throws {Error} When server returns 5xx status codes
    */
   async createFullScan(
     orgSlug: string,
@@ -1243,7 +1511,7 @@ export class SocketSdk {
         invalidPaths.length > 3
           ? `\n  ... and ${invalidPaths.length - 3} more`
           : ''
-      console.warn(
+      logger.warn(
         `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
           '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
           '→ Try: Run installation command to ensure files are accessible.',
@@ -1281,6 +1549,19 @@ export class SocketSdk {
       } as StrictErrorResult
     }
 
+    // Try the v1 content-addressed manifest flow first; every failure mode
+    // (unavailable route, unrepresentable path, retry exhaustion) falls back
+    // to the v0 multipart upload below rather than surfacing to the caller.
+    const v1Result = await this.#tryCreateFullScanViaManifest(
+      orgSlug,
+      validPaths,
+      basePath,
+      queryParams as QueryParams,
+    )
+    if (v1Result) {
+      return v1Result
+    }
+
     // Continue with validated files.
     try {
       const data = await this.#executeWithRetry(
@@ -1314,37 +1595,378 @@ export class SocketSdk {
   }
 
   /**
-   * Create a diff scan from two full scan IDs.
-   * Compares two existing full scans to identify changes.
+   * Attempt `createFullScan` via the v1 content-addressed manifest flow.
+   * Returns the v0-shaped success envelope on a 201, or undefined when the
+   * caller should fall back to the v0 multipart upload — an unavailable v1
+   * route, a path the manifest can't represent, a genuine request error, or
+   * retry exhaustion all fall back rather than surfacing to the caller, so
+   * `createFullScan`'s caller-visible behavior never regresses.
+   */
+  async #tryCreateFullScanViaManifest(
+    orgSlug: string,
+    validPaths: string[],
+    basePath: string,
+    queryParams: QueryParams,
+  ): Promise<FullScanResult | undefined> {
+    if (this.#v1FullScansUnavailable) {
+      return undefined
+    }
+    const v1BaseUrl = deriveApiV1BaseUrl(this.#baseUrl)
+    if (v1BaseUrl === undefined) {
+      return undefined
+    }
+    // The v1 body schema is `additionalProperties: false` — integration-linked
+    // scans have no v1 equivalent yet, so they stay on v0.
+    if (
+      queryParams['integration_type'] !== undefined ||
+      queryParams['integration_org_slug'] !== undefined
+    ) {
+      return undefined
+    }
+
+    try {
+      const assembled = await assembleManifest(basePath, validPaths)
+      if (assembled.skipped.length > 0 || assembled.entries.length === 0) {
+        debugLog(
+          'createFullScan:v1',
+          `manifest cannot represent every path (${assembled.skipped.length} skipped) — falling back to v0`,
+        )
+        return undefined
+      }
+
+      const branch = queryParams['branch'] as string | undefined
+      const commitHash = queryParams['commit_hash'] as string | undefined
+      const commitMessage = queryParams['commit_message'] as string | undefined
+      const committersRaw = queryParams['committers'] as
+        | string
+        | string[]
+        | undefined
+      const makeDefaultBranch = queryParams['make_default_branch'] as
+        | boolean
+        | undefined
+      const pullRequestRaw = queryParams['pull_request'] as
+        | number
+        | string
+        | undefined
+      const repo = queryParams['repo'] as string
+      const scanType = queryParams['scan_type'] as string | undefined
+      const setAsPendingHead = queryParams['set_as_pending_head'] as
+        | boolean
+        | undefined
+      const tmp = queryParams['tmp'] as boolean | undefined
+      const workspace = queryParams['workspace'] as string | undefined
+
+      // `committers` is documented as a single string, but callers casting
+      // options `as any` (e.g. socket-cli) may pass an array through — accept
+      // either shape and drop non-string/empty entries.
+      const committers =
+        committersRaw === undefined
+          ? undefined
+          : (Array.isArray(committersRaw)
+              ? committersRaw
+              : [committersRaw]
+            ).filter(
+              (entry): entry is string =>
+                typeof entry === 'string' && entry.length > 0,
+            )
+
+      // `pull_request` may arrive as a number, a numeric string (socket-cli
+      // sends `String(pullRequest)`), or `0` (the no-PR sentinel). The v1
+      // schema requires a minimum of 1, so only forward a safe integer ≥ 1 —
+      // anything else (including 0) is omitted rather than shipping a request
+      // that's guaranteed to 400 and pay the v0 fallback tax.
+      const pullRequestNum =
+        typeof pullRequestRaw === 'string'
+          ? Number(pullRequestRaw)
+          : pullRequestRaw
+      const pullRequest =
+        pullRequestNum !== undefined &&
+        Number.isSafeInteger(pullRequestNum) &&
+        pullRequestNum >= 1
+          ? pullRequestNum
+          : undefined
+
+      const params: CreateFullScanFromManifestParams = {
+        ...(branch !== undefined ? { branch } : {}),
+        ...(commitHash !== undefined ? { commit_hash: commitHash } : {}),
+        ...(commitMessage !== undefined
+          ? { commit_message: commitMessage }
+          : {}),
+        ...(committers !== undefined ? { committers } : {}),
+        ...(tmp !== undefined ? { ephemeral: tmp } : {}),
+        ...(makeDefaultBranch !== undefined
+          ? { make_default_branch: makeDefaultBranch }
+          : {}),
+        ...(pullRequest !== undefined ? { pull_request: pullRequest } : {}),
+        repo,
+        ...(scanType !== undefined ? { scan_type: scanType } : {}),
+        ...(setAsPendingHead !== undefined
+          ? { set_as_pending_head: setAsPendingHead }
+          : {}),
+        ...(workspace !== undefined ? { workspace } : {}),
+      }
+
+      const entriesByRelPath = new Map(
+        assembled.entries.map(entry => [entry.relPath, entry]),
+      )
+
+      let previousMissingHashes: Set<string> | undefined
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const result = await this.createFullScanFromManifest(
+          orgSlug,
+          assembled.manifest,
+          params,
+        )
+
+        if (!result.success) {
+          if (result.status === 404) {
+            this.#v1FullScansUnavailable = true
+            debugLog(
+              'createFullScan:v1',
+              `v1 full-scans route is unavailable (404) — memoizing and falling back to v0: ${result.error}`,
+            )
+          } else {
+            debugLog(
+              'createFullScan:v1',
+              `v1 full-scans create failed (status ${result.status}) — falling back to v0: ${result.error}`,
+            )
+          }
+          return undefined
+        }
+
+        if (result.status === 201) {
+          const created = result.data
+          // Mirror the exact key set the deployed v0 create endpoint's
+          // schema serializer emits (additionalProperties: false): fields
+          // known from the v1 body, fields synthesized from this call's own
+          // arguments, and schema defaults (null for nullable, '' for
+          // non-nullable string) for everything else. See openapi.json's
+          // `CreateOrgFullScan` 201 schema for the full 25-key set.
+          // oxlint-disable-next-line socket/prefer-undefined-over-null -- external API requirement: mirrors the v0 wire contract's literal JSON `null` schema default for an unset nullable field, not an internal unset sentinel.
+          const WIRE_NULL: null = null
+          const v0Shaped = {
+            api_url: WIRE_NULL,
+            branch: created.branch,
+            commit_hash: created.commit_hash,
+            commit_message: created.commit_message,
+            committers: created.committers,
+            created_at: created.created_at,
+            html_report_url: created.html_report_url,
+            html_url: WIRE_NULL,
+            id: created.id,
+            integration_branch_url: WIRE_NULL,
+            integration_commit_url: WIRE_NULL,
+            integration_pull_request_url: WIRE_NULL,
+            integration_repo_url: WIRE_NULL,
+            integration_type: WIRE_NULL,
+            organization_id: created.organization_id,
+            organization_slug: orgSlug,
+            pull_request: created.pull_request,
+            repo,
+            repository_id: created.repository_id,
+            repository_slug: repo,
+            scan_state: WIRE_NULL,
+            scan_type: created.scan_type,
+            unmatchedFiles: created.unsupported_files.map(f => f.path),
+            updated_at: created.updated_at,
+            workspace: workspace ?? '',
+          }
+          return {
+            cause: undefined,
+            data: v0Shaped,
+            error: undefined,
+            status: 200,
+            success: true,
+          }
+        }
+
+        const { missing } = result.data
+        const missingHashes = new Set(missing.map(m => m.hash))
+        const previous = previousMissingHashes
+        if (
+          previous !== undefined &&
+          missingHashes.size === previous.size &&
+          Array.from(missingHashes).every(hash => previous.has(hash))
+        ) {
+          debugLog(
+            'createFullScan:v1',
+            'no progress across manifest retries (same blobs still missing) — falling back to v0',
+          )
+          return undefined
+        }
+        previousMissingHashes = missingHashes
+
+        const missingEntries: ManifestLocalEntry[] = []
+        for (let i = 0, { length } = missing; i < length; i += 1) {
+          const missingBlob = missing[i]!
+          const entry = entriesByRelPath.get(missingBlob.path)
+          if (!entry) {
+            debugLog(
+              'createFullScan:v1',
+              `server reported a missing blob with no local match ("${missingBlob.path}") — falling back to v0`,
+            )
+            return undefined
+          }
+          missingEntries.push(entry)
+        }
+
+        const uploadResult = await this.uploadBlobs(
+          orgSlug,
+          missingEntries.map(entry => ({
+            hash: entry.hash,
+            localPath: entry.absPath,
+            name: entry.relPath,
+          })),
+        )
+        if (!uploadResult.success) {
+          debugLog(
+            'createFullScan:v1',
+            `blob upload failed (status ${uploadResult.status}) — falling back to v0: ${uploadResult.error}`,
+          )
+          return undefined
+        }
+      }
+
+      debugLog(
+        'createFullScan:v1',
+        'exhausted manifest retry attempts without a 201 — falling back to v0',
+      )
+      return undefined
+    } catch (e) {
+      debugLog(
+        'createFullScan:v1',
+        `unexpected error in the v1 manifest flow — falling back to v0: ${getErrorMessage(e)}`,
+      )
+      return undefined
+    }
+  }
+
+  /**
+   * Create a full scan from a pre-built content-addressed manifest (v1 API,
+   * internal preview — hidden from the public OpenAPI spec). A 201 means the
+   * scan was created outright; a 202 means one or more manifest entries are
+   * unknown to the org's blob store — upload the blobs named in
+   * `data.missing` via `uploadBlobs`, then re-post the same manifest.
    *
-   * @param orgSlug - Organization identifier
-   * @param options - Diff scan creation options
-   * @param options.after - ID of the after/head full scan (newer)
-   * @param options.before - ID of the before/base full scan (older)
-   * @param options.description - Description of the diff scan
-   * @param options.external_href - External URL to associate with the diff scan
-   * @param options.merge - Set true for merged commits, false for open PR diffs
-   * @returns Diff scan details
+   * @param orgSlug - Organization identifier.
+   * @param manifest - Content-addressed manifest (see `assembleManifest`).
+   * @param params - Scan metadata; only defined keys are sent.
+   *
+   * @returns 201 full-scan details, or 202 with the blob-presence breakdown
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans (v1)
+   *
+   * @operationId none
+   */
+  async createFullScanFromManifest(
+    orgSlug: string,
+    manifest: FullScanManifest,
+    params: CreateFullScanFromManifestParams,
+  ): Promise<CreateFullScanFromManifestResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          v1BaseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/full-scans`,
+          { manifest, ...params },
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(
+            res,
+            '',
+            `${v1BaseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans`,
+          )
+        }
+        return res
+      })
+      const data = await getResponseJson(response)
+      if (response.status === 202) {
+        return {
+          cause: undefined,
+          data: data as FullScanV1PendingData,
+          error: undefined,
+          status: 202,
+          success: true,
+        }
+      }
+      return {
+        cause: undefined,
+        data: data as FullScanV1CreatedData,
+        error: undefined,
+        status: 201,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Create a diff scan from two full scan IDs. Compares two existing full scans
+   * to identify changes.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.createOrgDiffScanFromIds('my-org', {
-   *   before: 'scan-id-1',
-   *   after: 'scan-id-2',
-   *   description: 'Compare versions',
-   *   merge: false
-   * })
+   *   ;```typescript
+   *   const result = await sdk.createOrgDiffScanFromIds('my-org', {
+   *     before: 'scan-id-1',
+   *     after: 'scan-id-2',
+   *     description: 'Compare versions',
+   *     merge: false,
+   *   })
    *
-   * if (result.success) {
-   *   console.log('Diff scan created:', result.data.diff_scan.id)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Diff scan created:', result.data.diff_scan.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Diff scan creation options.
+   * @param options.after - ID of the after/head full scan (newer)
+   * @param options.before - ID of the before/base full scan (older)
+   * @param options.description - Description of the diff scan.
+   * @param options.external_href - External URL to associate with the diff
+   *   scan.
+   * @param options.merge - Set true for merged commits, false for open PR
+   *   diffs.
+   * @param options.on_duplicate - Set to "redirect" to receive a 302 redirect
+   *   to the existing diff scan instead of a 409 error when a duplicate is
+   *   detected.
+   *
+   * @returns Diff scan details
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-ids
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:create, full-scans:list
    *
    * @see https://docs.socket.dev/reference/createorgdiffscanfromids
-   * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-ids
-   * @quota 0 units
-   * @scopes diff-scans:create, full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async createOrgDiffScanFromIds(
     orgSlug: string,
@@ -1354,6 +1976,7 @@ export class SocketSdk {
       description?: string | undefined
       external_href?: string | undefined
       merge?: boolean | undefined
+      on_duplicate?: string | undefined
     },
   ): Promise<SocketSdkResult<'createOrgDiffScanFromIds'>> {
     try {
@@ -1379,9 +2002,11 @@ export class SocketSdk {
    * Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
    * Uploads and scans a compressed archive of project files.
    *
-   * @param orgSlug - Organization identifier
-   * @param archivePath - Path to the archive file to upload
-   * @param options - Scan configuration options including repo, branch, and metadata
+   * @param orgSlug - Organization identifier.
+   * @param archivePath - Path to the archive file to upload.
+   * @param options - Scan configuration options including repo, branch, and
+   *   metadata.
+   *
    * @returns Created full scan details with scan ID and status
    *
    * @throws {Error} When server returns 5xx status codes or file cannot be read
@@ -1432,11 +2057,13 @@ export class SocketSdk {
   }
 
   /**
-   * Create a new webhook for an organization.
-   * Webhooks allow you to receive HTTP POST notifications when specific events occur.
+   * Create a new webhook for an organization. Webhooks allow you to receive
+   * HTTP POST notifications when specific events occur.
    *
-   * @param orgSlug - Organization identifier
-   * @param webhookData - Webhook configuration including name, URL, secret, and events
+   * @param orgSlug - Organization identifier.
+   * @param webhookData - Webhook configuration including name, URL, secret, and
+   *   events.
+   *
    * @returns Created webhook details including webhook ID
    *
    * @throws {Error} When server returns 5xx status codes
@@ -1477,35 +2104,40 @@ export class SocketSdk {
    *
    * Registers a repository for monitoring and security scanning.
    *
-   * @param orgSlug - Organization identifier
-   * @param repoSlug - Repository name/slug
-   * @param params - Additional repository configuration
-   * @param params.archived - Whether the repository is archived
-   * @param params.default_branch - Default branch of the repository
-   * @param params.description - Description of the repository
-   * @param params.homepage - Homepage URL of the repository
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.createRepository('my-org', 'my-repo', {
+   *     description: 'My project repository',
+   *     homepage: 'https://example.com',
+   *     visibility: 'private',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('Repository created:', result.data.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository name/slug.
+   * @param params - Additional repository configuration.
+   * @param params.archived - Whether the repository is archived.
+   * @param params.default_branch - Default branch of the repository.
+   * @param params.description - Description of the repository.
+   * @param params.homepage - Homepage URL of the repository.
    * @param params.visibility - Visibility setting ('public' or 'private')
-   * @param params.workspace - Workspace of the repository
+   * @param params.workspace - Workspace of the repository.
+   *
    * @returns Created repository details
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.createRepository('my-org', 'my-repo', {
-   *   description: 'My project repository',
-   *   homepage: 'https://example.com',
-   *   visibility: 'private'
-   * })
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Repository created:', result.data.id)
-   * }
-   * ```
+   * @apiEndpoint POST /orgs/{org_slug}/repos
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
    *
    * @see https://docs.socket.dev/reference/createorgrepo
-   * @apiEndpoint POST /orgs/{org_slug}/repos
-   * @quota 0 units
-   * @scopes repo:write
-   * @throws {Error} When server returns 5xx status codes
    */
   async createRepository(
     orgSlug: string,
@@ -1556,27 +2188,35 @@ export class SocketSdk {
   /**
    * Create a new repository label for an organization.
    *
-   * Labels can be used to group and organize repositories and apply security/license policies.
-   *
-   * @param orgSlug - Organization identifier
-   * @param labelData - Label configuration (must include name property)
-   * @returns Created label with guaranteed id and name fields
+   * Labels can be used to group and organize repositories and apply
+   * security/license policies.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.createRepositoryLabel('my-org', { name: 'production' })
+   *   ;```typescript
+   *   const result = await sdk.createRepositoryLabel('my-org', {
+   *     name: 'production',
+   *   })
    *
-   * if (result.success) {
-   *   console.log('Label created:', result.data.id)
-   *   console.log('Label name:', result.data.name)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Label created:', result.data.id)
+   *     console.log('Label name:', result.data.name)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelData - Label configuration (must include name property)
+   *
+   * @returns Created label with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos/labels
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:create
    *
    * @see https://docs.socket.dev/reference/createorgrepolabel
-   * @apiEndpoint POST /orgs/{org_slug}/repos/labels
-   * @quota 0 units
-   * @scopes repo-label:create
-   * @throws {Error} When server returns 5xx status codes
    */
   async createRepositoryLabel(
     orgSlug: string,
@@ -1619,24 +2259,29 @@ export class SocketSdk {
    *
    * Permanently removes scan data and results.
    *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier to delete
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.deleteFullScan('my-org', 'scan_123')
+   *
+   *   if (result.success) {
+   *     console.log('Scan deleted successfully')
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier to delete.
+   *
    * @returns Success confirmation
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.deleteFullScan('my-org', 'scan_123')
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Scan deleted successfully')
-   * }
-   * ```
+   * @apiEndpoint DELETE /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:delete
    *
    * @see https://docs.socket.dev/reference/deleteorgfullscan
-   * @apiEndpoint DELETE /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 0 units
-   * @scopes full-scans:delete
-   * @throws {Error} When server returns 5xx status codes
    */
   async deleteFullScan(
     orgSlug: string,
@@ -1673,8 +2318,46 @@ export class SocketSdk {
   }
 
   /**
-   * Delete a diff scan from an organization.
-   * Permanently removes diff scan data and results.
+   * Delete an alert resolution by UUID. Once deleted, alerts previously
+   * hidden by this resolution reappear after the next org snapshot.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param uuid - UUID of the alert resolution to delete.
+   *
+   * @returns Success confirmation
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/alerts/resolutions/{uuid}
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:delete
+   */
+  async deleteOrgAlertResolution(
+    orgSlug: string,
+    uuid: string,
+  ): Promise<SocketSdkResult<'deleteOrgAlertResolution'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgAlertResolution'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgAlertResolution'>(e)
+    }
+  }
+
+  /**
+   * Delete a diff scan from an organization. Permanently removes diff scan data
+   * and results.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1700,11 +2383,12 @@ export class SocketSdk {
   }
 
   /**
-   * Delete a webhook from an organization.
-   * This will stop all future webhook deliveries to the webhook URL.
+   * Delete a webhook from an organization. This will stop all future webhook
+   * deliveries to the webhook URL.
    *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to delete
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to delete.
+   *
    * @returns Success status
    *
    * @throws {Error} When server returns 5xx status codes
@@ -1735,25 +2419,30 @@ export class SocketSdk {
    *
    * Removes repository monitoring and associated scan data.
    *
-   * @param orgSlug - Organization identifier
-   * @param repoSlug - Repository slug/name to delete
-   * @param options - Optional parameters including workspace
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.deleteRepository('my-org', 'old-repo')
+   *
+   *   if (result.success) {
+   *     console.log('Repository deleted')
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name to delete.
+   * @param options - Optional parameters including workspace.
+   *
    * @returns Success confirmation
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.deleteRepository('my-org', 'old-repo')
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Repository deleted')
-   * }
-   * ```
+   * @apiEndpoint DELETE /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
    *
    * @see https://docs.socket.dev/reference/deleteorgrepo
-   * @apiEndpoint DELETE /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 0 units
-   * @scopes repo:write
-   * @throws {Error} When server returns 5xx status codes
    */
   async deleteRepository(
     orgSlug: string,
@@ -1800,26 +2489,32 @@ export class SocketSdk {
   /**
    * Delete a repository label from an organization.
    *
-   * Removes label and all its associations (repositories, security policy, license policy, etc.).
-   *
-   * @param orgSlug - Organization identifier
-   * @param labelId - Label identifier
-   * @returns Deletion confirmation
+   * Removes label and all its associations (repositories, security policy,
+   * license policy, etc.).
    *
    * @example
-   * ```typescript
-   * const result = await sdk.deleteRepositoryLabel('my-org', 'label-id-123')
+   *   ;```typescript
+   *   const result = await sdk.deleteRepositoryLabel('my-org', 'label-id-123')
    *
-   * if (result.success) {
-   *   console.log('Label deleted:', result.data.status)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Label deleted:', result.data.status)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   *
+   * @returns Deletion confirmation
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:delete
    *
    * @see https://docs.socket.dev/reference/deleteorgrepolabel
-   * @apiEndpoint DELETE /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 0 units
-   * @scopes repo-label:delete
-   * @throws {Error} When server returns 5xx status codes
    */
   async deleteRepositoryLabel(
     orgSlug: string,
@@ -1858,13 +2553,15 @@ export class SocketSdk {
   /**
    * Download full scan files as a tar archive.
    *
-   * Streams the full scan file contents to the specified output path as a tar file.
-   * Includes size limit enforcement to prevent excessive disk usage.
+   * Streams the full scan file contents to the specified output path as a tar
+   * file. Includes size limit enforcement to prevent excessive disk usage.
    *
-   * @param orgSlug - Organization identifier
-   * @param fullScanId - Full scan identifier
-   * @param outputPath - Local file path to write the tar archive
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan identifier.
+   * @param outputPath - Local file path to write the tar archive.
+   *
    * @returns Download result with success/error status
+   *
    * @throws {Error} When server returns 5xx status codes
    */
   async downloadOrgFullScanFilesAsTar(
@@ -1872,7 +2569,7 @@ export class SocketSdk {
     fullScanId: string,
     outputPath: string,
   ): Promise<SocketSdkResult<'downloadOrgFullScanFilesAsTar'>> {
-    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files.tar`
+    const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/files/tar`
     try {
       const res = await this.#executeWithRetry(async () => {
         const response = await httpRequest(url, {
@@ -1888,14 +2585,13 @@ export class SocketSdk {
         return response
       })
 
-      // Stream response directly to file.
+      // Stream response directly to file. Use pipeline() so errors from the
+      // source response stream propagate (a bare .pipe() leaves the source
+      // without an 'error' listener and crashes the process on network
+      // failure).
       const { createWriteStream } = await import('node:fs')
-      await new Promise<void>((resolve, reject) => {
-        const ws = createWriteStream(outputPath)
-        ws.on('error', reject)
-        ws.on('close', resolve)
-        res.rawResponse!.pipe(ws)
-      })
+      const { pipeline } = await import('node:stream/promises')
+      await pipeline(res.rawResponse!, createWriteStream(outputPath))
 
       return this.#handleApiSuccess<'downloadOrgFullScanFilesAsTar'>(res)
     } catch (e) {
@@ -1904,31 +2600,39 @@ export class SocketSdk {
   }
 
   /**
-   * Download patch file content from Socket blob storage.
-   * Retrieves patched file contents using SSRI hash or hex hash.
+   * Download patch file content from Socket blob storage. Retrieves patched
+   * file contents using SSRI hash or hex hash.
    *
-   * This is a low-level utility method - you'll typically use this after calling
-   * `viewPatch()` to get patch metadata, then download individual patched files.
-   *
-   * @param hash - The blob hash in SSRI (sha256-base64) or hex format
-   * @param options - Optional configuration
-   * @param options.baseUrl - Override blob store URL (for testing)
-   * @returns Promise<string> - The patch file content as UTF-8 string
-   * @throws Error if blob not found (404) or download fails
+   * This is a low-level utility method - you'll typically use this after
+   * calling `viewPatch()` to get patch metadata, then download individual
+   * patched files.
    *
    * @example
-   * ```typescript
-   * const sdk = new SocketSdk('your-api-token')
-   * // First get patch metadata
-   * const patch = await sdk.viewPatch('my-org', 'patch-uuid')
-   * // Then download the actual patched file
-   * const fileContent = await sdk.downloadPatch(patch.files['index.js'].socketBlob)
-   * ```
+   *   ;```typescript
+   *   const sdk = new SocketSdk('your-api-token')
+   *   // First get patch metadata
+   *   const patch = await sdk.viewPatch('my-org', 'patch-uuid')
+   *   // Then download the actual patched file
+   *   const fileContent = await sdk.downloadPatch(
+   *     patch.files['index.js'].socketBlob,
+   *   )
+   *   ```
+   *
+   * @param hash - The blob hash in SSRI (sha256-base64) or hex format.
+   * @param options - Optional configuration.
+   * @param options.baseUrl - Override blob store URL (for testing)
+   *
+   * @returns Promise<string> - The patch file content as UTF-8 string
+   *
+   * @throws Error if blob not found (404) or download fails
+   *
+   * @operationId none
    */
   async downloadPatch(
     hash: string,
     options?: { baseUrl?: string | undefined } | undefined,
   ): Promise<string> {
+    options = { __proto__: null, ...options } as typeof options
     const blobPath = `/blob/${encodeURIComponent(hash)}`
     const blobBaseUrl = options?.baseUrl || SOCKET_PUBLIC_BLOB_STORE_URL
     const url = `${blobBaseUrl}${blobPath}`
@@ -1947,7 +2651,7 @@ export class SocketSdk {
         '→ Verify: The blob hash is correct.',
         '→ Note: Blob URLs may expire after a certain time period.',
       ].join('\n')
-      throw new Error(message)
+      throw new ErrorCtor(message)
     }
     if (res.status !== 200) {
       const message = [
@@ -1959,15 +2663,15 @@ export class SocketSdk {
           ? '→ Try: Retry the download after a short delay.'
           : '→ Verify: The blob hash and URL are correct.',
       ].join('\n')
-      throw new Error(message)
+      throw new ErrorCtor(message)
     }
 
     return res.text()
   }
 
   /**
-   * Export scan results in CycloneDX SBOM format.
-   * Returns Software Bill of Materials compliant with CycloneDX standard.
+   * Export scan results in CycloneDX SBOM format. Returns Software Bill of
+   * Materials compliant with CycloneDX standard.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -1981,7 +2685,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/cdx`,
+              `orgs/${encodeURIComponent(orgSlug)}/export/cdx/${encodeURIComponent(fullScanId)}`,
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -1994,31 +2698,38 @@ export class SocketSdk {
 
   /**
    * Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
-   * Includes patch data and reachability analysis for vulnerability assessment.
-   *
-   * @param orgSlug - Organization identifier
-   * @param id - Full scan or SBOM report ID
-   * @param options - Optional parameters including author, role, and document_id
-   * @returns OpenVEX document with vulnerability exploitability information
+   * Includes patch data and reachability analysis for vulnerability
+   * assessment.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.exportOpenVEX('my-org', 'scan-id', {
-   *   author: 'Security Team',
-   *   role: 'VEX Generator'
-   * })
+   *   ;```typescript
+   *   const result = await sdk.exportOpenVEX('my-org', 'scan-id', {
+   *     author: 'Security Team',
+   *     role: 'VEX Generator',
+   *   })
    *
-   * if (result.success) {
-   *   console.log('VEX Version:', result.data.version)
-   *   console.log('Statements:', result.data.statements.length)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('VEX Version:', result.data.version)
+   *     console.log('Statements:', result.data.statements.length)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param id - Full scan or SBOM report ID.
+   * @param options - Optional parameters including author, role, and
+   *   document_id.
+   *
+   * @returns OpenVEX document with vulnerability exploitability information
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/export/openvex/{id}
+   *
+   * @quota 0 units
+   *
+   * @scopes report:read
    *
    * @see https://docs.socket.dev/reference/exportopenvex
-   * @apiEndpoint GET /orgs/{org_slug}/export/openvex/{id}
-   * @quota 0 units
-   * @scopes report:read
-   * @throws {Error} When server returns 5xx status codes
    */
   async exportOpenVEX(
     orgSlug: string,
@@ -2052,8 +2763,8 @@ export class SocketSdk {
   }
 
   /**
-   * Export scan results in SPDX SBOM format.
-   * Returns Software Bill of Materials compliant with SPDX standard.
+   * Export scan results in SPDX SBOM format. Returns Software Bill of Materials
+   * compliant with SPDX standard.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2067,7 +2778,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/sbom/export/spdx`,
+              `orgs/${encodeURIComponent(orgSlug)}/export/spdx/${encodeURIComponent(fullScanId)}`,
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -2079,11 +2790,19 @@ export class SocketSdk {
   }
 
   /**
-   * Execute a raw GET request to any API endpoint with configurable response type.
-   * Supports both throwing (default) and non-throwing modes.
+   * Execute a raw GET request to any API endpoint with configurable response
+   * type. Supports both throwing (default) and non-throwing modes.
+   *
    * @param urlPath - API endpoint path (e.g., 'organizations')
-   * @param options - Request options including responseType and throws behavior
-   * @returns Raw response, parsed data, or SocketSdkGenericResult based on options
+   * @param options - Request options including responseType and throws
+   *   behavior.
+   *
+   * @returns Raw response, parsed data, or SocketSdkGenericResult based on
+   *   options.
+   *
+   * @operationId getApi
+   *
+   * @quota 0 units
    */
   async getApi<T = HttpResponse>(
     urlPath: string,
@@ -2148,8 +2867,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get list of API tokens for an organization.
-   * Returns organization API tokens with metadata and permissions.
+   * Get list of API tokens for an organization. Returns organization API tokens
+   * with metadata and permissions.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2162,7 +2881,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens`,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens`,
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -2174,8 +2893,8 @@ export class SocketSdk {
   }
 
   /**
-   * Retrieve audit log events for an organization.
-   * Returns chronological log of security and administrative actions.
+   * Retrieve audit log events for an organization. Returns chronological log of
+   * security and administrative actions.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2201,26 +2920,70 @@ export class SocketSdk {
   }
 
   /**
-   * Get details for a specific diff scan.
-   * Returns comparison between two full scans with artifact changes.
+   * Get details for a specific diff scan. Returns comparison between two full
+   * scans with artifact changes.
    *
-   * @throws {Error} When server returns 5xx status codes
+   * Reads from the immutable cached-scan store by default (`cached: true`). On
+   * a cache miss the API returns 202 Accepted and computes the result in the
+   * background; this method polls transparently until the result is ready, so
+   * callers only ever observe the final comparison. Pass `cached: false` to
+   * bypass the cache and live-compute the diff (slower, for debugging). When
+   * `cached` is true the `omit_license_details` option is ignored server-side —
+   * cached results always include license details.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getDiffScanById('my-org', 'diff-scan-id')
+   *
+   *   if (result.success) {
+   *     console.log(result.data.diff_scan.artifacts.added)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param diffScanId - Diff scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.cached - Read cached immutable results (defaults to true).
+   * @param options.omit_license_details - Omit license details (ignored when
+   *   cached).
+   * @param options.omit_unchanged - Omit unchanged artifacts from the response.
+   *
+   * @returns Diff scan comparison with artifact changes
+   *
+   * @throws {Error} When server returns 5xx status codes or polling times out
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getdiffscanbyid
    */
   async getDiffScanById(
     orgSlug: string,
     diffScanId: string,
+    options?:
+      | {
+          cached?: boolean | undefined
+          omit_license_details?: boolean | undefined
+          omit_unchanged?: boolean | undefined
+        }
+      | undefined,
   ): Promise<SocketSdkResult<'getDiffScanById'>> {
+    const { cached = true, ...rest } = { __proto__: null, ...options } as {
+      cached?: boolean | undefined
+    } & QueryParams
+    // Omit the cached param when disabled: an absent param reads as false
+    // server-side, so there's no reason to send cached=false on the wire.
+    const queryParams = {
+      __proto__: null,
+      ...(cached ? { cached: true } : undefined),
+      ...rest,
+    } as QueryParams
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}?${queryToSearchParams(queryParams)}`
     try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/${encodeURIComponent(diffScanId)}`,
-              this.#reqOptionsWithHooks,
-            ),
-          ),
-      )
+      const data = await this.#pollCachedScan(urlPath, diffScanId)
       return this.#handleApiSuccess<'getDiffScanById'>(data)
     } catch (e) {
       return await this.#handleApiError<'getDiffScanById'>(e)
@@ -2228,30 +2991,36 @@ export class SocketSdk {
   }
 
   /**
-   * Get GitHub-flavored markdown comments for a diff scan.
-   * Returns dependency overview and alert comments suitable for pull requests.
-   *
-   * @param orgSlug - Organization identifier
-   * @param diffScanId - Diff scan identifier
-   * @param options - Optional query parameters
-   * @param options.github_installation_id - GitHub installation ID for settings
-   * @returns Diff scan metadata with formatted markdown comments
+   * Get GitHub-flavored markdown comments for a diff scan. Returns dependency
+   * overview and alert comments suitable for pull requests.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getDiffScanGfm('my-org', 'diff-scan-id')
+   *   ;```typescript
+   *   const result = await sdk.getDiffScanGfm('my-org', 'diff-scan-id')
    *
-   * if (result.success) {
-   *   console.log(result.data.dependency_overview_comment)
-   *   console.log(result.data.dependency_alert_comment)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log(result.data.dependency_overview_comment)
+   *     console.log(result.data.dependency_alert_comment)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param diffScanId - Diff scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.github_installation_id - GitHub installation ID for
+   *   settings.
+   *
+   * @returns Diff scan metadata with formatted markdown comments
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm
+   *
+   * @quota 0 units
+   *
+   * @scopes diff-scans:list
    *
    * @see https://docs.socket.dev/reference/getdiffscangfm
-   * @apiEndpoint GET /orgs/{org_slug}/diff-scans/{diff_scan_id}/gfm
-   * @quota 0 units
-   * @scopes diff-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getDiffScanGfm(
     orgSlug: string,
@@ -2278,8 +3047,13 @@ export class SocketSdk {
   /**
    * Retrieve the enabled entitlements for an organization.
    *
-   * This method fetches the organization's entitlements and filters for only the enabled ones, returning their keys. Entitlements represent Socket
+   * This method fetches the organization's entitlements and filters for only
+   * the enabled ones, returning their keys. Entitlements represent Socket
    * Products that the organization has access to use.
+   *
+   * @operationId getEnabledEntitlements
+   *
+   * @quota 0 units
    */
   async getEnabledEntitlements(orgSlug: string): Promise<string[]> {
     const data = await this.#executeWithRetry(
@@ -2303,8 +3077,12 @@ export class SocketSdk {
   /**
    * Retrieve all entitlements for an organization.
    *
-   * This method fetches all entitlements (both enabled and disabled) for
-   * an organization, returning the complete list with their status.
+   * This method fetches all entitlements (both enabled and disabled) for an
+   * organization, returning the complete list with their status.
+   *
+   * @operationId getEntitlements
+   *
+   * @quota 0 units
    */
   async getEntitlements(orgSlug: string): Promise<Entitlement[]> {
     const data = await this.#executeWithRetry(
@@ -2324,44 +3102,69 @@ export class SocketSdk {
   /**
    * Get complete full scan results buffered in memory.
    *
-   * Returns entire scan data as JSON for programmatic processing.
-   * For large scans, consider using streamFullScan() instead.
-   *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier
-   * @returns Complete full scan data including all artifacts
+   * Returns entire scan data as JSON for programmatic processing. For large
+   * scans, consider using streamFullScan() instead.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getFullScan('my-org', 'scan_123')
+   *   ;```typescript
+   *   const result = await sdk.getFullScan('my-org', 'scan_123')
    *
-   * if (result.success) {
+   *   if (result.success) {
    *   console.log('Scan status:', result.data.scan_state)
    *   console.log('Repository:', result.data.repository_slug)
-   * }
-   * ```
+   *   }
+   *   ```
+   *
+   *   Reads from the immutable cached-scan store by default (`cached: true`). On a
+   *   cache miss the API returns 202 Accepted and computes the result in the
+   *   background; this method polls transparently until the result is ready, so
+   *   callers only ever observe the final scan. Pass `cached: false` to bypass the
+   *   cache and live-compute the scan (slower, for debugging).
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   * @param options - Optional query parameters.
+   * @param options.cached - Read cached immutable results (defaults to true).
+   * @param options.include_license_details - Include per-artifact license
+   *   details.
+   * @param options.include_scores - Include score data for each artifact.
+   *
+   * @returns Complete full scan data including all artifacts
+   *
+   * @throws {Error} When server returns 5xx status codes or polling times out
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
    *
    * @see https://docs.socket.dev/reference/getorgfullscan
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 0 units
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getFullScan(
     orgSlug: string,
     scanId: string,
+    options?:
+      | {
+          cached?: boolean | undefined
+          include_license_details?: boolean | undefined
+          include_scores?: boolean | undefined
+        }
+      | undefined,
   ): Promise<FullScanResult | StrictErrorResult> {
+    const { cached = true, ...rest } = { __proto__: null, ...options } as {
+      cached?: boolean | undefined
+    } & QueryParams
+    // Omit the cached param when disabled: an absent param reads as false
+    // server-side, so there's no reason to send cached=false on the wire.
+    const queryParams = {
+      __proto__: null,
+      ...(cached ? { cached: true } : undefined),
+      ...rest,
+    } as QueryParams
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}?${queryToSearchParams(queryParams)}`
     try {
-      const data = await this.#executeWithRetry(
-        async () =>
-          await getResponseJson(
-            await createGetRequest(
-              this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`,
-              this.#reqOptionsWithHooks,
-            ),
-          ),
-      )
+      const data = await this.#pollCachedScan(urlPath, scanId)
       return {
         cause: undefined,
         data: data as FullScanItem,
@@ -2384,28 +3187,34 @@ export class SocketSdk {
   /**
    * Get metadata for a specific full scan.
    *
-   * Returns scan configuration, status, and summary information without full artifact data.
-   * Useful for checking scan status without downloading complete results.
-   *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier
-   * @returns Scan metadata including status and configuration
+   * Returns scan configuration, status, and summary information without full
+   * artifact data. Useful for checking scan status without downloading complete
+   * results.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
+   *   ;```typescript
+   *   const result = await sdk.getFullScanMetadata('my-org', 'scan_123')
    *
-   * if (result.success) {
-   *   console.log('Scan state:', result.data.scan_state)
-   *   console.log('Branch:', result.data.branch)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Scan state:', result.data.scan_state)
+   *     console.log('Branch:', result.data.branch)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   *
+   * @returns Scan metadata including status and configuration
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
    *
    * @see https://docs.socket.dev/reference/getorgfullscanmetadata
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}/metadata
-   * @quota 0 units
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getFullScanMetadata(
     orgSlug: string,
@@ -2443,8 +3252,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get security issues for a specific npm package and version.
-   * Returns detailed vulnerability and security alert information.
+   * Get security issues for a specific npm package and version. Returns
+   * detailed vulnerability and security alert information.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2470,33 +3279,38 @@ export class SocketSdk {
   }
 
   /**
-   * List full scans associated with a specific alert.
-   * Returns paginated full scan references for alert investigation.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Query parameters including alertKey, range, pagination
-   * @returns Paginated array of full scans associated with the alert
+   * List full scans associated with a specific alert. Returns paginated full
+   * scan references for alert investigation.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getOrgAlertFullScans('my-org', {
-   *   alertKey: 'npm/lodash/cve-2021-23337',
-   *   range: '-7d',
-   *   per_page: 50
-   * })
+   *   ;```typescript
+   *   const result = await sdk.getOrgAlertFullScans('my-org', {
+   *     alertKey: 'npm/lodash/cve-2021-23337',
+   *     range: '-7d',
+   *     per_page: 50,
+   *   })
    *
-   * if (result.success) {
-   *   for (const item of result.data.items) {
-   *     console.log('Full Scan ID:', item.fullScanId)
+   *   if (result.success) {
+   *     for (const item of result.data.items) {
+   *       console.log('Full Scan ID:', item.fullScanId)
+   *     }
    *   }
-   * }
-   * ```
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Query parameters including alertKey, range, pagination.
+   *
+   * @returns Paginated array of full scans associated with the alert
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alert-full-scan-search
+   *
+   * @quota 10 units
+   *
+   * @scopes alerts:list
    *
    * @see https://docs.socket.dev/reference/alertfullscans
-   * @apiEndpoint GET /orgs/{org_slug}/alert-full-scan-search
-   * @quota 10 units
-   * @scopes alerts:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getOrgAlertFullScans(
     orgSlug: string,
@@ -2525,11 +3339,96 @@ export class SocketSdk {
   }
 
   /**
-   * List latest alerts for an organization (Beta).
-   * Returns paginated alerts with comprehensive filtering options.
+   * Fetch a single active alert resolution by UUID. Returns the same row
+   * shape as the list endpoint.
    *
-   * @param orgSlug - Organization identifier
-   * @param options - Optional query parameters for pagination and filtering
+   * @param orgSlug - Organization identifier.
+   * @param uuid - UUID of the alert resolution to fetch.
+   *
+   * @returns The requested alert resolution.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alerts/resolutions/{uuid}
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:read
+   */
+  async getOrgAlertResolution(
+    orgSlug: string,
+    uuid: string,
+  ): Promise<SocketSdkResult<'getOrgAlertResolution'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgAlertResolution'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgAlertResolution'>(e)
+    }
+  }
+
+  /**
+   * List active alert resolutions for an organization. Results are
+   * paginated via an opaque cursor and ordered by created_at.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for sort direction and
+   *   pagination.
+   *
+   * @returns Paginated list of alert resolutions with cursor-based
+   * pagination.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/alerts/resolutions
+   *
+   * @quota 1 units
+   *
+   * @scopes alert-resolution:list
+   */
+  async getOrgAlertResolutions(
+    orgSlug: string,
+    options?:
+      | {
+          direction?: string | undefined
+          per_page?: number | undefined
+          startAfterCursor?: string | undefined
+        }
+      | undefined,
+  ): Promise<SocketSdkResult<'getOrgAlertResolutions'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/alerts/resolutions?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgAlertResolutions'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgAlertResolutions'>(e)
+    }
+  }
+
+  /**
+   * List latest alerts for an organization (Beta). Returns paginated alerts
+   * with comprehensive filtering options.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for pagination and filtering.
+   *
    * @returns Paginated list of alerts with cursor-based pagination
    *
    * @throws {Error} When server returns 5xx status codes
@@ -2626,14 +3525,22 @@ export class SocketSdk {
   }
 
   /**
-   * Fetch available fixes for vulnerabilities in a repository or scan.
-   * Returns fix recommendations including version upgrades and update types.
+   * Fetch available fixes for vulnerabilities in a repository or scan. Returns
+   * fix recommendations including version upgrades and update types.
    *
-   * @param orgSlug - Organization identifier
-   * @param options - Fix query options including repo_slug or full_scan_id, vulnerability IDs, and preferences
-   * @returns Fix details for requested vulnerabilities with upgrade recommendations
+   * @param orgSlug - Organization identifier.
+   * @param options - Fix query options including repo_slug or full_scan_id,
+   *   vulnerability IDs, and preferences.
+   * @param options.include_stateful_alert_ids - Set to include a
+   *   statefulAlertIds map (GHSA ID → open stateful alert IDs) in the
+   *   response, org-scoped only.
+   *
+   * @returns Fix details for requested vulnerabilities with upgrade
+   *   recommendations.
    *
    * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId none
    */
   async getOrgFixes(
     orgSlug: string,
@@ -2642,6 +3549,7 @@ export class SocketSdk {
       full_scan_id?: string | undefined
       include_details?: boolean | undefined
       include_responsible_direct_dependencies?: boolean | undefined
+      include_stateful_alert_ids?: boolean | undefined
       minimum_release_age?: string | undefined
       repo_slug?: string | undefined
       vulnerability_ids: string
@@ -2665,8 +3573,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's license policy configuration.
-   * Returns allowed, restricted, and monitored license types.
+   * Get organization's license policy configuration. Returns allowed,
+   * restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2691,8 +3599,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's security policy configuration.
-   * Returns alert rules, severity thresholds, and enforcement settings.
+   * Get organization's security policy configuration. Returns alert rules,
+   * severity thresholds, and enforcement settings.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2717,10 +3625,11 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization's telemetry configuration.
-   * Returns whether telemetry is enabled for the organization.
+   * Get organization's telemetry configuration. Returns whether telemetry is
+   * enabled for the organization.
    *
-   * @param orgSlug - Organization identifier
+   * @param orgSlug - Organization identifier.
+   *
    * @returns Telemetry configuration with enabled status
    *
    * @throws {Error} When server returns 5xx status codes
@@ -2746,8 +3655,39 @@ export class SocketSdk {
   }
 
   /**
-   * Get organization triage settings and status.
-   * Returns alert triage configuration and current state.
+   * List threat-feed items for an organization. Returns recently observed
+   * malicious / suspicious packages, paginated and filterable by ecosystem,
+   * name, version, and review state. Requires an Enterprise plan with the
+   * Threat Feed add-on and the `threat-feed:list` scope.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @quota 1 units
+   */
+  async getOrgThreatFeedItems(
+    orgSlug: string,
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getOrgThreatFeedItems'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-feed?${queryToSearchParams(queryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgThreatFeedItems'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgThreatFeedItems'>(e)
+    }
+  }
+
+  /**
+   * Get organization triage settings and status. Returns alert triage
+   * configuration and current state.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2760,7 +3700,7 @@ export class SocketSdk {
           await getResponseJson(
             await createGetRequest(
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/triage`,
+              `orgs/${encodeURIComponent(orgSlug)}/triage/alerts`,
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -2772,11 +3712,12 @@ export class SocketSdk {
   }
 
   /**
-   * Get details of a specific webhook.
-   * Returns webhook configuration including events, URL, and filters.
+   * Get details of a specific webhook. Returns webhook configuration including
+   * events, URL, and filters.
    *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to retrieve
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to retrieve.
+   *
    * @returns Webhook details
    *
    * @throws {Error} When server returns 5xx status codes
@@ -2803,11 +3744,12 @@ export class SocketSdk {
   }
 
   /**
-   * List all webhooks for an organization.
-   * Supports pagination and sorting options.
+   * List all webhooks for an organization. Supports pagination and sorting
+   * options.
    *
-   * @param orgSlug - Organization identifier
-   * @param options - Optional query parameters for pagination and sorting
+   * @param orgSlug - Organization identifier.
+   * @param options - Optional query parameters for pagination and sorting.
+   *
    * @returns List of webhooks with pagination info
    *
    * @throws {Error} When server returns 5xx status codes
@@ -2841,8 +3783,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get current API quota usage and limits.
-   * Returns remaining requests, rate limits, and quota reset times.
+   * Get current API quota usage and limits. Returns remaining requests, rate
+   * limits, and quota reset times.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2867,8 +3809,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get analytics data for a specific repository.
-   * Returns security metrics, dependency trends, and vulnerability statistics.
+   * Get analytics data for a specific repository. Returns security metrics,
+   * dependency trends, and vulnerability statistics.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -2898,27 +3840,32 @@ export class SocketSdk {
    *
    * Returns repository configuration, monitoring status, and metadata.
    *
-   * @param orgSlug - Organization identifier
-   * @param repoSlug - Repository slug/name
-   * @param options - Optional parameters including workspace
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getRepository('my-org', 'my-repo')
+   *
+   *   if (result.success) {
+   *     console.log('Repository:', result.data.name)
+   *     console.log('Visibility:', result.data.visibility)
+   *     console.log('Default branch:', result.data.default_branch)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name.
+   * @param options - Optional parameters including workspace.
+   *
    * @returns Repository details with configuration
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.getRepository('my-org', 'my-repo')
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Repository:', result.data.name)
-   *   console.log('Visibility:', result.data.visibility)
-   *   console.log('Default branch:', result.data.default_branch)
-   * }
-   * ```
+   * @apiEndpoint GET /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:read
    *
    * @see https://docs.socket.dev/reference/getorgrepo
-   * @apiEndpoint GET /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 0 units
-   * @scopes repo:read
-   * @throws {Error} When server returns 5xx status codes
    */
   async getRepository(
     orgSlug: string,
@@ -2970,26 +3917,31 @@ export class SocketSdk {
    *
    * Returns label configuration, associated repositories, and policy settings.
    *
-   * @param orgSlug - Organization identifier
-   * @param labelId - Label identifier
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.getRepositoryLabel('my-org', 'label-id-123')
+   *
+   *   if (result.success) {
+   *     console.log('Label name:', result.data.name)
+   *     console.log('Associated repos:', result.data.repository_ids)
+   *     console.log('Has security policy:', result.data.has_security_policy)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   *
    * @returns Label details with guaranteed id and name fields
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.getRepositoryLabel('my-org', 'label-id-123')
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Label name:', result.data.name)
-   *   console.log('Associated repos:', result.data.repository_ids)
-   *   console.log('Has security policy:', result.data.has_security_policy)
-   * }
-   * ```
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:list
    *
    * @see https://docs.socket.dev/reference/getorgrepolabel
-   * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 0 units
-   * @scopes repo-label:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async getRepositoryLabel(
     orgSlug: string,
@@ -3026,8 +3978,8 @@ export class SocketSdk {
   }
 
   /**
-   * Get security score for a specific npm package and version.
-   * Returns numerical security rating and scoring breakdown.
+   * Get security score for a specific npm package and version. Returns
+   * numerical security rating and scoring breakdown.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3053,30 +4005,37 @@ export class SocketSdk {
   }
 
   /**
-   * Get list of supported file types for full scan generation.
-   * Returns glob patterns for supported manifest files, lockfiles, and configuration formats.
+   * Get list of supported file types for full scan generation. Returns glob
+   * patterns for supported manifest files, lockfiles, and configuration
+   * formats.
    *
-   * Files whose names match the patterns returned by this endpoint can be uploaded
-   * for report generation. Examples include `package.json`, `package-lock.json`, and `yarn.lock`.
-   *
-   * @param orgSlug - Organization identifier
-   * @returns Nested object with environment and file type patterns
+   * Files whose names match the patterns returned by this endpoint can be
+   * uploaded for report generation. Examples include `package.json`,
+   * `package-lock.json`, and `yarn.lock`.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.getSupportedFiles('my-org')
+   *   ;```typescript
+   *   const result = await sdk.getSupportedFiles('my-org')
    *
-   * if (result.success) {
-   *   console.log('NPM patterns:', result.data.NPM)
-   *   console.log('PyPI patterns:', result.data.PyPI)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('NPM patterns:', result.data.NPM)
+   *     console.log('PyPI patterns:', result.data.PyPI)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns Nested object with environment and file type patterns
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/supported-files
+   *
+   * @quota 0 units
+   *
+   * @scopes No scopes required, but authentication is required
    *
    * @see https://docs.socket.dev/reference/getsupportedfiles
-   * @apiEndpoint GET /orgs/{org_slug}/supported-files
-   * @quota 0 units
-   * @scopes No scopes required, but authentication is required
-   * @throws {Error} When server returns 5xx status codes
    */
   async getSupportedFiles(
     orgSlug: string,
@@ -3099,35 +4058,136 @@ export class SocketSdk {
   }
 
   /**
+   * Get a single threat campaign by ID (v1 API, public route). Same shape as
+   * one item from `listThreatCampaigns`; package PURLs are not inlined —
+   * fetch them via `listThreatCampaignPackages`. Requires an Enterprise plan
+   * with the Threat Feed add-on and the `threat-campaigns:list` token scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param campaignId - Campaign identifier.
+   *
+   * @returns The campaign
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns/{campaign_id} (v1)
+   *
+   * @operationId none
+   */
+  async getThreatCampaign(
+    orgSlug: string,
+    campaignId: string,
+  ): Promise<GetThreatCampaignResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns/${encodeURIComponent(campaignId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaign,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List threat-feed items across all organizations the token can see. Returns
+   * recently observed malicious / suspicious packages, paginated and filterable
+   * by ecosystem, name, version, and review state.
+   *
+   * @deprecated The backend marks the top-level `/threat-feed` route as the
+   *   deprecated form; prefer the org-scoped {@link getOrgThreatFeedItems}.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @quota 1 units
+   */
+  async getThreatFeedItems(
+    queryParams?: QueryParams | undefined,
+  ): Promise<SocketSdkResult<'getThreatFeedItems'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `threat-feed?${queryToSearchParams(queryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getThreatFeedItems'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getThreatFeedItems'>(e)
+    }
+  }
+
+  /**
    * List all full scans for an organization.
    *
-   * Returns paginated list of full scan metadata with guaranteed required fields
-   * for improved TypeScript autocomplete.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Filtering and pagination options
-   * @returns List of full scans with metadata
+   * Returns paginated list of full scan metadata with guaranteed required
+   * fields for improved TypeScript autocomplete.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.listFullScans('my-org', {
-   *   branch: 'main',
-   *   per_page: 50,
-   *   use_cursor: true
-   * })
-   *
-   * if (result.success) {
-   *   result.data.results.forEach(scan => {
-   *     console.log(scan.id, scan.created_at)  // Guaranteed fields
+   *   ;```typescript
+   *   const result = await sdk.listFullScans('my-org', {
+   *     branch: 'main',
+   *     per_page: 50,
+   *     use_cursor: true,
    *   })
-   * }
-   * ```
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(scan => {
+   *       console.log(scan.id, scan.created_at) // Guaranteed fields
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Filtering and pagination options.
+   *
+   * @returns List of full scans with metadata
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
    *
    * @see https://docs.socket.dev/reference/getorgfullscanlist
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans
-   * @quota 0 units
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async listFullScans(
     orgSlug: string,
@@ -3166,25 +4226,29 @@ export class SocketSdk {
   /**
    * List all organizations accessible to the current user.
    *
-   * Returns organization details and access permissions with guaranteed required fields.
+   * Returns organization details and access permissions with guaranteed
+   * required fields.
+   *
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.listOrganizations()
+   *
+   *   if (result.success) {
+   *     result.data.organizations.forEach(org => {
+   *       console.log(org.name, org.slug) // Guaranteed fields
+   *     })
+   *   }
+   *   ```
    *
    * @returns List of organizations with metadata
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.listOrganizations()
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   result.data.organizations.forEach(org => {
-   *     console.log(org.name, org.slug)  // Guaranteed fields
-   *   })
-   * }
-   * ```
+   * @apiEndpoint GET /organizations
+   *
+   * @quota 0 units
    *
    * @see https://docs.socket.dev/reference/getorganizations
-   * @apiEndpoint GET /organizations
-   * @quota 0 units
-   * @throws {Error} When server returns 5xx status codes
    */
   async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult> {
     try {
@@ -3220,8 +4284,8 @@ export class SocketSdk {
   }
 
   /**
-   * List all diff scans for an organization.
-   * Returns paginated list of diff scan metadata and status.
+   * List all diff scans for an organization. Returns paginated list of diff
+   * scan metadata and status.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3248,32 +4312,38 @@ export class SocketSdk {
   /**
    * List all repositories in an organization.
    *
-   * Returns paginated list of repository metadata with guaranteed required fields.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Pagination and filtering options
-   * @returns List of repositories with metadata
+   * Returns paginated list of repository metadata with guaranteed required
+   * fields.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.listRepositories('my-org', {
-   *   per_page: 50,
-   *   sort: 'name',
-   *   direction: 'asc'
-   * })
-   *
-   * if (result.success) {
-   *   result.data.results.forEach(repo => {
-   *     console.log(repo.name, repo.visibility)
+   *   ;```typescript
+   *   const result = await sdk.listRepositories('my-org', {
+   *     per_page: 50,
+   *     sort: 'name',
+   *     direction: 'asc',
    *   })
-   * }
-   * ```
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(repo => {
+   *       console.log(repo.name, repo.visibility)
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Pagination and filtering options.
+   *
+   * @returns List of repositories with metadata
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:list
    *
    * @see https://docs.socket.dev/reference/getorgrepolist
-   * @apiEndpoint GET /orgs/{org_slug}/repos
-   * @quota 0 units
-   * @scopes repo:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async listRepositories(
     orgSlug: string,
@@ -3312,29 +4382,38 @@ export class SocketSdk {
   /**
    * List all repository labels for an organization.
    *
-   * Returns paginated list of labels configured for repository organization and policy management.
-   *
-   * @param orgSlug - Organization identifier
-   * @param options - Pagination options
-   * @returns List of labels with guaranteed id and name fields
+   * Returns paginated list of labels configured for repository organization and
+   * policy management.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.listRepositoryLabels('my-org', { per_page: 50, page: 1 })
-   *
-   * if (result.success) {
-   *   result.data.results.forEach(label => {
-   *     console.log('Label:', label.name)
-   *     console.log('Associated repos:', label.repository_ids?.length || 0)
+   *   ;```typescript
+   *   const result = await sdk.listRepositoryLabels('my-org', {
+   *     per_page: 50,
+   *     page: 1,
    *   })
-   * }
-   * ```
+   *
+   *   if (result.success) {
+   *     result.data.results.forEach(label => {
+   *       console.log('Label:', label.name)
+   *       console.log('Associated repos:', label.repository_ids?.length || 0)
+   *     })
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Pagination options.
+   *
+   * @returns List of labels with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:list
    *
    * @see https://docs.socket.dev/reference/getorgrepolabellist
-   * @apiEndpoint GET /orgs/{org_slug}/repos/labels
-   * @quota 0 units
-   * @scopes repo-label:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async listRepositoryLabels(
     orgSlug: string,
@@ -3371,8 +4450,141 @@ export class SocketSdk {
   }
 
   /**
-   * Create a new API token for an organization.
-   * Generates API token with specified scopes and metadata.
+   * List package PURLs affected by a single threat campaign (v1 API, public
+   * route), cursor-paginated. Pass the previous response's `endCursor` back
+   * as `options.cursor` to fetch the next page. Requires an Enterprise plan
+   * with the Threat Feed add-on and the `threat-campaigns:list` token scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param campaignId - Campaign identifier.
+   * @param options - Pagination options (`per_page`, `cursor`).
+   *
+   * @returns `{ items, endCursor }` — opaque PURL strings and the next cursor
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns/{campaign_id}/packages (v1)
+   *
+   * @operationId none
+   */
+  async listThreatCampaignPackages(
+    orgSlug: string,
+    campaignId: string,
+    options?: ListThreatCampaignPackagesOptions | undefined,
+  ): Promise<ListThreatCampaignPackagesResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns/${encodeURIComponent(campaignId)}/packages?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaignPackagesData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * List threat campaigns for an organization (v1 API, public route),
+   * paginated and filterable by status, ecosystem, and an incremental sync
+   * parameter (`updated_after`). Package PURLs are not inlined — fetch them
+   * per campaign via `listThreatCampaignPackages`. Requires an Enterprise
+   * plan with the Threat Feed add-on and the `threat-campaigns:list` token
+   * scope.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Filter and pagination options; `status` defaults to
+   *   `'ongoing'` server-side when omitted.
+   *
+   * @returns `{ items, endCursor }` — campaigns and the next cursor
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/threat-campaigns (v1)
+   *
+   * @operationId none
+   */
+  async listThreatCampaigns(
+    orgSlug: string,
+    options?: ListThreatCampaignsOptions | undefined,
+  ): Promise<ListThreatCampaignsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/threat-campaigns?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as ThreatCampaignsListData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Create a new API token for an organization. Generates API token with
+   * specified scopes and metadata.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3387,7 +4599,7 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens`,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens`,
               tokenData,
               this.#reqOptionsWithHooks,
             ),
@@ -3400,8 +4612,8 @@ export class SocketSdk {
   }
 
   /**
-   * Revoke an API token for an organization.
-   * Permanently disables the token and removes access.
+   * Revoke an API token for an organization. Permanently disables the token and
+   * removes access.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3416,8 +4628,8 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/revoke`,
-              {},
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/revoke`,
+              { id: tokenId },
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -3429,8 +4641,8 @@ export class SocketSdk {
   }
 
   /**
-   * Rotate an API token for an organization.
-   * Generates new token value while preserving token metadata.
+   * Rotate an API token for an organization. Generates new token value while
+   * preserving token metadata.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3445,8 +4657,8 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/rotate`,
-              {},
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/rotate`,
+              { id: tokenId },
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -3458,8 +4670,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update an existing API token for an organization.
-   * Modifies token metadata, scopes, or other properties.
+   * Update an existing API token for an organization. Modifies token metadata,
+   * scopes, or other properties.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3475,8 +4687,8 @@ export class SocketSdk {
             await createRequestWithJson(
               'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/tokens/${encodeURIComponent(tokenId)}/update`,
-              updateData,
+              `orgs/${encodeURIComponent(orgSlug)}/api-tokens/update`,
+              { id: tokenId, ...updateData },
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -3488,14 +4700,88 @@ export class SocketSdk {
   }
 
   /**
-   * Post telemetry data for an organization.
-   * Sends telemetry events and analytics data for monitoring and analysis.
+   * Post organization events for telemetry ingestion (v1 API, public route).
+   * Send events directly to Socket; an empty batch is accepted as a no-op.
+   * Requires an organization API token (any scope).
    *
-   * @param orgSlug - Organization identifier
-   * @param telemetryData - Telemetry payload containing events and metrics
+   * @param orgSlug - Organization identifier.
+   * @param events - Event payloads to ingest (max 1000 per call).
+   *
+   * @returns Empty object envelope on success
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/events (v1)
+   *
+   * @operationId none
+   */
+  async postEvents(
+    orgSlug: string,
+    events: SocketEvent[],
+  ): Promise<PostEventsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          v1BaseUrl,
+          `orgs/${encodeURIComponent(orgSlug)}/events`,
+          events,
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(
+            res,
+            '',
+            `${v1BaseUrl}orgs/${encodeURIComponent(orgSlug)}/events`,
+          )
+        }
+        return res
+      })
+      const data = await getResponseJson(response)
+      return {
+        cause: undefined,
+        data: data as PostEventsData,
+        error: undefined,
+        status: response.status as 200 | 201,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Post telemetry data for an organization. Sends telemetry events and
+   * analytics data for monitoring and analysis.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param telemetryData - Telemetry payload containing events and metrics.
+   *
    * @returns Empty object on successful submission
    *
    * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId none
    */
   async postOrgTelemetry(
     orgSlug: string,
@@ -3527,8 +4813,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update user or organization settings.
-   * Configures preferences, notifications, and security policies.
+   * Update user or organization settings. Configures preferences,
+   * notifications, and security policies.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3555,37 +4841,42 @@ export class SocketSdk {
   }
 
   /**
-   * Create a new full scan by rescanning an existing scan.
-   * Supports shallow (policy reapplication) and deep (dependency resolution rerun) modes.
-   *
-   * @param orgSlug - Organization identifier
-   * @param fullScanId - Full scan ID to rescan
-   * @param options - Rescan options including mode (shallow or deep)
-   * @returns New scan ID and status
+   * Create a new full scan by rescanning an existing scan. Supports shallow
+   * (policy reapplication) and deep (dependency resolution rerun) modes.
    *
    * @example
-   * ```typescript
-   * // Shallow rescan (reapply policies to cached data)
-   * const result = await sdk.rescanFullScan('my-org', 'scan_123', {
-   *   mode: 'shallow'
-   * })
+   *   ;```typescript
+   *   // Shallow rescan (reapply policies to cached data)
+   *   const result = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *     mode: 'shallow',
+   *   })
    *
-   * if (result.success) {
-   *   console.log('New Scan ID:', result.data.id)
-   *   console.log('Status:', result.data.status)
-   * }
+   *   if (result.success) {
+   *     console.log('New Scan ID:', result.data.id)
+   *     console.log('Status:', result.data.status)
+   *   }
    *
-   * // Deep rescan (rerun dependency resolution)
-   * const deepResult = await sdk.rescanFullScan('my-org', 'scan_123', {
-   *   mode: 'deep'
-   * })
-   * ```
+   *   // Deep rescan (rerun dependency resolution)
+   *   const deepResult = await sdk.rescanFullScan('my-org', 'scan_123', {
+   *     mode: 'deep',
+   *   })
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan ID to rescan.
+   * @param options - Rescan options including mode (shallow or deep)
+   *
+   * @returns New scan ID and status
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:create
    *
    * @see https://docs.socket.dev/reference/rescanorgfullscan
-   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/rescan
-   * @quota 0 units
-   * @scopes full-scans:create
-   * @throws {Error} When server returns 5xx status codes
    */
   async rescanFullScan(
     orgSlug: string,
@@ -3619,8 +4910,8 @@ export class SocketSdk {
   }
 
   /**
-   * Search for dependencies across monitored projects.
-   * Returns matching packages with security information and usage patterns.
+   * Search for dependencies across monitored projects. Returns matching
+   * packages with security information and usage patterns.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3649,9 +4940,16 @@ export class SocketSdk {
   /**
    * Send POST or PUT request with JSON body and return parsed JSON response.
    * Supports both throwing (default) and non-throwing modes.
+   *
    * @param urlPath - API endpoint path (e.g., 'organizations')
-   * @param options - Request options including method, body, and throws behavior
+   * @param options - Request options including method, body, and throws
+   *   behavior.
+   *
    * @returns Parsed JSON response or SocketSdkGenericResult based on options
+   *
+   * @operationId sendApi
+   *
+   * @quota 0 units
    */
   async sendApi<T>(
     urlPath: string,
@@ -3718,35 +5016,40 @@ export class SocketSdk {
   /**
    * Stream a full scan's results to file or stdout.
    *
-   * Provides efficient streaming for large scan datasets without loading
-   * entire response into memory. Useful for processing large SBOMs.
-   *
-   * @param orgSlug - Organization identifier
-   * @param scanId - Full scan identifier
-   * @param options - Streaming options (output file path, stdout, or buffered)
-   * @returns Scan result with streaming response
+   * Provides efficient streaming for large scan datasets without loading entire
+   * response into memory. Useful for processing large SBOMs.
    *
    * @example
-   * ```typescript
-   * // Stream to file
-   * await sdk.streamFullScan('my-org', 'scan_123', {
-   *   output: './scan-results.json'
-   * })
+   *   ;```typescript
+   *   // Stream to file
+   *   await sdk.streamFullScan('my-org', 'scan_123', {
+   *     output: './scan-results.json',
+   *   })
    *
-   * // Stream to stdout
-   * await sdk.streamFullScan('my-org', 'scan_123', {
-   *   output: true
-   * })
+   *   // Stream to stdout
+   *   await sdk.streamFullScan('my-org', 'scan_123', {
+   *     output: true,
+   *   })
    *
-   * // Get buffered response
-   * const result = await sdk.streamFullScan('my-org', 'scan_123')
-   * ```
+   *   // Get buffered response
+   *   const result = await sdk.streamFullScan('my-org', 'scan_123')
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param scanId - Full scan identifier.
+   * @param options - Streaming options (output file path, stdout, or buffered)
+   *
+   * @returns Scan result with streaming response
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes full-scans:list
    *
    * @see https://docs.socket.dev/reference/getorgfullscan
-   * @apiEndpoint GET /orgs/{org_slug}/full-scans/{full_scan_id}
-   * @quota 0 units
-   * @scopes full-scans:list
-   * @throws {Error} When server returns 5xx status codes
    */
   async streamFullScan(
     orgSlug: string,
@@ -3777,18 +5080,12 @@ export class SocketSdk {
 
       if (typeof output === 'string') {
         const { createWriteStream } = await import('node:fs')
-        await new Promise<void>((resolve, reject) => {
-          const ws = createWriteStream(output)
-          ws.on('error', reject)
-          ws.on('close', resolve)
-          res.rawResponse!.pipe(ws)
-        })
+        const { pipeline } = await import('node:stream/promises')
+        await pipeline(res.rawResponse!, createWriteStream(output))
       } else if (output === true) {
-        await new Promise<void>((resolve, reject) => {
-          res.rawResponse!.on('error', reject)
-          res.rawResponse!.on('end', resolve)
-          res.rawResponse!.pipe(process.stdout)
-        })
+        const { pipeline } = await import('node:stream/promises')
+        // Pipe to stdout but don't end stdout when the source ends.
+        await pipeline(res.rawResponse!, process.stdout, { end: false })
       }
 
       return this.#handleApiSuccess<'getOrgFullScan'>(res)
@@ -3800,16 +5097,20 @@ export class SocketSdk {
   /**
    * Stream patches for artifacts in a scan report.
    *
-   * This method streams all available patches for artifacts in a scan.
-   * Free tier users will only receive free patches.
+   * This method streams all available patches for artifacts in a scan. Free
+   * tier users will only receive free patches.
    *
    * Note: This method returns a ReadableStream for processing large datasets.
+   *
+   * @operationId streamPatchesFromScan
+   *
+   * @quota 0 units
    */
   async streamPatchesFromScan(
     orgSlug: string,
     scanId: string,
   ): Promise<ReadableStream<ArtifactPatches>> {
-    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/patches/scan?scan_id=${encodeURIComponent(scanId)}`
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/patches/scan/${encodeURIComponent(scanId)}`
     const url = `${this.#baseUrl}${urlPath}`
     const response = await this.#executeWithRetry(
       async () =>
@@ -3850,8 +5151,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update alert triage status for an organization.
-   * Modifies alert resolution status and triage decisions.
+   * Update alert triage status for an organization. Modifies alert resolution
+   * status and triage decisions.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3865,10 +5166,10 @@ export class SocketSdk {
         async () =>
           await getResponseJson(
             await createRequestWithJson(
-              'PUT',
+              'POST',
               this.#baseUrl,
-              `orgs/${encodeURIComponent(orgSlug)}/triage/${encodeURIComponent(alertId)}`,
-              triageData,
+              `orgs/${encodeURIComponent(orgSlug)}/triage/alerts`,
+              { alertTriage: [{ uuid: alertId, ...triageData }] },
               this.#reqOptionsWithHooks,
             ),
           ),
@@ -3880,8 +5181,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's license policy configuration.
-   * Modifies allowed, restricted, and monitored license types.
+   * Update organization's license policy configuration. Modifies allowed,
+   * restricted, and monitored license types.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3910,8 +5211,8 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's security policy configuration.
-   * Modifies alert rules, severity thresholds, and enforcement settings.
+   * Update organization's security policy configuration. Modifies alert rules,
+   * severity thresholds, and enforcement settings.
    *
    * @throws {Error} When server returns 5xx status codes
    */
@@ -3939,11 +5240,12 @@ export class SocketSdk {
   }
 
   /**
-   * Update organization's telemetry configuration.
-   * Enables or disables telemetry for the organization.
+   * Update organization's telemetry configuration. Enables or disables
+   * telemetry for the organization.
    *
-   * @param orgSlug - Organization identifier
-   * @param telemetryData - Telemetry configuration with enabled flag
+   * @param orgSlug - Organization identifier.
+   * @param telemetryData - Telemetry configuration with enabled flag.
+   *
    * @returns Updated telemetry configuration
    *
    * @throws {Error} When server returns 5xx status codes
@@ -3972,12 +5274,13 @@ export class SocketSdk {
   }
 
   /**
-   * Update an existing webhook's configuration.
-   * All fields are optional - only provided fields will be updated.
+   * Update an existing webhook's configuration. All fields are optional - only
+   * provided fields will be updated.
    *
-   * @param orgSlug - Organization identifier
-   * @param webhookId - Webhook ID to update
-   * @param webhookData - Updated webhook configuration
+   * @param orgSlug - Organization identifier.
+   * @param webhookId - Webhook ID to update.
+   * @param webhookData - Updated webhook configuration.
+   *
    * @returns Updated webhook details
    *
    * @throws {Error} When server returns 5xx status codes
@@ -4019,29 +5322,35 @@ export class SocketSdk {
    *
    * Modifies monitoring settings, branch configuration, and scan preferences.
    *
-   * @param orgSlug - Organization identifier
-   * @param repoSlug - Repository slug/name
-   * @param params - Configuration updates (description, homepage, default_branch, etc.)
-   * @param options - Optional parameters including workspace
+   * @example
+   *   ;```typescript
+   *   const result = await sdk.updateRepository('my-org', 'my-repo', {
+   *     description: 'Updated description',
+   *     default_branch: 'develop',
+   *   })
+   *
+   *   if (result.success) {
+   *     console.log('Repository updated:', result.data.name)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug/name.
+   * @param params - Configuration updates (description, homepage,
+   *   default_branch, etc.)
+   * @param options - Optional parameters including workspace.
+   *
    * @returns Updated repository details
    *
-   * @example
-   * ```typescript
-   * const result = await sdk.updateRepository('my-org', 'my-repo', {
-   *   description: 'Updated description',
-   *   default_branch: 'develop'
-   * })
+   * @throws {Error} When server returns 5xx status codes
    *
-   * if (result.success) {
-   *   console.log('Repository updated:', result.data.name)
-   * }
-   * ```
+   * @apiEndpoint POST /orgs/{org_slug}/repos/{repo_slug}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo:write
    *
    * @see https://docs.socket.dev/reference/updateorgrepo
-   * @apiEndpoint POST /orgs/{org_slug}/repos/{repo_slug}
-   * @quota 0 units
-   * @scopes repo:write
-   * @throws {Error} When server returns 5xx status codes
    */
   async updateRepository(
     orgSlug: string,
@@ -4091,28 +5400,38 @@ export class SocketSdk {
   /**
    * Update a repository label for an organization.
    *
-   * Modifies label properties like name. Label names must be non-empty and less than 1000 characters.
-   *
-   * @param orgSlug - Organization identifier
-   * @param labelId - Label identifier
-   * @param labelData - Label updates (typically name property)
-   * @returns Updated label with guaranteed id and name fields
+   * Modifies label properties like name. Label names must be non-empty and less
+   * than 1000 characters.
    *
    * @example
-   * ```typescript
-   * const result = await sdk.updateRepositoryLabel('my-org', 'label-id-123', { name: 'staging' })
+   *   ;```typescript
+   *   const result = await sdk.updateRepositoryLabel(
+   *     'my-org',
+   *     'label-id-123',
+   *     { name: 'staging' },
+   *   )
    *
-   * if (result.success) {
-   *   console.log('Label updated:', result.data.name)
-   *   console.log('Label ID:', result.data.id)
-   * }
-   * ```
+   *   if (result.success) {
+   *     console.log('Label updated:', result.data.name)
+   *     console.log('Label ID:', result.data.id)
+   *   }
+   *   ```
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param labelData - Label updates (typically name property)
+   *
+   * @returns Updated label with guaranteed id and name fields
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}
+   *
+   * @quota 0 units
+   *
+   * @scopes repo-label:update
    *
    * @see https://docs.socket.dev/reference/updateorgrepolabel
-   * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}
-   * @quota 0 units
-   * @scopes repo-label:update
-   * @throws {Error} When server returns 5xx status codes
    */
   async updateRepositoryLabel(
     orgSlug: string,
@@ -4152,10 +5471,112 @@ export class SocketSdk {
   }
 
   /**
-   * Upload manifest files for dependency analysis.
-   * Processes package files to create dependency snapshots and security analysis.
+   * Upload blobs to an organization's content-addressed blob store (v1 API,
+   * internal preview — hidden from the public OpenAPI spec). Each entry's
+   * hash is computed from `localPath` when omitted; `name` is diagnostics-
+   * only metadata (defaults to the file's basename). Idempotent: re-uploading
+   * an already-stored digest reports it under `already_existed`.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param entries - Files to upload; see `BlobUploadEntry`.
+   *
+   * @returns Digests grouped into `stored` (newly written) and
+   *   `already_existed`
    *
    * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/blobs (v1)
+   *
+   * @operationId none
+   */
+  async uploadBlobs(
+    orgSlug: string,
+    entries: BlobUploadEntry[],
+  ): Promise<UploadBlobsResult | StrictErrorResult> {
+    let v1BaseUrl: string
+    try {
+      v1BaseUrl = this.#requireApiV1BaseUrl()
+    } catch (e) {
+      return {
+        cause: undefined,
+        data: undefined,
+        error: getErrorMessage(e),
+        status: 400,
+        success: false,
+      }
+    }
+
+    const resolvedEntries: Array<{
+      absPath: string
+      hash: string
+      name: string
+    }> = []
+    for (let i = 0, { length } = entries; i < length; i += 1) {
+      const entry = entries[i]!
+      let hash: string
+      try {
+        hash = entry.hash ?? (await hashFile(entry.localPath)).hash
+      } catch (e) {
+        return {
+          cause: getErrorMessage(e),
+          data: undefined,
+          error: [
+            'Failed to hash a blob-upload entry before uploading.',
+            `→ Where: uploadBlobs(orgSlug="${orgSlug}"), entries[${i}].localPath`,
+            `→ Saw: "${entry.localPath}" — ${getErrorMessage(e)}`,
+            '→ Fix: verify the file exists, is a regular file (not a directory), and is readable, then retry.',
+          ].join('\n'),
+          status: 400,
+          success: false,
+        }
+      }
+      resolvedEntries.push({
+        absPath: entry.localPath,
+        hash,
+        name: entry.name ?? path.basename(entry.localPath),
+      })
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              v1BaseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/blobs`,
+              createRequestBodyForBlobs(resolvedEntries),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return {
+        cause: undefined,
+        data: data as BlobsUploadData,
+        error: undefined,
+        status: 200,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<never>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+      }
+    }
+  }
+
+  /**
+   * Upload manifest files for dependency analysis. Processes package files to
+   * create dependency snapshots and security analysis.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId uploadManifestFiles
+   *
+   * @quota 100 units
    */
   async uploadManifestFiles(
     orgSlug: string,
@@ -4198,7 +5619,7 @@ export class SocketSdk {
         invalidPaths.length > 3
           ? `\n  ... and ${invalidPaths.length - 3} more`
           : ''
-      console.warn(
+      logger.warn(
         `Warning: ${invalidPaths.length} files skipped (unreadable):\n  - ${samplePaths}${remaining}\n` +
           '→ This may occur with Yarn Berry PnP or pnpm symlinks.\n' +
           '→ Try: Run installation command to ensure files are accessible.',
@@ -4265,6 +5686,10 @@ export class SocketSdk {
    *
    * This method retrieves comprehensive patch details including files,
    * vulnerabilities, description, license, and tier information.
+   *
+   * @operationId viewPatch
+   *
+   * @quota 0 units
    */
   async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse> {
     try {
@@ -4281,7 +5706,7 @@ export class SocketSdk {
       return data as PatchViewResponse
     } catch (e) {
       const result = await this.#handleApiError<never>(e)
-      throw new Error(result.error, { cause: result.cause })
+      throw new ErrorCtor(result.error, { cause: result.cause })
     }
   }
 }

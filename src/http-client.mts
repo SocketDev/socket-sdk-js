@@ -1,13 +1,17 @@
-import { debugLog } from '@socketsecurity/lib/debug'
-import { httpRequest } from '@socketsecurity/lib/http-request'
-import { jsonParse } from '@socketsecurity/lib/json/parse'
-import { perfTimer } from '@socketsecurity/lib/performance'
+import { debugLog } from '@socketsecurity/lib/debug/output'
+import { isError } from '@socketsecurity/lib/errors/predicates'
+import { httpRequest } from '@socketsecurity/lib/http-request/request'
+import { parseJson } from '@socketsecurity/lib/json/parse'
+import { perfTimer } from '@socketsecurity/lib/perf/timer'
+import { DateNow } from '@socketsecurity/lib/primordials/date'
+import { SetCtor } from '@socketsecurity/lib/primordials/map-set'
+import { StringPrototypeTrim } from '@socketsecurity/lib/primordials/string'
 
 import {
   MAX_RESPONSE_SIZE,
   publicPolicy as defaultPublicPolicy,
-} from './constants'
-import { sanitizeHeaders } from './utils/header-sanitization'
+} from './constants.mts'
+import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
 import type {
   RequestOptions,
@@ -15,8 +19,8 @@ import type {
   SendMethod,
   SocketArtifactAlert,
   SocketArtifactWithExtras,
-} from './types'
-import type { HttpResponse } from '@socketsecurity/lib/http-request'
+} from './types.mts'
+import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
 
 export class ResponseError extends Error {
@@ -43,14 +47,14 @@ export async function createDeleteRequest(
   urlPath: string,
   options?: RequestOptionsWithHooks | undefined,
 ): Promise<HttpResponse> {
-  const startTime = Date.now()
+  const startTime = DateNow()
   const url = `${baseUrl}${urlPath}`
   const method = 'DELETE'
   const { hooks, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as any as RequestOptionsWithHooks
-  const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
+  } as unknown as RequestOptionsWithHooks
+  const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
 
   if (hooks?.onRequest) {
     hooks.onRequest({
@@ -73,7 +77,7 @@ export async function createDeleteRequest(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         status: response.status,
         statusText: response.statusText,
         headers: sanitizeHeaders(response.headers),
@@ -81,17 +85,17 @@ export async function createDeleteRequest(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     if (hooks?.onResponse) {
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
-        error: error as Error,
+        duration: DateNow() - startTime,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -100,15 +104,15 @@ export async function createGetRequest(
   urlPath: string,
   options?: RequestOptionsWithHooks | undefined,
 ): Promise<HttpResponse> {
-  const startTime = Date.now()
+  const startTime = DateNow()
   const url = `${baseUrl}${urlPath}`
   const method = 'GET'
   const stopTimer = perfTimer('http:get', { urlPath })
   const { hooks, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as any as RequestOptionsWithHooks
-  const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
+  } as unknown as RequestOptionsWithHooks
+  const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
 
   if (hooks?.onRequest) {
     hooks.onRequest({
@@ -132,7 +136,7 @@ export async function createGetRequest(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         status: response.status,
         statusText: response.statusText,
         headers: sanitizeHeaders(response.headers),
@@ -140,19 +144,19 @@ export async function createGetRequest(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
 
     if (hooks?.onResponse) {
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
-        error: error as Error,
+        duration: DateNow() - startTime,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -163,7 +167,7 @@ export async function createRequestWithJson(
   json: unknown,
   options?: RequestOptionsWithHooks | undefined,
 ): Promise<HttpResponse> {
-  const startTime = Date.now()
+  const startTime = DateNow()
   const url = `${baseUrl}${urlPath}`
   const stopTimer = perfTimer(`http:${method.toLowerCase()}`, {
     urlPath,
@@ -171,8 +175,8 @@ export async function createRequestWithJson(
   const { hooks, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as any as RequestOptionsWithHooks
-  const opts = { __proto__: null, ...rawOpts } as any as RequestOptions
+  } as unknown as RequestOptionsWithHooks
+  const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
   const body = JSON.stringify(json)
   const headers = {
     ...opts.headers,
@@ -202,7 +206,7 @@ export async function createRequestWithJson(
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
+        duration: DateNow() - startTime,
         status: response.status,
         statusText: response.statusText,
         headers: sanitizeHeaders(response.headers),
@@ -210,19 +214,19 @@ export async function createRequestWithJson(
     }
 
     return response
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
 
     if (hooks?.onResponse) {
       hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startTime,
-        error: error as Error,
+        duration: DateNow() - startTime,
+        error: e as Error,
       })
     }
 
-    throw error
+    throw e
   }
 }
 
@@ -249,7 +253,7 @@ export async function getResponseJson(
     }
 
     try {
-      const responseJson = jsonParse(responseBody)
+      const responseJson = parseJson(responseBody)
       debugLog('API response:', responseJson)
       stopTimer({ success: true })
       return responseJson
@@ -301,7 +305,7 @@ export async function getResponseJson(
         throw enhancedError
       }
       /* c8 ignore start - Error instanceof check and unknown error handling for JSON parsing edge cases. */
-      if (e instanceof Error) {
+      if (isError(e)) {
         throw e
       }
       const unknownError = new Error('Unknown JSON parsing error', {
@@ -315,9 +319,9 @@ export async function getResponseJson(
       throw unknownError
       /* c8 ignore stop */
     }
-  } catch (error) {
+  } catch (e) {
     stopTimer({ error: true })
-    throw error
+    throw e
   }
 }
 
@@ -325,18 +329,24 @@ export function isResponseOk(response: HttpResponse): boolean {
   return response.ok
 }
 
+export interface ReshapeArtifactOptions {
+  actions?: string | undefined
+  isAuthenticated: boolean
+  policy?: Map<string, string> | undefined
+}
+
 export function reshapeArtifactForPublicPolicy<
   T extends Record<string, unknown>,
->(
-  data: T,
-  isAuthenticated: boolean,
-  actions?: string | undefined,
-  policy?: Map<string, string> | undefined,
-): T {
+>(data: T, options: ReshapeArtifactOptions): T {
+  const { actions, isAuthenticated, policy } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   if (!isAuthenticated) {
-    const allowedActions = actions?.trim()
-      ? new Set(actions.split(','))
-      : undefined
+    const allowedActions =
+      actions !== undefined && StringPrototypeTrim(actions)
+        ? new SetCtor(actions.split(','))
+        : undefined
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({

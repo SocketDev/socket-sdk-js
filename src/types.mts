@@ -1,12 +1,12 @@
 /**
- * @fileoverview Type definitions and interfaces for Socket SDK.
- * Provides TypeScript types for API requests, responses, and internal SDK functionality.
+ * @file Type definitions and interfaces for Socket SDK. Provides TypeScript
+ *   types for API requests, responses, and internal SDK functionality.
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
 import type { components, operations } from '../types/api'
 import type { OpReturnType } from '../types/api-helpers'
-import type { Remap } from '@socketsecurity/lib/objects'
+import type { Remap } from '@socketsecurity/lib/objects/types'
 import type {
   Agent as HttpAgent,
   RequestOptions as HttpRequestOptions,
@@ -38,7 +38,7 @@ export type EntitlementsResponse = {
 export type PatchFile = {
   afterHash?: string | undefined
   beforeHash?: string | undefined
-  socketBlob?: string | null
+  socketBlob?: string | null | undefined
 }
 
 export type Vulnerability = {
@@ -52,8 +52,8 @@ export type SecurityAlert = {
   description: string
   severity: string
   summary: string
-  cveId?: string | null
-  ghsaId?: string | null
+  cveId?: string | null | undefined
+  ghsaId?: string | null | undefined
 }
 
 export type PatchRecord = {
@@ -222,18 +222,20 @@ export type SocketSdkResult<T extends SocketSdkOperations> =
 
 /**
  * Helper type to extract the data from a successful SDK operation result.
+ *
  * @example
- * type RepoData = SocketSdkData<'getOrgRepoList'>
+ *   type RepoData = SocketSdkData<'getOrgRepoList'>
  */
 export type SocketSdkData<T extends SocketSdkOperations> = OpReturnType<
   operations[T]
 >
 
 /**
- * Helper type to extract array element type from SDK operation results.
- * Useful for typing items from paginated results.
+ * Helper type to extract array element type from SDK operation results. Useful
+ * for typing items from paginated results.
+ *
  * @example
- * type RepoItem = SocketSdkArrayElement<'getOrgRepoList', 'results'>
+ *   type RepoItem = SocketSdkArrayElement<'getOrgRepoList', 'results'>
  */
 export type SocketSdkArrayElement<
   T extends SocketSdkOperations,
@@ -288,21 +290,21 @@ export type MalwareCheckScore = {
 }
 
 /**
- * Result from file validation callback.
- * Allows consumers to customize error handling and logging.
+ * Result from file validation callback. Allows consumers to customize error
+ * handling and logging.
  *
- * @since v3.0.0
+ * @since V3.0.0
  */
 export interface FileValidationResult {
   /**
-   * Whether to continue with the operation using valid files.
-   * If false, the SDK operation will fail with the provided error message.
+   * Whether to continue with the operation using valid files. If false, the SDK
+   * operation will fail with the provided error message.
    */
   shouldContinue: boolean
 
   /**
-   * Optional custom error message if shouldContinue is false.
-   * If not provided, SDK will use default error message.
+   * Optional custom error message if shouldContinue is false. If not provided,
+   * SDK will use default error message.
    */
   errorMessage?: string | undefined
 
@@ -313,15 +315,16 @@ export interface FileValidationResult {
 }
 
 /**
- * Callback invoked when file validation detects unreadable files.
- * Gives consumers control over error messages and logging.
+ * Callback invoked when file validation detects unreadable files. Gives
+ * consumers control over error messages and logging.
+ *
+ * @since V3.0.0
  *
  * @param validPaths - Files that passed validation (readable)
  * @param invalidPaths - Files that failed validation (unreadable)
  * @param context - Context about the operation (method name, orgSlug, etc.)
- * @returns Decision on whether to continue and optional custom error messages
  *
- * @since v3.0.0
+ * @returns Decision on whether to continue and optional custom error messages
  */
 export type FileValidationCallback = (
   validPaths: string[],
@@ -340,36 +343,41 @@ export type FileValidationCallback = (
  * Configuration options for SocketSdk.
  */
 export interface SocketSdkOptions {
-  /** HTTP agent for connection pooling and proxy support */
+  /**
+   * HTTP agent for connection pooling and proxy support.
+   */
   agent?: Agent | GotOptions | undefined
-  /** Base URL for Socket API (default: 'https://api.socket.dev/v0/') */
+  /**
+   * Base URL for Socket API (default: 'https://api.socket.dev/v0/')
+   */
   baseUrl?: string | undefined
   /**
-   * Enable TTL caching for API responses (default: false).
-   * When enabled, GET requests are cached with configurable TTLs.
-   * Only applies to listOrganizations() and getQuota() methods.
+   * Enable TTL caching for API responses (default: false). When enabled, GET
+   * requests are cached with configurable TTLs. Only applies to
+   * listOrganizations() and getQuota() methods.
    */
   cache?: boolean | undefined
   /**
-   * Cache TTL in milliseconds (default: 300_000 = 5 minutes).
-   * Only used when cache is enabled.
-   * Can be a single number for all endpoints or an object for per-endpoint TTLs.
+   * Cache TTL in milliseconds (default: 300_000 = 5 minutes). Only used when
+   * cache is enabled. Can be a single number for all endpoints or an object for
+   * per-endpoint TTLs.
    *
    * Recommended TTLs by endpoint:
-   * - organizations: 30 minutes (rarely changes)
-   * - quota: 10 minutes (changes incrementally)
+   *
+   * - Organizations: 30 minutes (rarely changes)
+   * - Quota: 10 minutes (changes incrementally)
    *
    * @example
-   * // Single TTL for all endpoints.
-   * cacheTtl: 15 * 60 * 1000  // 15 minutes
+   *   // Single TTL for all endpoints.
+   *   cacheTtl: 15 * 60 * 1000 // 15 minutes
    *
    * @example
-   * // Per-endpoint TTLs with recommended values.
-   * cacheTtl: {
+   *   // Per-endpoint TTLs with recommended values.
+   *   cacheTtl: {
    *   default: 5 * 60 * 1000,        // 5 minutes default
    *   organizations: 30 * 60 * 1000, // 30 minutes (recommended)
    *   quota: 10 * 60 * 1000          // 10 minutes (recommended)
-   * }
+   *   }
    */
   cacheTtl?:
     | number
@@ -380,21 +388,20 @@ export interface SocketSdkOptions {
       }
     | undefined
   /**
-   * Callback for file validation events.
-   * Called when any file-upload method detects unreadable files:
-   * - createDependenciesSnapshot
-   * - createFullScan (formerly createOrgFullScan)
-   * - uploadManifestFiles
+   * Callback for file validation events. Called when any file-upload method
+   * detects unreadable files: - createDependenciesSnapshot - createFullScan
+   * (formerly createOrgFullScan) - uploadManifestFiles.
    *
-   * Default behavior (if not provided):
-   * - Warns about invalid files (console.warn)
-   * - Continues with valid files if any exist
-   * - Throws error if all files are invalid
+   * Default behavior (if not provided): - Warns about invalid files
+   * (console.warn) - Continues with valid files if any exist - Throws error if
+   * all files are invalid.
    *
-   * @since v3.0.0
+   * @since V3.0.0
    */
   onFileValidation?: FileValidationCallback | undefined
-  /** Request/response logging hooks */
+  /**
+   * Request/response logging hooks.
+   */
   hooks?:
     | {
         onRequest?: ((info: RequestInfo) => void) | undefined
@@ -402,18 +409,29 @@ export interface SocketSdkOptions {
       }
     | undefined
   /**
-   * Number of retry attempts on failure (default: 3).
-   * Uses exponential backoff between retries.
+   * Delay in milliseconds between polls when a cached scan endpoint
+   * (getDiffScanById, getFullScan) returns 202 Accepted (default: 2000). On a
+   * cache miss the API computes the result in the background and the SDK polls
+   * until it is ready.
+   */
+  pollIntervalMs?: number | undefined
+  /**
+   * Number of retry attempts on failure (default: 3). Uses exponential backoff
+   * between retries.
    */
   retries?: number | undefined
   /**
-   * Initial delay in milliseconds between retries (default: 1000).
-   * Uses exponential backoff: 1000ms, 2000ms, 4000ms, etc.
+   * Initial delay in milliseconds between retries (default: 1000). Uses
+   * exponential backoff: 1000ms, 2000ms, 4000ms, etc.
    */
   retryDelay?: number | undefined
-  /** Request timeout in milliseconds */
+  /**
+   * Request timeout in milliseconds.
+   */
   timeout?: number | undefined
-  /** Custom User-Agent header */
+  /**
+   * Custom User-Agent header.
+   */
   userAgent?: string | undefined
 }
 
@@ -461,8 +479,8 @@ export type PostOrgTelemetryPayload = Record<string, unknown>
 export type PostOrgTelemetryResponse = Record<string, never>
 
 /**
- * Configuration for telemetry collection.
- * Controls whether telemetry is enabled and how events are collected.
+ * Configuration for telemetry collection. Controls whether telemetry is enabled
+ * and how events are collected.
  */
 export interface TelemetryConfig {
   telemetry: {

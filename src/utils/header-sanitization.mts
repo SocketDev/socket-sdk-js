@@ -1,7 +1,10 @@
 /**
- * @fileoverview HTTP header sanitization utilities for secure logging.
- * Provides functions to redact sensitive header values from logs.
+ * @file HTTP header sanitization utilities for secure logging. Provides
+ *   functions to redact sensitive header values from logs.
  */
+
+import { ArrayIsArray } from '@socketsecurity/lib/primordials/array'
+import { StringPrototypeToLowerCase } from '@socketsecurity/lib/primordials/string'
 
 /**
  * List of sensitive HTTP headers that should be redacted in logs.
@@ -19,6 +22,7 @@ export const SENSITIVE_HEADERS: readonly string[] = [
  * Sanitize headers for logging by redacting sensitive values.
  *
  * @param headers - Headers to sanitize (object or array)
+ *
  * @returns Sanitized headers with sensitive values redacted
  */
 export function sanitizeHeaders(
@@ -29,20 +33,26 @@ export function sanitizeHeaders(
   }
 
   // Handle readonly string[] case - this shouldn't normally happen for headers.
-  if (Array.isArray(headers)) {
-    return { headers: headers.join(', ') }
+  if (ArrayIsArray(headers)) {
+    return { headers: (headers as readonly string[]).join(', ') }
   }
 
   const sanitized: Record<string, string> = {}
 
   // Plain object iteration works for both HeadersRecord and IncomingHttpHeaders.
-  for (const [key, value] of Object.entries(headers)) {
-    const keyLower = key.toLowerCase()
+  const entries = Object.entries(headers)
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]!
+    const key = entry[0]
+    const value = entry[1]
+    const keyLower = StringPrototypeToLowerCase(key)
     if (SENSITIVE_HEADERS.includes(keyLower)) {
       sanitized[key] = '[REDACTED]'
     } else {
       // Handle both string and string[] values.
-      sanitized[key] = Array.isArray(value) ? value.join(', ') : String(value)
+      sanitized[key] = ArrayIsArray(value)
+        ? (value as readonly string[]).join(', ')
+        : String(value)
     }
   }
 

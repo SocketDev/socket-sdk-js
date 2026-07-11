@@ -1,12 +1,15 @@
 /**
- * @fileoverview Configuration constants and enums for the Socket SDK.
- * Provides default values, HTTP agents, and public policy configurations for API interactions.
+ * @file Configuration constants and enums for the Socket SDK. Provides default
+ *   values, HTTP agents, and public policy configurations for API
+ *   interactions.
  */
 
-import rootPkgJson from '../package.json' with { type: 'json' }
-import { createUserAgentFromPkgJson } from './user-agent'
+import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials/map-set'
 
-import type { ALERT_ACTION, ALERT_TYPE } from './types'
+import rootPkgJson from '../package.json' with { type: 'json' }
+import { createUserAgentFromPkgJson } from './user-agent.mts'
+
+import type { ALERT_ACTION, ALERT_TYPE } from './types.mts'
 
 // Re-export Socket.dev URL constants from @socketsecurity/lib
 export {
@@ -29,14 +32,6 @@ export const DEFAULT_RETRY_DELAY = 1000
 // Default cache TTL (5 minutes)
 export const DEFAULT_CACHE_TTL = 5 * 60 * 1000
 
-// Recommended cache TTL for organizations endpoint (30 minutes)
-// Organizations list rarely changes - only when joining/leaving orgs.
-export const RECOMMENDED_CACHE_TTL_ORGANIZATIONS = 30 * 60 * 1000
-
-// Recommended cache TTL for quota endpoint (10 minutes)
-// Quota changes incrementally and doesn't need real-time accuracy.
-export const RECOMMENDED_CACHE_TTL_QUOTA = 10 * 60 * 1000
-
 // Maximum timeout for HTTP requests (5 minutes)
 export const MAX_HTTP_TIMEOUT = 5 * 60 * 1000
 
@@ -46,8 +41,12 @@ export const MIN_HTTP_TIMEOUT = 5000
 // Maximum response body size (10MB)
 export const MAX_RESPONSE_SIZE = 10 * 1024 * 1024
 
-// Maximum response body size for streaming (100MB)
-export const MAX_STREAM_SIZE = 100 * 1024 * 1024
+// Maximum wall-clock time to poll a cached scan endpoint that keeps
+// returning 202 Accepted before giving up (5 minutes).
+export const DEFAULT_POLL_TIMEOUT = 5 * 60 * 1000
+
+// Delay between polls of a cached scan endpoint that returned 202 (2 seconds).
+export const DEFAULT_POLL_INTERVAL = 2000
 
 // Public blob store URL for patch downloads
 export const SOCKET_PUBLIC_BLOB_STORE_URL = 'https://socketusercontent.com'
@@ -60,10 +59,10 @@ export const SOCKET_FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
 
 // https://github.com/sindresorhus/got/blob/v14.4.6/documentation/2-options.md#agent
 // Valid HTTP agent names for Got-style agent configuration compatibility.
-export const httpAgentNames = new Set(['http', 'https', 'http2'])
+export const httpAgentNames = new SetCtor(['http', 'https', 'http2'])
 
 // Public security policy.
-export const publicPolicy = new Map<ALERT_TYPE, ALERT_ACTION>([
+export const publicPolicy: Map<ALERT_TYPE, ALERT_ACTION> = new MapCtor([
   // error (1):
   ['malware', 'error'],
   // warn (7):
