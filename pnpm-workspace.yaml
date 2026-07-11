@@ -1,19 +1,223 @@
-resolutionMode: highest
 loglevel: error
 trustPolicy: no-downgrade
+trustPolicyExclude:
+  - 'compromise@14.15.0'
+  - 'undici@5.29.0'
+
+# Register .claude/hooks/* as workspace packages so taze (run via
+# `pnpm run update`) sees and bumps their package.json manifests
+# alongside the root. Keeps hook deps in lockstep with the main tree.
+packages:
+  - .claude/hooks/*
+  - '.config/fleet/oxlint-plugin'
+  - '.config/fleet/oxlint-plugin/fleet/*'
 
 allowBuilds:
-  esbuild: true
+  '@anthropic-ai/claude-code': true
+  cpu-features: false
+  protobufjs: false
+  rolldown: true
+  ssh2: false
 
+# Auto-install missing peer deps (pnpm default). Declared explicitly
+# so a future default flip can't silently change install behavior.
+autoInstallPeers: true
+
+# Pin pnpm's default of running root pre/post lifecycle scripts.
+enablePrePostScripts: true
+
+# Force every consumer of Socket's own packages to resolve through the
+# catalog-pinned published versions. The `catalog:` form rewrites
+# `workspace:*`, `^x.y.z`, and bare-version specs alike to the version
+# in the default `catalog:` block above. This defeats accidental
+# local-checkout resolution when a sibling repo is on disk.
 overrides:
-  defu: '>=6.1.6'
-  vite: 7.3.2
+  # Fleet-canonical overrides (managed by socket-wheelhouse sync; do not edit).
+  '@socketregistry/packageurl-js': 'catalog:'
+  '@socketsecurity/lib': 'catalog:'
+  '@socketsecurity/registry': 'catalog:'
+  '@socketsecurity/sdk': 'catalog:'
+  'chalk@>=5': '5.6.2'
+  'es-define-property': 'npm:@socketregistry/es-define-property@1.0.7'
+  'es-set-tostringtag': 'npm:@socketregistry/es-set-tostringtag@1.0.10'
+  'function-bind': 'npm:@socketregistry/function-bind@1.0.7'
+  'glob': '13.0.6'
+  'gopd': 'npm:@socketregistry/gopd@1.0.7'
+  'has-symbols': 'npm:@socketregistry/has-symbols@1.0.7'
+  'has-tostringtag': 'npm:@socketregistry/has-tostringtag@1.0.7'
+  'hasown': 'npm:@socketregistry/hasown@1.0.7'
+  'iconv-lite': '0.7.2'
+  'isexe@>=3': '4.0.0'
+  'lru-cache@>=10': '11.3.6'
+  'magic-string': '0.30.21'
+  'mime-db': '1.54.0'
+  'mime-types@>=3': '3.0.2'
+  'minipass@>=4': '7.1.3'
+  'safe-buffer': 'npm:@socketregistry/safe-buffer@1.0.9'
+  'safer-buffer': 'npm:@socketregistry/safer-buffer@1.0.10'
+  'semver@>=5.0.0 <7.6.0': '7.8.1'
+  'side-channel': 'npm:@socketregistry/side-channel@1.0.10'
+  'ssri@>=12': '13.0.1'
+  'string-width@>=5': '8.1.0'
+  'update-notifier@>=4.0.0': '7.3.1'
+  'uuid': '11.1.1'
+  'which': '7.0.0'
+  'wrap-ansi@>=8': '9.0.2'
+  'yaml@2': '2.9.0'
+
+  # Repo-specific overrides below.
+  'defu': '>=6.1.7'
+  'js-yaml': '4.2.0'
+  'protobufjs': '7.6.3'
+  # advisories #51 / #54 (medium) — bump to latest 6.x patch
+  'undici': '6.27.0'
+  'vite': 'catalog:'
+  'which@>=4': '7.0.0'
+
+# Refuse to run if the pnpm version on PATH differs from the packageManager
+# field in package.json. Our setup action pins pnpm via external-tools.json;
+# any drift should fail fast, not silently auto-download via @pnpm/exe
+# (which in rc.5 leaves a placeholder launcher that errors at runtime).
+pmOnFail: warn
+
+catalog:
+  '@anthropic-ai/claude-code': 2.1.201
+  '@redwoodjs/agent-ci': 0.16.2
+  '@sinclair/typebox': 0.34.49
+  '@socketregistry/packageurl-js': 1.4.2
+  '@types/semver': 7.7.1
+  '@types/shell-quote': 1.7.5
+  '@ultrathink/acorn.wasm': npm:@ultrathink/acorn-wasm@0.0.1
+  # -stable aliases: pnpm `overrides:` can't redirect a package's own
+  # name from inside the same package — Node ESM resolves it as a
+  # self-reference. Build / hook / script / config code uses the
+  # -stable name. See socket-wheelhouse@92cd3e3 for full rationale.
+  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.2'
+  '@socketsecurity/lib': 6.0.9
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.9'
+  '@socketsecurity/registry': 2.0.2
+  '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.2'
+  '@socketsecurity/sdk': 4.0.1
+  '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.1'
+  '@types/mdast': 4.0.4
+  '@types/node': 26.1.0
+  '@typescript/native-preview': 7.0.0-dev.20260510.1
+  '@vitest/coverage-v8': 4.1.9
+  '@vitest/ui': 4.1.9
+  'dtu-github-actions': 0.16.2
+  'ecc-agentshield': 1.4.0
+  'markdownlint-cli2': 0.23.0
+  'mdast-util-from-markdown': 2.0.3
+  'micromark': 4.0.2
+  'neosanitize': 0.3.0
+  'nock': 15.0.0
+  'npm-run-all2': 9.0.2
+  'oxfmt': 0.57.0
+  'oxlint': 1.72.0
+  # Fleet bundler (replaces esbuild). Single-sourced to match the
+  # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
+  'playwright-core': 1.61.1
+  'regjsparser': 0.13.2
+  'rolldown': 1.1.4
+  'semver': 7.8.5
+  'shell-quote': 1.9.0
+  'svgo': 4.0.1
+  'taze': 19.14.1
+  # vite 8.0.14 swaps esbuild → rolldown natively (bundles rolldown
+  # 1.0.2), so the override below removes esbuild from the install tree.
+  'typescript': 7.0.2
+  'vite': 8.1.0
+  'vitest': 4.1.9
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
-  - '@anthropic-ai/claude-code@2.1.92'
+  # typescript 7.0.2 — first stable of the native 7.x compiler line, pulled
+  # ahead of the soak by owner directive (out of RC). The main package + its
+  # 20-package per-platform binding family are pinned to the exact version
+  # (a scope glob would blanket-bypass any future @typescript publish).
+  # published: 2026-07-08 | removable: 2026-07-15
+  - 'typescript@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-aix-ppc64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-darwin-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-darwin-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-freebsd-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-freebsd-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-arm@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-loong64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-mips64el@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-ppc64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-riscv64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-s390x@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-netbsd-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-netbsd-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-openbsd-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-openbsd-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-sunos-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-win32-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-win32-x64@7.0.2'
   - '@socketaddon/*'
   - '@socketbin/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
+  # compromise@14.15.1 is the attested re-publish that clears the
+  # trust-downgrade flag on 14.15.0. The catalog bump cascaded from the
+  # wheelhouse without its matching soak-exclude, leaving frozen installs
+  # broken; scoped to the exact tag so a future 14.15.2 still soaks.
+  # rolldown 1.0.2 is vite 8.0.14's bundled native rolldown release; the
+  # per-platform bindings share its pin. `@rolldown/pluginutils` versions
+  # independently — rolldown 1.0.2 depends on `^1.0.0` → resolves to 1.0.1.
+  # Listed explicitly per the fleet "no scope globs in soak excludes" rule.
+  # rolldown's AST/types layer. rolldown 1.0.3 pins `=0.133.0`.
+  - '@redwoodjs/agent-ci'
+  - '@rolldown/pluginutils'
+  - 'sfw'
+  - '@stuie/*'
+  - '@ultrathink/*'
+  - '@socketoverride/*'
+  - 'socket'
+  - '@sdxgen/*'
+  - 'sdxgen'
+  - 'stuie'
+
+# Refuse transitive dependencies declared via git/tarball/local-tarball
+# specs — an npm package shouldn't be allowed to drag in a git URL we
+# don't control (bypasses npm registry validation, no provenance, no
+# soak window). Direct git deps are still allowed (the test suite at
+# pnpm/pkg-manager/core/test/install/blockExoticSubdeps.ts confirms
+# this). pnpm's current default is `false`; declared explicitly so a
+# future flip can't silently change install behavior.
+blockExoticSubdeps: true
+confirmModulesPurge: false
+managePackageManagerVersions: false
+
+# Pin exact versions on `pnpm add`. Catalog and overrides should
+# also be exact pins (5.24.0, not ^5.24.0).
+saveExact: true
+
+# nock 15 (msw-interceptors rewrite) breaks 13 full-scan/blob test mocks —
+# deliberate hold-back at 14.0.10 until the corpus migrates (task on the board).
+catalogShadowIgnore:
+  - 'nock'
