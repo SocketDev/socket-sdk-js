@@ -57,13 +57,16 @@ jobs:
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@c4b120c34fa95a9974ffb3f407fa58f4d167c844 # main (2026-05-15)
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/fleet/setup-and-install
       - name: Configure push credentials
         env:
           GH_TOKEN: ${{ github.token }}
         run: git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
 
-      - uses: SocketDev/socket-registry/.github/actions/setup-git-signing@f09a1cd39868ae45d304cfcead2d4f19a5325d8a # main (2026-05-15)
+      - uses: ./.github/actions/fleet/setup-git-signing
         with:
           gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
@@ -115,11 +118,8 @@ jobs:
           existing_pr=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
 
           if [ -z "$existing_pr" ]; then
-            gh pr create \
-              --head automated/open-api \
-              --base main \
-              --title "Sync with OpenAPI definition" \
-              --body "## OpenAPI Sync
+            cat > /tmp/pr-body.md <<'EOF'
+          ## OpenAPI Sync
 
           The OpenAPI definition in the API has been updated. This PR automatically:
           - Downloads the latest OpenAPI specification
@@ -130,7 +130,13 @@ jobs:
           ### What's Changed
           See the file changes below for specific updates to the API types, strict types, and methods.
 
-          **Please review carefully for any breaking changes in the API.**" \
+          **Please review carefully for any breaking changes in the API.**
+          EOF
+            gh pr create \
+              --head automated/open-api \
+              --base main \
+              --title "Sync with OpenAPI definition" \
+              --body-file /tmp/pr-body.md \
               --label "dependencies" \
               --label "automated"
           else
@@ -169,5 +175,5 @@ jobs:
           > \`\`\`
           EOF
 
-      - uses: SocketDev/socket-registry/.github/actions/cleanup-git-signing@f09a1cd39868ae45d304cfcead2d4f19a5325d8a # main (2026-05-15)
+      - uses: ./.github/actions/fleet/cleanup-git-signing
         if: always()
