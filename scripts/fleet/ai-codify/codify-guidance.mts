@@ -135,7 +135,7 @@ export const SURFACE_GUIDANCE: Readonly<Record<CodifySurface, string>> = {
   - Mirror an existing check's shape (read scripts/fleet/check/hook-dirs-are-not-husks.mts as the canonical template): a header comment (what / why / what fails / usage), pure exported scan functions (\`scanForX(repoRoot): Hit[]\`), a \`main()\` that logs hits + sets \`process.exitCode = 1\` on findings, and the entrypoint guard \`if (process.argv[1] === fileURLToPath(import.meta.url)) { main() }\`.
   - Import REPO_ROOT from '../paths.mts'; logger from '@socketsecurity/lib-stable/logger/default'.
   - Register it in scripts/fleet/check.mts as \`() => run('node', ['scripts/fleet/check/<name>.mts'])\` with a 2-4 line comment naming the discipline + the motivating incident generically (no dates/SHAs — the dated-citation rule).
-  - If the check has non-trivial pure logic, write a vitest test at test/unit/fleet/check/<name>.test.mts (a dead-export fixture that fails + a clean one that passes) and run it with \`pnpm test test/unit/fleet/check/<name>.test.mts\`. Fleet-script tests cascade in lock-step; see docs/agents.md/fleet/test-layout.md.
+  - If the check has non-trivial pure logic, write a vitest test at test/repo/unit/check/<name>.test.mts (a dead-export fixture that fails + a clean one that passes) and run it with \`pnpm test test/repo/unit/check/<name>.test.mts\`. Fleet-script tests cascade in lock-step; see docs/agents.md/fleet/test-layout.md.
 </conventions>`,
   'hook-guard': `Author a new BLOCKING hook at .claude/hooks/{fleet,repo}/<name>-guard/ (a -guard BLOCKS; if it only nudges, use hook-nudge instead — never both for one concern).
 

@@ -83,10 +83,42 @@ export function defaultBase(tip: string): string | undefined {
   return tag.status === 0 && tag.stdout ? tag.stdout : undefined
 }
 
+/**
+ * True when `base` and `originRef` have DIVERGED — neither contains the
+ * other. A base above origin's tip (unpushed span on the same lineage) and a
+ * base below it (normal release anchor) are both legitimate; divergence means
+ * the base sits on superseded history and consolidating onto it re-embeds
+ * old-lineage commits.
+ */
+export function isOffLineage(
+  baseReachableFromOrigin: boolean,
+  originReachableFromBase: boolean,
+): boolean {
+  return !baseReachableFromOrigin && !originReachableFromBase
+}
+
+function resolveOriginDefaultRef(): string | undefined {
+  const sym = git(['symbolic-ref', 'refs/remotes/origin/HEAD'])
+  if (sym.status === 0 && sym.stdout) {
+    return sym.stdout.replace('refs/remotes/', '')
+  }
+  for (const name of ['origin/main', 'origin/master']) {
+    if (git(['rev-parse', '--verify', name]).status === 0) {
+      return name
+    }
+  }
+  return undefined
+}
+
+function isAncestor(ancestor: string, descendant: string): boolean {
+  return git(['merge-base', '--is-ancestor', ancestor, descendant]).status === 0
+}
+
 function main(): void {
   const { values } = parseArgs({
     args: process.argv.slice(2),
     options: {
+      'allow-off-lineage-base': { type: 'boolean' },
       base: { type: 'string' },
       'dry-run': { type: 'boolean' },
     },
@@ -116,6 +148,31 @@ function main(): void {
     )
     process.exitCode = 1
     return
+  }
+
+  // Off-lineage base guard. After a force-push rewrite, old anchors (a
+  // version tag, an npm gitHead) still point into the REPLACED history.
+  // Consolidating onto such a base rebuilds the branch on that dead line, so
+  // every replaced commit comes back — including ones the rewrite existed to
+  // remove (hit live: socket-mcp's v0.0.20 tag resurrected an AI-attributed
+  // commit the pre-push gate then rejected).
+  const originRef = resolveOriginDefaultRef()
+  if (originRef && !values['allow-off-lineage-base']) {
+    if (
+      isOffLineage(isAncestor(base, originRef), isAncestor(originRef, base))
+    ) {
+      logger.fail(
+        `[consolidate-commits] the base commit is not part of ${originRef}'s history.\n` +
+          `  What:   --base ${base.slice(0, 12)} sits on an old line of history that a force-push already replaced (stale anchors do this: a version tag or an npm gitHead minted before the rewrite).\n` +
+          `  Why:    consolidating onto it would rebuild your branch on that dead line, bringing every replaced commit back — including ones the rewrite removed on purpose (the pre-push gate will reject them again).\n` +
+          `  Fix:    pick the SAME release point on the live history instead — find it with\n` +
+          `            git log ${originRef} --oneline | head -20\n` +
+          `          (look for the matching bump/release subject) and pass that sha as --base.\n` +
+          `  Escape: --allow-off-lineage-base skips this check, ONLY for consolidating a deliberately local-only lineage.`,
+      )
+      process.exitCode = 1
+      return
+    }
   }
 
   const tipSubject = gitOrDie(['log', '-1', '--format=%s', orig], 'tip subject')

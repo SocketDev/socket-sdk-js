@@ -33,18 +33,14 @@ const enriched = {
 
 writeFileSync(outPath, JSON.stringify(enriched, null, 2) + '\n', 'utf8')
 
-// Run oxfmt on the output so the file matches what oxfmt would
-// produce. Without this, `pnpm run check --all` (which runs oxfmt
-// over the tree) would flag the emitted schema as drifted on every
-// repo that re-emits it. The schema is in IDENTICAL_FILES, so the
-// formatted form is the byte-canonical form fleet-wide.
-await spawn(
-  'pnpm',
-  ['exec', 'oxfmt', '-c', '.config/fleet/oxfmtrc.json', outPath],
-  {
-    cwd: rootDir,
-    stdio: 'inherit',
-  },
-)
+// Format the output through the package.json wrapper (it owns the config +
+// ignore set; never a bare oxfmt invocation). Without this, `pnpm run check
+// --all` would flag the emitted schema as drifted on every repo that
+// re-emits it. The schema is in IDENTICAL_FILES, so the formatted form is
+// the byte-canonical form fleet-wide.
+await spawn('pnpm', ['run', 'format', outPath], {
+  cwd: rootDir,
+  stdio: 'inherit',
+})
 
 logger.success(`wrote ${path.relative(rootDir, outPath)}`)
