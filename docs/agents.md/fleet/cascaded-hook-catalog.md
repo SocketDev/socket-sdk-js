@@ -28,7 +28,7 @@ or changing a cascaded hook/rule.
     structure-sensitive Bash guards. Replaces regex command detection so
     `$var`/eval/`$(…)` indirection is seen, not evaded. shell-quote is a
     fleet-wide catalog devDep (resolves from root node_modules, the ancestor
-    every hook + _shared walks up to).
+    every hook +_shared walks up to).
   - `transcript.mts` — centralizes `readStdin()` + the JSONL user-turn parser (3
     shape variants) used by every hook that needs the `Allow <X> bypass` phrase
     scan. Before extraction the parser was copy-pasted across no-revert-guard /
@@ -48,7 +48,7 @@ or changing a cascaded hook/rule.
     scan for the same vendor / generic shapes. Categorized by vendor (Socket, LLM
     providers, GitHub, Linear, Notion, AWS, Stripe, etc.) so consumers can opt
     out per category; `ALL_TOKEN_KEY_PATTERNS` is the default union.
-  - `wheelhouse-root.mts` — walks up from cwd to find the socket-wheelhouse
+  - `wheelhouse-root.mts` — walks up from cwd to find the wheelhouse
     checkout. Used by the user-global wheelhouse-dispatch hook so wheelhouse-only
     hooks (new-hook-claude-md-guard, drift-check-nudge) can fire from any
     fleet-repo session. Must cascade since the dispatcher imports it via the
@@ -180,7 +180,7 @@ phrase (where one exists):
 - **commit-author-guard** — PreToolUse(Bash) refusing commits whose author email
   drifts from the canonical GitHub identity. Bypass: `Allow commit-author bypass`.
 - **commit-message-format-guard** — PreToolUse(Bash) enforcing Conventional Commits
-  + banning AI attribution. Bypass: `Allow commit-format bypass` / `Allow ai-attribution bypass`.
+  - banning AI attribution. Bypass: `Allow commit-format bypass` / `Allow ai-attribution bypass`.
 - **default-branch-guard** — PreToolUse(Bash) refusing hard-coded `main`/`master` in
   scripting contexts. Bypass: `Allow default-branch bypass`.
 - **version-bump-order-guard** — PreToolUse(Bash) refusing `git tag vX.Y.Z` when HEAD

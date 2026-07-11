@@ -8,7 +8,7 @@ squash, reword, lease-force reconcile).
 When the pre-push gate reports "AI attribution found in commit messages", the
 owner is:
 
-```
+```bash
 node scripts/fleet/strip-ai-attribution.mts --base <ref> [--dry-run]
 ```
 

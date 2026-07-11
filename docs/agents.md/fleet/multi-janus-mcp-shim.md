@@ -4,9 +4,9 @@ A stdio MCP server (`scripts/fleet/janus-multi-mcp.mts`) that fronts **many** re
 
 ## Why
 
-The native `janus mcp` is rooted at a single `.janus/` (its launch cwd). An agent working in `socket-lib` can't file a ticket into `socket-wheelhouse`'s queue without changing directories — which, on a shared checkout, means fighting the other session's `.git/index`. That contention is what wedged a recent landing.
+The native `janus mcp` is rooted at a single `.janus/` (its launch cwd). An agent working in `socket-lib` can't file a ticket into the wheelhouse's queue without changing directories — which, on a shared checkout, means fighting the other session's `.git/index`. That contention is what wedged a recent landing.
 
-This shim adds a `workspace` parameter to every tool and routes the call to that repo's `.janus/` by shelling `janus` with `JANUS_ROOT` set. So a `socket-lib` agent that discovers it needs a fleet-canonical change **files it into the `socket-wheelhouse` queue and keeps draining its own** — no cross-checkout commit.
+This shim adds a `workspace` parameter to every tool and routes the call to that repo's `.janus/` by shelling `janus` with `JANUS_ROOT` set. So a `socket-lib` agent that discovers it needs a fleet-canonical change **files it into the wheelhouse queue and keeps draining its own** — no cross-checkout commit.
 
 ## Stopgap status
 
@@ -14,20 +14,20 @@ This is a stopgap. The upstream `janus mcp --workspace name=path` (a PR stack ag
 
 ## Workspaces
 
-Zero-config discovery: every fleet repo (from the wheelhouse-canonical `fleet-repos.json`) that is a sibling directory of the wheelhouse root **and** has a `.janus/` dir is a workspace. The workspace name is the repo dir name (e.g. `socket-wheelhouse`). Call `list_workspaces` for the live set. A repo with no `.janus/` is not listed (it has not adopted Janus yet).
+Zero-config discovery: every fleet repo (from the wheelhouse-canonical `fleet-repos.json`) that is a sibling directory of the wheelhouse root **and** has a `.janus/` dir is a workspace. The workspace name is the repo dir name (e.g. `the-wheelhouse`). Call `list_workspaces` for the live set. A repo with no `.janus/` is not listed (it has not adopted Janus yet).
 
 ## Tools
 
 Each tool except `list_workspaces` takes a required `workspace` arg.
 
-| Tool | Maps to | Notes |
-|------|---------|-------|
-| `list_workspaces` | discovery | name + repoPath for each |
-| `create_ticket` | `janus create` | the cross-repo fire-off; `externalRef` links back |
-| `get_next_available_ticket` | `janus next --json` | the runner loop's "what's next" |
-| `list_tickets` | `janus ls --json` | |
-| `show_ticket` | `janus show <id> --json` | |
-| `update_status` | `janus status <id> <status> --json` | new/next/in_progress/complete/cancelled/archived |
+| Tool                        | Maps to                             | Notes                                             |
+| --------------------------- | ----------------------------------- | ------------------------------------------------- |
+| `list_workspaces`           | discovery                           | name + repoPath for each                          |
+| `create_ticket`             | `janus create`                      | the cross-repo fire-off; `externalRef` links back |
+| `get_next_available_ticket` | `janus next --json`                 | the runner loop's "what's next"                   |
+| `list_tickets`              | `janus ls --json`                   |                                                   |
+| `show_ticket`               | `janus show <id> --json`            |                                                   |
+| `update_status`             | `janus status <id> <status> --json` | new/next/in_progress/complete/cancelled/archived  |
 
 ## Wiring (`.mcp.json`)
 
