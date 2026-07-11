@@ -53,7 +53,7 @@ Requires the `janus` binary on `PATH` (Homebrew: `brew tap divmain/janus && brew
   sleep 1 ) | node scripts/fleet/janus-multi-mcp.mts
 ```
 
-The pure logic (JSON-RPC dispatch, tool→argv mapping, workspace discovery) is unit-tested in `test/unit/fleet/janus-multi-mcp.test.mts`.
+The pure logic (JSON-RPC dispatch, tool→argv mapping, workspace discovery) is unit-tested in `test/repo/unit/janus-multi-mcp.test.mts`.
 
 ## Caveat: `.janus/` is not gitignored
 
