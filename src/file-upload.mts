@@ -1,7 +1,6 @@
 import { createReadStream } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
-
-import FormData from 'form-data'
 
 import { isErrnoException } from '@socketsecurity/lib/errors/predicates'
 import { httpRequest } from '@socketsecurity/lib/http-request/request'
@@ -12,6 +11,7 @@ import { MAX_RESPONSE_SIZE } from './constants.mts'
 import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
 import type { RequestOptions, RequestOptionsWithHooks } from './types.mts'
+import type FormData from 'form-data'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { ReadStream } from 'node:fs'
 import type { Readable } from 'node:stream'
@@ -19,7 +19,8 @@ import type { Readable } from 'node:stream'
 export function createRequestBodyForBlobs(
   entries: Array<{ absPath: string; hash: string; name: string }>,
 ): FormData {
-  const form = new FormData()
+  const FormDataCtor = getFormData()
+  const form = new FormDataCtor()
   for (let i = 0, { length } = entries; i < length; i += 1) {
     const entry = entries[i]!
     const stream = openFileReadStreamOrThrow(entry.absPath)
@@ -35,7 +36,8 @@ export function createRequestBodyForFilepaths(
   filepaths: string[],
   basePath: string,
 ): FormData {
-  const form = new FormData()
+  const FormDataCtor = getFormData()
+  const form = new FormDataCtor()
   for (let i = 0, { length } = filepaths; i < length; i += 1) {
     const absPath = filepaths[i]!
     const relPath = normalizePath(path.relative(basePath, absPath))
@@ -117,6 +119,22 @@ export async function createUploadRequest(
  * the error-message shape (and the coverage-ignore justification) lives in
  * one place.
  */
+const requireHere = createRequire(import.meta.url)
+
+// Lazy, memoized form-data. Loading it eagerly binds node:http's native
+// HTTPParser at MODULE EVAL (form-data requires node:http/https at its own
+// module scope), which makes every SDK importer hostile to V8 startup
+// snapshots (`--build-snapshot` aborts on the unserializable [Foreign]
+// handles). Only the two multipart builders below construct it, so the
+// require defers to first upload.
+let formDataCtor: typeof FormData | undefined
+export function getFormData(): typeof FormData {
+  if (formDataCtor === undefined) {
+    formDataCtor = requireHere('form-data') as typeof FormData
+  }
+  return formDataCtor
+}
+
 export function openFileReadStreamOrThrow(absPath: string): ReadStream {
   try {
     return createReadStream(absPath, { highWaterMark: 1024 * 1024 })
