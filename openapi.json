@@ -37647,6 +37647,7 @@
                 "SetLabelSettingToDefault",
                 "SetSsoBypassMemberships",
                 "SetSsoBypassRbacRoles",
+                "StartAlertPolicyMigrationPreview",
                 "SSOEmailVerificationCompleted",
                 "SSOLoginCompleted",
                 "SvdBackfillLegacyOverlay",
