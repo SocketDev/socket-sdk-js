@@ -47,21 +47,25 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 import { readSessionTouchedPaths } from '../_shared/foreign-paths.mts'
+import { isSquashOptIn } from '../_shared/fleet-roster.mts'
 import { extractGitCwd } from '../_shared/git-cwd.mts'
 import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
+import { isGitCommit } from '../_shared/commit-command.mts'
 import {
   commandsFor,
   detectBroadGitAdd,
-  findInvocation,
+  isFleetSyncCommand,
 } from '../_shared/shell-command.mts'
+import { spawnTimeoutMs } from '../_shared/spawn-timeout.mts'
 import { squashSentinelAllows } from '../_shared/squash-sentinel.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
 // Pre-flight trigger for the dispatcher: every block path runs through a
 // `git`-binary detector (`detectBroadGitAdd` → `commandsFor(_, 'git')`, and
-// `isGitCommit` → `findInvocation(_, { binary: 'git', … })`), each of which
-// short-circuits unless the raw command contains the substring `git`. So a
-// command with no `git` can never block — skip importing this guard for it.
+// `isGitCommit` → the shared `_shared/commit-command.mts` segment parse),
+// each of which short-circuits unless the raw command contains the substring
+// `git`. So a command with no `git` can never block — skip importing this
+// guard for it.
 export const triggers: readonly string[] = ['git']
 
 const BYPASS_PHRASES = ['Allow add-all bypass'] as const
@@ -80,9 +84,7 @@ export function getRepoDir(command: string): string {
   return extractGitCwd(command, { subcommand: ['add', 'commit'] })
 }
 
-export function isGitCommit(command: string): boolean {
-  return findInvocation(command, { binary: 'git', subcommand: 'commit' })
-}
+export { isGitCommit }
 
 // True when a `git commit` carries an explicit pathspec — the parallel-safe
 // form, because `git commit <paths>` / `-o`/`--only <paths>` commits ONLY those
@@ -137,7 +139,7 @@ export function isMidMergeCommit(repoDir: string): boolean {
       '--git-path',
       'REVERT_HEAD',
     ],
-    { cwd: repoDir, timeout: 5000 },
+    { cwd: repoDir, timeout: spawnTimeoutMs(5000) },
   )
   if (r.status !== 0) {
     return false
@@ -152,7 +154,7 @@ export function isMidMergeCommit(repoDir: string): boolean {
 export function listStagedFiles(repoDir: string): string[] {
   const r = spawnSync('git', ['diff', '--cached', '--name-only'], {
     cwd: repoDir,
-    timeout: 5000,
+    timeout: spawnTimeoutMs(5000),
   })
   if (r.status !== 0) {
     return []
@@ -175,7 +177,7 @@ export function listStagedRenamedPaths(repoDir: string): Set<string> {
   const r = spawnSync(
     'git',
     ['diff', '--cached', '--name-status', '-M', '--diff-filter=R'],
-    { cwd: repoDir, timeout: 5000 },
+    { cwd: repoDir, timeout: spawnTimeoutMs(5000) },
   )
   const renamed = new Set<string>()
   if (r.status !== 0) {
@@ -196,6 +198,16 @@ export const check = bashGuard((command, payload) => {
   const repoDir = getRepoDir(command)
   const transcriptPath = payload.transcript_path
 
+  // Squash-history relaxation. A repo opted into `squash-history` flattens its
+  // default branch to one commit before every push, so commit order and
+  // granularity carry no meaning — a broad `git add -A` or a bare `git commit`
+  // that sweeps the index is exactly the "merge merge merge, squash before push"
+  // flow, not a hazard. Every op this guard blocks is non-destructive (staging /
+  // committing, never losing work), so relaxing the whole guard here is safe.
+  if (isSquashOptIn(repoDir)) {
+    return undefined
+  }
+
   // ── Layer 1: block `git add -A` / `.` / `-u` ─────────────────────
   const broad = detectBroadGitAdd(command)
   if (broad) {
@@ -203,7 +215,7 @@ export const check = bashGuard((command, payload) => {
     // worktree they just created off origin/main — no parallel-session
     // hazard because the worktree is empty otherwise. Same opt-in
     // sentinel the no-revert-guard recognizes (`FLEET_SYNC=1` prefix).
-    if (/(?:^|\s)FLEET_SYNC\s*=\s*1\b/.test(command)) {
+    if (isFleetSyncCommand(command)) {
       return undefined
     }
     if (
@@ -243,7 +255,7 @@ export const check = bashGuard((command, payload) => {
     // a fresh worktree off origin/main). The `FLEET_SYNC=1` sentinel — which
     // no-revert-guard already recognizes for cascade `--no-verify` commits —
     // opts out of the sweep block too.
-    if (/(?:^|\s)FLEET_SYNC\s*=\s*1\b/.test(command)) {
+    if (isFleetSyncCommand(command)) {
       return undefined
     }
     // The squashing-history collapse commit stages the whole tree on purpose;

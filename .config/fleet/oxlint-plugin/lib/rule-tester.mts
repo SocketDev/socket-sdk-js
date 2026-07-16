@@ -220,10 +220,44 @@ interface OxlintDiagnostic {
 }
 
 /**
+ * One oxlint child invocation. Pipe (never inherit) the child's stdio: oxlint
+ * detects a TTY and emits an OSC-52 clipboard escape when stdout/stderr is a
+ * terminal, which trips the OS "terminal attempted to access the clipboard"
+ * denial on every test run. Piping makes isatty() false so the escape is never
+ * written, and the caller reads r.stdout anyway.
+ */
+export function spawnOxlintOnce(
+  oxlintBin: string,
+  cliArgs: string[],
+): ReturnType<typeof spawnSync> {
+  // The npm package's `bin/oxlint` is a node shim (`#!/usr/bin/env node`).
+  // Unix executes it via the shebang; windows has no shebangs, so spawning the
+  // shim directly fails ("oxlint child failed" on every windows CI run). Run
+  // anything that isn't a real executable through the current node binary —
+  // identical behavior on unix, the only working path on windows.
+  const isNativeExe = oxlintBin.endsWith('.exe')
+  const cmd = isNativeExe ? oxlintBin : process.execPath
+  const args = isNativeExe ? cliArgs : [oxlintBin, ...cliArgs]
+  return spawnSync(cmd, args, {
+    timeout: 15_000,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+}
+
+/**
+ * Synchronous backoff between starved-spawn retries. RuleTester is a fully
+ * synchronous pipeline (spawnSync per case), so an async sleep has nothing to
+ * yield to; Atomics.wait gives a real blocking pause without spinning.
+ */
+export function sleepSync(ms: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
+}
+
+/**
  * Run oxlint against a fixture file with a one-rule config; return the parsed
  * list of findings for THIS rule.
  */
-function runOxlint(args: {
+export function runOxlint(args: {
   oxlintBin: string
   fixturePath: string
   configPath: string
@@ -235,15 +269,19 @@ function runOxlint(args: {
     cliArgs.push('--fix')
   }
   cliArgs.push(args.fixturePath)
-  const r = spawnSync(args.oxlintBin, cliArgs, {
-    timeout: 15_000,
-    // Pipe (never inherit) the child's stdio: oxlint detects a TTY and emits an
-    // OSC-52 clipboard escape when stdout/stderr is a terminal, which trips the
-    // OS "terminal attempted to access the clipboard" denial on every test run.
-    // Piping makes isatty() false so the escape is never written, and we read
-    // r.stdout below anyway.
-    stdio: ['ignore', 'pipe', 'pipe'],
-  })
+  // Starved-spawn retry: on 2-core CI runners, vitest concurrency × one oxlint
+  // child per case starves spawns (windows: spawnSync error; linux/macos: the
+  // child sits queued until a timeout kills it). Both reds reproduced across
+  // whole runs on every OS while passing locally, so a starved child gets a
+  // short backoff and two more attempts before the loud throw below.
+  let r = spawnOxlintOnce(args.oxlintBin, cliArgs)
+  for (const backoffMs of [250, 1000]) {
+    if (!r.error && !r.signal && String(r.stdout || '').trim() !== '') {
+      break
+    }
+    sleepSync(backoffMs)
+    r = spawnOxlintOnce(args.oxlintBin, cliArgs)
+  }
   // oxlint's JSON reporter has changed shape across versions:
   //   - Older: line-delimited diagnostic objects, one per line.
   //   - Mid:   top-level array `[ { diagnostics: [...] }, ... ]`.
@@ -255,8 +293,26 @@ function runOxlint(args: {
   // findings (autofix from other socket rules in the same config)
   // don't inflate the count.
   const stdout = String(r.stdout || '')
-  const diagnostics: OxlintDiagnostic[] = []
   const trimmed = stdout.trim()
+  // A dead child must never read as "0 findings" — under heavy load a
+  // starved/killed oxlint (spawn error, timeout signal, or empty JSON
+  // stream) previously parsed to an empty diagnostics array, making a
+  // broken spawn indistinguishable from a clean file (coverage run 10:
+  // 29 false "expected 1 finding(s), got 0" assertions). The JSON
+  // reporter always emits at least one object on a real run, even with
+  // zero findings.
+  if (r.error || r.signal || trimmed === '') {
+    throw new Error(
+      `oxlint child failed for rule '${args.ruleName}'.\n` +
+        `  Where: RuleTester runOxlint (${args.oxlintBin})\n` +
+        `  Saw: ${r.error ? `spawn error ${String(r.error)}` : r.signal ? `killed with ${r.signal} (timeout or external kill)` : 'empty stdout'}; wanted: a JSON diagnostics stream\n` +
+        `  Fix: rerun without concurrent load; if it persists, check the oxlint binary and config at ${args.configPath}.\n` +
+        `  stderr: ${String(r.stderr || '')
+          .trim()
+          .slice(0, 400)}`,
+    )
+  }
+  const diagnostics: OxlintDiagnostic[] = []
   const matchesRule = (d: OxlintDiagnostic): boolean => {
     // Current oxlint emits `code` like `socket(no-cached-for-on-iterable)`
     // instead of (or in addition to) `ruleId`. Accept either form.

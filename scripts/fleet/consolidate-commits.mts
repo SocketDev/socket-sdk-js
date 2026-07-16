@@ -31,6 +31,7 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { groupPaths } from './land-work.mts'
 import { commitMessage } from './land-work/message.mts'
 import { REPO_ROOT } from './paths.mts'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
@@ -281,6 +282,6 @@ function main(): void {
   )
 }
 
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(import.meta.url)) {
   main()
 }

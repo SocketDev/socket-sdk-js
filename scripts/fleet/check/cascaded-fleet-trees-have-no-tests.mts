@@ -46,6 +46,11 @@ const ROOTS: readonly string[] = ['template/base', '.']
 // A `*.test.*` file (test.mts/ts/js/mjs/cjs/tsx/jsx). Path normalized to `/`.
 const TEST_FILE_RE = /\.test\.[a-z]+$/
 
+// Directory names the walk never descends into: an installed dependency tree or
+// a nested git working tree holds files this gate does not own — a dependency's
+// own `*.test.js` under node_modules is not a cascaded fleet test.
+const SKIP_DIRS: ReadonlySet<string> = new Set(['.git', 'node_modules'])
+
 function walkForTests(dir: string, found: string[]): void {
   let entries: string[]
   try {
@@ -63,6 +68,9 @@ function walkForTests(dir: string, found: string[]): void {
       continue
     }
     if (isDir) {
+      if (SKIP_DIRS.has(entry)) {
+        continue
+      }
       walkForTests(full, found)
     } else if (TEST_FILE_RE.test(entry)) {
       found.push(full)

@@ -9,7 +9,7 @@
       "kind": "first-party",
       "apiBase": "https://api.anthropic.com",
       "pricingSource": "https://platform.claude.com/docs/en/about-claude/pricing",
-      "snapshot": "2026-06-30",
+      "snapshot": "2026-07-12",
       "notes": [
         "multipliers.batch 0.5 = the Batch API's 50%-off on input + output.",
         "multipliers.cacheRead 0.1 = a prompt-cache hit costs 0.1x base input.",

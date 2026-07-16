@@ -2,14 +2,14 @@
 // Claude Code PreToolUse hook — commit-size-nudge.
 //
 // Reminder (NOT a block) on `git commit` when the STAGED diff is large. Fleet
-// commits stay small — one logical change, ~400 changed lines of authored
+// commits stay small — one logical change, ~200 changed lines of authored
 // source — so they land cleanly onto local main without cross-worktree
 // collisions and read like a small reviewable PR. A large staged set is the
 // signal to split into surgical commits (`git commit -o <file>`), each its own
 // logical change.
 //
-// This is the commit-time twin of `small-pr-nudge` (~200 lines on the rare PR
-// path): the fleet direct-pushes to main, so the size discipline actually bites
+// This is the commit-time twin of `small-pr-nudge`: both target ~200 authored
+// lines. The fleet direct-pushes to main, so the size discipline actually bites
 // here, at commit time.
 //
 // Generated / mechanical churn does NOT count toward the ceiling (a lockfile
@@ -28,9 +28,10 @@ import process from 'node:process'
 
 import { isGitCommit } from '../_shared/commit-command.mts'
 import { bashGuard, defineHook, notify, runHook } from '../_shared/guard.mts'
+import { spawnTimeoutMs } from '../_shared/spawn-timeout.mts'
 
-// Fleet doctrine: one logical change, ~400 changed lines of authored source.
-const COMMIT_SIZE_LINES = 400
+// Fleet doctrine: one logical change, ~200 changed lines of authored source.
+const COMMIT_SIZE_LINES = 200
 
 /**
  * The changed-line + file totals of the staged diff. Undefined when the diff
@@ -89,7 +90,7 @@ export function parseNumstat(numstat: string): DiffSize {
 export function stagedDiffSize(cwd: string): DiffSize | undefined {
   const r = spawnSync('git', ['diff', '--cached', '--numstat'], {
     cwd,
-    timeout: 5000,
+    timeout: spawnTimeoutMs(5000),
   })
   if (r.status !== 0) {
     return undefined

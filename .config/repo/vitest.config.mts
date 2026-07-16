@@ -152,14 +152,6 @@ export default defineConfig({
       // scoped to a nested package returns "No test files found", and a
       // full-suite run "passes" having executed zero of them).
       '**/test/**/*.test.{js,ts,mjs,mts,cjs}',
-      // In-place canonical-test mode: also discover the template copies so
-      // `pnpm test template/base/…` (which sets FLEET_TEST_TEMPLATE=1) can run
-      // one before the cascade. The matching exclude of `template/**` is lifted
-      // under the same flag; a normal run keeps both, so template never runs
-      // twice in the full suite.
-      ...(process.env['FLEET_TEST_TEMPLATE'] === '1'
-        ? ['template/base/test/**/*.test.{js,ts,mjs,mts,cjs}']
-        : []),
     ],
     // Vitest treats `test/**` as `**/test/**`, so without an explicit
     // exclude it picks up every nested `test/` directory in the repo
@@ -185,13 +177,14 @@ export default defineConfig({
       '.config/fleet/oxlint-plugin/**',
       'scripts/**/test/**',
       '.claude/hooks/**/test/**',
-      // `template/**` holds the CANONICAL copies; the cascaded LIVE copies are
-      // what the suite runs, so template is excluded to avoid double-running
-      // byte-identical files. `pnpm test template/base/…` sets
-      // FLEET_TEST_TEMPLATE=1 to lift this one exclude and verify a canonical
-      // test IN PLACE before the cascade — the blessed fast path
-      // (scripts/fleet/test.mts). A full/scoped run never sets the flag.
-      ...(process.env['FLEET_TEST_TEMPLATE'] === '1' ? [] : ['template/**']),
+      // Ephemeral git worktrees (sub-agent / companion sessions) carry a full
+      // checkout — their test copies would pollute the primary's discovery and
+      // fail against code the primary has already moved past.
+      '.claude/worktrees/**',
+      // `template/**` holds CANONICAL non-test sources (the cascaded LIVE
+      // copies are what the suite runs); live test/repo is the sole test
+      // authoring home, so template is excluded unconditionally.
+      'template/**',
       // `test/isolated/**` is the isolated SUITE's turf — its own forks / longer
       // -timeout config (`vitest.config.isolated.mts`), run as a separate suite
       // by cover.mts. Exclude it from this shared suite ONLY when the repo ships
@@ -274,8 +267,15 @@ export default defineConfig({
     maxWorkers: isCoverageEnabled
       ? 1
       : (resolveMaxWorkers() ?? (getCI() ? 4 : 16)),
-    testTimeout: 10_000,
-    hookTimeout: 10_000,
+    // Coverage runs serial (maxWorkers: 1 above) with V8 instrumentation that
+    // spawned children inherit, so spawn-heavy tests (hook integration specs
+    // launch a node child per case) legitimately exceed 10s there. CI gets a
+    // 60s budget unconditionally: 2-core runners × parallel workers starve
+    // spawn-per-case suites (RuleTester spawns one oxlint child per case) —
+    // the 10s/30s ceilings killed lint-rule suites mid-queue on every OS while
+    // the same files pass locally.
+    testTimeout: getCI() ? 60_000 : isCoverageEnabled ? 30_000 : 10_000,
+    hookTimeout: getCI() ? 60_000 : isCoverageEnabled ? 30_000 : 10_000,
     bail: getCI() ? 1 : 0,
     // Coverage shape comes from the fleet base merged with the repo-owned
     // `.config/repo/coverage.json` overlay (include replace, exclude

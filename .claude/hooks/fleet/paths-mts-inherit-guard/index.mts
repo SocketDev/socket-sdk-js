@@ -55,10 +55,12 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
-import { bypassPhrasePresent } from '../_shared/transcript.mts'
+import {
+  BYPASS_LOOKBACK_USER_TURNS,
+  bypassPhrasePresent,
+} from '../_shared/transcript.mts'
 
 const BYPASS_PHRASE = 'Allow paths-mts-inherit bypass'
-const BYPASS_LOOKBACK_USER_TURNS = 8
 
 // Match any path that ends with `/paths.mts` or `/paths.cts`, whether at the
 // start of the string or after a directory separator.

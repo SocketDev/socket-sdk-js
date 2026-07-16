@@ -31,6 +31,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  realpathSync,
   rmSync,
 } from 'node:fs'
 import os from 'node:os'
@@ -52,6 +53,7 @@ import {
   applyThinMode,
   installFiles,
   installSegments,
+  installSettingsSegment,
   installWorkspaceSegment,
   pruneStaleFleetFiles,
   readAppliedRef,
@@ -356,7 +358,9 @@ export async function installFleet(options: InstallOptions): Promise<number> {
       }
     }
     const fileCount = Object.keys(manifest.files).length
-    const segmentCount = manifest.segments?.length ?? 0
+    const segmentCount =
+      (manifest.segments?.length ?? 0) +
+      (manifest.settingsSegment === undefined ? 0 : 1)
     if (opts.dryRun) {
       logger.log(
         `install-fleet: [dry-run] ${fileCount} file(s) + ${segmentCount} segment(s) verified ` +
@@ -370,6 +374,10 @@ export async function installFleet(options: InstallOptions): Promise<number> {
     // a separate cleanup pass.
     const prunedCount = pruneStaleFleetFiles(dest, manifest)
     installSegments(segmentsDir, dest, manifest)
+    const settingsResult = installSettingsSegment(segmentsDir, dest, manifest)
+    if (settingsResult !== 0) {
+      return settingsResult
+    }
     const wsResult = installWorkspaceSegment(segmentsDir, dest, manifest)
     if (wsResult !== 0) {
       return wsResult
@@ -394,7 +402,22 @@ export async function installFleet(options: InstallOptions): Promise<number> {
   }
 }
 
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+// Realpath both sides: Node resolves the REAL path for `import.meta.url`
+// while `process.argv[1]` keeps the path as invoked, so a bare URL equality
+// silently skips the CLI body under a symlinked invocation.
+export function isMainModule(): boolean {
+  const entry = process.argv[1]
+  if (!entry) {
+    return false
+  }
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(entry)
+  } catch {
+    return false
+  }
+}
+
+if (isMainModule()) {
   const parsed = parseArgs(process.argv.slice(2))
   // `--status` is the read-only verb (NEVER mutates) — dispatch before the
   // fetch path so a status query can't accidentally apply anything.

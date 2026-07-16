@@ -13,15 +13,15 @@
  *     files directly, plus (b) for each staged SOURCE file, the test files that
  *     mirror it via the MIRROR resolver — never `vitest related` (that broad
  *     walk blew the pre-commit budget on a widely-imported util). The mirror
- *     resolver finds: bare basename tests, shard tests (basename-hyphen
- *     prefix), check-by-name tests for check scripts, and any test file whose
- *     first-party imports include the staged source (direct importers, the
- *     accurate catch for not-yet-renamed tests). Untracked paths are dropped so
- *     a foreign, mid-write test another live actor hasn't committed can't gate
- *     a commit. The staged lane stays tight to what is being committed; the
- *     full suite at pre-push + CI covers cross-cutting impact. A staged source
- *     file with no committed mirror test simply runs nothing at commit time
- *     (its impact is caught at the gate).
+ *     resolver finds: bare basename tests, shard tests that import the source
+ *     (basename-hyphen prefix), check-by-name tests for check scripts, and any
+ *     test file whose first-party imports include the staged source (direct
+ *     importers, the accurate catch for not-yet-renamed tests). Untracked paths
+ *     are dropped so a foreign, mid-write test another live actor hasn't
+ *     committed can't gate a commit. The staged lane stays tight to what is
+ *     being committed; the full suite at pre-push + CI covers cross-cutting
+ *     impact. A staged source file with no committed mirror test simply runs
+ *     nothing at commit time (its impact is caught at the gate).
  *   - `--all` — run the full suite (`vitest run`). Used in CI and on explicit
  *     opt-in. Flags: `--quiet` / `--silent` suppress progress output. Config /
  *     infrastructure changes (`vitest.config*`, `tsconfig*`, `.oxlintrc.json`,
@@ -45,6 +45,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
 
+import { hasLiveForeignActiveRun } from './_shared/active-run-marker.mts'
 import { resolveScopeMode } from './_shared/scope-flags.mts'
 import {
   firstPartyImports,
@@ -55,6 +56,7 @@ import {
   isGeneratedPath,
 } from './constants/generated-globs.mts'
 import { ensurePinnedNode } from './lib/ensure-node.mts'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
@@ -127,10 +129,11 @@ function log(msg: string): void {
   }
 }
 
-function gitFiles(args: string[]): string[] {
+function gitFiles(args: string[], cwd?: string | undefined): string[] {
   // spawnSync with array args — no shell interpolation. Matches the
   // socket/prefer-spawn-over-execsync rule contract.
   const r = spawnSync('git', args, {
+    ...(cwd ? { cwd } : {}),
     stdio: ['ignore', 'pipe', 'pipe'],
     stdioString: true,
   })
@@ -241,7 +244,12 @@ function runVitest(
   const opts = { __proto__: null, ...options } as {
     env?: Record<string, string> | undefined
   }
-  log(`Test scope: ${label}`)
+  // Announce the effective budget tier so a CI log answers "which timeout did
+  // the config compute?" without a probe commit — a 30s timeout under a
+  // config that should compute 60s on CI is diagnosable from the run log.
+  log(
+    `Test scope: ${label} (CI=${process.env['CI'] ? 'yes' : 'no'}, budget tier: ${process.env['CI'] ? '60s' : '10s local'})`,
+  )
   const configArgs = existsSync(ROOT_VITEST_CONFIG)
     ? ['--config', ROOT_VITEST_CONFIG]
     : []
@@ -333,6 +341,15 @@ function isDelegatedWorkspace(): boolean {
 // The test-file glob patterns, one pattern each for .mts/.ts/.mjs/.cjs/.js/.tsx/.jsx.
 const TEST_EXTENSIONS = '{mts,ts,mjs,cjs,js,tsx,jsx}'
 
+interface MirrorTestIndex {
+  readonly importersBySource: ReadonlyMap<string, readonly string[]>
+  readonly testFiles: readonly string[]
+}
+
+// A staged run may resolve mirrors for many source files. Index each repo's
+// test tree once so that cost is O(tests + sources), not O(tests × sources).
+const mirrorTestIndexCache = new Map<string, MirrorTestIndex>()
+
 // Filesystem-only test-file count (no vitest subprocess), matching the SAME
 // `**/`-anchored shape as the root vitest config's `include`. Lets `runAll()`
 // fail loud BEFORE spawning vitest, rather than trusting vitest's own
@@ -394,9 +411,59 @@ function runChanged(): number {
   return runVitest(['run', '--changed', '--passWithNoTests'], 'changed')
 }
 
+function mirrorTestIndex(root: string): MirrorTestIndex {
+  const resolvedRoot = path.resolve(root)
+  const cached = mirrorTestIndexCache.get(resolvedRoot)
+  if (cached) {
+    return cached
+  }
+  const tracked = gitFiles(['ls-files'], resolvedRoot)
+  // Git is the fast and exact index for a real checkout: it omits ignored
+  // output and submodule contents. A non-git fixture falls back to the glob.
+  const testFiles = tracked.length
+    ? tracked.filter(file => /(?:^|\/)test\//.test(file) && isTestFile(file))
+    : globSync(
+        [
+          `**/test/**/*.test.${TEST_EXTENSIONS}`,
+          `**/test/**/*.spec.${TEST_EXTENSIONS}`,
+        ],
+        {
+          cwd: resolvedRoot,
+          absolute: false,
+          ignore: ['**/node_modules/**'],
+        },
+      )
+  const importersBySource = new Map<string, string[]>()
+  for (let i = 0, { length } = testFiles; i < length; i += 1) {
+    const rel = testFiles[i]!
+    const abs = path.join(resolvedRoot, rel)
+    let content = ''
+    try {
+      content = readFileSync(abs, 'utf8')
+    } catch {
+      continue
+    }
+    const imports = firstPartyImports(content, path.dirname(abs), resolvedRoot)
+    for (let j = 0, { length } = imports; j < length; j += 1) {
+      const source = imports[j]!
+      const importers = importersBySource.get(source)
+      if (importers) {
+        importers.push(rel)
+      } else {
+        importersBySource.set(source, [rel])
+      }
+    }
+  }
+  const index = { importersBySource, testFiles }
+  mirrorTestIndexCache.set(resolvedRoot, index)
+  return index
+}
+
 // Find a source file's mirror test files by the MIRROR resolver:
 //   (1) `**/test/**/<base>.test.*` — bare basename match
-//   (2) `**/test/**/<base>-*.test.*` — shard tests (e.g. cover-thresholds for cover.mts)
+//   (2) direct importers named `**/test/**/<base>-*.test.*` — shard tests
+//       (e.g. cover-thresholds for cover.mts); requiring the import prevents a
+//       generic source such as test.mts from claiming unrelated test-* specs
 //   (3) `**/test/**/check-<base>.test.*` — check-by-name tests, only when
 //       a `scripts/.../check/<base>.mts` enforcer exists (isCheckByName)
 //   (4) any test file under a `test/` tree whose first-party imports include this
@@ -412,74 +479,29 @@ export function findMirrorTests(sourcePath: string, root: string): string[] {
     return []
   }
   const out = new Set<string>()
-
-  // (1) Bare basename: **/test/**/<base>.test.*
-  const bare = globSync([`**/test/**/${base}.test.${TEST_EXTENSIONS}`], {
-    cwd: root,
-    absolute: false,
-    ignore: ['**/node_modules/**'],
-  })
-  for (const f of bare) {
-    out.add(f)
-  }
-
-  // (2) Shards: **/test/**/<base>-*.test.*
-  const shards = globSync([`**/test/**/${base}-*.test.${TEST_EXTENSIONS}`], {
-    cwd: root,
-    absolute: false,
-    ignore: ['**/node_modules/**'],
-  })
-  for (const f of shards) {
-    out.add(f)
-  }
-
-  // (3) Check-by-name: **/test/**/check-<base>.test.* only when the check exists.
-  if (isCheckByName(`check-${base}`, root)) {
-    const checkTests = globSync(
-      [`**/test/**/check-${base}.test.${TEST_EXTENSIONS}`],
-      {
-        cwd: root,
-        absolute: false,
-        ignore: ['**/node_modules/**'],
-      },
-    )
-    for (const f of checkTests) {
-      out.add(f)
-    }
-  }
-
-  // (4) Direct importers: scan all test files for those whose first-party
-  // imports include this source. This is the accurate catch for test files that
-  // haven't been renamed yet, or that test a source under a different basename.
-  const allTests = globSync(
-    [
-      `**/test/**/*.test.${TEST_EXTENSIONS}`,
-      `**/test/**/*.spec.${TEST_EXTENSIONS}`,
-    ],
-    {
-      cwd: root,
-      absolute: false,
-      ignore: ['**/node_modules/**'],
-    },
-  )
-  for (const rel of allTests) {
-    if (out.has(rel)) {
+  const index = mirrorTestIndex(root)
+  const checkBase = `check-${base}`
+  const acceptsCheckName = isCheckByName(checkBase, root)
+  const importers = index.importersBySource.get(sourcePath) ?? []
+  const importerSet = new Set(importers)
+  for (let i = 0, { length } = index.testFiles; i < length; i += 1) {
+    const rel = index.testFiles[i]!
+    if (!/\.test\.[cm]?[jt]sx?$/.test(rel)) {
       continue
     }
-    const abs = path.join(root, rel)
-    let content = ''
-    try {
-      content = readFileSync(abs, 'utf8')
-    } catch {
-      continue
-    }
-    const imports = firstPartyImports(content, path.dirname(abs), root)
-    if (imports.includes(sourcePath)) {
+    const testBase = path.basename(rel).replace(/\.test\.[cm]?[jt]sx?$/, '')
+    if (
+      testBase === base ||
+      (testBase.startsWith(`${base}-`) && importerSet.has(rel)) ||
+      (acceptsCheckName && testBase === checkBase)
+    ) {
       out.add(rel)
     }
   }
-
-  return [...out]
+  for (let i = 0, { length } = importers; i < length; i += 1) {
+    out.add(importers[i]!)
+  }
+  return [...out].toSorted()
 }
 
 function runStaged(files: string[]): number {
@@ -522,16 +544,10 @@ function runFiles(files: string[]): number {
   // the fast path for "test this one file". --passWithNoTests keeps a path
   // that resolves to no test file from erroring.
   //
-  // A template/ path is the CANONICAL copy, which the config excludes by
-  // default (the cascaded live copy is what the suite runs). Setting
-  // FLEET_TEST_TEMPLATE=1 lifts that one exclude so `pnpm test
-  // template/base/.../x.test.mts` verifies a canonical test IN PLACE — before
-  // the cascade — instead of forcing a commit + cascade just to run it.
-  const includeTemplate = files.some(f => f.startsWith('template/'))
   return runVitest(
     ['run', ...files, '--passWithNoTests'],
     `files (${files.length})`,
-    includeTemplate ? { env: { FLEET_TEST_TEMPLATE: '1' } } : undefined,
+    undefined,
   )
 }
 
@@ -540,6 +556,35 @@ function main(): void {
   // in a non-interactive shell that never sourced fnm) is below the hook floor,
   // so the vitest + hooks this spawns run on the fleet runtime.
   ensurePinnedNode()
+
+  // A concurrent vitest run during a live coverage run cleans the shared
+  // coverage/.tmp and ENOENTs the outer run's v8 reports (two live
+  // incidents on 2026-07-11 killed 15-minute cover runs at the merge
+  // step). cover.mts registers an active-run marker; refuse to start
+  // while one is live instead of corrupting it.
+  if (
+    !args.includes('--force-during-active-run') &&
+    hasLiveForeignActiveRun()
+  ) {
+    // The staged pre-commit lane is non-blocking by design (its timeout
+    // path already skips) — a hard refusal here would freeze ALL commits
+    // for the length of any cover run. Skip like the timeout path; the
+    // merge gate runs the full suite.
+    if (mode === 'staged') {
+      logger.log(
+        'A long fleet run (coverage/build) is live — skipping the staged test lane (non-blocking; the merge gate runs the full suite).',
+      )
+      return
+    }
+    logger.error(
+      'A long fleet run (coverage/build) is live — refusing to start vitest.\n' +
+        '  Where: scripts/fleet/test.mts startup gate\n' +
+        '  Saw vs wanted: a live active-run marker in ~/.claude/hooks/stale-process-sweeper/active-runs/; wanted none\n' +
+        '  Fix: wait for the run to finish (or stop it), then re-run. Deliberate override: --force-during-active-run.',
+    )
+    process.exitCode = 1
+    return
+  }
   const explicitFiles = fileArgs()
   if (explicitFiles.length > 0) {
     process.exitCode = runFiles(explicitFiles)
@@ -599,6 +644,6 @@ function main(): void {
 
 // Entrypoint-guarded so importing this module (e.g. a unit test of
 // buildRelatedArgs) doesn't kick off a vitest run.
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(import.meta.url)) {
   main()
 }

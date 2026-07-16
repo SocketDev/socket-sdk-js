@@ -3,15 +3,17 @@
  *   `README.md`. Every fleet README — including the wheelhouse source itself —
  *   carries both follow badges directly under the title:
  *
- *     [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
- *     [![Follow @socket.dev on Bluesky](https://img.shields.io/badge/Follow-@socket.dev-1DA1F2?style=social&logo=bluesky)](https://bsky.app/profile/socket.dev)
+ *     [![Follow @SocketSecurity](assets/fleet/badge-follow-x.svg)](https://twitter.com/SocketSecurity)
+ *     [![Follow @socket.dev on Bluesky](assets/fleet/badge-follow-bluesky.svg)](https://bsky.app/profile/socket.dev)
  *
  *   These two badges are byte-identical fleet-canonical (not repo-contextual
  *   like the status badges), so unlike the section-skeleton rule this one does
- *   NOT exempt the wheelhouse source — the badges apply everywhere. Fires only
- *   on the repo-root README (nested READMEs under `packages/`, `docs/`, etc.
- *   are scoped docs with their own shape). No autofix: badge placement is
- *   contextual (under the title, after any status badges).
+ *   NOT exempt the wheelhouse source — the badges apply everywhere. Matched by
+ *   the stable LINK target, not the badge image, so an image-host change (the
+ *   retired shields.io URLs → the local assets/fleet/ SVGs) still counts.
+ *   Fires only on the repo-root README (nested READMEs under `packages/`,
+ *   `docs/`, etc. are scoped docs with their own shape). No autofix: badge
+ *   placement is contextual (under the title, after any status badges).
  */
 
 import path from 'node:path'
@@ -23,7 +25,7 @@ const SOCIAL_BADGES = [
   { name: 'Bluesky follow', signature: /bsky\.app\/profile\/socket\.dev/ },
   {
     name: 'X / Twitter follow',
-    signature: /img\.shields\.io\/twitter\/follow\/SocketSecurity/,
+    signature: /(?:twitter|x)\.com\/SocketSecurity/,
   },
 ]
 

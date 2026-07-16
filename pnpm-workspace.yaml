@@ -81,7 +81,7 @@ overrides:
 pmOnFail: warn
 
 catalog:
-  '@anthropic-ai/claude-code': 2.1.201
+  '@anthropic-ai/claude-code': 2.1.205
   '@redwoodjs/agent-ci': 0.16.2
   '@sinclair/typebox': 0.34.49
   '@socketregistry/packageurl-js': 1.4.2
@@ -93,17 +93,20 @@ catalog:
   # self-reference. Build / hook / script / config code uses the
   # -stable name. See socket-wheelhouse@92cd3e3 for full rationale.
   '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.2'
-  '@socketsecurity/lib': 6.0.9
-  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.9'
+  '@socketsecurity/lib': 6.0.10
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.10'
   '@socketsecurity/registry': 2.0.2
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.2'
   '@socketsecurity/sdk': 4.0.1
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.1'
   '@types/mdast': 4.0.4
-  '@types/node': 26.1.0
+  '@types/node': 26.1.1
   '@typescript/native-preview': 7.0.0-dev.20260510.1
-  '@vitest/coverage-v8': 4.1.9
-  '@vitest/ui': 4.1.9
+  '@vitest/coverage-v8': 4.1.10
+  '@vitest/ui': 4.1.10
+  'c8': 11.0.0
+  'chrome-devtools-mcp': 1.5.0
+  'compromise': 14.15.1
   'dtu-github-actions': 0.16.2
   'ecc-agentshield': 1.4.0
   'markdownlint-cli2': 0.23.0
@@ -112,8 +115,8 @@ catalog:
   'neosanitize': 0.3.0
   'nock': 15.0.0
   'npm-run-all2': 9.0.2
-  'oxfmt': 0.57.0
-  'oxlint': 1.72.0
+  'oxfmt': 0.58.0
+  'oxlint': 1.73.0
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
   'playwright-core': 1.61.1
@@ -127,7 +130,7 @@ catalog:
   # 1.0.2), so the override below removes esbuild from the install tree.
   'typescript': 7.0.2
   'vite': 8.1.0
-  'vitest': 4.1.9
+  'vitest': 4.1.10
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
 minimumReleaseAge: 10080
@@ -136,48 +139,6 @@ minimumReleaseAgeExclude:
   # ahead of the soak by owner directive (out of RC). The main package + its
   # 20-package per-platform binding family are pinned to the exact version
   # (a scope glob would blanket-bypass any future @typescript publish).
-  # published: 2026-07-08 | removable: 2026-07-15
-  - 'typescript@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-aix-ppc64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-darwin-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-darwin-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-freebsd-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-freebsd-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-arm@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-loong64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-mips64el@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-ppc64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-riscv64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-s390x@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-netbsd-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-netbsd-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-openbsd-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-openbsd-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-sunos-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-win32-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-win32-x64@7.0.2'
   - '@socketaddon/*'
   - '@socketbin/*'
   - '@socketregistry/*'

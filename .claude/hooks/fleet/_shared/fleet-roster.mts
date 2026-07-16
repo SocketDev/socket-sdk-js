@@ -15,6 +15,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { gitOut } from './git-branch.mts'
+import { fleetRosterPaths } from './paths.mts'
 
 export interface FleetRepo {
   readonly name: string
@@ -65,16 +66,7 @@ export function readRoster(rosterPath: string): FleetRoster | undefined {
  * seed first (so the wheelhouse itself resolves) then the live tree.
  */
 export function loadRosterFromRepo(repoRoot: string): FleetRoster | undefined {
-  const candidates = [
-    path.join(
-      repoRoot,
-      'template/base/.claude/skills/fleet/cascading-fleet/lib/fleet-repos.json',
-    ),
-    path.join(
-      repoRoot,
-      '.claude/skills/fleet/cascading-fleet/lib/fleet-repos.json',
-    ),
-  ]
+  const candidates = fleetRosterPaths(repoRoot)
   for (let i = 0, { length } = candidates; i < length; i += 1) {
     const roster = readRoster(candidates[i]!)
     if (roster) {

@@ -17,7 +17,6 @@
  */
 
 import process from 'node:process'
-import { pathToFileURL } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
@@ -26,6 +25,8 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { hasAiAttribution, stripAiAttribution } from './lib/attribution.mts'
 import { REPO_ROOT } from './paths.mts'
+import { isMainModule } from './_shared/is-main-module.mts'
+import { runMain } from './_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -70,6 +71,16 @@ function gitOrDie(
     throw new Error(what)
   }
   return r.stdout
+}
+
+// The rewritten body for one commit: strip attribution when present, otherwise
+// leave the message intact with a single trailing newline (so `commit-tree`
+// receives a normalized body either way). Pure — the message transform the
+// rewrite loop applies per commit.
+export function rewriteMessage(message: string): string {
+  return hasAiAttribution(message)
+    ? stripAiAttribution(message)
+    : `${message}\n`
 }
 
 export async function main(): Promise<void> {
@@ -128,7 +139,7 @@ export async function main(): Promise<void> {
     const authorName = gitOrDie(['log', '-1', '--format=%an', sha], 'author')
     const authorEmail = gitOrDie(['log', '-1', '--format=%ae', sha], 'email')
     const authorDate = gitOrDie(['log', '-1', '--format=%ad', sha], 'date')
-    const newMessage = flagged ? stripAiAttribution(message) : `${message}\n`
+    const newMessage = rewriteMessage(message)
     parent = gitOrDie(
       ['commit-tree', tree, '-p', parent, '-S', '-F', '-'],
       `commit-tree ${sha.slice(0, 12)}`,
@@ -183,11 +194,6 @@ export async function main(): Promise<void> {
   )
 }
 
-const invokedDirectly =
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
-if (invokedDirectly) {
-  void (async () => {
-    await main()
-  })()
+if (isMainModule(import.meta.url)) {
+  runMain(main)
 }

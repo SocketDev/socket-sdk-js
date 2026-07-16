@@ -93,7 +93,6 @@ One-line intro: what was traced and the shape of the result.
 
 <details>
 <summary><abbr title="Critical: fix before merge/run">🔴</abbr> <b>1. Title a junior dev understands</b></summary>
-
 <blockquote>
 
 Mechanism first, then the step-by-step failure scenario, then
@@ -104,7 +103,6 @@ Fix idea 💡: the concrete remediation.
 
 <details>
 <summary><abbr title="Moderate/minor: worth addressing">🟡</abbr> <b>Smaller items</b></summary>
-
 <blockquote>
 
 - Bullet per nit, complete sentences.

@@ -27,10 +27,12 @@ import { currentBranch, resolveDefaultBranch } from '../_shared/git-branch.mts'
 import { defineHook, notify, runHook } from '../_shared/guard.mts'
 import type { GuardResult } from '../_shared/guard.mts'
 import type { ToolCallPayload } from '../_shared/payload.mts'
-import { bypassPhrasePresent } from '../_shared/transcript.mts'
+import {
+  BYPASS_LOOKBACK_USER_TURNS,
+  bypassPhrasePresent,
+} from '../_shared/transcript.mts'
 
 const BYPASS_PHRASE = 'Allow squash-history-nudge bypass'
-const BYPASS_LOOKBACK_USER_TURNS = 8
 const HISTORY_COMMIT_THRESHOLD = Number.parseInt(
   process.env['SOCKET_SQUASH_HISTORY_COMMIT_THRESHOLD'] ?? '50',
   10,

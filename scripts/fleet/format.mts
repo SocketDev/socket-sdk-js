@@ -25,14 +25,41 @@ import {
   getStagedFiles,
   pickConfig,
 } from './_shared/format-scope.mts'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 // On Windows, `pnpm` is a .cmd shim Node refuses to exec directly via spawnSync
 // (CVE-2024-27980 hardening); the shell wrapper resolves it. On POSIX we keep
 // direct invocation so no shell-quoting surface is introduced.
 const useShell = process.platform === 'win32'
 
-function main(): void {
-  const argv = process.argv.slice(2)
+// The decision `main` reduces argv down to before it ever spawns oxfmt —
+// pure + exported so a test drives every argv shape without a subprocess.
+export type FormatPlan =
+  | { kind: 'run'; args: string[] }
+  | { kind: 'skip' }
+  | { kind: 'stdin'; args: string[] }
+
+/**
+ * Turn CLI argv into the oxfmt invocation plan `main` executes. `options`
+ * lets a test inject the staged/modified file listers instead of shelling out
+ * to git.
+ */
+export function resolveFormatPlan(
+  argv: readonly string[],
+  options?:
+    | {
+        getModifiedFiles?: (() => string[]) | undefined
+        getStagedFiles?: (() => string[]) | undefined
+      }
+    | undefined,
+): FormatPlan {
+  const opts = { __proto__: null, ...options } as {
+    getModifiedFiles?: (() => string[]) | undefined
+    getStagedFiles?: (() => string[]) | undefined
+  }
+  const listStaged = opts.getStagedFiles ?? getStagedFiles
+  const listModified = opts.getModifiedFiles ?? getModifiedFiles
+
   const check = argv.includes('--check')
 
   // Pipe mode: format stdin → stdout with the fleet config. Generators that
@@ -41,35 +68,51 @@ function main(): void {
   // parser (.mts vs .json); nothing is read from disk.
   const stdinArg = argv.find(arg => arg.startsWith('--stdin-filepath='))
   if (stdinArg) {
-    const res = spawnSync(
-      'pnpm',
-      ['exec', 'oxfmt', '-c', pickConfig('oxfmtrc.json'), stdinArg],
-      {
-        // Pipe consumers parse this stdout as source text — SFW_SILENT stops
-        // the firewall shim from writing banner lines into the same stream.
-        env: { ...process.env, SFW_SILENT: 'true' },
-        shell: useShell,
-        stdio: 'inherit',
-      },
-    )
-    process.exitCode = res.status ?? 1
-    return
+    return {
+      kind: 'stdin',
+      args: ['exec', 'oxfmt', '-c', pickConfig('oxfmtrc.json'), stdinArg],
+    }
   }
 
   let files = argv.filter(arg => !arg.startsWith('--'))
   if (argv.includes('--staged') || argv.includes('--modified')) {
-    files = argv.includes('--staged') ? getStagedFiles() : getModifiedFiles()
+    files = argv.includes('--staged') ? listStaged() : listModified()
     // Nothing in scope — do NOT fall through to a whole-tree format (an empty
     // file list would default to `.`). oxfmt skips paths it doesn't recognize.
     if (!files.length) {
-      return
+      return { kind: 'skip' }
     }
   }
-  const res = spawnSync('pnpm', buildOxfmtArgs({ check, files }), {
+  return { kind: 'run', args: buildOxfmtArgs({ check, files }) }
+}
+
+function main(): void {
+  const argv = process.argv.slice(2)
+  const plan = resolveFormatPlan(argv)
+
+  if (plan.kind === 'skip') {
+    return
+  }
+
+  if (plan.kind === 'stdin') {
+    const res = spawnSync('pnpm', plan.args, {
+      // Pipe consumers parse this stdout as source text — SFW_SILENT stops
+      // the firewall shim from writing banner lines into the same stream.
+      env: { ...process.env, SFW_SILENT: 'true' },
+      shell: useShell,
+      stdio: 'inherit',
+    })
+    process.exitCode = res.status ?? 1
+    return
+  }
+
+  const res = spawnSync('pnpm', plan.args, {
     shell: useShell,
     stdio: 'inherit',
   })
   process.exitCode = res.status ?? 1
 }
 
-main()
+if (isMainModule(import.meta.url)) {
+  main()
+}

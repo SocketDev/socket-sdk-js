@@ -145,7 +145,11 @@ export const check = editGuard(
         `Use the fleet wrapper instead:\n` +
         `  import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'\n` +
         `Prefer async \`spawn\`; reach for \`spawnSync\` only when sync semantics\n` +
-        `are genuinely required (still from the lib, not the builtin).\n` +
+        `are genuinely required (still from the lib, not the builtin). This holds\n` +
+        `for the LIB spawnSync too — async where the caller can await (subprocess-\n` +
+        `heavy pnpm/npm/git-network calls especially; sync for CLI bootstrap / hot\n` +
+        `loops only, code-style.md). windows-portability flags pnpm-family spawns\n` +
+        `missing \`shell: WIN32\`.\n` +
         `Bypass: type "${BYPASS_PHRASE}".\n`,
     )
   },

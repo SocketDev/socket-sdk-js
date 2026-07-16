@@ -38,13 +38,13 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { pathToFileURL } from 'node:url'
 
 // prefer-async-spawn: sync-required — this is a sequential CLI generator that
 // formats its output inline before the drift comparison; no concurrency.
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { LINT_RULE_TEST_DIRS, REPO_ROOT } from './paths.mts'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 const PLUGIN_DIR = path.join(REPO_ROOT, '.config', 'fleet', 'oxlint-plugin')
 // Each rule is its own dir under the cascaded `fleet/` tier (mirrors
@@ -479,9 +479,7 @@ function main(): number {
   return 0
 }
 
-const invokedDirectly =
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
+const invokedDirectly = isMainModule(import.meta.url)
 if (invokedDirectly) {
   process.exitCode = main()
 }

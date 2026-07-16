@@ -22,10 +22,11 @@ import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { parseShell } from '@socketsecurity/lib-stable/shell/parse'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
-interface Finding {
+export interface Finding {
   // Severity tier. critical = direct credential exfil risk; warn =
   // unusual but explainable; info = forensic record only.
   severity: 'critical' | 'warn' | 'info'
@@ -37,13 +38,13 @@ interface Finding {
   line: number
 }
 
-interface ToolUseEvent {
+export interface ToolUseEvent {
   name: string
   input: Record<string, unknown>
   line: number
 }
 
-function readToolUses(transcriptPath: string): ToolUseEvent[] {
+export function readToolUses(transcriptPath: string): ToolUseEvent[] {
   if (!existsSync(transcriptPath)) {
     throw new Error(`transcript not found: ${transcriptPath}`)
   }
@@ -104,7 +105,7 @@ function readToolUses(transcriptPath: string): ToolUseEvent[] {
  * `||`, `|` as segment terminators so chained commands each get their own
  * scan.
  */
-function findInvocations(
+export function findInvocations(
   command: string,
   cmdLine: readonly string[],
 ): readonly string[][] {
@@ -147,7 +148,10 @@ function findInvocations(
  * Equivalent to `findInvocations(command, cmdLine).length > 0`. The most common
  * audit-pattern shape.
  */
-function commandInvokes(command: string, cmdLine: readonly string[]): boolean {
+export function commandInvokes(
+  command: string,
+  cmdLine: readonly string[],
+): boolean {
   return findInvocations(command, cmdLine).length > 0
 }
 
@@ -266,7 +270,7 @@ const PATTERNS: ReadonlyArray<{
   },
 ]
 
-function scanToolUse(evt: ToolUseEvent): Finding[] {
+export function scanToolUse(evt: ToolUseEvent): Finding[] {
   const findings: Finding[] = []
   // Most patterns target Bash commands; some target file paths (Edit/Write).
   const command =
@@ -302,7 +306,7 @@ function scanToolUse(evt: ToolUseEvent): Finding[] {
   return findings
 }
 
-function findRecentTranscript(): string | undefined {
+export function findRecentTranscript(): string | undefined {
   // ~/.claude/projects/<encoded-cwd>/<session-id>.jsonl
   // encoded-cwd is the cwd with every `/` replaced by `-`. The leading
   // `/` becomes the leading `-` automatically since the replace
@@ -332,13 +336,13 @@ function findRecentTranscript(): string | undefined {
   return entries[0]?.full
 }
 
-interface Args {
+export interface Args {
   json: boolean
   transcript: string | undefined
   recent: boolean
 }
 
-function parseArgs(argv: readonly string[]): Args {
+export function parseArgs(argv: readonly string[]): Args {
   let json = false
   let recent = false
   let transcript: string | undefined
@@ -441,7 +445,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(err => {
-  logger.error(String((err as Error)?.message ?? err))
-  process.exit(1)
-})
+if (isMainModule(import.meta.url)) {
+  main().catch(err => {
+    logger.error(String((err as Error)?.message ?? err))
+    process.exit(1)
+  })
+}

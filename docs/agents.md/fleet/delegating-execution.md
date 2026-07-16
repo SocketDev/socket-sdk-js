@@ -12,16 +12,16 @@ The plan phase produces a written spec (a `.claude/plans/delegating-<slug>.md` d
 
 Source of truth: `scripts/fleet/lib/delegating-execution/route.mts` (`TIER_TABLE`). The saved workflow carries a comment-linked mirror because workflows cannot import repo TS.
 
-| phase    | sensitivity | model               | effort      | why                                                                  |
-|----------|-------------|---------------------|-------------|----------------------------------------------------------------------|
-| plan     | benign      | `claude-fable-5`    | `undefined` | big brain; adaptive-only, no effort knob                             |
-| plan     | security    | `claude-opus-4-8`   | `high`      | Fable false-positives on security work; refusal-fallback not live    |
-| review   | benign      | `claude-fable-5`    | `undefined` | same as plan                                                         |
-| review   | security    | `claude-opus-4-8`   | `high`      | same as plan                                                         |
-| execute  | benign      | `claude-sonnet-4-6` | `medium`    | floor executor follows a written plan                                |
+| phase    | sensitivity | model               | effort      | why |
+|----------|-------------|---------------------|-------------|-----|
+| plan     | benign      | `claude-fable-5`    | `undefined` | big brain; adaptive-only, no effort knob |
+| plan     | security    | `claude-opus-4-8`   | `high`      | Fable false-positives on security work; refusal-fallback not live |
+| review   | benign      | `claude-fable-5`    | `undefined` | same as plan |
+| review   | security    | `claude-opus-4-8`   | `high`      | same as plan |
+| execute  | benign      | `claude-sonnet-4-6` | `medium`    | floor executor follows a written plan |
 | execute  | security    | `claude-sonnet-4-6` | `medium`    | execution is mechanical either way; the plan carried the sensitivity |
-| followup | benign      | `claude-sonnet-4-6` | `medium`    | applies enumerated review findings                                   |
-| followup | security    | `claude-sonnet-4-6` | `medium`    | same                                                                 |
+| followup | benign      | `claude-sonnet-4-6` | `medium`    | applies enumerated review findings |
+| followup | security    | `claude-sonnet-4-6` | `medium`    | same |
 
 ## The security-sensitivity rule
 

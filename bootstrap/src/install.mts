@@ -27,10 +27,13 @@ import {
   endMarker,
   errorMessage,
   mergeWorkspaceYaml,
+  segmentFileName,
   spliceFleetBlock,
   walkFiles,
 } from './helpers.mts'
 import type { BundleManifest, ThinOptions } from './helpers.mts'
+import { mergeClaudeSettings } from './settings.mts'
+import type { ClaudeSettings } from './settings.mts'
 
 const logger = getDefaultLogger()
 
@@ -65,7 +68,7 @@ export function installSegments(
     return
   }
   for (const entry of segments) {
-    const destName = `${entry.path.replace(/^\./, 'dot-')}.fleetblock`
+    const destName = segmentFileName(entry.path)
     const blockPath = path.join(segmentsDir, destName)
     const fleetBlock = readFileSync(blockPath, 'utf8')
     const targetPath = path.join(dest, entry.path)
@@ -79,6 +82,47 @@ export function installSegments(
     })
     mkdirSync(path.dirname(targetPath), { recursive: true })
     writeFileSync(targetPath, updated)
+  }
+}
+
+/**
+ * Merge the release's canonical Claude settings section into the consumer's
+ * hybrid file. Fleet keys are replaced; repo-owned top-level settings and
+ * `.claude/hooks/repo/` registrations survive. Malformed JSON fails closed.
+ */
+export function installSettingsSegment(
+  segmentsDir: string,
+  dest: string,
+  manifest: BundleManifest,
+): number {
+  const segment = manifest.settingsSegment
+  if (segment === undefined) {
+    return 0
+  }
+  const sourcePath = path.join(segmentsDir, segmentFileName(segment.path))
+  if (!existsSync(sourcePath)) {
+    logger.log(
+      `install-fleet: Claude settings segment missing at ${sourcePath} — refusing to merge.`,
+    )
+    return 1
+  }
+  const targetPath = path.join(dest, segment.path)
+  try {
+    const fleetSettings = JSON.parse(
+      readFileSync(sourcePath, 'utf8'),
+    ) as ClaudeSettings
+    const repoSettings = existsSync(targetPath)
+      ? (JSON.parse(readFileSync(targetPath, 'utf8')) as ClaudeSettings)
+      : undefined
+    const merged = mergeClaudeSettings({ fleetSettings, repoSettings })
+    mkdirSync(path.dirname(targetPath), { recursive: true })
+    writeFileSync(targetPath, `${JSON.stringify(merged, undefined, 2)}\n`)
+    return 0
+  } catch (e) {
+    logger.log(
+      `install-fleet: Claude settings merge failed for ${targetPath}: ${errorMessage(e)}. Nothing written.`,
+    )
+    return 1
   }
 }
 
@@ -201,8 +245,12 @@ export function wirePackageJson(dest: string): void {
 export function thinIgnoreEntries(manifest: {
   files: Record<string, string>
   segments?: ReadonlyArray<{ path: string }> | undefined
+  settingsSegment?: { path: string } | undefined
 }): string[] {
   const hybridPaths = new Set((manifest.segments ?? []).map(s => s.path))
+  if (manifest.settingsSegment !== undefined) {
+    hybridPaths.add(manifest.settingsSegment.path)
+  }
   const entries = new Set<string>()
   const files = Object.keys(manifest.files)
   for (let i = 0, { length } = files; i < length; i += 1) {
@@ -227,8 +275,12 @@ export function thinIgnoreEntries(manifest: {
 export function fleetDirRoots(manifest: {
   files: Record<string, string>
   segments?: ReadonlyArray<{ path: string }> | undefined
+  settingsSegment?: { path: string } | undefined
 }): string[] {
   const hybridPaths = new Set((manifest.segments ?? []).map(s => s.path))
+  if (manifest.settingsSegment !== undefined) {
+    hybridPaths.add(manifest.settingsSegment.path)
+  }
   const roots = new Set<string>()
   const files = Object.keys(manifest.files)
   for (let i = 0, { length } = files; i < length; i += 1) {
@@ -320,11 +372,15 @@ export function pruneStaleFleetFiles(
   manifest: {
     files: Record<string, string>
     segments?: ReadonlyArray<{ path: string }> | undefined
+    settingsSegment?: { path: string } | undefined
   },
 ): number {
   const kept = new Set(Object.keys(manifest.files))
   for (const segment of manifest.segments ?? []) {
     kept.add(segment.path)
+  }
+  if (manifest.settingsSegment !== undefined) {
+    kept.add(manifest.settingsSegment.path)
   }
   let pruned = 0
   // Only the wholly-fleet DIR roots can hold on-disk files the current bundle

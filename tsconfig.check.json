@@ -1,9 +1,0 @@
-{
-  "extends": "./.config/fleet/tsconfig.check.base.json",
-  "compilerOptions": {
-    "types": ["vitest/globals", "node"],
-    "verbatimModuleSyntax": false
-  },
-  "include": ["./**/*.ts", "./**/*.mts"],
-  "exclude": ["./**/.cache/**", "./**/node_modules/**/*", "./bootstrap/**"]
-}

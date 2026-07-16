@@ -14,12 +14,20 @@
  *      window predictable.
  *   3. After all spawns finish, re-run `pnpm run lint` (without --fix) to verify
  *      nothing got worse. If the count went up, log a warning and exit
- *      non-zero. Skipped silently:
+ *      non-zero. Skipped silently ONLY on the two explicit opt-outs:
  *
- *   - When the `claude` CLI isn't on PATH.
  *   - When `SKIP_AI_FIX=1` is set (CI sets this; AI-fix runs locally).
- *   - When `--no-ai` is passed. The four lockdown flags per CLAUDE.md
- *     "Programmatic Claude calls":
+ *   - When `--no-ai` is passed.
+ *
+ *   A `claude` CLI that is missing or cannot execute (launcher without its
+ *   native binary) is NOT a skip: findings remain that this step owns, so it
+ *   reports the environment failure with a remedy and exits non-zero
+ *   (./ai-lint-fix/health.mts). Environmental per-spawn failures (workspace
+ *   trust, broken launcher, tool-policy mismatch, silent exits) are
+ *   classified the same way, and two consecutive ones abort the remaining
+ *   files — each spawn would fail identically and a long residue would
+ *   otherwise burn a 5-minute timeout per file. The four lockdown flags per
+ *   CLAUDE.md "Programmatic Claude calls":
  *   - tools / allowedTools / disallowedTools / permissionMode. Cost / safety:
  *   - Sonnet 4.6, not Opus — judgment work but not architecturally deep;
  *     cost-tier-appropriate.
@@ -40,7 +48,8 @@ import process from 'node:process'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { hasClaudeCli, runClaudeFix } from './ai-lint-fix/claude.mts'
+import { runClaudeFix } from './ai-lint-fix/claude.mts'
+import { classifyAiFailure, probeClaudeCli } from './ai-lint-fix/health.mts'
 import { runLintJson } from './ai-lint-fix/oxlint-json.mts'
 import { bucketFindings, buildPrompt } from './ai-lint-fix/prompt.mts'
 import {
@@ -48,17 +57,18 @@ import {
   TIER_EFFORT,
   TIER_MODEL,
 } from './ai-lint-fix/rule-guidance.mts'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
-interface CliArgs {
+export interface CliArgs {
   noAi: boolean
   staged: boolean
   all: boolean
   passthrough: string[]
 }
 
-function parseArgs(argv: readonly string[]): CliArgs {
+export function parseArgs(argv: readonly string[]): CliArgs {
   const passthrough: string[] = []
   let noAi = false
   let staged = false
@@ -84,7 +94,7 @@ function parseArgs(argv: readonly string[]): CliArgs {
   return { all, noAi, passthrough, staged }
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2))
   if (args.noAi) {
     return
@@ -105,16 +115,34 @@ async function main(): Promise<void> {
   // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- relative path for log output; user invokes `pnpm run fix` from their cwd and expects paths relative to where they ran.
   const cwd = process.cwd()
 
-  if (!(await hasClaudeCli(cwd))) {
+  const probe = await probeClaudeCli(cwd)
+  if (!probe.ok) {
     const total = [...byFile.values()].reduce((n, m) => n + m.length, 0)
-    logger.warn(
-      `${total} AI-handled lint findings remain in ${byFile.size} files; skipping AI-fix step (claude CLI not on PATH).`,
+    const saw =
+      probe.reason === 'not-on-path'
+        ? 'the claude CLI is not on PATH'
+        : `the claude CLI resolved on PATH but cannot execute (${probe.detail ?? 'version probe failed'})`
+    const fix =
+      probe.reason === 'not-on-path'
+        ? 'install Claude Code so `claude` resolves on PATH'
+        : 'run `claude install` to fetch the native binary'
+    logger.error(
+      `AI-fix cannot run: ${saw}.\n` +
+        `  Where: ai-lint-fix (AI residue leg of \`pnpm run fix\`)\n` +
+        `  Saw vs wanted: ${total} AI-handled findings remain in ${byFile.size} files with no runnable AI leg; wanted a healthy \`claude --version\`\n` +
+        `  Fix: ${fix}, or opt out explicitly with --no-ai / SKIP_AI_FIX=1.`,
     )
+    process.exitCode = 1
     return
   }
 
   let totalEdits = 0
   let totalErrors = 0
+  // Consecutive classified environmental failures (workspace trust, broken
+  // launcher, tool-policy, silent exits). Two in a row means every remaining
+  // spawn fails identically — abort instead of burning a 5-minute timeout
+  // per remaining file. File-specific failures reset the streak.
+  let envFailureStreak = 0
   // Per-file progress counter. A long residue (dozens of files) emits one
   // `[i/N]` line per file so the run never reads as "nothing happening" — a
   // long-running step must surface incremental progress as it goes, not only
@@ -140,13 +168,35 @@ async function main(): Promise<void> {
       `AI-fix [${fileIndex}/${fileCount}] ${rel} (${findings.length} findings, ${tier}/${effort})…`,
     )
     const prompt = buildPrompt(filePath, findings)
-    const { exitCode, stderr } = await runClaudeFix(prompt, cwd, model, effort)
+    const { exitCode, stderr, stdout } = await runClaudeFix(
+      prompt,
+      cwd,
+      model,
+      effort,
+    )
     if (exitCode === 0) {
       totalEdits += findings.length
+      envFailureStreak = 0
       continue
     }
     totalErrors++
-    logger.warn(`AI-fix exited ${exitCode} for ${rel}: ${stderr.slice(0, 200)}`)
+    const classified = classifyAiFailure(stdout, stderr)
+    if (!classified) {
+      envFailureStreak = 0
+      logger.warn(
+        `AI-fix exited ${exitCode} for ${rel}: ${stderr.slice(0, 200)}`,
+      )
+      continue
+    }
+    envFailureStreak += 1
+    logger.warn(`AI-fix ${classified.kind} for ${rel}: ${classified.remedy}`)
+    if (envFailureStreak >= 2) {
+      const remaining = fileCount - fileIndex
+      logger.error(
+        `AI-fix aborting: 2 consecutive ${classified.kind} failures — every remaining spawn would fail the same way (${remaining} files unattempted). ${classified.remedy}`,
+      )
+      break
+    }
   }
 
   // Verification — re-run lint and count remaining AI-handled
@@ -177,8 +227,10 @@ async function main(): Promise<void> {
   )
 }
 
-main().catch((e: unknown) => {
-  const msg = errorMessage(e)
-  logger.error(`ai-lint-fix: ${msg}`)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch((e: unknown) => {
+    const msg = errorMessage(e)
+    logger.error(`ai-lint-fix: ${msg}`)
+    process.exitCode = 1
+  })
+}

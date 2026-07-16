@@ -29,6 +29,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { isMainModule } from '../_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
@@ -153,7 +154,7 @@ export function main(): void {
 }
 
 /* c8 ignore start - entrypoint guard; exercised via subprocess */
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(import.meta.url)) {
   main()
 }
 /* c8 ignore stop */

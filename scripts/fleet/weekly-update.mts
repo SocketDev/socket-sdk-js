@@ -33,7 +33,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { discoverAiAgents } from '@socketsecurity/lib-stable/ai/discover'
 import { AI_PROFILE } from '@socketsecurity/lib-stable/ai/profiles'
@@ -46,6 +45,7 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { scan } from './check/soak-excludes-have-dates.mts'
 import { PNPM_WORKSPACE_YAML, REPO_ROOT } from './paths.mts'
 import { runDeterministicChain } from './weekly-update/deterministic-chain.mts'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
@@ -324,6 +324,6 @@ async function main(): Promise<void> {
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
   void main()
 }

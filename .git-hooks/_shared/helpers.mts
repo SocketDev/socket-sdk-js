@@ -4,9 +4,7 @@
 // `@socketsecurity/lib-stable/logger/default` directly for output; this module stays
 // import-light so the cost of `import '../_shared/helpers.mts'` is bounded.
 //
-// Requires Node 25+ for stable .mts type-stripping (no flag needed).
-// Earlier Node versions either lacked --experimental-strip-types or
-// shipped it under a flag, both unacceptable for hook ergonomics.
+// Requires Node 24+ for default-on native .mts type-stripping (no flag needed).
 //
 // Hooks run *after* `pnpm install`, so `@socketsecurity/lib-stable` is on the
 // resolution path for any caller that imports it.
@@ -45,14 +43,14 @@ export { PERSONAL_PATH_RE, isPurePlaceholder, suggestPlaceholder }
 // Hard-fail if Node is below 25. This runs at module load — every
 // hook invocation imports _shared/helpers.mts before doing anything, so the
 // version check is the first thing that happens.
-const NODE_MIN_MAJOR = 25
+const NODE_MIN_MAJOR = 24
 const nodeMajor = Number.parseInt(
   process.versions.node.split('.')[0] || '0',
   10,
 )
 if (nodeMajor < NODE_MIN_MAJOR) {
-  // @socketsecurity/lib-stable requires Node >= 25; the canonical logger
-  // isn't importable here. Use raw process.stderr with ASCII (no
+  // This import-light shared helper does not own a logger. Use raw
+  // process.stderr with ASCII (no
   // status-emoji glyph) so the no-status-emoji lint rule stays clean
   // — the lint rule's recommendation (use logger.fail()) doesn't
   // apply when the entire branch is the logger-unavailable bail.
@@ -62,7 +60,7 @@ if (nodeMajor < NODE_MIN_MAJOR) {
   )
   // oxlint-disable-next-line socket/no-module-eval-side-effects -- Node-floor bail before any import resolves; raw stderr is the only channel here.
   process.stderr.write(
-    'Install Node 25+ — these hooks rely on stable .mts type stripping.\n',
+    'Install Node 24+ — these hooks rely on default-on .mts type stripping.\n',
   )
   process.exit(1)
 }
