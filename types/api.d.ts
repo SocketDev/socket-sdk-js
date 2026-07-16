@@ -21629,6 +21629,7 @@ export interface operations {
           | 'SetLabelSettingToDefault'
           | 'SetSsoBypassMemberships'
           | 'SetSsoBypassRbacRoles'
+          | 'StartAlertPolicyMigrationPreview'
           | 'SSOEmailVerificationCompleted'
           | 'SSOLoginCompleted'
           | 'SvdBackfillLegacyOverlay'
