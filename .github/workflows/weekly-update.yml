@@ -13,7 +13,8 @@ jobs:
     uses: SocketDev/socket-registry/.github/workflows/weekly-update.yml@8a7952ac8dd8295fe8a8cf70535f84bb0a6c1a0c # main (2026-06-17)
     with:
       test-setup-script: 'pnpm run build'
-      test-script: 'pnpm test'
+      # A clean Actions checkout has no modified files; force the complete suite.
+      test-script: 'pnpm test --all'
     secrets:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       BOT_GPG_PRIVATE_KEY: ${{ secrets.BOT_GPG_PRIVATE_KEY }}

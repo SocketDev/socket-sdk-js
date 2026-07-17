@@ -85,10 +85,40 @@ const ROLLDOWN_CONFIG_BASENAMES: readonly string[] = [
   'rolldown.config.js',
 ]
 
-// True when the repo bundles with rolldown — a rolldown (dev)dependency, OR a
-// rolldown config file used by its scripts/plugins. Either way it ships bundled
-// output where every duplicate major costs real bytes, so dedup enforcement
-// auto-activates — no opt-in flag, no config.
+// A repo may use Rolldown only as a compiler while keeping every runtime
+// dependency external. Those lockfile entries never reach the shipped bundle,
+// so treating its dev-tool graph as a bundle-size failure is a false positive.
+// This recognizes the canonical `external: externalDependencies` configuration
+// after verifying that the variable is derived from package.json dependencies.
+function externalizesAllRuntimeDependencies(repoRoot: string): boolean {
+  const dirs = [
+    repoRoot,
+    path.join(repoRoot, '.config', 'fleet'),
+    path.join(repoRoot, '.config', 'repo'),
+  ]
+  for (const dir of dirs) {
+    for (const basename of ROLLDOWN_CONFIG_BASENAMES) {
+      try {
+        const config = readFileSync(path.join(dir, basename), 'utf8')
+        if (
+          /const\s+externalDependencies\s*=\s*Object\.keys\(\s*packageJson\.dependencies\s*\|\|\s*\{\}\s*\)/.test(
+            config,
+          ) && /external:\s*externalDependencies\b/.test(config)
+        ) {
+          return true
+        }
+      } catch {
+        // Missing config files are normal for the other candidate directories.
+      }
+    }
+  }
+  return false
+}
+
+// True when the repo uses Rolldown and third-party dependency code can reach
+// its output. In that case every extra major costs shipped bytes and is gated.
+// A compiler-only Rolldown config with all runtime deps external remains
+// informational: it has no bundled dependency closure to deduplicate.
 export function repoUsesRolldown(repoRoot: string): boolean {
   let pkgRaw: string | undefined
   try {
@@ -102,7 +132,7 @@ export function repoUsesRolldown(repoRoot: string): boolean {
       devDependencies?: Record<string, string> | undefined
     }
     if (pkg.dependencies?.['rolldown'] ?? pkg.devDependencies?.['rolldown']) {
-      return true
+      return !externalizesAllRuntimeDependencies(repoRoot)
     }
   }
   const dirs = [
@@ -113,7 +143,7 @@ export function repoUsesRolldown(repoRoot: string): boolean {
   for (let i = 0, { length } = dirs; i < length; i += 1) {
     for (let j = 0, n = ROLLDOWN_CONFIG_BASENAMES.length; j < n; j += 1) {
       if (existsSync(path.join(dirs[i]!, ROLLDOWN_CONFIG_BASENAMES[j]!))) {
-        return true
+        return !externalizesAllRuntimeDependencies(repoRoot)
       }
     }
   }

@@ -34,9 +34,9 @@ This umbrella reads repo state first to discover what applies. Sub-skills are on
 
 A bump to `engines.pnpm`, `packageManager: "pnpm@<ver>"`, or `engines.npm` has a **transitive blast radius**: the cascaded `setup` / `setup-and-install` actions install pnpm from `external-tools.json` at a specific version; if that version doesn't match a fleet repo's new `packageManager` pin, every CI job fails the version check before tests run. The tool version and the pin must move together, so **don't land a fleet-repo bump in isolation**:
 
-1. **Bump the tool at its source**: `node scripts/repo/cascade-fleet.mts --pnpm <ver>` (or `--npm <ver>`) writes `external-tools.json` (version + per-platform SRI integrity) plus the wheelhouse `packageManager` / `engines` pins and `pnpm-workspace.yaml` `allowBuilds` entries the new pnpm enforces (`pnpm@11.4` made `[ERR_PNPM_IGNORED_BUILDS]` a hard exit). Honors the 7-day soak.
+1. **Bump the tool at its source**: make the version change in socket-wheelhouse, whose fleet cascade owns `external-tools.json` (version + per-platform SRI integrity), package-manager pins, and `pnpm-workspace.yaml` `allowBuilds` entries. `pnpm@11.4` made `[ERR_PNPM_IGNORED_BUILDS]` a hard exit, so the coordinated cascade honors the 7-day soak.
 
-2. **Cascade to members** via the sync-scaffolding cascade: each socket-\* repo gets the new `external-tools.json` + `packageManager` / `engines` in one atomic cascade commit, so the installed pnpm and the pin always match. The setup actions are `./`-referenced cascaded copies, not `@sha` reusables — there is no separate propagation SHA to bump. (Without the atomic pin+tool move you hit the 2026-05-28 failure: a repo on pnpm@11.4 whose installed pnpm was still 11.3 refused the pin.)
+2. **Apply the member pins** after the cascade with `node scripts/fleet/sync-package-manager-pins.mts`: each socket-* repo gets the new `external-tools.json` + package-manager / engine pins in one atomic cascade commit, so the installed pnpm and the pin always match. The setup actions are `./`-referenced cascaded copies, not `@sha` reusables — there is no separate propagation SHA to bump. (Without the atomic pin+tool move you hit the 2026-05-28 failure: a repo on pnpm@11.4 whose installed pnpm was still 11.3 refused the pin.)
 
 ## Phases
 
