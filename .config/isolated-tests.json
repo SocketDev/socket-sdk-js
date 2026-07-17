@@ -1,16 +1,16 @@
 {
   "tests": [
-    "test/unit/blob.test.mts",
-    "test/unit/entitlements.test.mts",
-    "test/unit/getapi-sendapi-methods.test.mts",
-    "test/unit/json-parsing-edge-cases.test.mts",
-    "test/unit/socket-sdk-batch.test.mts",
-    "test/unit/socket-sdk-check-malware.test.mts",
-    "test/unit/socket-sdk-json-parsing-errors.test.mts",
-    "test/unit/socket-sdk-new-api-methods.test.mts",
-    "test/unit/socket-sdk-retry.test.mts",
-    "test/unit/socket-sdk-stream-limits.test.mts",
-    "test/unit/socket-sdk-strict-types.test.mts",
-    "test/unit/socket-sdk-success-paths.test.mts"
+    "test/repo/unit/blob.test.mts",
+    "test/repo/unit/entitlements.test.mts",
+    "test/repo/unit/getapi-sendapi-methods.test.mts",
+    "test/repo/unit/json-parsing-edge-cases.test.mts",
+    "test/repo/unit/socket-sdk-batch.test.mts",
+    "test/repo/unit/socket-sdk-check-malware.test.mts",
+    "test/repo/unit/socket-sdk-json-parsing-errors.test.mts",
+    "test/repo/unit/socket-sdk-new-api-methods.test.mts",
+    "test/repo/unit/socket-sdk-retry.test.mts",
+    "test/repo/unit/socket-sdk-stream-limits.test.mts",
+    "test/repo/unit/socket-sdk-strict-types.test.mts",
+    "test/repo/unit/socket-sdk-success-paths.test.mts"
   ]
 }
