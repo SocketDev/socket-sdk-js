@@ -16,9 +16,11 @@
  *   placement is contextual (under the title, after any status badges).
  */
 
-import path from 'node:path'
-
 import type { MarkdownlintRule } from './_shared/rule-types.mts'
+
+import { isRootReadme } from './_shared/root-readme.mts'
+
+export { isRootReadme } from './_shared/root-readme.mts'
 
 const RULE_NAME = 'socket-readme-social-badges'
 const SOCIAL_BADGES = [
@@ -28,18 +30,6 @@ const SOCIAL_BADGES = [
     signature: /(?:twitter|x)\.com\/SocketSecurity/,
   },
 ]
-
-export function isRootReadme(filePath) {
-  if (!filePath) {
-    return false
-  }
-  const base = path.basename(filePath)
-  if (base !== 'README.md') {
-    return false
-  }
-  const dir = path.dirname(filePath)
-  return dir === '.' || dir === '' || dir === process.cwd()
-}
 
 const rule: MarkdownlintRule = {
   description:

@@ -34,6 +34,8 @@ export const ALLOWED_CDN_HOSTS: readonly string[] = [
   'github.com',
   // Go toolchain download in CI/Docker for Go-based tooling.
   'go.dev',
+  // Official Node.js distribution host for versioned source and binary archives.
+  'nodejs.org',
   // rustup one-line installer host (`https://sh.rustup.rs`) — an allowed Rust
   // installer CDN for convenience-installer bootstraps.
   'sh.rustup.rs',

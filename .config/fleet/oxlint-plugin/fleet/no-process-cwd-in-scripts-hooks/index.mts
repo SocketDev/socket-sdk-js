@@ -32,6 +32,8 @@
  * @type {import('eslint').Rule.RuleModule}
  */
 
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
 const rule = {
@@ -52,7 +54,9 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const filename = context.filename ?? context.getFilename?.() ?? ''
+    const filename = normalizePath(
+      context.filename ?? context.getFilename?.() ?? '',
+    )
     // Only enforce on scripts/ + .claude/hooks/ paths.
     if (
       !/\/(?:scripts|\.claude\/hooks)\//.test(filename) ||

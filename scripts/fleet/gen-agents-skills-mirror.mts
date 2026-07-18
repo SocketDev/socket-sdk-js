@@ -20,7 +20,10 @@
  *   tool-gating is the operator's agent config. The rewritten `name:` plus
  *   YAML-safe `description:` quoting are the only frontmatter changes;
  *   `allowed-tools`/`model`/`context` are copied through (ignored as unknown
- *   keys by Codex/OpenCode, which only require name + description). Idempotent:
+ *   keys by Codex/OpenCode, which only require name + description). Repos may
+ *   expose a smaller lazy catalog through `codexSkills.default` in
+ *   `.config/socket-wheelhouse.json`; `--only` and `AGENTS_SKILLS` override it.
+ *   Idempotent:
  *   regenerates `.agents/skills/` from scratch each run (clears stale entries).
  *   The `agents-skills-mirror-current` check fails
  *   `check --all` if the committed mirror drifts from the source — the mirror
@@ -42,6 +45,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { REPO_ROOT } from './paths.mts'
 import { isMainModule } from './_shared/is-main-module.mts'
@@ -60,6 +64,42 @@ export interface MirrorEntry {
   source: string
   // Flat mirror name (e.g. fleet-foo).
   mirrorName: string
+}
+
+function selectionFrom(value: unknown): Set<string> | undefined {
+  const names = Array.isArray(value)
+    ? value.filter((name): name is string => typeof name === 'string')
+    : typeof value === 'string'
+      ? value.split(/[\s,]+/).filter(Boolean)
+      : []
+  return names.length > 0 ? new Set(names) : undefined
+}
+
+export function resolveSelectedSkills(
+  repoRoot: string,
+  args: readonly string[],
+  env: Readonly<Record<string, string | undefined>>,
+): Set<string> | undefined {
+  const onlyArg = args.find(arg => arg.startsWith('--only='))
+  const onlyIndex = args.indexOf('--only')
+  const cliValue =
+    onlyArg?.slice('--only='.length) ??
+    (onlyIndex >= 0 ? args[onlyIndex + 1] : undefined)
+  const cli = selectionFrom(cliValue)
+  if (cli) return cli
+  const fromEnv = selectionFrom(env['AGENTS_SKILLS'])
+  if (fromEnv) return fromEnv
+  try {
+    const settings = JSON.parse(
+      readFileSync(
+        path.join(repoRoot, '.config/socket-wheelhouse.json'),
+        'utf8',
+      ),
+    ) as { codexSkills?: { default?: unknown } }
+    return selectionFrom(settings.codexSkills?.default)
+  } catch {
+    return undefined
+  }
 }
 
 function yamlSingleQuote(value: string): string {
@@ -113,7 +153,10 @@ export function rewriteSkillName(skillMd: string, mirrorName: string): string {
 }
 
 // Discover the segmented skills as flat mirror entries.
-export function discoverSkills(repoRoot: string): MirrorEntry[] {
+export function discoverSkills(
+  repoRoot: string,
+  selected?: ReadonlySet<string>,
+): MirrorEntry[] {
   const entries: MirrorEntry[] = []
   const claudeSkills = path.join(repoRoot, '.claude', 'skills')
   for (let i = 0, { length } = TIERS; i < length; i += 1) {
@@ -134,9 +177,11 @@ export function discoverSkills(repoRoot: string): MirrorEntry[] {
       if (!existsSync(path.join(skillDir, 'SKILL.md'))) {
         continue
       }
+      const mirrorName = `${tier}-${name}`
+      if (selected && !selected.has(mirrorName)) continue
       entries.push({
-        mirrorName: `${tier}-${name}`,
-        source: path.relative(repoRoot, skillDir),
+        mirrorName,
+        source: normalizePath(path.relative(repoRoot, skillDir)),
       })
     }
   }
@@ -162,14 +207,15 @@ export function renderMirrorEntry(
         continue
       }
       const fileAbs = path.join(srcAbs, childRel)
+      const outputRel = normalizePath(childRel)
       if (childRel === 'SKILL.md') {
         const rewritten = rewriteSkillName(
           readFileSync(fileAbs, 'utf8'),
           entry.mirrorName,
         )
-        out.set(childRel, Buffer.from(rewritten, 'utf8'))
+        out.set(outputRel, Buffer.from(rewritten, 'utf8'))
       } else {
-        out.set(childRel, readFileSync(fileAbs))
+        out.set(outputRel, readFileSync(fileAbs))
       }
     }
   }
@@ -253,7 +299,10 @@ function main(): void {
     )
     return
   }
-  const entries = discoverSkills(REPO_ROOT)
+  const entries = discoverSkills(
+    REPO_ROOT,
+    resolveSelectedSkills(REPO_ROOT, process.argv.slice(2), process.env),
+  )
   if (checkOnly) {
     const drift = findMirrorDrift(REPO_ROOT, entries)
     if (drift.length) {

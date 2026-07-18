@@ -119,6 +119,10 @@ function main(): void {
       `fmt-rust: cargo fmt --all (${path.relative(repoRoot, manifest)})`,
     )
     const result = spawnSync('cargo', buildCargoFmtArgs(manifest, { check }), {
+      // Cargo/rustup discover rust-toolchain.toml and .cargo/config.toml from
+      // cwd, not from --manifest-path. Run at the workspace so a nested pin or
+      // target config is honored consistently.
+      cwd: path.dirname(manifest),
       stdio: 'inherit',
     })
     if (result.status !== 0) {

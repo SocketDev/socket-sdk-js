@@ -18,15 +18,17 @@
  *
  *   - When `SKIP_AI_FIX=1` is set (CI sets this; AI-fix runs locally).
  *   - When `--no-ai` is passed.
+ *   - When no AI agent CLI resolves to a runnable binary at all (the fleet
+ *     has fallbacks beyond claude — codex, opencode, gemini — so "no client
+ *     resolved" is an environment gap, not a findings-owner failure; residue
+ *     is re-evaluated on the next `pnpm run fix` once a client is available).
  *
- *   A `claude` CLI that is missing or cannot execute (launcher without its
- *   native binary) is NOT a skip: findings remain that this step owns, so it
- *   reports the environment failure with a remedy and exits non-zero
- *   (./ai-lint-fix/health.mts). Environmental per-spawn failures (workspace
- *   trust, broken launcher, tool-policy mismatch, silent exits) are
- *   classified the same way, and two consecutive ones abort the remaining
- *   files — each spawn would fail identically and a long residue would
- *   otherwise burn a 5-minute timeout per file. The four lockdown flags per
+ *   Once a probe finds a runnable client, environmental per-spawn failures
+ *   (workspace trust, broken launcher, tool-policy mismatch, silent exits)
+ *   are classified (./ai-lint-fix/health.mts), and two consecutive ones abort
+ *   the remaining files — each spawn would fail identically and a long
+ *   residue would otherwise burn a 5-minute timeout per file. The four
+ *   lockdown flags per
  *   CLAUDE.md "Programmatic Claude calls":
  *   - tools / allowedTools / disallowedTools / permissionMode. Cost / safety:
  *   - Sonnet 4.6, not Opus — judgment work but not architecturally deep;
@@ -45,11 +47,12 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import { joinAnd } from '@socketsecurity/lib-stable/arrays/join'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { runClaudeFix } from './ai-lint-fix/claude.mts'
-import { classifyAiFailure, probeClaudeCli } from './ai-lint-fix/health.mts'
+import { classifyAiFailure, probeAiCli } from './ai-lint-fix/health.mts'
 import { runLintJson } from './ai-lint-fix/oxlint-json.mts'
 import { bucketFindings, buildPrompt } from './ai-lint-fix/prompt.mts'
 import {
@@ -59,7 +62,30 @@ import {
 } from './ai-lint-fix/rule-guidance.mts'
 import { isMainModule } from './_shared/is-main-module.mts'
 
+import type { AiCliProbe } from './ai-lint-fix/health.mts'
+
 const logger = getDefaultLogger()
+
+/**
+ * Build the informational skip line for "no AI client resolved". Pulled out
+ * as a pure function so the skip decision (a clean return, never
+ * `process.exitCode = 1`) is unit-testable without spawning `main()`'s full
+ * lint + probe pipeline.
+ */
+export function buildAiSkipMessage(
+  probe: AiCliProbe,
+  totalFindings: number,
+  fileCount: number,
+): string {
+  const tried =
+    probe.tried && probe.tried.length > 0
+      ? joinAnd(probe.tried)
+      : 'none on PATH'
+  return (
+    `ai-lint-fix: no runnable AI client (tried: ${tried}); skipping the AI residue leg — ` +
+    `${totalFindings} finding(s) across ${fileCount} file(s) remain for a run with an AI client available.`
+  )
+}
 
 export interface CliArgs {
   noAi: boolean
@@ -115,24 +141,14 @@ export async function main(): Promise<void> {
   // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- relative path for log output; user invokes `pnpm run fix` from their cwd and expects paths relative to where they ran.
   const cwd = process.cwd()
 
-  const probe = await probeClaudeCli(cwd)
+  // No resolvable AI client (claude or a fallback agent) is a clean skip,
+  // not a failure — the fleet has fallbacks, so this is an environment gap
+  // rather than a findings-owner failure. The residue re-evaluates on the
+  // next `pnpm run fix` once a client is available.
+  const probe = await probeAiCli(cwd)
   if (!probe.ok) {
     const total = [...byFile.values()].reduce((n, m) => n + m.length, 0)
-    const saw =
-      probe.reason === 'not-on-path'
-        ? 'the claude CLI is not on PATH'
-        : `the claude CLI resolved on PATH but cannot execute (${probe.detail ?? 'version probe failed'})`
-    const fix =
-      probe.reason === 'not-on-path'
-        ? 'install Claude Code so `claude` resolves on PATH'
-        : 'run `claude install` to fetch the native binary'
-    logger.error(
-      `AI-fix cannot run: ${saw}.\n` +
-        `  Where: ai-lint-fix (AI residue leg of \`pnpm run fix\`)\n` +
-        `  Saw vs wanted: ${total} AI-handled findings remain in ${byFile.size} files with no runnable AI leg; wanted a healthy \`claude --version\`\n` +
-        `  Fix: ${fix}, or opt out explicitly with --no-ai / SKIP_AI_FIX=1.`,
-    )
-    process.exitCode = 1
+    logger.info(buildAiSkipMessage(probe, total, byFile.size))
     return
   }
 

@@ -50,7 +50,7 @@ export interface MemoryCodifyResult {
  * `~/.claude/projects/<slug>/memory/`.
  */
 export function memoryStoreDir(repoRoot: string, home = os.homedir()): string {
-  const slug = repoRoot.split(path.sep).join('-')
+  const slug = repoRoot.replaceAll('\\', '-').replaceAll('/', '-')
   return path.join(home, '.claude', 'projects', slug, 'memory')
 }
 

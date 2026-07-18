@@ -45,6 +45,8 @@ import {
   errorMessage,
   readManifest,
   run,
+  tarExecutable,
+  tarExtractArgs,
   verifyBundleFiles,
   verifySegments,
 } from './helpers.mts'
@@ -317,7 +319,14 @@ export async function installFleet(options: InstallOptions): Promise<number> {
     const sourceRef = ref || `local-${manifest.version}`
     const extractDir = path.join(tmp, 'extracted')
     mkdirSync(extractDir, { recursive: true })
-    run('tar', ['-xzf', sourceTarball, '-C', extractDir])
+    run(
+      tarExecutable(process.platform, process.env['SystemRoot']),
+      tarExtractArgs({
+        archive: sourceTarball,
+        destination: extractDir,
+        platform: process.platform,
+      }),
+    )
     const filesDir = path.join(extractDir, 'files')
     const segmentsDir = path.join(extractDir, 'segments')
     if (!existsSync(filesDir)) {

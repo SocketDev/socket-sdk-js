@@ -30,6 +30,9 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // runs it. Past incident (2026-06-06): a check rename left doctor:auth
     // pointing at a deleted file and no gate caught it.
     () => run('node', ['scripts/fleet/check/script-paths-resolve.mts']),
+    // Root `scripts/` is a namespace only: fleet and repo automation must
+    // declare ownership by living below scripts/fleet/ or scripts/repo/.
+    () => run('node', ['scripts/fleet/check/root-scripts-are-segregated.mts']),
     // Windows-portability classes (unshelled .cmd spawns, URL .pathname as a
     // filesystem path, hand-rolled platform literals) — each shipped a real
     // windows-only CI failure that failed OPEN (the bump-order pre-release
@@ -321,6 +324,12 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // un-refreshable lockfile). Skips absent tools; fails loud on below-floor.
     () =>
       run('node', ['scripts/fleet/check/path-tools-are-at-pinned-version.mts']),
+    // A `pnpm` shim can select a different `node` for `pnpm exec` than the
+    // fleet process. Catch that runtime split before it changes test semantics.
+    () =>
+      run('node', [
+        'scripts/fleet/check/package-manager-node-is-continuous.mts',
+      ]),
     // SkillSpector pin agrees across all three records (external-tools.json
     // version ⇔ pyproject.toml rev ⇔ uv.lock resolved SHA). The locked uv
     // project can't drift from the fleet-canonical SHA. Vacuous in repos that

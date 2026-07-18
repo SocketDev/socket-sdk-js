@@ -58,9 +58,7 @@
     "socket/no-vitest-skipped-tests": "error",
     "socket/no-vitest-standalone-expect": [
       "error",
-      {
-        "additionalTestBlockFunctions": ["cmdit"]
-      }
+      { "additionalTestBlockFunctions": ["cmdit"] }
     ],
     "socket/no-which-for-local-bin": "error",
     "socket/normalize-path-before-match": "error",
@@ -254,6 +252,7 @@
     "**/scripts/fleet/plugin-patches/**/*.patch",
     "**/.config/lockstep.schema.json",
     "**/.config/repo/vitest.config.mts",
+    "**/.kimi-code/mcp.json",
     "**/.mcp.json",
     "**/opencode.json",
     "**/packages/build-infra/lib/release-checksums/consumer.mts",

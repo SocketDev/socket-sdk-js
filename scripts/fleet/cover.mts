@@ -138,9 +138,22 @@ export async function runQuiet(
 ): Promise<SuiteResult> {
   options = { __proto__: null, ...options } as typeof options
   try {
-    const result = await spawn('pnpm', args, {
+    // A pnpm shim can select a different `node` from PATH than the runtime
+    // executing this coverage process. Prefer pnpm's JS entrypoint so the test
+    // children stay on this exact Node, and lead PATH with the same binary dir
+    // because `pnpm exec` launches local Node CLIs by name.
+    const pnpmEntry = process.env['npm_execpath']
+    const pnpmEntryIsJavaScript = /\.(?:cjs|js|mjs)$/u.test(pnpmEntry ?? '')
+    const command = pnpmEntryIsJavaScript ? process.execPath : 'pnpm'
+    const commandArgs = pnpmEntryIsJavaScript ? [pnpmEntry!, ...args] : args
+    const env = options.env ?? process.env
+    const nodeBin = path.dirname(process.execPath)
+    const result = await spawn(command, commandArgs, {
       cwd: options.cwd,
-      env: options.env ?? process.env,
+      env: {
+        ...env,
+        PATH: [nodeBin, env['PATH']].filter(Boolean).join(path.delimiter),
+      },
     })
     return {
       exitCode: result.code ?? 0,
@@ -169,6 +182,10 @@ const DEFAULT_UNIT_BUDGET_MS = 60_000
  */
 export function resolveUnitBudgetMs(): number {
   for (const file of [
+    // Canonical settings home (matches paths.mts's resolver order). Omitting it
+    // — as this reader did — silently ignored `vitest.unitBudgetMs` set in the
+    // repo's real settings file, pinning the budget to the 60s default.
+    '.config/repo/socket-wheelhouse.json',
     '.config/socket-wheelhouse.json',
     '.socket-wheelhouse.json',
   ]) {
@@ -211,7 +228,52 @@ export function warnIfOverBudget(suiteMs: number, budgetMs: number): boolean {
   logger.warn(
     '  `test:conformance` runner script. Tune the budget via `vitest.unitBudgetMs`.',
   )
+  logger.warn(
+    '  If the run instead HUNG (no completion), investigate a wedge — see the live',
+  )
+  logger.warn('  watchdog guidance above.')
   return true
+}
+
+/**
+ * LIVE wall-clock watchdog for the unit suites. `warnIfOverBudget` only fires
+ * AFTER the suites return, which is useless in the case that actually burns an
+ * operator: a suite that HANGS (a stuck child spawn, a missing nock mock
+ * blocking on a real socket — tests fail-closed on network, an infinite loop)
+ * never completes, so the post-hoc check never runs and whoever launched it
+ * waits blind. This fires WHILE the run is live — at the budget, then again
+ * each budget interval — telling them to INVESTIGATE rather than keep waiting.
+ * It never kills the run: a legitimately heavy suite still finishes and the nag
+ * is just noise; a wedged one becomes visible instead of silent. The timer is
+ * `unref`'d so a clean finish exits immediately with no pending-tick delay.
+ * Returns a disposer that clears it (call from a `finally`).
+ */
+export function startUnitBudgetWatchdog(budgetMs: number): () => void {
+  let elapsedMs = 0
+  const timer = setInterval(() => {
+    elapsedMs += budgetMs
+    logger.warn(
+      `[cover] unit suites STILL RUNNING after ${(elapsedMs / 1000).toFixed(0)}s (budget ${(budgetMs / 1000).toFixed(0)}s) — INVESTIGATE, do not just wait.`,
+    )
+    logger.warn(
+      '  A run this far over budget is usually WEDGED, not merely heavy: a hung',
+    )
+    logger.warn(
+      '  child spawn, a missing nock mock blocking on a real socket, or an infinite',
+    )
+    logger.warn(
+      '  loop. Check for a stuck vitest/node child (ps); narrow scope to bisect the',
+    )
+    logger.warn(
+      '  offending file. Genuinely heavy? Move it to the conformance tier or raise',
+    )
+    logger.warn('  vitest.unitBudgetMs.')
+  }, budgetMs)
+  // Do not let a pending tick hold the process open past a clean finish.
+  timer.unref?.()
+  return () => {
+    clearInterval(timer)
+  }
 }
 
 export function parseTypeCoveragePercent(output: string): number | undefined {
@@ -675,12 +737,17 @@ export async function main(): Promise<void> {
         logger.log('')
       }
     } else {
+      const budgetMs = resolveUnitBudgetMs()
       const suiteStart = performance.now()
-      const { combined, isolatedResult, mainResult } = await runTestSuites(
-        mainVitestArgs,
-        isolatedVitestArgs,
-      )
-      warnIfOverBudget(performance.now() - suiteStart, resolveUnitBudgetMs())
+      const stopWatchdog = startUnitBudgetWatchdog(budgetMs)
+      let suites: TestSuitesResult
+      try {
+        suites = await runTestSuites(mainVitestArgs, isolatedVitestArgs)
+      } finally {
+        stopWatchdog()
+      }
+      warnIfOverBudget(performance.now() - suiteStart, budgetMs)
+      const { combined, isolatedResult, mainResult } = suites
       exitCode = combined.exitCode
 
       const mainOutput = cleanOutput(mainResult.stdout + mainResult.stderr)

@@ -34,6 +34,7 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { getCI } from '@socketsecurity/lib-stable/env/ci'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 // oxlint-disable-next-line socket/prefer-async-spawn -- a check main() is a sync CLI gate; build + boot run inline in sequence.
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
@@ -109,10 +110,15 @@ export function settingsRoutesToLauncher(settingsText: string): boolean {
 export function isFreshSnapshotCheckout(options: {
   hasLauncher: boolean
   hasSnapshotBundle: boolean
+  isCI: boolean
   wiredToLauncher: boolean
 }): boolean {
   const opts = { __proto__: null, ...options }
-  return !opts.wiredToLauncher && !opts.hasLauncher && !opts.hasSnapshotBundle
+  return (
+    !opts.hasLauncher &&
+    !opts.hasSnapshotBundle &&
+    (opts.isCI || !opts.wiredToLauncher)
+  )
 }
 
 function main(): number {
@@ -143,6 +149,7 @@ function main(): number {
     isFreshSnapshotCheckout({
       hasLauncher: existsSync(LAUNCHER),
       hasSnapshotBundle: existsSync(SNAPSHOT_BUNDLE),
+      isCI: getCI(),
       wiredToLauncher,
     })
   ) {

@@ -125,7 +125,12 @@ export function scan(filePath: string, rawText: string): PathFinding[] {
       }
     }
     if (!proven) {
-      findings.push({ file: filePath, line: i + 1, text: line.trim(), varName })
+      findings.push({
+        file: filePath,
+        line: i + 1,
+        text: line.trim(),
+        varName,
+      })
     }
   }
   return findings
@@ -165,7 +170,7 @@ function main(): void {
       continue
     }
     // Skip the normalize helper itself.
-    if (/\/paths\/normalize\.[mc]?[jt]s$/.test(file)) {
+    if (/\/paths\/normalize\.[mc]?[jt]s$/.test(normalizePath(file))) {
       continue
     }
     // Skip this check script itself.

@@ -334,7 +334,7 @@ export function scanRepo(repoRoot: string): PortabilityHit[] {
 // ever LOWER this number as sites are fixed; a count above it means NEW
 // windows-portability debt and fails the gate. (Count-ratchet chosen over a
 // per-site baseline for weight; the doc's classes make each fix mechanical.)
-export const BASELINE_FINDINGS = 56
+export const BASELINE_FINDINGS = 54
 
 async function main(): Promise<void> {
   const quiet = process.argv.includes('--quiet')

@@ -83,6 +83,21 @@ the dead line, re-anchor it: snapshot the verified tree
 then consolidate with `--base origin/main` — the result is a fast-forward of
 origin, no force needed.
 
+## What consolidation preserves
+
+The local `HEAD` at command start is the content source. The base ref chooses
+the parent lineage; it never replaces the local tree. Before changing `HEAD`,
+the script records the original tip under
+`refs/fleet/recovery/consolidate/<full-sha>`. This local-only ref keeps every
+original commit reachable even after reflog expiry. Recover or inspect it with
+`git log refs/fleet/recovery/consolidate/<full-sha>`.
+
+Consolidation preserves the exact Git tree object, so every tracked path and
+byte stays the same. It intentionally replaces commit identities. The final
+message reports the original tip, recovery ref, old and new commit counts, and
+the push mode computed from ancestry: a normal push when `origin/<default>` is
+an ancestor of the new tip, otherwise a separately authorized lease force-push.
+
 ## Incident this codifies
 
 socket-mcp, 2026-07-10: a morning sweep consolidation force-pushed rewritten

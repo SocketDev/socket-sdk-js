@@ -25,6 +25,29 @@ summary on stderr (on the shared hook libs the skeleton is ~8% of source size).
 Model-agnostic — it is the substrate the "RAG + repo-map" retrieval answer points
 at, not a Claude-only tool.
 
+## Spend-delta measurement
+
+The engine reports bytes, not provider billing. Bytes are a repeatable lower-bound
+proxy for context spend: source bytes approximate a whole-file read and skeleton
+bytes approximate the orientation read. Do not describe this as observed token or
+dollar savings without paired transcript data.
+
+Run the same command before and after map changes and keep the stderr summary:
+
+```sh
+node --experimental-strip-types scripts/fleet/make-repo-map.mts scripts/fleet
+```
+
+Baseline captured 2026-07-16 on the wheelhouse fleet scripts:
+
+| corpus | whole source | skeleton | proxy reduction |
+| --- | ---: | ---: | ---: |
+| `scripts/fleet` | 2,869 KB | 218 KB | 92.4% |
+
+This confirms that the landed map materially reduces the orientation payload. A
+real session-spend study still needs paired transcripts with and without the
+nudge/cache; record the model, session count, and token totals here when available.
+
 ## The cache
 
 `--write` persists each file's skeleton to `.repo-map/<relpath>.skel`, mirroring

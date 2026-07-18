@@ -42,6 +42,12 @@ The script will refuse to auto-clean if:
 - A cascade commit modifies a file outside the cascade-allowlist (e.g. source code under `src/`, vendored deps, test fixtures).
 - Origin has no cascade commits at all. There's nothing to prove supersession against.
 
+## Squash-history repos are exempt from the commit reset
+
+🚨 A repo carrying the `squash-history` roster opt-in (`fleet-repos.json`) has a **canonical local `<base>`**: origin holds the pre-squash history and is reconciled FORWARD via `SQUASH_HISTORY=1 git push --force-with-lease`, never reset backward. So origin advancing to a newer template SHA does **not** strand a local-ahead cascade commit whose SHA is a strict ancestor of it — that commit is canonical work awaiting the next squash+push, and the supersession rail above would otherwise pass and drive a `git reset --hard origin/<base>` that discards the local lineage.
+
+`cleanup-stranded.mts` detects the opt-in via `isSquashOptIn` and, for such a repo, **holds** the local-ahead cascade commits — they are surfaced (`squashHeldCommits`, logged "held — squash-history cadence") but never reset — and still prunes scratch worktrees, which are disposable in any cadence. This mirrors the "local main is canonical, reconcile forward" rule the divergence hooks enforce.
+
 ## Stranded worktree detection
 
 Same supersession rule, applied to worktree branches:

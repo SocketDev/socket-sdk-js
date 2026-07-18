@@ -21,6 +21,7 @@ import process from 'node:process'
 
 import {
   buildOxfmtArgs,
+  filterFormatIgnored,
   getModifiedFiles,
   getStagedFiles,
   pickConfig,
@@ -48,17 +49,22 @@ export function resolveFormatPlan(
   argv: readonly string[],
   options?:
     | {
+        filterFormatIgnored?:
+          | ((files: readonly string[]) => string[])
+          | undefined
         getModifiedFiles?: (() => string[]) | undefined
         getStagedFiles?: (() => string[]) | undefined
       }
     | undefined,
 ): FormatPlan {
   const opts = { __proto__: null, ...options } as {
+    filterFormatIgnored?: ((files: readonly string[]) => string[]) | undefined
     getModifiedFiles?: (() => string[]) | undefined
     getStagedFiles?: (() => string[]) | undefined
   }
   const listStaged = opts.getStagedFiles ?? getStagedFiles
   const listModified = opts.getModifiedFiles ?? getModifiedFiles
+  const filterIgnored = opts.filterFormatIgnored ?? filterFormatIgnored
 
   const check = argv.includes('--check')
 
@@ -75,13 +81,17 @@ export function resolveFormatPlan(
   }
 
   let files = argv.filter(arg => !arg.startsWith('--'))
-  if (argv.includes('--staged') || argv.includes('--modified')) {
+  const hasExplicitFiles = files.length > 0
+  const hasGitScope = argv.includes('--staged') || argv.includes('--modified')
+  if (hasGitScope) {
     files = argv.includes('--staged') ? listStaged() : listModified()
-    // Nothing in scope — do NOT fall through to a whole-tree format (an empty
-    // file list would default to `.`). oxfmt skips paths it doesn't recognize.
-    if (!files.length) {
-      return { kind: 'skip' }
-    }
+  }
+  files = filterIgnored(files)
+  // Nothing in an explicit or Git-derived scope — do NOT fall through to a
+  // whole-tree format (an empty file list defaults to `.`). Pre-filter explicit
+  // paths because oxfmt does not apply --ignore-path to argv-named files.
+  if ((hasExplicitFiles || hasGitScope) && !files.length) {
+    return { kind: 'skip' }
   }
   return { kind: 'run', args: buildOxfmtArgs({ check, files }) }
 }

@@ -68,7 +68,7 @@
       "kind": "metered-openai-compatible",
       "apiBase": "https://api.fireworks.ai/inference/v1",
       "pricingSource": "https://docs.fireworks.ai/serverless/pricing",
-      "snapshot": "2026-07-05",
+      "snapshot": "2026-07-17",
       "notes": [
         "Metered per-token list prices from the serverless pricing page; re-source per snapshot. No org budget here — that is private runtime config."
       ],
@@ -101,7 +101,7 @@
       "kind": "flat-rate-openai-compatible",
       "apiBase": "https://api.synthetic.new/openai/v1",
       "pricingSource": "https://synthetic.new/pricing",
-      "snapshot": "2026-07-05",
+      "snapshot": "2026-07-17",
       "notes": [
         "Flat-rate plan: models bill under the plan (billing:'plan'), not per token. The generic plan STRUCTURE (price + public rate limits) is here; private usage is not."
       ],

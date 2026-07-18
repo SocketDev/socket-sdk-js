@@ -42,15 +42,17 @@
 //     "tool_input": { "command": "..." },
 //     "transcript_path": "/.../session.jsonl" }
 
-import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-import { readSessionTouchedPaths } from '../_shared/foreign-paths.mts'
+import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
+
+import { isGitCommit } from '../_shared/commit-command.mts'
 import { isSquashOptIn } from '../_shared/fleet-roster.mts'
+import { readSessionTouchedPaths } from '../_shared/foreign-paths.mts'
 import { extractGitCwd } from '../_shared/git-cwd.mts'
 import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
-import { isGitCommit } from '../_shared/commit-command.mts'
+import type { ToolCallPayload } from '../_shared/payload.mts'
 import {
   commandsFor,
   detectBroadGitAdd,
@@ -73,7 +75,7 @@ const BYPASS_PHRASES = ['Allow add-all bypass'] as const
 // `git add -A` block, so it gets its own bypass.
 const COMMIT_SWEEP_BYPASS = ['Allow index-sweep bypass'] as const
 
-export function getRepoDir(command: string): string {
+export function getRepoDir(command: string, cwd?: string | undefined): string {
   // The repo the `git` command actually runs in — `git -C <dir>`, a leading
   // `cd <dir>`, else the command's own cwd. NOT CLAUDE_PROJECT_DIR: that's the
   // session's project (the wheelhouse), so reading its index from a sibling
@@ -81,7 +83,7 @@ export function getRepoDir(command: string): string {
   // Scoped to the commit invocation — a -C inside a $(…) substitution
   // (e.g. a rev-parse composing the message) must not point the index
   // probe at a different repo.
-  return extractGitCwd(command, { subcommand: ['add', 'commit'] })
+  return extractGitCwd(command, { cwd, subcommand: ['add', 'commit'] })
 }
 
 export { isGitCommit }
@@ -194,8 +196,8 @@ export function listStagedRenamedPaths(repoDir: string): Set<string> {
   return renamed
 }
 
-export const check = bashGuard((command, payload) => {
-  const repoDir = getRepoDir(command)
+export function checkCommand(command: string, payload: ToolCallPayload) {
+  const repoDir = getRepoDir(command, payload.cwd)
   const transcriptPath = payload.transcript_path
 
   // Squash-history relaxation. A repo opted into `squash-history` flattens its
@@ -325,7 +327,9 @@ export const check = bashGuard((command, payload) => {
   }
 
   return undefined
-})
+}
+
+export const check = bashGuard(checkCommand)
 
 export const hook = defineHook({
   check,

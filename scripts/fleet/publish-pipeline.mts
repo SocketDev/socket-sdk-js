@@ -13,6 +13,16 @@
  *   completed (run the release pipeline first). Private / github-release-only
  *   packages never run this pipeline at all.
  *
+ *   Channel routing: this pipeline is the `npm-registry` engine (the stage →
+ *   verify → approve model is npm's staged-publish flow). The other publish
+ *   channels route to their OWN dedicated engines, NOT through here:
+ *   `crates-registry` → cargo-publish.mts, and `go-registry` → go-publish.mts
+ *   (a Go module publishes by pushing a semver tag — no registry upload, no
+ *   token, no stage/approve — so it has no analog to this flow; see
+ *   go-publish.mts). The channel→workflow authority is `PUBLISH_WORKFLOW_BY_FROM`
+ *   in sync-scaffolding/socket-wheelhouse-config.mts (`go-registry` →
+ *   .github/workflows/go-publish.yml → the `go-publish` CI environment).
+ *
  *   Stages: stage-publish (pnpm stage publish — nothing public yet) → verify
  *   (pre-approve integrity gate). `--approve` is the separate promote step,
  *   never part of a run.

@@ -15,12 +15,9 @@
 # name in FLEET_CANONICAL_CATALOG_NAMES (scripts/repo/sync-scaffolding/manifest.mts).
 # loadExpectedCatalogEntries() reads versions from this file + merges the purpose.
 catalog:
-  # The fleet AI CLI — gh-aw workflow engine + socket-lib src/ai spawnAiAgent
-  # runtime. Soaked (published 2026-06-04). Members reference it via `catalog:`.
-  '@anthropic-ai/claude-code': 2.1.205
   '@redwoodjs/agent-ci': 0.17.1
   'dtu-github-actions': 0.17.1
-  '@sinclair/typebox': 0.34.49
+  '@sinclair/typebox': 0.34.50
   '@socketregistry/packageurl-js': 1.4.2
   '@socketsecurity/lib': 6.0.10
   '@socketsecurity/registry': 2.0.2
@@ -50,7 +47,7 @@ catalog:
   # 14.15.1 is the attested re-publish that cleared the 14.15.0
   # trust-downgrade flag.
   'compromise': 14.15.1
-  'magic-string': 0.30.21
+  'magic-string': 1.0.0
   'markdownlint-cli2': 0.23.0
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
@@ -65,11 +62,13 @@ catalog:
   'oxlint': 1.73.0
   # playwright-core — headless Chromium driver for the rendering-chromium-to-png
   # skill (render a page or a real unpacked MV3 extension popup to PNG so an
-  # agent can SEE it). Browser binary via `pnpm exec playwright install chromium`.
+  # agent can SEE it). Browser binary via `node_modules/.bin/playwright install chromium`.
   'playwright-core': 1.61.1
+  # portless — stable HTTPS `.localhost` URLs for local page tests and rendered UI checks.
+  'portless': 0.15.4
   'regjsparser': 0.13.2
   'semver': 7.8.5
-  'shell-quote': 1.9.0
+  'shell-quote': 1.10.0
   'taze': 19.14.1
   # TypeScript 7 NATIVE (the Go `tsc`). Track the highest available 7.x
   # PRE-RELEASE — the RC line is intentional. npm's `latest` dist-tag points at

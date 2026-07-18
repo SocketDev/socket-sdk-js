@@ -9,18 +9,21 @@
  *
  *   Flow: verify the worktree is clean (land dirty files first via
  *   `land-work.mts --commit`) → capture ORIG → peel a bump tip if present →
- *   soft-reset to the base → commit each logical group by pathspec →
- *   cherry-pick the bump back → verify the final tree is BYTE-IDENTICAL to
- *   ORIG (hard-restores ORIG and fails loud on any mismatch). Nothing is
- *   pushed; pushing (usually with a lease force) is a separate, authorized
- *   step.
+ *   create a durable recovery ref → soft-reset to the base → commit each
+ *   logical group by pathspec → cherry-pick the bump back → verify the
+ *   final tree object is IDENTICAL to ORIG (hard-restores ORIG and fails loud
+ *   on any mismatch). Nothing is pushed; the final report says whether a
+ *   normal push is a fast-forward or a separately authorized lease force-push
+ *   is required.
  *
  *   Base default: the previous `chore: bump version to …` commit below the
  *   current tip (the "previous bump"), else the latest vX.Y.Z tag.
  *
- *   Usage: node scripts/fleet/consolidate-commits.mts [--base <ref>] [--dry-run]
+ *   Usage: node scripts/fleet/consolidate-commits.mts [--repo <path>]
+ *     [--base <ref>] [--dry-run]
  */
 
+import path from 'node:path'
 import process from 'node:process'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
@@ -36,6 +39,7 @@ import { isMainModule } from './_shared/is-main-module.mts'
 const logger = getDefaultLogger()
 
 const BUMP_SUBJECT_RE = /^chore: bump version to \d+\.\d+\.\d+/
+let gitRoot = REPO_ROOT
 
 export interface GitResult {
   status: number
@@ -44,7 +48,7 @@ export interface GitResult {
 
 function git(args: readonly string[]): GitResult {
   const r = spawnSync('git', [...args], {
-    cwd: REPO_ROOT,
+    cwd: gitRoot,
     stdio: ['ignore', 'pipe', 'pipe'],
     stdioString: true,
   })
@@ -91,11 +95,39 @@ export function defaultBase(tip: string): string | undefined {
  * the base sits on superseded history and consolidating onto it re-embeds
  * old-lineage commits.
  */
-export function isOffLineage(
-  baseReachableFromOrigin: boolean,
-  originReachableFromBase: boolean,
-): boolean {
-  return !baseReachableFromOrigin && !originReachableFromBase
+export function isOffLineage(options: {
+  baseReachableFromOrigin: boolean
+  originReachableFromBase: boolean
+}): boolean {
+  const opts = { __proto__: null, ...options }
+  return !opts.baseReachableFromOrigin && !opts.originReachableFromBase
+}
+
+export interface RewritePushLineage {
+  originAvailable: boolean
+  originIsAncestorOfHead: boolean
+}
+
+export type RewritePushDisposition = 'fast-forward' | 'lease-force' | 'unknown'
+
+/**
+ * Classify the push required after the local history rewrite.
+ */
+export function classifyRewritePush(
+  options: RewritePushLineage,
+): RewritePushDisposition {
+  const opts = { __proto__: null, ...options } as RewritePushLineage
+  if (!opts.originAvailable) {
+    return 'unknown'
+  }
+  return opts.originIsAncestorOfHead ? 'fast-forward' : 'lease-force'
+}
+
+/**
+ * A local-only ref that keeps the exact pre-rewrite tip reachable.
+ */
+export function recoveryRefForTip(tip: string): string {
+  return `refs/fleet/recovery/consolidate/${tip}`
 }
 
 function resolveOriginDefaultRef(): string | undefined {
@@ -122,10 +154,14 @@ function main(): void {
       'allow-off-lineage-base': { type: 'boolean' },
       base: { type: 'string' },
       'dry-run': { type: 'boolean' },
+      repo: { type: 'string' },
     },
     strict: false,
   })
   const dryRun = !!values['dry-run']
+  if (typeof values['repo'] === 'string' && values['repo']) {
+    gitRoot = path.resolve(values['repo'])
+  }
 
   const dirty = gitOrDie(['status', '--porcelain'], 'status')
   if (dirty) {
@@ -138,6 +174,11 @@ function main(): void {
   }
 
   const orig = gitOrDie(['rev-parse', 'HEAD'], 'rev-parse HEAD')
+  const originalTree = gitOrDie(
+    ['rev-parse', `${orig}^{tree}`],
+    'resolve original tree',
+  )
+  const branch = git(['symbolic-ref', '--short', 'HEAD']).stdout || 'HEAD'
   const base =
     typeof values['base'] === 'string' && values['base']
       ? gitOrDie(['rev-parse', String(values['base'])], 'resolve --base')
@@ -160,7 +201,10 @@ function main(): void {
   const originRef = resolveOriginDefaultRef()
   if (originRef && !values['allow-off-lineage-base']) {
     if (
-      isOffLineage(isAncestor(base, originRef), isAncestor(originRef, base))
+      isOffLineage({
+        baseReachableFromOrigin: isAncestor(base, originRef),
+        originReachableFromBase: isAncestor(originRef, base),
+      })
     ) {
       logger.fail(
         `[consolidate-commits] the base commit is not part of ${originRef}'s history.\n` +
@@ -204,6 +248,12 @@ function main(): void {
   }
 
   const groups = groupPaths(paths)
+  const originalCommitCount = Number(
+    gitOrDie(['rev-list', '--count', `${base}..${orig}`], 'count commits'),
+  )
+  logger.log(
+    `[consolidate-commits] source: local ${branch} tip ${orig.slice(0, 12)} is the canonical content; ${base.slice(0, 12)} only sets the new parent lineage.`,
+  )
   logger.log(
     `[consolidate-commits] ${paths.length} path(s) since ${base.slice(0, 12)} → ${groups.length} logical commit(s)` +
       `${bumpTip ? ' + the bump kept last' : ''}:`,
@@ -217,7 +267,12 @@ function main(): void {
     return
   }
 
+  const recoveryRef = recoveryRefForTip(orig)
   try {
+    gitOrDie(
+      ['update-ref', '-m', 'consolidate-commits recovery', recoveryRef, orig],
+      'create recovery ref',
+    )
     // Materialize the WORK tree, then point HEAD at base keeping that tree.
     gitOrDie(['reset', '--hard', workTip], 'reset to work tip')
     gitOrDie(['reset', '--soft', base], 'soft reset to base')
@@ -260,14 +315,18 @@ function main(): void {
       // cherry-pick has no --no-verify; it runs no pre-commit hooks anyway.
       gitOrDie(['cherry-pick', bumpTip], 'cherry-pick bump')
     }
-    const diff = git(['diff', '--stat', orig, 'HEAD'])
-    if (diff.status !== 0 || diff.stdout !== '') {
+    const finalTree = gitOrDie(
+      ['rev-parse', 'HEAD^{tree}'],
+      'resolve consolidated tree',
+    )
+    if (finalTree !== originalTree) {
       throw new Error('final tree differs from the original tip')
     }
   } catch (e) {
     // Restore the original history — the invariant is "never lose anything".
     git(['cherry-pick', '--abort'])
     git(['reset', '--hard', orig])
+    git(['update-ref', '-d', recoveryRef])
     logger.fail(
       `[consolidate-commits] rewrite failed (${e instanceof Error ? e.message : String(e)}) — restored ${orig.slice(0, 12)}. History unchanged.`,
     )
@@ -275,10 +334,24 @@ function main(): void {
     return
   }
 
+  const newTip = gitOrDie(['rev-parse', 'HEAD'], 'resolve consolidated tip')
+  const pushDisposition = classifyRewritePush({
+    originAvailable: !!originRef,
+    originIsAncestorOfHead: originRef ? isAncestor(originRef, newTip) : false,
+  })
+  const originLabel = originRef ?? 'the origin default ref'
+  const pushGuidance =
+    pushDisposition === 'fast-forward'
+      ? `${originLabel} is an ancestor of the new tip; use a normal git push.`
+      : pushDisposition === 'lease-force'
+        ? `${originLabel} is not an ancestor of the new tip; pushing requires a separately authorized lease force-push.`
+        : 'No origin default ref is available; inspect the destination lineage before pushing.'
+  const originalCommitLabel = `${originalCommitCount} original commit${originalCommitCount === 1 ? '' : 's'}`
   logger.success(
     `[consolidate-commits] done: ${groups.length} logical commit(s)` +
       `${bumpTip ? ' + bump last' : ''}, tree byte-identical to ${orig.slice(0, 12)}. ` +
-      'Push separately (a rewritten branch needs an authorized lease force-push).',
+      `${originalCommitLabel} replaced; recover the original history at ${recoveryRef}. ` +
+      `Push separately: ${pushGuidance}`,
   )
 }
 

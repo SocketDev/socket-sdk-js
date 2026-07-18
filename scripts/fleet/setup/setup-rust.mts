@@ -4,8 +4,9 @@
  *   the locked path, so a dev machine gets exactly what CI gets.
  *   Self-detecting: skips with a clear line unless the repo has a first-party
  *   `Cargo.toml`. Requires `rustup` (it never `curl | sh` — it fails loud with
- *   the install instruction), installs the `rust-toolchain.toml` pin when
- *   present, then runs `cargo fetch --locked` per manifest dir so the
+ *   the install instruction), requires and installs the nearest
+ *   `rust-toolchain.toml` pin (including components + targets), then runs
+ *   `cargo fetch --locked` per manifest dir so the
  *   dependency set is exactly the soaked `Cargo.lock`.
  */
 
@@ -56,6 +57,69 @@ export function parseRustToolchainPin(tomlText: string): string | undefined {
   return undefined
 }
 
+function parseToolchainArray(
+  tomlText: string,
+  key: 'components' | 'targets',
+): string[] {
+  const match = new RegExp(`^${key}\\s*=\\s*\\[([^\\]]*)\\]`, 'm').exec(
+    tomlText,
+  )
+  return match
+    ? [...match[1]!.matchAll(/["']([^"']+)["']/g)].map(item => item[1]!)
+    : []
+}
+
+/**
+ * Build the complete rustup install command from rust-toolchain.toml. Keeping
+ * components and targets in the pin means setup installs what format, lint,
+ * and cross-build commands need instead of only installing rustc + Cargo.
+ */
+export function rustupToolchainInstallArgs(tomlText: string): string[] {
+  const channel = parseRustToolchainPin(tomlText)
+  if (!channel) {
+    return []
+  }
+  const profile = /^profile\s*=\s*["']([^"']+)["']/m.exec(tomlText)?.[1]
+  const args = ['toolchain', 'install', channel]
+  if (profile) {
+    args.push('--profile', profile)
+  }
+  for (const component of parseToolchainArray(tomlText, 'components')) {
+    args.push('--component', component)
+  }
+  for (const target of parseToolchainArray(tomlText, 'targets')) {
+    args.push('--target', target)
+  }
+  return args
+}
+
+/**
+ * Resolve the nearest toolchain pin for a Cargo manifest, stopping at the repo
+ * root. A mixed-language monorepo may carry a root default plus a more specific
+ * pin inside one Rust workspace.
+ */
+export function findRustToolchainFile(
+  manifest: string,
+  repoRoot: string,
+): string | undefined {
+  // File scanners return portable `/`-separated paths. Resolve both inputs
+  // through the host path implementation before walking so Windows does not
+  // compare `C:/repo` with `C:\\repo` and incorrectly miss the root pin.
+  let dir = path.dirname(path.resolve(manifest))
+  const root = path.resolve(repoRoot)
+  while (dir === root || dir.startsWith(`${root}${path.sep}`)) {
+    const candidate = path.join(dir, 'rust-toolchain.toml')
+    if (existsSync(candidate)) {
+      return candidate
+    }
+    if (dir === root) {
+      break
+    }
+    dir = path.dirname(dir)
+  }
+  return undefined
+}
+
 /**
  * The skip reason for `setup:rust`, or undefined when the step should run. Pure
  * over the manifest count so the decision is unit-testable without a
@@ -92,30 +156,46 @@ export async function setupRust(
     )
     return { ok: false, reason: 'rustup not installed', skipped: false }
   }
-  const pinFile = path.join(repoRoot, 'rust-toolchain.toml')
-  if (existsSync(pinFile)) {
-    const channel = parseRustToolchainPin(readFileSync(pinFile, 'utf8'))
-    if (channel) {
-      logger.log(`setup:rust — ensuring toolchain ${channel}`)
-      // rustup toolchain install is idempotent — it no-ops when the pin is
-      // already present, so this installs the pin only when missing.
-      const installed = await runCommand('rustup', [
-        'toolchain',
-        'install',
-        channel,
-      ])
-      if (installed.exitCode !== 0) {
-        logger.fail(
-          `setup:rust: rustup could not install toolchain ${channel}.\n` +
-            `  Where: rustup toolchain install ${channel}.\n` +
-            `  Saw: exit ${installed.exitCode}; wanted the pinned toolchain present.\n` +
-            '  Fix: check network + the rust-toolchain.toml channel, then re-run.',
-        )
-        return {
-          ok: false,
-          reason: `toolchain ${channel} install failed`,
-          skipped: false,
-        }
+  const pinFiles = new Set<string>()
+  for (const manifest of manifests) {
+    const pinFile = findRustToolchainFile(manifest, repoRoot)
+    if (!pinFile) {
+      logger.fail(
+        `setup:rust: no rust-toolchain.toml covers ${manifest}.\n` +
+          '  Where: the Cargo workspace or one of its parent directories up to the repo root.\n' +
+          '  Saw: no exact toolchain pin; wanted reproducible local + CI compiler selection.\n' +
+          '  Fix: add rust-toolchain.toml at the workspace or repo root, then re-run.',
+      )
+      return { ok: false, reason: 'toolchain pin missing', skipped: false }
+    }
+    pinFiles.add(pinFile)
+  }
+  for (const pinFile of pinFiles) {
+    const tomlText = readFileSync(pinFile, 'utf8')
+    const installArgs = rustupToolchainInstallArgs(tomlText)
+    const channel = parseRustToolchainPin(tomlText)
+    if (!channel || installArgs.length === 0) {
+      logger.fail(
+        `setup:rust: ${pinFile} has no toolchain channel.\n` +
+          '  Fix: declare [toolchain] channel = "<exact-version>".',
+      )
+      return { ok: false, reason: 'toolchain channel missing', skipped: false }
+    }
+    logger.log(`setup:rust — ensuring toolchain ${channel}`)
+    // rustup toolchain install is idempotent — it no-ops when the complete pin
+    // is already present, including declared components and targets.
+    const installed = await runCommand('rustup', installArgs)
+    if (installed.exitCode !== 0) {
+      logger.fail(
+        `setup:rust: rustup could not install toolchain ${channel}.\n` +
+          `  Where: rustup ${installArgs.join(' ')}.\n` +
+          `  Saw: exit ${installed.exitCode}; wanted the pinned toolchain present.\n` +
+          '  Fix: check network + the rust-toolchain.toml channel, then re-run.',
+      )
+      return {
+        ok: false,
+        reason: `toolchain ${channel} install failed`,
+        skipped: false,
       }
     }
   }

@@ -10,6 +10,8 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
 import type {
   HashSource,
   TarballDigest,
@@ -24,6 +26,7 @@ import { withPinnedReadme } from './pin-readme.mts'
 import { isAlreadyPublished } from './registry.mts'
 import type { StageListEntry } from './shared.mts'
 import { isStagingExpected, readPackageJson } from './shared.mts'
+import { tarExecutable } from '../../_shared/tar-executable.mts'
 
 /**
  * `--staged` mode: stage this package's tarball.
@@ -229,7 +232,7 @@ async function hashDirContents(dir: string): Promise<Map<string, string>> {
       continue
     }
     const abs = path.join(entry.parentPath, entry.name)
-    const rel = path.relative(dir, abs)
+    const rel = normalizePath(path.relative(dir, abs))
     // eslint-disable-next-line no-await-in-loop
     const bytes = await fs.readFile(abs)
     result.set(rel, crypto.createHash('sha1').update(bytes).digest('hex'))
@@ -259,7 +262,11 @@ export async function compareExtractedTarballs(
       [tarB, dirB],
     ] as const) {
       // eslint-disable-next-line no-await-in-loop
-      const untar = await runCapture('tar', ['-xzf', tar, '-C', dir], tmpDir)
+      const untar = await runCapture(
+        tarExecutable(),
+        ['-xzf', tar, '-C', dir],
+        tmpDir,
+      )
       if (untar.code !== 0) {
         return { detail: `tar -xzf ${tar} exited ${untar.code}`, equal: false }
       }

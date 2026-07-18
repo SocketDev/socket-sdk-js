@@ -923,9 +923,11 @@ const main = async (): Promise<number> => {
 // unhandled rejection — surface the error through the logger so the
 // user sees what blocked the push, then exit 1 intentionally.
 main().then(
-  code => process.exit(code),
+  code => {
+    process.exitCode = code
+  },
   e => {
     logger.error(`pre-push: ${errorMessage(e)}`)
-    process.exit(1)
+    process.exitCode = 1
   },
 )

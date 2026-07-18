@@ -9,6 +9,7 @@
  *     npm:publish     → an npm registry publish (publish-pipeline.mts /
  *                       npm-publish.mts)
  *     cargo:publish   → `cargo publish`
+ *     go:publish      → a Go module tag-push publish (go-publish.mts)
  *     python:publish  → `uv publish` / `twine upload`
  *
  *   The check is BODY-DRIVEN, not name-guessing: it classifies each script's
@@ -40,7 +41,7 @@ import { collectTrackedFiles } from '../_shared/tracked-globs.mts'
 
 const logger = getDefaultLogger()
 
-export type ReleasePublishTarget = 'github' | 'npm' | 'cargo' | 'python'
+export type ReleasePublishTarget = 'github' | 'npm' | 'cargo' | 'go' | 'python'
 
 // Body → target patterns. Each entry maps the canonical `<target>:<verb>` name
 // to the regexes that identify that target's work in a script BODY. Ordered so
@@ -70,6 +71,14 @@ const TARGET_SIGNATURES: ReadonlyArray<{
     // canonical cargo-publish.mts entry (mirrors the npm signature, which
     // matches both publish-pipeline.mts and npm-publish.mts).
     patterns: [/\bcargo\s+publish\b/, /\bcargo-publish\.mts\b/],
+  },
+  {
+    target: 'go',
+    expectedName: 'go:publish',
+    // require-regex-comment: a body invoking the canonical go-publish.mts entry.
+    // Go has no `go publish` command — a module publishes by pushing a semver
+    // tag — so the engine script is the sole signature (cf. cargo's dual form).
+    patterns: [/\bgo-publish\.mts\b/],
   },
   {
     target: 'python',
@@ -217,8 +226,9 @@ async function main(): Promise<number> {
   logger.groupEnd()
   logger.log(
     'Fix: rename the script to its canonical <target>:<verb> key — ' +
-      'github:release, npm:publish, cargo:publish, or python:publish. A release ' +
-      'never publishes to a registry; publishing resumes from the release.',
+      'github:release, npm:publish, cargo:publish, go:publish, or ' +
+      'python:publish. A release never publishes to a registry; publishing ' +
+      'resumes from the release.',
   )
   process.exitCode = 1
   return 1

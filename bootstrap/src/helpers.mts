@@ -89,6 +89,36 @@ export interface SpliceOptions {
   readonly target: string
 }
 
+export interface TarExtractOptions {
+  readonly archive: string
+  readonly destination: string
+  readonly platform: NodeJS.Platform
+}
+
+/**
+ * Normalize bundle-manifest paths to their portable `/` wire format.
+ */
+export function normalizeBundlePath(filePath: string): string {
+  return filePath.replaceAll('\\', '/')
+}
+
+export function tarExecutable(
+  platform: NodeJS.Platform,
+  systemRoot: string | undefined,
+): string {
+  return platform === 'win32'
+    ? path.join(systemRoot ?? 'C:\\Windows', 'System32', 'tar.exe')
+    : 'tar'
+}
+
+/**
+ * Build extraction arguments for the platform-selected tar executable.
+ */
+export function tarExtractArgs(options: TarExtractOptions): string[] {
+  const opts = { __proto__: null, ...options } as TarExtractOptions
+  return ['-xzf', opts.archive, '-C', opts.destination]
+}
+
 export function errorMessage(e: unknown): string {
   if (e instanceof Error) {
     return e.message

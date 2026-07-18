@@ -192,6 +192,28 @@ const VitestSchema = Type.Object(
           'Heavy external-suite / cross-impl conformance wrapper globs excluded from the DEFAULT (unit) + cover suites, keeping the unit pass inside the fleet under-a-minute budget. A repo setting this MUST pair it with an explicit `test:conformance` runner so the tier never silently drops.',
       }),
     ),
+    lanes: Type.Optional(
+      Type.Object(
+        {
+          mid: Type.Optional(
+            Type.Array(Type.String(), {
+              description:
+                'Globs for the `mid` lane — isolated in-process suites (env-mutating / vi.mock / fs-heavy). Skipped by the bare `pnpm test` fast lane; run via `pnpm run test:mid`. Coverage + CI run every lane, so nothing is cut.',
+            }),
+          ),
+          slow: Type.Optional(
+            Type.Array(Type.String(), {
+              description:
+                'Globs for the `slow` lane — heavy suites (subprocess-per-case, e.g. hook integration specs). Skipped by the bare `pnpm test` fast lane; run via `pnpm run test:slow`. Coverage + CI run every lane, so nothing is cut.',
+            }),
+          ),
+        },
+        {
+          description:
+            "Test LANES: a SPEED category orthogonal to test TYPE (unit/integration/e2e). `fast` is the implicit complement of `mid`+`slow`. The runner's `--lane <fast|mid|slow>` flag selects one; bare `pnpm test` defaults to `fast`.",
+        },
+      ),
+    ),
     legacyScriptTests: Type.Optional(
       Type.Array(Type.String(), {
         description:
@@ -202,7 +224,7 @@ const VitestSchema = Type.Object(
       Type.Number({
         minimum: 1000,
         description:
-          'Wall-clock budget for the unit test suites under cover.mts, in milliseconds. Fleet default 60000 (under a minute). A suite exceeding the budget gets a loud report-only warning pointing at conformanceExclude; the gate ratchets to a hard failure once the fleet conforms.',
+          'Wall-clock budget for the unit test suites under cover.mts, in milliseconds. Fleet default 60000 (under a minute). A suite exceeding the budget gets a loud report-only warning pointing at the slow/mid lanes (`vitest.lanes`); the gate ratchets to a hard failure once the fleet conforms.',
       }),
     ),
   },

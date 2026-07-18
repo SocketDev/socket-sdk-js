@@ -27,18 +27,26 @@
  *
  *   Cross-major enforcement is AUTO-GATED on rolldown — not a config opt-in and
  *   no "reviewed" escape list: a repo that bundles with rolldown pays real bytes
- *   for every duplicate major, so the bar is ZERO dups. Any cross-major family
- *   is a hard failure there — collapse it (force the format-flips, `pnpm patch`-
- *   and-force the API-breaks). Rolldown use is detected from a rolldown
- *   (dev)dependency OR a rolldown config file (scripts/plugins that bundle). A
- *   non-bundling repo keeps the cross-major report informational (exit 0). A
- *   missing `@socketregistry` redirect is always a hard failure (the redirect is
- *   safe to add). No-ops when `pnpm-lock.yaml` is absent. Exit codes:
+ *   for every duplicate major, so the bar is ZERO dups. But it is ZERO dups in
+ *   the PRODUCTION dependency closure only — the set of resolved packages an
+ *   importer's `dependencies:`/`optionalDependencies:` roots actually reach
+ *   through the snapshot graph, i.e. what can reach a bundle. A repo with no
+ *   runtime `dependencies` (all tooling lives in `devDependencies`) has an
+ *   empty closure, so its dev/test/publish-only duplicate majors (arborist,
+ *   pacote, cacache, yargs, …) stay informational even when rolldown is
+ *   present — they never enter bundle bytes. Any cross-major family INSIDE the
+ *   closure is a hard failure there — collapse it (force the format-flips,
+ *   `pnpm patch`-and-force the API-breaks). Rolldown use is detected from a
+ *   rolldown (dev)dependency OR a rolldown config file (scripts/plugins that
+ *   bundle). A non-bundling repo keeps the cross-major report informational
+ *   (exit 0). A missing `@socketregistry` redirect is always a hard failure
+ *   (the redirect is safe to add). No-ops when `pnpm-lock.yaml` is absent.
+ *   Exit codes:
  *
  *   - 0 — no missing `@socketregistry` redirect, and (rolldown repo) zero
- *     cross-major duplicates.
- *   - 1 — a missing `@socketregistry` redirect, or any cross-major duplicate in
- *     a rolldown repo.
+ *     cross-major duplicates in the production closure.
+ *   - 1 — a missing `@socketregistry` redirect, or a cross-major duplicate in
+ *     the production closure of a rolldown repo.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -71,6 +79,7 @@ export interface UnredirectedDropIn {
 }
 
 export interface ScanResult {
+  bundledDuplicates: DuplicateFamily[]
   duplicates: DuplicateFamily[]
   unredirected: UnredirectedDropIn[]
 }
@@ -85,40 +94,10 @@ const ROLLDOWN_CONFIG_BASENAMES: readonly string[] = [
   'rolldown.config.js',
 ]
 
-// A repo may use Rolldown only as a compiler while keeping every runtime
-// dependency external. Those lockfile entries never reach the shipped bundle,
-// so treating its dev-tool graph as a bundle-size failure is a false positive.
-// This recognizes the canonical `external: externalDependencies` configuration
-// after verifying that the variable is derived from package.json dependencies.
-function externalizesAllRuntimeDependencies(repoRoot: string): boolean {
-  const dirs = [
-    repoRoot,
-    path.join(repoRoot, '.config', 'fleet'),
-    path.join(repoRoot, '.config', 'repo'),
-  ]
-  for (const dir of dirs) {
-    for (const basename of ROLLDOWN_CONFIG_BASENAMES) {
-      try {
-        const config = readFileSync(path.join(dir, basename), 'utf8')
-        if (
-          /const\s+externalDependencies\s*=\s*Object\.keys\(\s*packageJson\.dependencies\s*\|\|\s*\{\}\s*\)/.test(
-            config,
-          ) && /external:\s*externalDependencies\b/.test(config)
-        ) {
-          return true
-        }
-      } catch {
-        // Missing config files are normal for the other candidate directories.
-      }
-    }
-  }
-  return false
-}
-
-// True when the repo uses Rolldown and third-party dependency code can reach
-// its output. In that case every extra major costs shipped bytes and is gated.
-// A compiler-only Rolldown config with all runtime deps external remains
-// informational: it has no bundled dependency closure to deduplicate.
+// True when the repo bundles with rolldown — a rolldown (dev)dependency, OR a
+// rolldown config file used by its scripts/plugins. Either way it ships bundled
+// output where every duplicate major costs real bytes, so dedup enforcement
+// auto-activates — no opt-in flag, no config.
 export function repoUsesRolldown(repoRoot: string): boolean {
   let pkgRaw: string | undefined
   try {
@@ -132,7 +111,7 @@ export function repoUsesRolldown(repoRoot: string): boolean {
       devDependencies?: Record<string, string> | undefined
     }
     if (pkg.dependencies?.['rolldown'] ?? pkg.devDependencies?.['rolldown']) {
-      return !externalizesAllRuntimeDependencies(repoRoot)
+      return true
     }
   }
   const dirs = [
@@ -143,7 +122,7 @@ export function repoUsesRolldown(repoRoot: string): boolean {
   for (let i = 0, { length } = dirs; i < length; i += 1) {
     for (let j = 0, n = ROLLDOWN_CONFIG_BASENAMES.length; j < n; j += 1) {
       if (existsSync(path.join(dirs[i]!, ROLLDOWN_CONFIG_BASENAMES[j]!))) {
-        return !externalizesAllRuntimeDependencies(repoRoot)
+        return true
       }
     }
   }
@@ -207,6 +186,186 @@ function collectResolvedVersions(lines: string[]): Map<string, Set<string>> {
   return byName
 }
 
+// A 4-space dependency-kind header inside an importer or a snapshot entry
+// (`dependencies:`, `devDependencies:`, `optionalDependencies:`, …) — shared
+// by both, since pnpm nests both shapes at the same two levels.
+const DEPENDENCY_KIND_RE = /^ {4}(?!\s)([A-Za-z]+):\s*$/
+// A 6-space `<name>:` importer dependency entry with no inline value — its
+// resolved version lives on the nested `version:` line below it.
+const IMPORTER_DEP_NAME_RE = /^ {6}(?!\s)'?([^'\n]+?)'?:\s*$/
+// The 8-space `version:` line under an importer dependency entry.
+const IMPORTER_DEP_VERSION_RE = /^ {8}(?!\s)version:\s*(.+)$/
+// A 2-space `<path>:` importer key with no inline value — the boundary
+// between one importer's dependency blocks and the next.
+const IMPORTER_KEY_RE = /^ {2}\S.*:\s*$/
+// A 6-space `<name>: <version>` snapshot child dependency — inline value.
+const SNAPSHOT_CHILD_RE = /^ {6}(?!\s)'?([^'\n]+?)'?:\s*(.+)$/
+
+// Strip a YAML scalar's surrounding single quotes, if present.
+function stripQuotes(value: string): string {
+  if (
+    value.length >= 2 &&
+    value[0] === "'" &&
+    value[value.length - 1] === "'"
+  ) {
+    return value.slice(1, -1)
+  }
+  return value
+}
+
+// Strip a peer-suffix parenthetical (`(peer@1.0.0)`, possibly repeated) from a
+// resolved version-field VALUE — the value-side counterpart of what
+// `PACKAGE_KEY_RE` already strips from a resolved package KEY.
+function stripPeerSuffix(value: string): string {
+  const index = value.indexOf('(')
+  return index === -1 ? value : value.slice(0, index)
+}
+
+// Reduce an importer/snapshot dependency's `<name>` plus its raw version-field
+// VALUE to the resolved root key `<name>@<version>`. A pnpm `npm:` alias
+// rewrites the VALUE to the redirect target's own `<realName>@<version>`
+// (e.g. `gopd:` resolving to `@socketregistry/gopd@1.0.7`) instead of a bare
+// version — detected by an `@` surviving the peer-suffix strip, since a bare
+// semver or URL version never contains one.
+function resolveRootKey(name: string, rawValue: string): string {
+  const base = stripPeerSuffix(stripQuotes(rawValue.trim()))
+  return base.includes('@') ? base : `${name}@${base}`
+}
+
+// Collect every importer's PRODUCTION dependency root — `dependencies:` and
+// `optionalDependencies:` entries only, never `devDependencies:` /
+// `peerDependencies:` / `configDependencies:` / `packageManagerDependencies:`.
+// These are the entry points a rolldown bundle can actually reach; anything
+// only rooted from a dev/peer/config block never ships in bundle bytes.
+function collectImporterProdRoots(lines: readonly string[]): Set<string> {
+  const roots = new Set<string>()
+  let inImporters = false
+  let inProdSection = false
+  let pendingName: string | undefined
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i] ?? ''
+    if (line === 'importers:') {
+      inImporters = true
+      continue
+    }
+    // A new unindented top-level key ends the section.
+    if (inImporters && /^[A-Za-z_]/.test(line)) {
+      inImporters = false
+      continue
+    }
+    if (!inImporters) {
+      continue
+    }
+    if (IMPORTER_KEY_RE.test(line)) {
+      inProdSection = false
+      pendingName = undefined
+      continue
+    }
+    const kindMatch = DEPENDENCY_KIND_RE.exec(line)
+    if (kindMatch) {
+      const kind = kindMatch[1]!
+      inProdSection = kind === 'dependencies' || kind === 'optionalDependencies'
+      pendingName = undefined
+      continue
+    }
+    if (!inProdSection) {
+      continue
+    }
+    if (pendingName) {
+      const versionMatch = IMPORTER_DEP_VERSION_RE.exec(line)
+      if (versionMatch) {
+        roots.add(resolveRootKey(pendingName, versionMatch[1]!))
+        pendingName = undefined
+        continue
+      }
+    }
+    const nameMatch = IMPORTER_DEP_NAME_RE.exec(line)
+    if (nameMatch) {
+      pendingName = nameMatch[1]!
+    }
+  }
+  return roots
+}
+
+// Build the snapshot dependency graph: resolved key → the resolved keys of
+// its `dependencies:` + `optionalDependencies:` children. `devDependencies:` /
+// `peerDependencies:` edges are excluded — a rolldown bundle only walks the
+// production edges pnpm actually installs.
+function collectSnapshotGraph(
+  lines: readonly string[],
+): Map<string, Set<string>> {
+  const graph = new Map<string, Set<string>>()
+  let inSection = false
+  let currentKey: string | undefined
+  let inProdSection = false
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i] ?? ''
+    if (line === 'snapshots:') {
+      inSection = true
+      continue
+    }
+    // A new unindented top-level key ends the section.
+    if (inSection && /^[A-Za-z_]/.test(line)) {
+      inSection = false
+      continue
+    }
+    if (!inSection) {
+      continue
+    }
+    const keyMatch = PACKAGE_KEY_RE.exec(line)
+    if (keyMatch) {
+      currentKey = `${keyMatch[1]}@${keyMatch[2]}`
+      if (!graph.has(currentKey)) {
+        graph.set(currentKey, new Set())
+      }
+      inProdSection = false
+      continue
+    }
+    if (!currentKey) {
+      continue
+    }
+    const kindMatch = DEPENDENCY_KIND_RE.exec(line)
+    if (kindMatch) {
+      const kind = kindMatch[1]!
+      inProdSection = kind === 'dependencies' || kind === 'optionalDependencies'
+      continue
+    }
+    if (!inProdSection) {
+      continue
+    }
+    const childMatch = SNAPSHOT_CHILD_RE.exec(line)
+    if (childMatch) {
+      graph.get(currentKey)!.add(resolveRootKey(childMatch[1]!, childMatch[2]!))
+    }
+  }
+  return graph
+}
+
+// The set of every `<name>@<version>` reachable from a PRODUCTION importer
+// root through the snapshot graph — what a rolldown bundle can actually pull
+// in. Dev/test/publish-only tooling (arborist, pacote, cacache, yargs, …) that
+// no importer's `dependencies:`/`optionalDependencies:` ever roots is
+// excluded, even when it resolves at multiple majors.
+export function collectProductionClosure(lines: string[]): Set<string> {
+  const graph = collectSnapshotGraph(lines)
+  const visited = new Set<string>()
+  const queue = [...collectImporterProdRoots(lines)]
+  while (queue.length > 0) {
+    const key = queue.pop()!
+    if (visited.has(key)) {
+      continue
+    }
+    visited.add(key)
+    const children = graph.get(key)
+    if (children) {
+      for (const child of children) {
+        queue.push(child)
+      }
+    }
+  }
+  return visited
+}
+
 // Decode a drop-in basename back to the upstream package name it hardens
 // (socket-registry's `scope__pkg` encoding for scoped upstreams).
 function upstreamNameOf(dropIn: string): string {
@@ -232,6 +391,34 @@ function collectDropInUniverse(texts: readonly string[]): Set<string> {
   return universe
 }
 
+// Group a name → resolved-versions map into cross-major duplicate families,
+// counting only the versions `isIncluded` accepts. Shared by the ALL-dups
+// count (`isIncluded` always true) and the PRODUCTION-closure-gated count
+// (`isIncluded` checks closure membership) so both walk the same reduction.
+function computeDuplicateFamilies(
+  byName: Map<string, Set<string>>,
+  isIncluded: (name: string, version: string) => boolean,
+): DuplicateFamily[] {
+  const families: DuplicateFamily[] = []
+  for (const [name, versions] of byName) {
+    // Count registry semver resolutions only. A git or tarball URL resolution
+    // is not an npm major and is excluded from cross-major dedup.
+    const majors = [
+      ...new Set(
+        [...versions]
+          .filter(isSemverVersion)
+          .filter(version => isIncluded(name, version))
+          .map(majorOf),
+      ),
+    ].toSorted((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+    if (majors.length > 1) {
+      families.push({ majors, name })
+    }
+  }
+  families.sort((a, b) => a.name.localeCompare(b.name))
+  return families
+}
+
 export interface ScanOptions {
   // Text of the cascaded fleet catalog
   // (`.config/fleet/pnpm-workspace.fleet.yaml`) when present — its
@@ -247,19 +434,12 @@ export function scan(
   const opts = { __proto__: null, ...options } as ScanOptions
   const lines = text.split('\n')
   const byName = collectResolvedVersions(lines)
+  const closure = collectProductionClosure(lines)
 
-  const duplicates: DuplicateFamily[] = []
-  for (const [name, versions] of byName) {
-    // Count registry semver resolutions only. A git or tarball URL resolution
-    // is not an npm major and is excluded from cross-major dedup.
-    const majors = [
-      ...new Set([...versions].filter(isSemverVersion).map(majorOf)),
-    ].toSorted((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-    if (majors.length > 1) {
-      duplicates.push({ majors, name })
-    }
-  }
-  duplicates.sort((a, b) => a.name.localeCompare(b.name))
+  const duplicates = computeDuplicateFamilies(byName, () => true)
+  const bundledDuplicates = computeDuplicateFamilies(byName, (name, version) =>
+    closure.has(`${name}@${version}`),
+  )
 
   // A universe name still resolving from npm under its bare upstream name
   // means the hardened copy was never wired in for that copy — pnpm rewrites
@@ -277,7 +457,7 @@ export function scan(
   }
   unredirected.sort((a, b) => a.name.localeCompare(b.name))
 
-  return { duplicates, unredirected }
+  return { bundledDuplicates, duplicates, unredirected }
 }
 
 function main(): void {
@@ -296,22 +476,28 @@ function main(): void {
     // lockfile-learned drop-in universe still applies.
     fleetCatalogText = undefined
   }
-  const { duplicates, unredirected } = scan(content, { fleetCatalogText })
+  const { bundledDuplicates, duplicates, unredirected } = scan(content, {
+    fleetCatalogText,
+  })
   // Auto-gated on rolldown, no opt-in: a repo that bundles with rolldown pays
-  // real bytes for every duplicate major, so there ANY cross-major family is a
-  // hard failure — the bar is zero dups (force the format-flips, patch-and-force
-  // the API-breaks). A non-bundling repo keeps the report informational.
+  // real bytes for every duplicate major IN ITS PRODUCTION CLOSURE, so there
+  // ANY such cross-major family is a hard failure — the bar is zero dups
+  // (force the format-flips, patch-and-force the API-breaks). A dup outside
+  // the closure (dev/test/publish-only tooling) never reaches bundle bytes, so
+  // it stays informational even in a rolldown repo. A non-bundling repo keeps
+  // the whole report informational.
   const enforce = repoUsesRolldown(path.dirname(PNPM_LOCK))
   let failed = false
 
-  if (duplicates.length > 0) {
+  const gatedDuplicates = enforce ? bundledDuplicates : duplicates
+  if (gatedDuplicates.length > 0) {
     process.stderr.write(
-      `[check-dependencies-are-deduped] ${duplicates.length} package` +
-        `${duplicates.length === 1 ? '' : 's'} resolved at >1 major ` +
+      `[check-dependencies-are-deduped] ${gatedDuplicates.length} package` +
+        `${gatedDuplicates.length === 1 ? '' : 's'} resolved at >1 major ` +
         `(${enforce ? 'MUST collapse — this repo bundles with rolldown' : 'collapse candidates'}):\n`,
     )
-    for (let i = 0, { length } = duplicates; i < length; i += 1) {
-      const f = duplicates[i]!
+    for (let i = 0, { length } = gatedDuplicates; i < length; i += 1) {
+      const f = gatedDuplicates[i]!
       process.stderr.write(`  ${f.name}: majors ${f.majors.join(', ')}\n`)
     }
     process.stderr.write(
@@ -322,6 +508,12 @@ function main(): void {
     if (enforce) {
       failed = true
     }
+  } else if (enforce && duplicates.length > 0) {
+    process.stderr.write(
+      `[check-dependencies-are-deduped] (${duplicates.length} cross-major ` +
+        `dup${duplicates.length === 1 ? '' : 's'} are dev/test-only — not ` +
+        `bundled, not enforced)\n`,
+    )
   }
 
   if (unredirected.length > 0) {

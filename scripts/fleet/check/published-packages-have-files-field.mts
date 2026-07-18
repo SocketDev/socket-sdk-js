@@ -120,7 +120,7 @@ export function collectFindings(repoRoot: string): FilesFieldFinding[] {
       continue
     }
     const rel = path.relative(repoRoot, pkgDir)
-    const relPath = `${rel === '' ? '.' : rel}/package.json`
+    const relPath = path.join(rel === '' ? '.' : rel, 'package.json')
     const finding = checkFilesField(pkg, relPath)
     if (finding) {
       findings.push(finding)

@@ -22,9 +22,10 @@
 // `git -c k=v` prefixes); the size is `git diff --cached --shortstat` scoped by
 // exclude pathspecs, so `&&` chains and quoting in the command don't matter.
 
-import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
-import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import process from 'node:process'
+
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { isGitCommit } from '../_shared/commit-command.mts'
 import { bashGuard, defineHook, notify, runHook } from '../_shared/guard.mts'
@@ -49,14 +50,15 @@ export interface DiffSize {
  * nested location, which a `**`-pathspec is not).
  */
 export function isGeneratedPath(filePath: string): boolean {
-  const base = normalizePath(filePath).split('/').pop() ?? filePath
+  const normalizedFilePath = normalizePath(filePath)
+  const base = normalizedFilePath.split('/').pop() ?? filePath
   return (
     base === 'package-lock.json' ||
     base === 'pnpm-lock.yaml' ||
     base.endsWith('.snap') ||
     /\.min\.[^/]+$/.test(base) ||
-    (base === 'bundle.cjs' && filePath.includes('_dispatch/')) ||
-    /(?:^|\/)(?:build|dist)\//.test(filePath)
+    (base === 'bundle.cjs' && normalizedFilePath.includes('_dispatch/')) ||
+    /(?:^|\/)(?:build|dist)\//.test(normalizedFilePath)
   )
 }
 

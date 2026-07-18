@@ -1,7 +1,6 @@
-socket-addon
-socket-bin
 socket-btm
 socket-cli
+socket-gemini-nano
 socket-lib
 socket-mcp
 socket-packageurl-js

@@ -10,7 +10,7 @@
  *   scripts/fleet/audit-transcript.mts --recent # auto-pick most recent Output:
  *   human-readable report grouped by category. With --json, emits {findings:
  *   [...]} for programmatic consumption. The transcript JSONL lives at
- *   ~/.claude/projects/<encoded-cwd>/<session-id>.jsonl on macOS / Linux.
+ *   ~/.claude/projects/<encoded-cwd>/<session-id>.jsonl.
  *   --recent auto-picks the most-recently-modified transcript for the cwd the
  *   script is invoked from.
  */
@@ -306,15 +306,24 @@ export function scanToolUse(evt: ToolUseEvent): Finding[] {
   return findings
 }
 
-export function findRecentTranscript(): string | undefined {
+export function claudeProjectSlug(cwd: string): string {
+  // Claude's project directory is a flattened absolute path. Replace both
+  // platform separators and the Windows drive separator so the slug is one
+  // legal path segment everywhere (`C:\\repo` -> `C--repo`).
+  return cwd.replace(/[\\/:]/g, '-')
+}
+
+export function findRecentTranscript(
+  home: string = os.homedir(),
+  cwd: string = process.cwd(),
+): string | undefined {
   // ~/.claude/projects/<encoded-cwd>/<session-id>.jsonl
-  // encoded-cwd is the cwd with every `/` replaced by `-`. The leading
-  // `/` becomes the leading `-` automatically since the replace
-  // operates on the whole path. (So `/Users/foo` → `-Users-foo`, not
-  // `--Users-foo`.)
+  // encoded-cwd flattens path separators (and a Windows drive separator) to
+  // `-`. The leading `/` becomes the leading `-` automatically. For example,
+  // `/Users/foo` -> `-Users-foo`; `C:\\Users\\foo` -> `C--Users-foo`.
   // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- audit-transcript intentionally reads the user-invoked cwd to look up the matching Claude Code transcript dir; anchoring on the script's own location would always return the wheelhouse transcripts.
-  const encoded = process.cwd().replace(/\//g, '-')
-  const dir = path.join(os.homedir(), '.claude', 'projects', encoded)
+  const encoded = claudeProjectSlug(cwd)
+  const dir = path.join(home, '.claude', 'projects', encoded)
   if (!existsSync(dir)) {
     return undefined
   }

@@ -21,6 +21,7 @@
 // have both via brew or setup-security-tools, CI runners have them
 // preinstalled, but downstreams may not.
 
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { defineHook, editGuard, notify, runHook } from '../_shared/guard.mts'
@@ -41,7 +42,9 @@ export function zizmorAvailable(): boolean {
 }
 
 export function isWorkflowYaml(filePath: string): boolean {
-  return /[\\/]\.github[\\/]workflows[\\/][^\\/]+\.ya?ml$/.test(filePath)
+  return /[\\/]\.github[\\/]workflows[\\/][^\\/]+\.ya?ml$/.test(
+    normalizePath(filePath),
+  )
 }
 
 // PostToolUse — reporting only, never blocks (a nudge). Runs both scanners

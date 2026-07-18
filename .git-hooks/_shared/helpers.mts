@@ -1336,9 +1336,10 @@ const SKIP_FILE_RE =
 export const shouldSkipFile = (filePath: string): boolean =>
   SKIP_FILE_RE.test(filePath)
 
-// Returns file content as a string. For binaries, runs `strings` to
-// extract printable byte sequences (catches paths embedded in WASM
-// or other compiled artifacts).
+// Returns file content as a string. Text files stay in-process; binaries run
+// through `strings` to catch paths embedded in WASM or compiled artifacts.
+// A NUL byte is the stable cross-platform binary signal for the artifacts this
+// hook scans, and avoids spawning Git-for-Windows `grep` for every text file.
 export const readFileForScan = (filePath: string): string => {
   if (!existsSync(filePath)) {
     return ''
@@ -1350,18 +1351,16 @@ export const readFileForScan = (filePath: string): string => {
   } catch {
     return ''
   }
-  // Detect binary via grep -I (matches text-only); if grep says
-  // binary, fall back to `strings`.
-  const grepResult = spawnSync('grep', ['-qI', '', filePath])
-  if (grepResult.status === 0) {
-    // Text file.
-    try {
-      return readFileSync(filePath, 'utf8')
-    } catch {
-      return ''
-    }
+  let bytes: Buffer
+  try {
+    bytes = readFileSync(filePath)
+  } catch {
+    return ''
   }
-  // Binary — extract strings.
+  if (!bytes.includes(0)) {
+    return bytes.toString('utf8')
+  }
+  // NUL-bearing binary — extract printable strings.
   const stringsResult = spawnSync('strings', [filePath], {
     encoding: 'utf8',
   })

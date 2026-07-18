@@ -6,12 +6,12 @@
  *   same per-case fields (`code`, `errors`, `output`, `filename`). How it
  *   works:
  *
- *   1. For each test case, write the fixture to an OS-temp dir (mkdtemp).
+ *   1. Write every test case to an isolated fixture dir under one OS-temp dir.
  *   2. Write a tiny `.oxlintrc.json` that enables ONLY the rule under test, plus
  *      `jsPlugins: [<plugin-path>]`.
- *   3. Spawn `oxlint --config <tmpdir>/.oxlintrc.json <fixture>` and capture
- *      stdout.
- *   4. Compare findings against the test case's `errors` array.
+ *   3. Spawn oxlint once for all fixtures, then once more for every autofix
+ *      fixture. Group JSON diagnostics back to their source fixture.
+ *   4. Compare each fixture's findings against its test case's `errors` array.
  *   5. Clean up via `safeDeleteSync` (fleet rule: never `fs.rm` / `fs.unlink` /
  *      `rm -rf` directly). Cleanup runs in a try/finally so a failing assertion
  *      doesn't leak tmp dirs.
@@ -213,10 +213,11 @@ function resolveOxlintBinary(): string | undefined {
   }
 }
 
-interface OxlintDiagnostic {
+export interface OxlintDiagnostic {
   readonly ruleId?: string | undefined
   readonly message?: string | undefined
   readonly messageId?: string | undefined
+  readonly filename?: string | undefined
 }
 
 /**
@@ -246,7 +247,7 @@ export function spawnOxlintOnce(
 
 /**
  * Synchronous backoff between starved-spawn retries. RuleTester is a fully
- * synchronous pipeline (spawnSync per case), so an async sleep has nothing to
+ * synchronous pipeline (spawnSync per batch), so an async sleep has nothing to
  * yield to; Atomics.wait gives a real blocking pause without spinning.
  */
 export function sleepSync(ms: number): void {
@@ -254,23 +255,23 @@ export function sleepSync(ms: number): void {
 }
 
 /**
- * Run oxlint against a fixture file with a one-rule config; return the parsed
- * list of findings for THIS rule.
+ * Run oxlint against one or more fixture files with a one-rule config; return
+ * the parsed list of findings for THIS rule.
  */
-export function runOxlint(args: {
+function runOxlintFiles(args: {
   oxlintBin: string
-  fixturePath: string
+  fixturePaths: readonly string[]
   configPath: string
   ruleName: string
   fix: boolean
-}): { diagnostics: OxlintDiagnostic[]; output?: string | undefined } {
+}): OxlintDiagnostic[] {
   const cliArgs = ['--config', args.configPath, '-f', 'json']
   if (args.fix) {
     cliArgs.push('--fix')
   }
-  cliArgs.push(args.fixturePath)
-  // Starved-spawn retry: on 2-core CI runners, vitest concurrency × one oxlint
-  // child per case starves spawns (windows: spawnSync error; linux/macos: the
+  cliArgs.push(...args.fixturePaths)
+  // Starved-spawn retry: on 2-core CI runners, vitest concurrency × oxlint
+  // children can starve spawns (windows: spawnSync error; linux/macos: the
   // child sits queued until a timeout kills it). Both reds reproduced across
   // whole runs on every OS while passing locally, so a starved child gets a
   // short backoff and two more attempts before the loud throw below.
@@ -362,6 +363,66 @@ export function runOxlint(args: {
       }
     }
   }
+  return diagnostics
+}
+
+/**
+ * Group multi-file JSON diagnostics by the fixture path passed to oxlint.
+ * Oxlint can normalize separators and may emit a relative filename, so both
+ * sides resolve through the current platform before matching. Unknown or
+ * filename-less diagnostics fail loudly rather than becoming false clean
+ * fixtures.
+ */
+export function groupDiagnosticsByFixture(
+  fixturePaths: readonly string[],
+  diagnostics: readonly OxlintDiagnostic[],
+): Map<string, OxlintDiagnostic[]> {
+  const originalByKey = new Map<string, string>()
+  const result = new Map<string, OxlintDiagnostic[]>()
+  const toKey = (filename: string): string => {
+    const normalized = path.normalize(path.resolve(filename))
+    return process.platform === 'win32' ? normalized.toLowerCase() : normalized
+  }
+  for (const fixturePath of fixturePaths) {
+    originalByKey.set(toKey(fixturePath), fixturePath)
+    result.set(fixturePath, [])
+  }
+  for (const diagnostic of diagnostics) {
+    const { filename } = diagnostic
+    if (!filename) {
+      throw new Error(
+        'oxlint emitted a multi-file diagnostic without a filename; cannot map it to a RuleTester case',
+      )
+    }
+    const fixturePath = originalByKey.get(toKey(filename))
+    if (!fixturePath) {
+      throw new Error(
+        `oxlint emitted a diagnostic for an unknown RuleTester fixture: ${filename}`,
+      )
+    }
+    result.get(fixturePath)!.push(diagnostic)
+  }
+  return result
+}
+
+/**
+ * Backward-compatible single-fixture entry point used by focused harness
+ * tests and callers that need the post-fix source text.
+ */
+export function runOxlint(args: {
+  oxlintBin: string
+  fixturePath: string
+  configPath: string
+  ruleName: string
+  fix: boolean
+}): { diagnostics: OxlintDiagnostic[]; output?: string | undefined } {
+  const diagnostics = runOxlintFiles({
+    oxlintBin: args.oxlintBin,
+    fixturePaths: [args.fixturePath],
+    configPath: args.configPath,
+    ruleName: args.ruleName,
+    fix: args.fix,
+  })
   const output = args.fix ? readFileSync(args.fixturePath, 'utf8') : undefined
   return { diagnostics, output }
 }
@@ -419,17 +480,39 @@ export class RuleTester {
       const configPath = path.join(tmpdir, '.oxlintrc.json')
       writeFileSync(configPath, buildConfig(ruleName, opts.ruleOptions))
 
-      // Valid cases: no findings expected.
-      for (const tc of opts.valid) {
-        const fixturePath = path.join(tmpdir, fixtureFilename(tc))
-        writeFixture(fixturePath, tc.code, tc)
-        const { diagnostics } = runOxlint({
+      const prepareCases = <Case extends ValidTestCase>(
+        kind: 'invalid' | 'valid',
+        cases: readonly Case[],
+      ): Array<{ fixturePath: string; testCase: Case }> =>
+        cases.map((testCase, index) => {
+          const fixturePath = path.join(
+            tmpdir,
+            'cases',
+            `${kind}-${index}`,
+            fixtureFilename(testCase),
+          )
+          writeFixture(fixturePath, testCase.code, testCase)
+          return { fixturePath, testCase }
+        })
+      const validCases = prepareCases('valid', opts.valid)
+      const invalidCases = prepareCases('invalid', opts.invalid)
+      const fixturePaths = [...validCases, ...invalidCases].map(
+        prepared => prepared.fixturePath,
+      )
+      const diagnosticsByFixture = groupDiagnosticsByFixture(
+        fixturePaths,
+        runOxlintFiles({
           oxlintBin,
-          fixturePath,
+          fixturePaths,
           configPath,
           ruleName,
           fix: false,
-        })
+        }),
+      )
+
+      // Valid cases: no findings expected.
+      for (const { fixturePath, testCase: tc } of validCases) {
+        const diagnostics = diagnosticsByFixture.get(fixturePath)!
         if (diagnostics.length > 0) {
           throw new Error(
             `[${ruleName}] valid case ${tc.name ? `'${tc.name}'` : ''} ` +
@@ -440,16 +523,8 @@ export class RuleTester {
       }
 
       // Invalid cases: expected count + messageId / message match.
-      for (const tc of opts.invalid) {
-        const fixturePath = path.join(tmpdir, fixtureFilename(tc))
-        writeFixture(fixturePath, tc.code, tc)
-        const { diagnostics } = runOxlint({
-          oxlintBin,
-          fixturePath,
-          configPath,
-          ruleName,
-          fix: false,
-        })
+      for (const { fixturePath, testCase: tc } of invalidCases) {
+        const diagnostics = diagnosticsByFixture.get(fixturePath)!
         if (diagnostics.length !== tc.errors.length) {
           throw new Error(
             `[${ruleName}] invalid case ${tc.name ? `'${tc.name}'` : ''} ` +
@@ -468,23 +543,29 @@ export class RuleTester {
             )
           }
         }
-        // Autofix assertion.
-        if (typeof tc.output === 'string') {
-          // Rewrite the fixture (oxlint --fix mutates in place) and
-          // re-run with --fix.
-          writeFixture(fixturePath, tc.code, tc)
-          const fixResult = runOxlint({
-            oxlintBin,
-            fixturePath,
-            configPath,
-            ruleName,
-            fix: true,
-          })
-          if (fixResult.output !== tc.output) {
+      }
+
+      // Autofix assertions share one additional oxlint invocation. The first
+      // pass did not mutate fixtures, so each file still contains its original
+      // case source.
+      const fixCases = invalidCases.filter(
+        prepared => typeof prepared.testCase.output === 'string',
+      )
+      if (fixCases.length > 0) {
+        runOxlintFiles({
+          oxlintBin,
+          fixturePaths: fixCases.map(prepared => prepared.fixturePath),
+          configPath,
+          ruleName,
+          fix: true,
+        })
+        for (const { fixturePath, testCase: tc } of fixCases) {
+          const output = readFileSync(fixturePath, 'utf8')
+          if (output !== tc.output) {
             throw new Error(
               `[${ruleName}] autofix mismatch for ${tc.name ? `'${tc.name}'` : 'case'}:\n` +
                 `  expected: ${JSON.stringify(tc.output)}\n` +
-                `  got:      ${JSON.stringify(fixResult.output)}`,
+                `  got:      ${JSON.stringify(output)}`,
             )
           }
         }

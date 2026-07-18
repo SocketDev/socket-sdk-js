@@ -19,6 +19,27 @@ import crypto from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 
 //#region template/base/bootstrap/src/helpers.mts
+/**
+ * Normalize bundle-manifest paths to their portable `/` wire format.
+ */
+function normalizeBundlePath(filePath) {
+  return filePath.replaceAll('\\', '/')
+}
+function tarExecutable(platform, systemRoot) {
+  return platform === 'win32'
+    ? path.join(systemRoot ?? 'C:\\Windows', 'System32', 'tar.exe')
+    : 'tar'
+}
+/**
+ * Build extraction arguments for the platform-selected tar executable.
+ */
+function tarExtractArgs(options) {
+  const opts = {
+    __proto__: null,
+    ...options,
+  }
+  return ['-xzf', opts.archive, '-C', opts.destination]
+}
 function errorMessage(e) {
   if (e instanceof Error) return e.message
   return String(e)
@@ -589,6 +610,9 @@ function wirePackageJson(dest) {
   pkg['scripts'] = scripts
   writeFileSync(pkgPath, `${JSON.stringify(pkg, void 0, 2)}\n`)
 }
+function normalizeManifestEntryPath(entry) {
+  return normalizeBundlePath(entry.path)
+}
 /**
  * Compute the gitignore entries for thin mode — the wholly-fleet files that the
  * download/fetch action supplies, so they need not be git-tracked. Hybrid paths
@@ -603,13 +627,15 @@ function wirePackageJson(dest) {
  * fleetDirRoots().
  */
 function thinIgnoreEntries(manifest) {
-  const hybridPaths = new Set((manifest.segments ?? []).map(s => s.path))
+  const hybridPaths = new Set(
+    (manifest.segments ?? []).map(normalizeManifestEntryPath),
+  )
   if (manifest.settingsSegment !== void 0)
-    hybridPaths.add(manifest.settingsSegment.path)
+    hybridPaths.add(normalizeBundlePath(manifest.settingsSegment.path))
   const entries = /* @__PURE__ */ new Set()
   const files = Object.keys(manifest.files)
   for (let i = 0, { length } = files; i < length; i += 1) {
-    const p = files[i]
+    const p = normalizeBundlePath(files[i])
     if (hybridPaths.has(p)) continue
     entries.add(p)
   }
@@ -625,13 +651,15 @@ function thinIgnoreEntries(manifest) {
  * use these — its entries are explicit per-file (thinIgnoreEntries).
  */
 function fleetDirRoots(manifest) {
-  const hybridPaths = new Set((manifest.segments ?? []).map(s => s.path))
+  const hybridPaths = new Set(
+    (manifest.segments ?? []).map(normalizeManifestEntryPath),
+  )
   if (manifest.settingsSegment !== void 0)
-    hybridPaths.add(manifest.settingsSegment.path)
+    hybridPaths.add(normalizeBundlePath(manifest.settingsSegment.path))
   const roots = /* @__PURE__ */ new Set()
   const files = Object.keys(manifest.files)
   for (let i = 0, { length } = files; i < length; i += 1) {
-    const p = files[i]
+    const p = normalizeBundlePath(files[i])
     if (hybridPaths.has(p)) continue
     const parts = p.split('/')
     const fleetIdx = parts.indexOf('fleet')
@@ -700,10 +728,11 @@ const PRUNE_SKIP_NAMES = /* @__PURE__ */ new Set([
  * (PRUNE_SKIP_NAMES) are left alone — they are local, not bundle payload.
  */
 function pruneStaleFleetFiles(dest, manifest) {
-  const kept = new Set(Object.keys(manifest.files))
-  for (const segment of manifest.segments ?? []) kept.add(segment.path)
+  const kept = new Set(Object.keys(manifest.files).map(normalizeBundlePath))
+  for (const segment of manifest.segments ?? [])
+    kept.add(normalizeBundlePath(segment.path))
   if (manifest.settingsSegment !== void 0)
-    kept.add(manifest.settingsSegment.path)
+    kept.add(normalizeBundlePath(manifest.settingsSegment.path))
   let pruned = 0
   const roots = fleetDirRoots(manifest)
   for (let r = 0, { length: rootCount } = roots; r < rootCount; r += 1) {
@@ -712,7 +741,7 @@ function pruneStaleFleetFiles(dest, manifest) {
     if (!existsSync(dirAbs)) continue
     for (const rel of walkFiles(dirAbs, dest)) {
       if (PRUNE_SKIP_NAMES.has(path.basename(rel))) continue
-      const key = rel.split(path.sep).join('/')
+      const key = normalizeBundlePath(rel)
       if (!kept.has(key)) {
         rmSync(path.join(dest, rel), { force: true })
         pruned += 1
@@ -1376,7 +1405,14 @@ async function installFleet(options) {
     const sourceRef = ref || `local-${manifest.version}`
     const extractDir = path.join(tmp, 'extracted')
     mkdirSync(extractDir, { recursive: true })
-    run('tar', ['-xzf', sourceTarball, '-C', extractDir])
+    run(
+      tarExecutable(process.platform, process.env['SystemRoot']),
+      tarExtractArgs({
+        archive: sourceTarball,
+        destination: extractDir,
+        platform: process.platform,
+      }),
+    )
     const filesDir = path.join(extractDir, 'files')
     const segmentsDir = path.join(extractDir, 'segments')
     if (!existsSync(filesDir)) {
@@ -1489,6 +1525,8 @@ export {
   lockStepExitCode,
   maybeShowUpdateNotice,
   mergeWorkspaceYaml,
+  normalizeBundlePath,
+  normalizeManifestEntryPath,
   parseArgs,
   parseYamlKeyBlocks,
   printStatusReport,
@@ -1507,6 +1545,8 @@ export {
   shouldShowNotice,
   spliceFleetBlock,
   statusJson,
+  tarExecutable,
+  tarExtractArgs,
   thinIgnoreEntries,
   validateBundleBlock,
   validateCascadeSha,

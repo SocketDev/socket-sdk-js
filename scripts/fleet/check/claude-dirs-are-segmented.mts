@@ -115,7 +115,8 @@ export const BUILTIN_FLEET_SET: Readonly<Record<string, readonly string[]>> = {
   commands: [
     'audit-gha-settings',
     'green-ci',
-    'quality-loop',
+    'looping-quality',
+    'scanning-quality',
     'security-scan',
     'setup-security-tools',
     'squash-history',
@@ -140,6 +141,7 @@ export const BUILTIN_FLEET_SET: Readonly<Record<string, readonly string[]>> = {
     'reviewing-code',
     'migrating-rule-packs',
     'running-test262',
+    'looping-quality',
     'scanning-quality',
     'scanning-security',
     'squashing-history',

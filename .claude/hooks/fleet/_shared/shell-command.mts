@@ -393,14 +393,17 @@ export function isFleetSyncCommand(command: string): boolean {
  * `existsSync` silently misses (`./~/x`), which flipped a downstream
  * transient-state probe into a false "missing .git" verdict.
  */
-export function normalizeShellDir(dir: string): string {
+export function normalizeShellDir(
+  dir: string,
+  baseDir: string = process.cwd(),
+): string {
   const expanded =
     dir === '~'
       ? os.homedir()
       : dir.startsWith('~/')
         ? path.join(os.homedir(), dir.slice(2))
         : dir
-  return path.resolve(process.cwd(), expanded)
+  return path.resolve(baseDir, expanded)
 }
 
 /**

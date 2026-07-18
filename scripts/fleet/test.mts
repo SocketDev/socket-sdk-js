@@ -23,7 +23,8 @@
  *     impact. A staged source file with no committed mirror test simply runs
  *     nothing at commit time (its impact is caught at the gate).
  *   - `--all` — run the full suite (`vitest run`). Used in CI and on explicit
- *     opt-in. Flags: `--quiet` / `--silent` suppress progress output. Config /
+ *     opt-in. `--shard=<index>/<count>` partitions that full suite across CI
+ *     jobs. Flags: `--quiet` / `--silent` suppress progress output. Config /
  *     infrastructure changes (`vitest.config*`, `tsconfig*`, `.oxlintrc.json`,
  *     `.oxfmtrc.json`, `pnpm-lock.yaml`, `package.json`, the vitest setup
  *     files, and the test runner itself) still escalate to `all` — module-graph
@@ -40,13 +41,15 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { globSync } from '@socketsecurity/lib-stable/globs/match'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
 
 import { hasLiveForeignActiveRun } from './_shared/active-run-marker.mts'
-import { resolveScopeMode } from './_shared/scope-flags.mts'
+import { isScopeFlag, resolveScopeMode } from './_shared/scope-flags.mts'
 import {
   firstPartyImports,
   isCheckByName,
@@ -94,7 +97,44 @@ const ROOT_WORKSPACE_MANIFEST = 'pnpm-workspace.yaml'
 // `pnpm test` in monorepos with no root config (UNRESOLVED_ENTRY).
 const ROOT_VITEST_CONFIG = '.config/repo/vitest.config.mts'
 
-const args = process.argv.slice(2)
+// Test LANES — a SPEED category orthogonal to scope. `--lane fast|mid|slow`
+// runs that lane (membership from `vitest.lanes` in the settings file); bare
+// `pnpm test` defaults to the fast lane. See .config/repo/vitest.config.mts.
+const VALID_LANES: ReadonlySet<string> = new Set(['fast', 'mid', 'slow'])
+// Pull the `--lane <value>` / `--lane=<value>` flag out of argv and return the
+// rest, so the scope/shard parsers never mistake the lane value for a file.
+function extractLane(argv: readonly string[]): {
+  lane: string | undefined
+  rest: string[]
+} {
+  const rest: string[] = []
+  let lane: string | undefined
+  for (let i = 0, { length } = argv; i < length; i += 1) {
+    const arg = argv[i]!
+    let value: string | undefined
+    if (arg === '--lane') {
+      i += 1
+      value = argv[i]
+    } else if (arg.startsWith('--lane=')) {
+      value = arg.slice('--lane='.length)
+    } else {
+      rest.push(arg)
+      continue
+    }
+    if (!value || !VALID_LANES.has(value)) {
+      throw new Error(
+        'Invalid --lane value.\n' +
+          '  Where: scripts/fleet/test.mts CLI argument parsing.\n' +
+          `  Saw: ${value ?? '(missing value)'}; wanted one of fast | mid | slow.\n` +
+          '  Fix: pass --lane fast (the bare `pnpm test` default), --lane mid, or --lane slow.',
+      )
+    }
+    lane = value
+  }
+  return { lane, rest }
+}
+
+const { lane: laneFlag, rest: args } = extractLane(process.argv.slice(2))
 const mode = resolveScopeMode(args)
 const quiet = args.includes('--quiet') || args.includes('--silent')
 const stdio: SpawnSyncOptions['stdio'] = quiet ? 'pipe' : 'inherit'
@@ -335,7 +375,73 @@ function workspaceHasScript(script: string): boolean {
 // the per-file related/changed filtering vitest would do at the root is the
 // optimization that breaks, and a per-package full run is the safe trade.
 function isDelegatedWorkspace(): boolean {
-  return !existsSync(ROOT_VITEST_CONFIG) && existsSync(ROOT_WORKSPACE_MANIFEST)
+  return shouldDelegateWorkspace(
+    mode,
+    existsSync(ROOT_VITEST_CONFIG),
+    existsSync(ROOT_WORKSPACE_MANIFEST),
+  )
+}
+
+// Pre-commit is deliberately file-scoped even in a delegated workspace. Once
+// hook packages are registered as workspace members, `pnpm -r run test` fans
+// out across hundreds of hook manifests; a lockfile-only commit then spends
+// its entire budget launching empty test processes. Full/changed runs retain
+// per-package delegation and therefore keep package-specific env wrappers.
+export function shouldDelegateWorkspace(
+  scopeMode: string,
+  rootVitestConfigExists: boolean,
+  workspaceManifestExists: boolean,
+): boolean {
+  return (
+    scopeMode !== 'staged' && !rootVitestConfigExists && workspaceManifestExists
+  )
+}
+
+export interface ParsedTestRunnerArgs {
+  files: string[]
+  shard: string | undefined
+}
+
+export function parseTestRunnerArgs(
+  argv: readonly string[],
+): ParsedTestRunnerArgs {
+  const files: string[] = []
+  let shard: string | undefined
+
+  for (let i = 0, { length } = argv; i < length; i += 1) {
+    const arg = argv[i]!
+    let candidate: string | undefined
+    if (arg === '--shard') {
+      i += 1
+      candidate = argv[i]
+    } else if (arg.startsWith('--shard=')) {
+      candidate = arg.slice('--shard='.length)
+    } else if (!arg.startsWith('-')) {
+      files.push(arg)
+      continue
+    } else {
+      continue
+    }
+
+    const match = /^(?<index>[1-9]\d*)\/(?<count>[1-9]\d*)$/.exec(
+      candidate ?? '',
+    )
+    if (
+      !match?.groups ||
+      Number(match.groups['index']) > Number(match.groups['count']) ||
+      shard !== undefined
+    ) {
+      throw new Error(
+        'Invalid test shard argument.\n' +
+          'Where: scripts/fleet/test.mts CLI argument parsing.\n' +
+          `Saw: ${candidate ?? '(missing value)'}; wanted one --shard=<index>/<count> with 1 <= index <= count.\n` +
+          'Fix: pass a single shard such as --shard=1/4 alongside --all.',
+      )
+    }
+    shard = candidate
+  }
+
+  return { files, shard }
 }
 
 // The test-file glob patterns, one pattern each for .mts/.ts/.mjs/.cjs/.js/.tsx/.jsx.
@@ -380,7 +486,7 @@ function totalTestFileCount(): number {
   ).length
 }
 
-function runAll(): number {
+function runAll(shard?: string | undefined): number {
   if (isDelegatedWorkspace()) {
     return runWorkspaceTests()
   }
@@ -400,7 +506,10 @@ function runAll(): number {
     )
     return 1
   }
-  return runVitest(['run'], 'all')
+  return runVitest(
+    ['run', ...(shard ? ['--shard', shard] : [])],
+    shard ? `all (shard ${shard})` : 'all',
+  )
 }
 
 // --passWithNoTests: a scoped run where the changed files don't resolve
@@ -421,7 +530,9 @@ function mirrorTestIndex(root: string): MirrorTestIndex {
   // Git is the fast and exact index for a real checkout: it omits ignored
   // output and submodule contents. A non-git fixture falls back to the glob.
   const testFiles = tracked.length
-    ? tracked.filter(file => /(?:^|\/)test\//.test(file) && isTestFile(file))
+    ? tracked.filter(
+        file => /(?:^|\/)test\//.test(normalizePath(file)) && isTestFile(file),
+      )
     : globSync(
         [
           `**/test/**/*.test.${TEST_EXTENSIONS}`,
@@ -530,15 +641,6 @@ function runStaged(files: string[]): number {
   )
 }
 
-// Explicit positional file paths → the fast, file-scoped run. This is the
-// fleet-canonical replacement for a raw `node_modules/.bin/vitest run <file>`:
-// `pnpm test <file…>` runs exactly those files (vitest `run <files>`), so no
-// one ever needs to reach past the script to the bare binary. Flags (scope +
-// --quiet/--silent) are filtered out; what remains is treated as file paths.
-function fileArgs(): string[] {
-  return args.filter(a => !a.startsWith('-'))
-}
-
 function runFiles(files: string[]): number {
   // `vitest run <files…>` executes exactly the named test files (no watch),
   // the fast path for "test this one file". --passWithNoTests keeps a path
@@ -556,6 +658,25 @@ function main(): void {
   // in a non-interactive shell that never sourced fnm) is below the hook floor,
   // so the vitest + hooks this spawns run on the fleet runtime.
   ensurePinnedNode()
+
+  let parsedArgs: ParsedTestRunnerArgs
+  try {
+    parsedArgs = parseTestRunnerArgs(args)
+  } catch (e) {
+    logger.error(errorMessage(e))
+    process.exitCode = 1
+    return
+  }
+  if (parsedArgs.shard && mode !== 'all') {
+    logger.error(
+      'Test sharding requires full-suite scope.\n' +
+        'Where: scripts/fleet/test.mts CLI scope resolution.\n' +
+        `Saw: --shard=${parsedArgs.shard} with ${mode} scope; wanted --all.\n` +
+        `Fix: run pnpm test --all --shard=${parsedArgs.shard}.`,
+    )
+    process.exitCode = 1
+    return
+  }
 
   // A concurrent vitest run during a live coverage run cleans the shared
   // coverage/.tmp and ENOENTs the outer run's v8 reports (two live
@@ -585,14 +706,32 @@ function main(): void {
     process.exitCode = 1
     return
   }
-  const explicitFiles = fileArgs()
+  // Lane routing (a SPEED category, orthogonal to scope). `--lane fast|mid|slow`
+  // runs that lane; bare `pnpm test` (no scope flag, no explicit files) defaults
+  // to the fast lane for a quick local loop. --all / --staged / --changed and
+  // explicit files intentionally run EVERY lane (so editing a slow-lane test
+  // still runs it). The lane reaches the vitest config via FLEET_LANE, which
+  // shapes the config's include/exclude.
+  const hasScopeFlag = args.some(a => isScopeFlag(a))
+  const effectiveLane =
+    laneFlag ??
+    (!hasScopeFlag && parsedArgs.files.length === 0 ? 'fast' : undefined)
+  if (effectiveLane) {
+    process.env['FLEET_LANE'] = effectiveLane
+    process.exitCode = runVitest(['run'], `lane:${effectiveLane}`)
+    return
+  }
+
+  // Explicit positional file paths take the fast file-scoped path. The parser
+  // removes scope/runner flags and consumes the separate `--shard 1/4` value.
+  const explicitFiles = parsedArgs.files
   if (explicitFiles.length > 0) {
     process.exitCode = runFiles(explicitFiles)
     return
   }
 
   if (mode === 'all') {
-    process.exitCode = runAll()
+    process.exitCode = runAll(parsedArgs.shard)
     return
   }
 

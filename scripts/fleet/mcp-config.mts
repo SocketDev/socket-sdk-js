@@ -1,6 +1,6 @@
 /**
  * @file Pure adapters from the fleet-canonical Claude `.mcp.json` shape to
- *   project-local Codex/OpenCode configs and Kimi's per-user MCP file.
+ *   project-local Codex/OpenCode/Kimi configs and Kimi's per-user MCP file.
  *   Credentials never belong in the canonical or generated project files; each
  *   client owns OAuth state in its user data directory.
  */
@@ -62,6 +62,34 @@ function assertNoCredentials(value: unknown, location = '.mcp.json'): void {
   }
 }
 
+function compactKimiArgsArrays(
+  text: string,
+  servers: PortableMcpServers,
+): string {
+  let result = text
+  const items = Object.values(servers)
+  for (let i = 0, { length } = items; i < length; i += 1) {
+    const server = items[i]!
+    if (server.kind !== 'stdio' || server.args.length === 0) {
+      continue
+    }
+    const compact = `      "args": [${server.args.map(value => JSON.stringify(value)).join(', ')}]`
+    if (compact.length > 80) {
+      continue
+    }
+    const expanded = [
+      '      "args": [',
+      ...server.args.map(
+        (value, index) =>
+          `        ${JSON.stringify(value)}${index + 1 < server.args.length ? ',' : ''}`,
+      ),
+      '      ]',
+    ].join('\n')
+    result = result.replace(expanded, compact)
+  }
+  return result
+}
+
 function compactOpenCodeCommandArrays(
   text: string,
   servers: PortableMcpServers,
@@ -102,7 +130,9 @@ function main(): void {
     )
   }
   writeMcpClientConfigs(REPO_ROOT)
-  process.stdout.write('Generated .codex/config.toml and opencode.json.\n')
+  process.stdout.write(
+    'Generated .codex/config.toml, opencode.json, and .kimi-code/mcp.json.\n',
+  )
 }
 
 function parseStringArray(value: unknown, field: string): string[] {
@@ -119,6 +149,14 @@ function runMain(): void {
     process.stderr.write(`${errorMessage(error)}\n`)
     process.exitCode = 1
   }
+}
+
+function sortRecord<T>(record: Readonly<Record<string, T>>): Record<string, T> {
+  return Object.fromEntries(
+    Object.entries(record).toSorted(([left], [right]) =>
+      left < right ? -1 : left > right ? 1 : 0,
+    ),
+  )
 }
 
 function tomlString(value: string): string {
@@ -168,7 +206,11 @@ export function mergeKimiMcpConfig(
             cwd: repoRoot,
           }
   }
-  return `${JSON.stringify({ ...parsed, mcpServers }, undefined, 2)}\n`
+  return `${JSON.stringify(
+    { ...parsed, mcpServers: sortRecord(mcpServers) },
+    undefined,
+    2,
+  )}\n`
 }
 
 /**
@@ -209,7 +251,7 @@ export function parseCanonicalMcpConfig(text: string): PortableMcpServers {
       kind: 'stdio',
     }
   }
-  return servers
+  return sortRecord(servers)
 }
 
 /**
@@ -220,7 +262,7 @@ export function renderCodexMcpConfig(servers: PortableMcpServers): string {
     '# Generated from ../.mcp.json by scripts/fleet/mcp-config.mts.',
     '# OAuth credentials stay in Codex user storage; do not add them here.',
   ]
-  for (const [name, server] of Object.entries(servers)) {
+  for (const [name, server] of Object.entries(sortRecord(servers))) {
     lines.push('', `[mcp_servers.${name}]`)
     if (server.kind === 'http') {
       lines.push(`url = ${tomlString(server.url)}`)
@@ -237,7 +279,7 @@ export function renderCodexMcpConfig(servers: PortableMcpServers): string {
  */
 export function renderOpenCodeMcpConfig(servers: PortableMcpServers): string {
   const mcp: Record<string, unknown> = {}
-  for (const [name, server] of Object.entries(servers)) {
+  for (const [name, server] of Object.entries(sortRecord(servers))) {
     mcp[name] =
       server.kind === 'http'
         ? { enabled: true, type: 'remote', url: server.url }
@@ -256,7 +298,30 @@ export function renderOpenCodeMcpConfig(servers: PortableMcpServers): string {
 }
 
 /**
- * Regenerate the two committed project adapters from `.mcp.json`.
+ * Render Kimi's project-local `~/.kimi-code/mcp.json` adapter. Kimi resolves
+ * stdio commands relative to the project root when the file lives at
+ * `<project>/.kimi-code/mcp.json`, so no `cwd` is needed.
+ */
+export function renderKimiProjectMcpConfig(
+  servers: PortableMcpServers,
+): string {
+  const mcpServers: Record<string, unknown> = {}
+  for (const [name, server] of Object.entries(sortRecord(servers))) {
+    mcpServers[name] =
+      server.kind === 'http'
+        ? { auth: 'oauth', type: 'http', url: server.url }
+        : { args: server.args, command: server.command }
+  }
+  const rendered = JSON.stringify(
+    { mcpServers: sortRecord(mcpServers) },
+    undefined,
+    2,
+  )
+  return `${compactKimiArgsArrays(rendered, servers)}\n`
+}
+
+/**
+ * Regenerate the three committed project adapters from `.mcp.json`.
  */
 export function writeMcpClientConfigs(repoRoot: string): void {
   const templateRoot = path.join(repoRoot, 'template', 'base')
@@ -267,6 +332,7 @@ export function writeMcpClientConfigs(repoRoot: string): void {
     readFileSync(path.join(configRoot, '.mcp.json'), 'utf8'),
   )
   mkdirSync(path.join(configRoot, '.codex'), { recursive: true })
+  mkdirSync(path.join(configRoot, '.kimi-code'), { recursive: true })
   writeFileSync(
     path.join(configRoot, '.codex', 'config.toml'),
     renderCodexMcpConfig(servers),
@@ -274,6 +340,10 @@ export function writeMcpClientConfigs(repoRoot: string): void {
   writeFileSync(
     path.join(configRoot, 'opencode.json'),
     renderOpenCodeMcpConfig(servers),
+  )
+  writeFileSync(
+    path.join(configRoot, '.kimi-code', 'mcp.json'),
+    renderKimiProjectMcpConfig(servers),
   )
 }
 

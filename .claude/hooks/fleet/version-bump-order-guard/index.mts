@@ -234,7 +234,7 @@ function hasLintScript(cwd: string): boolean {
 // never invents a failure.
 // Newest mtime (ms) under a dir tree, or 0 when absent/empty. Skips
 // node_modules + dotdirs so a stray install timestamp can't mask staleness.
-function newestMtime(dir: string): number {
+export function newestMtime(dir: string): number {
   let newest = 0
   let entries: string[]
   try {
