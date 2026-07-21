@@ -18,6 +18,10 @@ Use `undefined`. `null` is allowed only for `__proto__: null` or external API re
 
 `{ __proto__: null, ... }` for config / return / internal-state.
 
+## Working directory
+
+Never call `process.chdir()`. It mutates global process state, so concurrent work (parallel installs, spawned subprocesses, other async tasks) silently inherits the new cwd and relative paths resolve wrong. Pass an explicit `cwd` to `spawn` / `exec` / path builders instead of changing the process's directory.
+
 ## Imports
 
 No dynamic `await import()`. `node:fs` is the canonical fs source. One import per file: `import { existsSync, promises as fs } from 'node:fs'`. Sync APIs may be cherry-picked (`existsSync`, `copyFileSync`, `readFileSync`, etc.). Async APIs MUST go through the `promises as fs` namespace. Never cherry-pick from `node:fs/promises` (`import { rename } from 'node:fs/promises'` is forbidden; use `fs.rename(...)` instead). Rationale: a single canonical handle for async fs keeps the call sites uniform across the fleet and avoids two imports for what's logically one module. `path` / `os` / `crypto` use default imports. `node:url` is cherry-picked like `node:fs` (`import { fileURLToPath, pathToFileURL } from 'node:url'`) — callers use those symbols directly and `url.fileURLToPath(...)` reads worse than the named form.
@@ -103,6 +107,10 @@ See [`parser-comments.md`](parser-comments.md) §5–7 for the full Lock-step co
 ## `Promise.race` / `Promise.any` in loops
 
 Never re-race a pool that survives across iterations (the handlers stack). See `.claude/skills/plugging-promise-race/SKILL.md`.
+
+## Prefer `Promise.allSettled` for order-independent batches
+
+When you `await Promise.all([...])` and DISCARD the resolved array (the await is its own statement), the only thing `Promise.all` does that `Promise.allSettled` doesn't is abort the whole batch on the first rejection — leaving the sibling promises' rejections unhandled. For order-independent concurrent work prefer `Promise.allSettled(...)` so one failure doesn't abandon the rest (then `.filter(Boolean)` / inspect the settled results). Keep `Promise.all` when you consume the positional result (`const [a, b] = await Promise.all(...)`) or genuinely want fail-fast — for the latter, mark it: `// oxlint-disable-next-line socket/prefer-all-settled -- fail-fast: <reason>`. Enforced by `socket/prefer-all-settled` (report-only; the fix changes error semantics, so it's the author's call).
 
 ## `Safe` suffix
 

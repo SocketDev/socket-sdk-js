@@ -50,6 +50,11 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // a renamed/dropped script can't leave a dead `pnpm run` citation shipping
     // fleet-wide. Skips `allowed-tools:` frontmatter (Bash() permission globs).
     () => run('node', ['scripts/fleet/check/pnpm-run-citations-resolve.mts']),
+    // Sibling of the two above for the skill-NAME surface: every command that
+    // delegates in prose ("Run the `<name>` skill") must name a real
+    // .claude/skills/**/<name>/SKILL.md, so a renamed/moved skill can't leave a
+    // command pointing at nothing.
+    () => run('node', ['scripts/fleet/check/skill-delegations-resolve.mts']),
     // A package's `exports` map and its public file surface must agree: every
     // exports target resolves to a real file (no stale map entry that throws
     // ERR_MODULE_NOT_FOUND for consumers), and every public built file (privacy
@@ -64,6 +69,15 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // incident: a drifted tool entry left an INLINED_* env var empty and hung a
     // pre-commit test run.
     () => run('node', ['scripts/fleet/check/external-tools-are-valid.mts']),
+    // Brand marks under assets/repo/brand/ follow the canonical
+    // <repo>-<mark>[-light|-dark].<svg|png> grammar (mark ∈ combomark | favicon |
+    // logomark | wordmark). Conditional: a repo with no brand/ dir vacuous-passes;
+    // the gate bites the moment marks land, so a stray logo.svg or wrong-repo
+    // prefix can't drift the README/asset-dirs references that resolve those names.
+    () =>
+      run('node', [
+        'scripts/fleet/check/brand-assets-are-canonically-named.mts',
+      ]),
     // Fail-closed telemetry scan: no dependency or external tool ships a telemetry
     // / analytics SDK (Sentry/PostHog/Segment/Datadog/OTEL-SDK/langfuse/…) that
     // isn't in the reviewed baseline. A dep update or a new tool that ADDS one is

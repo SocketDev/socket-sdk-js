@@ -63,6 +63,17 @@ export function buildReleaseAndDocsSteps(): CheckStep[] {
     // ~200 dangling entries across 10 repos. Auto-fixable with
     // `node scripts/fleet/check/claude-dirs-are-segmented.mts --fix`.
     () => run('node', ['scripts/fleet/check/claude-dirs-are-segmented.mts']),
+    // Every file under template/base is classified into exactly one distribution
+    // channel (mirror / optional / preset / conditional / expected / carveOut /
+    // overrides / native handler) — Assertion A (blocking) fails when a file
+    // reaches no member + no release bundle, the silent-drift class that shipped
+    // a stale github-release.yml / npm-publish.yml. Assertion B (report-only)
+    // flags a present root copy that drifted from its resolved template source.
+    // Wheelhouse-only in effect (scripts/repo absent → vacuous pass in members).
+    () =>
+      run('node', [
+        'scripts/fleet/check/wheelhouse-controlled-files-are-classified.mts',
+      ]),
     // Release-hygiene floor: every publishable package.json (private!==true,
     // has a name) must declare a `files` field. Without it, npm publishes the
     // ENTIRE directory — test fixtures, .claude/ tooling, coverage, secrets.
@@ -103,6 +114,18 @@ export function buildReleaseAndDocsSteps(): CheckStep[] {
     // launcher fails open to baseline, so a rotted snapshot is otherwise
     // invisible; this makes it loud. Release-tier (builds + boots).
     releaseStep(['scripts/fleet/check/hook-snapshot-is-wired.mts']),
+    // Every fleet member's ci.yml workflow must actually FIRE on push — a repo
+    // can carry a valid push trigger yet never run (fresh private repo pending
+    // org/enterprise Actions activation), landing commits unverified. Reads the
+    // push-run count per member via gh; report-mode for now (skips cleanly when
+    // gh is unauthenticated / no fleet-repos.json in a member checkout).
+    releaseStep(['scripts/fleet/check/member-ci-fires-on-push.mts']),
+    // Every repo in fleet-repos.json must EXIST in its org — a roster entry with
+    // no repo is a half-onboarded member (socket-gemini-nano: roster entry, no
+    // SocketDev/ repo → stranded cascades + 404'd environments). Onboarding must
+    // create the repo AND update the roster together. Report-mode + network-gated
+    // (a 404 can mean private + no token access), skips cleanly in offline lanes.
+    releaseStep(['scripts/fleet/check/member-repos-exist.mts']),
     // The dep-0 fetcher (bootstrap/fleet.mjs) is a rolldown-inlined build artifact;
     // fail loud if it drifts from its bootstrap/src/* source (rebuild: node
     // scripts/repo/build-bootstrap-fetcher.mts). Wheelhouse-only — the build script
@@ -141,6 +164,21 @@ export function buildReleaseAndDocsSteps(): CheckStep[] {
     // Catches the failure mode that shipped a CHANGELOG entry describing work that
     // landed after its tag. Published versions are historical and not re-checked.
     () => run('node', ['scripts/fleet/check/changelog-is-commit-derived.mts']),
+    // A PENDING release's package.json version must be at most ONE bump ahead of
+    // the registry's latest-published version. A manifest pre-bumped further
+    // skips the versions between (package.json pre-bumped to 1.4.3, then the
+    // workflow bumped 1.4.3 → 1.4.4, so 1.4.3 was never published). Network read
+    // → release-tier; fail-open when no published version / registry unreachable.
+    releaseStep(['scripts/fleet/check/version-is-not-ahead-of-published.mts']),
+    // A publishable manifest's version must be an `X.Y.Z-prerelease` HINT on the
+    // dev branch — the agent never hand-sets a bare release version; the publish
+    // script owns the bare bump (strips the suffix). No-ops on non-publishable
+    // manifests (private / no publishConfig) + fail-opens when git is unreadable.
+    // Release-tier so it gates at publish time, not every dev commit.
+    releaseStep([
+      'scripts/fleet/check/publishable-version-is-prerelease-hint.mts',
+      '--quiet',
+    ]),
     // No tracked symlink is self-referential or points at an absolute path
     // inside the repo (a `node_modules → /abs/<repo>/node_modules` self-loop
     // bricked fresh clones fleet-wide with ELOOP; git kept it tracked despite

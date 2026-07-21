@@ -161,6 +161,7 @@ pnpm-debug.log
 # fleet files, so only its generated adapter file is named.
 /.agents/
 /.clinerules/
+/.codex/
 /.cursor/
 /.github/copilot-instructions.md
 /.janus/
@@ -212,3 +213,7 @@ npm-debug.log
 pnpm-debug.log
 *.tgz
 # </fleet-canonical>
+
+# ─── repo-local (socket-wheelhouse): keep hand-authored files that the
+# fleet-canonical globs would otherwise ignore (untrack-ignored-files fix) ───
+!/.node-version

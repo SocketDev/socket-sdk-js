@@ -59,7 +59,7 @@
     },
     {
       "name": "decmpfs",
-      "owner": "decmpfs",
+      "owner": "SocketDev",
       "description": "Transparent-compression (decmpfs) reader/writer for macOS — Rust crate",
       "publishes": "cargo"
     },
@@ -67,6 +67,12 @@
       "name": "envrypt",
       "description": "Encrypted .env library for Rust — ECIES + locked v1/v2, keychain-first",
       "optIns": ["squash-history"]
+    },
+    {
+      "name": "meander",
+      "description": "Walkthrough generator — annotated code walkthroughs with comments, hosted on Val Town",
+      "optIns": ["squash-history"],
+      "publishes": "js"
     },
     {
       "name": "sdxgen",

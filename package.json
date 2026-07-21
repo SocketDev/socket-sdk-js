@@ -120,6 +120,7 @@
     "del": "8.0.1",
     "dev-null-cli": "2.0.0",
     "ecc-agentshield": "catalog:",
+    "fast-check": "catalog:",
     "fast-glob": "3.3.3",
     "form-data": "4.0.6",
     "magic-string": "0.30.14",
