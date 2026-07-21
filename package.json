@@ -69,6 +69,7 @@
     "npm:publish": "node scripts/fleet/publish-pipeline.mts",
     "security": "node scripts/fleet/security.mts",
     "test": "node scripts/fleet/test.mts",
+    "test:fuzz": "node scripts/repo/fuzz.mts",
     "type": "tsgo --noEmit -p tsconfig.check.json",
     "update": "node scripts/fleet/update.mts",
     "lockstep": "node scripts/fleet/lockstep.mts",
@@ -112,6 +113,7 @@
     "@types/semver": "catalog:",
     "@types/shell-quote": "catalog:",
     "@typescript/native-preview": "catalog:",
+    "@vitiate/core": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
     "acorn": "8.15.0",
@@ -143,6 +145,7 @@
     "taze": "catalog:",
     "type-coverage": "2.29.7",
     "typescript": "catalog:",
+    "vitiate": "catalog:",
     "vitest": "catalog:"
   },
   "typeCoverage": {

@@ -217,3 +217,7 @@ pnpm-debug.log
 # ─── repo-local (socket-wheelhouse): keep hand-authored files that the
 # fleet-canonical globs would otherwise ignore (untrack-ignored-files fix) ───
 !/.node-version
+
+# vitiate coverage-guided fuzz lane caches (regenerable; never commit)
+/.swc/
+/.vitiate/
