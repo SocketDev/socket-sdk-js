@@ -1,5 +1,5 @@
 {
-  "$schema": "./lockstep.schema.json",
+  "$schema": "../fleet/lockstep.schema.json",
   "area": "socket-sdk-js",
   "description": "Lock-step manifest. socket-sdk-js is a single npm package with no submodule upstreams or sibling language ports \u2014 empty rows is the expected state.",
   "upstreams": {},

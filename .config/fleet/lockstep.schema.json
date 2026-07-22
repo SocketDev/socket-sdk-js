@@ -4,10 +4,12 @@
   "title": "lockstep manifest",
   "description": "Unified lock-step manifest shared across Socket repos. One schema, all cases — the `kind` discriminator on each row selects which flavor of lock-step applies. Single-file manifests work for repos with one cohesive concern; the `includes[]` field carves a manifest into per-area files (e.g. lockstep-acorn.json + lockstep-build.json) when one repo tracks multiple independent concerns.",
   "type": "object",
-  "required": ["rows"],
+  "required": [
+    "rows"
+  ],
   "properties": {
     "$schema": {
-      "description": "JSON Schema reference for editor autocompletion. Conventionally `./lockstep.schema.json` — both the manifest and its schema live side-by-side at repo root.",
+      "description": "JSON Schema reference for editor autocompletion. The repo-owned manifest lives at `.config/repo/lockstep.json` and the fleet-identical schema at `.config/fleet/lockstep.schema.json`, so the reference is `../fleet/lockstep.schema.json` (a repo using a root `lockstep.json` points at `./lockstep.schema.json`).",
       "type": "string"
     },
     "description": {
@@ -33,7 +35,10 @@
           "additionalProperties": false,
           "description": "A submodule + its upstream repo URL. Referenced by file-fork / version-pin / feature-parity / spec-conformance rows via `upstream`.",
           "type": "object",
-          "required": ["submodule", "repo"],
+          "required": [
+            "submodule",
+            "repo"
+          ],
           "properties": {
             "submodule": {
               "description": "Submodule path, relative to repo root. Must match an entry in `.gitmodules`.",
@@ -56,7 +61,9 @@
           "additionalProperties": false,
           "description": "A sibling port (typically per-language). Referenced by lang-parity rows via `ports.<site-key>`.",
           "type": "object",
-          "required": ["path"],
+          "required": [
+            "path"
+          ],
           "properties": {
             "path": {
               "description": "Path to the port's root directory, relative to repo root. The harness reads files under this path when checking the port's assertions.",
@@ -178,6 +185,27 @@
                 "description": "Free-form context: why this row exists, gotchas, links to related issues / PRs / upstream discussions. Read by humans, not by the harness.",
                 "type": "string"
               },
+              "materialization": {
+                "description": "Lock-step vs adapt-step mode. `full` (default when omitted) = lock-step: consume the whole pinned upstream, kept fleet-uniform. `sparse` = adapt-step: consume only a sparse-checkout cone / inlined subset of the same pin. Rows omitting this are `full`.",
+                "anyOf": [
+                  {
+                    "const": "full",
+                    "type": "string"
+                  },
+                  {
+                    "const": "sparse",
+                    "type": "string"
+                  }
+                ]
+              },
+              "sparse_cone": {
+                "minItems": 1,
+                "description": "For `materialization: sparse` — the upstream paths (the sparse-checkout cone) this row actually consumes or inlines. Documents what the adapt-step takes; the harness ignores it when materialization is `full` or omitted.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
               "pinned_sha": {
                 "pattern": "^[0-9a-f]{40}$",
                 "description": "Full 40-char SHA the submodule is pinned to. Authoritative — the harness compares this against the submodule HEAD, not against `pinned_tag`.",
@@ -210,7 +238,13 @@
             "additionalProperties": false,
             "description": "A behavioral feature reimplemented locally to match upstream behavior. Three-pillar validation: code patterns + test patterns + fixture snapshot. The total score is averaged across present pillars; rows below the criticality / 10 floor surface as drift.",
             "type": "object",
-            "required": ["kind", "id", "upstream", "criticality", "local_area"],
+            "required": [
+              "kind",
+              "id",
+              "upstream",
+              "criticality",
+              "local_area"
+            ],
             "properties": {
               "kind": {
                 "const": "feature-parity",
@@ -265,7 +299,9 @@
                 "additionalProperties": false,
                 "description": "Golden-input verification. Snapshot-based diffs replace the brittle hardcoded-count checks the harness used historically (sdxgen's lock-step-features lesson).",
                 "type": "object",
-                "required": ["fixture_path"],
+                "required": [
+                  "fixture_path"
+                ],
                 "properties": {
                   "fixture_path": {
                     "description": "Path (relative to repo root) of the input fixture the local implementation runs against.",
@@ -423,7 +459,9 @@
                     "additionalProperties": false,
                     "description": "Per-port status for a lang-parity row. The `ports` map on a row pairs each top-level `sites` key with one of these.",
                     "type": "object",
-                    "required": ["status"],
+                    "required": [
+                      "status"
+                    ],
                     "properties": {
                       "status": {
                         "description": "`implemented` = port meets the row's assertions; `opt-out` = port consciously skips this row (requires `reason`).",

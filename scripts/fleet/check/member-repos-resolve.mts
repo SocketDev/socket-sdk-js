@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * @file Assertion: every repo in fleet-repos.json EXISTS in its org. Onboarding
+ * @file Assertion: every repo in fleet-repos.json resolves to a real repo in its
+ *   org (a roster reference resolves to an actual GitHub repo). Onboarding
  *   must update the roster AND create the actual GitHub repo (in the exact org)
  *   — a roster entry with no repo is a half-onboarded member.
  *   socket-gemini-nano sat in the roster with no `SocketDev/` repo, so its
@@ -82,13 +83,13 @@ export function main(): void {
   const reposPath = fleetReposPath(REPO_ROOT)
   if (!existsSync(reposPath)) {
     logger.log(
-      'member-repos-exist: skipped (no fleet-repos.json — member checkout / fresh clone).',
+      'member-repos-resolve: skipped (no fleet-repos.json — member checkout / fresh clone).',
     )
     return
   }
   if (!ghAuthed()) {
     logger.log(
-      'member-repos-exist: skipped (gh unauthenticated — cannot audit repo existence).',
+      'member-repos-resolve: skipped (gh unauthenticated — cannot audit repo existence).',
     )
     return
   }
@@ -97,7 +98,7 @@ export function main(): void {
     repos = parseFleetRepos(readFileSync(reposPath, 'utf8'))
   } catch (e) {
     logger.warn(
-      `member-repos-exist: skipped (could not read fleet-repos.json — ${errorMessage(e)}).`,
+      `member-repos-resolve: skipped (could not read fleet-repos.json — ${errorMessage(e)}).`,
     )
     return
   }
@@ -108,12 +109,12 @@ export function main(): void {
   const missing = missingRepos(statuses)
   if (missing.length === 0) {
     logger.log(
-      'member-repos-exist: OK — every roster member resolves to a repo in its org.',
+      'member-repos-resolve: OK — every roster member resolves to a repo in its org.',
     )
     return
   }
   logger.warn(
-    `member-repos-exist: ${missing.length} roster member(s) have NO repo in their org (404):`,
+    `member-repos-resolve: ${missing.length} roster member(s) have NO repo in their org (404):`,
   )
   for (const name of missing) {
     logger.warn(`  ${name}`)

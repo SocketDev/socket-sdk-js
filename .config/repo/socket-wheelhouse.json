@@ -2,6 +2,11 @@
   "$schema": "./socket-wheelhouse-schema.json",
   "schemaVersion": 1,
   "repoName": "socket-sdk-js",
-  "repo": { "type": "solo" },
-  "build": { "from": "npm-registry", "type": "js" }
+  "repo": {
+    "type": "solo"
+  },
+  "build": {
+    "from": "npm-registry",
+    "type": "js"
+  }
 }

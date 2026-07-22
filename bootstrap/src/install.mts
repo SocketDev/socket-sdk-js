@@ -2,8 +2,8 @@
  * @file Source module for the dep-0 fleet bundle installer: the install
  *   pipeline (files / segments / workspace-segment), package.json wiring, thin
  *   mode + stale-prune, and the settings / applied-ref readers. Built into the
- *   single distributed `bootstrap/fleet.mjs`. Dep-0: node: builtins + the
- *   lib-stable logger only (never the in-repo socket-lib).
+ *   single distributed `bootstrap/fleet.mjs`. Dep-0: node: builtins + lib-stable
+ *   (logger + safe-delete) only (never the in-repo socket-lib).
  */
 
 // socket-lint: allow source-method-order -- ordered by the install pipeline (files → segments → workspace → wire → thin → prune → settings), mirroring the dep-0 fetcher's call-flow rather than alphabetized.
@@ -13,13 +13,13 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  rmSync,
   writeFileSync,
 } from 'node:fs'
 // oxlint-disable-next-line socket/prefer-spawn-over-execsync -- dep-0 bare-node fetcher (documented invariant: never imports in-repo socket-lib): `git rm --cached` runs via node:child_process, and execFileSync's throw-on-nonzero is caught locally — the lib spawn wrapper (async, non-throwing) would re-plumb the error handling.
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {
@@ -403,7 +403,7 @@ export function pruneStaleFleetFiles(
       // walkFiles returns OS-separated paths; manifest keys are '/'-joined.
       const key = normalizeBundlePath(rel)
       if (!kept.has(key)) {
-        rmSync(path.join(dest, rel), { force: true })
+        safeDeleteSync(path.join(dest, rel))
         pruned += 1
       }
     }
@@ -412,8 +412,24 @@ export function pruneStaleFleetFiles(
 }
 
 // The member's wheelhouse settings file — the single member-owned config
-// surface (repo identity + the pinned bundle ref). Relative to <dest>.
-const SETTINGS_PATH = '.config/socket-wheelhouse.json'
+// surface (repo identity + the pinned bundle ref). Resolved preferring the
+// segregated `.config/repo/` location (repo-owned), then the legacy loose
+// `.config/` and the root dotfile — mirrors paths.mts's
+// findSocketWheelhouseConfig, but dep-0 (no import). Relative to <dest>.
+const SETTINGS_CANDIDATES = [
+  '.config/repo/socket-wheelhouse.json',
+  '.config/socket-wheelhouse.json',
+  '.socket-wheelhouse.json',
+]
+function resolveSettingsPath(dest: string): string | undefined {
+  for (let i = 0, { length } = SETTINGS_CANDIDATES; i < length; i += 1) {
+    const p = path.join(dest, SETTINGS_CANDIDATES[i]!)
+    if (existsSync(p)) {
+      return p
+    }
+  }
+  return undefined
+}
 // Local cache marker recording the ref of the last-applied bundle. Lives under
 // node_modules/.cache/ — the standard tool-cache location: gitignored via
 // node_modules (so it never dirties the worktree), and reachable dep-free at
@@ -435,8 +451,8 @@ const LEGACY_APPLIED_MARKER = '.config/fleet/.bundle-applied'
  * the pin lives in exactly one place. Returns undefined when absent/malformed.
  */
 export function readBundleRef(dest: string): string | undefined {
-  const p = path.join(dest, SETTINGS_PATH)
-  if (!existsSync(p)) {
+  const p = resolveSettingsPath(dest)
+  if (!p) {
     return undefined
   }
   try {
@@ -461,8 +477,8 @@ export interface BundleConfig {
  * Returns both as undefined when the file is absent / malformed.
  */
 export function readBundleConfig(dest: string): BundleConfig {
-  const p = path.join(dest, SETTINGS_PATH)
-  if (!existsSync(p)) {
+  const p = resolveSettingsPath(dest)
+  if (!p) {
     return { ref: undefined, cascadeSha: undefined }
   }
   try {
@@ -493,6 +509,6 @@ export function writeAppliedRef(dest: string, ref: string): void {
   // state lives only under node_modules/.cache/ (out of the tracked tree).
   const legacy = path.join(dest, LEGACY_APPLIED_MARKER)
   if (existsSync(legacy)) {
-    rmSync(legacy, { force: true })
+    safeDeleteSync(legacy)
   }
 }

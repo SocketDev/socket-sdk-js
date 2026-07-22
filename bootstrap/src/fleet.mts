@@ -32,13 +32,13 @@ import {
   mkdtempSync,
   readdirSync,
   realpathSync,
-  rmSync,
 } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {
@@ -187,7 +187,7 @@ export function runStatus(options: InstallOptions): number {
   if (!ref) {
     if (!opts.quiet) {
       logger.log(
-        'fleet:status: no bundle.ref pinned in .config/socket-wheelhouse.json — not a thin consumer.',
+        'fleet:status: no bundle.ref pinned in .config/repo/socket-wheelhouse.json — not a thin consumer.',
       )
     }
     return 0
@@ -248,7 +248,7 @@ export async function installFleet(options: InstallOptions): Promise<number> {
     }
     logger.log(
       'install-fleet: no --ref and no `bundle.ref` in ' +
-        `${'.config/socket-wheelhouse.json'}. Pass --ref fleet-<sha> or set bundle.ref.`,
+        `${'.config/repo/socket-wheelhouse.json'}. Pass --ref fleet-<sha> or set bundle.ref.`,
     )
     return 1
   }
@@ -407,7 +407,7 @@ export async function installFleet(options: InstallOptions): Promise<number> {
     )
     return 0
   } finally {
-    rmSync(tmp, { recursive: true, force: true })
+    safeDeleteSync(tmp)
   }
 }
 
