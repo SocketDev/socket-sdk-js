@@ -970,7 +970,12 @@ export class SocketSdk {
     options?: BatchPackageStreamOptions | undefined,
   ): AsyncGenerator<BatchPackageFetchResultType> {
     const {
-      chunkSize = 100,
+      // Default to the batch API's per-request component maximum. Quota is
+      // charged per REQUEST (see @quota above), not per component, so
+      // maximal chunks minimize quota spend — smaller chunkSize values
+      // multiply the cost of the same purl set with no benefit beyond
+      // earlier first results.
+      chunkSize = 1024,
       concurrencyLimit = 10,
       queryParams,
     } = {

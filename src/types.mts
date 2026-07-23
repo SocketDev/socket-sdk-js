@@ -460,6 +460,10 @@ export type UploadManifestFilesError = {
 export type BatchPackageFetchResultType = SocketSdkResult<'batchPackageFetch'>
 
 export type BatchPackageStreamOptions = {
+  /**
+   * Components per request. Defaults to 1024 (the API's per-request max);
+   * quota is charged per request, so the default is also the cheapest.
+   */
   chunkSize?: number | undefined
   concurrencyLimit?: number | undefined
   queryParams?: QueryParams | undefined
