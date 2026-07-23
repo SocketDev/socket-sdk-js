@@ -29,7 +29,7 @@ import type {
 export function isErrorResult<T>(
   result: SocketSdkGenericResult<T>,
 ): result is Extract<SocketSdkGenericResult<T>, { success: false }> {
-  return result.success === false
+  return !result.success
 }
 
 /**
@@ -50,7 +50,7 @@ export function isErrorResult<T>(
 export function isSuccessResult<T>(
   result: SocketSdkGenericResult<T>,
 ): result is Extract<SocketSdkGenericResult<T>, { success: true }> {
-  return result.success === true
+  return result.success
 }
 
 /**
@@ -409,7 +409,7 @@ export function mockSdkResult<T extends SocketSdkOperations>(
     error: dataOrError as string,
     status,
     success: false,
-  } as SocketSdkErrorResult<T>
+  }
 }
 
 /**

@@ -180,7 +180,7 @@ export async function fetchChunkedBytes(
     Array.isArray(rawOffset) &&
     rawOffset.length === chunks.length &&
     rawOffset.every(n => typeof n === 'number')
-      ? (rawOffset as number[])
+      ? rawOffset
       : undefined
 
   // Decide how many chunks we actually need. With offsets (and a known size)

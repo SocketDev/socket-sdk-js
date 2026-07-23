@@ -94,7 +94,7 @@ export function getAllMethodRequirements(): Record<string, ApiRequirement> {
 export const getMethodRequirements = memoize(
   (methodName: SocketSdkOperations | string): ApiRequirement => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName as string]
+    const requirement = reqs.api[methodName]
 
     if (!requirement) {
       throw new ErrorCtor(`Unknown SDK method: "${String(methodName)}"`)
@@ -159,7 +159,7 @@ export const getMethodsByQuotaCost = memoize(
 export const getQuotaCost = memoize(
   (methodName: SocketSdkOperations | string): number => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName as string]
+    const requirement = reqs.api[methodName]
 
     if (!requirement) {
       throw new ErrorCtor(`Unknown SDK method: "${String(methodName)}"`)
@@ -213,7 +213,7 @@ export const getQuotaUsageSummary = memoize(
 export const getRequiredPermissions = memoize(
   (methodName: SocketSdkOperations | string): string[] => {
     const reqs = loadRequirements()
-    const requirement = reqs.api[methodName as string]
+    const requirement = reqs.api[methodName]
 
     if (!requirement) {
       throw new ErrorCtor(`Unknown SDK method: "${String(methodName)}"`)

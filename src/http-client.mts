@@ -179,6 +179,7 @@ export async function createRequestWithJson(
   const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
   const body = JSON.stringify(json)
   const headers = {
+    // oxlint-disable-next-line typescript/no-misused-spread -- opts.headers is the SDK's HeadersRecord (a plain object); the readonly string[] arm the analyzer sees comes from node's RequestOptions union and is never constructed here.
     ...opts.headers,
     'Content-Type': 'application/json',
   } as Record<string, string>

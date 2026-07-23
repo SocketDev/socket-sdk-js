@@ -33,7 +33,11 @@ describe('SocketSdk - batchOrgPackageFetch', () => {
 
           if (url.includes('compact=true')) {
             // Compact mode response
-            const artifact = { name: 'lodash', type: 'npm', version: '4.17.21' }
+            const artifact = {
+              name: 'lodash',
+              type: 'npm',
+              version: '4.17.21',
+            }
             res.end(`${JSON.stringify(artifact)}\n`)
           } else if (url.includes('invalid-lines')) {
             // Response with empty and invalid lines

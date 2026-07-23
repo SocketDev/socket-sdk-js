@@ -113,9 +113,9 @@
     "@types/semver": "catalog:",
     "@types/shell-quote": "catalog:",
     "@typescript/native-preview": "catalog:",
-    "@vitiate/core": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
+    "@vitiate/core": "catalog:",
     "acorn": "8.15.0",
     "c8": "catalog:",
     "chrome-devtools-mcp": "catalog:",
@@ -146,8 +146,8 @@
     "taze": "catalog:",
     "type-coverage": "2.29.7",
     "typescript": "catalog:",
-    "vitiate": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "vitiate": "catalog:"
   },
   "typeCoverage": {
     "atLeast": 99,

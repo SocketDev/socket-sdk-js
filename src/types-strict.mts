@@ -268,7 +268,7 @@ export type RepositoryListItem = {
  */
 export type StrictErrorResult = {
   cause?: string | undefined
-  data?: undefined | undefined
+  data?: undefined
   error: string
   status: number
   success: false
@@ -279,9 +279,9 @@ export type StrictErrorResult = {
  */
 export type StrictResult<T> =
   | {
-      cause?: undefined | undefined
+      cause?: undefined
       data: T
-      error?: undefined | undefined
+      error?: undefined
       status: number
       success: true
     }
@@ -291,9 +291,9 @@ export type StrictResult<T> =
  * Strict type for full scan list result.
  */
 export type FullScanListResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: FullScanListData
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
@@ -302,9 +302,9 @@ export type FullScanListResult = {
  * Strict type for single full scan result.
  */
 export type FullScanResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: FullScanItem
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
@@ -320,11 +320,11 @@ export type StreamFullScanOptions = {
  * Strict type for organizations list result.
  */
 export type OrganizationsResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: {
     organizations: OrganizationItem[]
   }
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
@@ -333,9 +333,9 @@ export type OrganizationsResult = {
  * Strict type for repositories list result.
  */
 export type RepositoriesListResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: RepositoriesListData
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
@@ -344,9 +344,9 @@ export type RepositoriesListResult = {
  * Strict type for delete operation result.
  */
 export type DeleteResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: { success: boolean }
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
@@ -355,9 +355,9 @@ export type DeleteResult = {
  * Strict type for single repository result.
  */
 export type RepositoryResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: RepositoryItem
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
@@ -366,9 +366,9 @@ export type RepositoryResult = {
  * Strict type for repository labels list result.
  */
 export type RepositoryLabelsListResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: RepositoryLabelsListData
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
@@ -377,9 +377,9 @@ export type RepositoryLabelsListResult = {
  * Strict type for single repository label result.
  */
 export type RepositoryLabelResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: RepositoryLabelItem
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
@@ -388,9 +388,9 @@ export type RepositoryLabelResult = {
  * Strict type for delete repository label result.
  */
 export type DeleteRepositoryLabelResult = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: { status: string }
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }

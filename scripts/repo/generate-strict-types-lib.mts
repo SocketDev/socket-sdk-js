@@ -44,11 +44,9 @@ export function extractProperties(
   const properties: TypeProperty[] = []
   const bodyProp = node.body
   const innerBody =
-    bodyProp && !Array.isArray(bodyProp)
-      ? (bodyProp as AstNode).body
-      : undefined
-  const members: AstNode[] = (node.members ||
-    (Array.isArray(innerBody) ? innerBody : [])) as AstNode[]
+    bodyProp && !Array.isArray(bodyProp) ? bodyProp.body : undefined
+  const members: AstNode[] =
+    node.members || (Array.isArray(innerBody) ? innerBody : [])
   const requiredFields = new Set(config.requiredFields || [])
   const typeOverrides = config.typeOverrides || {}
 
@@ -113,7 +111,7 @@ export function extractQueryParams(
 
   const queryType = queryProp.typeAnnotation?.typeAnnotation
   const properties: TypeProperty[] = []
-  const members: AstNode[] = (queryType?.members || []) as AstNode[]
+  const members: AstNode[] = queryType?.members || []
   const requiredParams = new Set(config.requiredParams || [])
 
   for (let i = 0, { length } = members; i < length; i += 1) {
@@ -257,9 +255,8 @@ export function findProperty(
   propName: string | number,
 ): AstNode | undefined {
   // TSInterfaceBody has .body array, TSTypeLiteral has .members array
-  const members: AstNode[] = ((Array.isArray(node.body)
-    ? node.body
-    : node.members) || []) as AstNode[]
+  const members: AstNode[] =
+    (Array.isArray(node.body) ? node.body : node.members) || []
   for (let i = 0, { length } = members; i < length; i += 1) {
     const member = members[i]!
     if (member.type === 'TSPropertySignature') {

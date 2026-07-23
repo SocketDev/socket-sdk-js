@@ -53,7 +53,7 @@ export function createRouteHandler(
     // Check for pattern match
     const entries = Object.entries(routes)
     for (let i = 0, { length } = entries; i < length; i += 1) {
-      const entry = entries[i]!
+      const entry = entries[i]
       const pattern = entry[0]
       const handler = entry[1]
       if (url.includes(pattern)) {

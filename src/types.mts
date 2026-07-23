@@ -198,16 +198,16 @@ export type SocketArtifactAlert = Remap<
 export type SocketSdkOperations = keyof operations
 
 export type SocketSdkSuccessResult<T extends SocketSdkOperations> = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: OpReturnType<operations[T]>
-  error?: undefined | undefined
+  error?: undefined
   status: number
   success: true
 }
 
 export type SocketSdkErrorResult<T extends SocketSdkOperations> = {
   cause?: string | undefined
-  data?: undefined | undefined
+  data?: undefined
   error: string
   status: number
   success: false
@@ -245,15 +245,15 @@ export type SocketSdkArrayElement<
 // Generic result type for methods not mapped to specific operations
 export type SocketSdkGenericResult<T> =
   | {
-      cause?: undefined | undefined
+      cause?: undefined
       data: T
-      error?: undefined | undefined
+      error?: undefined
       status: number
       success: true
     }
   | {
       cause?: string | undefined
-      data?: undefined | undefined
+      data?: undefined
       error: string
       status: number
       success: false
@@ -441,16 +441,16 @@ export type UploadManifestFilesResponse = {
 }
 
 export type UploadManifestFilesReturnType = {
-  cause?: undefined | undefined
+  cause?: undefined
   data: UploadManifestFilesResponse
-  error?: undefined | undefined
+  error?: undefined
   status: 200
   success: true
 }
 
 export type UploadManifestFilesError = {
   cause?: string | undefined
-  data?: undefined | undefined
+  data?: undefined
   error: string
   status: number
   success: false

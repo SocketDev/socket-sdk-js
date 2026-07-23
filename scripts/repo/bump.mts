@@ -641,7 +641,7 @@ export async function interactiveReviewChangelog(
     logger.log('Current Changelog Entry:')
     logger.log('─'.repeat(60))
     logger.log(currentEntry)
-    logger.log(`${'─'.repeat(60)}`)
+    logger.log('─'.repeat(60))
     logger.log('')
 
     // Offer action choices.
@@ -794,9 +794,9 @@ export function isRegistryPackage(): boolean {
   return existsSync(path.join(rootPath, 'registry', 'package.json'))
 }
 
-export function printFooter(message?: string): void {
+export function printFooter(message?: string | undefined): void {
   logger.log('')
-  logger.log(`${'─'.repeat(60)}`)
+  logger.log('─'.repeat(60))
   if (message) {
     logger.substep(message)
   }
@@ -804,9 +804,9 @@ export function printFooter(message?: string): void {
 
 export function printHeader(title: string): void {
   logger.log('')
-  logger.log(`${'─'.repeat(60)}`)
+  logger.log('─'.repeat(60))
   logger.log(`  ${title}`)
-  logger.log(`${'─'.repeat(60)}`)
+  logger.log('─'.repeat(60))
 }
 
 /**
@@ -854,11 +854,11 @@ export async function reviewChangelog(
   interactive = false,
 ): Promise<string> {
   logger.log('')
-  logger.log(`${'━'.repeat(60)}`)
+  logger.log('━'.repeat(60))
   logger.log('Proposed Changelog Entry:')
   logger.log('━'.repeat(60))
   logger.log(changelogEntry)
-  logger.log(`${'━'.repeat(60)}`)
+  logger.log('━'.repeat(60))
   logger.log('')
 
   // Use interactive prompts if available and requested.
@@ -906,11 +906,11 @@ Provide the refined changelog entry in the same format.`
         log.done('Changelog refined')
 
         logger.log('')
-        logger.log(`${'━'.repeat(60)}`)
+        logger.log('━'.repeat(60))
         logger.log('Refined Changelog Entry:')
         logger.log('━'.repeat(60))
         logger.log(changelogEntry)
-        logger.log(`${'━'.repeat(60)}`)
+        logger.log('━'.repeat(60))
         logger.log('')
       } else {
         log.failed('Failed to refine changelog')

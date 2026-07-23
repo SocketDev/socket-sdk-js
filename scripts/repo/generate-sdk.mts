@@ -34,8 +34,8 @@ import { getRootPath } from '../utils/path-helpers.mts'
 import { runCommand } from '../utils/run-command.mts'
 
 // CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
-const traverse = ((_traverse as { default?: typeof _traverse | undefined })
-  .default ?? _traverse) as typeof _traverse
+const traverse =
+  (_traverse as { default?: typeof _traverse | undefined }).default ?? _traverse
 
 const OPENAPI_URL = 'https://api.socket.dev/v0/openapi'
 

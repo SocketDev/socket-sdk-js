@@ -327,12 +327,12 @@ export class SocketSdk {
             yield this.#handleApiSuccess<'batchPackageFetch'>(
               /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
               isPublicToken
-                ? reshapeArtifactForPublicPolicy(artifact!, {
+                ? reshapeArtifactForPublicPolicy(artifact, {
                     actions: queryParams?.['actions'] as string,
                     isAuthenticated: false,
                     policy: publicPolicy,
                   })
-                : artifact!,
+                : artifact,
             )
           }
         }
@@ -395,7 +395,7 @@ export class SocketSdk {
       }
     }
 
-    const errStr = e ? StringPrototypeTrim(String(e)) : ''
+    const errStr = e ? StringPrototypeTrim(getErrorMessage(e)) : ''
     return {
       cause: errStr || UNKNOWN_ERROR,
       data: undefined,
@@ -691,7 +691,7 @@ export class SocketSdk {
       status: statusCode ?? 0,
       success: false,
       url: error.url,
-    } as SocketSdkErrorResult<T>
+    }
   }
 
   /**
@@ -749,8 +749,8 @@ export class SocketSdk {
 
     // Handle array of values (take first).
     const value: string | undefined = ArrayIsArray(retryAfterValue)
-      ? (retryAfterValue[0] as string | undefined)
-      : (retryAfterValue as string | undefined)
+      ? retryAfterValue[0]
+      : retryAfterValue
 
     /* c8 ignore next 3 - c8 ignored: because HTTP headers are always strings; empty array[0] returns undefined which is guarded here for safety */
     // Return if value is empty after extracting from array.
@@ -883,7 +883,7 @@ export class SocketSdk {
             throws: false,
           }) as SocketArtifact | null
           if (isObject(artifact)) {
-            results.push(artifact!)
+            results.push(artifact)
           }
         }
         start = i + 1
@@ -934,12 +934,12 @@ export class SocketSdk {
             results.push(
               /* c8 ignore next 8 - Public token artifact reshaping for policy compliance. */
               isPublicToken
-                ? reshapeArtifactForPublicPolicy(artifact!, {
+                ? reshapeArtifactForPublicPolicy(artifact, {
                     actions: queryParams?.['actions'] as string,
                     isAuthenticated: false,
                     policy: publicPolicy,
                   })
-                : artifact!,
+                : artifact,
             )
           }
         }
@@ -1358,7 +1358,7 @@ export class SocketSdk {
           error: errorMsg,
           status: 400,
           success: false,
-        } as SocketSdkErrorResult<'createDependenciesSnapshot'>
+        }
       }
     }
 
@@ -1404,7 +1404,7 @@ export class SocketSdk {
         error: 'No readable manifest files found',
         status: 400,
         success: false,
-      } as SocketSdkErrorResult<'createDependenciesSnapshot'>
+      }
     }
 
     // Continue with validated files.
@@ -1505,7 +1505,7 @@ export class SocketSdk {
           error: errorMsg,
           status: 400,
           success: false,
-        } as StrictErrorResult
+        }
       }
     }
 
@@ -1551,7 +1551,7 @@ export class SocketSdk {
         error: 'No readable manifest files found',
         status: 400,
         success: false,
-      } as StrictErrorResult
+      }
     }
 
     // Try the v1 content-addressed manifest flow first; every failure mode
@@ -1561,7 +1561,7 @@ export class SocketSdk {
       orgSlug,
       validPaths,
       basePath,
-      queryParams as QueryParams,
+      queryParams,
     )
     if (v1Result) {
       return v1Result
@@ -2839,7 +2839,7 @@ export class SocketSdk {
       )
 
       if (throws) {
-        return data as T
+        return data
       }
 
       return {
@@ -3075,7 +3075,7 @@ export class SocketSdk {
     // Extract enabled products from the response.
     const items = (data as EntitlementsResponse)?.items || []
     return items
-      .filter((item: Entitlement) => item && item.enabled === true && item.key)
+      .filter((item: Entitlement) => item?.enabled && item.key)
       .map((item: Entitlement) => item.key)
   }
 
@@ -4131,8 +4131,10 @@ export class SocketSdk {
    * recently observed malicious / suspicious packages, paginated and filterable
    * by ecosystem, name, version, and review state.
    *
-   * @deprecated The backend marks the top-level `/threat-feed` route as the
-   *   deprecated form; prefer the org-scoped {@link getOrgThreatFeedItems}.
+   * @deprecated socket-lint: allow deprecated-marker -- quoting the backend
+   *   API's own deprecation: it marks the top-level `/threat-feed` route as
+   *   the deprecated form; prefer the org-scoped
+   *   {@link getOrgThreatFeedItems}.
    *
    * @throws {Error} When server returns 5xx status codes
    *
@@ -5613,7 +5615,7 @@ export class SocketSdk {
           status: 400,
           success: false,
           ...(finalCause ? { cause: finalCause } : {}),
-        } as UploadManifestFilesError
+        }
       }
     }
 
@@ -5658,7 +5660,7 @@ export class SocketSdk {
         error: 'No readable manifest files found',
         status: 400,
         success: false,
-      } as UploadManifestFilesError
+      }
     }
 
     // Continue with validated files.
@@ -5679,9 +5681,7 @@ export class SocketSdk {
       ) as unknown as UploadManifestFilesReturnType
     } catch (e) {
       /* c8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
-      return (await this.#handleApiError<never>(
-        e,
-      )) as unknown as UploadManifestFilesError
+      return await this.#handleApiError<never>(e)
       /* c8 ignore stop */
     }
   }

@@ -160,7 +160,7 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
         if (!quiet) {
           logger.success('Rebuild succeeded')
         }
-        event.result.close()
+        void event.result.close()
       } else if (event.code === 'ERROR') {
         if (!quiet) {
           logger.error('Rebuild failed')
@@ -170,7 +170,7 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
     })
 
     process.on('SIGINT', () => {
-      watcher.close().finally(() => process.exit(0))
+      void watcher.close().finally(() => process.exit(0))
     })
 
     // Wait indefinitely — SIGINT is the only exit path.

@@ -299,9 +299,10 @@ describe('full-scans-v1', () => {
       blobScope2.on('request', (_req, _interceptor, body) => {
         capturedBody = decodeMultipartBody(body)
       })
-      blobScope2
-        .post('/v1/orgs/test-org/blobs')
-        .reply(200, { already_existed: [`sha256:${expectedHash}`], stored: [] })
+      blobScope2.post('/v1/orgs/test-org/blobs').reply(200, {
+        already_existed: [`sha256:${expectedHash}`],
+        stored: [],
+      })
 
       const client = createTestClient('test-api-token', { retries: 0 })
       const result = await client.uploadBlobs('test-org', [

@@ -28,7 +28,7 @@ describe('SocketSdk - Logging Hooks', () => {
 
     // Verify onRequest hook was called
     expect(onRequest).toHaveBeenCalledTimes(1)
-    const requestInfo: RequestInfo = onRequest.mock.calls[0]?.[0]!
+    const requestInfo: RequestInfo = onRequest.mock.calls[0]?.[0]
     expect(requestInfo).toMatchObject({
       method: 'GET',
       url: 'https://api.socket.dev/v0/quota',
@@ -37,7 +37,7 @@ describe('SocketSdk - Logging Hooks', () => {
 
     // Verify onResponse hook was called
     expect(onResponse).toHaveBeenCalledTimes(1)
-    const responseInfo: ResponseInfo = onResponse.mock.calls[0]?.[0]!
+    const responseInfo: ResponseInfo = onResponse.mock.calls[0]?.[0]
     expect(responseInfo).toMatchObject({
       method: 'GET',
       url: 'https://api.socket.dev/v0/quota',
@@ -68,7 +68,7 @@ describe('SocketSdk - Logging Hooks', () => {
     expect(onResponse).toHaveBeenCalledTimes(1)
 
     // Verify response hook logged the error
-    const responseInfo: ResponseInfo = onResponse.mock.calls[0]?.[0]!
+    const responseInfo: ResponseInfo = onResponse.mock.calls[0]?.[0]
     expect(responseInfo).toMatchObject({
       method: 'GET',
       url: 'https://api.socket.dev/v0/quota',
@@ -101,11 +101,11 @@ describe('SocketSdk - Logging Hooks', () => {
     await client.getQuota()
 
     // Verify request headers are sanitized
-    const requestInfo: RequestInfo = onRequest.mock.calls[0]?.[0]!
+    const requestInfo: RequestInfo = onRequest.mock.calls[0]?.[0]
     expect(requestInfo.headers?.['Authorization']).toBe('[REDACTED]')
 
     // Verify response headers are sanitized
-    const responseInfo: ResponseInfo = onResponse.mock.calls[0]?.[0]!
+    const responseInfo: ResponseInfo = onResponse.mock.calls[0]?.[0]
     expect(responseInfo.headers?.['set-cookie']).toBe('[REDACTED]')
     expect(responseInfo.headers?.['content-type']).toBe('application/json')
   })
