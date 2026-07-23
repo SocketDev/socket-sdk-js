@@ -25,6 +25,7 @@ import { promiseWithResolvers } from '../../../src/utils.mts'
 import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // =============================================================================
 // 1. file-upload.ts — createUploadRequest hooks and multi-file form data
@@ -39,8 +40,8 @@ describe('file-upload createUploadRequest with hooks', () => {
     writeFileSync(path.join(tmpDir, 'b.json'), '{"b":2}')
   })
 
-  afterAll(() => {
-    rmSync(tmpDir, { recursive: true, force: true })
+  afterAll(async () => {
+    await safeDelete(tmpDir)
   })
 
   // Local server to accept multipart uploads

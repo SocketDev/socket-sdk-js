@@ -22,6 +22,7 @@ import {
 } from '../../utils/environment.mts'
 
 import type { FullScanManifest } from '../../../src/full-scans-v1.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 /**
  * Nock hands multipart request bodies back hex-encoded when they aren't
@@ -43,8 +44,8 @@ describe('full-scans-v1', () => {
     tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-sdk-full-scans-v1-'))
   })
 
-  afterEach(() => {
-    rmSync(tempDir, { force: true, recursive: true })
+  afterEach(async () => {
+    await safeDelete(tempDir)
   })
 
   const manifest: FullScanManifest = {

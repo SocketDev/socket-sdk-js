@@ -14,6 +14,7 @@ import { setupNockEnvironment } from '../../utils/environment.mts'
 import { NO_RETRY_CONFIG } from '../../utils/fast-test-config.mts'
 
 import type { IncomingHttpHeaders } from 'node:http'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('SocketSdk - Batch Operations', () => {
   describe('Multi-part Upload', () => {
@@ -72,10 +73,10 @@ describe('SocketSdk - Batch Operations', () => {
       )
     })
 
-    afterEach(() => {
+    afterEach(async () => {
       // Clean up temporary files
       if (tempDir) {
-        rmSync(tempDir, { recursive: true, force: true })
+        await safeDelete(tempDir)
       }
     })
 

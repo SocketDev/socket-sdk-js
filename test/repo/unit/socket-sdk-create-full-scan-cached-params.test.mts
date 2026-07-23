@@ -24,6 +24,7 @@ import {
 } from '../../utils/full-scan-v1-fixtures.mts'
 
 import type { JsonRecord } from '../../utils/full-scan-v1-fixtures.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('SocketSdk#createFullScan cache-aware v1 path — v1-body param normalization', () => {
   setupNockEnvironment()
@@ -37,8 +38,8 @@ describe('SocketSdk#createFullScan cache-aware v1 path — v1-body param normali
     writeFileSync(filePath, FILE_CONTENT)
   })
 
-  afterEach(() => {
-    rmSync(tempDir, { force: true, recursive: true })
+  afterEach(async () => {
+    await safeDelete(tempDir)
   })
 
   it('maps tmp:true to ephemeral:true and drops the tmp key', async () => {

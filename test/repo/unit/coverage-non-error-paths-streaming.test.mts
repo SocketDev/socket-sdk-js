@@ -20,6 +20,7 @@ import { SocketSdk } from '../../../src/index.mts'
 import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // =============================================================================
 // 4e. socket-sdk-class.ts — #checkMalwareBatch normalize with publicPolicy
@@ -163,8 +164,8 @@ describe('SocketSdk - downloadOrgFullScanFilesAsTar streaming byte tracking', ()
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'sdk-tar-bytes-'))
   })
 
-  afterAll(() => {
-    rmSync(tmpDir, { recursive: true, force: true })
+  afterAll(async () => {
+    await safeDelete(tmpDir)
   })
 
   it('should track bytes through multiple data chunks', async () => {
@@ -215,8 +216,8 @@ describe('SocketSdk - streamFullScan data handlers', () => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'sdk-stream-data-'))
   })
 
-  afterAll(() => {
-    rmSync(tmpDir, { recursive: true, force: true })
+  afterAll(async () => {
+    await safeDelete(tmpDir)
   })
 
   it('should track byte count through data handler for file output', async () => {

@@ -215,8 +215,8 @@ catalogs:
       specifier: 0.34.52
       version: 0.34.52
     '@socketregistry/packageurl-js-stable':
-      specifier: npm:@socketregistry/packageurl-js@1.4.2
-      version: 1.4.2
+      specifier: npm:@socketregistry/packageurl-js@1.4.4
+      version: 1.4.4
     '@socketsecurity/lib-stable':
       specifier: npm:@socketsecurity/lib@6.1.0
       version: 6.1.0
@@ -398,7 +398,7 @@ importers:
         version: 1.4.4
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.2'
+        version: '@socketregistry/packageurl-js@1.4.4'
       '@socketsecurity/lib':
         specifier: 6.1.0
         version: 6.1.0(typescript@7.0.2)
@@ -703,7 +703,7 @@ importers:
     dependencies:
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.2'
+        version: '@socketregistry/packageurl-js@1.4.4'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.1.0(typescript@7.0.2)'
@@ -1847,7 +1847,7 @@ importers:
         version: 0.34.52
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.2'
+        version: '@socketregistry/packageurl-js@1.4.4'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.1.0(typescript@7.0.2)'
@@ -2986,10 +2986,6 @@ packages:
   '@socketregistry/hasown@1.0.7':
     resolution: {integrity: sha512-MZ5dyXOtiEc7q3801T+2EmKkxrd55BOSQnG8z/8/IkIJzDxqBxGGBKVyixqFm3W657TyUEBfIT9iWgSB6ipFsA==}
     engines: {node: '>=18'}
-
-  '@socketregistry/packageurl-js@1.4.2':
-    resolution: {integrity: sha512-yt9UfUzD02wZ7kwb67oe4jxG2D9JtgPqjrK/ans2BovFyeie0w8hvRR0MuOWM4mUt2371oFPp7NB6O5ZjYJmlw==}
-    engines: {node: '>=18.20.8', pnpm: '>=11.0.0-rc.0'}
 
   '@socketregistry/packageurl-js@1.4.4':
     resolution: {integrity: sha512-yC/FL9o4IhTcAn5BILV2L9kCzbopESefffLFbvkWsYUdXSyRbWmmw8+mLhiEL7Zck0A6C1D9rgf8+r4T1WVPLA==}
@@ -5601,8 +5597,6 @@ snapshots:
   '@socketregistry/es-set-tostringtag@1.0.10': {}
 
   '@socketregistry/hasown@1.0.7': {}
-
-  '@socketregistry/packageurl-js@1.4.2': {}
 
   '@socketregistry/packageurl-js@1.4.4': {}
 

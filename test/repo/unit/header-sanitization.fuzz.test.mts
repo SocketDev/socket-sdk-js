@@ -11,8 +11,8 @@ import fc from 'fast-check'
 import { describe, expect, test } from 'vitest'
 
 import {
-  SENSITIVE_HEADERS,
   sanitizeHeaders,
+  SENSITIVE_HEADERS,
 } from '../../../src/utils/header-sanitization.mts'
 
 // Non-sensitive header names: alnum + dashes, never one of the sensitive names
@@ -89,11 +89,14 @@ describe('header-sanitization/sanitizeHeaders (fuzz)', () => {
         fc.dictionary(safeName, fc.string(), { maxKeys: 8 }),
         safeHeaders => {
           const result = sanitizeHeaders(safeHeaders)!
-          expect(Object.keys(result).toSorted()).toEqual(
-            Object.keys(safeHeaders).toSorted(),
+          // oxlint-disable-next-line unicorn/no-array-sort -- fresh copy
+          expect(Object.keys(result).slice().sort()).toEqual(
+            // oxlint-disable-next-line unicorn/no-array-sort -- fresh copy
+            Object.keys(safeHeaders).slice().sort(),
           )
-          for (const value of Object.values(result)) {
-            expect(typeof value).toBe('string')
+          const resultValues = Object.values(result)
+          for (let i = 0, { length } = resultValues; i < length; i += 1) {
+            expect(typeof resultValues[i]).toBe('string')
           }
         },
       ),
@@ -109,8 +112,9 @@ describe('header-sanitization/sanitizeHeaders (fuzz)', () => {
         headers => {
           const result = sanitizeHeaders(headers)
           expect(result).toBeDefined()
-          for (const value of Object.values(result!)) {
-            expect(typeof value).toBe('string')
+          const values = Object.values(result!)
+          for (let i = 0, { length } = values; i < length; i += 1) {
+            expect(typeof values[i]).toBe('string')
           }
         },
       ),

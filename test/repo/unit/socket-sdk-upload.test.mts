@@ -26,6 +26,7 @@ import {
   setupNockEnvironment,
 } from '../../utils/environment.mts'
 import { FAST_TEST_CONFIG } from '../../utils/fast-test-config.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // =============================================================================
 // File Upload Utilities
@@ -44,7 +45,7 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
     // Allow time for any async operations to complete
     await new Promise(resolve => setTimeout(resolve, 10))
     if (tempDir) {
-      rmSync(tempDir, { force: true, recursive: true })
+      await safeDelete(tempDir)
     }
   })
 
@@ -142,7 +143,7 @@ describe('File Upload - createUploadRequest', () => {
     // Allow time for any async operations to complete
     await sleep(10)
     if (tempDir) {
-      rmSync(tempDir, { force: true, recursive: true })
+      await safeDelete(tempDir)
     }
   })
 
@@ -348,7 +349,7 @@ describe('SocketSdk - Upload Manifest', () => {
     // Allow time for any async operations to complete
     await sleep(10)
     if (tempDir) {
-      rmSync(tempDir, { force: true, recursive: true })
+      await safeDelete(tempDir)
     }
   })
 

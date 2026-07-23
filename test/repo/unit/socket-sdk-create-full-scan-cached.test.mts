@@ -27,6 +27,7 @@ import {
 } from '../../utils/full-scan-v1-fixtures.mts'
 
 import type { JsonRecord } from '../../utils/full-scan-v1-fixtures.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('SocketSdk#createFullScan cache-aware v1 path', () => {
   setupNockEnvironment()
@@ -42,8 +43,8 @@ describe('SocketSdk#createFullScan cache-aware v1 path', () => {
     fileHash = crypto.createHash('sha256').update(FILE_CONTENT).digest('hex')
   })
 
-  afterEach(() => {
-    rmSync(tempDir, { force: true, recursive: true })
+  afterEach(async () => {
+    await safeDelete(tempDir)
   })
 
   it('creates via v1 on the first try when every blob is already present', async () => {

@@ -17,6 +17,7 @@ import type {
   FullScanResult,
   OrganizationsResult,
 } from '../../../src/types-strict.mts'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 describe.sequential('Strict Types - v3.0', () => {
   const getClient = setupTestClient('test-token', { retries: 0 })
@@ -189,7 +190,7 @@ describe.sequential('Strict Types - v3.0', () => {
         }
       } finally {
         // Clean up temporary directory
-        rmSync(tempDir, { recursive: true })
+        safeDeleteSync(tempDir)
       }
     })
 

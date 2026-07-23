@@ -11,6 +11,7 @@ import { SocketSdk } from '../../../src/socket-sdk-class.mts'
 import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('SocketSdk - Streaming downloads', () => {
   let tmpDir: string
@@ -30,8 +31,8 @@ describe('SocketSdk - Streaming downloads', () => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'sdk-stream-test-'))
   })
 
-  afterEach(() => {
-    rmSync(tmpDir, { recursive: true, force: true })
+  afterEach(async () => {
+    await safeDelete(tmpDir)
   })
 
   it('should stream downloadOrgFullScanFilesAsTar to file', async () => {
