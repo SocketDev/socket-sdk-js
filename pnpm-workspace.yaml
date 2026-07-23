@@ -123,6 +123,11 @@ catalog:
   'npm-run-all2': 9.0.2
   'oxfmt': 0.59.0
   'oxlint': 1.74.0
+  # oxlint-tsgolint — the type-aware lint sidecar the fleet lint runner's
+  # whole-tree gate invokes via `oxlint --type-aware`. Exact-pinned to match
+  # the wheelhouse catalog; the per-platform binaries are soak-excluded
+  # transitives (consumers depend on `oxlint-tsgolint` only).
+  'oxlint-tsgolint': 7.0.2001
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
   'playwright-core': 1.61.1
@@ -147,8 +152,6 @@ minimumReleaseAgeExclude:
   # ahead of the soak by owner directive (out of RC). The main package + its
   # 20-package per-platform binding family are pinned to the exact version
   # (a scope glob would blanket-bypass any future @typescript publish).
-  - '@socketaddon/*'
-  - '@socketbin/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
   # compromise@14.15.1 is the attested re-publish that clears the
@@ -172,6 +175,24 @@ minimumReleaseAgeExclude:
   - 'magic-string@1.0.0'
   # published: 2026-07-16 | removable: 2026-07-23
   - 'portless@0.15.4'
+  # oxlint-tsgolint 7.0.2001 — the type-aware lint sidecar the fleet lint
+  # runner's whole-tree gate needs. The main package + its per-platform binary
+  # family are pinned to the exact version (a scope glob would blanket-bypass a
+  # future publish); exact-pinned so a future version re-soaks.
+  # published: 2026-07-21 | removable: 2026-07-28
+  - 'oxlint-tsgolint@7.0.2001'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint-tsgolint/darwin-arm64@7.0.2001'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint-tsgolint/darwin-x64@7.0.2001'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint-tsgolint/linux-arm64@7.0.2001'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint-tsgolint/linux-x64@7.0.2001'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint-tsgolint/win32-arm64@7.0.2001'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint-tsgolint/win32-x64@7.0.2001'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
