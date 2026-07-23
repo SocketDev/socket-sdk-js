@@ -6,18 +6,12 @@
  *   because we're using actual HTTP, not module patching.
  */
 
-import {
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  unlinkSync,
-  writeFileSync,
-} from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
@@ -177,6 +171,9 @@ describe('SocketSdk - API Methods Coverage', () => {
           } else {
             res.end(JSON.stringify({ data: [] }))
           }
+        } else if (url.includes('/export/')) {
+          // SBOM/VEX export endpoints (orgs/{org}/export/{cdx,spdx,openvex}/{id})
+          res.end(JSON.stringify({ data: { format: 'cyclonedx' } }))
         } else if (url.includes('/scan')) {
           // Scanning endpoints
           if (req.method === 'POST') {
@@ -188,9 +185,6 @@ describe('SocketSdk - API Methods Coverage', () => {
               JSON.stringify({ data: { id: 'scan-1', status: 'complete' } }),
             )
           }
-        } else if (url.includes('/sbom/export')) {
-          // SBOM endpoints
-          res.end(JSON.stringify({ data: { format: 'cyclonedx' } }))
         } else if (url.includes('/patches')) {
           // Patches endpoint
           res.end(JSON.stringify({ data: [] }))
@@ -579,7 +573,7 @@ describe('SocketSdk - API Methods Coverage', () => {
         })
         expect(result.success).toBe(true)
       } finally {
-        rmSync(tempDir, { recursive: true })
+        safeDeleteSync(tempDir)
       }
     })
 
@@ -705,7 +699,7 @@ describe('SocketSdk - API Methods Coverage', () => {
         })
         expect(result.success).toBe(true)
       } finally {
-        rmSync(tempDir, { recursive: true })
+        safeDeleteSync(tempDir)
       }
     })
   })
@@ -947,7 +941,7 @@ describe('SocketSdk - API Methods Coverage', () => {
       } finally {
         // Clean up test file
         try {
-          unlinkSync(testFilePath)
+          safeDeleteSync(testFilePath)
         } catch {
           // Ignore cleanup errors
         }
@@ -974,7 +968,7 @@ describe('SocketSdk - API Methods Coverage', () => {
       } finally {
         // Clean up output file
         try {
-          unlinkSync(outputPath)
+          safeDeleteSync(outputPath)
         } catch {
           // Ignore cleanup errors
         }
@@ -1261,7 +1255,7 @@ describe('SocketSdk - API Methods Coverage', () => {
         )
         expect(result.success).toBe(true)
       } finally {
-        rmSync(tempDir, { recursive: true })
+        safeDeleteSync(tempDir)
       }
     })
   })
