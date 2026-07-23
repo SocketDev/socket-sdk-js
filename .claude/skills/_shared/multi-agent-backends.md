@@ -52,6 +52,6 @@ Don't invent per-skill env var names — reuse these. Skills that need a non-def
 
 ## When NOT to use
 
-- Skills that only need _one_ agent (the current Claude session driving the user). No detection needed; just do the work.
+- Skills that only need _one_ agent — the current Claude session driving the user. No detection needed; just do the work.
 - Skills that need a specific model unconditionally (e.g. a benchmark that compares two models — those use direct API calls, not the CLI registry).
 - Per-repo fix scripts that rely on a single tool (`pnpm`, `git`, `cargo`). Tooling, not agents.
