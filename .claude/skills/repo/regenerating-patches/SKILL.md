@@ -19,7 +19,7 @@ The authority on the patch format is [`docs/agents.md/fleet/plugin-cache-patches
 
 ```bash
 # Print {current|upstreamed|stale} per patch, against the currently pinned SHA.
-node .claude/skills/fleet/regenerating-patches/lib/regen-patches.mts classify
+node .claude/skills/repo/regenerating-patches/lib/regen-patches.mts classify
 ```
 
 - `current` — applies cleanly; leave it.
@@ -34,7 +34,7 @@ For each `stale` patch:
 
 1. Stage the pristine target file(s) at the pinned SHA into a temp `a/` tree:
    ```bash
-   node .claude/skills/fleet/regenerating-patches/lib/regen-patches.mts pristine <name>.patch
+   node .claude/skills/repo/regenerating-patches/lib/regen-patches.mts pristine <name>.patch
    # prints the staging dir; copy a/ → b/:
    cp -R <dir>/a <dir>/b
    ```
@@ -42,7 +42,7 @@ For each `stale` patch:
 3. Re-apply that intent to the `b/<file>` copy with the **Edit tool** — exact-match editing forces byte-for-byte context against the new pristine source. (This step is yours; the script does the plumbing around it.)
 4. Rebuild + restamp + validate in one call — emits the clean `diff -u` body (timestamps stripped, paths rewritten to `a/`-`b/`) under the restamped `# @` header, and fails non-zero unless `patch -p1 --dry-run` exits 0:
    ```bash
-   node .claude/skills/fleet/regenerating-patches/lib/regen-patches.mts rebuild <name>.patch <dir> \
+   node .claude/skills/repo/regenerating-patches/lib/regen-patches.mts rebuild <name>.patch <dir> \
      > scripts/fleet/plugin-patches/<name>.patch
    ```
    If the version changed, rename the file and bump `# @plugin-version:` in the header after writing.
