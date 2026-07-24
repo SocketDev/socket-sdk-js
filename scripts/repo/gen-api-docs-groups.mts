@@ -145,10 +145,17 @@ export const GROUPS: Array<{
     methods: [
       'getOrgLicensePolicy',
       'updateOrgLicensePolicy',
+      'viewLicensePolicy',
+      'licensePolicy',
       'getOrgSecurityPolicy',
       'updateOrgSecurityPolicy',
       'postSettings',
     ],
+  },
+  {
+    title: 'Organization settings',
+    description: 'Read organization settings and integration state.',
+    methods: ['getIntegrationEvents', 'getSocketBasicsConfig'],
   },
   {
     title: 'Telemetry',
@@ -210,6 +217,16 @@ export const GROUPS: Array<{
     title: 'Quota',
     description: 'Inspect current API quota.',
     methods: ['getQuota'],
+  },
+  {
+    title: 'Metadata',
+    description: 'Alert-type and license metadata lookups.',
+    methods: ['alertTypes', 'licenseMetadata'],
+  },
+  {
+    title: 'Meta',
+    description: 'The Socket API OpenAPI definition.',
+    methods: ['getOpenAPI', 'getOpenAPIJSON'],
   },
   {
     title: 'Escape hatches',

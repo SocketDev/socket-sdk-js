@@ -58,4 +58,10 @@ export type CreateOrgRepoDiffOptions = NonNullable<
 export type UpdateOrgRepoLabelSettingBody = NonNullable<
   NonNullable<operations['updateOrgRepoLabelSetting']['requestBody']>['content']
 >['application/json']
+
+// License-policy (beta) returns newline-delimited JSON violations; the SDK
+// parses the stream into this array shape.
+export type LicensePolicyViolations = NonNullable<
+  NonNullable<operations['licensePolicy']['responses']['200']['content']>
+>['application/x-ndjson']
 /* c8 ignore stop */

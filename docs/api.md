@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **97** public methods.
+There are **105** public methods.
 
 ## Contents
 
@@ -23,6 +23,7 @@ There are **97** public methods.
 - [Patches](#patches)
 - [API tokens](#api-tokens)
 - [Policies](#policies)
+- [Organization settings](#organization-settings)
 - [Telemetry](#telemetry)
 - [Audit log](#audit-log)
 - [Threat campaigns](#threat-campaigns)
@@ -31,6 +32,8 @@ There are **97** public methods.
 - [Dependencies & manifests](#dependencies-manifests)
 - [Exports](#exports)
 - [Quota](#quota)
+- [Metadata](#metadata)
+- [Meta](#meta)
 - [Escape hatches](#escape-hatches)
 - [Other](#other)
 
@@ -1112,6 +1115,30 @@ async updateOrgLicensePolicy(
 
 **Quota:** `0` (Free) · **OpenAPI:** `updateOrgLicensePolicy` · **Permissions:** `settings:write`
 
+### `viewLicensePolicy`
+
+View an organization's computed license policy allow list (Beta). Returns
+
+```typescript
+async viewLicensePolicy(
+  orgSlug: string,
+): Promise<SocketSdkResult<'viewLicensePolicy'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `viewLicensePolicy` · **Permissions:** `license-policy:read`
+
+### `licensePolicy`
+
+Compute license policy violations for a set of packages (Beta). The
+
+```typescript
+async licensePolicy(
+  request: QueryParams,
+): Promise<SocketSdkGenericResult<LicensePolicyViolations>>
+```
+
+**Quota:** `100` (Expensive) · **OpenAPI:** `licensePolicy` · **Permissions:** `packages:list`, `license-policy:read`
+
 ### `getOrgSecurityPolicy`
 
 Get organization's security policy configuration. Returns alert rules,
@@ -1148,6 +1175,35 @@ async postSettings(
 ```
 
 **Quota:** `0` (Free) · **OpenAPI:** `postSettings`
+
+## Organization settings
+
+Read organization settings and integration state.
+
+### `getIntegrationEvents`
+
+List integration events for a specific organization integration.
+
+```typescript
+async getIntegrationEvents(
+  orgSlug: string,
+  integrationId: string,
+): Promise<SocketSdkResult<'getIntegrationEvents'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getIntegrationEvents` · **Permissions:** `integration:list`
+
+### `getSocketBasicsConfig`
+
+Get the Socket Basics configuration for an organization.
+
+```typescript
+async getSocketBasicsConfig(
+  orgSlug: string,
+): Promise<SocketSdkResult<'getSocketBasicsConfig'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getSocketBasicsConfig` · **Permissions:** `socket-basics:read`
 
 ## Telemetry
 
@@ -1469,6 +1525,60 @@ async getQuota(): Promise<SocketSdkResult<'getQuota'>>
 ```
 
 **Quota:** `0` (Free) · **OpenAPI:** `getQuota`
+
+## Metadata
+
+Alert-type and license metadata lookups.
+
+### `alertTypes`
+
+Get metadata for a set of alert types. Accepts an array of alert type
+
+```typescript
+async alertTypes(
+  alertTypes: string[],
+  options?: { language?: string | undefined } | undefined,
+): Promise<SocketSdkResult<'alertTypes'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `alertTypes`
+
+### `licenseMetadata`
+
+Get metadata for a set of licenses (SPDX identifiers or expressions).
+
+```typescript
+async licenseMetadata(
+  request: QueryParams,
+  options?: { includetext?: boolean | undefined } | undefined,
+): Promise<SocketSdkResult<'licenseMetadata'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `licenseMetadata`
+
+## Meta
+
+The Socket API OpenAPI definition.
+
+### `getOpenAPI`
+
+Get the Socket API OpenAPI definition.
+
+```typescript
+async getOpenAPI(): Promise<SocketSdkResult<'getOpenAPI'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOpenAPI`
+
+### `getOpenAPIJSON`
+
+Get the Socket API OpenAPI definition as JSON.
+
+```typescript
+async getOpenAPIJSON(): Promise<SocketSdkResult<'getOpenAPIJSON'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOpenAPIJSON`
 
 ## Escape hatches
 

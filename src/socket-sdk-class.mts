@@ -130,6 +130,7 @@ import type {
   HistoricalAlertsTrendOptions,
   HistoricalDependenciesTrendOptions,
   HistoricalSnapshotsListOptions,
+  LicensePolicyViolations,
   UpdateOrgRepoLabelSettingBody,
 } from './types-parity.mts'
 import type {
@@ -805,6 +806,47 @@ export class SocketSdk {
       )
     }
     return v1BaseUrl
+  }
+
+  /**
+   * Get metadata for a set of alert types. Accepts an array of alert type
+   * identifiers and returns human-readable metadata for each, optionally
+   * localized via the `language` query param.
+   *
+   * @param alertTypes - Alert type identifiers to look up.
+   * @param options - Optional query params (e.g. `language`).
+   *
+   * @returns Metadata for the requested alert types.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /alert-types
+   *
+   * @quota 1 units
+   *
+   * @see https://docs.socket.dev/reference/alerttypes
+   */
+  async alertTypes(
+    alertTypes: string[],
+    options?: { language?: string | undefined } | undefined,
+  ): Promise<SocketSdkResult<'alertTypes'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `alert-types?${queryToSearchParams(options as QueryParams)}`,
+              alertTypes,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'alertTypes'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'alertTypes'>(e)
+    }
   }
 
   /**
@@ -3504,6 +3546,46 @@ export class SocketSdk {
   }
 
   /**
+   * List integration events for a specific organization integration.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param integrationId - Integration identifier.
+   *
+   * @returns Integration event history.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET
+   *   /orgs/{org_slug}/settings/integrations/{integration_id}/events
+   *
+   * @quota 1 units
+   *
+   * @scopes integration:list
+   *
+   * @see https://docs.socket.dev/reference/getintegrationevents
+   */
+  async getIntegrationEvents(
+    orgSlug: string,
+    integrationId: string,
+  ): Promise<SocketSdkResult<'getIntegrationEvents'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/integrations/${encodeURIComponent(integrationId)}/events`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getIntegrationEvents'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getIntegrationEvents'>(e)
+    }
+  }
+
+  /**
    * Get security issues for a specific npm package and version. Returns
    * detailed vulnerability and security alert information.
    *
@@ -3527,6 +3609,68 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
     } catch (e) {
       return await this.#handleApiError<'getIssuesByNPMPackage'>(e)
+    }
+  }
+
+  /**
+   * Get the Socket API OpenAPI definition.
+   *
+   * @returns The OpenAPI document.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /openapi
+   *
+   * @quota 1 units
+   *
+   * @see https://docs.socket.dev/reference/getopenapi
+   */
+  async getOpenAPI(): Promise<SocketSdkResult<'getOpenAPI'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              'openapi',
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOpenAPI'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOpenAPI'>(e)
+    }
+  }
+
+  /**
+   * Get the Socket API OpenAPI definition as JSON.
+   *
+   * @returns The OpenAPI document.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /openapi.json
+   *
+   * @quota 1 units
+   *
+   * @see https://docs.socket.dev/reference/getopenapijson
+   */
+  async getOpenAPIJSON(): Promise<SocketSdkResult<'getOpenAPIJSON'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              'openapi.json',
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOpenAPIJSON'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOpenAPIJSON'>(e)
     }
   }
 
@@ -4434,6 +4578,43 @@ export class SocketSdk {
   }
 
   /**
+   * Get the Socket Basics configuration for an organization.
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns The Socket Basics configuration.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/settings/socket-basics
+   *
+   * @quota 1 units
+   *
+   * @scopes socket-basics:read
+   *
+   * @see https://docs.socket.dev/reference/getsocketbasicsconfig
+   */
+  async getSocketBasicsConfig(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getSocketBasicsConfig'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/socket-basics`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getSocketBasicsConfig'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getSocketBasicsConfig'>(e)
+    }
+  }
+
+  /**
    * Get list of supported file types for full scan generation. Returns glob
    * patterns for supported manifest files, lockfiles, and configuration
    * formats.
@@ -4781,6 +4962,124 @@ export class SocketSdk {
       return this.#handleApiSuccess<'historicalSnapshotsStart'>(data)
     } catch (e) {
       return await this.#handleApiError<'historicalSnapshotsStart'>(e)
+    }
+  }
+
+  /**
+   * Get metadata for a set of licenses (SPDX identifiers or expressions).
+   *
+   * @param request - License metadata request body.
+   * @param options - Optional query params (e.g. `includetext` to include the
+   *   full license text).
+   *
+   * @returns Metadata for the requested licenses.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /license-metadata
+   *
+   * @quota 1 units
+   *
+   * @see https://docs.socket.dev/reference/licensemetadata
+   */
+  async licenseMetadata(
+    request: QueryParams,
+    options?: { includetext?: boolean | undefined } | undefined,
+  ): Promise<SocketSdkResult<'licenseMetadata'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `license-metadata?${queryToSearchParams(options as QueryParams)}`,
+              request,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'licenseMetadata'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'licenseMetadata'>(e)
+    }
+  }
+
+  /**
+   * Compute license policy violations for a set of packages (Beta). The
+   * endpoint streams newline-delimited JSON, which this method parses into an
+   * array of violation records.
+   *
+   * @param request - License allow-list request body.
+   *
+   * @returns The parsed license policy violations.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId licensePolicy
+   *
+   * @apiEndpoint POST /license-policy
+   *
+   * @quota 100 units
+   *
+   * @scopes packages:list, license-policy:read
+   *
+   * @see https://docs.socket.dev/reference/licensepolicy
+   */
+  async licensePolicy(
+    request: QueryParams,
+  ): Promise<SocketSdkGenericResult<LicensePolicyViolations>> {
+    const urlPath = 'license-policy'
+    const url = `${this.#baseUrl}${urlPath}`
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          urlPath,
+          request,
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
+      // Parse the newline-delimited JSON response into violation records.
+      const results: LicensePolicyViolations = []
+      const text = response.text()
+      let start = 0
+      for (let i = 0; i <= text.length; i++) {
+        if (i === text.length || text.charCodeAt(i) === 10) {
+          if (i > start) {
+            const line = text.slice(start, i)
+            const violation = parseJson(line, {
+              throws: false,
+            }) as LicensePolicyViolations[number] | null
+            if (isObject(violation)) {
+              results.push(violation)
+            }
+          }
+          start = i + 1
+        }
+      }
+      return {
+        cause: undefined,
+        data: results,
+        error: undefined,
+        status: response.status,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'licensePolicy'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+        url: errorResult.url,
+      }
     }
   }
 
@@ -6351,6 +6650,44 @@ export class SocketSdk {
       /* c8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
       return await this.#handleApiError<never>(e)
       /* c8 ignore stop */
+    }
+  }
+
+  /**
+   * View an organization's computed license policy allow list (Beta). Returns
+   * the saturated license policy for the organization.
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns The organization's license policy view.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/settings/license-policy/view
+   *
+   * @quota 1 units
+   *
+   * @scopes license-policy:read
+   *
+   * @see https://docs.socket.dev/reference/viewlicensepolicy
+   */
+  async viewLicensePolicy(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'viewLicensePolicy'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy/view`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'viewLicensePolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'viewLicensePolicy'>(e)
     }
   }
 

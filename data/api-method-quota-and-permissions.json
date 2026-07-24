@@ -1,5 +1,37 @@
 {
   "api": {
+    "alertTypes": {
+      "quota": 1,
+      "permissions": []
+    },
+    "getIntegrationEvents": {
+      "quota": 1,
+      "permissions": ["integration:list"]
+    },
+    "getOpenAPI": {
+      "quota": 1,
+      "permissions": []
+    },
+    "getOpenAPIJSON": {
+      "quota": 1,
+      "permissions": []
+    },
+    "getSocketBasicsConfig": {
+      "quota": 1,
+      "permissions": ["socket-basics:read"]
+    },
+    "licenseMetadata": {
+      "quota": 1,
+      "permissions": []
+    },
+    "licensePolicy": {
+      "quota": 100,
+      "permissions": ["packages:list", "license-policy:read"]
+    },
+    "viewLicensePolicy": {
+      "quota": 1,
+      "permissions": ["license-policy:read"]
+    },
     "batchPackageFetch": {
       "quota": 100,
       "permissions": ["packages:list"]
