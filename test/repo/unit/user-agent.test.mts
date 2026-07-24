@@ -7,10 +7,16 @@
  *   through verbatim.
  */
 
+import os from 'node:os'
+import process from 'node:process'
+
 import fc from 'fast-check'
 import { describe, expect, test } from 'vitest'
 
-import { createUserAgentFromPkgJson } from '../../../src/user-agent.mts'
+import {
+  buildSdkBaseUserAgent,
+  createUserAgentFromPkgJson,
+} from '../../../src/user-agent.mts'
 
 // A plain (unscoped) package-name fragment: alnum + dashes + dots, no '@'/'/'.
 const plainName = fc
@@ -72,6 +78,46 @@ describe('user-agent/createUserAgentFromPkgJson (fuzz)', () => {
         expect(typeof ua).toBe('string')
         expect(ua).toContain('/')
         expect(ua).toContain(ver)
+      }),
+    )
+  })
+})
+
+describe('user-agent/buildSdkBaseUserAgent', () => {
+  // DERIVED-FROM-INPUT: the base UA is the SDK name/version enriched with the
+  // running Node.js version and the OS platform/arch, space-separated in a
+  // stable order. Fields are read from node:process / node:os so the expected
+  // value is knowable at test time.
+  test('formats "name/version node/<ver> <platform>/<arch>"', () => {
+    fc.assert(
+      fc.property(plainName, version, (name, ver) => {
+        expect(buildSdkBaseUserAgent({ name, version: ver })).toBe(
+          `${name}/${ver} node/${process.version} ${os.platform()}/${os.arch()}`,
+        )
+      }),
+    )
+  })
+
+  // Enrichment tokens are always present regardless of the pkg fields.
+  test('includes the node version and the OS platform/arch tokens', () => {
+    const ua = buildSdkBaseUserAgent({
+      name: 'socketsecurity-sdk',
+      version: '4.0.4',
+    })
+    expect(ua).toContain(`node/${process.version}`)
+    expect(ua).toContain(`${os.platform()}/${os.arch()}`)
+  })
+
+  // NORMALIZER: a scoped name is normalized the same way as the caller-token
+  // builder (@scope/pkg -> scope-pkg).
+  test('normalizes a scoped @scope/pkg name to scope-pkg', () => {
+    fc.assert(
+      fc.property(plainName, plainName, version, (scope, pkg, ver) => {
+        expect(
+          buildSdkBaseUserAgent({ name: `@${scope}/${pkg}`, version: ver }),
+        ).toBe(
+          `${scope}-${pkg}/${ver} node/${process.version} ${os.platform()}/${os.arch()}`,
+        )
       }),
     )
   })

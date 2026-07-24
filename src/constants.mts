@@ -7,7 +7,7 @@
 import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials/map-set'
 
 import rootPkgJson from '../package.json' with { type: 'json' }
-import { createUserAgentFromPkgJson } from './user-agent.mts'
+import { buildSdkBaseUserAgent } from './user-agent.mts'
 
 import type { ALERT_ACTION, ALERT_TYPE } from './types.mts'
 
@@ -18,7 +18,7 @@ export {
   SOCKET_DASHBOARD_URL,
 } from '@socketsecurity/lib/constants/socket'
 
-export const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
+export const DEFAULT_USER_AGENT = buildSdkBaseUserAgent(rootPkgJson)
 
 // Default timeout for HTTP requests (30 seconds)
 export const DEFAULT_HTTP_TIMEOUT = 30_000

@@ -288,7 +288,9 @@ export class SocketSdk {
       ...(agent ? { agent } : {}),
       headers: {
         Authorization: `Basic ${btoa(`${trimmedToken}:`)}`,
-        'User-Agent': userAgent ?? DEFAULT_USER_AGENT,
+        'User-Agent': userAgent
+          ? `${DEFAULT_USER_AGENT} ${userAgent}`
+          : DEFAULT_USER_AGENT,
       },
       signal: getSdkAbortSignal(),
       /* c8 ignore next - Optional timeout parameter, tested implicitly through method calls */
