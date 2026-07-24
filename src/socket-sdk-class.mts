@@ -123,6 +123,17 @@ import type {
   UploadManifestFilesReturnType,
 } from './types.mts'
 import type {
+  CreateOrgRepoDiffOptions,
+  GetOrgFullScanCsvOptions,
+  GetOrgFullScanPdfOptions,
+  HistoricalAlertsListOptions,
+  HistoricalAlertsTrendOptions,
+  HistoricalDependenciesTrendOptions,
+  HistoricalSnapshotsListOptions,
+  LicensePolicyViolations,
+  UpdateOrgRepoLabelSettingBody,
+} from './types-parity.mts'
+import type {
   CreateFullScanOptions,
   DeleteRepositoryLabelResult,
   DeleteResult,
@@ -795,6 +806,90 @@ export class SocketSdk {
       )
     }
     return v1BaseUrl
+  }
+
+  /**
+   * Get metadata for a set of alert types. Accepts an array of alert type
+   * identifiers and returns human-readable metadata for each, optionally
+   * localized via the `language` query param.
+   *
+   * @param alertTypes - Alert type identifiers to look up.
+   * @param options - Optional query params (e.g. `language`).
+   *
+   * @returns Metadata for the requested alert types.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /alert-types
+   *
+   * @quota 1 units
+   *
+   * @see https://docs.socket.dev/reference/alerttypes
+   */
+  async alertTypes(
+    alertTypes: string[],
+    options?: { language?: string | undefined } | undefined,
+  ): Promise<SocketSdkResult<'alertTypes'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `alert-types?${queryToSearchParams(options as QueryParams)}`,
+              alertTypes,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'alertTypes'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'alertTypes'>(e)
+    }
+  }
+
+  /**
+   * Associate a repository with an organization repository label.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param repositoryId - Repository identifier to associate with the label.
+   *
+   * @returns Association result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos/labels/{label_id}/associate
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/associateorgrepolabel
+   */
+  async associateOrgRepoLabel(
+    orgSlug: string,
+    labelId: string,
+    repositoryId: string,
+  ): Promise<SocketSdkResult<'associateOrgRepoLabel'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/associate`,
+              { repository_id: repositoryId },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'associateOrgRepoLabel'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'associateOrgRepoLabel'>(e)
+    }
   }
 
   /**
@@ -2062,6 +2157,75 @@ export class SocketSdk {
   }
 
   /**
+   * Create a diff scan between a repository's current HEAD full scan and a new
+   * full scan built from the uploaded manifest files. Returns metadata about
+   * the new full scan and the diff scan.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug whose HEAD full scan is the diff base.
+   * @param filepaths - Manifest file paths to upload as the new full scan.
+   * @param options - Diff scan metadata (branch, commit, PR, etc.) and
+   *   `pathsRelativeTo` controlling how the file paths are resolved.
+   *
+   * @returns Created full scan and diff scan details.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-repo/{repo_slug}
+   *
+   * @quota 1 units
+   *
+   * @scopes repo:list, diff-scans:create, full-scans:create
+   *
+   * @see https://docs.socket.dev/reference/createorgrepodiff
+   */
+  async createOrgRepoDiff(
+    orgSlug: string,
+    repoSlug: string,
+    filepaths: string[],
+    options?: CreateOrgRepoDiffOptions | undefined,
+  ): Promise<SocketSdkResult<'createOrgRepoDiff'>> {
+    const { pathsRelativeTo = '.', ...queryParams } = {
+      __proto__: null,
+      ...options,
+    } as CreateOrgRepoDiffOptions
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+
+    // Validate file readability before upload. Unlike createFullScan this does
+    // not invoke the onFileValidation callback: that callback's operation union
+    // is scoped to the manifest-upload methods, and widening a shared type for
+    // one method would be the wrong boundary. All-invalid still fails clearly.
+    const { invalidPaths, validPaths } = validateFiles(absFilepaths)
+    if (validPaths.length === 0) {
+      return {
+        cause: `All ${invalidPaths.length} manifest files failed validation`,
+        data: undefined,
+        error: 'No readable manifest files found',
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/from-repo/${encodeURIComponent(repoSlug)}?${queryToSearchParams(queryParams as QueryParams)}`,
+              createRequestBodyForFilepaths(validPaths, basePath),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'createOrgRepoDiff'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createOrgRepoDiff'>(e)
+    }
+  }
+
+  /**
    * Create a new webhook for an organization. Webhooks allow you to receive
    * HTTP POST notifications when specific events occur.
    *
@@ -2361,6 +2525,46 @@ export class SocketSdk {
   }
 
   /**
+   * Delete a triage entry for a specific alert in an organization. Removes the
+   * triage record identified by its UUID.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param uuid - Alert triage UUID to delete.
+   *
+   * @returns Deletion result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/triage/alerts/{uuid}
+   *
+   * @quota 1 units
+   *
+   * @scopes triage:alerts-update
+   *
+   * @see https://docs.socket.dev/reference/deleteorgalerttriage
+   */
+  async deleteOrgAlertTriage(
+    orgSlug: string,
+    uuid: string,
+  ): Promise<SocketSdkResult<'deleteOrgAlertTriage'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/triage/alerts/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgAlertTriage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgAlertTriage'>(e)
+    }
+  }
+
+  /**
    * Delete a diff scan from an organization. Permanently removes diff scan data
    * and results.
    *
@@ -2384,6 +2588,48 @@ export class SocketSdk {
       return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
     } catch (e) {
       return await this.#handleApiError<'deleteOrgDiffScan'>(e)
+    }
+  }
+
+  /**
+   * Delete a single setting from a repository label.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param settingKey - Key of the label setting to delete.
+   *
+   * @returns Deletion result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE
+   *   /orgs/{org_slug}/repos/labels/{label_id}/label-setting
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/deleteorgrepolabelsetting
+   */
+  async deleteOrgRepoLabelSetting(
+    orgSlug: string,
+    labelId: string,
+    settingKey: string,
+  ): Promise<SocketSdkResult<'deleteOrgRepoLabelSetting'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/label-setting?${queryToSearchParams({ setting_key: settingKey })}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgRepoLabelSetting'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgRepoLabelSetting'>(e)
     }
   }
 
@@ -2552,6 +2798,49 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
+    }
+  }
+
+  /**
+   * Disassociate a repository from an organization repository label.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param repositoryId - Repository identifier to disassociate from the label.
+   *
+   * @returns Disassociation result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos/labels/{label_id}/disassociate
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/disassociateorgrepolabel
+   */
+  async disassociateOrgRepoLabel(
+    orgSlug: string,
+    labelId: string,
+    repositoryId: string,
+  ): Promise<SocketSdkResult<'disassociateOrgRepoLabel'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/disassociate`,
+              { repository_id: repositoryId },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'disassociateOrgRepoLabel'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'disassociateOrgRepoLabel'>(e)
     }
   }
 
@@ -3257,6 +3546,46 @@ export class SocketSdk {
   }
 
   /**
+   * List integration events for a specific organization integration.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param integrationId - Integration identifier.
+   *
+   * @returns Integration event history.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET
+   *   /orgs/{org_slug}/settings/integrations/{integration_id}/events
+   *
+   * @quota 1 units
+   *
+   * @scopes integration:list
+   *
+   * @see https://docs.socket.dev/reference/getintegrationevents
+   */
+  async getIntegrationEvents(
+    orgSlug: string,
+    integrationId: string,
+  ): Promise<SocketSdkResult<'getIntegrationEvents'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/integrations/${encodeURIComponent(integrationId)}/events`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getIntegrationEvents'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getIntegrationEvents'>(e)
+    }
+  }
+
+  /**
    * Get security issues for a specific npm package and version. Returns
    * detailed vulnerability and security alert information.
    *
@@ -3280,6 +3609,68 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getIssuesByNPMPackage'>(data)
     } catch (e) {
       return await this.#handleApiError<'getIssuesByNPMPackage'>(e)
+    }
+  }
+
+  /**
+   * Get the Socket API OpenAPI definition.
+   *
+   * @returns The OpenAPI document.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /openapi
+   *
+   * @quota 1 units
+   *
+   * @see https://docs.socket.dev/reference/getopenapi
+   */
+  async getOpenAPI(): Promise<SocketSdkResult<'getOpenAPI'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              'openapi',
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOpenAPI'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOpenAPI'>(e)
+    }
+  }
+
+  /**
+   * Get the Socket API OpenAPI definition as JSON.
+   *
+   * @returns The OpenAPI document.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /openapi.json
+   *
+   * @quota 1 units
+   *
+   * @see https://docs.socket.dev/reference/getopenapijson
+   */
+  async getOpenAPIJSON(): Promise<SocketSdkResult<'getOpenAPIJSON'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              'openapi.json',
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOpenAPIJSON'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOpenAPIJSON'>(e)
     }
   }
 
@@ -3578,6 +3969,142 @@ export class SocketSdk {
   }
 
   /**
+   * Export a full scan's alerts as CSV. The endpoint responds with raw
+   * `text/csv`, so the result data is the CSV text rather than a parsed object.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan identifier.
+   * @param options - Query params (`include_license_details` is required) plus
+   *   an optional `filters` body forwarded to the export.
+   *
+   * @returns The CSV export text.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId getOrgFullScanCsv
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/format/csv
+   *
+   * @quota 1 units
+   *
+   * @scopes full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscancsv
+   */
+  async getOrgFullScanCsv(
+    orgSlug: string,
+    fullScanId: string,
+    options: GetOrgFullScanCsvOptions,
+  ): Promise<SocketSdkGenericResult<string>> {
+    const { filters, ...queryParams } = {
+      __proto__: null,
+      ...options,
+    } as GetOrgFullScanCsvOptions
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/format/csv?${queryToSearchParams(queryParams as QueryParams)}`
+    const url = `${this.#baseUrl}${urlPath}`
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          urlPath,
+          { filters },
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
+      return {
+        cause: undefined,
+        data: response.text(),
+        error: undefined,
+        status: response.status,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgFullScanCsv'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+        url: errorResult.url,
+      }
+    }
+  }
+
+  /**
+   * Export a full scan's alerts as a PDF report. The endpoint responds with raw
+   * `application/pdf`, so the result data is the PDF bytes as a Buffer.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan identifier.
+   * @param options - Query params (`include_license_details` is required) plus
+   *   optional `filters`, `groupBy`, and `additionalInformation` body fields.
+   *
+   * @returns The PDF report bytes.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId getOrgFullScanPdf
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/format/pdf
+   *
+   * @quota 1 units
+   *
+   * @scopes full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscanpdf
+   */
+  async getOrgFullScanPdf(
+    orgSlug: string,
+    fullScanId: string,
+    options: GetOrgFullScanPdfOptions,
+  ): Promise<SocketSdkGenericResult<Buffer>> {
+    const { additionalInformation, filters, groupBy, ...queryParams } = {
+      __proto__: null,
+      ...options,
+    } as GetOrgFullScanPdfOptions
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/format/pdf?${queryToSearchParams(queryParams as QueryParams)}`
+    const url = `${this.#baseUrl}${urlPath}`
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          urlPath,
+          { additionalInformation, filters, groupBy },
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
+      return {
+        cause: undefined,
+        data: response.body,
+        error: undefined,
+        status: response.status,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgFullScanPdf'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+        url: errorResult.url,
+      }
+    }
+  }
+
+  /**
    * Get organization's license policy configuration. Returns allowed,
    * restricted, and monitored license types.
    *
@@ -3600,6 +4127,47 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
     } catch (e) {
       return await this.#handleApiError<'getOrgLicensePolicy'>(e)
+    }
+  }
+
+  /**
+   * Get a single setting for a repository label.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param settingKey - Key of the label setting to fetch.
+   *
+   * @returns The requested label setting.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}/label-setting
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:list
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolabelsetting
+   */
+  async getOrgRepoLabelSetting(
+    orgSlug: string,
+    labelId: string,
+    settingKey: string,
+  ): Promise<SocketSdkResult<'getOrgRepoLabelSetting'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/label-setting?${queryToSearchParams({ setting_key: settingKey })}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgRepoLabelSetting'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgRepoLabelSetting'>(e)
     }
   }
 
@@ -4010,6 +4578,43 @@ export class SocketSdk {
   }
 
   /**
+   * Get the Socket Basics configuration for an organization.
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns The Socket Basics configuration.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/settings/socket-basics
+   *
+   * @quota 1 units
+   *
+   * @scopes socket-basics:read
+   *
+   * @see https://docs.socket.dev/reference/getsocketbasicsconfig
+   */
+  async getSocketBasicsConfig(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'getSocketBasicsConfig'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/socket-basics`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getSocketBasicsConfig'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getSocketBasicsConfig'>(e)
+    }
+  }
+
+  /**
    * Get list of supported file types for full scan generation. Returns glob
    * patterns for supported manifest files, lockfiles, and configuration
    * formats.
@@ -4157,6 +4762,324 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getThreatFeedItems'>(data)
     } catch (e) {
       return await this.#handleApiError<'getThreatFeedItems'>(e)
+    }
+  }
+
+  /**
+   * List historical alerts for an organization. Returns point-in-time alert
+   * data across repositories with extensive filtering and cursor pagination.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Date, range, pagination, and alert filter options.
+   *
+   * @returns Paginated historical alerts with an end cursor.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/historical/alerts
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:alerts-list
+   *
+   * @see https://docs.socket.dev/reference/historicalalertslist
+   */
+  async historicalAlertsList(
+    orgSlug: string,
+    options?: HistoricalAlertsListOptions | undefined,
+  ): Promise<SocketSdkResult<'historicalAlertsList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/alerts?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalAlertsList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalAlertsList'>(e)
+    }
+  }
+
+  /**
+   * Get a trend of historical alert counts for an organization. Returns
+   * aggregated alert totals over the requested time range.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Date, range, aggregation, and alert filter options.
+   *
+   * @returns Historical alert trend data.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/historical/alerts/trend
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:alerts-trend
+   *
+   * @see https://docs.socket.dev/reference/historicalalertstrend
+   */
+  async historicalAlertsTrend(
+    orgSlug: string,
+    options?: HistoricalAlertsTrendOptions | undefined,
+  ): Promise<SocketSdkResult<'historicalAlertsTrend'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/alerts/trend?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalAlertsTrend'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalAlertsTrend'>(e)
+    }
+  }
+
+  /**
+   * Get a trend of historical dependency counts for an organization. Returns
+   * aggregated dependency totals over the requested time range.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Date, range, and dependency filter options.
+   *
+   * @returns Historical dependency trend data.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/historical/dependencies/trend
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:dependencies-trend
+   *
+   * @see https://docs.socket.dev/reference/historicaldependenciestrend
+   */
+  async historicalDependenciesTrend(
+    orgSlug: string,
+    options?: HistoricalDependenciesTrendOptions | undefined,
+  ): Promise<SocketSdkResult<'historicalDependenciesTrend'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/dependencies/trend?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalDependenciesTrend'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalDependenciesTrend'>(e)
+    }
+  }
+
+  /**
+   * List historical dependency snapshots for an organization. Returns snapshot
+   * metadata with status filtering and cursor pagination.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Date, range, pagination, and snapshot filter options.
+   *
+   * @returns Paginated historical snapshots with an end cursor.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/historical/snapshots
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:snapshots-list
+   *
+   * @see https://docs.socket.dev/reference/historicalsnapshotslist
+   */
+  async historicalSnapshotsList(
+    orgSlug: string,
+    options?: HistoricalSnapshotsListOptions | undefined,
+  ): Promise<SocketSdkResult<'historicalSnapshotsList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/snapshots?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalSnapshotsList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalSnapshotsList'>(e)
+    }
+  }
+
+  /**
+   * Start a new historical dependency snapshot for an organization. Triggers
+   * the background computation of a point-in-time dependency snapshot.
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns Snapshot start acknowledgement, including the new request ID.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/historical/snapshots
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:snapshots-start
+   *
+   * @see https://docs.socket.dev/reference/historicalsnapshotsstart
+   */
+  async historicalSnapshotsStart(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'historicalSnapshotsStart'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/snapshots`,
+              {},
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalSnapshotsStart'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalSnapshotsStart'>(e)
+    }
+  }
+
+  /**
+   * Get metadata for a set of licenses (SPDX identifiers or expressions).
+   *
+   * @param request - License metadata request body.
+   * @param options - Optional query params (e.g. `includetext` to include the
+   *   full license text).
+   *
+   * @returns Metadata for the requested licenses.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /license-metadata
+   *
+   * @quota 1 units
+   *
+   * @see https://docs.socket.dev/reference/licensemetadata
+   */
+  async licenseMetadata(
+    request: QueryParams,
+    options?: { includetext?: boolean | undefined } | undefined,
+  ): Promise<SocketSdkResult<'licenseMetadata'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `license-metadata?${queryToSearchParams(options as QueryParams)}`,
+              request,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'licenseMetadata'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'licenseMetadata'>(e)
+    }
+  }
+
+  /**
+   * Compute license policy violations for a set of packages (Beta). The
+   * endpoint streams newline-delimited JSON, which this method parses into an
+   * array of violation records.
+   *
+   * @param request - License allow-list request body.
+   *
+   * @returns The parsed license policy violations.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId licensePolicy
+   *
+   * @apiEndpoint POST /license-policy
+   *
+   * @quota 100 units
+   *
+   * @scopes packages:list, license-policy:read
+   *
+   * @see https://docs.socket.dev/reference/licensepolicy
+   */
+  async licensePolicy(
+    request: QueryParams,
+  ): Promise<SocketSdkGenericResult<LicensePolicyViolations>> {
+    const urlPath = 'license-policy'
+    const url = `${this.#baseUrl}${urlPath}`
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          urlPath,
+          request,
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
+      // Parse the newline-delimited JSON response into violation records.
+      const results: LicensePolicyViolations = []
+      const text = response.text()
+      let start = 0
+      for (let i = 0; i <= text.length; i++) {
+        if (i === text.length || text.charCodeAt(i) === 10) {
+          if (i > start) {
+            const line = text.slice(start, i)
+            const violation = parseJson(line, {
+              throws: false,
+            }) as LicensePolicyViolations[number] | null
+            if (isObject(violation)) {
+              results.push(violation)
+            }
+          }
+          start = i + 1
+        }
+      }
+      return {
+        cause: undefined,
+        data: results,
+        error: undefined,
+        status: response.status,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'licensePolicy'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+        url: errorResult.url,
+      }
     }
   }
 
@@ -5218,6 +6141,50 @@ export class SocketSdk {
   }
 
   /**
+   * Update the settings for a repository label. Accepts the structured
+   * issue-rules body defined by the API.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param settings - Label settings body (issue rules).
+   *
+   * @returns Update result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}/label-setting
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/updateorgrepolabelsetting
+   */
+  async updateOrgRepoLabelSetting(
+    orgSlug: string,
+    labelId: string,
+    settings: UpdateOrgRepoLabelSettingBody,
+  ): Promise<SocketSdkResult<'updateOrgRepoLabelSetting'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/label-setting`,
+              settings,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgRepoLabelSetting'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgRepoLabelSetting'>(e)
+    }
+  }
+
+  /**
    * Update organization's security policy configuration. Modifies alert rules,
    * severity thresholds, and enforcement settings.
    *
@@ -5683,6 +6650,44 @@ export class SocketSdk {
       /* c8 ignore start - Error handling in uploadManifestFiles method for edge cases. */
       return await this.#handleApiError<never>(e)
       /* c8 ignore stop */
+    }
+  }
+
+  /**
+   * View an organization's computed license policy allow list (Beta). Returns
+   * the saturated license policy for the organization.
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns The organization's license policy view.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/settings/license-policy/view
+   *
+   * @quota 1 units
+   *
+   * @scopes license-policy:read
+   *
+   * @see https://docs.socket.dev/reference/viewlicensepolicy
+   */
+  async viewLicensePolicy(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'viewLicensePolicy'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/settings/license-policy/view`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'viewLicensePolicy'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'viewLicensePolicy'>(e)
     }
   }
 
