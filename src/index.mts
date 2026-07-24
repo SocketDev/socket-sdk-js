@@ -82,6 +82,7 @@ export type {
   HistoricalAlertsTrendOptions,
   HistoricalDependenciesTrendOptions,
   HistoricalSnapshotsListOptions,
+  UpdateOrgRepoLabelSettingBody,
 } from './types-parity.mts'
 // Re-export types from modules.
 export type {

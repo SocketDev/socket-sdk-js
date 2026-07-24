@@ -52,4 +52,10 @@ export type CreateOrgRepoDiffOptions = NonNullable<
 > & {
   pathsRelativeTo?: string | undefined
 }
+
+// The label-setting update body is a structured issue-rules object; reference
+// the generated request body so the shape tracks the spec.
+export type UpdateOrgRepoLabelSettingBody = NonNullable<
+  NonNullable<operations['updateOrgRepoLabelSetting']['requestBody']>['content']
+>['application/json']
 /* c8 ignore stop */

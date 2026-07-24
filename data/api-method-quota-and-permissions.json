@@ -48,6 +48,30 @@
       "quota": 0,
       "permissions": ["repo:delete"]
     },
+    "associateOrgRepoLabel": {
+      "quota": 1,
+      "permissions": ["repo-label:update"]
+    },
+    "disassociateOrgRepoLabel": {
+      "quota": 1,
+      "permissions": ["repo-label:update"]
+    },
+    "getOrgRepoLabelSetting": {
+      "quota": 1,
+      "permissions": ["repo-label:list"]
+    },
+    "updateOrgRepoLabelSetting": {
+      "quota": 1,
+      "permissions": ["repo-label:update"]
+    },
+    "deleteOrgRepoLabelSetting": {
+      "quota": 1,
+      "permissions": ["repo-label:update"]
+    },
+    "deleteOrgAlertTriage": {
+      "quota": 1,
+      "permissions": ["triage:alerts-update"]
+    },
     "getAuditLogEvents": {
       "quota": 10,
       "permissions": ["audit-log:list"]

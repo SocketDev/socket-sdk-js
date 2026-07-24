@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **91** public methods.
+There are **97** public methods.
 
 ## Contents
 
@@ -498,6 +498,76 @@ async deleteRepositoryLabel(
 
 **Quota:** `0` (Free) · **OpenAPI:** `deleteOrgRepoLabel` · **Permissions:** `repo-label:delete`
 
+### `associateOrgRepoLabel`
+
+Associate a repository with an organization repository label.
+
+```typescript
+async associateOrgRepoLabel(
+  orgSlug: string,
+  labelId: string,
+  repositoryId: string,
+): Promise<SocketSdkResult<'associateOrgRepoLabel'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `associateOrgRepoLabel` · **Permissions:** `repo-label:update`
+
+### `disassociateOrgRepoLabel`
+
+Disassociate a repository from an organization repository label.
+
+```typescript
+async disassociateOrgRepoLabel(
+  orgSlug: string,
+  labelId: string,
+  repositoryId: string,
+): Promise<SocketSdkResult<'disassociateOrgRepoLabel'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `disassociateOrgRepoLabel` · **Permissions:** `repo-label:update`
+
+### `getOrgRepoLabelSetting`
+
+Get a single setting for a repository label.
+
+```typescript
+async getOrgRepoLabelSetting(
+  orgSlug: string,
+  labelId: string,
+  settingKey: string,
+): Promise<SocketSdkResult<'getOrgRepoLabelSetting'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgRepoLabelSetting` · **Permissions:** `repo-label:list`
+
+### `updateOrgRepoLabelSetting`
+
+Update the settings for a repository label. Accepts the structured
+
+```typescript
+async updateOrgRepoLabelSetting(
+  orgSlug: string,
+  labelId: string,
+  settings: UpdateOrgRepoLabelSettingBody,
+): Promise<SocketSdkResult<'updateOrgRepoLabelSetting'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `updateOrgRepoLabelSetting` · **Permissions:** `repo-label:update`
+
+### `deleteOrgRepoLabelSetting`
+
+Delete a single setting from a repository label.
+
+```typescript
+async deleteOrgRepoLabelSetting(
+  orgSlug: string,
+  labelId: string,
+  settingKey: string,
+): Promise<SocketSdkResult<'deleteOrgRepoLabelSetting'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `deleteOrgRepoLabelSetting` · **Permissions:** `repo-label:update`
+
 ## Organizations
 
 Org listing, analytics, and entitlements.
@@ -706,6 +776,19 @@ async updateOrgAlertTriage(
 ```
 
 **Quota:** `0` (Free) · **OpenAPI:** `updateOrgAlertTriage` · **Permissions:** `triage:alerts-update`
+
+### `deleteOrgAlertTriage`
+
+Delete a triage entry for a specific alert in an organization. Removes the
+
+```typescript
+async deleteOrgAlertTriage(
+  orgSlug: string,
+  uuid: string,
+): Promise<SocketSdkResult<'deleteOrgAlertTriage'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `deleteOrgAlertTriage` · **Permissions:** `triage:alerts-update`
 
 ### `getOrgFixes`
 

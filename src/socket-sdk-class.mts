@@ -130,6 +130,7 @@ import type {
   HistoricalAlertsTrendOptions,
   HistoricalDependenciesTrendOptions,
   HistoricalSnapshotsListOptions,
+  UpdateOrgRepoLabelSettingBody,
 } from './types-parity.mts'
 import type {
   CreateFullScanOptions,
@@ -804,6 +805,49 @@ export class SocketSdk {
       )
     }
     return v1BaseUrl
+  }
+
+  /**
+   * Associate a repository with an organization repository label.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param repositoryId - Repository identifier to associate with the label.
+   *
+   * @returns Association result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos/labels/{label_id}/associate
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/associateorgrepolabel
+   */
+  async associateOrgRepoLabel(
+    orgSlug: string,
+    labelId: string,
+    repositoryId: string,
+  ): Promise<SocketSdkResult<'associateOrgRepoLabel'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/associate`,
+              { repository_id: repositoryId },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'associateOrgRepoLabel'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'associateOrgRepoLabel'>(e)
+    }
   }
 
   /**
@@ -2439,6 +2483,46 @@ export class SocketSdk {
   }
 
   /**
+   * Delete a triage entry for a specific alert in an organization. Removes the
+   * triage record identified by its UUID.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param uuid - Alert triage UUID to delete.
+   *
+   * @returns Deletion result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE /orgs/{org_slug}/triage/alerts/{uuid}
+   *
+   * @quota 1 units
+   *
+   * @scopes triage:alerts-update
+   *
+   * @see https://docs.socket.dev/reference/deleteorgalerttriage
+   */
+  async deleteOrgAlertTriage(
+    orgSlug: string,
+    uuid: string,
+  ): Promise<SocketSdkResult<'deleteOrgAlertTriage'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/triage/alerts/${encodeURIComponent(uuid)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgAlertTriage'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgAlertTriage'>(e)
+    }
+  }
+
+  /**
    * Delete a diff scan from an organization. Permanently removes diff scan data
    * and results.
    *
@@ -2462,6 +2546,48 @@ export class SocketSdk {
       return this.#handleApiSuccess<'deleteOrgDiffScan'>(data)
     } catch (e) {
       return await this.#handleApiError<'deleteOrgDiffScan'>(e)
+    }
+  }
+
+  /**
+   * Delete a single setting from a repository label.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param settingKey - Key of the label setting to delete.
+   *
+   * @returns Deletion result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint DELETE
+   *   /orgs/{org_slug}/repos/labels/{label_id}/label-setting
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/deleteorgrepolabelsetting
+   */
+  async deleteOrgRepoLabelSetting(
+    orgSlug: string,
+    labelId: string,
+    settingKey: string,
+  ): Promise<SocketSdkResult<'deleteOrgRepoLabelSetting'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createDeleteRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/label-setting?${queryToSearchParams({ setting_key: settingKey })}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'deleteOrgRepoLabelSetting'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'deleteOrgRepoLabelSetting'>(e)
     }
   }
 
@@ -2630,6 +2756,49 @@ export class SocketSdk {
         status: errorResult.status,
         success: false,
       }
+    }
+  }
+
+  /**
+   * Disassociate a repository from an organization repository label.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param repositoryId - Repository identifier to disassociate from the label.
+   *
+   * @returns Disassociation result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/repos/labels/{label_id}/disassociate
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/disassociateorgrepolabel
+   */
+  async disassociateOrgRepoLabel(
+    orgSlug: string,
+    labelId: string,
+    repositoryId: string,
+  ): Promise<SocketSdkResult<'disassociateOrgRepoLabel'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/disassociate`,
+              { repository_id: repositoryId },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'disassociateOrgRepoLabel'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'disassociateOrgRepoLabel'>(e)
     }
   }
 
@@ -3814,6 +3983,47 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getOrgLicensePolicy'>(data)
     } catch (e) {
       return await this.#handleApiError<'getOrgLicensePolicy'>(e)
+    }
+  }
+
+  /**
+   * Get a single setting for a repository label.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param settingKey - Key of the label setting to fetch.
+   *
+   * @returns The requested label setting.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/repos/labels/{label_id}/label-setting
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:list
+   *
+   * @see https://docs.socket.dev/reference/getorgrepolabelsetting
+   */
+  async getOrgRepoLabelSetting(
+    orgSlug: string,
+    labelId: string,
+    settingKey: string,
+  ): Promise<SocketSdkResult<'getOrgRepoLabelSetting'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/label-setting?${queryToSearchParams({ setting_key: settingKey })}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'getOrgRepoLabelSetting'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgRepoLabelSetting'>(e)
     }
   }
 
@@ -5628,6 +5838,50 @@ export class SocketSdk {
       return this.#handleApiSuccess<'updateOrgLicensePolicy'>(data)
     } catch (e) {
       return await this.#handleApiError<'updateOrgLicensePolicy'>(e)
+    }
+  }
+
+  /**
+   * Update the settings for a repository label. Accepts the structured
+   * issue-rules body defined by the API.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param labelId - Label identifier.
+   * @param settings - Label settings body (issue rules).
+   *
+   * @returns Update result.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint PUT /orgs/{org_slug}/repos/labels/{label_id}/label-setting
+   *
+   * @quota 1 units
+   *
+   * @scopes repo-label:update
+   *
+   * @see https://docs.socket.dev/reference/updateorgrepolabelsetting
+   */
+  async updateOrgRepoLabelSetting(
+    orgSlug: string,
+    labelId: string,
+    settings: UpdateOrgRepoLabelSettingBody,
+  ): Promise<SocketSdkResult<'updateOrgRepoLabelSetting'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'PUT',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/repos/labels/${encodeURIComponent(labelId)}/label-setting`,
+              settings,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'updateOrgRepoLabelSetting'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'updateOrgRepoLabelSetting'>(e)
     }
   }
 
