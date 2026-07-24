@@ -4,37 +4,37 @@
 
 import type { TierSensitivity } from './types.mts'
 
-export interface ExecutePromptOptions {
+export interface ExecutePromptConfig {
   readonly planDocPath: string
   readonly task: string
 }
 
-export interface FollowupPromptOptions {
+export interface FollowupPromptConfig {
   readonly findings: string
   readonly planDocPath: string
   readonly task: string
 }
 
-export interface PlanPromptOptions {
+export interface PlanPromptConfig {
   readonly sensitivity: TierSensitivity
   readonly task: string
 }
 
-export interface ReviewPromptOptions {
+export interface ReviewPromptConfig {
   readonly planDocPath: string
   readonly sensitivity: TierSensitivity
   readonly task: string
 }
 
-export function executePrompt(options: ExecutePromptOptions): string {
-  const opts: ExecutePromptOptions = {
+export function executePrompt(config: ExecutePromptConfig): string {
+  const cfg: ExecutePromptConfig = {
     __proto__: null,
-    ...options,
-  } as ExecutePromptOptions
+    ...config,
+  } as ExecutePromptConfig
   return [
-    `Task: ${opts.task}`,
+    `Task: ${cfg.task}`,
     '',
-    `Read the plan at ${opts.planDocPath} and follow the plan verbatim.`,
+    `Read the plan at ${cfg.planDocPath} and follow the plan verbatim.`,
     '',
     'Execution rules:',
     '- Work in a git worktree off the default branch — never the primary checkout.',
@@ -45,15 +45,15 @@ export function executePrompt(options: ExecutePromptOptions): string {
   ].join('\n')
 }
 
-export function followupPrompt(options: FollowupPromptOptions): string {
-  const opts: FollowupPromptOptions = {
+export function followupPrompt(config: FollowupPromptConfig): string {
+  const cfg: FollowupPromptConfig = {
     __proto__: null,
-    ...options,
-  } as FollowupPromptOptions
+    ...config,
+  } as FollowupPromptConfig
   return [
-    `Task: ${opts.task}`,
+    `Task: ${cfg.task}`,
     '',
-    `Plan doc: ${opts.planDocPath}`,
+    `Plan doc: ${cfg.planDocPath}`,
     '',
     'Apply every finding listed below. Never offer "fix vs accept-as-gap" — pick the fix.',
     '',
@@ -63,18 +63,18 @@ export function followupPrompt(options: FollowupPromptOptions): string {
     '- Report anything that resisted with a reason.',
     '',
     'Findings:',
-    opts.findings,
+    cfg.findings,
   ].join('\n')
 }
 
-export function planPrompt(options: PlanPromptOptions): string {
-  const opts: PlanPromptOptions = {
+export function planPrompt(config: PlanPromptConfig): string {
+  const cfg: PlanPromptConfig = {
     __proto__: null,
-    ...options,
-  } as PlanPromptOptions
+    ...config,
+  } as PlanPromptConfig
   return [
-    `Task: ${opts.task}`,
-    `Sensitivity: ${opts.sensitivity}`,
+    `Task: ${cfg.task}`,
+    `Sensitivity: ${cfg.sensitivity}`,
     '',
     'Write a numbered plan for this task.',
     '',
@@ -90,16 +90,16 @@ export function planPrompt(options: PlanPromptOptions): string {
   ].join('\n')
 }
 
-export function reviewPrompt(options: ReviewPromptOptions): string {
-  const opts: ReviewPromptOptions = {
+export function reviewPrompt(config: ReviewPromptConfig): string {
+  const cfg: ReviewPromptConfig = {
     __proto__: null,
-    ...options,
-  } as ReviewPromptOptions
+    ...config,
+  } as ReviewPromptConfig
   return [
-    `Task: ${opts.task}`,
-    `Sensitivity: ${opts.sensitivity}`,
+    `Task: ${cfg.task}`,
+    `Sensitivity: ${cfg.sensitivity}`,
     '',
-    `Diff the landed result against the plan at ${opts.planDocPath}.`,
+    `Diff the landed result against the plan at ${cfg.planDocPath}.`,
     '',
     'Review rules:',
     '- Every finding needs: severity (critical/high/medium/low), file:line, and a concrete fix.',

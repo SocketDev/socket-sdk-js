@@ -6,10 +6,11 @@
  *   package.json reader for the release subject.
  */
 
-import { promises as fs, readFileSync } from 'node:fs'
+import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
+import { resolveReleaseSubject } from '../_shared/release-subject.mts'
 import {
   ensureTagAndRelease,
   requireRegistryLive,
@@ -192,13 +193,12 @@ export function resolveSeams(seams: RunnerSeams | undefined): ResolvedSeams {
 }
 
 /**
- * Read `<cwd>/package.json` name + version (the release subject).
+ * Read the release subject's name + version: `<cwd>/package.json` for a plain
+ * repo, the `publishConfig.directory` manifest for a redirected monorepo —
+ * the version the pipeline bumps/verifies/releases is the SUBJECT's, never a
+ * private root's.
  */
 export function readPkg(cwd: string): { name: string; version: string } {
-  const raw = readFileSync(path.join(cwd, 'package.json'), 'utf8')
-  const pkg = JSON.parse(raw) as {
-    name?: string | undefined
-    version?: string | undefined
-  }
-  return { name: pkg.name ?? '', version: pkg.version ?? '' }
+  const subject = resolveReleaseSubject(cwd)
+  return { name: subject.name, version: subject.version }
 }

@@ -33,13 +33,17 @@ import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 // `.config/` is blocked. `.socket-wheelhouse.json` (root dotfile alternative)
 // is matched by basename too.
 const ALLOWED_BASENAMES: ReadonlySet<string> = new Set([
-  'socket-wheelhouse.json',
-  'socket-wheelhouse-schema.json',
   '.socket-wheelhouse.json',
+  // A workspace-member manifest, not config data — every oxlint-plugin rule
+  // dir under `.config/fleet/oxlint-plugin/` carries one so pnpm treats the
+  // rule as a workspace member.
+  'package.json',
+  'socket-wheelhouse-schema.json',
+  'socket-wheelhouse.json',
 ])
 
 // Config-DATA extensions. Code configs (`.mts`/`.mjs`/`.ts`) are tooling, exempt.
-const CONFIG_DATA_EXT = /\.(?:json|ya?ml|toml)$/
+const CONFIG_DATA_EXT = /\.(?:json|toml|ya?ml)$/
 
 export function isNewConfigViolation(absPath: string): boolean {
   if (isEphemeralPath(absPath)) {

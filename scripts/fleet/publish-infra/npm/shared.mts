@@ -5,10 +5,9 @@
  *   staging-expected trust check consumed by both --staged and --direct.
  */
 
-import { readFileSync } from 'node:fs'
 import os from 'node:os'
-import path from 'node:path'
 
+import { resolveReleaseSubject } from '../../_shared/release-subject.mts'
 import { extractFirstJson, rootPath, runCapture } from '../shared.mts'
 import { fetchVersionTrustInfo } from './registry.mts'
 
@@ -34,16 +33,24 @@ export interface StageListEntry {
   shasum?: string | undefined
 }
 
-export function readPackageJson(): {
+/**
+ * The PUBLISH SUBJECT's name/version/repository — the root package.json for a
+ * plain repo, the `publishConfig.directory` manifest for a redirected monorepo
+ * like socket-registry. Every guard that keys on "this repo's package"
+ * (already-published refusal, cross-repo pack refusal, approve's local-entry
+ * match) must see the subject, never a private root. `root` is injectable for
+ * tests.
+ */
+export function readPackageJson(root: string = rootPath): {
   name: string
   version: string
   repository?: string | { url?: string | undefined } | undefined
 } {
-  const raw = readFileSync(path.join(rootPath, 'package.json'), 'utf8')
-  return JSON.parse(raw) as {
-    name: string
-    version: string
-    repository?: string | { url?: string | undefined } | undefined
+  const subject = resolveReleaseSubject(root)
+  return {
+    name: subject.name,
+    repository: subject.repository,
+    version: subject.version,
   }
 }
 

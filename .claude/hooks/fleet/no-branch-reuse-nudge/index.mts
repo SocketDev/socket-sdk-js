@@ -28,10 +28,9 @@
 //
 // Fires as a PreToolUse Bash hook; exits 0 always (reminder-only).
 
-import process from 'node:process'
-
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
+import { actedOnPath } from '../_shared/fleet-context.mts'
 import { currentBranch, resolveDefaultBranch } from '../_shared/git-branch.mts'
 import { bashGuard, defineHook, notify, runHook } from '../_shared/guard.mts'
 import { spawnTimeoutMs } from '../_shared/spawn-timeout.mts'
@@ -71,7 +70,12 @@ export const check = bashGuard((command, payload) => {
   if (!isGitCommit(command)) {
     return undefined
   }
-  const cwd = payload.cwd ?? process.cwd()
+  // Honor a subshell `cd` in the command (actedOnPath), not just the session
+  // cwd — a `(cd <other-repo> && git commit)` must be judged against the repo
+  // the commit LANDS in, not the session's home checkout. Judging the session
+  // cwd made this nudge report a sibling repo's branch (a false "reusing a
+  // feature branch" alarm) when the commit actually targeted a repo on main.
+  const cwd = actedOnPath(payload)
   const branch = currentBranch(cwd)
   if (!branch) {
     return undefined
@@ -89,7 +93,8 @@ export const check = bashGuard((command, payload) => {
     [
       `no-branch-reuse-nudge: committing onto an existing remote branch`,
       ``,
-      `  Branch: ${branch}  (already has history on origin)`,
+      `  Repo:   ${cwd}`,
+      `  Branch: ${branch}  (this checkout's CURRENT branch — already has history on origin)`,
       ``,
       `  Per CLAUDE.md "branch discipline" — cut a FRESH branch per logical`,
       `  change; never reuse an existing branch for unrelated work. Reusing`,

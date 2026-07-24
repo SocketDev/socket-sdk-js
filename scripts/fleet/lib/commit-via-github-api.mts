@@ -28,7 +28,7 @@ export interface CommitFile {
   readonly path: string
 }
 
-export interface CommitViaGithubApiOptions {
+export interface CommitViaGithubApiConfig {
   // Override the API origin (GitHub Enterprise / tests). Defaults to api.github.com.
   readonly apiUrl?: string | undefined
   // SHA of the tree to layer the new files onto (usually `HEAD^{tree}`).
@@ -52,14 +52,14 @@ export interface CommitViaGithubApiOptions {
  * the new (verified) commit SHA. Throws on any non-2xx API response.
  */
 export async function commitViaGithubApi(
-  options: CommitViaGithubApiOptions,
+  config: CommitViaGithubApiConfig,
 ): Promise<string> {
-  const opts = { __proto__: null, ...options } as CommitViaGithubApiOptions
-  const apiUrl = opts.apiUrl ?? DEFAULT_API_URL
-  const git = `${apiUrl}/repos/${opts.repo}/git`
+  const cfg = { __proto__: null, ...config } as CommitViaGithubApiConfig
+  const apiUrl = cfg.apiUrl ?? DEFAULT_API_URL
+  const git = `${apiUrl}/repos/${cfg.repo}/git`
   const headers = {
     accept: 'application/vnd.github+json',
-    authorization: `Bearer ${opts.token}`,
+    authorization: `Bearer ${cfg.token}`,
     'content-type': 'application/json',
     'x-github-api-version': '2022-11-28',
   }
@@ -79,8 +79,8 @@ export async function commitViaGithubApi(
     sha: string
     type: string
   }> = []
-  for (let i = 0, { length } = opts.files; i < length; i += 1) {
-    const file = opts.files[i]!
+  for (let i = 0, { length } = cfg.files; i < length; i += 1) {
+    const file = cfg.files[i]!
     // oxlint-disable-next-line no-await-in-loop -- blobs must exist before the tree references them; the file count is tiny (a bump touches 1-2 files).
     const blob = await post<{ sha: string }>('blobs', {
       content: Buffer.from(file.content, 'utf8').toString('base64'),
@@ -91,24 +91,24 @@ export async function commitViaGithubApi(
 
   // 2. Tree layered on the base tree.
   const newTree = await post<{ sha: string }>('trees', {
-    base_tree: opts.baseTreeSha,
+    base_tree: cfg.baseTreeSha,
     tree,
   })
 
   // 3. Commit (API-created => verified/signed).
   const commit = await post<{ sha: string }>('commits', {
-    message: opts.message,
-    parents: [opts.parentSha],
+    message: cfg.message,
+    parents: [cfg.parentSha],
     tree: newTree.sha,
   })
 
   // 4. Fast-forward the branch ref to the new commit.
   await updateBranchRef({
     apiUrl,
-    branch: opts.branch,
-    repo: opts.repo,
+    branch: cfg.branch,
+    repo: cfg.repo,
     sha: commit.sha,
-    token: opts.token,
+    token: cfg.token,
   })
 
   return commit.sha

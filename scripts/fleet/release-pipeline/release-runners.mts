@@ -15,6 +15,7 @@ import { existsSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { hashTarball } from '../lib/verify-release-hashes.mts'
+import { resolveBumpScript } from '../publish-infra/npm/bump.mts'
 import { StageListAuthError } from '../publish-infra/npm/shared.mts'
 import { buildWorkflowRunArgs } from '../publish-infra/remote-dispatch.mts'
 import {
@@ -56,7 +57,10 @@ export async function runBumpStage(config: {
   if (derived.error !== undefined) {
     return { detail: derived.error, status: 'failed' }
   }
-  const args = ['scripts/fleet/bump.mts', '--release-as', derived.level]
+  // Overlay-first: a repo-specific scripts/repo/bump.mts (monorepo / custom
+  // bumps, e.g. socket-registry's publishConfig.directory subject) wins over
+  // the canonical scripts/fleet/bump.mts — same precedence as the CI bump.
+  const args = [resolveBumpScript(cfg.cwd), '--release-as', derived.level]
   if (cfg.dryRun) {
     args.push('--dry-run')
   }

@@ -1,4 +1,4 @@
-/**
+/*
  * @file The sanctioned gap-fill backfill gate for the npm publish flow. A
  *   backfill republishes PRIOR content as a version that was skipped between
  *   two already-published versions — 1.4.3 between a live 1.4.2 and 1.4.4.

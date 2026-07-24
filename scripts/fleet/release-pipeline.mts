@@ -39,6 +39,7 @@ import process from 'node:process'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { renderOwedAfterRelease } from './lib/release-cascade.mts'
 import { REPO_ROOT } from './paths.mts'
 import { runCapture } from './publish-infra/shared.mts'
 import {
@@ -451,6 +452,16 @@ export async function runApproveMode(
   })
   if (releaseOutcome.status === 'failed') {
     process.exitCode = 1
+    return
+  }
+  // The release is cut — the cascade is not. Print what this release OWES
+  // downstream from the release-cascade graph, so the operator leaves the
+  // approve with the follow-up train named instead of remembered.
+  for (const line of renderOwedAfterRelease(
+    state_.packageName,
+    targetVersion,
+  )) {
+    logger.log(line)
   }
 }
 
@@ -549,6 +560,13 @@ export async function runReconcileMode(
     process.exitCode = 1
     return
   }
+  // The healed release owes the same downstream follow-ups a fresh one does —
+  // print the release-cascade graph's owed list to the log and, in the
+  // workflow, into the job summary the operator actually reads.
+  const owedLines = renderOwedAfterRelease(pkg.name, targetVersion)
+  for (const line of owedLines) {
+    logger.log(line)
+  }
   if (opts.summaryPath) {
     const sha = await headSha()
     appendFileSync(
@@ -557,7 +575,18 @@ export async function runReconcileMode(
         `- content commit: \`${sha}\`\n` +
         `- verify: ${truth.detail}\n` +
         `- checksums: sha1 \`${truth.releaseChecksums.sha1}\`, sha512-base64 \`${truth.releaseChecksums.sha512}\`\n` +
-        `- release: ${releaseOutcome.detail}\n`,
+        `- release: ${releaseOutcome.detail}\n` +
+        (owedLines.length
+          ? `\n${owedLines
+              .map(line =>
+                line.startsWith('  - ')
+                  ? `- ${line.slice(4)}`
+                  : line.startsWith('  ')
+                    ? `- ${line.slice(2)}`
+                    : line,
+              )
+              .join('\n')}\n`
+          : ''),
     )
   }
 }

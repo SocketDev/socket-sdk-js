@@ -151,6 +151,11 @@ pnpm-debug.log
 **/.claude/hooks/fleet/_dispatch/snapshot-bundle.cjs
 **/.claude/hooks/fleet/_shared/dispatch-manifest.json
 
+# ─── repo-local: fleet hook bundle build output (generated-outputs-are-untracked).
+# The v1.0.11 bundle still ships _dist/bundle.cjs, so it lands on disk from a
+# refresh; keep it out of tracking until the fleet gitignore block covers it. ───
+/.claude/hooks/fleet/_dist/
+
 # Derived cross-harness rule adapters — generated per-repo, per-platform by
 # the multi-agent scaffolding (setup / init / sync) script from .claude/skills/
 # and CLAUDE.md, never committed. A tracked symlink checks out as a plain

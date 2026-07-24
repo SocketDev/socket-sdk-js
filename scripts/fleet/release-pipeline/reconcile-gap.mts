@@ -9,8 +9,8 @@
  *   depth-1 checkout with the runner's preinstalled Node — no pnpm install —
  *   so the cron's common no-gap path stays near-free. Top-level imports are
  *   node builtins + dependency-free fleet modules (constants/npm-registry.mts,
- *   _shared/is-main-module.mts) ONLY; anything heavier loads via dynamic
- *   import inside the mode that needs it.
+ *   _shared/is-main-module.mts, _shared/release-subject.mts) ONLY; anything
+ *   heavier loads via dynamic import inside the mode that needs it.
  *
  *   Modes:
  *   - default: read the package's PUBLIC packument + the remote v* tag list,
@@ -28,7 +28,7 @@
  */
 
 import { execFile } from 'node:child_process'
-import { appendFileSync, existsSync, readFileSync } from 'node:fs'
+import { appendFileSync, existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -36,6 +36,7 @@ import { promisify } from 'node:util'
 
 import { NPM_REGISTRY_URL } from '../constants/npm-registry.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
+import { resolveReleaseSubject } from '../_shared/release-subject.mts'
 
 const execFileP = promisify(execFile)
 
@@ -177,11 +178,18 @@ interface PackageSubject {
   private?: boolean | undefined
 }
 
-function readPackageSubject(repoRoot: string): PackageSubject {
+/**
+ * The healer's subject: the PUBLISH SUBJECT resolved through
+ * publishConfig.directory — a redirected monorepo's root is private, but its
+ * subject publishes, so the tag-gap healer must cover it instead of
+ * self-skipping on the root's `private: true`. Fail-open on any read/resolve
+ * failure: the cron treats an unresolvable subject as registry-less and skips
+ * this run. Exported for tests.
+ */
+export function readPackageSubject(repoRoot: string): PackageSubject {
   try {
-    const raw = readFileSync(path.join(repoRoot, 'package.json'), 'utf8')
-    const pkg = JSON.parse(raw) as PackageSubject
-    return { name: pkg.name, private: pkg.private }
+    const subject = resolveReleaseSubject(repoRoot)
+    return { name: subject.name || undefined, private: subject.private }
   } catch {
     return {}
   }
