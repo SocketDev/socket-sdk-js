@@ -1181,8 +1181,12 @@ describe('SocketSdk - API Methods Coverage', () => {
     })
 
     it('covers sendApi method', async () => {
-      // Test the generic sendApi method with POST
-      const result = await client.sendApi('/scan', {
+      // Test the generic sendApi method with POST. The urlPath follows the
+      // documented form without a leading slash — the SDK appends it to the
+      // trailing-slash baseUrl, and a leading slash would produce a
+      // double-slash URL that nock's fail-closed net-connect guard misparses
+      // as protocol-relative and refuses.
+      const result = await client.sendApi('scan', {
         body: { repo: 'test' },
         method: 'POST',
       })

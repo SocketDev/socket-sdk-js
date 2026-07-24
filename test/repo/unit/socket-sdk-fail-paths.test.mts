@@ -12,6 +12,7 @@
 import os from 'node:os'
 import path from 'node:path'
 
+import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
@@ -150,6 +151,21 @@ describe('SocketSdk - downloadPatch error codes', () => {
 
   it('should include ENOTFOUND guidance for unresolvable hostname', async () => {
     const client = new SocketSdk('test-token')
+    // The fleet vitest setup fails network CLOSED (nock.disableNetConnect),
+    // which refuses non-loopback requests BEFORE DNS resolution runs — the
+    // refusal surfaces as ENETUNREACH, never ENOTFOUND. Mock the DNS failure
+    // instead so the test still exercises the SDK's ENOTFOUND guidance
+    // mapping deterministically.
+    nock('http://this-host-does-not-exist-xyzzy.invalid')
+      .get('/blob/sha256-test')
+      .replyWithError(
+        Object.assign(
+          new Error(
+            'getaddrinfo ENOTFOUND this-host-does-not-exist-xyzzy.invalid',
+          ),
+          { code: 'ENOTFOUND' },
+        ),
+      )
     await expect(
       client.downloadPatch('sha256-test', {
         baseUrl: 'http://this-host-does-not-exist-xyzzy.invalid',
