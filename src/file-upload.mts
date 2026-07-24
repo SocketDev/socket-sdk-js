@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import { isErrnoException } from '@socketsecurity/lib/errors/predicates'
-import { httpRequest } from '@socketsecurity/lib/http-request/request'
+import { httpRequest } from '@socketsecurity/lib/http-request'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import { MAX_RESPONSE_SIZE } from './constants.mts'

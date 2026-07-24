@@ -36,7 +36,7 @@ export function getSdkAbortSignal(): AbortSignal {
   return cachedAbortSignal
 }
 
-import { httpRequest } from '@socketsecurity/lib/http-request/request'
+import { httpRequest } from '@socketsecurity/lib/http-request'
 
 import {
   DEFAULT_CACHE_TTL,

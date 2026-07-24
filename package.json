@@ -27,6 +27,7 @@
     ".": {
       "source": "./src/index.mts",
       "types": "./dist/index.d.mts",
+      "browser": "./dist/index.browser.js",
       "default": "./dist/index.js"
     },
     "./testing": {
