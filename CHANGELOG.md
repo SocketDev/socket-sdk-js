@@ -8,12 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- `getFullScan()` and `getDiffScanById()` now read cached scan results by default and poll automatically while a result is still computing, so callers get the finished scan without handling intermediate responses. Pass `{ cached: false }` to recompute on demand.
+- **`batch`** — default batchPackageStream chunkSize to the API's 1024 max
+- **`upload`** — lazy form-data — importing the SDK no longer binds node:http
 
-### Added
+### Fixed
 
-- `getDiffScanById()` accepts an options object (`cached`, `omit_license_details`, `omit_unchanged`); `getFullScan()` accepts an options object (`cached`, `include_scores`, `include_license_details`).
-- `pollIntervalMs` client option sets the wait between polls while a cached scan is still computing (default 2 seconds).
+- **`install`** — use the canonical foundation bootstrap; segregate the firewall bootstrap entry
+- resolve quality scan issues
+- **`deps`** — import from @socketsecurity/lib errors/* leaves, not the dropped bare subpath
+- **`codegen`** — converge the openapi sync pipeline
 
 ## [4.0.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.1) - 2026-04-14
 
