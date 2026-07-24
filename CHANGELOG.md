@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- **`install`** — the published manifest no longer declares a `preinstall` script pointing at a file the tarball does not ship; 4.0.3 installs failed when lifecycle scripts were enabled
+
 ## [4.0.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.3) - 2026-07-24
 
 ### Changed
