@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/sdk",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "SDK for the Socket API client",
   "homepage": "https://github.com/SocketDev/socket-sdk-js",
   "license": "MIT",
@@ -48,7 +48,6 @@
   },
   "scripts": {
     "build": "node scripts/repo/build.mts",
-    "bump": "node scripts/repo/bump.mts",
     "check": "node scripts/fleet/check.mts",
     "check:paths": "node scripts/fleet/check/paths-are-canonical.mts",
     "check:quota-sync": "node scripts/repo/validate-quota-sync.mts",

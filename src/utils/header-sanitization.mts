@@ -3,8 +3,25 @@
  *   functions to redact sensitive header values from logs.
  */
 
-import { ArrayIsArray } from '@socketsecurity/lib/primordials/array'
+import {
+  ArrayIsArray,
+  ArrayPrototypeMap,
+} from '@socketsecurity/lib/primordials/array'
 import { StringPrototypeToLowerCase } from '@socketsecurity/lib/primordials/string'
+
+/**
+ * Coerce one header value to a string without ever throwing. `String(value)`
+ * throws a TypeError on an object with a non-callable `toString` and no
+ * `Symbol.toPrimitive`; sanitized headers feed diagnostics/logging, which is
+ * never worth an exception.
+ */
+export function coerceHeaderValue(value: unknown): string {
+  try {
+    return String(value)
+  } catch {
+    return '[unstringifiable]'
+  }
+}
 
 /**
  * List of sensitive HTTP headers that should be redacted in logs.
@@ -51,8 +68,8 @@ export function sanitizeHeaders(
     } else {
       // Handle both string and string[] values.
       sanitized[key] = ArrayIsArray(value)
-        ? (value as readonly string[]).join(', ')
-        : String(value)
+        ? ArrayPrototypeMap(value, coerceHeaderValue).join(', ')
+        : coerceHeaderValue(value)
     }
   }
 

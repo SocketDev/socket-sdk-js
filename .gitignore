@@ -156,6 +156,13 @@ pnpm-debug.log
 # refresh; keep it out of tracking until the fleet gitignore block covers it. ───
 /.claude/hooks/fleet/_dist/
 
+# ─── repo-local: fleet oxlint plugin bundle build output (generated-outputs-are-untracked).
+# The rolldown-inlined bundle rebuilt by scripts/fleet/build-oxlint-bundle.mts from
+# .config/fleet/oxlint-plugin/; shipped in the GitHub-release bundle, never committed.
+# It lands on disk during setup/check, so oxfmt's format walk would otherwise gate
+# the bundler output. Keep it untracked until the fleet gitignore block covers it. ───
+/.config/fleet/oxlint-plugin.mjs
+
 # Derived cross-harness rule adapters — generated per-repo, per-platform by
 # the multi-agent scaffolding (setup / init / sync) script from .claude/skills/
 # and CLAUDE.md, never committed. A tracked symlink checks out as a plain
