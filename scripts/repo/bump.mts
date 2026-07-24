@@ -12,11 +12,11 @@ import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import readline from 'node:readline'
-import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { findUpPackageJson } from '@socketsecurity/lib-stable/packages/find'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { incrementVersion } from '@socketsecurity/lib-stable/versions/modify'
 import { isValidVersion } from '@socketsecurity/lib-stable/versions/parse'
@@ -24,8 +24,7 @@ import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const logger = getDefaultLogger()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
+const rootPath = path.dirname(findUpPackageJson(import.meta))
 const WIN32 = process.platform === 'win32'
 
 // Check if prompts are available for interactive mode.
