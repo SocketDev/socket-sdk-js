@@ -33,6 +33,7 @@
  *   (stage-publish → verify), and promote + release with its `--approve`.
  */
 
+import { appendFileSync } from 'node:fs'
 import process from 'node:process'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
@@ -110,6 +111,8 @@ const USAGE = `Usage: node scripts/fleet/release-pipeline.mts [options]
   (stage-publish → verify); its \`--approve\` promotes AND — once the publish
   is live — cuts the tag + immutable GH release in the same invocation.`
 
+// socket-lint: allow no-required-in-options-bag -- not an options bag: the
+// parsed CLI flag set, always passed as the required positional `cli` param.
 export interface CliOptions {
   approve: boolean
   ciTimeoutMs: number
@@ -448,6 +451,114 @@ export async function runApproveMode(
   })
   if (releaseOutcome.status === 'failed') {
     process.exitCode = 1
+  }
+}
+
+/**
+ * The tag-gap RECONCILE mode (`publish-pipeline.mts --reconcile X.Y.Z`): the
+ * registry-truth verify + release stage ONLY, for a version that is ALREADY
+ * LIVE on the registry but has no v* tag / GH release — the gap an npm-UI
+ * owner promote leaves behind, since no local pipeline is running there.
+ * Structurally narrower than runApproveMode: it can never stage, never
+ * promote (runApproveStep is unreachable), never touches npm auth or an OTP.
+ * The tree must be checked out at the version's content commit (package.json
+ * reads the target version); verifyAgainstRegistry re-packs and compares
+ * against the packument digests — divergent or incomparable bytes REFUSE, a
+ * tag is never forced. On a match, verify + approve receipts are minted from
+ * registry truth into a FRESH version-keyed state (never a resumed state
+ * file: reconcile stands on registry evidence alone), then the normal release
+ * stage cuts the tag + immutable GH release via ensureTagAndRelease behind
+ * requireRegistryLive. `options.summaryPath` appends a job summary — the
+ * workflow passes GITHUB_STEP_SUMMARY; unit tests omit it.
+ */
+export async function runReconcileMode(
+  targetVersion: string,
+  cli: CliOptions,
+  options?:
+    | {
+        persist?: typeof persistOutcome | undefined
+        seams?: RunnerSeams | undefined
+        summaryPath?: string | undefined
+      }
+    | undefined,
+): Promise<void> {
+  const opts = { __proto__: null, ...options } as NonNullable<typeof options>
+  const persist = opts.persist ?? persistOutcome
+  const pkg = readPkg(REPO_ROOT)
+  let state = withTargetVersion(newState(pkg.name, nowIso()), targetVersion)
+  logger.log(
+    `Reconcile: probing registry truth for ${pkg.name}@${targetVersion}…`,
+  )
+  const truth = await verifyAgainstRegistry({
+    cwd: REPO_ROOT,
+    seams: opts.seams,
+    targetVersion,
+  })
+  if (truth.status !== 'match') {
+    logger.fail(
+      `Registry-truth reconcile REFUSED for ${pkg.name}@${targetVersion}.\n` +
+        `  Where: ${truth.detail}\n` +
+        (truth.status === 'not-live'
+          ? `  A tag may only mark a LIVE registry version — nothing to reconcile.\n` +
+            `  Fix: confirm the version is actually published, then re-run.`
+          : `  Never tag divergent or incomparable bytes — the tag must mark the published content.\n` +
+            `  Fix: check out the exact content commit for ${targetVersion} and re-run --reconcile.`),
+    )
+    process.exitCode = 1
+    return
+  }
+  logger.log('── registry-truth reconcile ──')
+  state = withReleaseChecksums(state, truth.releaseChecksums)
+  state = persist(
+    state,
+    'verify',
+    {
+      detail: `${truth.detail} [reconciled: version already live on the registry]`,
+      releaseChecksums: truth.releaseChecksums,
+      status: 'passed',
+    },
+    { dryRun: cli.dryRun, key: targetVersion },
+  )
+  state = persist(
+    state,
+    'approve',
+    {
+      detail:
+        `registry truth: ${pkg.name}@${targetVersion} is already public — ` +
+        `the promote happened out of band; receipt minted from the registry read, not a new approve`,
+      status: 'passed',
+    },
+    { dryRun: cli.dryRun, key: targetVersion },
+  )
+  logger.log('── stage: release ──')
+  const releaseStartMs = Date.now()
+  const releaseOutcome = await runReleaseStage({
+    approveReceipt: state.stages['approve'],
+    cwd: REPO_ROOT,
+    dryRun: cli.dryRun,
+    releaseChecksums: state.releaseChecksums,
+    seams: opts.seams,
+    targetVersion,
+  })
+  state = persist(state, 'release', releaseOutcome, {
+    dryRun: cli.dryRun,
+    key: targetVersion,
+    ms: Date.now() - releaseStartMs,
+  })
+  if (releaseOutcome.status === 'failed') {
+    process.exitCode = 1
+    return
+  }
+  if (opts.summaryPath) {
+    const sha = await headSha()
+    appendFileSync(
+      opts.summaryPath,
+      `### release-reconcile: ${pkg.name}@${targetVersion}\n\n` +
+        `- content commit: \`${sha}\`\n` +
+        `- verify: ${truth.detail}\n` +
+        `- checksums: sha1 \`${truth.releaseChecksums.sha1}\`, sha512-base64 \`${truth.releaseChecksums.sha512}\`\n` +
+        `- release: ${releaseOutcome.detail}\n`,
+    )
   }
 }
 

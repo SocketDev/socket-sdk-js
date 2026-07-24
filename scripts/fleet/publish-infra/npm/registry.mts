@@ -4,22 +4,27 @@
  *   staged-publish approver, trusted-publisher attribution).
  */
 
-import { httpJson } from '@socketsecurity/lib-stable/http-request'
+import {
+  httpJson,
+  HttpResponseError,
+} from '@socketsecurity/lib-stable/http-request'
 
 import { NPM_REGISTRY_URL } from '../../constants/npm-registry.mts'
 
+import type { RegistryLatestRead } from '../../lib/release-anchor.mts'
+
 /**
- * The registry `dist-tags.latest` for a package — the currently-published
- * version — or undefined on any failure/unpublished. Reads the packument (not
- * `npm view`, which trips this repo's pnpm devEngines). The tolerant twin of
- * reconcile's throwing reader: the bump uses it to anchor the base version to
- * what actually published (never a possibly-ahead manifest), so it must NOT
- * throw on a first-publish / offline registry — it returns undefined and the
- * caller falls back.
+ * The registry `dist-tags.latest` for a package, distinguishing "the registry
+ * answered: never published" (a 404 — `reachable: true, latest: undefined`)
+ * from "the registry could not be consulted" (network failure, timeout, 5xx —
+ * `reachable: false`). Reads the packument (not `npm view`, which trips this
+ * repo's pnpm devEngines). The changelog anchor derivation hard-stops on
+ * `reachable: false`: offline, the released base cannot be confirmed and a
+ * stale local tag would silently widen the range.
  */
-export async function fetchLatestPublishedVersion(
+export async function fetchLatestPublishedVersionChecked(
   name: string,
-): Promise<string | undefined> {
+): Promise<RegistryLatestRead> {
   const url = `${NPM_REGISTRY_URL}/${encodeURIComponent(name).replace('%40', '@')}`
   try {
     const json = await httpJson<{
@@ -28,10 +33,28 @@ export async function fetchLatestPublishedVersion(
       headers: { accept: 'application/vnd.npm.install-v1+json' },
       timeout: 15_000,
     })
-    return json['dist-tags']?.latest
-  } catch {
-    return undefined
+    return { latest: json['dist-tags']?.latest, reachable: true }
+  } catch (e) {
+    if (e instanceof HttpResponseError && e.response.status === 404) {
+      return { latest: undefined, reachable: true }
+    }
+    return { reachable: false }
   }
+}
+
+/**
+ * The registry `dist-tags.latest` for a package — the currently-published
+ * version — or undefined on any failure/unpublished. The tolerant twin of
+ * reconcile's throwing reader and of `fetchLatestPublishedVersionChecked`:
+ * callers that only display or compare a best-effort latest (version-ahead
+ * check, reconcile) must NOT throw on a first-publish / offline registry — it
+ * returns undefined and the caller falls back.
+ */
+export async function fetchLatestPublishedVersion(
+  name: string,
+): Promise<string | undefined> {
+  const read = await fetchLatestPublishedVersionChecked(name)
+  return read.reachable ? read.latest : undefined
 }
 
 /**

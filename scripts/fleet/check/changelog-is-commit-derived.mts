@@ -10,9 +10,9 @@
  *   commit stream the generator used, one implementation for both sides — and
  *   fails when the committed entry's bullets don't match. A published version
  *   (version == last tag) is historical and not re-validated. Fail-open: any
- *   uncertainty (no tag, shallow clone, unresolvable range anchor, unreadable
- *   CHANGELOG) skips rather than false-fails. Usage: node
- *   scripts/fleet/check/changelog-is-commit-derived.mts.
+ *   uncertainty (no tag, shallow clone, unreachable registry, unresolvable
+ *   range anchor, unreadable CHANGELOG) skips rather than false-fails. Usage:
+ *   node scripts/fleet/check/changelog-is-commit-derived.mts.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -21,16 +21,13 @@ import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import {
-  deriveReleaseCommits,
-  describeAnchor,
-  lastReleaseTag,
-} from '../bump.mts'
+import { deriveReleaseCommits } from '../bump.mts'
 import {
   generateChangelogSection,
   repoBaseUrl,
   versionHintFrom,
 } from '../lib/changelog.mts'
+import { describeAnchor, lastReleaseTag } from '../lib/release-anchor.mts'
 import { REPO_ROOT } from '../paths.mts'
 import { runCapture } from '../publish-infra/shared.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
@@ -133,8 +130,9 @@ async function main(): Promise<void> {
 
   // ONE derivation, shared byte-for-byte with bump.mts's generation (same
   // base, same anchor chain, same commit stream). `undefined` means a prior
-  // release exists but no anchor resolves — fail-open, never regenerate from
-  // a widened (older-tag) range that would flag shipped entries as drift.
+  // release exists but no anchor resolves, or the registry is unreachable —
+  // fail-open, never regenerate from a widened (older-tag) range that would
+  // flag shipped entries as drift.
   const derivation = await deriveReleaseCommits({
     manifestVersion: version,
     packageName: pkg.name,
