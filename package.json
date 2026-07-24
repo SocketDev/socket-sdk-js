@@ -48,7 +48,6 @@
   },
   "scripts": {
     "build": "node scripts/repo/build.mts",
-    "bump": "node scripts/repo/bump.mts",
     "check": "node scripts/fleet/check.mts",
     "check:paths": "node scripts/fleet/check/paths-are-canonical.mts",
     "check:quota-sync": "node scripts/repo/validate-quota-sync.mts",
