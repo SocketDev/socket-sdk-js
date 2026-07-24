@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **`deps`** — bump bundled `@socketregistry/packageurl-js` to 1.4.6
+- **`deps`** — update vendored `@socketsecurity/lib` to 6.2.3: engine-gate collapse and lazy-required purl specs trim the published bundle
+- **`deps`** — update vendored `@socketregistry/packageurl-js` to 1.4.7
 
 ## [4.0.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.2) - 2026-07-24
 
