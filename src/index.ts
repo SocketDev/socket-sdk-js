@@ -184,6 +184,42 @@ export type UploadManifestFilesError = {
   cause: string | undefined
 }
 
+export type GetOrgFullScanCachedOptions = {
+  // Read pre-computed results from the immutable scan store via `?cached=true`.
+  // Defaults to true. When false the endpoint recomputes on demand and this
+  // method returns the first 200 without any polling.
+  cached?: boolean | undefined
+  // Initial delay between polls after a 202. Doubles each poll up to
+  // DEFAULT_CACHED_SCAN_POLL_MAX_MS. Defaults to
+  // DEFAULT_CACHED_SCAN_POLL_INITIAL_MS.
+  pollIntervalMs?: number | undefined
+  // Maximum wall-clock time to keep polling a 202 before returning a timeout
+  // error. Defaults to DEFAULT_CACHED_SCAN_POLL_TIMEOUT_MS.
+  maxPollMs?: number | undefined
+}
+
+export type GetOrgFullScanCachedResult =
+  | {
+      success: true
+      status: 200
+      data: SocketArtifact[]
+    }
+  | {
+      success: false
+      status: number
+      error: string
+      cause?: string | undefined
+      url?: string | undefined
+    }
+
+// HTTP 202 Accepted: the cached scan is still being computed; poll again.
+const HTTP_STATUS_ACCEPTED = 202
+
+// Backoff schedule for polling a cached full scan that returns 202 Accepted.
+const DEFAULT_CACHED_SCAN_POLL_INITIAL_MS = 1000
+const DEFAULT_CACHED_SCAN_POLL_MAX_MS = 10_000
+const DEFAULT_CACHED_SCAN_POLL_TIMEOUT_MS = 10 * 60 * 1000
+
 const DEFAULT_USER_AGENT = createUserAgentFromPkgJson(rootPkgJson)
 
 // Public security policy.
@@ -852,6 +888,73 @@ function isResponseOk(response: IncomingMessage): boolean {
   )
 }
 
+async function getResponseText(response: IncomingMessage): Promise<string> {
+  const chunks = []
+  let size = 0
+  const MAX = 50 * 1024 * 1024
+  for await (const chunk of response) {
+    size += chunk.length
+    if (size > MAX) {
+      throw new Error('Response body too large')
+    }
+    chunks.push(chunk)
+  }
+  return Buffer.concat(chunks).toString('utf8')
+}
+
+// Parse a newline-delimited JSON body (one artifact per line) into an array.
+// Blank lines are skipped; a line that is not valid JSON throws.
+function parseNdjsonArtifacts(text: string): SocketArtifact[] {
+  const artifacts: SocketArtifact[] = []
+  const lines = text.split('\n')
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!.trim()
+    if (!line) {
+      continue
+    }
+    artifacts.push(JSON.parse(line) as SocketArtifact)
+  }
+  return artifacts
+}
+
+// Read the `{ status, id }` payload the API sends with a 202 Accepted. Returns
+// undefined when the body is absent or not JSON — polling continues on the
+// status code alone, so a missing body never breaks the loop.
+async function readProcessingBody(
+  response: IncomingMessage
+): Promise<
+  { id?: string | undefined; status?: string | undefined } | undefined
+> {
+  let text: string
+  try {
+    text = await getResponseText(response)
+  } catch {
+    return undefined
+  }
+  if (!text) {
+    return undefined
+  }
+  try {
+    const parsed = JSON.parse(text)
+    if (isObjectObject(parsed)) {
+      const { id, status } = parsed as Record<string, unknown>
+      return {
+        id: typeof id === 'string' ? id : undefined,
+        status: typeof status === 'string' ? status : undefined
+      }
+    }
+  } catch {
+    // Non-JSON 202 body: nothing to surface, keep polling on status.
+  }
+  return undefined
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
+}
+
 function promiseWithResolvers<T>(): ReturnType<
   typeof Promise.withResolvers<T>
 > {
@@ -1494,6 +1597,83 @@ export class SocketSdk {
         res.pipe(process.stdout)
       }
       return this.#handleApiSuccess<'getOrgFullScan'>(res)
+    } catch (e) {
+      return await this.#handleApiError<'getOrgFullScan'>(e)
+    }
+  }
+
+  // Read a full scan's artifacts into memory, serving pre-computed results from
+  // the immutable scan store via `?cached=true` (the default). A cache hit
+  // returns 200 with the ndjson artifacts; a cache miss returns 202 Accepted
+  // while the server computes them in the background, so this polls with
+  // exponential backoff until a 200 arrives (or the poll budget is exhausted).
+  //
+  // Unlike getOrgFullScan this never pipes to a stream — it buffers and returns
+  // the parsed artifacts, so it is the right entry point for callers that need
+  // the whole scan (e.g. to format or diff it) rather than to tee bytes to a
+  // file or stdout. getOrgFullScan remains the streaming path.
+  async getOrgFullScanCached(
+    orgSlug: string,
+    fullScanId: string,
+    options?: GetOrgFullScanCachedOptions | undefined
+  ): Promise<GetOrgFullScanCachedResult> {
+    const {
+      cached = true,
+      maxPollMs = DEFAULT_CACHED_SCAN_POLL_TIMEOUT_MS,
+      pollIntervalMs = DEFAULT_CACHED_SCAN_POLL_INITIAL_MS
+    } = { __proto__: null, ...options } as GetOrgFullScanCachedOptions
+    // Omit the param when disabled: an absent `cached` reads as false
+    // server-side, so there is no reason to send cached=false on the wire.
+    const search = queryToSearchParams(cached ? { cached: true } : undefined)
+    const qs = search.toString()
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}${qs ? `?${qs}` : ''}`
+    try {
+      const deadline = Date.now() + maxPollMs
+      let attempt = 0
+      let delayMs = pollIntervalMs
+      // getResponse() treats 202 as ok (it is 2xx) and throws a ResponseError
+      // on any non-2xx, so 4xx/5xx surface to the catch below and a 202 flows
+      // through the poll loop.
+      for (;;) {
+        // eslint-disable-next-line no-await-in-loop
+        const response = await createGetRequest(
+          this.#baseUrl,
+          urlPath,
+          this.#reqOptions,
+          this.#hooks
+        )
+        if (response.statusCode !== HTTP_STATUS_ACCEPTED) {
+          // eslint-disable-next-line no-await-in-loop
+          const text = await getResponseText(response)
+          return {
+            success: true,
+            status: 200,
+            data: parseNdjsonArtifacts(text)
+          }
+        }
+        // Cache miss: results still computing. Drain the body for its
+        // { status, id } payload, then wait and poll again — unless polling is
+        // disabled or the next poll would land past the wall-clock budget.
+        attempt += 1
+        // eslint-disable-next-line no-await-in-loop
+        const processing = await readProcessingBody(response)
+        const scanId = processing?.id || fullScanId
+        debugLog(
+          `Socket API full scan ${scanId} ${processing?.status ?? 'processing'} (poll attempt ${attempt})`
+        )
+        if (!cached || Date.now() + delayMs > deadline) {
+          return {
+            success: false,
+            status: HTTP_STATUS_ACCEPTED,
+            error: 'Cached full scan not ready',
+            cause: `The Socket API is still computing cached results for scan ${scanId} after ${Math.round(maxPollMs / 1000)}s (${attempt} polls). Retry later, or call with cached:false to live-compute.`,
+            url: `${this.#baseUrl}${urlPath}`
+          }
+        }
+        // eslint-disable-next-line no-await-in-loop
+        await sleep(delayMs)
+        delayMs = Math.min(delayMs * 2, DEFAULT_CACHED_SCAN_POLL_MAX_MS)
+      }
     } catch (e) {
       return await this.#handleApiError<'getOrgFullScan'>(e)
     }
