@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **88** public methods.
+There are **91** public methods.
 
 ## Contents
 
@@ -188,6 +188,34 @@ async downloadOrgFullScanFilesAsTar(
 
 **Quota:** _not tracked_ · **OpenAPI:** `downloadOrgFullScanFilesAsTar`
 
+### `getOrgFullScanCsv`
+
+Export a full scan's alerts as CSV. The endpoint responds with raw
+
+```typescript
+async getOrgFullScanCsv(
+  orgSlug: string,
+  fullScanId: string,
+  options: GetOrgFullScanCsvOptions,
+): Promise<SocketSdkGenericResult<string>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgFullScanCsv` · **Permissions:** `full-scans:list`
+
+### `getOrgFullScanPdf`
+
+Export a full scan's alerts as a PDF report. The endpoint responds with raw
+
+```typescript
+async getOrgFullScanPdf(
+  orgSlug: string,
+  fullScanId: string,
+  options: GetOrgFullScanPdfOptions,
+): Promise<SocketSdkGenericResult<Buffer>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgFullScanPdf` · **Permissions:** `full-scans:list`
+
 ### `rescanFullScan`
 
 Create a new full scan by rescanning an existing scan. Supports shallow
@@ -242,6 +270,21 @@ async createOrgDiffScanFromIds(
 ```
 
 **Quota:** `0` (Free) · **OpenAPI:** `createOrgDiffScanFromIds` · **Permissions:** `diff-scans:create`
+
+### `createOrgRepoDiff`
+
+Create a diff scan between a repository's current HEAD full scan and a new
+
+```typescript
+async createOrgRepoDiff(
+  orgSlug: string,
+  repoSlug: string,
+  filepaths: string[],
+  options?: CreateOrgRepoDiffOptions | undefined,
+): Promise<SocketSdkResult<'createOrgRepoDiff'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `createOrgRepoDiff` · **Permissions:** `repo:list`, `diff-scans:create`, `full-scans:create`
 
 ### `getDiffScanById`
 

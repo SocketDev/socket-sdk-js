@@ -26,4 +26,30 @@ export type HistoricalDependenciesTrendOptions = NonNullable<
 export type HistoricalSnapshotsListOptions = NonNullable<
   operations['historicalSnapshotsList']['parameters']['query']
 >
+
+// Full-scan CSV/PDF exports take both query params and an optional filters
+// body; the SDK method flattens them into a single options object and splits
+// them back out when building the request.
+export type GetOrgFullScanCsvOptions = NonNullable<
+  operations['getOrgFullScanCsv']['parameters']['query']
+> &
+  NonNullable<
+    NonNullable<operations['getOrgFullScanCsv']['requestBody']>['content']
+  >['application/json']
+
+export type GetOrgFullScanPdfOptions = NonNullable<
+  operations['getOrgFullScanPdf']['parameters']['query']
+> &
+  NonNullable<
+    NonNullable<operations['getOrgFullScanPdf']['requestBody']>['content']
+  >['application/json']
+
+// Repo-HEAD diff scan: the query params drive the new full-scan's metadata;
+// pathsRelativeTo mirrors createFullScan and controls how the uploaded
+// manifest file paths are resolved (it is not sent to the API).
+export type CreateOrgRepoDiffOptions = NonNullable<
+  operations['createOrgRepoDiff']['parameters']['query']
+> & {
+  pathsRelativeTo?: string | undefined
+}
 /* c8 ignore stop */

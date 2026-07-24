@@ -24,6 +24,18 @@
       "quota": 0,
       "permissions": ["repo:create"]
     },
+    "createOrgRepoDiff": {
+      "quota": 1,
+      "permissions": ["repo:list", "diff-scans:create", "full-scans:create"]
+    },
+    "getOrgFullScanCsv": {
+      "quota": 1,
+      "permissions": ["full-scans:list"]
+    },
+    "getOrgFullScanPdf": {
+      "quota": 1,
+      "permissions": ["full-scans:list"]
+    },
     "createScanFromFilepaths": {
       "quota": 100,
       "permissions": ["report:write"]

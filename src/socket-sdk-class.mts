@@ -123,6 +123,9 @@ import type {
   UploadManifestFilesReturnType,
 } from './types.mts'
 import type {
+  CreateOrgRepoDiffOptions,
+  GetOrgFullScanCsvOptions,
+  GetOrgFullScanPdfOptions,
   HistoricalAlertsListOptions,
   HistoricalAlertsTrendOptions,
   HistoricalDependenciesTrendOptions,
@@ -2068,6 +2071,75 @@ export class SocketSdk {
   }
 
   /**
+   * Create a diff scan between a repository's current HEAD full scan and a new
+   * full scan built from the uploaded manifest files. Returns metadata about
+   * the new full scan and the diff scan.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param repoSlug - Repository slug whose HEAD full scan is the diff base.
+   * @param filepaths - Manifest file paths to upload as the new full scan.
+   * @param options - Diff scan metadata (branch, commit, PR, etc.) and
+   *   `pathsRelativeTo` controlling how the file paths are resolved.
+   *
+   * @returns Created full scan and diff scan details.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/diff-scans/from-repo/{repo_slug}
+   *
+   * @quota 1 units
+   *
+   * @scopes repo:list, diff-scans:create, full-scans:create
+   *
+   * @see https://docs.socket.dev/reference/createorgrepodiff
+   */
+  async createOrgRepoDiff(
+    orgSlug: string,
+    repoSlug: string,
+    filepaths: string[],
+    options?: CreateOrgRepoDiffOptions | undefined,
+  ): Promise<SocketSdkResult<'createOrgRepoDiff'>> {
+    const { pathsRelativeTo = '.', ...queryParams } = {
+      __proto__: null,
+      ...options,
+    } as CreateOrgRepoDiffOptions
+    const basePath = resolveBasePath(pathsRelativeTo)
+    const absFilepaths = resolveAbsPaths(filepaths, basePath)
+
+    // Validate file readability before upload. Unlike createFullScan this does
+    // not invoke the onFileValidation callback: that callback's operation union
+    // is scoped to the manifest-upload methods, and widening a shared type for
+    // one method would be the wrong boundary. All-invalid still fails clearly.
+    const { invalidPaths, validPaths } = validateFiles(absFilepaths)
+    if (validPaths.length === 0) {
+      return {
+        cause: `All ${invalidPaths.length} manifest files failed validation`,
+        data: undefined,
+        error: 'No readable manifest files found',
+        status: 400,
+        success: false,
+      }
+    }
+
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createUploadRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/diff-scans/from-repo/${encodeURIComponent(repoSlug)}?${queryToSearchParams(queryParams as QueryParams)}`,
+              createRequestBodyForFilepaths(validPaths, basePath),
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'createOrgRepoDiff'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'createOrgRepoDiff'>(e)
+    }
+  }
+
+  /**
    * Create a new webhook for an organization. Webhooks allow you to receive
    * HTTP POST notifications when specific events occur.
    *
@@ -3580,6 +3652,142 @@ export class SocketSdk {
       return this.#handleApiSuccess<'fetch-fixes'>(data)
     } catch (e) {
       return await this.#handleApiError<'fetch-fixes'>(e)
+    }
+  }
+
+  /**
+   * Export a full scan's alerts as CSV. The endpoint responds with raw
+   * `text/csv`, so the result data is the CSV text rather than a parsed object.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan identifier.
+   * @param options - Query params (`include_license_details` is required) plus
+   *   an optional `filters` body forwarded to the export.
+   *
+   * @returns The CSV export text.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId getOrgFullScanCsv
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/format/csv
+   *
+   * @quota 1 units
+   *
+   * @scopes full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscancsv
+   */
+  async getOrgFullScanCsv(
+    orgSlug: string,
+    fullScanId: string,
+    options: GetOrgFullScanCsvOptions,
+  ): Promise<SocketSdkGenericResult<string>> {
+    const { filters, ...queryParams } = {
+      __proto__: null,
+      ...options,
+    } as GetOrgFullScanCsvOptions
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/format/csv?${queryToSearchParams(queryParams as QueryParams)}`
+    const url = `${this.#baseUrl}${urlPath}`
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          urlPath,
+          { filters },
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
+      return {
+        cause: undefined,
+        data: response.text(),
+        error: undefined,
+        status: response.status,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgFullScanCsv'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+        url: errorResult.url,
+      }
+    }
+  }
+
+  /**
+   * Export a full scan's alerts as a PDF report. The endpoint responds with raw
+   * `application/pdf`, so the result data is the PDF bytes as a Buffer.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param fullScanId - Full scan identifier.
+   * @param options - Query params (`include_license_details` is required) plus
+   *   optional `filters`, `groupBy`, and `additionalInformation` body fields.
+   *
+   * @returns The PDF report bytes.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @operationId getOrgFullScanPdf
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/full-scans/{full_scan_id}/format/pdf
+   *
+   * @quota 1 units
+   *
+   * @scopes full-scans:list
+   *
+   * @see https://docs.socket.dev/reference/getorgfullscanpdf
+   */
+  async getOrgFullScanPdf(
+    orgSlug: string,
+    fullScanId: string,
+    options: GetOrgFullScanPdfOptions,
+  ): Promise<SocketSdkGenericResult<Buffer>> {
+    const { additionalInformation, filters, groupBy, ...queryParams } = {
+      __proto__: null,
+      ...options,
+    } as GetOrgFullScanPdfOptions
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(fullScanId)}/format/pdf?${queryToSearchParams(queryParams as QueryParams)}`
+    const url = `${this.#baseUrl}${urlPath}`
+    try {
+      const response = await this.#executeWithRetry(async () => {
+        const res = await createRequestWithJson(
+          'POST',
+          this.#baseUrl,
+          urlPath,
+          { additionalInformation, filters, groupBy },
+          this.#reqOptionsWithHooks,
+        )
+        if (!isResponseOk(res)) {
+          throw new ResponseError(res, '', url)
+        }
+        return res
+      })
+      return {
+        cause: undefined,
+        data: response.body,
+        error: undefined,
+        status: response.status,
+        success: true,
+      }
+    } catch (e) {
+      const errorResult = await this.#handleApiError<'getOrgFullScanPdf'>(e)
+      return {
+        cause: errorResult.cause,
+        data: undefined,
+        error: errorResult.error,
+        status: errorResult.status,
+        success: false,
+        url: errorResult.url,
+      }
     }
   }
 

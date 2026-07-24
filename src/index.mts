@@ -75,6 +75,9 @@ export {
 export { SocketSdk } from './socket-sdk-class.mts'
 // Re-export option/response types for the newer endpoint methods.
 export type {
+  CreateOrgRepoDiffOptions,
+  GetOrgFullScanCsvOptions,
+  GetOrgFullScanPdfOptions,
   HistoricalAlertsListOptions,
   HistoricalAlertsTrendOptions,
   HistoricalDependenciesTrendOptions,

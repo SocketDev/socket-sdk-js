@@ -28,6 +28,8 @@ export const GROUPS: Array<{
       'listFullScans',
       'streamFullScan',
       'downloadOrgFullScanFilesAsTar',
+      'getOrgFullScanCsv',
+      'getOrgFullScanPdf',
       'rescanFullScan',
       'deleteFullScan',
     ],
@@ -37,6 +39,7 @@ export const GROUPS: Array<{
     description: 'Compare two scans and inspect the diff.',
     methods: [
       'createOrgDiffScanFromIds',
+      'createOrgRepoDiff',
       'getDiffScanById',
       'getDiffScanGfm',
       'listOrgDiffScans',
