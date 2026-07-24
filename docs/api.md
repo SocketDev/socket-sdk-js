@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **83** public methods.
+There are **88** public methods.
 
 ## Contents
 
@@ -17,7 +17,8 @@ There are **83** public methods.
 - [Repositories](#repositories)
 - [Repository labels](#repository-labels)
 - [Organizations](#organizations)
-- [Alerts & triage](#alerts--triage)
+- [Alerts & triage](#alerts-triage)
+- [Historical & analytics](#historical-analytics)
 - [Webhooks](#webhooks)
 - [Patches](#patches)
 - [API tokens](#api-tokens)
@@ -27,7 +28,7 @@ There are **83** public methods.
 - [Threat campaigns](#threat-campaigns)
 - [Events](#events)
 - [Packages](#packages)
-- [Dependencies & manifests](#dependencies--manifests)
+- [Dependencies & manifests](#dependencies-manifests)
 - [Exports](#exports)
 - [Quota](#quota)
 - [Escape hatches](#escape-hatches)
@@ -684,6 +685,74 @@ async getOrgFixes(
 ```
 
 **Quota:** _not tracked_
+
+## Historical & analytics
+
+Point-in-time alert and dependency history, trends, and snapshots.
+
+### `historicalAlertsList`
+
+List historical alerts for an organization. Returns point-in-time alert
+
+```typescript
+async historicalAlertsList(
+  orgSlug: string,
+  options?: HistoricalAlertsListOptions | undefined,
+): Promise<SocketSdkResult<'historicalAlertsList'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalAlertsList` · **Permissions:** `historical:alerts-list`
+
+### `historicalAlertsTrend`
+
+Get a trend of historical alert counts for an organization. Returns
+
+```typescript
+async historicalAlertsTrend(
+  orgSlug: string,
+  options?: HistoricalAlertsTrendOptions | undefined,
+): Promise<SocketSdkResult<'historicalAlertsTrend'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalAlertsTrend` · **Permissions:** `historical:alerts-trend`
+
+### `historicalDependenciesTrend`
+
+Get a trend of historical dependency counts for an organization. Returns
+
+```typescript
+async historicalDependenciesTrend(
+  orgSlug: string,
+  options?: HistoricalDependenciesTrendOptions | undefined,
+): Promise<SocketSdkResult<'historicalDependenciesTrend'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalDependenciesTrend` · **Permissions:** `historical:dependencies-trend`
+
+### `historicalSnapshotsList`
+
+List historical dependency snapshots for an organization. Returns snapshot
+
+```typescript
+async historicalSnapshotsList(
+  orgSlug: string,
+  options?: HistoricalSnapshotsListOptions | undefined,
+): Promise<SocketSdkResult<'historicalSnapshotsList'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalSnapshotsList` · **Permissions:** `historical:snapshots-list`
+
+### `historicalSnapshotsStart`
+
+Start a new historical dependency snapshot for an organization. Triggers
+
+```typescript
+async historicalSnapshotsStart(
+  orgSlug: string,
+): Promise<SocketSdkResult<'historicalSnapshotsStart'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalSnapshotsStart` · **Permissions:** `historical:snapshots-start`
 
 ## Webhooks
 

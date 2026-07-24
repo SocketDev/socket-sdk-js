@@ -123,6 +123,12 @@ import type {
   UploadManifestFilesReturnType,
 } from './types.mts'
 import type {
+  HistoricalAlertsListOptions,
+  HistoricalAlertsTrendOptions,
+  HistoricalDependenciesTrendOptions,
+  HistoricalSnapshotsListOptions,
+} from './types-parity.mts'
+import type {
   CreateFullScanOptions,
   DeleteRepositoryLabelResult,
   DeleteResult,
@@ -4157,6 +4163,206 @@ export class SocketSdk {
       return this.#handleApiSuccess<'getThreatFeedItems'>(data)
     } catch (e) {
       return await this.#handleApiError<'getThreatFeedItems'>(e)
+    }
+  }
+
+  /**
+   * List historical alerts for an organization. Returns point-in-time alert
+   * data across repositories with extensive filtering and cursor pagination.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Date, range, pagination, and alert filter options.
+   *
+   * @returns Paginated historical alerts with an end cursor.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/historical/alerts
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:alerts-list
+   *
+   * @see https://docs.socket.dev/reference/historicalalertslist
+   */
+  async historicalAlertsList(
+    orgSlug: string,
+    options?: HistoricalAlertsListOptions | undefined,
+  ): Promise<SocketSdkResult<'historicalAlertsList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/alerts?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalAlertsList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalAlertsList'>(e)
+    }
+  }
+
+  /**
+   * Get a trend of historical alert counts for an organization. Returns
+   * aggregated alert totals over the requested time range.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Date, range, aggregation, and alert filter options.
+   *
+   * @returns Historical alert trend data.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/historical/alerts/trend
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:alerts-trend
+   *
+   * @see https://docs.socket.dev/reference/historicalalertstrend
+   */
+  async historicalAlertsTrend(
+    orgSlug: string,
+    options?: HistoricalAlertsTrendOptions | undefined,
+  ): Promise<SocketSdkResult<'historicalAlertsTrend'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/alerts/trend?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalAlertsTrend'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalAlertsTrend'>(e)
+    }
+  }
+
+  /**
+   * Get a trend of historical dependency counts for an organization. Returns
+   * aggregated dependency totals over the requested time range.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Date, range, and dependency filter options.
+   *
+   * @returns Historical dependency trend data.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/historical/dependencies/trend
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:dependencies-trend
+   *
+   * @see https://docs.socket.dev/reference/historicaldependenciestrend
+   */
+  async historicalDependenciesTrend(
+    orgSlug: string,
+    options?: HistoricalDependenciesTrendOptions | undefined,
+  ): Promise<SocketSdkResult<'historicalDependenciesTrend'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/dependencies/trend?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalDependenciesTrend'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalDependenciesTrend'>(e)
+    }
+  }
+
+  /**
+   * List historical dependency snapshots for an organization. Returns snapshot
+   * metadata with status filtering and cursor pagination.
+   *
+   * @param orgSlug - Organization identifier.
+   * @param options - Date, range, pagination, and snapshot filter options.
+   *
+   * @returns Paginated historical snapshots with an end cursor.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint GET /orgs/{org_slug}/historical/snapshots
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:snapshots-list
+   *
+   * @see https://docs.socket.dev/reference/historicalsnapshotslist
+   */
+  async historicalSnapshotsList(
+    orgSlug: string,
+    options?: HistoricalSnapshotsListOptions | undefined,
+  ): Promise<SocketSdkResult<'historicalSnapshotsList'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/snapshots?${queryToSearchParams(options as QueryParams)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalSnapshotsList'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalSnapshotsList'>(e)
+    }
+  }
+
+  /**
+   * Start a new historical dependency snapshot for an organization. Triggers
+   * the background computation of a point-in-time dependency snapshot.
+   *
+   * @param orgSlug - Organization identifier.
+   *
+   * @returns Snapshot start acknowledgement, including the new request ID.
+   *
+   * @throws {Error} When server returns 5xx status codes
+   *
+   * @apiEndpoint POST /orgs/{org_slug}/historical/snapshots
+   *
+   * @quota 10 units
+   *
+   * @scopes historical:snapshots-start
+   *
+   * @see https://docs.socket.dev/reference/historicalsnapshotsstart
+   */
+  async historicalSnapshotsStart(
+    orgSlug: string,
+  ): Promise<SocketSdkResult<'historicalSnapshotsStart'>> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/historical/snapshots`,
+              {},
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return this.#handleApiSuccess<'historicalSnapshotsStart'>(data)
+    } catch (e) {
+      return await this.#handleApiError<'historicalSnapshotsStart'>(e)
     }
   }
 

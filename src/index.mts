@@ -73,6 +73,13 @@ export {
 } from './quota-utils.mts'
 // Re-export the main SocketSdk class.
 export { SocketSdk } from './socket-sdk-class.mts'
+// Re-export option/response types for the newer endpoint methods.
+export type {
+  HistoricalAlertsListOptions,
+  HistoricalAlertsTrendOptions,
+  HistoricalDependenciesTrendOptions,
+  HistoricalSnapshotsListOptions,
+} from './types-parity.mts'
 // Re-export types from modules.
 export type {
   ALERT_ACTION,

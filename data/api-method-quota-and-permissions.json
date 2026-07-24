@@ -128,6 +128,26 @@
       "quota": 1,
       "permissions": ["threat-feed:list"]
     },
+    "historicalAlertsList": {
+      "quota": 10,
+      "permissions": ["historical:alerts-list"]
+    },
+    "historicalAlertsTrend": {
+      "quota": 10,
+      "permissions": ["historical:alerts-trend"]
+    },
+    "historicalDependenciesTrend": {
+      "quota": 10,
+      "permissions": ["historical:dependencies-trend"]
+    },
+    "historicalSnapshotsList": {
+      "quota": 10,
+      "permissions": ["historical:snapshots-list"]
+    },
+    "historicalSnapshotsStart": {
+      "quota": 10,
+      "permissions": ["historical:snapshots-start"]
+    },
     "postSettings": {
       "quota": 0,
       "permissions": []
