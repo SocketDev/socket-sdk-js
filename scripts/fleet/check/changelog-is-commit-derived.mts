@@ -5,11 +5,13 @@
  *   from the Conventional Commits being released (run `node
  *   scripts/fleet/bump.mts`), never hand-written ahead of the tag. Fires only
  *   for a PENDING release — when `package.json` version is ahead of the last
- *   `v<semver>` tag. For that pending version it regenerates the entry from the
- *   commits since the last tag and fails when the committed entry's bullets
- *   don't match. A published version (version == last tag) is historical and
- *   not re-validated. Fail-open: any uncertainty (no tag, shallow clone,
- *   unreadable CHANGELOG) skips rather than false-fails. Usage: node
+ *   `v<semver>` tag. For that pending version it regenerates the entry via
+ *   bump.mts's OWN `deriveReleaseCommits` — the same base + anchor chain +
+ *   commit stream the generator used, one implementation for both sides — and
+ *   fails when the committed entry's bullets don't match. A published version
+ *   (version == last tag) is historical and not re-validated. Fail-open: any
+ *   uncertainty (no tag, shallow clone, unresolvable range anchor, unreadable
+ *   CHANGELOG) skips rather than false-fails. Usage: node
  *   scripts/fleet/check/changelog-is-commit-derived.mts.
  */
 
@@ -19,10 +21,13 @@ import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { lastReleaseTag, readCommitStream } from '../bump.mts'
+import {
+  deriveReleaseCommits,
+  describeAnchor,
+  lastReleaseTag,
+} from '../bump.mts'
 import {
   generateChangelogSection,
-  parseConventionalCommits,
   repoBaseUrl,
   versionHintFrom,
 } from '../lib/changelog.mts'
@@ -33,6 +38,7 @@ import { isMainModule } from '../_shared/is-main-module.mts'
 const logger = getDefaultLogger()
 
 interface PackageJsonShape {
+  name?: string | undefined
   repository?: { url?: string | undefined } | string | undefined
   version?: string | undefined
 }
@@ -125,20 +131,33 @@ async function main(): Promise<void> {
     return
   }
 
+  // ONE derivation, shared byte-for-byte with bump.mts's generation (same
+  // base, same anchor chain, same commit stream). `undefined` means a prior
+  // release exists but no anchor resolves — fail-open, never regenerate from
+  // a widened (older-tag) range that would flag shipped entries as drift.
+  const derivation = await deriveReleaseCommits({
+    manifestVersion: version,
+    packageName: pkg.name,
+  })
+  if (!derivation) {
+    return
+  }
+
   // A `-prerelease` hint version means the CHANGELOG entry for the hinted
   // release doesn't exist yet — the release run's bump.mts generates it. Until
-  // then the top section must remain the last released version; a section
-  // already carrying the hinted version is stale or hand-authored.
+  // then the top section must remain the last RELEASED version (registry
+  // latest + tag — NOT `git describe`, which resolves an older tag when the
+  // newest release's tag is missing); a section already carrying the hinted
+  // version is stale or hand-authored.
   const topVersion = headingVersion(section)
   const hinted = versionHintFrom(version)
   if (hinted) {
-    const tagVersion = tag.replace(/^v/, '')
-    if (topVersion !== tagVersion) {
+    if (topVersion !== derivation.base) {
       fail(
         `package.json carries release hint ${version} (next release: ${hinted}) ` +
           `but the top CHANGELOG section is for ${topVersion ?? 'an unparseable heading'}. ` +
           `The release run's bump.mts generates the ${hinted} entry — restore ` +
-          `CHANGELOG.md to its v${tagVersion} state and don't hand-edit it.`,
+          `CHANGELOG.md to its ${derivation.base} state and don't hand-edit it.`,
       )
     }
     return
@@ -155,7 +174,7 @@ async function main(): Promise<void> {
     return
   }
 
-  const commits = parseConventionalCommits(await readCommitStream(tag))
+  const { commits } = derivation
   if (commits.length === 0) {
     // No history to derive from (shallow clone) — fail-open.
     return
@@ -183,7 +202,9 @@ async function main(): Promise<void> {
     detail.push(
       `  ${extra.length} entry(ies) not derived from a released commit (drift):`,
     )
-    for (const b of extra.slice(0, 5)) {
+    const bList = extra.slice(0, 5)
+    for (let i = 0, { length } = bList; i < length; i += 1) {
+      const b = bList[i]!
       detail.push(`    + ${b}`)
     }
   }
@@ -191,12 +212,15 @@ async function main(): Promise<void> {
     detail.push(
       `  ${missing.length} released commit(s) missing from the entry:`,
     )
-    for (const b of missing.slice(0, 5)) {
+    const bs = missing.slice(0, 5)
+    for (let i = 0, { length } = bs; i < length; i += 1) {
+      const b = bs[i]!
       detail.push(`    - ${b}`)
     }
   }
   fail(
-    `The ${version} CHANGELOG entry doesn't match the commits since ${tag}.\n` +
+    `The ${version} CHANGELOG entry doesn't match the commits since ` +
+      `${describeAnchor(derivation.anchor)}.\n` +
       `${detail.join('\n')}\n` +
       `  Regenerate it: \`node scripts/fleet/bump.mts\` (the CHANGELOG is derived, not hand-written).`,
   )
