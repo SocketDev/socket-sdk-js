@@ -5,6 +5,7 @@
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
+import { DEFAULT_USER_AGENT } from '../../../src/constants.mts'
 import { SocketSdk } from '../../../src/index.mts'
 import { setupTestClient } from '../../utils/environment.mts'
 
@@ -288,7 +289,7 @@ describe('getApi and sendApi Methods', () => {
       }
     })
 
-    it('should use custom User-Agent from SDK options', async () => {
+    it('should append custom User-Agent from SDK options to the SDK base', async () => {
       const customClient = new SocketSdk('test-token', {
         userAgent: 'CustomApp/1.0.0',
       })
@@ -305,7 +306,11 @@ describe('getApi and sendApi Methods', () => {
         throws: false,
       })
 
-      expect(capturedHeaders['user-agent']).toBe('CustomApp/1.0.0')
+      // The caller token is appended to the enriched SDK base, not swapped in.
+      expect(capturedHeaders['user-agent']).toBe(
+        `${DEFAULT_USER_AGENT} CustomApp/1.0.0`,
+      )
+      expect(capturedHeaders['user-agent']).toContain('node/')
     })
 
     it('should work with custom base URLs', async () => {

@@ -430,7 +430,8 @@ export interface SocketSdkOptions {
    */
   timeout?: number | undefined
   /**
-   * Custom User-Agent header.
+   * User-Agent token appended to the SDK's base User-Agent (which already
+   * carries the SDK name/version, Node.js version, and OS platform/arch).
    */
   userAgent?: string | undefined
 }
