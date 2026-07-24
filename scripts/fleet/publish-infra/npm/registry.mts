@@ -7,7 +7,6 @@
 import { httpJson } from '@socketsecurity/lib-stable/http-request'
 
 import { NPM_REGISTRY_URL } from '../../constants/npm-registry.mts'
-import { runCapture } from '../shared.mts'
 
 /**
  * The registry `dist-tags.latest` for a package — the currently-published
@@ -36,20 +35,71 @@ export async function fetchLatestPublishedVersion(
 }
 
 /**
- * `npm view <name>@<version> version` exits 0 iff the version exists on the
- * registry. Faster than fetching the full packument for a yes/no check.
+ * The registry state the backfill gate reads in one packument fetch: the
+ * `dist-tags.latest` pointer plus the `time` map. The time map is the
+ * registry's PERMANENT publish ledger — it keeps an entry for every version
+ * ever published, including versions later unpublished — so it is the one
+ * source that can prove a version was NEVER published. Requires the full
+ * packument; the abbreviated format drops `time`.
+ */
+export interface RegistryReleaseState {
+  latest: string | undefined
+  timeMap: Record<string, string>
+}
+
+/**
+ * Fetch `RegistryReleaseState` for a package, or undefined on ANY failure —
+ * network, 404, or a packument without a `time` map. The backfill gate fails
+ * CLOSED on undefined: an unreadable publish ledger is never treated as an
+ * empty one.
+ */
+export async function fetchRegistryReleaseState(
+  name: string,
+): Promise<RegistryReleaseState | undefined> {
+  const url = `${NPM_REGISTRY_URL}/${encodeURIComponent(name).replace('%40', '@')}`
+  try {
+    const json = await httpJson<{
+      'dist-tags'?: { latest?: string | undefined } | undefined
+      time?: Record<string, string> | undefined
+    }>(url, {
+      // Full packument — the abbreviated install-v1 format drops `time`.
+      headers: { accept: 'application/json' },
+      timeout: 15_000,
+    })
+    if (!json.time || typeof json.time !== 'object') {
+      return undefined
+    }
+    return { latest: json['dist-tags']?.latest, timeMap: json.time }
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Whether `<name>@<version>` exists on the public registry. An abbreviated
+ * packument read (not `npm view`: bare npm invocations die on EBADDEVENGINES
+ * inside repos whose devEngines pin pnpm, which made this probe false-negative
+ * everywhere — including the release stage's registry-liveness gate). Staged
+ * entries are absent from the public packument, so a staged-only version
+ * correctly reads as not published. Returns false on any network failure,
+ * matching the old exit-code semantics.
  */
 export async function isAlreadyPublished(
   name: string,
   version: string,
-  cwd: string,
 ): Promise<boolean> {
-  const { code } = await runCapture(
-    'npm',
-    ['view', `${name}@${version}`, 'version'],
-    cwd,
-  )
-  return code === 0
+  const url = `${NPM_REGISTRY_URL}/${encodeURIComponent(name).replace('%40', '@')}`
+  try {
+    const json = await httpJson<{
+      versions?: Record<string, unknown> | undefined
+    }>(url, {
+      headers: { accept: 'application/vnd.npm.install-v1+json' },
+      timeout: 15_000,
+    })
+    return Boolean(json.versions && version in json.versions)
+  } catch {
+    return false
+  }
 }
 
 /**

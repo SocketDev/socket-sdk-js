@@ -1,21 +1,24 @@
 /**
- * @file `--approve` mode: list the user's staged packages, multi-select,
- *   run the pre-approve integrity gate, then batch-approve with one shared
- *   2FA OTP and create the git tag + GitHub release for each promoted
- *   package. `--yes` replaces both interactive prompts for agent/scripted
- *   runs: every eligible entry is selected, and with no `--otp` the registry
- *   challenge drives pnpm's web-OTP (a browser window to npmjs.com opens per
- *   approve call, so the human authenticates in the browser instead of the
- *   terminal).
+ * @file `--approve` mode: list the user's staged packages, run the
+ *   pre-approve integrity gate over every eligible entry FIRST (staging is
+ *   one-shot per version, so verification must complete successfully before
+ *   the human approve step is even offered), then multi-select over the
+ *   verified entries, then batch-approve with one shared 2FA OTP and create
+ *   the git tag + GitHub release for each promoted package. `--yes` replaces
+ *   both interactive prompts for agent/scripted runs: every verified entry is
+ *   selected, and with no `--otp` the registry challenge drives pnpm's
+ *   web-OTP (a browser window to npmjs.com opens per approve call, so the
+ *   human authenticates in the browser instead of the terminal).
  */
 
 import os from 'node:os'
 import process from 'node:process'
 
-import { sleep } from '@socketsecurity/lib/promises/timers'
-import { checkbox, password } from '@socketsecurity/lib/stdio/prompts'
+import { httpRequest } from '@socketsecurity/lib-stable/http-request'
+import { sleep } from '@socketsecurity/lib-stable/promises/timers'
+import { checkbox, password } from '@socketsecurity/lib-stable/stdio/prompts'
 
-import { ensureTagAndRelease } from '../release.mts'
+import { releaseBehindLiveGate } from '../release.mts'
 import {
   logger,
   rootPath,
@@ -29,6 +32,7 @@ import {
   fetchPriorProvenanceMap,
   formatPriorProvenance,
   listStagedPackages,
+  readPackageJson,
 } from './shared.mts'
 import { scanStagedEntry } from './scan.mts'
 import { verifyStagedEntry } from './staged.mts'
@@ -68,7 +72,7 @@ async function openBrowser(url: string, cwd: string): Promise<void> {
 async function webLogin(home: string): Promise<boolean> {
   // `npm-auth-type: web` is load-bearing: without it the registry 401s the
   // session create (it gates the endpoint on the client declaring web auth).
-  const created = await fetch(`${NPM_REGISTRY}/-/v1/login`, {
+  const created = await httpRequest(`${NPM_REGISTRY}/-/v1/login`, {
     body: '{}',
     headers: {
       'content-type': 'application/json',
@@ -81,10 +85,10 @@ async function webLogin(home: string): Promise<boolean> {
     logger.fail(`Web-login session create failed (${created.status}).`)
     return false
   }
-  const session = (await created.json()) as {
+  const session = created.json<{
     doneUrl?: string | undefined
     loginUrl?: string | undefined
-  }
+  }>()
   if (!session.loginUrl || !session.doneUrl) {
     logger.fail('Web-login session response missing loginUrl/doneUrl.')
     return false
@@ -96,11 +100,11 @@ async function webLogin(home: string): Promise<boolean> {
   const deadline = Date.now() + 10 * 60 * 1000
   while (Date.now() < deadline) {
     // eslint-disable-next-line no-await-in-loop
-    const done = await fetch(session.doneUrl, {
+    const done = await httpRequest(session.doneUrl, {
       headers: { 'npm-auth-type': 'web', 'npm-command': 'login' },
     })
     if (done.status === 200) {
-      const { token } = (await done.json()) as { token?: string | undefined }
+      const { token } = done.json<{ token?: string | undefined }>()
       if (!token) {
         logger.fail('Web-login done response carried no token.')
         return false
@@ -128,7 +132,10 @@ async function webLogin(home: string): Promise<boolean> {
       logger.fail(`Web-login poll failed (${done.status}).`)
       return false
     }
-    const retryAfter = Number(done.headers.get('retry-after'))
+    const retryAfterHeader = done.headers['retry-after']
+    const retryAfter = Number(
+      Array.isArray(retryAfterHeader) ? retryAfterHeader[0] : retryAfterHeader,
+    )
     // eslint-disable-next-line no-await-in-loop
     await sleep(
       Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2000,
@@ -194,16 +201,17 @@ export function buildApproveChoices(
  * are selected, and (absent `otpFromFlag`) 2FA falls through to the browser
  * web-OTP challenge.
  */
-export async function runApprove(options: {
+export async function runApprove(config: {
   dryRun: boolean
   noScan: boolean
   otpFromFlag: string | undefined
+  skipRelease?: boolean | undefined
   yes: boolean
 }): Promise<void> {
-  const { dryRun, noScan, otpFromFlag, yes } = {
+  const { dryRun, noScan, otpFromFlag, skipRelease, yes } = {
     __proto__: null,
-    ...options,
-  } as typeof options
+    ...config,
+  } as typeof config
   if (!(await ensureNpmLogin())) {
     process.exitCode = 1
     return
@@ -214,16 +222,41 @@ export async function runApprove(options: {
     return
   }
 
+  // The stage list is ACCOUNT-scoped, not repo-scoped: entries staged by this
+  // account from OTHER repos show up here too. Approve must skip those — the
+  // verify gate can only ever pack THIS repo's package (defaultPackTarball
+  // packs rootPath), so a foreign entry could never verify; worse, its verify
+  // pack would pin THIS repo's README against the FOREIGN entry's version (a
+  // wrong-manifest pin) and then fail with advice to reject an artifact that
+  // is perfectly good in its own repo.
+  const localName = readPackageJson().name
+  const ours: StageListEntry[] = []
+  for (const entry of staged) {
+    if (entry.name === localName) {
+      ours.push(entry)
+    } else {
+      logger.log(
+        `Skipping ${entry.name}@${entry.version} — staged by this account but ` +
+          `not this repo's package (${localName}). Run --approve from its own repo.`,
+      )
+    }
+  }
+  if (ours.length === 0) {
+    logger.log(`No staged entries for ${localName}; nothing to approve here.`)
+    return
+  }
+
   // Filter out already-published versions. If a stage upload was
   // approved earlier but the entry lingers in stage list (registry
   // quirk), don't offer it for re-approval.
   const eligible: StageListEntry[] = []
-  for (const entry of staged) {
+  for (let i = 0, { length } = ours; i < length; i += 1) {
+    const entry = ours[i]!
     // eslint-disable-next-line no-await-in-loop
     if (
       entry.name &&
       entry.version &&
-      !(await isAlreadyPublished(entry.name, entry.version, rootPath))
+      !(await isAlreadyPublished(entry.name, entry.version))
     ) {
       eligible.push(entry)
     }
@@ -233,15 +266,43 @@ export async function runApprove(options: {
     return
   }
 
+  // Pre-approve integrity gate FIRST — before the human is offered anything.
+  // Staging is one-shot per version (a staged-then-published version can
+  // never re-stage), so verification must complete successfully BEFORE the
+  // approve step is offered: a divergent or unverifiable artifact never
+  // reaches the multi-select, the 2FA prompt, or `pnpm stage approve`.
+  const verifiedEntries: StageListEntry[] = []
+  for (let i = 0, { length } = eligible; i < length; i += 1) {
+    const entry = eligible[i]!
+    // eslint-disable-next-line no-await-in-loop
+    if (await verifyStagedEntry(entry)) {
+      verifiedEntries.push(entry)
+    }
+  }
+  if (verifiedEntries.length === 0) {
+    logger.fail(
+      'No staged package passed pre-approve verification; nothing offered for approve.',
+    )
+    process.exitCode = 1
+    return
+  }
+  if (verifiedEntries.length < eligible.length) {
+    logger.fail(
+      `${eligible.length - verifiedEntries.length}/${eligible.length} failed pre-approve verify; ` +
+        `offering only the ${verifiedEntries.length} verified. Reject the rest (pnpm stage reject <id>).`,
+    )
+    process.exitCode = 1
+  }
+
   // Fetch prior-version provenance for each unique package name so the
   // approver can spot regressions (last public version had provenance
   // but the staged one's parent name has lost trust metadata between
   // versions — a workflow drift signal). Cheap: one fetch per unique
   // name, abbreviated packument (no _npmUser needed; we only check
   // attestations presence as a proxy for "this name is OIDC-published").
-  const priorProvenance = await fetchPriorProvenanceMap(eligible)
+  const priorProvenance = await fetchPriorProvenanceMap(verifiedEntries)
 
-  const choices = buildApproveChoices(eligible, priorProvenance)
+  const choices = buildApproveChoices(verifiedEntries, priorProvenance)
   let selected: string[] | undefined
   if (yes) {
     // --yes (agent / scripted runs, no TTY): approve everything eligible —
@@ -266,7 +327,7 @@ export async function runApprove(options: {
   if (dryRun) {
     logger.log('[dry-run] would approve:')
     for (const stageId of selected) {
-      const entry = eligible.find(e => e.stageId === stageId)
+      const entry = verifiedEntries.find(e => e.stageId === stageId)
       logger.log(`  ${entry?.name}@${entry?.version} (id: ${stageId})`)
     }
     logger.success(
@@ -275,69 +336,19 @@ export async function runApprove(options: {
     return
   }
 
-  // OTP resolution order:
-  //   1. --otp <code> flag (CI / scripted use).
-  //   2. --yes with no --otp: skip the prompt entirely and let the registry
-  //      challenge drive pnpm's web-OTP (browser) flow directly.
-  //   3. Interactive prompt; entering a TOTP code uses it for all
-  //      approvals; entering nothing falls through to pnpm's per-call
-  //      web-OTP flow (the registry challenges and pnpm opens a browser
-  //      window to npmjs.com for each approve call).
-  // Passing the same TOTP to every approve in a batch is fine: npm
-  // accepts the same code for the duration of its ~30s validity window.
-  let otp = otpFromFlag
-  if (!otp && yes) {
-    logger.log(
-      'No --otp supplied; npm opens a browser window (web-OTP) to authenticate each approve — complete the 2FA there.',
-    )
-  } else if (!otp) {
-    const entered = (await password({
-      message:
-        '2FA OTP (TOTP code for batch; leave blank for browser web-OTP):',
-      mask: '*',
-    })) as string | undefined
-    if (entered) {
-      otp = entered
-    }
-  }
-
-  // Pre-approve integrity gate: verify EACH selected staged package before the
-  // promote loop. A mismatch (or unresolvable staged digest) drops the entry;
-  // if nothing survives, return before any `pnpm stage approve` runs so the
-  // 2FA / OAuth promote is never reached on a divergent artifact.
-  const verified: string[] = []
-  for (const stageId of selected) {
-    const entry = eligible.find(e => e.stageId === stageId)
-    // eslint-disable-next-line no-await-in-loop
-    if (entry && (await verifyStagedEntry(entry))) {
-      verified.push(stageId)
-    }
-  }
-  if (verified.length === 0) {
-    logger.fail(
-      'No selected package passed pre-approve verification; nothing approved.',
-    )
-    process.exitCode = 1
-    return
-  }
-  if (verified.length < selected.length) {
-    logger.fail(
-      `${selected.length - verified.length}/${selected.length} failed pre-approve verify; ` +
-        `approving only the ${verified.length} verified. Reject the rest (pnpm stage reject <id>).`,
-    )
-    process.exitCode = 1
-  }
-
-  // Full-scan gate: the shasum verify above proved the staged bytes match
-  // the local pack, so a Socket scan of the local artifact IS a scan of the
-  // upload. Entries that fail drop out, mirroring the verify gate.
-  let gated = verified
+  // Full-scan gate: the pre-select shasum verify proved the staged bytes
+  // match the local pack, so a Socket scan of the local artifact IS a scan of
+  // the upload. Entries that fail drop out, mirroring the verify gate. Runs
+  // BEFORE the OTP prompt: a TOTP code is only valid ~30s, so every slow gate
+  // must finish before the human types one.
+  let gated = selected
   if (noScan) {
     logger.log('--no-scan: skipping the Socket full-scan gate.')
   } else {
     const scanned: string[] = []
-    for (const stageId of verified) {
-      const entry = eligible.find(e => e.stageId === stageId)
+    for (let i = 0, { length } = selected; i < length; i += 1) {
+      const stageId = selected[i]!
+      const entry = verifiedEntries.find(e => e.stageId === stageId)
       if (
         entry?.name &&
         entry.version &&
@@ -354,14 +365,41 @@ export async function runApprove(options: {
       process.exitCode = 1
       return
     }
-    if (scanned.length < verified.length) {
+    if (scanned.length < selected.length) {
       logger.fail(
-        `${verified.length - scanned.length}/${verified.length} failed the scan gate; ` +
+        `${selected.length - scanned.length}/${selected.length} failed the scan gate; ` +
           `approving only the ${scanned.length} that scanned clean.`,
       )
       process.exitCode = 1
     }
     gated = scanned
+  }
+
+  // OTP resolution order:
+  //   1. --otp <code> flag (CI / scripted use).
+  //   2. --yes with no --otp: skip the prompt entirely and let the registry
+  //      challenge drive pnpm's web-OTP (browser) flow directly.
+  //   3. Interactive prompt; entering a TOTP code uses it for all
+  //      approvals; entering nothing falls through to pnpm's per-call
+  //      web-OTP flow (the registry challenges and pnpm opens a browser
+  //      window to npmjs.com for each approve call).
+  // Passing the same TOTP to every approve in a batch is fine: npm
+  // accepts the same code for the duration of its ~30s validity window —
+  // which is exactly why this prompt sits LAST, after every gate.
+  let otp = otpFromFlag
+  if (!otp && yes) {
+    logger.log(
+      'No --otp supplied; npm opens a browser window (web-OTP) to authenticate each approve — complete the 2FA there.',
+    )
+  } else if (!otp) {
+    const entered = (await password({
+      message:
+        '2FA OTP (TOTP code for batch; leave blank for browser web-OTP):',
+      mask: '*',
+    })) as string | undefined
+    if (entered) {
+      otp = entered
+    }
   }
 
   let approved = 0
@@ -379,7 +417,7 @@ export async function runApprove(options: {
     const code = await runInheritTty('pnpm', args, rootPath)
     if (code === 0) {
       approved += 1
-      const entry = eligible.find(e => e.stageId === stageId)
+      const entry = verifiedEntries.find(e => e.stageId === stageId)
       if (entry) {
         approvedEntries.push(entry)
       }
@@ -400,11 +438,30 @@ export async function runApprove(options: {
   // locally where git, gh, and npm are all authenticated; the CI --staged step
   // holds only an OIDC npm token (no contents:write / GH_TOKEN), so a release
   // attempt there fails and is also premature (nothing is public yet).
+  // `skipRelease` (--no-release) hands the tag + release to the caller — the
+  // publish pipeline's release stage owns them there, with verify-time
+  // checksums.
+  if (skipRelease) {
+    logger.log(
+      '--no-release: leaving the tag + GitHub release to the caller ' +
+        '(publish-pipeline release stage).',
+    )
+    return
+  }
   for (let i = 0, { length } = approvedEntries; i < length; i += 1) {
     const entry = approvedEntries[i]!
     if (entry.name && entry.version) {
+      // The tag + immutable release are the LAST markers: cut them only once
+      // the approved version is actually resolvable on the registry.
       // eslint-disable-next-line no-await-in-loop
-      await ensureTagAndRelease({ name: entry.name, version: entry.version })
+      const released = await releaseBehindLiveGate({
+        isLive: () => isAlreadyPublished(entry.name!, entry.version!),
+        pkg: { name: entry.name, version: entry.version },
+        registry: 'npm',
+      })
+      if (!released) {
+        process.exitCode = 1
+      }
     }
   }
 }

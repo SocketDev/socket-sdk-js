@@ -21,9 +21,9 @@ import {
   compareHashSources,
   hashTarball,
 } from '../../lib/verify-release-hashes.mts'
-import { ensureTagAndRelease } from '../release.mts'
+import { releaseBehindLiveGate } from '../release.mts'
 import { logger, rootPath, runCapture, runInherit } from '../shared.mts'
-import { withPinnedReadme } from './pin-readme.mts'
+import { withPinnedReadme } from '../pin-readme.mts'
 import { isAlreadyPublished } from './registry.mts'
 import type { StageListEntry } from './shared.mts'
 import { isStagingExpected, readPackageJson } from './shared.mts'
@@ -40,15 +40,15 @@ import { tarExecutable } from '../../_shared/tar-executable.mts'
  */
 export async function runStaged(
   tag: string,
-  options: { dryRun: boolean },
+  config: { dryRun: boolean },
 ): Promise<void> {
-  const { dryRun } = { __proto__: null, ...options } as typeof options
+  const { dryRun } = { __proto__: null, ...config } as typeof config
   const pkg = readPackageJson()
   logger.log(
     `Staging ${pkg.name}@${pkg.version} (tag=${tag})${dryRun ? ' [dry-run]' : ''}`,
   )
 
-  if (await isAlreadyPublished(pkg.name, pkg.version, rootPath)) {
+  if (await isAlreadyPublished(pkg.name, pkg.version)) {
     logger.fail(
       `${pkg.name}@${pkg.version} is already published. Bump the version and try again.`,
     )
@@ -115,15 +115,15 @@ export async function runStaged(
  */
 export async function runDirect(
   tag: string,
-  options: { dryRun: boolean },
+  config: { dryRun: boolean },
 ): Promise<void> {
-  const { dryRun } = { __proto__: null, ...options } as typeof options
+  const { dryRun } = { __proto__: null, ...config } as typeof config
   const pkg = readPackageJson()
   logger.log(
     `Direct-publishing ${pkg.name}@${pkg.version} (tag=${tag})${dryRun ? ' [dry-run]' : ''}`,
   )
 
-  if (await isAlreadyPublished(pkg.name, pkg.version, rootPath)) {
+  if (await isAlreadyPublished(pkg.name, pkg.version)) {
     logger.fail(
       `${pkg.name}@${pkg.version} is already published. Bump the version and try again.`,
     )
@@ -178,7 +178,16 @@ export async function runDirect(
     )
   } else {
     logger.success(`Published ${pkg.name}@${pkg.version} directly.`)
-    await ensureTagAndRelease(pkg)
+    // The tag + immutable release are the LAST markers: cut them only once
+    // the version is actually resolvable on the registry.
+    const released = await releaseBehindLiveGate({
+      isLive: () => isAlreadyPublished(pkg.name, pkg.version),
+      pkg: { name: pkg.name, version: pkg.version },
+      registry: 'npm',
+    })
+    if (!released) {
+      process.exitCode = 1
+    }
   }
 }
 
@@ -192,10 +201,25 @@ export async function defaultPackTarball(
   name: string,
   version: string,
 ): Promise<string | undefined> {
+  // Refuse a cross-repo pack outright: the stage list is account-scoped, so a
+  // caller can hand this an entry staged from ANOTHER repo. Packing it here
+  // would pin the README against the wrong manifest — this repo's repository
+  // slug with the foreign entry's version — before failing anyway on the
+  // tarball-name lookup. Fail loud, with zero pack side effects.
+  const pkg = readPackageJson()
+  if (pkg.name !== name) {
+    logger.fail(
+      `Refusing to pack ${name}@${version} from ${rootPath}: this repo's ` +
+        `package is ${pkg.name}. A cross-repo pack would pin the README ` +
+        `against the wrong repository/version. Run the publish flow from ` +
+        `${name}'s own repo.`,
+    )
+    return undefined
+  }
   // Same README-pin bracket as runStaged, so the approve-time verify pack is
   // byte-identical to the staged tarball (the integrity gate compares them).
   const packed = await withPinnedReadme(
-    { repository: readPackageJson().repository, rootPath, version },
+    { repository: pkg.repository, rootPath, version },
     () => runCapture('pnpm', ['pack'], rootPath),
   )
   const tarballName = `${name.replace(/^@/, '').replace('/', '-')}-${version}.tgz`
@@ -275,11 +299,11 @@ export async function compareExtractedTarballs(
     const hashesA = await hashDirContents(dirA)
     const hashesB = await hashDirContents(dirB)
     const diffs: string[] = []
-    for (const [rel, hash] of hashesA) {
+    for (const [rel, entryHash] of hashesA) {
       const other = hashesB.get(rel)
       if (other === undefined) {
         diffs.push(`only in first: ${rel}`)
-      } else if (other !== hash) {
+      } else if (other !== entryHash) {
         diffs.push(`content differs: ${rel}`)
       }
     }
@@ -313,15 +337,17 @@ export async function compareExtractedTarballs(
  */
 export async function verifyStagedEntry(
   entry: StageListEntry,
-  options?: {
-    downloadStagedTarball?:
-      | ((stageId: string) => Promise<string | undefined>)
-      | undefined
-    hashLocalTarball?: ((filePath: string) => TarballDigest) | undefined
-    packTarball?:
-      | ((name: string, version: string) => Promise<string | undefined>)
-      | undefined
-  },
+  options?:
+    | {
+        downloadStagedTarball?:
+          | ((stageId: string) => Promise<string | undefined>)
+          | undefined
+        hashLocalTarball?: ((filePath: string) => TarballDigest) | undefined
+        packTarball?:
+          | ((name: string, version: string) => Promise<string | undefined>)
+          | undefined
+      }
+    | undefined,
 ): Promise<boolean> {
   const opts = { __proto__: null, ...options } as {
     downloadStagedTarball?:

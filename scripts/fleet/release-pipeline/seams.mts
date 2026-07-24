@@ -6,22 +6,48 @@
  *   package.json reader for the release subject.
  */
 
-import { readFileSync } from 'node:fs'
+import { promises as fs, readFileSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 
-import { ensureTagAndRelease } from '../publish-infra/release.mts'
+import {
+  ensureTagAndRelease,
+  requireRegistryLive,
+} from '../publish-infra/release.mts'
 import { listStagedPackages } from '../publish-infra/npm/shared.mts'
-import { verifyStagedEntry } from '../publish-infra/npm/staged.mts'
+import {
+  fetchVersionTrustInfo,
+  isAlreadyPublished,
+} from '../publish-infra/npm/registry.mts'
+import {
+  compareExtractedTarballs,
+  defaultPackTarball,
+  verifyStagedEntry,
+} from '../publish-infra/npm/staged.mts'
 import { runCapture, runInherit } from '../publish-infra/shared.mts'
 
 import type { StageListEntry } from '../publish-infra/npm/shared.mts'
-import type { ReceiptStatus } from './state.mts'
+import type { ReceiptStatus, ReleaseChecksums } from './state.mts'
+
+/**
+ * The per-version `dist` digests a public (unauthenticated) packument read
+ * exposes — the registry-truth evidence the reconcile path compares a local
+ * re-pack against.
+ */
+export interface RegistryDistInfo {
+  integrity?: string | undefined
+  shasum?: string | undefined
+}
 
 /**
  * What a stage runner reports back; the CLI writes it into a receipt.
+ * `releaseChecksums` rides on a passed verify outcome so the orchestrator can
+ * stash it into state for the release stage (assets prepared before the
+ * immutable release is created).
  */
 export interface StageOutcome {
   detail: string
+  releaseChecksums?: ReleaseChecksums | undefined
   status: ReceiptStatus
 }
 
@@ -30,10 +56,33 @@ export interface StageOutcome {
  * helpers; tests inject fakes so no runner ever spawns for real.
  */
 export interface RunnerSeams {
+  compareTarballContents?:
+    | ((
+        tarA: string,
+        tarB: string,
+      ) => Promise<{ equal: boolean; detail: string }>)
+    | undefined
+  downloadRegistryTarball?:
+    | ((name: string, version: string) => Promise<string | undefined>)
+    | undefined
   ensureRelease?:
-    | ((pkg: { name: string; version: string }) => Promise<void>)
+    | ((
+        pkg: { name: string; version: string },
+        options?:
+          | { packAssets?: (() => Promise<string[]>) | undefined }
+          | undefined,
+      ) => Promise<void>)
+    | undefined
+  fetchRegistryDist?:
+    | ((name: string) => Promise<Record<string, RegistryDistInfo>>)
     | undefined
   listStaged?: (() => Promise<StageListEntry[]>) | undefined
+  packTarball?:
+    | ((name: string, version: string) => Promise<string | undefined>)
+    | undefined
+  registryLive?:
+    | ((name: string, version: string) => Promise<boolean>)
+    | undefined
   runCapture?:
     | ((
         cmd: string,
@@ -49,8 +98,24 @@ export interface RunnerSeams {
 }
 
 export interface ResolvedSeams {
-  ensureRelease: (pkg: { name: string; version: string }) => Promise<void>
+  compareTarballContents: (
+    tarA: string,
+    tarB: string,
+  ) => Promise<{ equal: boolean; detail: string }>
+  downloadRegistryTarball: (
+    name: string,
+    version: string,
+  ) => Promise<string | undefined>
+  ensureRelease: (
+    pkg: { name: string; version: string },
+    options?:
+      | { packAssets?: (() => Promise<string[]>) | undefined }
+      | undefined,
+  ) => Promise<void>
+  fetchRegistryDist: (name: string) => Promise<Record<string, RegistryDistInfo>>
   listStaged: () => Promise<StageListEntry[]>
+  packTarball: (name: string, version: string) => Promise<string | undefined>
+  registryLive: (name: string, version: string) => Promise<boolean>
   runCapture: (
     cmd: string,
     args: string[],
@@ -67,14 +132,58 @@ function defaultSleep(ms: number): Promise<void> {
   })
 }
 
+// Public (unauthenticated) packument read: per-version dist digests. The
+// abbreviated format is enough — it keeps dist.shasum + dist.integrity.
+function defaultFetchRegistryDist(
+  name: string,
+): Promise<Record<string, RegistryDistInfo>> {
+  return fetchVersionTrustInfo(name, 'abbreviated')
+}
+
+// Download the PUBLISHED tarball for a version into a fresh temp dir via
+// `npm pack <name>@<version>` (an unauthenticated registry read; run from the
+// temp dir because the repo's devEngines pins pnpm and vetoes bare npm
+// invocations in-repo). Returns the tarball path, or undefined on failure.
+async function defaultDownloadRegistryTarball(
+  name: string,
+  version: string,
+): Promise<string | undefined> {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'socket-registry-dl-'))
+  const dl = await runCapture('npm', ['pack', `${name}@${version}`], tmpDir)
+  if (dl.code !== 0) {
+    return undefined
+  }
+  const entries = await fs.readdir(tmpDir)
+  const tgz = entries.find(e => e.endsWith('.tgz'))
+  return tgz ? path.join(tmpDir, tgz) : undefined
+}
+
+// Default registry-liveness probe for the release stage: the version must be
+// resolvable on npm (with the requireRegistryLive retry window for registry
+// propagation) before the tag + immutable GH release may exist.
+function defaultRegistryLive(name: string, version: string): Promise<boolean> {
+  return requireRegistryLive({
+    isLive: () => isAlreadyPublished(name, version),
+    registry: 'npm',
+    subject: `${name}@${version}`,
+  })
+}
+
 /**
  * Fill seam gaps with the real implementations.
  */
 export function resolveSeams(seams: RunnerSeams | undefined): ResolvedSeams {
   const s = { __proto__: null, ...seams } as RunnerSeams
   return {
+    compareTarballContents:
+      s.compareTarballContents ?? compareExtractedTarballs,
+    downloadRegistryTarball:
+      s.downloadRegistryTarball ?? defaultDownloadRegistryTarball,
     ensureRelease: s.ensureRelease ?? ensureTagAndRelease,
+    fetchRegistryDist: s.fetchRegistryDist ?? defaultFetchRegistryDist,
     listStaged: s.listStaged ?? listStagedPackages,
+    packTarball: s.packTarball ?? defaultPackTarball,
+    registryLive: s.registryLive ?? defaultRegistryLive,
     runCapture: s.runCapture ?? runCapture,
     runInherit: s.runInherit ?? runInherit,
     sleep: s.sleep ?? defaultSleep,
@@ -87,6 +196,9 @@ export function resolveSeams(seams: RunnerSeams | undefined): ResolvedSeams {
  */
 export function readPkg(cwd: string): { name: string; version: string } {
   const raw = readFileSync(path.join(cwd, 'package.json'), 'utf8')
-  const pkg = JSON.parse(raw) as { name?: string; version?: string }
+  const pkg = JSON.parse(raw) as {
+    name?: string | undefined
+    version?: string | undefined
+  }
   return { name: pkg.name ?? '', version: pkg.version ?? '' }
 }

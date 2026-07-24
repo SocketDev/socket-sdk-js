@@ -6,10 +6,20 @@
  */
 
 import { readFileSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 
 import { extractFirstJson, rootPath, runCapture } from '../shared.mts'
 import { fetchVersionTrustInfo } from './registry.mts'
+
+/**
+ * Raised when the staged-entry listing could not be AUTHENTICATED. The stage
+ * endpoints 401 without npm auth and `pnpm stage list`'s failure output
+ * parses as an EMPTY list — the 6.2.1 run recorded that as verify=failed
+ * "0 staged entries", a false negative that stranded the pipeline. Callers
+ * must treat this error as "auth unavailable", never as an empty stage list.
+ */
+export class StageListAuthError extends Error {}
 
 export interface StageListEntry {
   name?: string | undefined
@@ -63,12 +73,12 @@ export function readStagedShasum(entry: {
 // shape used `{ stageId, name, … }`.
 interface RawStageEntry {
   dist?: { shasum?: unknown | undefined } | undefined
-  id?: unknown
-  name?: unknown
-  packageName?: unknown
-  shasum?: unknown
-  stageId?: unknown
-  version?: unknown
+  id?: unknown | undefined
+  name?: unknown | undefined
+  packageName?: unknown | undefined
+  shasum?: unknown | undefined
+  stageId?: unknown | undefined
+  version?: unknown | undefined
 }
 
 function normalizeStageEntry(raw: RawStageEntry): StageListEntry | undefined {
@@ -124,7 +134,8 @@ export function parseStageListJson(stdout: string): StageListEntry[] {
       ? (Object.values(parsed) as Array<RawStageEntry | undefined>)
       : []
   const result: StageListEntry[] = []
-  for (const raw of rawEntries) {
+  for (let i = 0, { length } = rawEntries; i < length; i += 1) {
+    const raw = rawEntries[i]
     const entry = raw ? normalizeStageEntry(raw) : undefined
     if (entry) {
       result.push(entry)
@@ -135,15 +146,36 @@ export function parseStageListJson(stdout: string): StageListEntry[] {
 
 /**
  * Resolve all currently-staged packages by running `pnpm stage list --json`
- * and normalizing the output (see parseStageListJson).
+ * and normalizing the output (see parseStageListJson). Auth-honest: an empty
+ * result (or a non-zero exit) is only trusted after `npm whoami` proves local
+ * npm auth exists — an unauthenticated `pnpm stage list` 401s and its output
+ * parses as an EMPTY list, indistinguishable from "nothing staged". Without
+ * that proof this throws StageListAuthError carrying the whoami evidence, so
+ * a missing token can never masquerade as "0 staged entries".
  */
 export async function listStagedPackages(): Promise<StageListEntry[]> {
-  const { stdout } = await runCapture(
+  const { code, stdout } = await runCapture(
     'pnpm',
     ['stage', 'list', '--json'],
     rootPath,
   )
-  return parseStageListJson(stdout)
+  const entries = parseStageListJson(stdout)
+  if (code === 0 && entries.length > 0) {
+    return entries
+  }
+  // `npm whoami` runs from the OS home dir: the repo's devEngines pins pnpm
+  // as the package manager and vetoes bare `npm` invocations in-repo.
+  const whoami = await runCapture('npm', ['whoami'], os.homedir())
+  if (whoami.code !== 0) {
+    throw new StageListAuthError(
+      `\`npm whoami\` exited ${whoami.code} — no npm auth, so the staging ` +
+        `endpoints 401 — and \`pnpm stage list --json\` exited ${code} with ` +
+        `${entries.length} parseable entr${entries.length === 1 ? 'y' : 'ies'}. ` +
+        `An unauthenticated stage list parses as EMPTY; refusing to report ` +
+        `"0 staged entries" without auth.`,
+    )
+  }
+  return entries
 }
 
 /**
@@ -208,8 +240,9 @@ export function formatPriorProvenance(
 export async function isStagingExpected(pkgName: string): Promise<boolean> {
   try {
     const versions = await fetchVersionTrustInfo(pkgName, 'full')
-    for (const v of Object.values(versions)) {
-      if (v.approver !== undefined) {
+    const versionList = Object.values(versions)
+    for (let i = 0, { length } = versionList; i < length; i += 1) {
+      if (versionList[i]!.approver !== undefined) {
         return true
       }
     }
