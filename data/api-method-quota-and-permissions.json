@@ -1,5 +1,37 @@
 {
   "api": {
+    "alertTypes": {
+      "quota": 1,
+      "permissions": []
+    },
+    "getIntegrationEvents": {
+      "quota": 1,
+      "permissions": ["integration:list"]
+    },
+    "getOpenAPI": {
+      "quota": 1,
+      "permissions": []
+    },
+    "getOpenAPIJSON": {
+      "quota": 1,
+      "permissions": []
+    },
+    "getSocketBasicsConfig": {
+      "quota": 1,
+      "permissions": ["socket-basics:read"]
+    },
+    "licenseMetadata": {
+      "quota": 1,
+      "permissions": []
+    },
+    "licensePolicy": {
+      "quota": 100,
+      "permissions": ["packages:list", "license-policy:read"]
+    },
+    "viewLicensePolicy": {
+      "quota": 1,
+      "permissions": ["license-policy:read"]
+    },
     "batchPackageFetch": {
       "quota": 100,
       "permissions": ["packages:list"]
@@ -24,6 +56,18 @@
       "quota": 0,
       "permissions": ["repo:create"]
     },
+    "createOrgRepoDiff": {
+      "quota": 1,
+      "permissions": ["repo:list", "diff-scans:create", "full-scans:create"]
+    },
+    "getOrgFullScanCsv": {
+      "quota": 1,
+      "permissions": ["full-scans:list"]
+    },
+    "getOrgFullScanPdf": {
+      "quota": 1,
+      "permissions": ["full-scans:list"]
+    },
     "createScanFromFilepaths": {
       "quota": 100,
       "permissions": ["report:write"]
@@ -35,6 +79,30 @@
     "deleteOrgRepo": {
       "quota": 0,
       "permissions": ["repo:delete"]
+    },
+    "associateOrgRepoLabel": {
+      "quota": 1,
+      "permissions": ["repo-label:update"]
+    },
+    "disassociateOrgRepoLabel": {
+      "quota": 1,
+      "permissions": ["repo-label:update"]
+    },
+    "getOrgRepoLabelSetting": {
+      "quota": 1,
+      "permissions": ["repo-label:list"]
+    },
+    "updateOrgRepoLabelSetting": {
+      "quota": 1,
+      "permissions": ["repo-label:update"]
+    },
+    "deleteOrgRepoLabelSetting": {
+      "quota": 1,
+      "permissions": ["repo-label:update"]
+    },
+    "deleteOrgAlertTriage": {
+      "quota": 1,
+      "permissions": ["triage:alerts-update"]
     },
     "getAuditLogEvents": {
       "quota": 10,
@@ -127,6 +195,26 @@
     "getThreatFeedItems": {
       "quota": 1,
       "permissions": ["threat-feed:list"]
+    },
+    "historicalAlertsList": {
+      "quota": 10,
+      "permissions": ["historical:alerts-list"]
+    },
+    "historicalAlertsTrend": {
+      "quota": 10,
+      "permissions": ["historical:alerts-trend"]
+    },
+    "historicalDependenciesTrend": {
+      "quota": 10,
+      "permissions": ["historical:dependencies-trend"]
+    },
+    "historicalSnapshotsList": {
+      "quota": 10,
+      "permissions": ["historical:snapshots-list"]
+    },
+    "historicalSnapshotsStart": {
+      "quota": 10,
+      "permissions": ["historical:snapshots-start"]
     },
     "postSettings": {
       "quota": 0,

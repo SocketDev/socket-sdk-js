@@ -64,10 +64,11 @@ pnpm run check
 
 ### Documentation map
 
-| Guide                                              | Description                         |
-| -------------------------------------------------- | ----------------------------------- |
-| **[API Reference](./docs/api.md)**                 | Complete API method documentation   |
-| **[Quota Management](./docs/quota-management.md)** | Cost tiers (0/10/100) and utilities |
+| Guide                                              | Description                          |
+| -------------------------------------------------- | ------------------------------------ |
+| **[API Reference](./docs/api.md)**                 | Complete API method documentation    |
+| **[Quota Management](./docs/quota-management.md)** | Cost tiers (0/10/100) and utilities  |
+| **[Unsupported endpoints](./docs/unsupported.md)** | Deprecated ops the SDK does not wrap |
 
 </details>
 

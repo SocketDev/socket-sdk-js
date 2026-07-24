@@ -8,7 +8,7 @@
 
 Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **83** public methods.
+There are **105** public methods.
 
 ## Contents
 
@@ -17,19 +17,23 @@ There are **83** public methods.
 - [Repositories](#repositories)
 - [Repository labels](#repository-labels)
 - [Organizations](#organizations)
-- [Alerts & triage](#alerts--triage)
+- [Alerts & triage](#alerts-triage)
+- [Historical & analytics](#historical-analytics)
 - [Webhooks](#webhooks)
 - [Patches](#patches)
 - [API tokens](#api-tokens)
 - [Policies](#policies)
+- [Organization settings](#organization-settings)
 - [Telemetry](#telemetry)
 - [Audit log](#audit-log)
 - [Threat campaigns](#threat-campaigns)
 - [Events](#events)
 - [Packages](#packages)
-- [Dependencies & manifests](#dependencies--manifests)
+- [Dependencies & manifests](#dependencies-manifests)
 - [Exports](#exports)
 - [Quota](#quota)
+- [Metadata](#metadata)
+- [Meta](#meta)
 - [Escape hatches](#escape-hatches)
 - [Other](#other)
 
@@ -187,6 +191,34 @@ async downloadOrgFullScanFilesAsTar(
 
 **Quota:** _not tracked_ · **OpenAPI:** `downloadOrgFullScanFilesAsTar`
 
+### `getOrgFullScanCsv`
+
+Export a full scan's alerts as CSV. The endpoint responds with raw
+
+```typescript
+async getOrgFullScanCsv(
+  orgSlug: string,
+  fullScanId: string,
+  options: GetOrgFullScanCsvOptions,
+): Promise<SocketSdkGenericResult<string>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgFullScanCsv` · **Permissions:** `full-scans:list`
+
+### `getOrgFullScanPdf`
+
+Export a full scan's alerts as a PDF report. The endpoint responds with raw
+
+```typescript
+async getOrgFullScanPdf(
+  orgSlug: string,
+  fullScanId: string,
+  options: GetOrgFullScanPdfOptions,
+): Promise<SocketSdkGenericResult<Buffer>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgFullScanPdf` · **Permissions:** `full-scans:list`
+
 ### `rescanFullScan`
 
 Create a new full scan by rescanning an existing scan. Supports shallow
@@ -241,6 +273,21 @@ async createOrgDiffScanFromIds(
 ```
 
 **Quota:** `0` (Free) · **OpenAPI:** `createOrgDiffScanFromIds` · **Permissions:** `diff-scans:create`
+
+### `createOrgRepoDiff`
+
+Create a diff scan between a repository's current HEAD full scan and a new
+
+```typescript
+async createOrgRepoDiff(
+  orgSlug: string,
+  repoSlug: string,
+  filepaths: string[],
+  options?: CreateOrgRepoDiffOptions | undefined,
+): Promise<SocketSdkResult<'createOrgRepoDiff'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `createOrgRepoDiff` · **Permissions:** `repo:list`, `diff-scans:create`, `full-scans:create`
 
 ### `getDiffScanById`
 
@@ -454,6 +501,76 @@ async deleteRepositoryLabel(
 
 **Quota:** `0` (Free) · **OpenAPI:** `deleteOrgRepoLabel` · **Permissions:** `repo-label:delete`
 
+### `associateOrgRepoLabel`
+
+Associate a repository with an organization repository label.
+
+```typescript
+async associateOrgRepoLabel(
+  orgSlug: string,
+  labelId: string,
+  repositoryId: string,
+): Promise<SocketSdkResult<'associateOrgRepoLabel'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `associateOrgRepoLabel` · **Permissions:** `repo-label:update`
+
+### `disassociateOrgRepoLabel`
+
+Disassociate a repository from an organization repository label.
+
+```typescript
+async disassociateOrgRepoLabel(
+  orgSlug: string,
+  labelId: string,
+  repositoryId: string,
+): Promise<SocketSdkResult<'disassociateOrgRepoLabel'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `disassociateOrgRepoLabel` · **Permissions:** `repo-label:update`
+
+### `getOrgRepoLabelSetting`
+
+Get a single setting for a repository label.
+
+```typescript
+async getOrgRepoLabelSetting(
+  orgSlug: string,
+  labelId: string,
+  settingKey: string,
+): Promise<SocketSdkResult<'getOrgRepoLabelSetting'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOrgRepoLabelSetting` · **Permissions:** `repo-label:list`
+
+### `updateOrgRepoLabelSetting`
+
+Update the settings for a repository label. Accepts the structured
+
+```typescript
+async updateOrgRepoLabelSetting(
+  orgSlug: string,
+  labelId: string,
+  settings: UpdateOrgRepoLabelSettingBody,
+): Promise<SocketSdkResult<'updateOrgRepoLabelSetting'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `updateOrgRepoLabelSetting` · **Permissions:** `repo-label:update`
+
+### `deleteOrgRepoLabelSetting`
+
+Delete a single setting from a repository label.
+
+```typescript
+async deleteOrgRepoLabelSetting(
+  orgSlug: string,
+  labelId: string,
+  settingKey: string,
+): Promise<SocketSdkResult<'deleteOrgRepoLabelSetting'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `deleteOrgRepoLabelSetting` · **Permissions:** `repo-label:update`
+
 ## Organizations
 
 Org listing, analytics, and entitlements.
@@ -663,6 +780,19 @@ async updateOrgAlertTriage(
 
 **Quota:** `0` (Free) · **OpenAPI:** `updateOrgAlertTriage` · **Permissions:** `triage:alerts-update`
 
+### `deleteOrgAlertTriage`
+
+Delete a triage entry for a specific alert in an organization. Removes the
+
+```typescript
+async deleteOrgAlertTriage(
+  orgSlug: string,
+  uuid: string,
+): Promise<SocketSdkResult<'deleteOrgAlertTriage'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `deleteOrgAlertTriage` · **Permissions:** `triage:alerts-update`
+
 ### `getOrgFixes`
 
 Fetch available fixes for vulnerabilities in a repository or scan. Returns
@@ -684,6 +814,74 @@ async getOrgFixes(
 ```
 
 **Quota:** _not tracked_
+
+## Historical & analytics
+
+Point-in-time alert and dependency history, trends, and snapshots.
+
+### `historicalAlertsList`
+
+List historical alerts for an organization. Returns point-in-time alert
+
+```typescript
+async historicalAlertsList(
+  orgSlug: string,
+  options?: HistoricalAlertsListOptions | undefined,
+): Promise<SocketSdkResult<'historicalAlertsList'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalAlertsList` · **Permissions:** `historical:alerts-list`
+
+### `historicalAlertsTrend`
+
+Get a trend of historical alert counts for an organization. Returns
+
+```typescript
+async historicalAlertsTrend(
+  orgSlug: string,
+  options?: HistoricalAlertsTrendOptions | undefined,
+): Promise<SocketSdkResult<'historicalAlertsTrend'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalAlertsTrend` · **Permissions:** `historical:alerts-trend`
+
+### `historicalDependenciesTrend`
+
+Get a trend of historical dependency counts for an organization. Returns
+
+```typescript
+async historicalDependenciesTrend(
+  orgSlug: string,
+  options?: HistoricalDependenciesTrendOptions | undefined,
+): Promise<SocketSdkResult<'historicalDependenciesTrend'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalDependenciesTrend` · **Permissions:** `historical:dependencies-trend`
+
+### `historicalSnapshotsList`
+
+List historical dependency snapshots for an organization. Returns snapshot
+
+```typescript
+async historicalSnapshotsList(
+  orgSlug: string,
+  options?: HistoricalSnapshotsListOptions | undefined,
+): Promise<SocketSdkResult<'historicalSnapshotsList'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalSnapshotsList` · **Permissions:** `historical:snapshots-list`
+
+### `historicalSnapshotsStart`
+
+Start a new historical dependency snapshot for an organization. Triggers
+
+```typescript
+async historicalSnapshotsStart(
+  orgSlug: string,
+): Promise<SocketSdkResult<'historicalSnapshotsStart'>>
+```
+
+**Quota:** `10` (Standard) · **OpenAPI:** `historicalSnapshotsStart` · **Permissions:** `historical:snapshots-start`
 
 ## Webhooks
 
@@ -917,6 +1115,30 @@ async updateOrgLicensePolicy(
 
 **Quota:** `0` (Free) · **OpenAPI:** `updateOrgLicensePolicy` · **Permissions:** `settings:write`
 
+### `viewLicensePolicy`
+
+View an organization's computed license policy allow list (Beta). Returns
+
+```typescript
+async viewLicensePolicy(
+  orgSlug: string,
+): Promise<SocketSdkResult<'viewLicensePolicy'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `viewLicensePolicy` · **Permissions:** `license-policy:read`
+
+### `licensePolicy`
+
+Compute license policy violations for a set of packages (Beta). The
+
+```typescript
+async licensePolicy(
+  request: QueryParams,
+): Promise<SocketSdkGenericResult<LicensePolicyViolations>>
+```
+
+**Quota:** `100` (Expensive) · **OpenAPI:** `licensePolicy` · **Permissions:** `packages:list`, `license-policy:read`
+
 ### `getOrgSecurityPolicy`
 
 Get organization's security policy configuration. Returns alert rules,
@@ -953,6 +1175,35 @@ async postSettings(
 ```
 
 **Quota:** `0` (Free) · **OpenAPI:** `postSettings`
+
+## Organization settings
+
+Read organization settings and integration state.
+
+### `getIntegrationEvents`
+
+List integration events for a specific organization integration.
+
+```typescript
+async getIntegrationEvents(
+  orgSlug: string,
+  integrationId: string,
+): Promise<SocketSdkResult<'getIntegrationEvents'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getIntegrationEvents` · **Permissions:** `integration:list`
+
+### `getSocketBasicsConfig`
+
+Get the Socket Basics configuration for an organization.
+
+```typescript
+async getSocketBasicsConfig(
+  orgSlug: string,
+): Promise<SocketSdkResult<'getSocketBasicsConfig'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getSocketBasicsConfig` · **Permissions:** `socket-basics:read`
 
 ## Telemetry
 
@@ -1274,6 +1525,60 @@ async getQuota(): Promise<SocketSdkResult<'getQuota'>>
 ```
 
 **Quota:** `0` (Free) · **OpenAPI:** `getQuota`
+
+## Metadata
+
+Alert-type and license metadata lookups.
+
+### `alertTypes`
+
+Get metadata for a set of alert types. Accepts an array of alert type
+
+```typescript
+async alertTypes(
+  alertTypes: string[],
+  options?: { language?: string | undefined } | undefined,
+): Promise<SocketSdkResult<'alertTypes'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `alertTypes`
+
+### `licenseMetadata`
+
+Get metadata for a set of licenses (SPDX identifiers or expressions).
+
+```typescript
+async licenseMetadata(
+  request: QueryParams,
+  options?: { includetext?: boolean | undefined } | undefined,
+): Promise<SocketSdkResult<'licenseMetadata'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `licenseMetadata`
+
+## Meta
+
+The Socket API OpenAPI definition.
+
+### `getOpenAPI`
+
+Get the Socket API OpenAPI definition.
+
+```typescript
+async getOpenAPI(): Promise<SocketSdkResult<'getOpenAPI'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOpenAPI`
+
+### `getOpenAPIJSON`
+
+Get the Socket API OpenAPI definition as JSON.
+
+```typescript
+async getOpenAPIJSON(): Promise<SocketSdkResult<'getOpenAPIJSON'>>
+```
+
+**Quota:** `1` (1 units) · **OpenAPI:** `getOpenAPIJSON`
 
 ## Escape hatches
 
