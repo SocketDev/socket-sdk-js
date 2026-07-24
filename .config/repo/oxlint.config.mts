@@ -30,6 +30,11 @@ export default defineConfig(
       // renaming to `config` is an API-shape change that needs its own
       // reviewed pass, not a lint sweep.
       'socket/bag-param-optionality-naming': 'off',
+      // Brand-new socket/* rule from the bundle 1.0.11 sync: the SDK's
+      // published options bags carry required members (orgSlug, scanId,
+      // etc.) — hoisting them to positional params is an API-shape change
+      // that needs its own reviewed pass, not a bundle-refresh sweep.
+      'socket/no-required-in-options-bag': 'off',
       // Fights the fleet-owned socket/optional-explicit-undefined rule on
       // optional function params: the socket rule requires the explicit
       // `| undefined` (exactOptionalPropertyTypes pairing) that this rule
