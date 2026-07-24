@@ -1,6 +1,6 @@
 import { debugLog } from '@socketsecurity/lib/debug/output'
 import { isError } from '@socketsecurity/lib/errors/predicates'
-import { httpRequest } from '@socketsecurity/lib/http-request/request'
+import { httpRequest } from '@socketsecurity/lib/http-request'
 import { parseJson } from '@socketsecurity/lib/json/parse'
 import { perfTimer } from '@socketsecurity/lib/perf/timer'
 import { DateNow } from '@socketsecurity/lib/primordials/date'

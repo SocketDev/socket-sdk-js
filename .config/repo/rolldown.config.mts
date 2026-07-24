@@ -48,7 +48,7 @@ const externalDependencies = Object.keys(packageJson.dependencies || {})
 // leaf modules with empty exports keeps `spinner/spinner.js` loadable while
 // dropping the interactive-prompt subgraph rolldown would otherwise bundle
 // (esbuild's cross-module DCE dropped it; rolldown evaluates full CJS bodies).
-const LIB_STUB_PATTERN =
+export const LIB_STUB_PATTERN =
   /@socketsecurity\/lib\/dist\/(?:constants\/package-default-node-range|external\/(?:@socketregistry\/yocto-spinner|cacache|del|npm-pack|pico-pack|yoctocolors-cjs)|globs|sorts)\.js$/
 
 // `packages/operations` is required only for the pure `pkgNameToSlug` helper
@@ -58,9 +58,9 @@ const LIB_STUB_PATTERN =
 // fetcher-backed export, so replace the module with just the pure helper.
 // (lib 6.0.4 makes that fetcher lazy, after which this stub is belt-and-
 // suspenders; kept so the SDK builds against published 6.0.3 too.)
-const OPERATIONS_PATTERN =
+export const OPERATIONS_PATTERN =
   /@socketsecurity\/lib\/dist\/packages\/operations\.js$/
-const OPERATIONS_STUB = `'use strict'
+export const OPERATIONS_STUB = `'use strict'
 function pkgNameToSlug(pkgName) {
   return pkgName.charCodeAt(0) === 64
     ? pkgName.slice(1).replace('/', '-')
@@ -70,8 +70,8 @@ module.exports = { pkgNameToSlug }`
 
 // 212KB mime-db reached via form-data → mime-types → mime-db; the SDK only
 // needs octet-stream + json + form-data. Replace with a minimal lookup.
-const MIME_DB_PATTERN = /mime-db\/db\.json$/
-const MIME_DB_STUB = `module.exports = {
+export const MIME_DB_PATTERN = /mime-db\/db\.json$/
+export const MIME_DB_STUB = `module.exports = {
   "application/json": { source: "iana", charset: "UTF-8", compressible: true },
   "application/octet-stream": { source: "iana", compressible: false },
   "multipart/form-data": { source: "iana" }

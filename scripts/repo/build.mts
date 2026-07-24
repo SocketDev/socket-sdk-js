@@ -18,6 +18,7 @@ import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { buildConfig } from '../../.config/repo/rolldown.config.mts'
+import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.mts'
 import { runSequence } from '../utils/run-command.mts'
 
 const rootPath = path.resolve(
@@ -74,6 +75,18 @@ export async function buildSource(
     } finally {
       await bundle.close()
     }
+
+    // Browser bundle (dist/index.browser.js): fetch-based, node-free build for
+    // Chrome MV3 service workers, selected via the package.json `browser`
+    // export condition. See .config/repo/rolldown.browser.config.mts.
+    const { output: browserOutput, ...browserInputOptions } = browserBuildConfig
+    const browserBundle = await rolldown(browserInputOptions)
+    try {
+      await browserBundle.write(browserOutput)
+    } finally {
+      await browserBundle.close()
+    }
+
     const buildTime = Date.now() - startTime
 
     return { exitCode: 0, buildTime }

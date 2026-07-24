@@ -165,6 +165,114 @@ export async function checkBundledDependencies(content: string): Promise<{
   }
 }
 
+// Node core modules that must never appear as an executable import/require in
+// the browser bundle. A leading `node:` prefix always disqualifies; these bare
+// names are the builtins the SDK/lib graph could reach.
+const NODE_BUILTIN_NAMES = new Set([
+  'assert',
+  'async_hooks',
+  'buffer',
+  'child_process',
+  'cluster',
+  'console',
+  'constants',
+  'crypto',
+  'dgram',
+  'dns',
+  'domain',
+  'events',
+  'fs',
+  'http',
+  'http2',
+  'https',
+  'inspector',
+  'module',
+  'net',
+  'os',
+  'path',
+  'perf_hooks',
+  'process',
+  'punycode',
+  'querystring',
+  'readline',
+  'repl',
+  'stream',
+  'stream/promises',
+  'string_decoder',
+  'sys',
+  'timers',
+  'timers/promises',
+  'tls',
+  'tty',
+  'url',
+  'util',
+  'v8',
+  'vm',
+  'worker_threads',
+  'zlib',
+])
+
+/**
+ * AST-scan a bundle for executable Node builtin imports/requires. Ignores
+ * string literals and comments (e.g. an embedded package.json script or a
+ * shim's throw-message), so it flags only imports the runtime would actually
+ * resolve — the exact thing that crashes a Chrome MV3 service worker at module
+ * load.
+ */
+export function findNodeBuiltinImports(content: string): string[] {
+  const file = parse(content, {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  })
+
+  const offenders = new Set<string>()
+  const flag = (source: string | undefined): void => {
+    if (!source) {
+      return
+    }
+    if (source.startsWith('node:') || NODE_BUILTIN_NAMES.has(source)) {
+      offenders.add(source)
+    }
+  }
+
+  traverse(file as Parameters<typeof traverse>[0], {
+    ImportDeclaration(importPath) {
+      flag(importPath.node.source.value)
+    },
+    ExportNamedDeclaration(exportPath) {
+      if (exportPath.node.source) {
+        flag(exportPath.node.source.value)
+      }
+    },
+    ExportAllDeclaration(exportPath) {
+      flag(exportPath.node.source.value)
+    },
+    Import(importPath) {
+      // Dynamic import(): the specifier is the parent CallExpression's first arg.
+      const parent = importPath.parent
+      if (parent.type === 'CallExpression') {
+        const [firstArg] = parent.arguments
+        if (firstArg?.type === 'StringLiteral') {
+          flag(firstArg.value)
+        }
+      }
+    },
+    CallExpression(callPath) {
+      const { callee } = callPath.node
+      const [firstArg] = callPath.node.arguments
+      if (
+        callee.type === 'Identifier' &&
+        callee.name === 'require' &&
+        firstArg?.type === 'StringLiteral'
+      ) {
+        flag(firstArg.value)
+      }
+    },
+  })
+
+  return Array.from(offenders)
+}
+
 /**
  * Check if content contains absolute paths. Detects paths like /Users/, C:,
  * /home/, etc.
@@ -234,5 +342,28 @@ describe('Bundle validation', () => {
       result.hasNoBundledDeps,
       'Dependencies from package.json should be external, not bundled inline',
     ).toBe(true)
+  })
+
+  it('browser bundle (dist/index.browser.js) is node-free', async () => {
+    const browserPath = path.join(distPath, 'index.browser.js')
+    const content = await fs.readFile(browserPath, 'utf8')
+
+    // An MV3 service worker cannot resolve `node:*` (or bare builtin) imports; a
+    // single one throws at module load and kills the whole worker. The browser
+    // config shims every builtin the graph reaches, so the emitted bundle must
+    // contain zero executable Node builtin imports/requires.
+    const offenders = findNodeBuiltinImports(content)
+
+    if (offenders.length) {
+      logger.fail('Found Node builtin imports in the browser bundle:')
+      for (let i = 0, { length } = offenders; i < length; i += 1) {
+        logger.fail(`  - ${offenders[i]!}`)
+      }
+    }
+
+    expect(
+      offenders,
+      'Browser bundle must not import any Node builtin (node:* or bare)',
+    ).toEqual([])
   })
 })

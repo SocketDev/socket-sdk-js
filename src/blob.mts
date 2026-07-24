@@ -12,7 +12,7 @@
 import crypto from 'node:crypto'
 
 import { errorMessage } from '@socketsecurity/lib/errors/message'
-import { httpRequest } from '@socketsecurity/lib/http-request/request'
+import { httpRequest } from '@socketsecurity/lib/http-request'
 
 export interface BlobResult {
   binary: boolean
