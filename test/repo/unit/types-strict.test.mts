@@ -15,6 +15,7 @@ import type {
   FullScanItem,
   FullScanListResult,
   FullScanResult,
+  OrganizationItem,
   OrganizationsResult,
 } from '../../../src/types-strict.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
@@ -243,21 +244,25 @@ describe.sequential('Strict Types - v3.0', () => {
 
   describe('OrganizationsResult', () => {
     it('should have guaranteed organization fields', async () => {
+      // GET /v0/organizations returns `organizations` as a map keyed by org
+      // id (OpenAPI `additionalProperties`), not an array.
       const mockResponse = {
-        organizations: [
-          {
+        organizations: {
+          'org-1': {
             id: 'org-1',
             name: 'Test Org',
             slug: 'test-org',
+            // `plan` is an open-ended string; the API returns arbitrary plan
+            // identifiers beyond a fixed set.
             plan: 'pro',
           },
-          {
+          'org-2': {
             id: 'org-2',
             name: 'Another Org',
             slug: 'another-org',
-            plan: 'free',
+            plan: 'enterprise-custom-2025',
           },
-        ],
+        },
       }
 
       nock('https://api.socket.dev')
@@ -272,9 +277,14 @@ describe.sequential('Strict Types - v3.0', () => {
       if (result.success) {
         const typedResult: OrganizationsResult = result
 
-        expect(typedResult.data.organizations).toHaveLength(2)
+        // The result is a keyed map, so iterate its values (as consumers must).
+        const orgs = Object.values(typedResult.data.organizations)
+        expect(orgs).toHaveLength(2)
+        expect(Object.keys(typedResult.data.organizations)).toEqual([
+          'org-1',
+          'org-2',
+        ])
 
-        const orgs = typedResult.data.organizations
         for (let i = 0, { length } = orgs; i < length; i += 1) {
           const org = orgs[i]!
           // All fields should be present and correctly typed
@@ -284,16 +294,40 @@ describe.sequential('Strict Types - v3.0', () => {
           expect(typeof org.plan).toBe('string')
         }
 
-        // Specific value checks
-        const firstOrg = typedResult.data.organizations[0]
-        const secondOrg = typedResult.data.organizations[1]
+        // Lookup by key, plus specific value checks.
+        const firstOrg = typedResult.data.organizations['org-1']
+        const secondOrg = typedResult.data.organizations['org-2']
         expect(firstOrg).toBeDefined()
         expect(secondOrg).toBeDefined()
         if (firstOrg && secondOrg) {
           expect(firstOrg.name).toBe('Test Org')
           expect(secondOrg.slug).toBe('another-org')
+          // Open-ended plan strings are accepted, not just a fixed union.
+          expect(secondOrg.plan).toBe('enterprise-custom-2025')
         }
       }
+    })
+
+    it('types organizations as a keyed map and plan as an open string', () => {
+      // Compile-time lock: `organizations` must be a Record keyed by org id,
+      // and `plan` must accept any string (not a narrow union). This block is
+      // validated by the type checker, not at runtime.
+      const orgs: OrganizationsResult['data']['organizations'] = {
+        'org-1': {
+          id: 'org-1',
+          name: 'Test Org',
+          slug: 'test-org',
+          plan: 'some-brand-new-plan',
+        },
+      }
+
+      // Index access returns an OrganizationItem (map shape, not array).
+      const org: OrganizationItem | undefined = orgs['org-1']
+      expect(org?.plan).toBe('some-brand-new-plan')
+
+      // `plan` is `string`: an arbitrary runtime string is assignable.
+      const plan: OrganizationItem['plan'] = String(Date.now())
+      expect(typeof plan).toBe('string')
     })
   })
 
