@@ -5166,9 +5166,10 @@ export class SocketSdk {
    *   const result = await sdk.listOrganizations()
    *
    *   if (result.success) {
-   *     result.data.organizations.forEach(org => {
-   *       console.log(org.name, org.slug) // Guaranteed fields
-   *     })
+   *   // `organizations` is a map keyed by org id, so iterate its values.
+   *   Object.values(result.data.organizations).forEach(org => {
+   *   console.log(org.name, org.slug) // Guaranteed fields
+   *   })
    *   }
    *   ```
    *

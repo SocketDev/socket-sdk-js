@@ -129,11 +129,15 @@ export type StreamFullScanOptions = {
 
 /**
  * Strict type for organizations list result.
+ *
+ * The GET /organizations endpoint returns \`organizations\` as a map keyed by
+ * organization id (OpenAPI \`additionalProperties\`), not an array. Type it as a
+ * Record so consumers iterate with Object.values()/Object.entries().
  */
 export type OrganizationsResult = {
   cause?: undefined | undefined
   data: {
-    organizations: OrganizationItem[]
+    organizations: Record<string, OrganizationItem>
   }
   error?: undefined | undefined
   status: number
