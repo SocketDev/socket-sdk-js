@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.1.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.0) - 2026-07-25
+
+### Added
+
+- add browser/MV3 build (dist/index.browser.js) (#666)
+- enrich default user agent with Node.js version and OS info (#665)
+- add missing Socket API endpoints for SDK parity
+
+### Fixed
+
+- **`types`** — type listOrganizations result as a keyed map, not an array (#667)
+- **`fleet`** — disable typescript/no-unnecessary-type-assertion (#663)
+
 ## [4.0.4](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.4) - 2026-07-24
 
 ### Fixed
