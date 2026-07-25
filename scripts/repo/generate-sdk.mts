@@ -11,6 +11,7 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 import type { Node } from '@babel/types'
 import { parse } from '@babel/parser'
@@ -26,12 +27,12 @@ import {
 import MagicString from 'magic-string'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { httpJson } from '@socketsecurity/lib-stable/http-request'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
-import { getRootPath } from '../utils/path-helpers.mts'
-import { runCommand } from '../utils/run-command.mts'
+import { runCommand } from './run-command.mts'
 
 // CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
 const traverse =
@@ -39,7 +40,13 @@ const traverse =
 
 const OPENAPI_URL = 'https://api.socket.dev/v0/openapi'
 
-const rootPath = getRootPath(import.meta.url)
+const rootPackageJsonPath = findUpSync('package.json', {
+  cwd: path.dirname(fileURLToPath(import.meta.url)),
+})
+if (!rootPackageJsonPath) {
+  throw new Error('Unable to locate repository root (package.json not found).')
+}
+const rootPath = path.dirname(rootPackageJsonPath)
 const openApiPath = path.resolve(rootPath, 'openapi.json')
 const typesPath = path.resolve(rootPath, 'types/api.d.ts')
 
