@@ -19,7 +19,7 @@ import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { buildConfig } from '../../.config/repo/rolldown.config.mts'
 import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.mts'
-import { runSequence } from '../utils/run-command.mts'
+import { runSequence } from './run-command.mts'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),

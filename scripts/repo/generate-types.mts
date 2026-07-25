@@ -5,17 +5,23 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 import openapiTS from 'openapi-typescript'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { getRootPath } from '../utils/path-helpers.mts'
 
 const logger = getDefaultLogger()
 
-const rootPath = getRootPath(import.meta.url)
+const rootPackageJsonPath = findUpSync('package.json', {
+  cwd: path.dirname(fileURLToPath(import.meta.url)),
+})
+if (!rootPackageJsonPath) {
+  throw new Error('Unable to locate repository root (package.json not found).')
+}
+const rootPath = path.dirname(rootPackageJsonPath)
 const openApiJsonPath = path.join(rootPath, 'openapi.json')
 const typesPath = path.join(rootPath, 'types/api.d.ts')
 

@@ -6,14 +6,20 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
+import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getChangedFilesSync } from '@socketsecurity/lib-stable/git/changed'
 import { getStagedFilesSync } from '@socketsecurity/lib-stable/git/staged'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-import { getRootPath } from './path-helpers.mts'
-
-const rootPath = getRootPath(import.meta.url)
+const rootPackageJsonPath = findUpSync('package.json', {
+  cwd: path.dirname(fileURLToPath(import.meta.url)),
+})
+if (!rootPackageJsonPath) {
+  throw new Error('Unable to locate repository root (package.json not found).')
+}
+const rootPath = path.dirname(rootPackageJsonPath)
 
 /**
  * Core files that require running all tests when changed.

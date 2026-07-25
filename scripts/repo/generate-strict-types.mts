@@ -9,9 +9,11 @@ import { spawnSync } from 'node:child_process'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 import openapiTS from 'openapi-typescript'
 
+import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {
@@ -25,13 +27,18 @@ import {
   findExportByName,
   parseTypeScript,
 } from './generate-strict-types-lib.mts'
-import { getRootPath } from '../utils/path-helpers.mts'
 
 import type { StrictTypeConfig } from './generate-strict-types-emit.mts'
 import type { AstNode } from './generate-strict-types-lib.mts'
 
 const logger = getDefaultLogger()
-const rootPath = getRootPath(import.meta.url)
+const rootPackageJsonPath = findUpSync('package.json', {
+  cwd: path.dirname(fileURLToPath(import.meta.url)),
+})
+if (!rootPackageJsonPath) {
+  throw new Error('Unable to locate repository root (package.json not found).')
+}
+const rootPath = path.dirname(rootPackageJsonPath)
 const openApiPath = path.resolve(rootPath, 'openapi.json')
 const strictTypesPath = path.resolve(rootPath, 'src/types-strict.mts')
 const indexExportsPath = path.resolve(rootPath, 'src/index.mts')

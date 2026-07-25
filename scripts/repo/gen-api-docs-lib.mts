@@ -6,11 +6,19 @@
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 
 import { GROUPS, QUOTA_LABELS } from './gen-api-docs-groups.mts'
-import { getRootPath } from '../utils/path-helpers.mts'
 
-const rootPath = getRootPath(import.meta.url)
+const rootPackageJsonPath = findUpSync('package.json', {
+  cwd: path.dirname(fileURLToPath(import.meta.url)),
+})
+if (!rootPackageJsonPath) {
+  throw new Error('Unable to locate repository root (package.json not found).')
+}
+const rootPath = path.dirname(rootPackageJsonPath)
 const classPath = path.join(rootPath, 'src/socket-sdk-class.mts')
 const dataPath = path.join(
   rootPath,
