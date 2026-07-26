@@ -273,6 +273,63 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
       })
     })
 
+    describe('inputPurl correlation key preservation', () => {
+      it('should preserve inputPurl on each artifact in an artifacts array', () => {
+        const data = {
+          artifacts: [
+            {
+              inputPurl: 'pkg:npm/test-package@1.0.0',
+              name: 'test-package',
+              version: '1.0.0',
+              alerts: [
+                { type: 'criticalCVE', severity: 'high', key: 'alert1' },
+              ],
+            },
+          ],
+        }
+
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
+
+        expect(result.artifacts?.[0]?.inputPurl).toBe(
+          'pkg:npm/test-package@1.0.0',
+        )
+      })
+
+      it('should preserve inputPurl on a single reshaped artifact', () => {
+        const data = {
+          inputPurl: 'pkg:npm/single-package@2.0.0',
+          name: 'single-package',
+          version: '2.0.0',
+          alerts: [{ type: 'criticalCVE', severity: 'high', key: 'alert1' }],
+        }
+
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
+
+        expect(result.inputPurl).toBe('pkg:npm/single-package@2.0.0')
+      })
+
+      it('should preserve inputPurl on error rows (no alerts) for symmetry', () => {
+        // Error rows have no `alerts`/`artifacts`, so they fall through
+        // unchanged. This confirms success and error rows both carry the
+        // correlation key.
+        const data = {
+          inputPurl: 'pkg:npm/missing-package@9.9.9',
+          error: 'Package not found',
+        }
+
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
+
+        expect(result).toBe(data)
+        expect(result.inputPurl).toBe('pkg:npm/missing-package@9.9.9')
+      })
+    })
+
     describe('data with neither artifacts nor alerts', () => {
       it('should return data unchanged when no artifacts or alerts present', () => {
         const data = {

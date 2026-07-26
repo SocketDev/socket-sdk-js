@@ -351,6 +351,11 @@ export function reshapeArtifactForPublicPolicy<
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
+      // Preserve the caller's echoed-back request PURL. It is the
+      // request->response correlation key batch consumers use to map replies
+      // back to the purl they asked for, and it is not sensitive (the caller
+      // supplied it), so it must survive the public reshape.
+      inputPurl: artifact.inputPurl,
       name: artifact.name,
       version: artifact.version,
       size: artifact.size,
