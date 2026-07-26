@@ -336,6 +336,41 @@ export interface ReshapeArtifactOptions {
   policy?: Map<string, string> | undefined
 }
 
+// Non-sensitive deep-link routing hints public consumers (e.g. the web
+// extension popover's packageLink builder) read off a batch artifact to
+// construct correct socket.dev URLs for non-npm ecosystems (Maven
+// classifier/ext, PyPI artifactId, RubyGems platform, Go path). They are not
+// part of the generated OpenAPI SocketArtifact schema, so they are typed
+// locally (all optional) and the public reshape copies each one explicitly,
+// only when present, instead of dropping them.
+export interface ArtifactDeepLinkQualifiers {
+  artifactId?: string | undefined
+  classifier?: string | undefined
+  ext?: string | undefined
+  params?: Record<string, string> | undefined
+  path?: string | undefined
+  platform?: string | undefined
+  section?: string | undefined
+}
+
+export function pickPresentDeepLinkFields(
+  artifact: SocketArtifactWithExtras & ArtifactDeepLinkQualifiers,
+): ArtifactDeepLinkQualifiers {
+  return {
+    ...(artifact.artifactId !== undefined
+      ? { artifactId: artifact.artifactId }
+      : {}),
+    ...(artifact.classifier !== undefined
+      ? { classifier: artifact.classifier }
+      : {}),
+    ...(artifact.ext !== undefined ? { ext: artifact.ext } : {}),
+    ...(artifact.params !== undefined ? { params: artifact.params } : {}),
+    ...(artifact.path !== undefined ? { path: artifact.path } : {}),
+    ...(artifact.platform !== undefined ? { platform: artifact.platform } : {}),
+    ...(artifact.section !== undefined ? { section: artifact.section } : {}),
+  }
+}
+
 export function reshapeArtifactForPublicPolicy<
   T extends Record<string, unknown>,
 >(data: T, options: ReshapeArtifactOptions): T {
@@ -351,11 +386,29 @@ export function reshapeArtifactForPublicPolicy<
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
+      // Deep-link qualifier fields (artifactId, classifier, ext, params, path,
+      // platform, section) are non-sensitive routing hints public consumers use
+      // to build correct socket.dev links for non-npm ecosystems. Copy only the
+      // ones actually present so the reshaped shape stays minimal.
+      ...pickPresentDeepLinkFields(artifact),
+      // Preserve the caller's echoed-back request PURL. It is the
+      // request->response correlation key batch consumers use to map replies
+      // back to the purl they asked for, and it is not sensitive (the caller
+      // supplied it), so it must survive the public reshape.
+      inputPurl: artifact.inputPurl,
+      // namespace + score are non-sensitive package identity/health fields
+      // the public consumer (webext popover) needs to render: `namespace`
+      // completes the coordinate for scoped/grouped packages (npm @scope,
+      // Maven groupId) and `score` drives the score bar. The public policy
+      // (alert low-severity + action filtering below) is unaffected — these
+      // are per-object fields, not the alert set.
+      namespace: artifact.namespace,
       name: artifact.name,
       version: artifact.version,
       size: artifact.size,
       author: artifact.author,
       type: artifact.type,
+      score: artifact.score,
       supplyChainRisk: artifact.supplyChainRisk,
       scorecards: artifact.scorecards,
       topLevelAncestors: artifact.topLevelAncestors,
