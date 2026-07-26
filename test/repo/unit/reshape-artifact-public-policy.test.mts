@@ -312,6 +312,94 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
         expect(result.inputPurl).toBe('pkg:npm/single-package@2.0.0')
       })
 
+      it('should preserve namespace and score on reshaped artifacts', () => {
+        // namespace completes the coordinate for scoped/grouped packages and
+        // score drives the public score bar; both must survive the reshape.
+        const data = {
+          artifacts: [
+            {
+              inputPurl: 'pkg:maven/org.example/lib@1.0.0',
+              namespace: 'org.example',
+              name: 'lib',
+              version: '1.0.0',
+              score: { overall: 0.8, maintenance: 0.9 },
+              alerts: [{ type: 'criticalCVE', severity: 'high', key: 'a1' }],
+            },
+          ],
+        }
+
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
+
+        expect(result.artifacts?.[0]?.namespace).toBe('org.example')
+        expect(result.artifacts?.[0]?.score).toEqual({
+          overall: 0.8,
+          maintenance: 0.9,
+        })
+      })
+
+      it('should preserve deep-link qualifier fields when present', () => {
+        const data = {
+          artifacts: [
+            {
+              inputPurl: 'pkg:maven/org.example/lib@1.0.0',
+              name: 'lib',
+              version: '1.0.0',
+              classifier: 'sources',
+              ext: 'jar',
+              platform: 'ruby',
+              artifactId: 'lib-1.0.0.tar.gz',
+              path: 'go.mod',
+              section: 'files',
+              params: { foo: 'bar' },
+              alerts: [{ type: 'criticalCVE', severity: 'high', key: 'a1' }],
+            },
+          ],
+        }
+
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
+
+        const reshaped = result.artifacts?.[0]
+        expect(reshaped?.classifier).toBe('sources')
+        expect(reshaped?.ext).toBe('jar')
+        expect(reshaped?.platform).toBe('ruby')
+        expect(reshaped?.artifactId).toBe('lib-1.0.0.tar.gz')
+        expect(reshaped?.path).toBe('go.mod')
+        expect(reshaped?.section).toBe('files')
+        expect(reshaped?.params).toEqual({ foo: 'bar' })
+      })
+
+      it('should omit deep-link qualifier fields when absent', () => {
+        // Only copy qualifier fields that are actually present so the reshaped
+        // shape stays minimal (npm artifacts carry none of them).
+        const data = {
+          artifacts: [
+            {
+              inputPurl: 'pkg:npm/test@1.0.0',
+              name: 'test',
+              version: '1.0.0',
+              alerts: [{ type: 'criticalCVE', severity: 'high', key: 'a1' }],
+            },
+          ],
+        }
+
+        const result = reshapeArtifactForPublicPolicy(data, {
+          isAuthenticated: false,
+        })
+
+        const reshaped = result.artifacts?.[0]
+        expect(reshaped && 'classifier' in reshaped).toBe(false)
+        expect(reshaped && 'ext' in reshaped).toBe(false)
+        expect(reshaped && 'platform' in reshaped).toBe(false)
+        expect(reshaped && 'artifactId' in reshaped).toBe(false)
+        expect(reshaped && 'path' in reshaped).toBe(false)
+        expect(reshaped && 'section' in reshaped).toBe(false)
+        expect(reshaped && 'params' in reshaped).toBe(false)
+      })
+
       it('should preserve inputPurl on error rows (no alerts) for symmetry', () => {
         // Error rows have no `alerts`/`artifacts`, so they fall through
         // unchanged. This confirms success and error rows both carry the
