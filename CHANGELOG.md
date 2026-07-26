@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.1.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.1) - 2026-07-26
+
+### Fixed
+
+- preserve fields the public batch consumer needs through the policy reshape (#670)
+
 ## [4.1.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.0) - 2026-07-25
 
 ### Added
