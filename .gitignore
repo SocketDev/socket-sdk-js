@@ -103,6 +103,12 @@ test-output.*
 # files. Keep in lock-step with RELEASE_ONLY_DIR_MIRROR_FILES (scripts/repo/
 # sync-scaffolding/dir-mirror-skip.mts). See docs/agents.md/fleet/release-vs-cascade.md.
 **/.claude/hooks/fleet/_dist/bundle.cjs
+# Legacy pre-v1.0.16 dispatch layout: socket-sdk-js still tracks the
+# _dispatch/index.cjs loader, which requires ./bundle.cjs — that generated
+# bundle must stay untracked there. Keep this entry until every member
+# has migrated to the fleet/index.cjs + _dist/bundle.cjs layout; it
+# matches nothing once the legacy bundle is gone.
+**/.claude/hooks/fleet/_dispatch/bundle.cjs
 **/.claude/hooks/fleet/_dispatch/dispatch-launcher
 **/.claude/hooks/fleet/_dispatch/dispatch-launcher.exe
 **/.claude/hooks/fleet/_dispatch/dispatch-table-excluded.mts
@@ -195,9 +201,3 @@ pnpm-debug.log
 # Per-machine precommit env — fleet peers keep it on disk but untracked; this
 # repo's canonical block lacks a broad .env.* glob, so ignore it here.
 /.env.precommit
-
-# ─── repo-local: generated fleet hook dispatch bundle, required at hook run
-# time by the tracked _dispatch/index.cjs loader. This repo's dispatch layout
-# is ahead of the v1.0.16 fleet block's release-only list — keep the bundle
-# ignored here until the block cascades the entry. ───
-**/.claude/hooks/fleet/_dispatch/bundle.cjs
