@@ -7,7 +7,10 @@ import { describe, expect, it } from 'vitest'
 
 import { DEFAULT_USER_AGENT } from '../../../src/constants.mts'
 import { SocketSdk } from '../../../src/index.mts'
-import { setupTestClient } from '../../utils/environment.mts'
+import {
+  captureRequestHeaders,
+  setupTestClient,
+} from '../../utils/environment.mts'
 
 import type {
   CustomResponseType,
@@ -297,7 +300,7 @@ describe('getApi and sendApi Methods', () => {
 
       const scope = nock('https://api.socket.dev')
       scope.on('request', req => {
-        capturedHeaders = Object.fromEntries(req.headers.entries())
+        capturedHeaders = captureRequestHeaders(req)
       })
       scope.get('/v0/user-agent-test').reply(200, 'ok')
 

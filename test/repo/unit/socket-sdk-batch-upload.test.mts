@@ -10,7 +10,10 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
-import { setupNockEnvironment } from '../../utils/environment.mts'
+import {
+  captureRequestHeaders,
+  setupNockEnvironment,
+} from '../../utils/environment.mts'
 import { NO_RETRY_CONFIG } from '../../utils/fast-test-config.mts'
 
 import type { IncomingHttpHeaders } from 'node:http'
@@ -85,7 +88,7 @@ describe('SocketSdk - Batch Operations', () => {
 
       const scope1 = nock('https://api.socket.dev')
       scope1.on('request', req => {
-        capturedHeaders = Object.fromEntries(req.headers.entries())
+        capturedHeaders = captureRequestHeaders(req)
       })
       scope1.post('/v0/dependencies/upload').reply(200, {
         id: 'snapshot-123',
@@ -120,7 +123,7 @@ describe('SocketSdk - Batch Operations', () => {
 
       const scope2 = nock('https://api.socket.dev')
       scope2.on('request', req => {
-        capturedHeaders = Object.fromEntries(req.headers.entries())
+        capturedHeaders = captureRequestHeaders(req)
       })
       scope2
         .post('/v0/orgs/test-org/full-scans')

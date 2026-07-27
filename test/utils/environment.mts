@@ -9,9 +9,28 @@ import { afterEach, beforeEach } from 'vitest'
 import { FAST_TEST_CONFIG } from './fast-test-config.mts'
 import { SocketSdk } from '../../src/index.mts'
 
+import type { IncomingHttpHeaders } from 'node:http'
+
 // Check if running in coverage mode
 // This is set in vitest.config.mts when coverage is enabled
 export const isCoverageMode = process.env['COVERAGE'] === 'true'
+
+/**
+ * Normalize a nock `scope.on('request')` payload's headers across nock majors:
+ * nock 14 emits a legacy ClientRequest-shaped req whose `headers` is a plain
+ * IncomingHttpHeaders object; nock 15 emits a fetch Request whose `headers`
+ * is a Headers instance. Tests capture through this so the assertion shape
+ * stays stable across the fleet catalog's nock pin.
+ */
+export function captureRequestHeaders(req: {
+  headers: Headers | IncomingHttpHeaders
+}): IncomingHttpHeaders {
+  const { headers } = req
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries())
+  }
+  return { ...headers }
+}
 
 /**
  * Create a test client with a standard token.
