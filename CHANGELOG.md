@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.1.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.2) - 2026-07-27
+
+### Fixed
+
+- **`deps`** — bump the @socketsecurity/lib catalog pin to 6.3.0
+- **`test`** — normalize nock request-header capture across nock majors
+- **`test`** — accept nock 14 legacy request headers in the content-type capture
+- **`fuzz`** — sweep orphaned vitiate shm segments before the run
+
 ## [4.1.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.1) - 2026-07-26
 
 ### Fixed
