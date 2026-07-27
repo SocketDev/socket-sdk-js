@@ -152,7 +152,14 @@ describe('getApi and sendApi Methods', () => {
 
       const scope = nock('https://api.socket.dev')
       scope.on('request', req => {
-        capturedHeaders = Object.fromEntries(req.headers.entries())
+        // nock 14 emits a legacy ClientRequest-shaped req whose `headers` is a
+        // plain IncomingHttpHeaders object; nock 15 emits a fetch Request whose
+        // `headers` is a Headers instance. Accept both shapes.
+        const { headers } = req
+        capturedHeaders =
+          typeof headers?.entries === 'function'
+            ? Object.fromEntries(headers.entries())
+            : { ...headers }
       })
       scope.post('/v0/headers-test', requestData).reply(200, { received: true })
 
