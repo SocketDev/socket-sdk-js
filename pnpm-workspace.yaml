@@ -122,7 +122,12 @@ catalog:
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
   'neosanitize': 0.3.0
-  'nock': 15.0.0
+  # Pinned back 15.0.0 -> 14.0.16 on 2026-07-27: 15.0.0 ships
+  # @mswjs/interceptors 0.39.8, whose fetch bypass path throws
+  # TypeError: unusable on any fetch POST-with-body to an
+  # enableNetConnect-allowed host. Mirrors the fleet canonical pin; bump
+  # to the stabilized 15.x when it ships.
+  'nock': 14.0.16
   'npm-run-all2': 9.0.2
   'oxfmt': 0.59.0
   'oxlint': 1.74.0
