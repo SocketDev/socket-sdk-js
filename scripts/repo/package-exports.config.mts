@@ -32,10 +32,17 @@ export const config: ExportsConfig = {
     'dist/socket-sdk-class.d.mts',
     'dist/threat-campaigns-v1.d.mts',
     'dist/types-strict.d.mts',
+    'dist/types-parity.d.mts',
     'dist/types.d.mts',
     'dist/user-agent.d.mts',
     'dist/utils.d.mts',
     'dist/utils/*',
+    // rolldown code-split JS chunks: the shared runtime and hashed shared
+    // chunks imported by the exported entries — graph-only, shipped via
+    // `files`, never exported. Globbed so a content-hash change does not
+    // re-trip the validator on every dependency bump.
+    'dist/promises-*.js',
+    'dist/rolldown-runtime-*.js',
   ],
   outDir: 'dist',
 }
