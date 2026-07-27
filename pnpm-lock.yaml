@@ -221,8 +221,8 @@ catalogs:
       specifier: npm:@socketsecurity/lib@6.3.0
       version: 6.3.0
     '@socketsecurity/registry-stable':
-      specifier: npm:@socketsecurity/registry@2.0.4
-      version: 2.0.4
+      specifier: npm:@socketsecurity/registry@2.0.5
+      version: 2.0.5
     '@socketsecurity/sdk-stable':
       specifier: npm:@socketsecurity/sdk@4.1.1
       version: 4.1.1
@@ -332,7 +332,7 @@ catalogs:
 overrides:
   '@socketregistry/packageurl-js': 1.4.8
   '@socketsecurity/lib': 6.3.0
-  '@socketsecurity/registry': 2.0.4
+  '@socketsecurity/registry': 2.0.5
   '@socketsecurity/sdk': 4.1.1
   chalk@>=5: 5.6.2
   es-define-property: npm:@socketregistry/es-define-property@1.0.7
@@ -413,7 +413,7 @@ importers:
         version: '@socketsecurity/lib@6.3.0(typescript@7.0.2)'
       '@socketsecurity/registry-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/registry@2.0.4(typescript@7.0.2)'
+        version: '@socketsecurity/registry@2.0.5(typescript@7.0.2)'
       '@socketsecurity/sdk':
         specifier: 4.1.1
         version: 4.1.1
@@ -3231,8 +3231,8 @@ packages:
       typescript:
         optional: true
 
-  '@socketsecurity/registry@2.0.4':
-    resolution: {integrity: sha512-3LswKwVzaxvVJIa4fTBcBTQWqoqA/Eg6U4+zDQHqexPC6/XbxObr19NM5eVDf648koSenhhVH0VORP8iA8llgQ==}
+  '@socketsecurity/registry@2.0.5':
+    resolution: {integrity: sha512-sE4c3CPeEw492GXis9HZz5567j+qzGpAcyaa+Zi+wmJmi/GATB+cURnQ9MXkOyLZVmGjEZRhmfMbZ8mnyzrxCg==}
     engines: {node: '>=24'}
     peerDependencies:
       typescript: '>=5.0.0'
@@ -5919,7 +5919,7 @@ snapshots:
     optionalDependencies:
       typescript: 7.0.2
 
-  '@socketsecurity/registry@2.0.4(typescript@7.0.2)':
+  '@socketsecurity/registry@2.0.5(typescript@7.0.2)':
     optionalDependencies:
       typescript: 7.0.2
 
