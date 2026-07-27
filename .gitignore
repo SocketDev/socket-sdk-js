@@ -237,3 +237,7 @@ pnpm-debug.log
 # vitiate coverage-guided fuzz lane caches (regenerable; never commit)
 /.swc/
 /.vitiate/
+
+# Per-machine precommit env — fleet peers keep it on disk but untracked; this
+# repo's canonical block lacks a broad .env.* glob, so ignore it here.
+/.env.precommit
