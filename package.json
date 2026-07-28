@@ -90,7 +90,8 @@
     "setup:refero": "node scripts/fleet/setup/refero.mts",
     "setup:rust": "node scripts/fleet/setup/rust.mts",
     "setup:mcp": "node scripts/fleet/setup/mcp.mts",
-    "socket-wheelhouse:emit-schema": "node scripts/fleet/socket-wheelhouse-emit-schema.mts"
+    "socket-wheelhouse:emit-schema": "node scripts/fleet/socket-wheelhouse-emit-schema.mts",
+    "mcp:reset": "node scripts/fleet/mcp-reset.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
