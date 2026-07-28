@@ -14,42 +14,42 @@
 // plausibly parsing around need listing — an unlisted value flag degrades
 // to the naive behavior, which is what these guards already had.
 export const GH_VALUE_FLAGS: ReadonlySet<string> = new Set([
-  '-R',
-  '--repo',
-  '-b',
-  '--body',
-  '-t',
-  '--title',
-  '-B',
-  '--base',
-  '-H',
-  '--head',
-  '-F',
-  '--body-file',
-  '-l',
-  '--label',
-  '-a',
   '--assignee',
+  '--base',
+  '--body',
+  '--body-file',
+  '--head',
+  '--label',
+  '--repo',
+  '--title',
+  '-a',
+  '-B',
+  '-b',
+  '-F',
+  '-H',
+  '-l',
+  '-R',
+  '-t',
 ])
 
 export const NPM_VALUE_FLAGS: ReadonlySet<string> = new Set([
+  '--access',
   '--otp',
-  '--workspace',
-  '-w',
+  '--prefix',
   '--registry',
   '--tag',
-  '--access',
-  '--prefix',
+  '--workspace',
   '-C',
+  '-w',
 ])
 
 export const GIT_VALUE_FLAGS: ReadonlySet<string> = new Set([
+  '--git-dir',
+  '--message',
+  '--work-tree',
   '-C',
   '-c',
-  '--git-dir',
-  '--work-tree',
   '-m',
-  '--message',
 ])
 
 /**
