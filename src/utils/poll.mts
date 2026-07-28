@@ -42,18 +42,19 @@ export type PollCachedScanOptions = {
   // DEFAULT_POLL_INTERVAL.
   pollIntervalMs?: number | undefined
   // Injectable clock and sleep for deterministic tests. Default to the real
-  // clock and the lib sleep helper (which fake timers advance correctly).
+  // clock and the lib sleep helper. Fake timers advance that helper correctly.
   now?: (() => number) | undefined
   sleep?: ((ms: number) => Promise<void>) | undefined
 }
 
 /**
  * Drive the 200/202 cached-scan polling loop. Resolves with the parsed JSON of
- * the first 200 response. Each 202 is read for its `{ status, id }` payload,
- * logged via debugLog, and the server-reported id (falling back to label) is
- * used in the timeout message. A non-2xx response throws via getResponseJson
- * (so the caller's existing error handling fires). Repeated 202s past maxPollMs
- * throw a bounded timeout error naming the scan and poll count.
+ * the first 200 response. Each 202 is read for its `{ status, id }` payload and
+ * logged via debugLog. The timeout message uses the server-reported id. When
+ * the server sends no id, it falls back to the label. A non-2xx response
+ * throws via getResponseJson (so the caller's existing error handling fires).
+ * Repeated 202s past maxPollMs throw a bounded timeout error naming the scan
+ * and poll count.
  */
 export async function pollCachedScan(
   options: PollCachedScanOptions,

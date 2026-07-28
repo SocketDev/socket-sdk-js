@@ -162,7 +162,8 @@ export async function checkFileForCdnRefs(
 
     return violations
   } catch (e) {
-    // Skip files we can't read (likely binary despite extension)
+    // Skip files we cannot read. A read failure here usually means the file is
+    // binary despite its extension.
     const err = e as NodeJS.ErrnoException
     if (err.code === 'EISDIR' || err.message.includes('ENOENT')) {
       return []

@@ -3373,8 +3373,9 @@ export class SocketSdk {
   /**
    * Retrieve all entitlements for an organization.
    *
-   * This method fetches all entitlements (both enabled and disabled) for an
-   * organization, returning the complete list with their status.
+   * This method fetches all entitlements for an organization and returns the
+   * complete list with their status. The result covers both enabled and
+   * disabled entitlements.
    *
    * @operationId getEntitlements
    *
