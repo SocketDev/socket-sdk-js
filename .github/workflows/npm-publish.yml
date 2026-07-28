@@ -106,7 +106,7 @@ jobs:
           # On a first-publish repo the registry has nothing, so the tags are
           # the only anchor — a tagless shallow checkout makes the engine
           # derive from zero (0.1.0) and trip the half-applied-bump gate on
-          # historical CHANGELOG sections (decmpfs run 30226873755).
+          # historical CHANGELOG sections that describe shipped versions.
           fetch-tags: true
           persist-credentials: false
       - name: Setup + install
