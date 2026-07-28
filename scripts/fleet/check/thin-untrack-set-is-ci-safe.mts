@@ -23,7 +23,7 @@
  *   fetcher is absent (a partially-onboarded repo). Exit: 0 — clean / no
  *   fetcher; 1 — a CI path is in the untrack set, or the control path is not.
  *
- *   Usage: node scripts/fleet/check/thin-untrack-excludes-ci.mts [--quiet]
+ *   Usage: node scripts/fleet/check/thin-untrack-set-is-ci-safe.mts [--quiet]
  */
 
 import { existsSync } from 'node:fs'
@@ -57,7 +57,7 @@ const CANONICAL_CI_PATHS: readonly string[] = [
 // A wholly-fleet, non-hybrid, non-splice, non-CI bundle path — the positive
 // control thinIgnoreEntries MUST return, proving the function ran and the
 // result isn't vacuously empty.
-const CONTROL_FLEET_PATH = 'scripts/fleet/check/thin-untrack-excludes-ci.mts'
+const CONTROL_FLEET_PATH = 'scripts/fleet/check/thin-untrack-set-is-ci-safe.mts'
 
 /**
  * The repo's tracked CI surface: every `.github/workflows` +
@@ -94,7 +94,7 @@ export async function main(): Promise<void> {
   if (!existsSync(fetcherPath)) {
     if (!quiet) {
       logger.log(
-        `thin-untrack-excludes-ci: no ${FLEET_FETCHER_REL} — vacuous pass.`,
+        `thin-untrack-set-is-ci-safe: no ${FLEET_FETCHER_REL} — vacuous pass.`,
       )
     }
     process.exitCode = 0
@@ -122,7 +122,7 @@ export async function main(): Promise<void> {
   if (offenders.length === 0 && controlPresent) {
     if (!quiet) {
       logger.log(
-        `thin-untrack-excludes-ci: ${ciPaths.length} CI path(s) stay tracked; untrack set is CI-safe.`,
+        `thin-untrack-set-is-ci-safe: ${ciPaths.length} CI path(s) stay tracked; untrack set is CI-safe.`,
       )
     }
     process.exitCode = 0
@@ -131,7 +131,7 @@ export async function main(): Promise<void> {
 
   if (!controlPresent) {
     logger.fail(
-      'thin-untrack-excludes-ci: the control path did not appear in the untrack set — the check could not verify exclusion.',
+      'thin-untrack-set-is-ci-safe: the control path did not appear in the untrack set — the check could not verify exclusion.',
     )
     logger.fail(
       '  What:  thinIgnoreEntries returned an unexpected result (empty or\n' +
@@ -147,7 +147,7 @@ export async function main(): Promise<void> {
   }
 
   logger.fail(
-    `thin-untrack-excludes-ci: ${offenders.length} CI path(s) are in the thin untrack set:`,
+    `thin-untrack-set-is-ci-safe: ${offenders.length} CI path(s) are in the thin untrack set:`,
   )
   for (let i = 0, { length } = offenders; i < length; i += 1) {
     logger.fail(`  ${offenders[i]!}`)
@@ -169,7 +169,7 @@ export async function main(): Promise<void> {
 /* c8 ignore start - entrypoint guard; exercised via subprocess */
 if (isMainModule(import.meta.url)) {
   main().catch((e: unknown) => {
-    logger.fail(`thin-untrack-excludes-ci failed: ${String(e)}`)
+    logger.fail(`thin-untrack-set-is-ci-safe failed: ${String(e)}`)
     process.exitCode = 1
   })
 }
