@@ -8,10 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **`deps`** — bump the @socketsecurity/lib catalog pin to 6.3.0
 - **`test`** — normalize nock request-header capture across nock majors
 - **`test`** — accept nock 14 legacy request headers in the content-type capture
 - **`fuzz`** — sweep orphaned vitiate shm segments before the run
+
+### Internal
+
+- **`deps`** — bump the @socketsecurity/lib catalog pin to 6.3.0
 
 ## [4.1.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.1) - 2026-07-26
 
@@ -30,6 +33,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - **`types`** — type listOrganizations result as a keyed map, not an array (#667)
+
+### Internal
+
 - **`fleet`** — disable typescript/no-unnecessary-type-assertion (#663)
 
 ## [4.0.4](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.4) - 2026-07-24
@@ -40,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [4.0.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.3) - 2026-07-24
 
-### Changed
+### Internal
 
 - **`deps`** — update vendored `@socketsecurity/lib` to 6.2.3: engine-gate collapse and lazy-required purl specs trim the published bundle
 - **`deps`** — update vendored `@socketregistry/packageurl-js` to 1.4.7
@@ -62,10 +68,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **`install`** — use the canonical foundation bootstrap; segregate the firewall bootstrap entry
 - resolve quality scan issues
-- **`deps`** — import from @socketsecurity/lib errors/* leaves, not the dropped bare subpath
 - **`codegen`** — converge the openapi sync pipeline
 
+### Internal
+
+- **`deps`** — import from @socketsecurity/lib errors/* leaves, not the dropped bare subpath
+
 ## [4.0.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.1) - 2026-04-14
+
+### Fixed
+
+- Strip `Authorization` header (case-insensitive) from public firewall API endpoint requests
 
 ### Changed — build
 
@@ -73,11 +86,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Stub heavy `@socketsecurity/lib` internals (npm-pack.js 2.5MB, pico-pack.js 260KB) and replace `mime-db` (212KB) with a minimal 3-entry lookup
 - dist/index.js: 3,897KB → 712KB (82% reduction)
 
-### Fixed
-
-- Strip `Authorization` header (case-insensitive) from public firewall API endpoint requests
-
 ## [4.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.0.0) - 2026-04-06
+
+### Changed
+
+- Migrated HTTP internals to `@socketsecurity/lib/http-request` (`httpRequest`), reducing code duplication and consolidating response handling
+- Retry logic improved: all 4xx client errors now bail immediately (previously only 401/403)
+- New audit log action types: `CreateFirewallCustomRegistry`, `CreateFirewallDeploymentConfig`, `DeleteFirewallCustomRegistry`, `DeleteFirewallDeploymentConfig`, `UpdateFirewallCustomRegistry`, `UpdateFirewallDeploymentConfig`
 
 ### Breaking Changes
 
@@ -93,12 +108,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Removed `PromiseQueue`**: The `PromiseQueue` class has been removed entirely
 - **Removed `getSupportedScanFiles()`**: Deprecated since 2023-01-15 — use `getSupportedFiles()` instead
 - **Removed `http2-wrapper` type dependency**: `Agent` type now uses `ClientHttp2Session` from native `node:http2`
-
-### Changed
-
-- Migrated HTTP internals to `@socketsecurity/lib/http-request` (`httpRequest`), reducing code duplication and consolidating response handling
-- Retry logic improved: all 4xx client errors now bail immediately (previously only 401/403)
-- New audit log action types: `CreateFirewallCustomRegistry`, `CreateFirewallDeploymentConfig`, `DeleteFirewallCustomRegistry`, `DeleteFirewallDeploymentConfig`, `UpdateFirewallCustomRegistry`, `UpdateFirewallDeploymentConfig`
 
 ## [3.5.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.5.0) - 2026-04-03
 
@@ -143,13 +152,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.3.1](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.3.1) - 2026-03-03
 
-### Changed
-
-- **createRepository**: Now requires `repoSlug` as second parameter with typed options including `workspace`, `visibility`, `homepage`, `archived`, `default_branch`, and `description`
-
 ### Added
 
 - New API endpoints from OpenAPI sync: CSV/PDF export for full scans, delete triage alerts, new alert types
+
+### Changed
+
+- **createRepository**: Now requires `repoSlug` as second parameter with typed options including `workspace`, `visibility`, `homepage`, `archived`, `default_branch`, and `description`
 
 ## [3.3.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.3.0) - 2026-01-25
 
@@ -201,13 +210,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.1.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.1.3) - 2025-11-04
 
-### Fixed
-
-- Updated OpenAPI type generation script to automatically preserve SDK v3 method name aliases during automated syncs
-
 ### Changed
 
 - Updated `@socketsecurity/lib` to v3.2.4
+
+### Fixed
+
+- Updated OpenAPI type generation script to automatically preserve SDK v3 method name aliases during automated syncs
 
 ## [3.1.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.1.2) - 2025-11-02
 
@@ -236,14 +245,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Bundle dependencies validation to prevent `link:` dependencies in production
 
-### Fixed
-
-- Build process now correctly bundles `@socketsecurity/lib` instead of marking it as external
-
 ### Changed
 
 - Updated `@socketsecurity/lib` to v3.1.3
 - Updated `@socketregistry/packageurl-js` to v1.3.5
+
+### Fixed
+
+- Build process now correctly bundles `@socketsecurity/lib` instead of marking it as external
 
 ## [3.0.30](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.30) - 2025-11-01
 
@@ -252,14 +261,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Validation guard against `link:` dependencies in package.json
 - Pre-commit and pre-push hooks for development workflow
 
-### Fixed
-
-- Build output now uses relative paths instead of absolute paths for better portability
-
 ### Changed
 
 - Updated `@socketsecurity/lib` to v3.0.6
 - Updated `@socketregistry/packageurl-js` to v1.3.3
+
+### Fixed
+
+- Build output now uses relative paths instead of absolute paths for better portability
 
 ## [3.0.29](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.29) - 2025-11-01
 
@@ -406,13 +415,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.0.6](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.6) - 2025-10-24
 
-### Fixed
-
-- Externalized `@socketsecurity/lib` dependency to prevent dynamic require errors in bundled applications
-
 ### Changed
 
 - Updated `@socketsecurity/lib` to v1.3.3
+
+### Fixed
+
+- Externalized `@socketsecurity/lib` dependency to prevent dynamic require errors in bundled applications
 
 ## [3.0.5](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.5) - 2025-10-24
 
@@ -446,43 +455,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.0) - 2025-10-23
 
-### ⚠️ BREAKING CHANGES
-
 #### Removed Deprecated Methods
-
 The following methods mapped to deprecated `/report/*` backend endpoints and have been removed:
-
-- **`createScan()`** - Use `createFullScan()` instead
-- **`deleteScan()`** - Use `deleteFullScan()` instead
-- **`getScan()`** - Use `getFullScan()` instead
-- **`listScans()`** - Use `listFullScans()` instead
-
-#### Method Renames (Following REST Conventions)
-
-**Full Scans (Modern API):**
-
-- `getOrgFullScanList()` → `listFullScans()` with `ListFullScansOptions`
-- `createOrgFullScan()` → `createFullScan()` with `CreateFullScanOptions`
-- `getOrgFullScanBuffered()` → `getFullScan()`
-- `deleteOrgFullScan()` → `deleteFullScan()`
-- `streamOrgFullScan()` → `streamFullScan()` with `StreamFullScanOptions`
-- `getOrgFullScanMetadata()` → `getFullScanMetadata()`
-
-**Organizations:**
-
-- `getOrganizations()` → `listOrganizations()`
-
-**Repositories:**
-
-- `getOrgRepoList()` → `listRepositories()` with `ListRepositoriesOptions`
-- `getOrgRepo()` → `getRepository()`
-- `createOrgRepo()` → `createRepository()`
-- `updateOrgRepo()` → `updateRepository()`
-- `deleteOrgRepo()` → `deleteRepository()`
-
-#### Type System Improvements
-
-Strict types now mark guaranteed API fields as required instead of optional, improving IntelliSense autocomplete.
 
 ### Added
 
@@ -491,6 +465,31 @@ Strict types now mark guaranteed API fields as required instead of optional, imp
 ### Changed
 
 - File-upload methods automatically skip unreadable files with warnings instead of failing
+
+### ⚠️ BREAKING CHANGES
+
+- **`createScan()`** - Use `createFullScan()` instead
+- **`deleteScan()`** - Use `deleteFullScan()` instead
+- **`getScan()`** - Use `getFullScan()` instead
+- **`listScans()`** - Use `listFullScans()` instead
+#### Method Renames (Following REST Conventions)
+**Full Scans (Modern API):**
+- `getOrgFullScanList()` → `listFullScans()` with `ListFullScansOptions`
+- `createOrgFullScan()` → `createFullScan()` with `CreateFullScanOptions`
+- `getOrgFullScanBuffered()` → `getFullScan()`
+- `deleteOrgFullScan()` → `deleteFullScan()`
+- `streamOrgFullScan()` → `streamFullScan()` with `StreamFullScanOptions`
+- `getOrgFullScanMetadata()` → `getFullScanMetadata()`
+**Organizations:**
+- `getOrganizations()` → `listOrganizations()`
+**Repositories:**
+- `getOrgRepoList()` → `listRepositories()` with `ListRepositoriesOptions`
+- `getOrgRepo()` → `getRepository()`
+- `createOrgRepo()` → `createRepository()`
+- `updateOrgRepo()` → `updateRepository()`
+- `deleteOrgRepo()` → `deleteRepository()`
+#### Type System Improvements
+Strict types now mark guaranteed API fields as required instead of optional, improving IntelliSense autocomplete.
 
 ## [2.0.7](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.7) - 2025-10-22
 
@@ -543,6 +542,17 @@ Strict types now mark guaranteed API fields as required instead of optional, imp
 
 ## [2.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.0) - 2025-10-10
 
+To migrate from v1.x to v2.0:
+1. Ensure your project supports ESM modules (Node.js 14+ with `"type": "module"` or `.mjs` extensions)
+2. Update imports from CommonJS `require()` to ESM `import` statements:
+   ```javascript
+   // Before (v1.x)
+   const { SocketSdk } = require('@socketsecurity/sdk')
+   // After (v2.0)
+   import { SocketSdk } from '@socketsecurity/sdk'
+   ```
+3. If your project still requires CommonJS, consider staying on v1.x or using a transpiler
+
 ### Changed
 
 - **BREAKING**: Migrated to ESM-only module format
@@ -558,23 +568,6 @@ Strict types now mark guaranteed API fields as required instead of optional, imp
 
 - **BREAKING**: Removed CommonJS support and exports
 - Removed CommonJS-specific build configurations
-
-### Migration Guide
-
-To migrate from v1.x to v2.0:
-
-1. Ensure your project supports ESM modules (Node.js 14+ with `"type": "module"` or `.mjs` extensions)
-2. Update imports from CommonJS `require()` to ESM `import` statements:
-
-   ```javascript
-   // Before (v1.x)
-   const { SocketSdk } = require('@socketsecurity/sdk')
-
-   // After (v2.0)
-   import { SocketSdk } from '@socketsecurity/sdk'
-   ```
-
-3. If your project still requires CommonJS, consider staying on v1.x or using a transpiler
 
 ## [1.11.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v1.11.2) - 2025-10-07
 
