@@ -70,7 +70,7 @@
     "security": "node scripts/fleet/security.mts",
     "test": "node scripts/fleet/test.mts",
     "test:fuzz": "node scripts/repo/fuzz.mts",
-    "type": "tsgo --noEmit -p .config/fleet/tsconfig.check.json",
+    "type": "node node_modules/typescript/bin/tsc --noEmit -p .config/fleet/tsconfig.check.json",
     "update": "node scripts/fleet/update.mts",
     "lockstep": "node scripts/fleet/lockstep.mts",
     "lockstep:emit-mirror-globs": "node scripts/fleet/lockstep-emit-mirror-globs.mts",
@@ -83,13 +83,14 @@
     "sync-oxlint-rules": "node scripts/fleet/sync-oxlint-rules.mts",
     "sync-package-manager-pins": "node scripts/fleet/sync-package-manager-pins.mts",
     "doctor": "node scripts/fleet/doctor.mts",
-    "gen:llms-txt": "node scripts/fleet/make-llms-txt.mts --no-ai",
-    "setup:brew": "node scripts/fleet/setup/setup-brew.mts",
-    "setup:go": "node scripts/fleet/setup/setup-go.mts",
-    "setup:python": "node scripts/fleet/setup/setup-python.mts",
-    "setup:refero": "node scripts/fleet/setup/setup-refero.mts",
-    "setup:rust": "node scripts/fleet/setup/setup-rust.mts",
-    "setup:mcp": "node scripts/fleet/setup/setup-mcp.mts"
+    "gen:llms-txt": "node scripts/fleet/gen/llms-txt.mts --no-ai",
+    "setup:brew": "node scripts/fleet/setup/brew.mts",
+    "setup:go": "node scripts/fleet/setup/go.mts",
+    "setup:python": "node scripts/fleet/setup/python.mts",
+    "setup:refero": "node scripts/fleet/setup/refero.mts",
+    "setup:rust": "node scripts/fleet/setup/rust.mts",
+    "setup:mcp": "node scripts/fleet/setup/mcp.mts",
+    "socket-wheelhouse:emit-schema": "node scripts/fleet/socket-wheelhouse-emit-schema.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
@@ -99,6 +100,7 @@
     "@babel/types": "7.29.7",
     "@oxlint/migrate": "1.52.0",
     "@redwoodjs/agent-ci": "catalog:",
+    "@shadscan/cli": "catalog:",
     "@sinclair/typebox": "catalog:",
     "@socketregistry/packageurl-js": "catalog:",
     "@socketregistry/packageurl-js-stable": "catalog:",
@@ -170,7 +172,7 @@
   },
   "engines": {
     "node": ">=18.20.8",
-    "npm": ">=12.0.0",
+    "npm": ">=12.0.1",
     "pnpm": ">=11.0.5"
   },
   "allowScripts": {

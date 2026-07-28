@@ -93,6 +93,13 @@ test-output.*
 !/.claude/settings.json
 !/.claude/skills/
 !/.claude/workflows/
+# Transient agent work-state: handoff + planning docs live in these
+# gitignored operator-notes homes and are NEVER committed. Re-asserted here
+# AFTER the re-include lines above so a future `!/.claude/<x>/` re-include
+# can't accidentally start tracking them. Dir-scoped so no sibling path is
+# caught. handoff-docs-are-untracked backstops a stray committed handoff doc.
+/.claude/plans/
+/.claude/reports/
 # Release-only GENERATED hook-dispatch artifacts: all three dispatch-table
 # variants, the rolldown bundles, the native snapshot launcher + its frozen
 # sidecars, and the dispatch manifest. Rebuilt by
@@ -185,6 +192,10 @@ Thumbs.db
 
 # Node
 node_modules/
+# Workspace-local pnpm store — CI jobs whose pnpm runs inside a
+# workspace-mounted sandbox pin the store here (setup-and-install
+# store-dir input); never committed.
+/.pnpm-store/
 npm-debug.log
 pnpm-debug.log
 *.tgz
