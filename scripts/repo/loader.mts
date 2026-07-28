@@ -29,6 +29,7 @@ interface ResolveResult {
 
 type NextResolve = (specifier: string, context: ResolveContext) => ResolveResult
 
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- Node module-hooks contract: a loader must export exactly `resolve`.
 export function resolve(
   specifier: string,
   context: ResolveContext,

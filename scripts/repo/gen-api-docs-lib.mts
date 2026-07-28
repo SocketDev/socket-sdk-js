@@ -197,7 +197,7 @@ export function loadQuotaData(): QuotaData {
 /**
  * Render the full markdown document from extracted methods.
  */
-export function render(methods: MethodInfo[]): string {
+export function renderApiDocs(methods: MethodInfo[]): string {
   const byName = new Map(methods.map(m => [m.name, m]))
   const sections: string[] = []
   sections.push('<!--')

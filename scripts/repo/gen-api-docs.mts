@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { extractMethods, render } from './gen-api-docs-lib.mts'
+import { extractMethods, renderApiDocs } from './gen-api-docs-lib.mts'
 
 const logger = getDefaultLogger()
 const rootPackageJsonPath = findUpSync('package.json', {
@@ -36,7 +36,7 @@ const outPath = path.join(rootPath, 'docs/api.md')
 function main(): void {
   const check = process.argv.includes('--check')
   const methods = extractMethods()
-  const next = render(methods)
+  const next = renderApiDocs(methods)
 
   if (check) {
     const current = existsSync(outPath) ? readFileSync(outPath, 'utf8') : ''
