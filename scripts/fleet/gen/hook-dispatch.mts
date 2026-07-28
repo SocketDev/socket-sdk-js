@@ -16,7 +16,7 @@
  *     --check  exit 2 if the on-disk table differs from freshly generated.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -48,6 +48,7 @@ export {
   resolveHookBundleOut,
 } from '../paths.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
+import { writeThroughMirrorLock } from '../_shared/mirror-lock.mts'
 
 /**
  * Render the dispatch-table.mts source from the eligible-hook list. Each hook
@@ -309,12 +310,14 @@ function main(): void {
     return
   }
   for (const [variant, outPath] of TABLE_OUTPUTS) {
-    writeFileSync(
+    // The outputs live inside the cascade-locked hook mirror; the shared helper
+    // lifts the read-only lock around each regeneration write.
+    writeThroughMirrorLock(
       outPath,
       generateDispatchTableSource(FLEET_HOOKS_DIR, variant),
     )
   }
-  writeFileSync(
+  writeThroughMirrorLock(
     DISPATCH_MANIFEST_PATH,
     generateDispatchManifestSource(FLEET_HOOKS_DIR),
   )
@@ -330,15 +333,19 @@ function main(): void {
     'template/base/.claude/hooks/fleet/_dispatch',
   )
   if (existsSync(templateDispatch)) {
-    writeFileSync(
-      path.join(templateDispatch, 'dispatch-table.mts'),
+    // The template mirror is cascade-locked read-only in the wheelhouse just
+    // like the live outputs above; lift the lock around each write.
+    const templateTable = path.join(templateDispatch, 'dispatch-table.mts')
+    writeThroughMirrorLock(
+      templateTable,
       generateDispatchTableSource(FLEET_HOOKS_DIR),
     )
-    writeFileSync(
-      path.join(
-        REPO_ROOT,
-        'template/base/.claude/hooks/fleet/_shared/dispatch-manifest.json',
-      ),
+    const templateManifest = path.join(
+      REPO_ROOT,
+      'template/base/.claude/hooks/fleet/_shared/dispatch-manifest.json',
+    )
+    writeThroughMirrorLock(
+      templateManifest,
       generateDispatchManifestSource(FLEET_HOOKS_DIR),
     )
   }

@@ -11,6 +11,10 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { resolveReleaseSubject } from '../_shared/release-subject.mts'
+import { npmIdentityFor } from '../publish-infra/npm/auth-identity.mts'
+import { resolveNpmWorkspaceLayout } from '../publish-infra/npm/workspace.mts'
+
+import type { NpmIdentityReport } from '../publish-infra/npm/auth-identity.mts'
 import {
   ensureTagAndRelease,
   requireRegistryLive,
@@ -23,7 +27,7 @@ import {
 import {
   compareExtractedTarballs,
   defaultPackTarball,
-  verifyStagedEntry,
+  verifyStagedEntryRouted,
 } from '../publish-infra/npm/staged.mts'
 import { runCapture, runInherit } from '../publish-infra/shared.mts'
 
@@ -72,11 +76,12 @@ export interface RunnerSeams {
         options?:
           | { packAssets?: (() => Promise<string[]>) | undefined }
           | undefined,
-      ) => Promise<void>)
+      ) => Promise<boolean | void>)
     | undefined
   fetchRegistryDist?:
     | ((name: string) => Promise<Record<string, RegistryDistInfo>>)
     | undefined
+  identityFor?: ((pkg: string) => Promise<NpmIdentityReport>) | undefined
   listStaged?: (() => Promise<StageListEntry[]>) | undefined
   packTarball?:
     | ((name: string, version: string) => Promise<string | undefined>)
@@ -112,8 +117,9 @@ export interface ResolvedSeams {
     options?:
       | { packAssets?: (() => Promise<string[]>) | undefined }
       | undefined,
-  ) => Promise<void>
+  ) => Promise<boolean | void>
   fetchRegistryDist: (name: string) => Promise<Record<string, RegistryDistInfo>>
+  identityFor: (pkg: string) => Promise<NpmIdentityReport>
   listStaged: () => Promise<StageListEntry[]>
   packTarball: (name: string, version: string) => Promise<string | undefined>
   registryLive: (name: string, version: string) => Promise<boolean>
@@ -182,23 +188,33 @@ export function resolveSeams(seams: RunnerSeams | undefined): ResolvedSeams {
       s.downloadRegistryTarball ?? defaultDownloadRegistryTarball,
     ensureRelease: s.ensureRelease ?? ensureTagAndRelease,
     fetchRegistryDist: s.fetchRegistryDist ?? defaultFetchRegistryDist,
+    identityFor: s.identityFor ?? npmIdentityFor,
     listStaged: s.listStaged ?? listStagedPackages,
     packTarball: s.packTarball ?? defaultPackTarball,
     registryLive: s.registryLive ?? defaultRegistryLive,
     runCapture: s.runCapture ?? runCapture,
     runInherit: s.runInherit ?? runInherit,
     sleep: s.sleep ?? defaultSleep,
-    verifyEntry: s.verifyEntry ?? verifyStagedEntry,
+    verifyEntry: s.verifyEntry ?? verifyStagedEntryRouted,
   }
 }
 
 /**
  * Read the release subject's name + version: `<cwd>/package.json` for a plain
- * repo, the `publishConfig.directory` manifest for a redirected monorepo —
- * the version the pipeline bumps/verifies/releases is the SUBJECT's, never a
- * private root's.
+ * repo, the `publishConfig.directory` manifest for a redirected monorepo, and
+ * the MAIN workspace anchor for a multi-package layout — the staged entries a
+ * multi layout uploads carry the members' names, so a verify/promote keyed on
+ * the private root's name can never find them. The version the pipeline
+ * bumps/verifies/releases is the SUBJECT's, never a private root's.
  */
 export function readPkg(cwd: string): { name: string; version: string } {
+  const layout = resolveNpmWorkspaceLayout(cwd)
+  if (layout.kind === 'multi' && layout.main) {
+    return {
+      name: layout.main.name,
+      version: layout.versionSource.version,
+    }
+  }
   const subject = resolveReleaseSubject(cwd)
   return { name: subject.name, version: subject.version }
 }

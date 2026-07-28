@@ -102,6 +102,12 @@ jobs:
           # Backfill checks out the content ref; empty = the dispatched ref.
           ref: ${{ inputs.checkout-ref }}
           fetch-depth: 1
+          # The bump derivation anchors on registry-latest + the last v-tag.
+          # On a first-publish repo the registry has nothing, so the tags are
+          # the only anchor — a tagless shallow checkout makes the engine
+          # derive from zero (0.1.0) and trip the half-applied-bump gate on
+          # historical CHANGELOG sections (decmpfs run 30226873755).
+          fetch-tags: true
           persist-credentials: false
       - name: Setup + install
         uses: ./.github/actions/fleet/setup-and-install
@@ -129,6 +135,19 @@ jobs:
         with:
           client-id: ${{ vars.SOCKET_RELEASE_CLIENT_ID }}
           private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
+      # The promote PR that lands the bump on the default branch needs
+      # pull_requests:write, which the release App does not carry — the PR App
+      # does. Minted here, beside the release token and BEFORE the publish
+      # step, so a missing/ungranted PR App refuses while nothing is published:
+      # resolveReleaseEnv demands PR_APP_TOKEN at bump time, and the promote PR
+      # only runs after the irreversible registry write.
+      - name: Mint PR App token
+        if: ${{ inputs.backfill-version == '' && inputs.bump }}
+        id: pr-app
+        uses: ./.github/actions/fleet/github-pr-app-token
+        with:
+          client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
       # --bump consumes the committed version hint (X.Y.Z-prerelease →
       # X.Y.Z), writes CHANGELOG, and commits via the release App (verified,
       # signed) onto a throwaway npm-publish-v<version> branch — main is
@@ -149,6 +168,7 @@ jobs:
           BACKFILL_VERSION: ${{ inputs.backfill-version }}
           CHECKOUT_REF: ${{ inputs.checkout-ref }}
           DIST_TAG: ${{ inputs.dist-tag }}
+          PR_APP_TOKEN: ${{ steps.pr-app.outputs.token }}
           RELEASE_AS: ${{ inputs.release-as }}
           RELEASE_APP_TOKEN: ${{ steps.release-app.outputs.token }}
         # CHECKOUT_REF forwards on its own so a checkout-ref dispatch WITHOUT

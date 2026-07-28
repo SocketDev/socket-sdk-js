@@ -132,16 +132,21 @@ export function npmReleaseLane(
 }
 
 /**
- * The commit that FLIPPED package.json's root `version` to `version` — the
- * npm binding of the shared flip probe, kept exported for the tag-gap
- * reconciler (release-pipeline/reconcile-gap.mts).
+ * The commit that FLIPPED the repo's VERSION-SOURCE manifest to `version` —
+ * the npm binding of the shared flip probe, kept exported for the tag-gap
+ * reconciler (release-pipeline/reconcile-gap.mts). The manifest comes from
+ * the workspace layout, not a hard-coded root `package.json`: a private
+ * workspace root carries no version, so its releases flip the MAIN member's
+ * manifest (decmpfs bumps `napi/decmpfs/package.json`) and a root-only probe
+ * would never find the commit to tag.
  */
 export async function findVersionFlipCommit(
   version: string,
   cwd: string = rootPath,
 ): Promise<string | undefined> {
+  const layout = resolveNpmWorkspaceLayout(cwd)
   return await findAnchorVersionFlipCommit(
-    npmReleaseLane(undefined),
+    npmReleaseLane(undefined, layout.versionSource.relManifestPath),
     version,
     cwd,
   )
@@ -618,17 +623,47 @@ async function main(): Promise<void> {
   let hintedVersion: string | undefined
   if (typeof releaseAs === 'string') {
     if (
-      releaseAs !== 'major' &&
-      releaseAs !== 'minor' &&
-      releaseAs !== 'patch'
+      releaseAs === 'major' ||
+      releaseAs === 'minor' ||
+      releaseAs === 'patch'
     ) {
+      level = releaseAs
+    } else if (/^\d+\.\d+\.\d+$/.test(releaseAs)) {
+      // An exact `--release-as X.Y.Z` names the landing version outright —
+      // the release pipeline forwards the USER-named version this way, since
+      // translating it into a level is lossy (bump.mts increments from the
+      // released base, never the manifest, so base+level can land somewhere
+      // other than the named version). Same guardrails as a committed hint.
+      const baseMajor = base.split('.')[0]
+      if (releaseAs.split('.')[0] !== baseMajor) {
+        logger.fail(
+          `--release-as ${releaseAs} is a MAJOR jump past the last released ` +
+            `version ${base} — a major requires the explicit --release-as ` +
+            `major signal, not an exact version.`,
+        )
+        process.exitCode = 1
+        return
+      }
+      if (!gt(releaseAs, base)) {
+        logger.fail(
+          `--release-as ${releaseAs} is not ahead of the last released ` +
+            `version ${base} — it would re-publish or move backward. ` +
+            `Name a version greater than ${base}.`,
+        )
+        process.exitCode = 1
+        return
+      }
+      hintedVersion = releaseAs
+      level = 'patch'
+      logger.log(`--release-as names the exact landing version ${releaseAs}.`)
+    } else {
       logger.fail(
-        `--release-as must be one of major | minor | patch (got "${releaseAs}").`,
+        `--release-as must be major | minor | patch or an exact X.Y.Z ` +
+          `version (got "${releaseAs}").`,
       )
       process.exitCode = 1
       return
     }
-    level = releaseAs
   } else if (hinted) {
     // Compare the hint's major against the LAST RELEASED version (`base`), not
     // the manifest — `hinted` is the manifest with its suffix stripped, so its
@@ -721,6 +756,65 @@ async function main(): Promise<void> {
       logger.success(
         `Bump already applied: package.json reads ${nextVersion} and ` +
           `CHANGELOG.md already has its section — nothing to write.`,
+      )
+      return
+    }
+    if (versionHintFrom(pkg.version) === nextVersion) {
+      // The changelog section landed but the version source still carries
+      // the release HINT (`X.Y.Z-prerelease`) — a member manifest joined the
+      // layout after the section was written, or an earlier run finalized
+      // only part of the tree. Complete the bump: finalize the manifest(s)
+      // without touching the changelog.
+      logger.log(
+        `CHANGELOG.md already carries ${nextVersion}; finalizing the ` +
+          `manifest hint ${pkg.version} → ${nextVersion}.`,
+      )
+      let finalized: string[]
+      if (multi) {
+        const written = await applyLockstepBump(layout, nextVersion)
+        if (!written) {
+          process.exitCode = 1
+          return
+        }
+        finalized = written
+      } else {
+        writeFileSync(
+          path.join(rootPath, 'package.json'),
+          replaceVersion(pkgRaw, nextVersion),
+        )
+        finalized = ['package.json']
+      }
+      const addFinalize = await runCapture(
+        'git',
+        ['add', ...finalized],
+        rootPath,
+      )
+      if (addFinalize.code !== 0) {
+        logger.fail('git add failed.')
+        process.exitCode = 1
+        return
+      }
+      const commitFinalize = await runCapture(
+        'git',
+        [
+          'commit',
+          '-o',
+          ...finalized,
+          '-m',
+          `chore: bump version to ${nextVersion}`,
+        ],
+        rootPath,
+      )
+      if (commitFinalize.code !== 0) {
+        logger.fail('git commit failed:')
+        logger.fail(commitFinalize.stdout)
+        process.exitCode = 1
+        return
+      }
+      logger.success(
+        `Finalized ${finalized.join(' + ')} at ${nextVersion}. Push, then ` +
+          `trigger the publish workflow (stage), then ` +
+          `\`node scripts/fleet/npm-publish.mts --approve\` to promote.`,
       )
       return
     }

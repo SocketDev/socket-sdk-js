@@ -1,15 +1,18 @@
 /**
  * @file `--staged` / `--direct` publish over a MULTI-PACKAGE workspace layout
- *   (decmpfs, stuie): gate the whole set first — version lockstep, no hollow
- *   platform package, an orderable dependency graph — then publish each
- *   member in dependency order (platform packages before the loader that
+ *   (decmpfs, stuie): gate the whole set first — version lockstep, every
+ *   declared platform package present on disk, no hollow platform package, an
+ *   orderable dependency graph — then publish each member
+ *   in dependency order (platform packages before the loader that
  *   optional-depends on them; `pnpm -r publish`'s topological semantics,
  *   computed via computePublishOrder so the per-package gates run in the same
- *   order the registry receives the uploads). Already-published members are
- *   skipped LOUD (the partial-publish recovery path); the first failed upload
- *   aborts the rest so a dependent never publishes ahead of its missing
- *   dependency. Single-package repos never reach this module — staged.mts
- *   delegates here only for `kind: 'multi'` layouts.
+ *   order the registry receives the uploads). Every member also stands behind
+ *   the pack preflight (pack-preflight.mts) — its packed tarball must carry
+ *   every declared payload file before the publish command runs.
+ *   Already-published members are skipped LOUD (the partial-publish recovery
+ *   path); the first failed upload aborts the rest so a dependent never
+ *   publishes ahead of its missing dependency. Single-package repos never reach
+ *   this module — staged.mts delegates here only for `kind: 'multi'` layouts.
  */
 
 import crypto from 'node:crypto'
@@ -27,14 +30,25 @@ import process from 'node:process'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 import { releaseBehindLiveGate } from '../release.mts'
-import { logger, runCapture, runInherit } from '../shared.mts'
+import {
+  logger,
+  provenanceAllowed,
+  runCapture,
+  runInherit,
+} from '../shared.mts'
 import { withPinnedReadme } from '../pin-readme.mts'
 import { withPrunedPackManifest } from './pack-manifest.mts'
-import { isAlreadyPublished } from './registry.mts'
-import { isStagingExpected } from './shared.mts'
+import { verifyPackedPayload } from './pack-preflight.mts'
+import {
+  diagnoseStageConflict,
+  diagnoseStagedAuthFailure,
+  isAlreadyPublished,
+} from './registry.mts'
+import { isStagingExpected, logNpmApproveHandoff } from './shared.mts'
 import {
   checkVersionLockstep,
   computePublishOrder,
+  findAbsentPlatformPackages,
   findHollowPackages,
   requiredPayloadFiles,
 } from './workspace-plan.mts'
@@ -101,9 +115,10 @@ export async function packWorkspaceMemberTarball(
 
 /**
  * Run the pre-publish gates every multi-package publish stands behind, in
- * fail-loud order: version lockstep across every member, no hollow platform
- * package, an orderable dependency graph. Returns the publish order, or
- * undefined after failing loud (process.exitCode set). Exported for tests.
+ * fail-loud order: version lockstep across every member, every declared
+ * platform package present on disk, no hollow platform package, an orderable
+ * dependency graph. Returns the publish order, or undefined after failing loud
+ * (process.exitCode set). Exported for tests.
  */
 export function gateWorkspaceForPublish(
   layout: NpmWorkspaceLayout,
@@ -117,6 +132,35 @@ export function gateWorkspaceForPublish(
         `\n  Fix: run the bump (scripts/fleet/bump.mts) so every manifest ` +
         `and sibling pin moves to ${layout.versionSource.version} in ` +
         `lockstep; never hand-edit one member.`,
+    )
+    process.exitCode = 1
+    return undefined
+  }
+  const absent = findAbsentPlatformPackages(layout.packages)
+  if (absent.length > 0) {
+    const detail = absent
+      .map(
+        report =>
+          `    ${report.owner.relDir} (${report.owner.name}) declares ` +
+          `${report.missing.join(', ')}`,
+      )
+      .join('\n')
+    logger.fail(
+      `Refusing to publish a loader whose declared platform package(s) are ` +
+        `ABSENT from the workspace — an optionalDependency that never ` +
+        `publishes 404s on every consumer install.\n` +
+        `  Where:\n${detail}\n` +
+        `  Saw vs wanted: the loader's optionalDependencies name platform ` +
+        `siblings with NO package directory on disk (repos gitignore their ` +
+        `generated npm/<platformId>/ dirs, so a clean checkout has none); ` +
+        `wanted every declared name backed by a real package directory ` +
+        `carrying its payload before any upload.\n` +
+        `  Fix: run the platform matrix build so the artifacts exist — ` +
+        `decmpfs's build-addons job builds each runner's .node, runs ` +
+        `make-npm-dirs.mts, and stages the payload into ` +
+        `napi/decmpfs/npm/<platformId>/ before the publish leg — or, if these ` +
+        `names are genuinely unpublished, reserve and publish them FIRST; a ` +
+        `loader whose optionalDependencies 404 breaks every consumer install.`,
     )
     process.exitCode = 1
     return undefined
@@ -395,17 +439,49 @@ export async function runWorkspacePublish(
       '--ignore-scripts',
     )
     if (process.env['GITHUB_ACTIONS'] === 'true') {
-      args.push('--provenance')
+      if (provenanceAllowed()) {
+        args.push('--provenance')
+      } else {
+        logger.warn(
+          'Provenance skipped: npm only verifies sigstore bundles from ' +
+            'PUBLIC source repositories, and this run is not one. The ' +
+            'upload proceeds unattested; provenance turns back on ' +
+            'automatically when the repo is public.',
+        )
+      }
     }
     if (dryRun) {
       args.push('--dry-run')
     }
     // Same README-pin + manifest-prune brackets as the single-subject modes,
-    // per member, so the approve-time verify pack sees identical bytes.
+    // per member, so the approve-time verify pack sees identical bytes. The
+    // pack preflight runs inside them, before the command, so a member whose
+    // tarball is missing declared payload never stages or publishes.
+    let preflightOk = true
     // eslint-disable-next-line no-await-in-loop -- serial by design
     const code = await withPinnedReadme(pinTargetForPackage(layout, pkg), () =>
-      withPrunedPackManifest(pkg.dir, () => runInherit('pnpm', args, pkg.dir)),
+      withPrunedPackManifest(pkg.dir, async () => {
+        preflightOk = await verifyPackedPayload({
+          dir: pkg.dir,
+          manifest: pkg.manifest,
+          name: pkg.name,
+          version,
+        })
+        if (!preflightOk) {
+          return 1
+        }
+        return await runInherit('pnpm', args, pkg.dir)
+      }),
     )
+    if (!preflightOk) {
+      logger.fail(
+        `Pack preflight failed for ${pkg.name}@${version} ` +
+          `(${path.relative(layout.rootPath, pkg.dir)}). Aborting the ` +
+          `remaining members — a hollow tarball must never stage or publish.`,
+      )
+      process.exitCode = 1
+      return
+    }
     if (code !== 0) {
       logger.fail(
         `pnpm ${mode === 'staged' ? 'stage publish' : 'publish'} exited ` +
@@ -414,6 +490,14 @@ export async function runWorkspacePublish(
           `remaining members — a dependent must never publish ahead of a ` +
           `failed dependency.`,
       )
+      // eslint-disable-next-line no-await-in-loop -- failure path, loop exits here
+      for (const line of await diagnoseStageConflict(pkg.name, version)) {
+        logger.fail(line)
+      }
+      // eslint-disable-next-line no-await-in-loop -- failure path, loop exits here
+      for (const line of await diagnoseStagedAuthFailure(pkg.name)) {
+        logger.fail(line)
+      }
       process.exitCode = code
       return
     }
@@ -437,11 +521,9 @@ export async function runWorkspacePublish(
   if (mode === 'staged') {
     logger.success(
       `Staged ${published} package(s) at ${version}` +
-        `${skipped ? ` (${skipped} already published, skipped)` : ''}. Run ` +
-        `\`pnpm run publish -- --approve\` locally to promote — the git tag ` +
-        `and GitHub release are created at approve time, when the packages ` +
-        `go public.`,
+        `${skipped ? ` (${skipped} already published, skipped)` : ''}.`,
     )
+    logNpmApproveHandoff()
   } else {
     logger.success(
       `Published ${published} package(s) at ${version} directly` +
