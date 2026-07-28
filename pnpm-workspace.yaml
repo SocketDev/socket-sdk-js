@@ -180,10 +180,6 @@ minimumReleaseAgeExclude:
   - '@sdxgen/*'
   - 'sdxgen'
   - 'stuie'
-  # published: 2026-07-16 | removable: 2026-07-23
-  - 'magic-string@1.0.0'
-  # published: 2026-07-16 | removable: 2026-07-23
-  - 'portless@0.15.4'
   # oxlint-tsgolint 7.0.2001 — the type-aware lint sidecar the fleet lint
   # runner's whole-tree gate needs. The main package + its per-platform binary
   # family are pinned to the exact version (a scope glob would blanket-bypass a
@@ -209,8 +205,6 @@ minimumReleaseAgeExclude:
   - 'taze@19.16.0'
   # verkit — new dev-only transitive of taze 19.16.0 (same owner directive);
   # exact-pinned so future versions re-soak.
-  # published: 2026-07-19 | removable: 2026-07-26
-  - 'verkit@0.1.2'
 
 patchedDependencies:
   # Single-registry: drops taze's default-registry fast path in
