@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url'
 
 import { defineConfig } from 'vitest/config'
 
+import { REPO_CACHE_DIR } from '../scripts/fleet/paths.mts'
+
 import { baseCoverageConfig } from './vitest.coverage.config.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -26,7 +28,7 @@ const isCoverageEnabled =
 
 // oxlint-disable-next-line socket/no-default-export -- vitest config loader requires the default export.
 export default defineConfig({
-  cacheDir: './node_modules/.cache/vitest',
+  cacheDir: path.join(REPO_CACHE_DIR, 'vitest'),
   test: {
     globals: false,
     environment: 'node',
