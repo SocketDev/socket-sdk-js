@@ -99,19 +99,30 @@ export async function createDeleteRequest(
   }
 }
 
+/**
+ * GET options. `stream` resolves as soon as the response headers arrive and
+ * leaves the body unread on `rawResponse`, so a caller can consume records as
+ * they land instead of holding the whole body in memory. `maxResponseSize`
+ * cannot be enforced without reading the body, so it is skipped in stream mode
+ * and the caller owns the read budget.
+ */
+export type GetRequestOptions = RequestOptionsWithHooks & {
+  stream?: boolean | undefined
+}
+
 export async function createGetRequest(
   baseUrl: string,
   urlPath: string,
-  options?: RequestOptionsWithHooks | undefined,
+  options?: GetRequestOptions | undefined,
 ): Promise<HttpResponse> {
   const startTime = DateNow()
   const url = `${baseUrl}${urlPath}`
   const method = 'GET'
   const stopTimer = perfTimer('http:get', { urlPath })
-  const { hooks, ...rawOpts } = {
+  const { hooks, stream, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as unknown as RequestOptionsWithHooks
+  } as unknown as GetRequestOptions
   const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
 
   if (hooks?.onRequest) {
@@ -128,7 +139,7 @@ export async function createGetRequest(
       method,
       headers: opts.headers as Record<string, string>,
       timeout: opts.timeout,
-      maxResponseSize: MAX_RESPONSE_SIZE,
+      ...(stream ? { stream: true } : { maxResponseSize: MAX_RESPONSE_SIZE }),
     })
     stopTimer({ statusCode: response.status })
 

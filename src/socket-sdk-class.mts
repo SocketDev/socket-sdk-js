@@ -45,7 +45,6 @@ import {
   DEFAULT_RETRIES,
   DEFAULT_RETRY_DELAY,
   DEFAULT_USER_AGENT,
-  httpAgentNames,
   MAX_FIREWALL_COMPONENTS,
   MAX_HTTP_TIMEOUT,
   MAX_RESPONSE_SIZE,
@@ -84,10 +83,11 @@ import {
   resolveAbsPaths,
   resolveBasePath,
 } from './utils.mts'
+import { iterateNdjsonLines, readNdjsonLines } from './utils/ndjson.mts'
 import { pollCachedScan } from './utils/poll.mts'
+import { bufferStreamedErrorResponse } from './utils/response-stream.mts'
 
 import type {
-  Agent,
   ArtifactPatches,
   BatchPackageFetchResultType,
   BatchPackageStreamOptions,
@@ -98,7 +98,6 @@ import type {
   EntitlementsResponse,
   FileValidationCallback,
   GetOptions,
-  GotOptions,
   MalwareCheckAlert,
   MalwareCheckPackage,
   MalwareCheckResult,
@@ -224,7 +223,6 @@ export class SocketSdk {
     }
 
     const {
-      agent: agentOrObj,
       baseUrl = 'https://api.socket.dev/v0/',
       cache = false,
       cacheTtl,
@@ -251,16 +249,6 @@ export class SocketSdk {
       }
     }
 
-    const agentKeys = agentOrObj ? Object.keys(agentOrObj) : []
-    const agentAsGotOptions = agentOrObj as GotOptions
-    const agent = (
-      agentKeys.length && agentKeys.every(k => httpAgentNames.has(k))
-        ? /* c8 ignore next 3 - Got-style agent options compatibility layer */
-          agentAsGotOptions.https ||
-          agentAsGotOptions.http ||
-          agentAsGotOptions.http2
-        : agentOrObj
-    ) as Agent | undefined
     this.#apiToken = trimmedToken
     this.#baseUrl = normalizeBaseUrl(baseUrl)
     this.#cacheTtlConfig = cacheTtl
@@ -285,7 +273,6 @@ export class SocketSdk {
     this.#retries = retries
     this.#retryDelay = retryDelay
     this.#reqOptions = {
-      ...(agent ? { agent } : {}),
       headers: {
         Authorization: `Basic ${btoa(`${trimmedToken}:`)}`,
         'User-Agent': userAgent
@@ -327,29 +314,22 @@ export class SocketSdk {
     }
     // Parse the newline delimited JSON response.
     const isPublicToken = this.#apiToken === SOCKET_PUBLIC_API_TOKEN
-    const text = res.text()
-    let start = 0
-    for (let i = 0; i <= text.length; i++) {
-      if (i === text.length || text.charCodeAt(i) === 10) {
-        if (i > start) {
-          const line = text.slice(start, i)
-          const artifact = parseJson(line, {
-            throws: false,
-          }) as SocketArtifact | null
-          if (isObject(artifact)) {
-            yield this.#handleApiSuccess<'batchPackageFetch'>(
-              /* c8 ignore next 8 - Public token artifact reshaping branch for policy compliance. */
-              isPublicToken
-                ? reshapeArtifactForPublicPolicy(artifact, {
-                    actions: queryParams?.['actions'] as string,
-                    isAuthenticated: false,
-                    policy: publicPolicy,
-                  })
-                : artifact,
-            )
-          }
-        }
-        start = i + 1
+    for (const line of readNdjsonLines(res.text())) {
+      const artifact = parseJson(line, {
+        throws: false,
+      }) as SocketArtifact | null
+      if (isObject(artifact)) {
+        /* c8 ignore start - Public token artifact reshaping branch for policy compliance. */
+        yield this.#handleApiSuccess<'batchPackageFetch'>(
+          isPublicToken
+            ? reshapeArtifactForPublicPolicy(artifact, {
+                actions: queryParams?.['actions'] as string,
+                isAuthenticated: false,
+                policy: publicPolicy,
+              })
+            : artifact,
+        )
+        /* c8 ignore stop */
       }
     }
   }
@@ -1304,7 +1284,8 @@ export class SocketSdk {
       components.map(async ({ purl }) => {
         const urlPath = `/${encodeURIComponent(purl)}`
         // Public endpoint — copy all headers except Authorization
-        // (case-insensitive per RFC 7230 §3.2), keep agent/signal/timeout.
+        // (case-insensitive per RFC 7230 §3.2); the rest of #reqOptions
+        // (timeout) is spread through unchanged.
         const publicHeaders: Record<string, string> = {
           __proto__: null,
         } as unknown as Record<string, string>
@@ -5948,10 +5929,12 @@ export class SocketSdk {
   }
 
   /**
-   * Stream a full scan's results to file or stdout.
+   * Stream a full scan's results to a file, to stdout, or to the caller.
    *
-   * Provides efficient streaming for large scan datasets without loading entire
-   * response into memory. Useful for processing large SBOMs.
+   * The response body is never buffered: the request resolves as soon as the
+   * headers arrive, and the body is piped straight to the destination. Without
+   * an `output` the body is left unread on `data.rawResponse` for the caller to
+   * pipe or iterate — read or destroy that stream, or the socket stays open.
    *
    * @example
    *   ;```typescript
@@ -5965,15 +5948,21 @@ export class SocketSdk {
    *     output: true,
    *   })
    *
-   *   // Get buffered response
+   *   // Consume the body yourself
    *   const result = await sdk.streamFullScan('my-org', 'scan_123')
+   *   if (result.success) {
+   *     for await (const chunk of result.data.rawResponse) {
+   *       // ...
+   *     }
+   *   }
    *   ```
    *
    * @param orgSlug - Organization identifier.
    * @param scanId - Full scan identifier.
-   * @param options - Streaming options (output file path, stdout, or buffered)
+   * @param options - Where to send the body. Set `output` to a file path to
+   *   write there, or to `true` to write to stdout.
    *
-   * @returns Scan result with streaming response
+   * @returns Scan result carrying the unconsumed response stream
    *
    * @throws {Error} When server returns 5xx status codes
    *
@@ -5996,18 +5985,20 @@ export class SocketSdk {
     } as StreamOrgFullScanOptions
     const url = `${this.#baseUrl}orgs/${encodeURIComponent(orgSlug)}/full-scans/${encodeURIComponent(scanId)}`
     try {
-      const needsStream = typeof output === 'string' || output === true
       const res = await this.#executeWithRetry(async () => {
         const response = await httpRequest(url, {
           method: 'GET',
           headers: this.#reqOptions.headers as Record<string, string>,
-          stream: needsStream,
+          stream: true,
           timeout: this.#reqOptions.timeout,
-          ...(!needsStream && { maxResponseSize: MAX_RESPONSE_SIZE }),
         })
 
         if (!isResponseOk(response)) {
-          throw new ResponseError(response, '', url)
+          throw new ResponseError(
+            await bufferStreamedErrorResponse(response),
+            '',
+            url,
+          )
         }
         return response
       })
@@ -6034,7 +6025,12 @@ export class SocketSdk {
    * This method streams all available patches for artifacts in a scan. Free
    * tier users will only receive free patches.
    *
-   * Note: This method returns a ReadableStream for processing large datasets.
+   * The returned ReadableStream is pull-driven: each `read()` parses only as
+   * much of the NDJSON response as that record needs, so the first record is
+   * available before the API has finished sending, a slow consumer applies
+   * backpressure to the socket, and the full dataset is never resident. A
+   * transport that cannot expose the response stream (the browser build's
+   * `fetch` backend) falls back to reading the buffered body.
    *
    * @operationId streamPatchesFromScan
    *
@@ -6048,38 +6044,49 @@ export class SocketSdk {
     const url = `${this.#baseUrl}${urlPath}`
     const response = await this.#executeWithRetry(
       async () =>
-        await createGetRequest(
-          this.#baseUrl,
-          urlPath,
-          this.#reqOptionsWithHooks,
-        ),
+        await createGetRequest(this.#baseUrl, urlPath, {
+          ...this.#reqOptionsWithHooks,
+          stream: true,
+        }),
     )
 
     // Check for HTTP error status codes.
     if (!isResponseOk(response)) {
-      throw new ResponseError(response, 'GET Request failed', url)
+      throw new ResponseError(
+        await bufferStreamedErrorResponse(response),
+        'GET Request failed',
+        url,
+      )
     }
 
-    // Parse the buffered NDJSON response into a ReadableStream.
-    const text = response.text()
+    const raw = response.rawResponse
+    const lines = iterateNdjsonLines(raw ?? [response.text()])
     return new ReadableStream<ArtifactPatches>({
-      start(controller) {
-        let start = 0
-        for (let i = 0; i <= text.length; i++) {
-          if (i === text.length || text.charCodeAt(i) === 10) {
-            if (i > start) {
-              const line = text.slice(start, i)
-              try {
-                const data = JSON.parse(line) as ArtifactPatches
-                controller.enqueue(data)
-              } catch (e) {
-                debugLog('streamPatchesFromScan', `Failed to parse line: ${e}`)
-              }
-            }
-            start = i + 1
+      async cancel() {
+        raw?.destroy()
+      },
+      async pull(controller) {
+        // Skip lines that are not a JSON object and keep reading; enqueue the
+        // first record found, then hand control back so the consumer's next
+        // read drives the next chunk off the socket.
+        for (;;) {
+          const next = await lines.next()
+          if (next.done) {
+            controller.close()
+            return
           }
+          const record = parseJson(next.value, {
+            throws: false,
+          }) as ArtifactPatches | null
+          if (isObject(record)) {
+            controller.enqueue(record)
+            return
+          }
+          debugLog(
+            'streamPatchesFromScan',
+            `Skipped unparsable line: ${next.value.slice(0, 120)}`,
+          )
         }
-        controller.close()
       },
     })
   }

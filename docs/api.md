@@ -165,7 +165,7 @@ async listFullScans(
 
 ### `streamFullScan`
 
-Stream a full scan's results to file or stdout.
+Stream a full scan's results to a file, to stdout, or to the caller.
 
 ```typescript
 async streamFullScan(
