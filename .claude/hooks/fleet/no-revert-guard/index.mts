@@ -40,6 +40,10 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { actedOnPath, isFleetTarget } from '../_shared/fleet-context.mts'
 import { currentBranch, gitOut } from '../_shared/git-branch.mts'
+import {
+  gitSubcommandReadings,
+  splitGitSubcommand,
+} from '../_shared/git-subcommand.mts'
 import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
 import type { GuardResult } from '../_shared/guard.mts'
 import { commandsFor, isFleetSyncCommand } from '../_shared/shell-command.mts'
@@ -171,13 +175,15 @@ const CHECKS: readonly RevertCheck[] = [
     // `git stash pop/drop/clear`, which the destructive-git check above
     // already owns, it's a different destruction surface.
     matches: command =>
-      commandsFor(command, 'git').some(c => {
-        if (c.args[0] !== 'stash') {
-          return false
-        }
-        const sub = c.args[1]
-        return sub !== 'clear' && sub !== 'drop' && sub !== 'pop'
-      })
+      commandsFor(command, 'git').some(c =>
+        gitSubcommandReadings(c.args).some(({ rest, sub }) => {
+          if (sub !== 'stash') {
+            return false
+          }
+          const action = rest[0]
+          return action !== 'clear' && action !== 'drop' && action !== 'pop'
+        }),
+      )
         ? 'git stash'
         : undefined,
   },
@@ -368,12 +374,16 @@ export function matchNoVerify(command: string): string | undefined {
   // found at all", fall through to defensive block.
   let sawOwnedNoVerify = false
   for (const c of commandsFor(command, 'git')) {
-    const [sub, ...rest] = c.args
+    const { rest, sub } = splitGitSubcommand(c.args)
     const hasNoVerify = rest.some(a => a === '--no-verify')
     if (!hasNoVerify) {
       continue
     }
     sawOwnedNoVerify = true
+    // Deliberately the CONFIDENT read, not the fail-closed one: this branch
+    // decides which subcommand OWNS the flag so `git rebase --no-verify` and
+    // the lockfile-only reconcile stay allowed. An ambiguous read falls
+    // through to the block below, which is already the fail-closed answer.
     if (sub === 'rebase') {
       // Allowed shape — keep scanning. A chain like
       // `git rebase --no-verify && git commit --no-verify` still
@@ -406,43 +416,56 @@ export function matchNoVerify(command: string): string | undefined {
 
 export function matchDestructiveGit(command: string): string | undefined {
   for (const c of commandsFor(command, 'git')) {
-    const [sub, ...rest] = c.args
-    if (!sub) {
-      continue
+    for (const { rest, sub } of gitSubcommandReadings(c.args)) {
+      const hit = destructiveShape(sub, rest)
+      if (hit) {
+        return hit
+      }
     }
-    // Both discard the working tree: `git checkout -- <path>` (explicit
-    // pathspec) and `git checkout .`, bare-dot pathspec. A pathspec-less
-    // `git checkout <branch>` is a SWITCH, not a discard — left to
-    // primary-checkout-branch-guard — so we key on `--` or a `.` arg.
-    if (sub === 'checkout' && (rest.includes('--') || rest.includes('.'))) {
-      return rest.includes('.') ? 'git checkout .' : 'git checkout -- <path>'
-    }
-    if (sub === 'restore' && !rest.includes('--staged')) {
-      return 'git restore'
-    }
-    if (sub === 'reset' && rest.includes('--hard')) {
-      return 'git reset --hard'
-    }
-    if (
-      sub === 'stash' &&
-      (rest[0] === 'clear' || rest[0] === 'drop' || rest[0] === 'pop')
-    ) {
-      return `git stash ${rest[0]}`
-    }
-    // Force flag in any form: short `-f`/`-xf`/`-df` (the `/^-[a-z]*f/`
-    // bundle) OR long `--force`. The long form slips the short-flag regex
-    // (`--force` has no `f` in the `-[a-z]*` run), so test it explicitly —
-    // `git clean --force -d` wipes untracked files just like `git clean -fd`.
-    // Dry-run (`-n`/`--dry-run`) carries no force flag, so it stays allowed.
-    if (
-      sub === 'clean' &&
-      rest.some(a => /^-[a-z]*f/.test(a) || a.startsWith('--force'))
-    ) {
-      return 'git clean -f'
-    }
-    if (sub === 'rm' && rest.some(a => /^-r?f?$/.test(a) && a.includes('f'))) {
-      return 'git rm -f'
-    }
+  }
+  return undefined
+}
+
+// The destructive label for ONE reading of a git segment, or undefined.
+function destructiveShape(
+  sub: string | undefined,
+  rest: readonly string[],
+): string | undefined {
+  if (!sub) {
+    return undefined
+  }
+  // Both discard the working tree: `git checkout -- <path>` (explicit
+  // pathspec) and `git checkout .`, bare-dot pathspec. A pathspec-less
+  // `git checkout <branch>` is a SWITCH, not a discard — left to
+  // primary-checkout-branch-guard — so we key on `--` or a `.` arg.
+  if (sub === 'checkout' && (rest.includes('--') || rest.includes('.'))) {
+    return rest.includes('.') ? 'git checkout .' : 'git checkout -- <path>'
+  }
+  if (sub === 'restore' && !rest.includes('--staged')) {
+    return 'git restore'
+  }
+  if (sub === 'reset' && rest.includes('--hard')) {
+    return 'git reset --hard'
+  }
+  if (
+    sub === 'stash' &&
+    (rest[0] === 'clear' || rest[0] === 'drop' || rest[0] === 'pop')
+  ) {
+    return `git stash ${rest[0]}`
+  }
+  // Force flag in any form: short `-f`/`-xf`/`-df` (the `/^-[a-z]*f/`
+  // bundle) OR long `--force`. The long form slips the short-flag regex
+  // (`--force` has no `f` in the `-[a-z]*` run), so test it explicitly —
+  // `git clean --force -d` wipes untracked files just like `git clean -fd`.
+  // Dry-run (`-n`/`--dry-run`) carries no force flag, so it stays allowed.
+  if (
+    sub === 'clean' &&
+    rest.some(a => /^-[a-z]*f/.test(a) || a.startsWith('--force'))
+  ) {
+    return 'git clean -f'
+  }
+  if (sub === 'rm' && rest.some(a => /^-r?f?$/.test(a) && a.includes('f'))) {
+    return 'git rm -f'
   }
   return undefined
 }
@@ -504,15 +527,16 @@ export function blockMessage(
 // that isn't `--hard` and doesn't look like a flag.
 export function resetHardTarget(command: string): string | undefined {
   for (const c of commandsFor(command, 'git')) {
-    const [sub, ...rest] = c.args
-    if (sub !== 'reset' || !rest.includes('--hard')) {
-      continue
-    }
-    for (const a of rest) {
-      if (a === '--hard' || a.startsWith('-')) {
+    for (const { rest, sub } of gitSubcommandReadings(c.args)) {
+      if (sub !== 'reset' || !rest.includes('--hard')) {
         continue
       }
-      return a
+      for (const a of rest) {
+        if (a === '--hard' || a.startsWith('-')) {
+          continue
+        }
+        return a
+      }
     }
   }
   return undefined
