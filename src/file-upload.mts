@@ -126,11 +126,21 @@ const requireHere = createRequire(import.meta.url)
 // module scope), which makes every SDK importer hostile to V8 startup
 // snapshots (`--build-snapshot` aborts on the unserializable [Foreign]
 // handles). Only the two multipart builders below construct it, so the
-// require defers to first upload.
+// require defers to first upload. The built layout resolves the sibling
+// `./form-data.js` chunk rolldown emits (the SDK ships zero runtime
+// dependencies, so the bytes must come from the bundle); running from src —
+// tests, strip-types dev runs — falls back to node_modules.
 let formDataCtor: typeof FormData | undefined
 export function getFormData(): typeof FormData {
   if (formDataCtor === undefined) {
-    formDataCtor = requireHere('form-data') as typeof FormData
+    let mod: unknown
+    try {
+      mod = requireHere('./form-data.js')
+    } catch {
+      mod = requireHere('form-data')
+    }
+    const named = mod as { FormData?: typeof FormData | undefined }
+    formDataCtor = named.FormData ?? (mod as typeof FormData)
   }
   return formDataCtor
 }

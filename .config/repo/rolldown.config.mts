@@ -124,6 +124,10 @@ export const buildConfig: RolldownOptions & { output: OutputOptions } = {
   // externalized by the node-protocol plugin.
   external: externalDependencies,
   input: {
+    // form-data builds as its own chunk so `getFormData()` can defer its
+    // node:http-binding module eval to the first multipart upload while the
+    // bytes still ship in the zero-dependency bundle.
+    'form-data': path.join(srcPath, 'form-data-entry.mts'),
     index: path.join(srcPath, 'index.mts'),
     testing: path.join(srcPath, 'testing.mts'),
   },
