@@ -456,6 +456,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [3.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.0) - 2025-10-23
 
 #### Removed Deprecated Methods
+
 The following methods mapped to deprecated `/report/*` backend endpoints and have been removed:
 
 ### Added
@@ -472,23 +473,32 @@ The following methods mapped to deprecated `/report/*` backend endpoints and hav
 - **`deleteScan()`** - Use `deleteFullScan()` instead
 - **`getScan()`** - Use `getFullScan()` instead
 - **`listScans()`** - Use `listFullScans()` instead
+
 #### Method Renames (Following REST Conventions)
+
 **Full Scans (Modern API):**
+
 - `getOrgFullScanList()` → `listFullScans()` with `ListFullScansOptions`
 - `createOrgFullScan()` → `createFullScan()` with `CreateFullScanOptions`
 - `getOrgFullScanBuffered()` → `getFullScan()`
 - `deleteOrgFullScan()` → `deleteFullScan()`
 - `streamOrgFullScan()` → `streamFullScan()` with `StreamFullScanOptions`
 - `getOrgFullScanMetadata()` → `getFullScanMetadata()`
+
 **Organizations:**
+
 - `getOrganizations()` → `listOrganizations()`
+
 **Repositories:**
+
 - `getOrgRepoList()` → `listRepositories()` with `ListRepositoriesOptions`
 - `getOrgRepo()` → `getRepository()`
 - `createOrgRepo()` → `createRepository()`
 - `updateOrgRepo()` → `updateRepository()`
 - `deleteOrgRepo()` → `deleteRepository()`
+
 #### Type System Improvements
+
 Strict types now mark guaranteed API fields as required instead of optional, improving IntelliSense autocomplete.
 
 ## [2.0.7](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.7) - 2025-10-22
@@ -543,6 +553,7 @@ Strict types now mark guaranteed API fields as required instead of optional, imp
 ## [2.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v2.0.0) - 2025-10-10
 
 To migrate from v1.x to v2.0:
+
 1. Ensure your project supports ESM modules (Node.js 14+ with `"type": "module"` or `.mjs` extensions)
 2. Update imports from CommonJS `require()` to ESM `import` statements:
    ```javascript
