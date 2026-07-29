@@ -620,7 +620,7 @@ export async function verifyStagedEntry(
       `Pre-approve verify: no server-side shasum for ${name}@${version}.\n` +
         `  Where: pnpm stage list --json (stageId ${stageId}) exposed no shasum field.\n` +
         `  Saw vs wanted: an entry with no digest; wanted npm's staged sha1 to compare against the local pack.\n` +
-        `  Fix: reject + re-stage (pnpm stage reject ${stageId}); if pnpm's stage-list shape changed, update readStagedShasum. Refusing to approve unverified bytes.`,
+        `  Fix: reject + re-stage (node scripts/fleet/npm-web-auth.mts stage reject ${stageId}); if pnpm's stage-list shape changed, update readStagedShasum. Refusing to approve unverified bytes.`,
     )
     return false
   }
@@ -667,7 +667,7 @@ export async function verifyStagedEntry(
           `  Saw vs wanted: ${contents.detail}\n` +
           `    local pack:  ${local.shasum}\n` +
           `    npm staging: ${stagedShasum}\n` +
-          `  Fix: reject the staged publish (pnpm stage reject ${stageId}) and re-stage — never approve a divergent artifact.`,
+          `  Fix: reject the staged publish (node scripts/fleet/npm-web-auth.mts stage reject ${stageId}) and re-stage — never approve a divergent artifact.`,
       )
       return false
     }

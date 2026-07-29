@@ -13,6 +13,10 @@
 //   - Hook bypass (--no-verify, --no-gpg-sign) →
 //       user must type "Allow <X> bypass" where <X> matches the flag
 //       (e.g. "Allow no-verify bypass", "Allow gpg bypass").
+//   - Hook-chain redirection (`-c core.hooksPath=…`, `--config-env`, the
+//       `GIT_CONFIG_KEY_<i>` env form) → same "Allow no-verify bypass"
+//       phrase, since it is the same decision with the HUSKY=0 blast
+//       radius. Detector + the foreign-repo carve-out: `hooks-path.mts`.
 //
 // Force-push (--force / -f / --force-with-lease / --force-if-includes) is
 // its own guard: `.claude/hooks/fleet/no-force-push-guard/`.
@@ -46,9 +50,11 @@ import {
 } from '../_shared/git-subcommand.mts'
 import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
 import type { GuardResult } from '../_shared/guard.mts'
+import type { ToolCallPayload } from '../_shared/payload.mts'
 import { commandsFor, isFleetSyncCommand } from '../_shared/shell-command.mts'
 import { squashSentinelAllows } from '../_shared/squash-sentinel.mts'
 import { operatorBypassPresent } from '../_shared/transcript.mts'
+import { matchHooksPathSkip } from './hooks-path.mts'
 
 type RevertCheck = {
   // Canonical phrase the user must type to bypass.
@@ -70,9 +76,13 @@ type RevertCheck = {
   //   - `matches`: a parser-based detector for command-STRUCTURE rules
   //     which git subcommand runs. Returns the offending substring for
   //     the log, or undefined when no match. Sees through chains / `$(…)`
-  //     / quotes, where a regex would over- or under-match.
+  //     / quotes, where a regex would over- or under-match. The payload is
+  //     passed so a detector can resolve WHICH repo the command targets.
   readonly pattern?: RegExp | undefined
-  readonly matches?: (command: string) => string | undefined
+  readonly matches?: (
+    command: string,
+    payload: ToolCallPayload,
+  ) => string | undefined
 }
 
 // Pre-flight triggers: the dispatcher imports + runs this guard only when the
@@ -82,6 +92,9 @@ type RevertCheck = {
 //     bare-stash) go through `commandsFor(command, 'git')`, which
 //     short-circuits unless the line contains `git`.
 //   - the --no-verify check is gated by a `--no-verify` regex.
+//   - the core.hooksPath check needs a real `git` segment running a
+//     hook-running subcommand, so the `git` trigger already covers every
+//     spelling of it (`-c`, `--config-env`, `GIT_CONFIG_KEY_<i>`).
 //   - the gpg check matches `--no-gpg-sign` or `commit.gpgsign`.
 //   - SKIP_ASSET_DOWNLOAD is its own literal.
 //   - bash-write alternates over python / sed / cat (heredoc) / tee / dd.
@@ -140,6 +153,17 @@ const CHECKS: readonly RevertCheck[] = [
     fleetOnly: true,
     label: 'HUSKY=0 (skips the whole .git-hooks/ chain)',
     matches: command => matchHuskySkip(command),
+  },
+  {
+    // Pointing `core.hooksPath` away from `.git-hooks/` for one invocation
+    // skips the whole chain exactly like HUSKY=0, so it carries the same
+    // phrase. Detector, the three spellings it covers, the misses it does
+    // not, and the foreign-repo carve-out that keeps the fleet's own
+    // hostile-checkout hardening working: `hooks-path.mts`.
+    bypassPhrase: 'Allow no-verify bypass',
+    fleetOnly: true,
+    label: 'git -c core.hooksPath (redirects the .git-hooks/ chain)',
+    matches: (command, payload) => matchHooksPathSkip(command, payload),
   },
   {
     // SKIP_ASSET_DOWNLOAD is a documented degraded-mode flag in
@@ -763,7 +787,7 @@ export const check = bashGuard((command, payload): GuardResult => {
   for (let i = 0, { length } = CHECKS; i < length; i += 1) {
     const revertCheck = CHECKS[i]!
     if (revertCheck.matches) {
-      const hit = revertCheck.matches(command)
+      const hit = revertCheck.matches(command, payload)
       if (hit) {
         triggered = { check: revertCheck, matchedSubstring: hit }
         break
