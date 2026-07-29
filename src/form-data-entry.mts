@@ -10,4 +10,9 @@
 
 import FormDataCtor from 'form-data'
 
-export const FormData = FormDataCtor
+import type { MultipartFormConstructor } from './file-upload.mts'
+
+// Annotated structurally so the emitted declaration file does not import
+// the form-data package consumers never install.
+export const FormData: MultipartFormConstructor =
+  FormDataCtor as unknown as MultipartFormConstructor

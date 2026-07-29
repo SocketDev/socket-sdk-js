@@ -11,14 +11,34 @@ import { MAX_RESPONSE_SIZE } from './constants.mts'
 import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
 import type { RequestOptions, RequestOptionsWithHooks } from './types.mts'
-import type FormData from 'form-data'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { ReadStream } from 'node:fs'
 import type { Readable } from 'node:stream'
 
+/**
+ * Structural type for the multipart form the SDK builds. Deliberately NOT the
+ * `form-data` package's own type: the runtime class ships inside the bundle
+ * (see `getFormData`), and the published declarations must not import a
+ * package consumers never install. `pipe` and `getHeaders` stay on the
+ * shape because the HTTP layer duck-types stream bodies through them.
+ */
+export interface MultipartForm {
+  append(
+    name: string,
+    value: unknown,
+    options?:
+      | { contentType?: string | undefined; filename?: string | undefined }
+      | undefined,
+  ): void
+  getHeaders(): Record<string, string>
+  pipe<T>(destination: T): T
+}
+
+export type MultipartFormConstructor = new () => MultipartForm
+
 export function createRequestBodyForBlobs(
   entries: Array<{ absPath: string; hash: string; name: string }>,
-): FormData {
+): MultipartForm {
   const FormDataCtor = getFormData()
   const form = new FormDataCtor()
   for (let i = 0, { length } = entries; i < length; i += 1) {
@@ -35,7 +55,7 @@ export function createRequestBodyForBlobs(
 export function createRequestBodyForFilepaths(
   filepaths: string[],
   basePath: string,
-): FormData {
+): MultipartForm {
   const FormDataCtor = getFormData()
   const form = new FormDataCtor()
   for (let i = 0, { length } = filepaths; i < length; i += 1) {
@@ -54,7 +74,7 @@ export function createRequestBodyForFilepaths(
 export async function createUploadRequest(
   baseUrl: string,
   urlPath: string,
-  form: FormData,
+  form: MultipartForm,
   options?: RequestOptionsWithHooks | undefined,
 ): Promise<HttpResponse> {
   const { hooks, ...rawOpts } = {
@@ -130,8 +150,8 @@ const requireHere = createRequire(import.meta.url)
 // `./form-data.js` chunk rolldown emits (the SDK ships zero runtime
 // dependencies, so the bytes must come from the bundle); running from src —
 // tests, strip-types dev runs — falls back to node_modules.
-let formDataCtor: typeof FormData | undefined
-export function getFormData(): typeof FormData {
+let formDataCtor: MultipartFormConstructor | undefined
+export function getFormData(): MultipartFormConstructor {
   if (formDataCtor === undefined) {
     let mod: unknown
     try {
@@ -139,8 +159,8 @@ export function getFormData(): typeof FormData {
     } catch {
       mod = requireHere('form-data')
     }
-    const named = mod as { FormData?: typeof FormData | undefined }
-    formDataCtor = named.FormData ?? (mod as typeof FormData)
+    const named = mod as { FormData?: MultipartFormConstructor | undefined }
+    formDataCtor = named.FormData ?? (mod as MultipartFormConstructor)
   }
   return formDataCtor
 }
