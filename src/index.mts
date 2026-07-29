@@ -89,7 +89,6 @@ export type {
 export type {
   ALERT_ACTION,
   ALERT_TYPE,
-  Agent,
   ArtifactPatches,
   BatchPackageFetchResultType,
   BatchPackageStreamOptions,
@@ -102,7 +101,6 @@ export type {
   FileValidationCallback,
   FileValidationResult,
   GetOptions,
-  GotOptions,
   HeadersRecord,
   MalwareCheckAlert,
   MalwareCheckPackage,

@@ -3,7 +3,6 @@
  *   covers optional parameters and configurations that are not covered in the
  *   main test files, including:
  *
- *   - Agent configuration
  *   - Cache configuration
  *   - Timeout configuration
  *   - IssueRules parameter
@@ -19,25 +18,6 @@ import type { SocketSdkGenericResult } from '../../../src/index.mts'
 
 describe.skipIf(isCoverageMode)('SocketSdk - Optional Configuration', () => {
   const getClient = setupTestClient('test-token', { retries: 0 })
-
-  describe('Agent configuration', () => {
-    it('should work with agent configuration', async () => {
-      nock('https://api.socket.dev')
-        .get('/v0/test')
-        .reply(200, { success: true })
-
-      const client = new SocketSdk('test-token', {
-        retries: 0,
-      })
-
-      const result = (await client.getApi('test', {
-        responseType: 'json',
-        throws: false,
-      })) as SocketSdkGenericResult<unknown>
-
-      expect(result.success).toBe(true)
-    })
-  })
 
   describe('Cache configuration', () => {
     it('should work with cache disabled', async () => {

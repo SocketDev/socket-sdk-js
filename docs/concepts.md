@@ -33,7 +33,6 @@ const client = new SocketSdk('your-api-token', {
 | `timeout`          | `number`                        | `30_000`                       | Per-request timeout in ms. Must be between `5_000` and `300_000`.                  |
 | `baseUrl`          | `string`                        | `'https://api.socket.dev/v0/'` | Useful for staging environments or proxies.                                        |
 | `userAgent`        | `string`                        | SDK default                    | Identifier sent on every request. Set this so Socket can attribute traffic to you. |
-| `agent`            | `http.Agent` / `https.Agent`    | none                           | Bring your own agent for connection pooling or a corporate proxy.                  |
 | `cache`            | `boolean`                       | `false`                        | Cache `getQuota()` and `listOrganizations()` responses in memory.                  |
 | `cacheTtl`         | `number` or per-endpoint object | `5 * 60_000`                   | Cache lifetime. See `SocketSdkOptions` JSDoc for the per-endpoint shape.           |
 | `hooks`            | `{ onRequest, onResponse }`     | none                           | Observe every request and response (logging, metrics).                             |

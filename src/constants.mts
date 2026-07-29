@@ -4,7 +4,7 @@
  *   interactions.
  */
 
-import { MapCtor, SetCtor } from '@socketsecurity/lib/primordials/map-set'
+import { MapCtor } from '@socketsecurity/lib/primordials/map-set'
 
 import rootPkgJson from '../package.json' with { type: 'json' }
 import { buildSdkBaseUserAgent } from './user-agent.mts'
@@ -56,10 +56,6 @@ export const MAX_FIREWALL_COMPONENTS = 8
 
 // Public firewall API URL for per-package lookups (unauthenticated, fast).
 export const SOCKET_FIREWALL_API_URL = 'https://firewall-api.socket.dev/purl'
-
-// https://github.com/sindresorhus/got/blob/v14.4.6/documentation/2-options.md#agent
-// Valid HTTP agent names for Got-style agent configuration compatibility.
-export const httpAgentNames = new SetCtor(['http', 'https', 'http2'])
 
 // Public security policy.
 export const publicPolicy: Map<ALERT_TYPE, ALERT_ACTION> = new MapCtor([

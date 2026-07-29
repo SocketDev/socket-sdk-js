@@ -7,18 +7,9 @@
 import type { components, operations } from '../types/api'
 import type { OpReturnType } from '../types/api-helpers'
 import type { Remap } from '@socketsecurity/lib/objects/types'
-import type {
-  Agent as HttpAgent,
-  RequestOptions as HttpRequestOptions,
-} from 'node:http'
-import type {
-  ClientHttp2Session,
-  ClientSessionRequestOptions,
-} from 'node:http2'
-import type {
-  Agent as HttpsAgent,
-  RequestOptions as HttpsRequestOptions,
-} from 'node:https'
+import type { RequestOptions as HttpRequestOptions } from 'node:http'
+import type { ClientSessionRequestOptions } from 'node:http2'
+import type { RequestOptions as HttpsRequestOptions } from 'node:https'
 
 export type ALERT_ACTION = 'error' | 'monitor' | 'warn' | 'ignore'
 
@@ -81,8 +72,6 @@ export type ArtifactPatches = {
   patches: PatchRecord[]
 }
 
-export type Agent = HttpsAgent | HttpAgent | ClientHttp2Session
-
 export interface RequestInfo {
   method: string
   url: string
@@ -134,12 +123,6 @@ export type CustomResponseType = 'response' | 'text' | 'json'
 export type GetOptions = {
   responseType?: CustomResponseType | undefined
   throws?: boolean | undefined
-}
-
-export type GotOptions = {
-  http2?: ClientHttp2Session | undefined
-  http?: HttpAgent | undefined
-  https?: HttpsAgent | undefined
 }
 
 export type QueryParams = Record<string, unknown>
@@ -343,10 +326,6 @@ export type FileValidationCallback = (
  * Configuration options for SocketSdk.
  */
 export interface SocketSdkOptions {
-  /**
-   * HTTP agent for connection pooling and proxy support.
-   */
-  agent?: Agent | GotOptions | undefined
   /**
    * Base URL for Socket API (default: 'https://api.socket.dev/v0/')
    */
