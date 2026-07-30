@@ -37,7 +37,13 @@ import {
   openStagedBrowserSession,
 } from './staged-browser-read.mts'
 import type { StagedBrowserSession } from './staged-browser-read.mts'
-import { defaultDownloadStagedTarball, verifyStagedEntry } from './staged.mts'
+import {
+  composeTarballProviders,
+  defaultDownloadStagedTarball,
+  defaultPackTarball,
+  verifyStagedEntry,
+} from './staged.mts'
+import type { TarballProvider } from './staged.mts'
 import {
   packWorkspaceReleaseAssets,
   verifyStagedPlatformEntry,
@@ -340,33 +346,38 @@ export async function runApprove(config: {
         }
         const member = findWorkspacePackageByName(layout, entry.name)
         const scanSubject = { name: entry.name, version: entry.version }
-        // Artifact source precedence: a browser-read session (its bytes are
-        // npm's actual staged upload) → the registry-API staged download for
-        // platform/machine-built packages a local pack can't reproduce → a
-        // local pack (byte-identical once the shasum gate passed).
-        let packTarball:
-          | ((name: string, version: string) => Promise<string | undefined>)
-          | undefined
+        // Artifact-source FALLBACK CHAIN in precedence order, not a single
+        // pick: a browser-read session (its bytes are npm's actual staged
+        // upload) → the registry-API staged download for platform/machine-built
+        // packages a local pack can't reproduce → the default local pack
+        // (byte-identical once the shasum gate passed). A source that yields no
+        // bytes (undefined — a staged entry with no tarballUrl, an in-page
+        // fetch that failed) falls through to the next instead of hard-failing
+        // the scan, matching downloadStagedTarballInPage's documented contract.
+        const sources: TarballProvider[] = []
         if (browserSession) {
           const stagedTar = browserSession.tarballs.find(
             t => t.packageName === entry.name && t.version === entry.version,
           )
           if (stagedTar) {
-            packTarball = () =>
-              downloadStagedInPage(browserSession!.page, stagedTar)
+            sources.push(() =>
+              downloadStagedInPage(browserSession!.page, stagedTar),
+            )
           }
         }
         if (
-          !packTarball &&
           member &&
           (member.platform || hasMachineBuiltPayload(member.manifest))
         ) {
-          packTarball = () => defaultDownloadStagedTarball(stageId)
+          sources.push(() => defaultDownloadStagedTarball(stageId))
         }
+        sources.push(defaultPackTarball)
+        const packTarball = composeTarballProviders(sources)
         // eslint-disable-next-line no-await-in-loop
-        const scanOk = packTarball
-          ? await scanEntry(scanSubject, { context: scanContext, packTarball })
-          : await scanEntry(scanSubject, { context: scanContext })
+        const scanOk = await scanEntry(scanSubject, {
+          context: scanContext,
+          packTarball,
+        })
         if (scanOk) {
           scanned.push(stageId)
         }
