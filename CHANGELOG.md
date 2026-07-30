@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`sdk`** — stream scan and patch reads instead of buffering the whole body
 - **`test`** — move the isolated-vitest cache out of node\_modules
 - **`build`** — bundle form-data as a lazily required chunk
+- **`deps`** — keep the nock pin on the released 14.x line
 
 ### Internal
 
