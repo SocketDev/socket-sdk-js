@@ -57,7 +57,7 @@ overrides:
   'isexe@>=3': '4.0.0'
   'js-yaml@>=5.0.0 <5.2.2': '5.2.2'
   'lru-cache@>=10': '11.5.2'
-  'magic-string': '1.0.0'
+  'magic-string': '1.1.0'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
   'minipass@>=4': '7.1.3'
@@ -130,7 +130,7 @@ catalog:
   # TypeError: unusable on any fetch POST-with-body to an
   # enableNetConnect-allowed host. Mirrors the fleet canonical pin; bump
   # to the stabilized 15.x when it ships.
-  'nock': 15.0.0
+  'nock': 14.0.16
   'npm-run-all2': 9.0.2
   'oxfmt': 0.60.0
   'oxlint': 1.75.0
