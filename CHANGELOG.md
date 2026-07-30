@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.1.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.3) - 2026-07-30
+
+### Added
+
+- **`http`** — drain a streamed error body under the response size cap
+- **`ndjson`** — add one incremental line splitter for NDJSON reads
+
+### Fixed
+
+- **`types`** — ship self-contained multipart declarations
+- **`exports`** — declare the form-data chunk graph-only and revive the llms script
+- **`sdk`** — drop the agent option the transport cannot forward
+- **`sdk`** — stream scan and patch reads instead of buffering the whole body
+- **`test`** — move the isolated-vitest cache out of node\_modules
+- **`build`** — bundle form-data as a lazily required chunk
+
+### Internal
+
+- **`deps`** — absorb the fleet catalog heal (sdk 4.1.2)
+
 ## [4.1.2](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.2) - 2026-07-27
 
 ### Fixed
