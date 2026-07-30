@@ -218,8 +218,8 @@ catalogs:
       specifier: 0.34.52
       version: 0.34.52
     '@socketregistry/packageurl-js-stable':
-      specifier: npm:@socketregistry/packageurl-js@1.4.8
-      version: 1.4.8
+      specifier: npm:@socketregistry/packageurl-js@1.5.0
+      version: 1.5.0
     '@socketsecurity/lib-stable':
       specifier: npm:@socketsecurity/lib@6.5.1
       version: 6.5.1
@@ -350,7 +350,7 @@ overrides:
   isexe@>=3: 4.0.0
   js-yaml@>=5.0.0 <5.2.2: 5.2.2
   lru-cache@>=10: 11.5.2
-  magic-string: 1.0.0
+  magic-string: 1.1.0
   mime-db: 1.54.0
   mime-types@>=3: 3.0.2
   minipass@>=4: 7.1.3
@@ -411,7 +411,7 @@ importers:
         version: 1.5.0
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.8'
+        version: '@socketregistry/packageurl-js@1.5.0'
       '@socketsecurity/lib':
         specifier: 6.5.1
         version: 6.5.1(typescript@7.0.2)
@@ -485,8 +485,8 @@ importers:
         specifier: 4.0.6
         version: 4.0.6
       magic-string:
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 1.1.0
+        version: 1.1.0
       markdownlint-cli2:
         specifier: 'catalog:'
         version: 0.23.1(supports-color@9.4.0)
@@ -761,7 +761,7 @@ importers:
     dependencies:
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.8'
+        version: '@socketregistry/packageurl-js@1.5.0'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.5.1(typescript@7.0.2)'
@@ -2244,7 +2244,7 @@ importers:
         version: 0.34.52
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.8'
+        version: '@socketregistry/packageurl-js@1.5.0'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.5.1(typescript@7.0.2)'
@@ -3633,10 +3633,6 @@ packages:
     resolution: {integrity: sha512-MZ5dyXOtiEc7q3801T+2EmKkxrd55BOSQnG8z/8/IkIJzDxqBxGGBKVyixqFm3W657TyUEBfIT9iWgSB6ipFsA==}
     engines: {node: '>=18'}
 
-  '@socketregistry/packageurl-js@1.4.8':
-    resolution: {integrity: sha512-u9Mlg3zeiCr8FHdG6Sxd4T8dWS/zVzW270tS67JdDra2hrzPfgsmbWr7itlQc/0P9uWX6gslISs88YQvi3Z5SQ==}
-    engines: {node: '>=24', npm: '>=12.0.0', pnpm: '>=11.0.5'}
-
   '@socketregistry/packageurl-js@1.5.0':
     resolution: {integrity: sha512-Yqnq50McfKVqKCUKRIhW3XcnjxzFoysBDkUktOuLzOdy4cWi0smVqvLNSkS3f4sdDJYpRBjcxTlb2ajHr+cURQ==}
     engines: {node: '>=24', npm: '>=12.0.1', pnpm: '>=11.0.5'}
@@ -4815,8 +4811,8 @@ packages:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
 
-  magic-string@1.0.0:
-    resolution: {integrity: sha512-CGvjzMN08iv6w1mm4/x3Gh1hLb4VnyRUA15FFpl6CsCIGGoe36k7kY5KNz9QDbSBN5I/fWHM6ZlIkUTa5xdUEA==}
+  magic-string@1.1.0:
+    resolution: {integrity: sha512-kS3VHe0nEPST2saQV4Rbkchcd3UBRkVTQHo1D3h/ZTwFDhai/mfKkmtPAtD129EOI7K3HlHIsFOt0WrI2/oU9g==}
 
   magicast@0.5.3:
     resolution: {integrity: sha512-pVKE4UdSQ7DvHzivsCIFx2BJn1mHG6KsyrFcaxFx6tONdneEuThrDx0Cj3AMg58KyN4pzYT+LHOotxDQDjNvkw==}
@@ -6357,8 +6353,6 @@ snapshots:
 
   '@socketregistry/hasown@1.0.7': {}
 
-  '@socketregistry/packageurl-js@1.4.8': {}
-
   '@socketregistry/packageurl-js@1.5.0': {}
 
   '@socketregistry/safe-buffer@1.0.9': {}
@@ -6625,7 +6619,7 @@ snapshots:
     dependencies:
       '@vitest/spy': 4.1.10
       estree-walker: 3.0.3
-      magic-string: 1.0.0
+      magic-string: 1.1.0
     optionalDependencies:
       vite: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
 
@@ -6642,7 +6636,7 @@ snapshots:
     dependencies:
       '@vitest/pretty-format': 4.1.10
       '@vitest/utils': 4.1.10
-      magic-string: 1.0.0
+      magic-string: 1.1.0
       pathe: 2.0.3
 
   '@vitest/spy@4.1.10': {}
@@ -6674,7 +6668,7 @@ snapshots:
       es-module-lexer: 2.1.0
       escape-string-regexp: 5.0.0
       ipaddr.js: 2.4.0
-      magic-string: 1.0.0
+      magic-string: 1.1.0
       valibot: 1.4.2(typescript@7.0.2)
       vite: 8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0)
       vitest: 4.1.10(@types/node@26.1.1)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.1.5(@types/node@26.1.1)(jiti@2.7.0)(yaml@2.9.0))
@@ -7346,7 +7340,7 @@ snapshots:
     dependencies:
       yallist: 4.0.0
 
-  magic-string@1.0.0:
+  magic-string@1.1.0:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
@@ -8362,7 +8356,7 @@ snapshots:
       '@vitest/utils': 4.1.10
       es-module-lexer: 2.1.0
       expect-type: 1.3.0
-      magic-string: 1.0.0
+      magic-string: 1.1.0
       obug: 2.1.1
       pathe: 2.0.3
       picomatch: 4.0.4
