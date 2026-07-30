@@ -89,7 +89,7 @@ overrides:
 pmOnFail: warn
 
 catalog:
-  '@anthropic-ai/claude-code': 2.1.216
+  '@anthropic-ai/claude-code': 2.1.218
   '@redwoodjs/agent-ci': 0.17.1
   '@shadscan/cli': 0.2.0
   '@sinclair/typebox': 0.34.52
