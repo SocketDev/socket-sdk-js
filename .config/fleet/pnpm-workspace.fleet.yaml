@@ -68,7 +68,7 @@ catalog:
   # marks 15.0.0 deprecated as "released accidentally" and the fix lives
   # in 15.0.0-beta.14, a beta still inside the 7-day soak; bump to the
   # stabilized 15.x when it ships.
-  'nock': 14.0.16
+  'nock': 15.0.0
   'npm-run-all2': 9.0.2
   'oxfmt': 0.60.0
   'oxlint': 1.75.0
