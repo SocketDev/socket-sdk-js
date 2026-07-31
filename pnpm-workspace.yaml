@@ -193,8 +193,6 @@ minimumReleaseAgeExclude:
   # exact-pinned so future versions re-soak.
   # published: 2026-07-24 | removable: 2026-07-31
   - '@shadscan/cli@0.2.0'
-  # published: 2026-07-23 | removable: 2026-07-30
-  - 'js-yaml@5.2.2'
 
 patchedDependencies:
   # Single-registry: drops taze's default-registry fast path in
