@@ -65,9 +65,9 @@ export interface ChainStepResult {
 }
 
 // Resolve the lockstep manifest path. The canonical CLI reads `lockstep.json` at
-// the repo root; the segregated location is `.config/repo/lockstep.json` (the
-// manifest is repo-owned); older repos keep the loose `.config/lockstep.json`.
-// Return whichever exists so the chain drives the same manifest the gate keyed on.
+// the repo root; the segregated location is `.config/repo/lockstep.json`, since
+// the manifest is repo-owned. Return whichever exists so the chain drives the
+// same manifest the gate keyed on.
 export function resolveLockstepManifestPath(
   repoRoot: string,
 ): string | undefined {
