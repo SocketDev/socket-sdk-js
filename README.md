@@ -8,8 +8,6 @@
 
 JavaScript SDK for the [Socket.dev](https://socket.dev/) API — package scoring, quota management, batch lookups, dependency analysis.
 
-## Why this repo exists
-
 `@socketsecurity/sdk` is the canonical JavaScript/TypeScript client for the Socket.dev API. It exists so any Node app — your build pipeline, your registry tooling, your custom security gate — can call Socket's package-scoring and analysis endpoints without hand-rolling auth, retries, and response shapes. The SDK is consumed by Socket's own CLI, MCP server, and third-party integrations.
 
 ## Install
