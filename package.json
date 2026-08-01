@@ -91,7 +91,8 @@
     "type": "node node_modules/typescript/bin/tsc --noEmit -p .config/fleet/tsconfig.check.json",
     "update": "node scripts/fleet/update.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
-    "weekly-update:ci": "node scripts/fleet/weekly-update-workflow.mts run"
+    "weekly-update:ci": "node scripts/fleet/weekly-update-workflow.mts run",
+    "setup:sfw-ca": "node scripts/fleet/setup/sfw-ca.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
@@ -135,6 +136,7 @@
     "micromark": "catalog:",
     "neosanitize": "catalog:",
     "nock": "catalog:",
+    "npm-high-impact": "catalog:",
     "npm-run-all2": "catalog:",
     "openapi-typescript": "6.7.6",
     "oxfmt": "catalog:",

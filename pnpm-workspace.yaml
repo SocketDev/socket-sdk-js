@@ -131,6 +131,7 @@ catalog:
   # enableNetConnect-allowed host. Mirrors the fleet canonical pin; bump
   # to the stabilized 15.x when it ships.
   'nock': 14.0.16
+  'npm-high-impact': 1.13.0
   'npm-run-all2': 9.0.2
   'oxfmt': 0.60.0
   'oxlint': 1.75.0
@@ -141,7 +142,7 @@ catalog:
   'oxlint-tsgolint': 7.0.2001
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
-  'playwright-core': 1.61.1
+  'playwright-core': 1.62.0
   'portless': 0.15.4
   'regjsparser': 0.13.2
   'rolldown': 1.1.4
@@ -191,10 +192,6 @@ minimumReleaseAgeExclude:
   # tracks the current release. Exact-pinned so a future version re-soaks.
   # verkit — new dev-only transitive of taze 19.16.0 (same owner directive);
   # exact-pinned so future versions re-soak.
-  # published: 2026-07-24 | removable: 2026-07-31
-  - '@shadscan/cli@0.2.0'
-  # published: 2026-07-23 | removable: 2026-07-30
-  - 'js-yaml@5.2.2'
 
 patchedDependencies:
   # Single-registry: drops taze's default-registry fast path in
