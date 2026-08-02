@@ -56,9 +56,7 @@
     "ci:validate": "node scripts/repo/ci-validate.mts",
     "clean": "node scripts/fleet/clean.mts",
     "cover": "node scripts/fleet/cover.mts",
-    "docs:api": "node scripts/fleet/make-api-md.mts",
     "docs:api:check": "node scripts/repo/gen-api-docs.mts --check",
-    "docs:llms": "node scripts/fleet/make-llms-txt.mts",
     "doctor": "node scripts/fleet/doctor.mts",
     "doctor:auth": "node scripts/fleet/check/setup-is-prompt-less.mts",
     "fix": "node scripts/fleet/fix.mts",
@@ -92,7 +90,9 @@
     "update": "node scripts/fleet/update.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
     "setup:sfw-ca": "node scripts/fleet/setup/sfw-ca.mts",
-    "get-green": "node scripts/fleet/get-green.mts"
+    "get-green": "node scripts/fleet/get-green.mts",
+    "gen:llms-txt": "node scripts/fleet/gen/llms-txt.mts",
+    "weekly-update:ci": "gh workflow run weekly-update.lock.yml"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
