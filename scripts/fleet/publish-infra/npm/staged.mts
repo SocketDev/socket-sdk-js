@@ -28,16 +28,13 @@ import {
   rootPath,
   runCapture,
   runInherit,
+  runInheritTee,
 } from '../shared.mts'
 import { withPinnedReadme } from '../pin-readme.mts'
 import { withPrunedPackManifest } from './pack-manifest.mts'
 import { verifyPackedPayload } from './pack-preflight.mts'
-import {
-  diagnoseStageConflict,
-  diagnoseStagedAuthFailure,
-  fetchPublishedState,
-  isAlreadyPublished,
-} from './registry.mts'
+import { diagnosePublishFailure } from './publish-failure.mts'
+import { fetchPublishedState, isAlreadyPublished } from './registry.mts'
 import type { StageListEntry } from './shared.mts'
 import { isStagingExpected, logNpmApproveHandoff } from './shared.mts'
 import {
@@ -195,6 +192,10 @@ export async function runStaged(
     readFileSync(pkg.manifestPath, 'utf8'),
   ) as WorkspaceManifestShape
   let preflightOk = true
+  // Teed, not inherited: the operator still watches the upload live, and the
+  // failure branch below gets to read what the registry actually said before
+  // it offers any diagnosis.
+  let staged: { code: number; output: string } = { code: 0, output: '' }
   const code = await withPinnedReadme(pinTargetFor(pkg), () =>
     withPrunedPackManifest(pkg.dir, async () => {
       preflightOk = await verifyPackedPayload({
@@ -206,7 +207,8 @@ export async function runStaged(
       if (!preflightOk) {
         return 1
       }
-      return await runInherit('pnpm', args, rootPath)
+      staged = await runInheritTee('pnpm', args, rootPath)
+      return staged.code
     }),
   )
   if (!preflightOk) {
@@ -215,10 +217,11 @@ export async function runStaged(
   }
   if (code !== 0) {
     logger.fail(`pnpm stage publish exited ${code}`)
-    for (const line of await diagnoseStageConflict(pkg.name, pkg.version)) {
-      logger.fail(line)
-    }
-    for (const line of await diagnoseStagedAuthFailure(pkg.name)) {
+    for (const line of await diagnosePublishFailure({
+      name: pkg.name,
+      output: staged.output,
+      version: pkg.version,
+    })) {
       logger.fail(line)
     }
     process.exitCode = code

@@ -28,16 +28,13 @@ import {
   logger,
   provenanceAllowed,
   runCapture,
-  runInherit,
+  runInheritTee,
 } from '../shared.mts'
 import { withPinnedReadme } from '../pin-readme.mts'
 import { withPrunedPackManifest } from './pack-manifest.mts'
 import { verifyPackedPayload } from './pack-preflight.mts'
-import {
-  diagnoseStageConflict,
-  diagnoseStagedAuthFailure,
-  isAlreadyPublished,
-} from './registry.mts'
+import { diagnosePublishFailure } from './publish-failure.mts'
+import { isAlreadyPublished } from './registry.mts'
 import { isStagingExpected, logNpmApproveHandoff } from './shared.mts'
 import {
   checkVersionLockstep,
@@ -453,6 +450,9 @@ export async function runWorkspacePublish(
     // pack preflight runs inside them, before the command, so a member whose
     // tarball is missing declared payload never stages or publishes.
     let preflightOk = true
+    // Teed so the failure branch can read the member's own output instead of
+    // guessing from the packument. See publish-failure.mts.
+    let member: { code: number; output: string } = { code: 0, output: '' }
     // eslint-disable-next-line no-await-in-loop -- serial by design
     const code = await withPinnedReadme(pinTargetForPackage(layout, pkg), () =>
       withPrunedPackManifest(pkg.dir, async () => {
@@ -465,7 +465,8 @@ export async function runWorkspacePublish(
         if (!preflightOk) {
           return 1
         }
-        return await runInherit('pnpm', args, pkg.dir)
+        member = await runInheritTee('pnpm', args, pkg.dir)
+        return member.code
       }),
     )
     if (!preflightOk) {
@@ -486,11 +487,11 @@ export async function runWorkspacePublish(
           `failed dependency.`,
       )
       // eslint-disable-next-line no-await-in-loop -- failure path, loop exits here
-      for (const line of await diagnoseStageConflict(pkg.name, version)) {
-        logger.fail(line)
-      }
-      // eslint-disable-next-line no-await-in-loop -- failure path, loop exits here
-      for (const line of await diagnoseStagedAuthFailure(pkg.name)) {
+      for (const line of await diagnosePublishFailure({
+        name: pkg.name,
+        output: member.output,
+        version,
+      })) {
         logger.fail(line)
       }
       process.exitCode = code

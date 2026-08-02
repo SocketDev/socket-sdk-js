@@ -1,0 +1,9 @@
+# @socketsecurity/sdk
+
+> SDK for the Socket API client. 1 subpath exports, grouped by namespace.
+
+Import any namespace by its subpath, e.g. `import '@socketsecurity/sdk/testing'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
+
+## Top-level
+
+- [@socketsecurity/sdk/testing](./dist/testing.d.mts)

@@ -8,5 +8,8 @@
   "build": {
     "from": "npm-registry",
     "type": "js"
+  },
+  "docs": {
+    "llmsTxt": true
   }
 }
