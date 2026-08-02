@@ -181,7 +181,6 @@ minimumReleaseAgeExclude:
   - 'socket'
   - '@sdxgen/*'
   - 'sdxgen'
-  - 'stuie'
   # oxlint-tsgolint 7.0.2001 — the type-aware lint sidecar the fleet lint
   # runner's whole-tree gate needs. The main package + its per-platform binary
   # family are pinned to the exact version (a scope glob would blanket-bypass a
