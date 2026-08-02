@@ -123,15 +123,28 @@ export function formatDefinitiveFailure(failure: DefinitiveFailure): string[] {
  * Everything to log after `pnpm stage publish` / `pnpm publish` exits non-zero.
  *
  * A definitive error in the captured output short-circuits the heuristics.
- * Otherwise the existing packument-driven diagnoses run unchanged — an
- * ambiguous failure is exactly where a probable cause earns its place.
+ * Otherwise the packument-driven diagnoses run — an ambiguous failure is
+ * exactly where a probable cause earns its place.
+ *
+ * `mode` defaults to `staged`. Pass `direct` from the `pnpm publish` path: a
+ * direct publish never touches the stage endpoint, so "a staged unpublished
+ * entry already exists" cannot be its cause, and printing that guess would send
+ * the reader after a stage that by construction does not exist. The
+ * trusted-publisher diagnosis still runs — a wrong publisher binding breaks
+ * both modes identically.
  */
 export async function diagnosePublishFailure(config: {
+  mode?: 'direct' | 'staged' | undefined
   name: string
   output: string
   version: string
 }): Promise<string[]> {
-  const { name, output, version } = {
+  const {
+    mode = 'staged',
+    name,
+    output,
+    version,
+  } = {
     __proto__: null,
     ...config,
   } as typeof config
@@ -140,7 +153,7 @@ export async function diagnosePublishFailure(config: {
     return formatDefinitiveFailure(definitive)
   }
   return [
-    ...(await diagnoseStageConflict(name, version)),
+    ...(mode === 'staged' ? await diagnoseStageConflict(name, version) : []),
     ...(await diagnoseStagedAuthFailure(name)),
   ]
 }
