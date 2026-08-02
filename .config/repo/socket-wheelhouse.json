@@ -11,5 +11,17 @@
   },
   "docs": {
     "llmsTxt": true
+  },
+  "release": {
+    "provenanceOrphanBaseline": [
+      {
+        "id": "@socketsecurity/sdk@4.1.0",
+        "reason": "Bump-in-CI: attested commit 29a1daed carries a 4.0.4 manifest while v4.1.0 sits at the later bump commit 253d5d17. Neither reaches the published tree and neither tag can be moved."
+      },
+      {
+        "id": "@socketsecurity/sdk@4.1.1",
+        "reason": "Bump-in-CI: attested commit 00995089 carries a 4.1.0 manifest while v4.1.1 sits at the later bump commit 9809340a. Neither reaches the published tree and neither tag can be moved."
+      }
+    ]
   }
 }
