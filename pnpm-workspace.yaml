@@ -91,13 +91,12 @@ pmOnFail: warn
 catalog:
   '@anthropic-ai/claude-code': 2.1.218
   '@redwoodjs/agent-ci': 0.17.1
-  '@shadscan/cli': 0.2.0
+  '@shadscan/cli': 0.5.0
   '@sinclair/typebox': 0.34.52
   '@socketregistry/packageurl-js': 1.5.0
   '@types/semver': 7.7.1
   '@types/shell-quote': 1.7.5
   '@ultrathink/acorn.rs.wasm': 0.1.1
-  '@ultrathink/acorn.wasm': npm:@ultrathink/acorn-wasm@0.0.1
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name from inside the same package — Node ESM resolves it as a
   # self-reference. Build / hook / script / config code uses the

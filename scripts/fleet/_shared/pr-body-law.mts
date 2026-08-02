@@ -11,7 +11,7 @@
  *   so every fold has to be opened to find out whether it matters. The
  *   operator's verdict on one such body was that it read as a word dump. The
  *   corrected shape is the law below; that body, rewritten, is the fixture at
- *   `test/repo/unit/fixtures/pr-body-law/socket-patch-142.md`, which the
+ *   `test/repo/unit/fixtures/pr-body-law/compliant-body.md`, which the
  *   validator must stay quiet on.
  *   The law, and why each clause exists:
  *
