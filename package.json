@@ -150,7 +150,7 @@
     "shell-quote": "catalog:",
     "svgo": "catalog:",
     "taze": "catalog:",
-    "type-coverage": "2.29.7",
+    "type-coverage": "2.30.1",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "vitiate": "catalog:"
