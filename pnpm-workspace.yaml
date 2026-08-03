@@ -78,7 +78,7 @@ overrides:
   'js-yaml': '4.3.0'
   'protobufjs': '7.6.5'
   # advisories #51 / #54 (medium) — bump to latest 6.x patch
-  'undici': '6.27.0'
+  'undici': '6.28.0'
   'vite': 'catalog:'
   'which@>=4': '7.0.0'
 
@@ -89,7 +89,7 @@ overrides:
 pmOnFail: warn
 
 catalog:
-  '@anthropic-ai/claude-code': 2.1.218
+  '@anthropic-ai/claude-code': 2.1.220
   '@redwoodjs/agent-ci': 0.17.1
   '@shadscan/cli': 0.5.0
   '@sinclair/typebox': 0.34.52
@@ -120,7 +120,7 @@ catalog:
   'dtu-github-actions': 0.17.1
   'ecc-agentshield': 1.4.0
   'fast-check': 4.9.0
-  'markdownlint-cli2': 0.23.1
+  'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
   'neosanitize': 0.3.0
