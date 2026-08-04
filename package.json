@@ -121,7 +121,7 @@
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
     "@vitiate/core": "catalog:",
-    "acorn": "8.17.0",
+    "acorn": "8.18.0",
     "c8": "catalog:",
     "chrome-devtools-mcp": "catalog:",
     "del": "8.0.1",
@@ -150,7 +150,7 @@
     "shell-quote": "catalog:",
     "svgo": "catalog:",
     "taze": "catalog:",
-    "type-coverage": "2.29.7",
+    "type-coverage": "2.30.1",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "vitiate": "catalog:"
