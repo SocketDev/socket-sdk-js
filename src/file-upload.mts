@@ -1,5 +1,4 @@
 import { createReadStream } from 'node:fs'
-import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import { isErrnoException } from '@socketsecurity/lib/errors/predicates'
@@ -10,6 +9,7 @@ import { MAX_RESPONSE_SIZE } from './constants.mts'
 
 import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
+import type formDataExternal from './external/form-data'
 import type { RequestOptions, RequestOptionsWithHooks } from './types.mts'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { ReadStream } from 'node:fs'
@@ -139,28 +139,32 @@ export async function createUploadRequest(
  * the error-message shape (and the coverage-ignore justification) lives in
  * one place.
  */
-const requireHere = createRequire(import.meta.url)
+// The emitted bundle is CJS, so `require` is real at runtime; this declaration
+// only teaches tsgo about it (`.mts` sources have no ambient `require`).
+declare const require: (id: string) => unknown
 
-// Lazy, memoized form-data. Loading it eagerly binds node:http's native
-// HTTPParser at MODULE EVAL (form-data requires node:http/https at its own
-// module scope), which makes every SDK importer hostile to V8 startup
-// snapshots (`--build-snapshot` aborts on the unserializable [Foreign]
-// handles). Only the two multipart builders below construct it, so the
-// require defers to first upload. The built layout resolves the sibling
-// `./form-data.js` chunk rolldown emits (the SDK ships zero runtime
-// dependencies, so the bytes must come from the bundle); running from src —
-// tests, strip-types dev runs — falls back to node_modules.
+// Lazy, memoized form-data, vendored through `src/external/` the way
+// socket-lib handles its externals: a type-only import for the shape plus a
+// static relative `require` inside the accessor, resolved against the
+// separately built self-contained `dist/external/form-data.js` bundle.
+//
+// The require must stay LAZY because form-data requires node:http/https at its
+// own module scope, binding the native HTTPParser at eval and making every SDK
+// importer hostile to V8 startup snapshots (`--build-snapshot` aborts on the
+// unserializable [Foreign] handles). Only the two multipart builders above
+// construct it, so evaluation defers to the first upload.
+//
+// The require must also stay a STATIC RELATIVE LITERAL pointing at a file that
+// ships in the package, so a consumer bundler (socket-cli's rollup) can
+// resolve and inline it. The previous `createRequire(...)('form-data')` was
+// invisible to bundlers, so the bare specifier survived into published output
+// with form-data neither bundled nor declared — every fresh install threw
+// "Cannot find module 'form-data'" on its first upload, which took a
+// customer's CI down (CE-356).
 let formDataCtor: MultipartFormConstructor | undefined
 export function getFormData(): MultipartFormConstructor {
   if (formDataCtor === undefined) {
-    let mod: unknown
-    try {
-      mod = requireHere('./form-data.js')
-    } catch {
-      mod = requireHere('form-data')
-    }
-    const named = mod as { FormData?: MultipartFormConstructor | undefined }
-    formDataCtor = named.FormData ?? (mod as MultipartFormConstructor)
+    formDataCtor = require('./external/form-data.js') as typeof formDataExternal
   }
   return formDataCtor
 }
