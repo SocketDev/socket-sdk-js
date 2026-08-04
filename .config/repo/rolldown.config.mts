@@ -22,6 +22,8 @@ import type { OutputOptions, Plugin, RolldownOptions } from 'rolldown'
 const rootPath = REPO_ROOT
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
+// Own-vendored-externals prefix for the scoped external() match below.
+const srcExternalPath = path.join(srcPath, 'external') + path.sep
 
 const packageJson = JSON.parse(
   readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
@@ -121,13 +123,28 @@ export function createNodeProtocolPlugin(): Plugin {
 
 export const buildConfig: RolldownOptions & { output: OutputOptions } = {
   // Runtime deps stay external (consumers install them); node: builtins are
-  // externalized by the node-protocol plugin.
-  external: externalDependencies,
+  // externalized by the node-protocol plugin. The SDK's OWN vendored
+  // `src/external/*` shims are externalized so consumers' relative
+  // `require('./external/form-data.js')` calls survive verbatim and resolve
+  // against the separately built self-contained `dist/external/*` bundles.
+  //
+  // The match is by RESOLVED PATH under this repo's `src/external/`, never a
+  // blanket `external/`-segment test: this build INLINES @socketsecurity/lib,
+  // whose internals require lib's own nested `dist/external/*` modules, and a
+  // segment match externalizes those too — emitting relative requires into a
+  // package that consumers of this zero-dependency SDK never install.
+  external: (id: string, importer?: string | undefined) => {
+    if (externalDependencies.includes(id)) {
+      return true
+    }
+    const resolved = path.isAbsolute(id)
+      ? id
+      : id.startsWith('.') && importer
+        ? path.resolve(path.dirname(importer), id)
+        : undefined
+    return resolved !== undefined && resolved.startsWith(srcExternalPath)
+  },
   input: {
-    // form-data builds as its own chunk so `getFormData()` can defer its
-    // node:http-binding module eval to the first multipart upload while the
-    // bytes still ship in the zero-dependency bundle.
-    'form-data': path.join(srcPath, 'form-data-entry.mts'),
     index: path.join(srcPath, 'index.mts'),
     testing: path.join(srcPath, 'testing.mts'),
   },

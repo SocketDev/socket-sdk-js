@@ -19,6 +19,7 @@
     "dist/*.d.mts",
     "dist/utils/*.d.mts",
     "dist/*.js",
+    "dist/external/*",
     "types/*.d.ts"
   ],
   "main": "./dist/index.js",

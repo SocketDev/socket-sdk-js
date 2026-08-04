@@ -73,6 +73,7 @@ test-output.*
 # Allow specific files
 !/.vscode/extensions.json
 !api*.d.ts
+!src/external/*.d.ts
 !src/types/**/*.d.ts
 
 # <fleet>

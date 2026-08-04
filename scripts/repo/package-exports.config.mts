@@ -37,17 +37,16 @@ export const config: ExportsConfig = {
     'dist/user-agent.d.mts',
     'dist/utils.d.mts',
     'dist/utils/*',
+    // Vendored externals (socket-lib convention): self-contained bundles the
+    // main bundle reaches through verbatim relative requires — shipped via
+    // `files`, never exported as subpaths.
+    'dist/external/*',
     // rolldown code-split JS chunks: the shared runtime and hashed shared
     // chunks imported by the exported entries — graph-only, shipped via
     // `files`, never exported. Globbed so a content-hash change does not
     // re-trip the validator on every dependency bump.
     'dist/promises-*.js',
     'dist/rolldown-runtime-*.js',
-    // The lazily required form-data chunk: getFormData() resolves it as a
-    // sibling file at runtime, so it ships in `files` but is never an
-    // exports entry (its .d.mts is graph-only too).
-    'dist/form-data.js',
-    'dist/form-data-entry.d.mts',
   ],
   outDir: 'dist',
 }

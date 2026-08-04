@@ -2,7 +2,7 @@
  * @file Build runner: rolldown for the bundle, tsgo for declarations.
  */
 
-import { existsSync } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -17,8 +17,10 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
+import { REPO_ROOT } from '../fleet/paths.mts'
 import { buildConfig } from '../../.config/repo/rolldown.config.mts'
 import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.mts'
+import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
 
 const rootPath = path.resolve(
@@ -86,6 +88,24 @@ export async function buildSource(
     } finally {
       await browserBundle.close()
     }
+
+    // Vendored externals (dist/external/*): self-contained CJS bundles the
+    // main bundle reaches through verbatim relative requires, mimicking
+    // socket-lib's build-externals step. See rolldown.externals.config.mts.
+    const { output: externalsOutput, ...externalsInputOptions } =
+      externalsBuildConfig
+    const externalsBundle = await rolldown(externalsInputOptions)
+    try {
+      await externalsBundle.write(externalsOutput)
+    } finally {
+      await externalsBundle.close()
+    }
+    // Ship the hand-authored structural declarations beside the bundles
+    // (socket-lib's copy-files step).
+    await fs.cp(
+      path.join(REPO_ROOT, 'src/external/form-data.d.ts'),
+      path.join(REPO_ROOT, 'dist/external/form-data.d.ts'),
+    )
 
     const buildTime = Date.now() - startTime
 
