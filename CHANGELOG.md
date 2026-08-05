@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.1.4](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.4) - 2026-08-05
+
+### Fixed
+
+- **`upload`** — vendor form-data so bundlers can ship it (#681)
+- **`catalog`** — sync the sdk -stable alias to its base version
+- **`catalog`** — sync the sdk -stable alias to the held base version
+- **`soak`** — drop the unpublishable bare stuie exclude
+
+### Internal
+
+- **`fleet`** — resync -stable aliases, drop scripts with missing targets
+
 ## [4.1.3](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.3) - 2026-07-30
 
 ### Added
