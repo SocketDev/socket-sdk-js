@@ -29,6 +29,9 @@ Two naming conventions are load-bearing:
 
 The same File-size rule from CLAUDE.md applies — soft cap 500, hard cap 1000 — but for skills the trigger is usually **shape**, not lines: as soon as the SKILL.md is "this and also that and also the other thing," extract.
 
+<details>
+<summary><b>What goes where</b>: a path-by-path table covering <code>SKILL.md</code>, <code>reference.md</code>, the <code>scans/</code> and <code>phases/</code> and <code>tools/</code> dirs, <code>templates/&lt;name&gt;.tmpl</code>, <code>run.mts</code>, <code>_shared/&lt;topic&gt;.md</code>, and <code>_shared/scripts/&lt;helper&gt;.mts</code></summary>
+
 What goes where:
 
 | Path                                  | Purpose                                                                                                                                                                                                                                                                                  |
@@ -40,6 +43,8 @@ What goes where:
 | `<skill>/run.mts`                     | Skill-specific executable runner. Inline prompts so prompts and code can't drift. Per CLAUDE.md _Tooling — Runners are `.mts`, not `.sh`_.                                                                                                                                               |
 | `_shared/<topic>.md`                  | Shared **prose** (variant-analysis discipline, compound-lessons workflow, multi-agent backends). Cross-skill load surface.                                                                                                                                                               |
 | `_shared/scripts/<helper>.mts`        | Shared **TypeScript** helpers imported by per-skill `run.mts` (default-branch resolution, report formatting, spawn wrappers). Internal automation — not a public library, hence `scripts/` not `lib/`. Use `@socketsecurity/lib/spawn` for subprocesses, never raw `node:child_process`. |
+
+</details>
 
 ## Auditor agents
 
@@ -147,6 +152,9 @@ export async function test(): Promise<{
 
 The Rust dispatcher then execs `binPath` with the user's args. Swapping the tool = changing one resolver; the dispatcher doesn't care.
 
+<details>
+<summary><b>Fleet rationale and shipped status</b>: why per-repo <code>check.mts</code>, <code>fix.mts</code> and <code>test.mts</code> each re-implement binary lookup, plus the <code>_shared/scripts/resolve-tools.mts</code> exports, a caller example, and the rolldown migration path</summary>
+
 **Why the fleet should borrow this:** today every fleet repo carries 200–450-line `scripts/check.mts` / `scripts/fix.mts` / `scripts/test.mts` files that duplicate "find the tool binary, build the right args, exec it." Real drift surface — the same logic written 12 times rarely stays in sync.
 
 **Implemented:** `_shared/scripts/resolve-tools.mts` (fleet-shared, byte-identical) exports `resolveLinter()` / `resolveFormatter()` / `resolveTypeChecker()` / `resolveTestRunner()` / `resolveBundler()` — each returning `{ args, envs }` where `args` is the full `pnpm exec` argv (tool name first) and `envs` is the env-var overrides. A `runResolved()` convenience runs the resolved tool and returns `{ exitCode, stdout, stderr }`.
@@ -161,6 +169,8 @@ const result = await runResolved(resolveLinter({ mode: 'check' }), { cwd })
 ```
 
 The resolver gives us a clean migration path: when rolldown goes fleet-wide, we change `resolveBundler()` to return `['rolldown']` instead of `['esbuild']` — every per-repo `scripts/repo/build.mts` that consults the resolver picks up the swap. Per-repo migration to consume the resolver lands repo-by-repo so we don't bundle bundler-swap risk into a 12-repo cascade.
+
+</details>
 
 ## References
 

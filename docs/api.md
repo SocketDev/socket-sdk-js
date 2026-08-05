@@ -73,6 +73,9 @@ async createFullScanFromManifest(
 
 Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
 
+<details>
+<summary><b>Signature</b>: <code>orgSlug</code>, <code>archivePath</code>, and an options object of <code>repo</code>, <code>branch</code>, <code>commit_hash</code>, <code>commit_message</code>, <code>committers</code>, <code>integration_org_slug</code>, <code>integration_type</code>, <code>make_default_branch</code>, <code>pull_request</code>, <code>scan_type</code>, <code>set_as_pending_head</code>, <code>tmp</code>, <code>workspace</code></summary>
+
 ```typescript
 async createOrgFullScanFromArchive(
   orgSlug: string,
@@ -101,6 +104,8 @@ async createOrgFullScanFromArchive(
   },
 ): Promise<SocketSdkResult<'CreateOrgFullScanArchive'>>
 ```
+
+</details>
 
 **Quota:** _not tracked_ · **OpenAPI:** `CreateOrgFullScanArchive`
 
@@ -638,6 +643,9 @@ Surface and triage alerts across an organization.
 
 List latest alerts for an organization (Beta). Returns paginated alerts
 
+<details>
+<summary><b>Signature</b>: <code>orgSlug</code> plus optional alert filters for action, category, cveId, cveTitle, cweId, cweName, EPSS, fixType, KEV, priority, reachabilityType, severity, status, type, <code>alertUpdatedAt</code> comparisons, <code>repoFullName</code>, <code>repoLabels</code>, <code>repoSlug</code>, each with a <code>.notIn</code> variant, plus <code>per_page</code> and <code>startAfterCursor</code></summary>
+
 ```typescript
 async getOrgAlertsList(
   orgSlug: string,
@@ -688,6 +696,8 @@ async getOrgAlertsList(
     | undefined,
 ): Promise<SocketSdkResult<'alertsList'>>
 ```
+
+</details>
 
 **Quota:** _not tracked_ · **OpenAPI:** `alertsList`
 

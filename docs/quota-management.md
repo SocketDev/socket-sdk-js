@@ -29,6 +29,9 @@ if (quota.success) {
 
 The SDK exports four helpers for planning quota usage:
 
+<details>
+<summary><b>Worked calls</b>: <code>getQuotaCost</code>, <code>calculateTotalQuotaCost</code>, <code>hasQuotaForMethods</code>, and <code>getMethodsByQuotaCost</code>, each with its returned value inline</summary>
+
 ```typescript
 import {
   calculateTotalQuotaCost,
@@ -50,6 +53,8 @@ hasQuotaForMethods(50, ['batchPackageFetch']) // false — needs 100
 
 getMethodsByQuotaCost(0) // ['getQuota', 'listOrganizations', …]
 ```
+
+</details>
 
 ## Pre-flight check
 

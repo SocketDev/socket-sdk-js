@@ -18,6 +18,9 @@ pnpm add @socketsecurity/sdk
 
 ## Usage
 
+<details>
+<summary><b>Quickstart</b>: construct <code>SocketSdk</code> with <code>retries</code>, <code>retryDelay</code> and <code>timeout</code>, then call <code>getQuota</code>, <code>getScoreByNpmPackage</code>, and <code>batchPackageFetch</code></summary>
+
 ```typescript
 import { SocketSdk } from '@socketsecurity/sdk'
 
@@ -47,6 +50,8 @@ const batchResult = await client.batchPackageFetch({
   ],
 })
 ```
+
+</details>
 
 ## Development
 
