@@ -44,6 +44,8 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { isMainModule } from '../_shared/is-main-module.mts'
 import { runMain } from '../_shared/run-main.mts'
+
+import type { ScriptMeta } from '../_shared/run-main.mts'
 import { REPO_ROOT } from '../paths.mts'
 
 const logger = getDefaultLogger()
@@ -252,6 +254,12 @@ async function main(): Promise<void> {
   logger.log('  REPORT-ONLY for now — this does not fail the build yet.')
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'checks long markdown sections carry a <details> fold so a reader explores instead of scrolling',
+  help: `Usage: node scripts/fleet/check/long-doc-sections-are-folded.mts`,
+}
+
 if (isMainModule(import.meta.url)) {
-  runMain(main)
+  runMain(main, SCRIPT_META)
 }
