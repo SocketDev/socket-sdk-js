@@ -365,10 +365,8 @@ describe('Entitlements API', () => {
         .reply(200, mockResponse)
 
       const client = getClient()
-      const promises = Array.from(
-        { length: 5 },
-        (): Promise<string[]> =>
-          client.getEnabledEntitlements('concurrent-org'),
+      const promises = Array.from({ length: 5 }, (): Promise<string[]> =>
+        client.getEnabledEntitlements('concurrent-org'),
       )
 
       const settled = await Promise.allSettled(promises)
