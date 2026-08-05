@@ -54,6 +54,9 @@ if (result.success) {
 }
 ```
 
+<details>
+<summary><b>Field-by-field shapes</b>: success carries <code>status</code> and typed <code>data</code>; failure carries <code>status</code>, <code>error</code>, and the optional <code>cause</code> and <code>url</code></summary>
+
 The shapes:
 
 ```typescript
@@ -73,6 +76,8 @@ The shapes:
   url?: string,    // request URL — handy for debugging
 }
 ```
+
+</details>
 
 **Why a result object instead of throwing?** Network failures, auth failures, and validation failures are normal control flow when you're talking to a remote API. Treating them as exceptions would force every caller to wrap every call in `try`/`catch`. The result object lets you handle them as data.
 
