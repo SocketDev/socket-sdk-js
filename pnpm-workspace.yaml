@@ -98,7 +98,7 @@ catalog:
   '@redwoodjs/agent-ci': 0.17.1
   '@shadscan/cli': 0.7.0
   '@sinclair/typebox': 0.34.52
-  '@socketregistry/packageurl-js': 1.5.1
+  '@socketregistry/packageurl-js': 1.5.2
   '@types/semver': 7.7.1
   '@types/shell-quote': 1.7.5
   '@ultrathink/acorn.rs.wasm': 0.1.1
@@ -106,7 +106,7 @@ catalog:
   # name from inside the same package — Node ESM resolves it as a
   # self-reference. Build / hook / script / config code uses the
   # -stable name. See socket-wheelhouse@92cd3e3 for full rationale.
-  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.1'
+  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.2'
   '@socketsecurity/lib': 6.6.0
   '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.6.0'
   '@socketsecurity/registry': 2.0.5
@@ -209,6 +209,8 @@ minimumReleaseAgeExclude:
   # re-soaks.
   # published: 2026-08-01 | removable: 2026-08-08
   - 'tinyexec@1.3.0'
+  # published: 2026-08-05 | removable: 2026-08-12
+  - '@socketregistry/packageurl-js@1.5.2'
 
 patchedDependencies:
   # default-export interop (managed by socket-wheelhouse sync; do not edit):
