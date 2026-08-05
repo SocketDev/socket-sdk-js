@@ -46,16 +46,11 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { isFleetRepo } from '../_shared/fleet-repos.mts'
-import {
-  isOptedIn,
-  loadRosterFromRepo,
-  resolveRepoName,
-} from '../_shared/fleet-roster.mts'
+import { resolveRepoName } from '../_shared/fleet-roster.mts'
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import {
   BYPASS_LOOKBACK_USER_TURNS,
@@ -143,7 +138,7 @@ const SIBLING_PATH_RES: readonly RegExp[] = [
 // The canonical social-follow badge block every fleet README carries under
 // the title, byte-identical fleet-canonical, not repo-contextual. Both must
 // be present. Matched by the stable LINK target, not the badge image, so an
-// image-host change (shields.io → the local assets/fleet/ SVGs) or reworded
+// image-host change (shields.io → the local assets/ SVGs) or reworded
 // alt-text still counts.
 const SOCIAL_BADGES: ReadonlyArray<{ name: string; signature: RegExp }> = [
   { name: 'Bluesky follow', signature: /bsky\.app\/profile\/socket\.dev/ },
@@ -153,25 +148,34 @@ const SOCIAL_BADGES: ReadonlyArray<{ name: string; signature: RegExp }> = [
   },
 ]
 
-// Repo root of THIS hook installation — the authoritative roster source. The
-// hook lives at <repoRoot>/.claude/hooks/fleet/readme-fleet-shape-guard/
-// index.mts, so the root is four levels up. loadRosterFromRepo prefers the
-// in-repo template seed, so the wheelhouse resolves its own canonical roster and
-// a member resolves its cascaded copy.
-const HOOK_REPO_ROOT = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../../..',
-)
+// A README carries EXACTLY ONE brand mark (owner directive, 2026-08-04): a
+// repo with its own combomark shows that at the top, and a repo without one
+// shows the fleet Socket combomark at the bottom. Both at once is duplicate
+// branding — the reader sees the same lockup twice and the page pays for it in
+// vertical space, which is what made the 420px footer read as oversized on
+// repos that already had a logo.
+//
+// Matched on the ASSET PATH, which is the stable part: `assets/`
+// is repo-owned, `assets/socket-combomark` is the fleet mark. Sizes and
+// alt text are free to change without touching this rule.
+const REPO_BRAND_MARK = /assets\/repo\/brand\/[^"')\s]*combomark/
+const FLEET_BRAND_MARK = /assets\/fleet\/socket-combomark/
 
 /**
- * True when the repo owning `readmePath` has opted into a freeform
- * (non-skeleton) README via the cascade roster's `optIns: ['freeform-readme']`.
- * Such a repo's README is product / marketplace-shaped, exempt from the
- * five-section skeleton; the universal social badges, wheelhouse-leak, and
- * sibling-path rules still apply. The target repo name is resolved from the
- * README's own directory, so a wheelhouse session editing a sibling member's
- * README looks the member up in the wheelhouse's authoritative roster.
+ * Which brand marks a README shows. BOTH present is the violation. Neither is
+ * left alone: a scoped or in-progress README may carry no logo yet, and
+ * demanding one would block edits this guard has no business blocking.
  */
+export function brandMarksPresent(text: string): {
+  fleet: boolean
+  repo: boolean
+} {
+  return {
+    fleet: FLEET_BRAND_MARK.test(text),
+    repo: REPO_BRAND_MARK.test(text),
+  }
+}
+
 /**
  * Non-fleet opt-in check. A foreign repo, origin not in the fleet roster
  * owns its README shape by default; it ADOPTS the fleet skeleton + hygiene
@@ -202,20 +206,6 @@ export function foreignReadmeOptIn(
     [OPT_IN_PHRASE, `${OPT_IN_PHRASE}: ${repoName}`],
     BYPASS_LOOKBACK_USER_TURNS,
   )
-}
-
-export function isFreeformReadmeRepo(readmePath: string): boolean {
-  const repoName = resolveRepoName(path.dirname(readmePath))
-  if (!repoName) {
-    return false
-  }
-  const roster = loadRosterFromRepo(HOOK_REPO_ROOT)
-  /* c8 ignore start - safety net: roster always present when running from the wheelhouse repo */
-  if (!roster) {
-    return false
-  }
-  /* c8 ignore stop */
-  return isOptedIn(roster, repoName, 'freeform-readme')
 }
 
 /**
@@ -263,13 +253,21 @@ export function isRootReadme(filePath: string): boolean {
  * the post-edit text can't be reliably computed (Edit against a file that
  * doesn't exist, or old_string not found).
  */
+export interface PostEditTextOptions {
+  content?: string | undefined
+  newString?: string | undefined
+  oldString?: string | undefined
+}
+
 export function computePostEditText(
   toolName: string,
   filePath: string,
-  newString: string | undefined,
-  oldString: string | undefined,
-  content: string | undefined,
+  options?: PostEditTextOptions | undefined,
 ): string | undefined {
+  const { content, newString, oldString } = {
+    __proto__: null,
+    ...options,
+  } as PostEditTextOptions
   if (toolName === 'Write') {
     return content
   }
@@ -302,6 +300,7 @@ export function computePostEditText(
 
 interface ShapeFinding {
   kind:
+    | 'duplicate-brand-mark'
     | 'missing-section'
     | 'missing-social-badges'
     | 'relative-sibling'
@@ -311,21 +310,15 @@ interface ShapeFinding {
 
 export function findShapeViolations(
   text: string,
-  options?:
-    | {
-        skipSkeleton?: boolean | undefined
-        skipSocialBadges?: boolean | undefined
-      }
-    | undefined,
+  options?: { skipSocialBadges?: boolean | undefined } | undefined,
 ): ShapeFinding[] {
   const opts = { __proto__: null, ...options }
   const lines = text.split('\n')
   const findings: ShapeFinding[] = []
 
-  // The five-section skeleton is infra-repo shape; product / marketplace repos
-  // opt out via the roster (`freeform-readme`). The badge, wheelhouse-leak, and
-  // sibling-path checks below stay universal regardless.
-  if (!opts.skipSkeleton) {
+  // Every fleet README follows the five-section skeleton. The badge,
+  // wheelhouse-leak, and sibling-path checks are universal too.
+  {
     const headings: string[] = []
     for (let i = 0, { length } = lines; i < length; i += 1) {
       /* c8 ignore next */
@@ -333,6 +326,18 @@ export function findShapeViolations(
       if (m && m.groups?.['heading']) {
         headings.push(m.groups['heading'])
       }
+    }
+    // Exactly one brand mark: the repo's own at the top, or the fleet
+    // combomark at the bottom.
+    const marks = brandMarksPresent(text)
+    if (marks.fleet && marks.repo) {
+      findings.push({
+        kind: 'duplicate-brand-mark',
+        detail:
+          'README shows BOTH the repo brand mark and the fleet Socket ' +
+          'combomark. A page carries exactly one: keep the repo mark at the ' +
+          'top and delete the fleet combomark block at the bottom.',
+      })
     }
     if (!hasLeadAnswer(text)) {
       findings.push({
@@ -456,19 +461,16 @@ export const check = editGuard((filePath, content, payload) => {
   const oldString =
     typeof input?.old_string === 'string' ? input.old_string : undefined
 
-  const postEdit = computePostEditText(
-    tool,
-    filePath,
+  const postEdit = computePostEditText(tool, filePath, {
+    content,
     newString,
     oldString,
-    content,
-  )
+  })
   if (postEdit === undefined) {
     return undefined
   }
 
   const findings = findShapeViolations(postEdit, {
-    skipSkeleton: isFreeformReadmeRepo(filePath),
     skipSocialBadges: isForeign,
   })
   if (findings.length === 0) {

@@ -13,12 +13,14 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { REPO_ROOT } from '../paths.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
+import { runMain } from '../_shared/run-main.mts'
+
+import type { ScriptMeta } from '../_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -29,11 +31,14 @@ export interface UpstreamPin {
   noReleaseTag: boolean
 }
 
-// A release tag carries a `<major>.<minor>` version token: v0.4.5, 1.2.3,
-// v6.0.2, a monorepo `@scope/pkg@1.2.3`, `pkg-v1.2.3`. A moving branch (main,
-// master, develop, releases/v6, release/next) has no such `\d+\.\d+` token.
-// Major-only floats (`v6`) intentionally fail — pin the full `v6.0.2`.
-const RELEASE_TAG_RE = /\d+\.\d+/
+// A release tag carries a `<major><sep><minor>` version token: v0.4.5, 1.2.3,
+// v6.0.2, a monorepo `@scope/pkg@1.2.3`, `pkg-v1.2.3` — and upstreams that
+// spell the separator differently, curl's `curl-8_19_0` and postgres's
+// `REL_17_9` among them. A moving branch (main, master, develop, releases/v6,
+// release/next) has no multi-part version token in ANY separator. Major-only
+// floats (`v6`) intentionally fail — pin the full `v6.0.2`.
+// require-regex-comment: two digit groups joined by `.` or `_`.
+const RELEASE_TAG_RE = /\d+[._]\d+/
 
 /**
  * True when `branch` looks like an immutable release tag (has a
@@ -160,11 +165,12 @@ export function runCheck(repoRoot: string): number {
   return 1
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'checks every upstream/ reference submodule pins a release tag, not a moving branch',
+  help: 'Usage: node scripts/fleet/check/upstream-submodules-are-release-tagged.mts',
+}
+
 if (isMainModule(import.meta.url)) {
-  try {
-    process.exitCode = runCheck(REPO_ROOT)
-  } catch (e) {
-    logger.error(e)
-    process.exitCode = 1
-  }
+  runMain(() => runCheck(REPO_ROOT), SCRIPT_META)
 }

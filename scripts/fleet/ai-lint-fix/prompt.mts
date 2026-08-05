@@ -26,8 +26,16 @@ export function bucketFindings(
     if (isGeneratedPath(f.filePath)) {
       continue
     }
+    // Error tier only. The lint verdict gates on oxlint's exit code, which
+    // only errors drive — a warn-tier finding never fails `pnpm run lint`, so
+    // it never buys a paid AI spawn either. Every AI_HANDLED_RULES entry is
+    // configured "error" in the canonical config; this filter keeps a future
+    // warn-tier rule from silently widening the batch past the verdict.
     const handled = f.messages.filter(
-      m => m.ruleId !== undefined && AI_HANDLED_RULES.has(m.ruleId),
+      m =>
+        m.severity === 2 &&
+        m.ruleId !== undefined &&
+        AI_HANDLED_RULES.has(m.ruleId),
     )
     if (handled.length === 0) {
       continue
@@ -77,28 +85,23 @@ export function renderRuleGuidance(findings: OxlintMessage[]): string {
 }
 
 /**
- * Build the per-file prompt. Structure follows Anthropic's prompt- engineering
- * best practices for headless tool-use:
+ * Build the per-file prompt, structured per Anthropic's prompt-engineering
+ * guidance for headless tool-use:
  *
  * - <role>: senior engineer doing a careful refactor — sets the bar above "quick
  *   autofix" so the model treats edge cases.
- * - <task>: one-sentence framing.
- * - <file>: the target path. Edits must stay scoped to it.
- * - <findings>: machine-readable list of violations.
+ * - <task>/<file>/<findings>: one-sentence framing, the scoped target path, and
+ *   the machine-readable violation list.
  * - <rules>: per-rule canonical rewrite + good/bad examples, low freedom.
- * - <process>: numbered steps that force a Read → reason → Edit → self-verify
- *   loop. Self-verify is the highest-leverage step — it catches the
- *   import/callsite mismatch class that produced past breakage.
- * - <constraints>: hard rules — no Bash, no Write, single-file scope, no orphan
- *   imports.
- * - <reminders>: instructions repeated at the END for the long- context regime
- *   per Anthropic guidance.
- * - <output>: response format expectation, prefilled to suppress markdown /
- *   preamble.
+ * - <process>: numbered steps forcing a Read → reason → Edit → self-verify loop.
+ *   Self-verify is the highest-leverage step — it catches the import/callsite
+ *   mismatch class that produced past breakage.
+ * - <constraints>: no Bash, no Write, single-file scope, no orphan imports.
+ * - <reminders>: instructions repeated at the END for the long-context regime.
+ * - <output>: response format, prefilled to suppress markdown/preamble.
  *
- * The prompt is intentionally short but the structure is explicit. Adding
- * boilerplate dilutes instructions; omitting the verify step is how this prompt
- * has historically produced orphan imports.
+ * Short but explicit: boilerplate dilutes instructions, and omitting the
+ * verify step is how this prompt has historically produced orphan imports.
  */
 export function buildPrompt(
   filePath: string,

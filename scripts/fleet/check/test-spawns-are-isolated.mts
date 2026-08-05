@@ -38,9 +38,11 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { REPO_ROOT } from '../paths.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
+import { runMain } from '../_shared/run-main.mts'
 import { envSetKey, sourceFunctions } from '../_shared/spawn-env-scan.mts'
 import { testIsolationSmells } from '../_shared/test-isolation-law.mts'
 
+import type { ScriptMeta } from '../_shared/run-main.mts'
 import type { TestIsolationSmell } from '../_shared/test-isolation-law.mts'
 
 const logger = getDefaultLogger()
@@ -65,6 +67,11 @@ export const TEST_GLOBS: readonly string[] = Object.freeze([
 // input that is deliberately broken so a detector has something to catch.
 const IGNORED = Object.freeze([
   '**/.cache/**',
+  // Nested agent worktrees carry a pnpm parent-link symlink cycle
+  // (`<pkg>/test/node_modules/@scope/<pkg> -> ../../..`) that recurses until
+  // ENAMETOOLONG kills the whole walk. Same pruning the shared tracked-globs
+  // and the doctrine scanner already do.
+  '**/.claude/worktrees/**',
   '**/build/**',
   '**/coverage/**',
   '**/dist/**',
@@ -258,6 +265,14 @@ function main(): void {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'checks every test-spawned child process points at an isolation sandbox',
+  help: `Usage: node scripts/fleet/check/test-spawns-are-isolated.mts [flags]
+  --fix    apply the narrow automatic fix where one exists
+  --quiet  suppress the success message`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }

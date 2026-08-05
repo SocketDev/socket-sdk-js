@@ -31,6 +31,14 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // runs it. Past incident (2026-06-06): a check rename left doctor:auth
     // pointing at a deleted file and no gate caught it.
     () => run('node', ['scripts/fleet/check/script-paths-resolve.mts']),
+    // A managed file's relative imports must be managed too. The cascade ships
+    // only what a manifest list names, so a managed file importing an unmanaged
+    // sibling delivers a module whose import target never arrives. Past incident:
+    // the conditional vitest group shipped `.config/repo/vitest.config.mts`
+    // without the `./vitest.settings.mts` it imports, and every member's suite
+    // died before a single test ran.
+    () =>
+      run('node', ['scripts/fleet/check/managed-file-imports-are-managed.mts']),
     // Root `scripts/` is a namespace only: fleet and repo automation must
     // declare ownership by living below scripts/fleet/ or scripts/repo/.
     () => run('node', ['scripts/fleet/check/root-scripts-are-segregated.mts']),
@@ -105,7 +113,7 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // incident: a drifted tool entry left an INLINED_* env var empty and hung a
     // pre-commit test run.
     () => run('node', ['scripts/fleet/check/external-tools-are-valid.mts']),
-    // Brand marks under assets/repo/brand/ follow the canonical
+    // Brand marks under assets/ follow the canonical
     // <repo>-<mark>[-light|-dark].<svg|png> grammar (mark ∈ combomark | favicon |
     // logomark | wordmark). Conditional: a repo with no brand/ dir vacuous-passes;
     // the gate bites the moment marks land, so a stray logo.svg or wrong-repo
@@ -183,6 +191,13 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // third-party actions. See docs/agents.md/fleet/upstream-references.md.
     () =>
       run('node', ['scripts/fleet/check/action-ports-are-lock-stepped.mts']),
+    // Sibling gate on the same pins: an alias tag (`v4`, `main`) that upstream
+    // MOVES must not be recorded as if it were immutable, or the recorded pin
+    // stops reaching the commit it names.
+    () =>
+      run('node', [
+        'scripts/fleet/check/github-action-aliases-are-not-frozen.mts',
+      ]),
     // The canonical GH Actions allowlist (auditing-gha CANONICAL_PATTERNS)
     // matches the template's workflow surface in BOTH directions: every
     // cascaded template/base `uses:` is pattern-covered — GitHub validates
@@ -337,6 +352,29 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // unstable keys are inert on stable cargo, so the lock is the build-time
     // enforcement and the nightly updater is the only thing that moves it.
     () => run('node', ['scripts/fleet/check/cargo-soak-config-is-current.mts']),
+    // Every language capability a repo DECLARES must dispatch to a coverage
+    // lane that measures something. Pass 1 (static wiring: a known capability,
+    // a lane behind it, declared paths on disk carrying the language's marker)
+    // runs everywhere and always fails hard. Pass 2 (the lane actually measured
+    // lines, read off coverage/lane-summary.json) is release/CI tier only,
+    // because a fresh clone has no artifact to read.
+    () => run('node', ['scripts/fleet/check/coverage-lanes-are-wired.mts']),
+    // A repo's vitest tuning lives in the ONE settings file
+    // (socket-wheelhouse.json `vitest` section), never a standalone
+    // .config/repo/vitest.json. The canonical vitest config reads only that
+    // section, so a leftover vitest.json is dead config the tests silently
+    // ignore — this gate fails loud on the orphan a config consolidation
+    // strands when a member's old per-file config is left on disk.
+    () =>
+      run('node', ['scripts/fleet/check/vitest-config-is-consolidated.mts']),
+    // Coverage's include/exclude overlay lives in the SAME one settings file
+    // (socket-wheelhouse.json `coverage` section), never a standalone
+    // .config/repo/coverage.json. The canonical coverage config reads only that
+    // section, so a leftover coverage.json is dead config that silently measures
+    // a different denominator — this gate fails loud on the orphan a config
+    // consolidation strands. config-segregation twin of the vitest gate above.
+    () =>
+      run('node', ['scripts/fleet/check/coverage-config-is-consolidated.mts']),
     // Never pin the microarch of a SHIPPED build — a distributed artifact must
     // detect the CPU at run time (portable SIMD = runtime dispatch), not bake in
     // the build machine's ISA and SIGILL on older CPUs. Fails on Rust
@@ -465,6 +503,10 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // Every fleet/repo CLI entrypoint must FAIL SOFT (use runMain / a .catch),
     // never crash the user with a raw unhandled-rejection stack trace.
     () => run('node', ['scripts/fleet/check/entry-scripts-are-fail-soft.mts']),
+    // Every fleet/repo CLI entrypoint must SELF-DESCRIBE: runMain(main, meta)
+    // so --describe and -h/--help print purpose/usage instead of running the
+    // script's side effect.
+    () => run('node', ['scripts/fleet/check/entry-scripts-self-describe.mts']),
     // No committed dependency spec resolves through a local filesystem path
     // the repo does not carry: a hand-written `link:`/`file:` spec in a
     // package.json dependency block, or a pnpm-GENERATED lockfile `link:`
@@ -494,6 +536,33 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // off the public-CDN/registry allowlist (catches a bare CDN domain the
     // edit-time guard's fetch-attached detection misses).
     () => run('node', ['scripts/fleet/check/cdn-allowlist-is-respected.mts']),
+    // Every SHA-pinned `uses:` in a workflow or composite action carries its
+    // `# <label> (YYYY-MM-DD)` staleness stamp. The edit-time twin
+    // (workflow-uses-comment-guard) is PreToolUse, so it only ever sees an
+    // Edit/Write payload — a GENERATED workflow's bytes never travel through a
+    // tool call, so no hook is consulted for it and no matcher tightening can
+    // change that. Incident: 37 bare `# v9.0.0` pins landed in a `gh aw compile`
+    // output and only surfaced when the cascade aborted before its mirror stage,
+    // blocking `git push` fleet-wide. This gate reads the TRACKED TREE, so it
+    // sees generated and hand-written bytes alike, at any depth, across every
+    // wheelhouse template layer. Generated artifacts (a gh-aw `*.lock.yml`) are
+    // exempt via the shared isNeverGated predicate.
+    () =>
+      run('node', ['scripts/fleet/check/workflow-sha-pins-are-stamped.mts']),
+    // No block comment closes earlier than its author meant it to. A glob
+    // written as a bare star segment inside a docblock IS the closing token, so
+    // the block ends mid-sentence and the tail parses as code. The lint rule
+    // socket/no-comment-glob-star-slash cannot see this: it walks PARSED
+    // comments, and by then the comment already ended at the glob, so nothing is
+    // left for a comment visitor to match. Two more layers miss it for their own
+    // reasons — a rule cannot run at all on a file whose residue is a syntax
+    // error, and `.config/fleet/**` (where the real incident landed) is in the
+    // oxlint ignore list. Reading raw bytes ahead of any parse sees all three.
+    // Incident: one such glob in vitest.coverage.fleet.config.mts produced
+    // `Cannot find name 'src'` plus ten knock-on tsc errors, and zero lint
+    // findings. Complements the rule, which owns the BACKSLASH-escaped form.
+    () =>
+      run('node', ['scripts/fleet/check/block-comments-are-closed-once.mts']),
     // Commit-time twin of denied-domain-reference-guard: no tracked file may
     // reference a fleet-DENIED domain or filename IOC (single source:
     // .claude/hooks/fleet/_shared/denied-domains.mts), and no gh-aw

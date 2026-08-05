@@ -28,9 +28,12 @@ import {
 import { confirm } from '@socketsecurity/lib-stable/stdio/prompts'
 
 import { NPM_REGISTRY_URL } from '../../constants/npm-registry.mts'
+import { runMain } from '../../_shared/run-main.mts'
 import { ensureNpmLogin } from './login.mts'
 import { npmScratchCwd } from './shared.mts'
 import { logger, runCapture, runInherit } from '../shared.mts'
+
+import type { ScriptMeta } from '../../_shared/run-main.mts'
 
 /**
  * The npm username the local machine is logged in as, or undefined when
@@ -63,7 +66,7 @@ export type MaintainerRead =
 export async function readPackageMaintainers(
   name: string,
 ): Promise<MaintainerRead> {
-  const url = `${NPM_REGISTRY_URL}/${encodeURIComponent(name).replace('%40', '@')}`
+  const url = `${NPM_REGISTRY_URL}/${encodeURIComponent(name).replaceAll('%40', '@')}`
   try {
     const json = await httpJson<{
       maintainers?: Array<{ name?: string | undefined }> | undefined
@@ -225,9 +228,12 @@ async function runCli(): Promise<void> {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'verifies the local npm login is a maintainer of the subject package, offering the logout/login rotation on mismatch',
+  help: 'Usage: node scripts/fleet/publish-infra/npm/auth-identity.mts <package>',
+}
+
 if (import.meta.main) {
-  void runCli().catch((error: unknown) => {
-    logger.error(error)
-    process.exitCode = 1
-  })
+  runMain(runCli, SCRIPT_META)
 }

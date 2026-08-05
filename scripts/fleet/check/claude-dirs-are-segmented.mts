@@ -35,8 +35,26 @@ import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 import { REPO_ROOT } from '../paths.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
+import { runMain } from '../_shared/run-main.mts'
+
+import type { ScriptMeta } from '../_shared/run-main.mts'
 
 const logger = getDefaultLogger()
+
+/**
+ * The two `.claude/<tier>/` directories that are deliberately EXEMPT from
+ * `fleet/`/`repo/` segmentation — never add them to `KINDS` below.
+ *
+ * Claude Code discovers `.claude/workflows/` and `.claude/output-styles/` by
+ * walking up the directory tree and reading files directly inside each
+ * `.claude/<tier>/` directory; it does not recurse into subdirectories. A
+ * segmented `.claude/output-styles/fleet/x.md` (or the workflows equivalent)
+ * is never found, so the workflow/style would silently disappear instead of
+ * just failing to resolve. Docs:
+ * https://code.claude.com/docs/en/output-styles
+ * https://code.claude.com/docs/en/workflows.
+ */
+export const FLAT_TIERS: readonly string[] = ['output-styles', 'workflows']
 
 interface KindSpec {
   // Directory name under `.claude/`.
@@ -45,6 +63,8 @@ interface KindSpec {
   entryIsDir: boolean
 }
 
+// `workflows` and `output-styles` are absent by design — see `FLAT_TIERS`
+// above, not an oversight.
 const KINDS: readonly KindSpec[] = [
   { dir: 'agents', entryIsDir: false },
   { dir: 'commands', entryIsDir: false },
@@ -282,9 +302,14 @@ async function main(): Promise<void> {
   logger.log('[check-claude-dirs-are-segmented] Done.')
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'checks that .claude/{agents,commands,hooks,skills}/ entries are segmented into fleet/ and repo/',
+  help: `Usage: node scripts/fleet/check/claude-dirs-are-segmented.mts [--fix]
+
+  --fix  move each dangling entry into fleet/ or repo/ and remove duplicates`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(`[check-claude-dirs-are-segmented] error: ${e}`)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

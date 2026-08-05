@@ -6,7 +6,11 @@
 // PROSE_PATTERNS from here.
 
 import { AI_SLOP_PATTERNS } from '../_shared/ai-slop-patterns.mts'
-import { HONESTY_FRAMING_RE } from '../_shared/honesty-framing.mts'
+import {
+  HONESTY_FRAMING_RE,
+  HONESTY_LABEL,
+  HONESTY_WHY,
+} from '../_shared/honesty-framing.mts'
 import { HEADING_LISTY_ASIDE_RE } from '../_shared/trailing-aside.mts'
 
 export interface ProsePattern {
@@ -15,13 +19,87 @@ export interface ProsePattern {
   readonly why: string
 }
 
+/**
+ * The CATEGORICAL tier: patterns that are a VERDICT on any surface, never a
+ * heuristic. Every other entry in `PROSE_PATTERNS` can over-fire on a
+ * legitimate sentence, which is why they only gate a doc write the author can
+ * reword and retry. These cannot: the word itself is the defect. That is what
+ * makes them safe to enforce on the REPLY too, where there is no retry loop
+ * and no file to inspect.
+ *
+ * The honesty family is the founding member. Claiming honesty implies the rest
+ * is not — see `_shared/honesty-framing.mts`, the single source this and
+ * `convo-prose-nudge` both consume.
+ */
+export const CATEGORICAL_PROSE_BANS: readonly ProsePattern[] = [
+  {
+    label: HONESTY_LABEL,
+    // The honesty matcher is the shared _shared/honesty-framing.mts source —
+    // meta-commentary on one's own candor ("to be honest", "honestly", the
+    // framing phrases) plus the "papered over" self-defense. State the fact;
+    // the honesty is assumed, not announced.
+    regex: HONESTY_FRAMING_RE,
+    why: HONESTY_WHY,
+  },
+]
+
 export const PROSE_PATTERNS: readonly ProsePattern[] = [
+  // The categorical bans gate doc writes alongside the heuristics; the Stop
+  // surface scans this tier ALONE, because only these are verdict-grade.
+  ...CATEGORICAL_PROSE_BANS,
   {
     label: 'em-dash chain',
     // Two or more ` — ` spaced-em-dash spans in the same paragraph. A single
     // em-dash is fine; a chain is the AI-prose tell.
     regex: / — [^\n]*? — /,
     why: 'Em-dash chains read AI-generated. Break into separate sentences or use commas / parentheses.',
+  },
+  {
+    label: 'value inflation',
+    // Editorializing that one thing is worth more than another, or that an
+    // effort repaid itself. It grades the work instead of reporting it, and the
+    // comparison is always the writer's opinion dressed as a finding. State
+    // what was found and let the reader weigh it.
+    regex:
+      /\b(?:earned its keep|earns its keep|if nothing else|more valuable than|paid for itself|pays for itself|the real (?:prize|value|win)|worth more than)\b/i,
+    why: 'Value inflation grades the work instead of reporting it. Drop the comparison and state the finding plainly.',
+  },
+  {
+    label: 'truth intensifier',
+    // Asserting that THIS claim is the real one implies the neighbours are
+    // approximate. Measured over 3 months of transcripts: `genuinely` 36,970
+    // hits, `the actual <noun>` 46,359. Same defect as claiming one's own
+    // truthfulness, already banned above: a finding stands on its evidence or
+    // it does not. `the actual` is scoped to the crutch collocations, so a
+    // real measurement ("the actual byte count was 4,096") still passes.
+    regex:
+      /\b(?:genuinely|let me be clear|precisely the|the actual (?:behavior|behaviour|cause|defect|failure|issue|problem|reason|shape|state)|to be clear)\b/i,
+    why: 'Truth intensifiers claim reliability instead of showing it. Delete the word and let the evidence carry the sentence.',
+  },
+  {
+    label: 'significance marker',
+    // Ranking the content for the reader instead of reporting it. If a finding
+    // needs `crucially` to land, the finding is underwritten.
+    regex:
+      /\b(?:crucially|importantly|notably|the key insight|the whole point is|what matters here)\b/i,
+    why: 'Significance markers rank the content for the reader. State the finding; its weight should be self-evident.',
+  },
+  {
+    label: 'recycled jargon',
+    // House metaphors reached for in place of describing the mechanism. Each
+    // names a category instead of the specific thing that breaks. Measured:
+    // `load-bearing` 11,603 hits, `by construction` 3,509.
+    regex:
+      /\b(?:by construction|load-bearing|the (?:exact|failure|same) shape|the tell)\b/i,
+    why: 'Recycled jargon names a category instead of the mechanism. Say what specifically breaks, and how.',
+  },
+  {
+    label: 'contrast scaffolding',
+    // The banned "not X, it's Y" shape in another spelling: build a foil, then
+    // knock it down. Measured: `the real <noun>` ~12,600 hits. The value/win/
+    // prize spellings belong to value inflation above.
+    regex: /\bthe real (?:answer|issue|problem|question)\b/i,
+    why: 'Contrast scaffolding erects a foil to knock down. State the positive finding directly.',
   },
   {
     label: 'throat-clearing opener',
@@ -40,15 +118,6 @@ export const PROSE_PATTERNS: readonly ProsePattern[] = [
     why: 'Vague hedging adverb doing no work. Cut it or replace with the concrete fact.',
   },
   {
-    label: 'self-congratulatory honesty framing',
-    // The honesty matcher is the shared _shared/honesty-framing.mts source —
-    // meta-commentary on one's own candor ("to be honest", "honestly", the
-    // framing phrases) plus the "papered over" self-defense. State the fact;
-    // the honesty is assumed, not announced.
-    regex: HONESTY_FRAMING_RE,
-    why: 'Announcing your own honesty is throat-clearing. Drop "honest"/"papered over" framing and state the fact plainly.',
-  },
-  {
     label: 'heading trailing parenthetical aside',
     // Shares the value-level "extra bits" detector's source
     // (_shared/trailing-aside.mts) so a heading and a manifest description are
@@ -63,18 +132,38 @@ export const PROSE_PATTERNS: readonly ProsePattern[] = [
 ]
 
 /**
- * Scan `content` for prose antipatterns. Returns the matched patterns (empty
- * when clean).
+ * Every pattern in `patterns` whose regex matches `content`, in table order.
+ * The one scan loop all three finders share.
  */
-export function findProseAntipatterns(content: string): ProsePattern[] {
+export function matchProsePatterns(
+  content: string,
+  patterns: readonly ProsePattern[],
+): ProsePattern[] {
   const hits: ProsePattern[] = []
-  for (let i = 0, { length } = PROSE_PATTERNS; i < length; i += 1) {
-    const pattern = PROSE_PATTERNS[i]!
+  for (let i = 0, { length } = patterns; i < length; i += 1) {
+    const pattern = patterns[i]!
     if (pattern.regex.test(content)) {
       hits.push(pattern)
     }
   }
   return hits
+}
+
+/**
+ * Scan `content` for prose antipatterns. Returns the matched patterns (empty
+ * when clean).
+ */
+export function findProseAntipatterns(content: string): ProsePattern[] {
+  return matchProsePatterns(content, PROSE_PATTERNS)
+}
+
+/**
+ * Scan `content` for the CATEGORICAL bans only — the verdict-grade tier, with
+ * every over-firing heuristic left out. What the Stop surface runs against a
+ * chat reply.
+ */
+export function findCategoricalProseBans(content: string): ProsePattern[] {
+  return matchProsePatterns(content, CATEGORICAL_PROSE_BANS)
 }
 
 // CHANGELOG-only antipatterns: a changelog states user-visible behavior
@@ -121,12 +210,5 @@ export const CHANGELOG_IMPL_PATTERNS: readonly ProsePattern[] = [
  * CHANGELOG.md writes.
  */
 export function findChangelogImplDetail(content: string): ProsePattern[] {
-  const hits: ProsePattern[] = []
-  for (let i = 0, { length } = CHANGELOG_IMPL_PATTERNS; i < length; i += 1) {
-    const pattern = CHANGELOG_IMPL_PATTERNS[i]!
-    if (pattern.regex.test(content)) {
-      hits.push(pattern)
-    }
-  }
-  return hits
+  return matchProsePatterns(content, CHANGELOG_IMPL_PATTERNS)
 }

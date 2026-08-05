@@ -52,6 +52,9 @@ import type {
 } from './lint-github-settings/types.mts'
 import { isMainModule } from './_shared/is-main-module.mts'
 import { writeThroughMirrorLock } from './_shared/mirror-lock.mts'
+import { runMain } from './_shared/run-main.mts'
+
+import type { ScriptMeta } from './_shared/run-main.mts'
 
 // Inline path equivalent of the wheelhouse template's paths.mts helper.
 // `lint-github-settings.mts` cascades into fleet repos whose per-package
@@ -163,7 +166,7 @@ export function applyFixes(repo: string, findings: readonly Finding[]): number {
   for (const [k, v] of Object.entries(patch)) {
     process.stdout.write(`    ${k} = ${JSON.stringify(v)}\n`)
   }
-  const result = ghApi(`repos/${repo}`, 'PATCH', patch)
+  const result = ghApi(`repos/${repo}`, { body: patch, method: 'PATCH' })
   if (!result) {
     process.stderr.write(
       '::error::PATCH failed. Token may lack `repo:admin` permission.\n',
@@ -346,6 +349,16 @@ export function main(
   return pass ? 0 : 1
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'audits the GitHub repository settings against the canonical fleet config',
+  help: `Usage: node scripts/fleet/lint-github-settings.mts [flags]
+
+  --fix    PATCH the misconfigured settings (needs repo:admin)
+  --force  skip the 7-day result cache
+  --json   machine-readable output`,
+}
+
 if (isMainModule(import.meta.url)) {
-  process.exit(main())
+  runMain(main, SCRIPT_META)
 }

@@ -24,22 +24,26 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { findOwnFiles } from './_shared.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
+import { runMain } from '../_shared/run-main.mts'
 import { REPO_ROOT } from '../paths.mts'
+
+import type { ScriptMeta } from '../_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
 /**
  * The nightly toolchain the updater tooling runs on — pinned because
  * `-Zmin-publish-age` is a nightly-only unstable flag. Kept in LOCKSTEP with
- * the canonical build pin in `template/conditional/rust/rust-toolchain.toml`
- * (currently nightly-2026-07-20): the fleet unified build + updater on one
- * nightly so there is no separate updater-only pin. Update both together.
+ * the canonical build pin in `template/conditional/rust/rust-toolchain.toml`:
+ * the fleet unified build + updater on one nightly so there is no separate
+ * updater-only pin. Update both together — the sync check rewrites this
+ * constant FROM that file, so a bump made only here gets resynced away.
  *
  * TEMPORARY: once Cargo stabilizes the min-publish-age soak (targeting 1.98 —
  * https://github.com/rust-lang/cargo/issues/17009), drop back to the stable pin
  * and retire this nightly constant.
  */
-export const RUST_UPDATER_TOOLCHAIN = 'nightly-2026-07-28'
+export const RUST_UPDATER_TOOLCHAIN = 'nightly-2026-08-01'
 
 /**
  * The registry config key that carries the soak threshold. The
@@ -309,9 +313,18 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'drives cargo update per first-party Cargo.toml with the native min-publish-age soak gate',
+  help: `Usage: node scripts/fleet/update/cargo.mts --soak-days <n> [flags]
+
+  --soak-days <n>    soak window in days (required trust gate)
+  (no mode flag)     dry plan: print the cargo command + soak config per root
+  --apply            run cargo update per root through the soak config
+  --precise <spec>   pass a precise version spec through to cargo update
+  --workspace        pass --workspace through to cargo update`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

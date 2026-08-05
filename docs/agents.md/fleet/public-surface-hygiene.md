@@ -74,31 +74,35 @@ GitHub auto-links `<owner>/<repo>#<num>` and `https://github.com/<owner>/<repo>/
 
 Bypass: `Allow external-issue-ref bypass` (enforced by `.claude/hooks/fleet/no-ext-issue-ref-guard/`).
 
-## Root README skeleton + `freeform-readme` opt-in
+## Clickable PR/issue refs in reports and docs
+
+The rule above governs commit messages and PR bodies, where GitHub auto-links a bare `#N` against the current repo, so there a bare `#N` is already a working link and the danger is the reverse: a foreign `<owner>/<repo>#N` or full URL that backref-spams. Rendered Markdown docs and agent status reports are the opposite surface. GitHub only auto-links `#N` inside issues, PRs, and commits, so a bare `#7317` in a `.md` file or a terminal status report is **dead text**. Reference a PR or issue there as a clickable Markdown link.
+
+- Write `[#7317](https://github.com/PerryTS/perry/pull/7317)`, not a bare `#7317`.
+- Build it in code with the shared helper `githubRefLink(repoUrl, n, kind)` from `@socketsecurity/lib/links/github`. It returns `[#7317](…/pull/7317)` and degrades to a bare `#N` when the repo URL can't be parsed. For a CLI's own stdout, which is not Markdown, socket-cli's `githubRepoLink` emits an OSC-8 terminal hyperlink instead.
+- This does not change the rule above. In commit messages and PR bodies keep the bare same-repo `#N`, and never emit a raw `<owner>/<repo>#N` or full github URL there.
+
+Enforced by `scripts/fleet/check/pr-refs-in-docs-are-linked.mts` over tracked docs. Changelogs and fixtures are out of scope, since a fragment becomes Release notes where `#N` auto-links. Escape hatch: `<!-- pr-ref-link: allow -->` on the line, or `<!-- pr-ref-link: allow-file -->` anywhere in the file.
+
+## Root README skeleton
 
 Every fleet member's root `README.md` opens with lead prose saying why the repo
-exists — directly under the title and badges, never a `## Why this repo exists`
-heading — and carries the canonical four level-2 sections
-in order — `Install` / `Usage` / `Development` /
-`License` — plus the universal social-follow badges (X / Twitter + Bluesky) under
-the title, no fleet source repo leak, no sibling-relative script commands.
-Canonical skeleton: `template/base/README.md`.
+exists, directly under the title and badges, never a `## Why this repo exists`
+heading. It then carries the canonical four level-2 sections in order:
+`Install`, `Usage`, `Development`, `License`. It also carries the universal
+social-follow badges (X / Twitter + Bluesky) under the title, no fleet source
+repo leak, and no sibling-relative script commands. Canonical skeleton:
+`template/base/README.md`.
 
-Some repos are not infra repos. The VS Code + browser extensions and the skills
-directory ship **public product / marketplace READMEs** whose structure is owned
-by the listing, not the fleet skeleton. Those repos declare
-`"optIns": ["freeform-readme"]` in the cascade roster
-(`.claude/skills/fleet/cascading-fleet/lib/fleet-repos.json`). The opt-in exempts
-them from the **five-section skeleton only** — the follow-badges, the
-the fleet source repo-leak check, and the sibling-relative-path check stay universal.
+Extra sections beyond the canonical four are fine anywhere, so a product or
+marketplace README can carry its own listing-shaped material. Only the four
+canonical sections and their relative order are required, which is why no member
+needs an exemption.
 
-The rule is enforced across four surfaces, all reading the one roster:
+The rule is enforced across four surfaces:
 
-- Edit-time: `.claude/hooks/fleet/readme-fleet-shape-guard/` (skips the section
-  check when the target repo is `freeform-readme`).
-- Lint-time: `.config/fleet/markdownlint-rules/socket-readme-required-sections.mts`
-  (bails via `_shared/freeform-readme-optin`); `socket-readme-social-badges` always
-  runs.
-- Sync-time: `scripts/repo/sync-scaffolding/checks/readme-skeleton-drift.mts`
-  (skips the section finding for `FREEFORM_README_REPOS`).
+- Edit-time: `.claude/hooks/fleet/readme-fleet-shape-guard/`.
+- Lint-time: `.config/fleet/markdownlint-rules/socket-readme-required-sections.mts`;
+  `socket-readme-social-badges` runs alongside it.
+- Sync-time: `scripts/repo/sync-scaffolding/checks/readme-skeleton-drift.mts`.
 - Index: the `Root README.md` bullet in `CLAUDE.md`.

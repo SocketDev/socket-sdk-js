@@ -19,6 +19,7 @@
 // import — keep it above every import that transitively loads paths.mts.
 import './cover/scratch-isolation.mts'
 
+import path from 'node:path'
 import { performance } from 'node:perf_hooks'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -34,7 +35,9 @@ import {
   unregisterActiveRun,
 } from './_shared/active-run-marker.mts'
 import { isMainModule } from './_shared/is-main-module.mts'
+import { runMain } from './_shared/run-main.mts'
 
+import type { ScriptMeta } from './_shared/run-main.mts'
 import type { CoverThresholds } from './cover/discovery.mts'
 import {
   buildChildrenCoverageReport,
@@ -88,6 +91,14 @@ import {
   REPO_ROOT,
 } from './paths.mts'
 import { runBunCoverageLane } from './cover/bun-lane.mts'
+import {
+  combineWithTsLines,
+  defaultLaneCommandRunner,
+  persistLaneSummary,
+  rewriteSummaryLines,
+  runNativeLanes,
+} from './cover/native-lanes.mts'
+import type { NativeLanesOutcome } from './cover/native-lanes.mts'
 import type { AggregateCoverage } from './util/coverage-merge.mts'
 import {
   mergeCoverageFinal,
@@ -243,6 +254,43 @@ export async function convertChildrenCoverage(): Promise<boolean> {
   return buildChildrenCoverageReport()
 }
 
+/**
+ * The NATIVE half of the run: every coverage lane this repo's declared
+ * `capabilities` activate (rust/go/cpp), folded into the same report the TS
+ * pass produced. A TypeScript-only repo resolves no lanes, so this costs one
+ * config read and changes nothing it writes.
+ *
+ * `tsLines` is the TS line tally from the merged aggregate, or undefined when
+ * the merge produced none; the combined percentage the badge reads is the sum
+ * of both sides' raw counts, never an average of two percentages. Returns the
+ * lane exit code so the caller folds it into the run's own.
+ */
+export async function runNativeCoverageLanes(
+  tsLines: { coveredLines: number; totalLines: number } | undefined,
+): Promise<number> {
+  const outcome: NativeLanesOutcome = await runNativeLanes({
+    detailDir: path.join(COVERAGE_DIR, 'lanes'),
+    logger,
+    repoRoot: rootPath,
+    runner: defaultLaneCommandRunner,
+    scratchDir: COVERAGE_SCRATCH_DIR,
+  })
+  if (outcome.results.length === 0) {
+    return 0
+  }
+  persistLaneSummary(COVERAGE_DIR, outcome)
+  logger.log('')
+  logger.log(' Coverage by language')
+  for (let i = 0, { length } = outcome.breakdownLines; i < length; i += 1) {
+    logger.log(outcome.breakdownLines[i]!)
+  }
+  const combined = combineWithTsLines(tsLines, outcome.combined)
+  if (combined) {
+    rewriteSummaryLines(COVERAGE_SUMMARY_PATH, combined.pct)
+  }
+  return outcome.exitCode
+}
+
 export async function main(): Promise<void> {
   // Re-exec under the pinned node when a stale PATH node, below the hook floor
   // is active, so the coverage vitest + the hooks it spawns run on the fleet
@@ -321,6 +369,20 @@ export async function main(): Promise<void> {
     if (thresholdFailures.length) {
       logger.error(`Coverage below threshold: ${thresholdFailures.join(', ')}`)
       exitCode = exitCode === 0 ? 1 : exitCode
+    }
+    // The native lanes run under BOTH runners: a repo declaring `cargo` must
+    // measure its Rust whether its JS tests run on bun or on vitest, so the
+    // runner choice cannot decide whether a language is covered.
+    const nativeExitCode = await runNativeCoverageLanes(
+      lane.aggregate
+        ? {
+            coveredLines: lane.aggregate.coveredLines,
+            totalLines: lane.aggregate.totalLines,
+          }
+        : undefined,
+    )
+    if (nativeExitCode !== 0) {
+      exitCode = exitCode === 0 ? nativeExitCode : exitCode
     }
     if (buildFailed) {
       exitCode = 1
@@ -546,6 +608,20 @@ export async function main(): Promise<void> {
         exitCode = exitCode === 0 ? 1 : exitCode
       }
 
+      // The native lanes measure the languages the v8 pass cannot see. Skipped
+      // entirely under --type-only, which runs no test suite at all.
+      const nativeExitCode = await runNativeCoverageLanes(
+        aggregateCoverage
+          ? {
+              coveredLines: aggregateCoverage.coveredLines,
+              totalLines: aggregateCoverage.totalLines,
+            }
+          : undefined,
+      )
+      if (nativeExitCode !== 0) {
+        exitCode = exitCode === 0 ? nativeExitCode : exitCode
+      }
+
       // A failing suite must say WHY before the terminal "Coverage failed":
       // per-suite vitest errors (config-level threshold misses, test
       // failures) live only in the captured suite output.
@@ -596,15 +672,23 @@ export async function main(): Promise<void> {
 // import inside a coverage-instrumented vitest worker starts a NESTED cover
 // run whose startup cleans the shared coverage/.tmp and ENOENTs the outer
 // run's v8 reports (four cover runs died this way on 2026-07-11).
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'runs the coverage suite — builds with source maps, runs vitest with coverage, prints a summary',
+  help: `Usage: node scripts/fleet/cover.mts [flags]
+
+  --code-only  run only code coverage, skip type coverage
+  --type-only  run only type coverage
+  --summary    hide the detailed v8 table, show only the summary`,
+}
+
 if (isMainModule(import.meta.url)) {
-  reexecWithHeapHeadroom(fileURLToPath(import.meta.url))
-  registerActiveRun()
-  main()
-    .catch((e: unknown) => {
-      logger.error(`Coverage script failed: ${errorMessage(e)}`)
-      process.exitCode = 1
-    })
-    .finally(() => {
+  runMain(async () => {
+    reexecWithHeapHeadroom(fileURLToPath(import.meta.url))
+    registerActiveRun()
+    try {
+      await main()
+    } finally {
       unregisterActiveRun()
       // Remove this run's private scratch dir. With a fixed shared path the
       // next run's startup wipe reclaimed it; a per-run-unique dir has no next
@@ -612,5 +696,6 @@ if (isMainModule(import.meta.url)) {
       // COVERAGE_DIR (the persisted summary/final the badge + gate read) lives
       // elsewhere and is untouched.
       safeDeleteSync(COVERAGE_SCRATCH_DIR, { force: true, recursive: true })
-    })
+    }
+  }, SCRIPT_META)
 }

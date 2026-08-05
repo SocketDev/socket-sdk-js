@@ -27,7 +27,7 @@ order:
    recipes. Never hand-roll a hex or spacing value a token already names.
 3. **Brand assets — `assets/`.** The Socket wordmark lockups (light/dark),
    favicon, avatar, shield, and follow badges live under `assets/`. The
-   `assets/fleet/` subset cascades to every repo; the full kit stays in the
+   `assets/` subset cascades to every repo; the full kit stays in the
    wheelhouse. Use the lockup for the README `<picture>` footer and the favicon
    for hosted surfaces — don't recreate the mark from the brand colors below.
 
@@ -392,6 +392,6 @@ hex literals, no magic numbers — even `padding: 13px` is a smell (use
 
 Add it to all four theme blocks in `tokens.css` (light, dark, synthwave,
 and the `prefers-color-scheme: dark` system override). Pick perceptually
-matched values — same lightness, different hue — so the token tells the
+matched values, same lightness but different hue, so the token tells the
 same story across themes. Run the contrast lint to verify any pair against
 its surface.

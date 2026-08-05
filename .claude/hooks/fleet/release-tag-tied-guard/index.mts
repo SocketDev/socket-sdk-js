@@ -13,9 +13,16 @@
 // without a prompt; this hook is the safety rail that keeps "allow" from
 // meaning "create any release at any ref".
 //
-// Tag existence is checked two ways, either is sufficient:
+// Tag existence is checked against the repo the command TARGETS. Without
+// `--repo`, that is the invoking checkout, two ways (either sufficient):
 //   - local:  `git rev-parse --verify --quiet refs/tags/<ref>`
 //   - remote: `git ls-remote --tags origin <ref>` returns a ref line
+// With `--repo <owner/name>` naming a repo other than the checkout's origin,
+// gh operates on THAT repo regardless of cwd, so the checkout's tags answer
+// the wrong question — existence is asked of GitHub directly
+// (`gh api repos/<owner/name>/git/ref/tags/<ref>`), and the manifest-reading
+// publish gate below skips (the checkout's manifests describe a different
+// repo than the release targets).
 //
 // PUBLISH-BEFORE-RELEASE gate (the v6.2.0 near-miss: an immutable release cut
 // before a stage-publish that then failed on auth — a release with no
@@ -42,6 +49,10 @@ import path from 'node:path'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
+import {
+  normalizeRepoSlug,
+  repoMatchesOrigin,
+} from '../_shared/gh-target-repo.mts'
 import { commandsFor } from '../_shared/shell-command.mts'
 import { resolveProjectDir } from '../_shared/project-dir.mts'
 
@@ -76,12 +87,15 @@ export interface ReleaseCreateDetection {
   readonly ref: string
   // True when `--target <commitish>` is present, gh would create the tag.
   readonly hasTarget: boolean
+  // The raw `--repo`/`-R` value; '' when the flag is absent.
+  readonly repo: string
 }
 
 const NOT_DETECTED: ReleaseCreateDetection = {
   detected: false,
   hasTarget: false,
   ref: '',
+  repo: '',
 }
 
 // Find a real `gh release create …` invocation and pull out its ref + whether
@@ -99,10 +113,16 @@ export function detectReleaseCreate(command: string): ReleaseCreateDetection {
     }
     let ref = ''
     let hasTarget = false
+    let repo = ''
     for (let i = createIdx + 1, { length } = args; i < length; i += 1) {
       const arg = args[i]!
       if (arg === '--target' || arg.startsWith('--target=')) {
         hasTarget = true
+      }
+      if (arg === '--repo' || arg === '-R') {
+        repo = args[i + 1] ?? ''
+      } else if (arg.startsWith('--repo=') || arg.startsWith('-R=')) {
+        repo = arg.slice(arg.indexOf('=') + 1)
       }
       if (arg.startsWith('-')) {
         // A value-taking flag in `--flag value` form swallows the next token.
@@ -115,7 +135,7 @@ export function detectReleaseCreate(command: string): ReleaseCreateDetection {
         ref = arg
       }
     }
-    return { detected: true, hasTarget, ref }
+    return { detected: true, hasTarget, ref, repo }
   }
   return NOT_DETECTED
 }
@@ -142,11 +162,17 @@ export function tagExists(ref: string, cwd: string): boolean {
 }
 
 export function formatBlock(d: ReleaseCreateDetection): string {
-  const reason = d.hasTarget
-    ? `\`--target\` is set, so \`gh release create\` would CREATE the tag${d.ref ? ` \`${d.ref}\`` : ''} from that commitish.`
-    : d.ref
-      ? `tag \`${d.ref}\` does not exist locally or on origin, so \`gh release create\` would create it on the fly.`
-      : 'no release ref was given, so the tag it would create cannot be verified.'
+  let reason: string
+  if (d.hasTarget) {
+    reason = `\`--target\` is set, so \`gh release create\` would CREATE the tag${d.ref ? ` \`${d.ref}\`` : ''} from that commitish.`
+  } else if (!d.ref) {
+    reason =
+      'no release ref was given, so the tag it would create cannot be verified.'
+  } else if (d.repo) {
+    reason = `tag \`${d.ref}\` does not exist on \`${d.repo}\`, so \`gh release create\` would create it on the fly.`
+  } else {
+    reason = `tag \`${d.ref}\` does not exist locally or on origin, so \`gh release create\` would create it on the fly.`
+  }
   return (
     [
       `[release-tag-tied-guard] Blocked: ${reason}`,
@@ -227,13 +253,28 @@ export function cratesIndexPath(name: string): string {
   return `${n.slice(0, 2)}/${n.slice(2, 4)}/${n}`
 }
 
-// Injectable registry probes so tests never hit the network. Both return true
-// ONLY on a confirmed-live version; errors and misses are both "not live".
-export interface RegistryProbes {
+// Injectable probes so tests never hit the network. Each returns true ONLY on
+// a confirmed hit; errors and misses are both "no".
+export interface GuardProbes {
   crateVersionLive?: ((name: string, version: string) => boolean) | undefined
   npmVersionLive?:
     | ((name: string, version: string, cwd: string) => boolean)
     | undefined
+  repoTagLive?: ((repo: string, ref: string) => boolean) | undefined
+}
+
+// Tag existence on a repo that is NOT the invoking checkout: ask GitHub
+// itself, with gh's own auth. Exit 0 iff the tag ref exists there.
+function defaultRepoTagLive(repo: string, ref: string): boolean {
+  if (!repo || !ref) {
+    return false
+  }
+  const probe = spawnSync(
+    'gh',
+    ['api', `repos/${repo}/git/ref/tags/${ref}`, '--silent'],
+    { stdio: 'pipe' },
+  )
+  return !probe.error && probe.status === 0
 }
 
 function defaultNpmVersionLive(
@@ -269,9 +310,9 @@ function defaultCrateVersionLive(name: string, version: string): boolean {
 export function publishBeforeReleaseGate(
   ref: string,
   cwd: string,
-  probes?: RegistryProbes | undefined,
+  probes?: GuardProbes | undefined,
 ): string | undefined {
-  const p = { __proto__: null, ...probes } as RegistryProbes
+  const p = { __proto__: null, ...probes } as GuardProbes
   const version = versionFromReleaseRef(ref)
   if (!version) {
     return undefined
@@ -310,7 +351,8 @@ export function publishBeforeReleaseGate(
  * Build the guard check. `probes` is a test seam for the registry-liveness
  * gate (the exported `check` uses the real npm/crates probes).
  */
-export function makeCheck(probes?: RegistryProbes | undefined): GuardCheck {
+export function makeCheck(probes?: GuardProbes | undefined): GuardCheck {
+  const p = { __proto__: null, ...probes } as GuardProbes
   return bashGuard((command, payload) => {
     const detection = detectReleaseCreate(command)
     if (!detection.detected) {
@@ -320,11 +362,26 @@ export function makeCheck(probes?: RegistryProbes | undefined): GuardCheck {
     const cwd = resolveProjectDir(
       typeof payload.cwd === 'string' ? payload.cwd : undefined,
     )
-    if (!detection.hasTarget && tagExists(detection.ref, cwd)) {
+    // `--repo` re-points gh at a repo that may not be this checkout — tag
+    // existence must then be answered by GitHub for THAT repo, never by the
+    // checkout's own tags.
+    const targetRepo = normalizeRepoSlug(detection.repo)
+    const sameRepo = !targetRepo || repoMatchesOrigin(targetRepo, cwd)
+    const exists =
+      !detection.hasTarget &&
+      !!detection.ref &&
+      (sameRepo
+        ? tagExists(detection.ref, cwd)
+        : (p.repoTagLive ?? defaultRepoTagLive)(targetRepo, detection.ref))
+    if (exists) {
       // Existing tag, no --target: the legitimate backfill shape — allowed
       // only once the tagged version is live on the repo's registry
-      // publish-before-release order.
-      const orderBlock = publishBeforeReleaseGate(detection.ref, cwd, probes)
+      // (publish-before-release order). The gate reads the CHECKOUT's
+      // manifests, so it only applies when the release targets this
+      // checkout's own repo.
+      const orderBlock = sameRepo
+        ? publishBeforeReleaseGate(detection.ref, cwd, probes)
+        : undefined
       return orderBlock === undefined ? undefined : block(orderBlock)
     }
 

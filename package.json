@@ -96,6 +96,7 @@
     "weekly-update:ci": "gh workflow run weekly-update.lock.yml"
   },
   "devDependencies": {
+    "@actions/cache": "catalog:",
     "@anthropic-ai/claude-code": "catalog:",
     "@babel/generator": "7.29.7",
     "@babel/parser": "7.29.7",

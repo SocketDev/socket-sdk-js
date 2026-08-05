@@ -140,6 +140,29 @@ export function buildHookAndDocSteps(forwardedArgs: string[]): CheckStep[] {
       run('node', [
         'scripts/fleet/check/prose-parenthetical-asides-are-absent.mts',
       ]),
+    // Prose in tracked markdown must not chain spaced em-dashes. Two dashes make
+    // an X - aside - rest sentence, which reads AI-generated. Gate-time twin of
+    // the anti-prose-guard em-dash-chain pattern.
+    () =>
+      run('node', ['scripts/fleet/check/prose-em-dash-chains-are-absent.mts']),
+    // A human-gate lane A must be pasteable as-is: a `! <cmd>` that runs in
+    // the session so its output is readable, with no working-directory
+    // assumption. A lane the operator edits, or runs in their own terminal, is
+    // a gate that strands the agent.
+    () =>
+      run('node', [
+        'scripts/fleet/check/human-gate-lanes-are-runnable.mts',
+      ]),
+    // Prose in tracked markdown must reference a PR/issue as a clickable
+    // `[#N](url)` link, not a bare `#N` — dead text in a rendered .md or a
+    // terminal report. Complements the anti-backref rule (bare `#N` is correct
+    // in a commit body, where it auto-links); reuses scan-comments' ref shapes.
+    () => run('node', ['scripts/fleet/check/pr-refs-in-docs-are-linked.mts']),
+    // No commit message carries an AI-attribution trailer and no branch uses an
+    // AI-agent tool prefix. Both are fleet commit-format policy, and both are
+    // scored as automation signals by the public @unveil/identity engine.
+    () =>
+      run('node', ['scripts/fleet/check/commits-have-no-ai-attribution.mts']),
     // Commit-time twin of markdown-filename-guard: every tracked .md has a
     // canonical filename (lowercase-hyphens, or an allowlisted SCREAMING_CASE name
     // only at root/docs/.claude). Reuses the guard's classifyMarkdownPath predicate.
@@ -154,6 +177,26 @@ export function buildHookAndDocSteps(forwardedArgs: string[]): CheckStep[] {
     // the single root .gitignore — no tracked nested per-dir .gitignore. Reuses
     // the guard's isNestedGitignore predicate.
     () => run('node', ['scripts/fleet/check/gitignore-is-single-file.mts']),
+    // Defence-in-depth under no-self-referential-symlink-guard: `node_modules/`
+    // with a trailing slash matches a DIRECTORY, so a node_modules SYMLINK is
+    // stageable and one shipped. Report-only until the six trailing-slash
+    // members are fixed (MODE inside the check).
+    () =>
+      run('node', ['scripts/fleet/check/node-modules-symlink-is-ignored.mts']),
+    // A `github-action` channel member ships the repo itself at a git tag —
+    // the runner executes the committed dist/, not src/. Flags a repo whose
+    // dist/ was last rebuilt before its src/ last changed, report-only until
+    // the first github-action member onboards (ENFORCING inside the check).
+    () => run('node', ['scripts/fleet/check/committed-dist-is-current.mts']),
+    // A floating alias tag (`v1`, `v1.3`) either tracks the newest release on
+    // its line or does not exist. An alias left frozen after the workflow that
+    // moved it is deleted silently pins every existing consumer to an old
+    // release forever, report-only until the first github-action member
+    // onboards (ENFORCING inside the check).
+    () =>
+      run('node', [
+        'scripts/fleet/check/github-action-aliases-are-not-frozen.mts',
+      ]),
     // DRY bypass-phrase gate: a defineHook hook that references an `Allow <slug>
     // bypass` phrase must declare it as `bypass:` metadata (single source →
     // detector + footer), never hand-write it. Catches drift regressions.
@@ -258,6 +301,11 @@ export function buildHookAndDocSteps(forwardedArgs: string[]): CheckStep[] {
     // every branch). A token or absent test fails the gate.
     () =>
       run('node', ['scripts/fleet/check/enforcers-have-thorough-tests.mts']),
+    // A test targeting a cascaded dir-mirror source must import the CANONICAL
+    // copy under template/base/**, not the live mirror — a mirror import reads
+    // the previous revision and deadlocks the commit that changes the source.
+    // No-ops cleanly in member repos without a template/ tree.
+    () => run('node', ['scripts/fleet/check/tests-read-canonical-sources.mts']),
     // No husk hook dirs: a hook directory holding only node_modules/ (no
     // index.mts / install.mts / README.md) is a rename leftover — git moved the
     // tracked files, the untracked node_modules stayed behind under the old name.
