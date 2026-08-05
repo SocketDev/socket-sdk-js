@@ -1074,47 +1074,15 @@ export class SocketSdk {
     /* c8 ignore stop */
     const { components } = componentsObj
     const { length: componentsCount } = components
-    // ─────────────────────────────────────────────────────────────────────
-    // Why this isn't `Promise.race(running.values())` in a loop.
-    //
-    // The old version kept a Map<generator, promise> of every in-flight
-    // generator step, then each iteration did:
-    //
-    //   await Promise.race(running.values())
-    //
-    // That looks fine, but here's the trap: `Promise.race` attaches a
-    // *fresh* pair of `.then(resolve, reject)` handlers to EVERY promise
-    // it's passed — every single time it's called. Those handlers stay
-    // attached until the promise they're on settles. The race itself
-    // settling doesn't detach them from the losers.
-    //
-    // So imagine 10 generators running, and one finishes quickly while
-    // the other 9 are slow. Each loop iteration:
-    //   - race returns (say) generator #3's step
-    //   - we kick off generator #3's next step → new race over 10 promises
-    //   - BUT the 9 slow ones still have handlers from the PREVIOUS race
-    //     hanging off them, plus the 9 new ones we just added
-    //
-    // After N iterations on a long-running generator's promise, that
-    // single promise has ~N dead handler closures queued on it, each
-    // holding references to closure state. For a batch of thousands of
-    // components this adds up to a real memory leak, and the GC can't
-    // help until every last generator in the pool settles.
-    //
-    // See https://github.com/nodejs/node/issues/17469 for the canonical
-    // write-up, and the `@watchable/unpromise` package for the
-    // one-shot-handler pattern we're adopting here.
-    //
-    // The fix: flip the direction. Instead of the main loop repeatedly
-    // racing the pool, each generator's `.then` pushes its result into a
-    // tiny queue (`completed`), and the main loop awaits one promise at
-    // a time via `takeStep()`. Each generator attaches its handlers
-    // exactly ONCE per step — no stacking, nothing to leak.
-    // ─────────────────────────────────────────────────────────────────────
+    // INVARIANT: never drain this pool with `Promise.race(running.values())`
+    // in a loop. race re-attaches handlers to every loser on each call, so a
+    // long-running generator's promise accumulates dead closures and leaks.
+    // Each generator pushes into `completed` instead, attaching its handlers
+    // exactly once per step. Why, at length: docs/agents.md/repo/batch-generator-pool.md
 
-    // `running` is now just a Set for pool-size accounting (how many
-    // generators are still in flight). We no longer store promises here
-    // because we don't race them — see the block comment above.
+    // `running` is just a Set for pool-size accounting: how many generators
+    // are still in flight. No promises are stored here because nothing races
+    // them, per the invariant above.
     const running = new Set<AsyncGenerator<BatchPackageFetchResultType>>()
 
     // Buffer of steps that finished while the main loop wasn't waiting.
