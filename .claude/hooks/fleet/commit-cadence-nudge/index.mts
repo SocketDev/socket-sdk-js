@@ -24,6 +24,7 @@
 import { defineHook, notify, runHook } from '../_shared/guard.mts'
 import type { GuardResult } from '../_shared/guard.mts'
 import { gitOut, resolveDefaultBranch } from '../_shared/git-branch.mts'
+import { verdictLine } from '../_shared/verdict.mts'
 import { resolveProjectDir } from '../_shared/project-dir.mts'
 
 // A linked worktree has a distinct working-tree git dir from the common dir;
@@ -72,23 +73,18 @@ export const check = (): GuardResult => {
     return undefined
   }
 
-  const lines = ['[commit-cadence-nudge] Worktree cadence check.', '']
+  const parts: string[] = []
   if (dirty > 0) {
-    lines.push(
-      `  ${dirty} uncommitted change(s). Commit this logical step now —`,
-      '  small commits as you go. In a worktree `--no-verify` is fine.',
+    parts.push(
+      `${dirty} uncommitted change(s) — commit this logical step now (\`--no-verify\` is fine in a worktree)`,
     )
   }
   if (ahead > 0) {
-    lines.push(
-      `  ${ahead} commit(s) ahead of the target branch. Before merging,`,
-      '  the gate must pass clean:',
-      '    pnpm run fix --all',
-      '    pnpm run check --all',
-      '    pnpm run test',
+    parts.push(
+      `${ahead} commit(s) ahead of the target branch — gate before merging: pnpm run fix --all && pnpm run check --all && pnpm run test`,
     )
   }
-  return notify(lines.join('\n'))
+  return notify(verdictLine('hint', 'commit-cadence-nudge', parts.join('; ')))
 }
 
 export const hook = defineHook({

@@ -36,6 +36,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import process from 'node:process'
 
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
+import { verdictLine } from '../_shared/verdict.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 const DEFAULT_CAP_BYTES = 40 * 1024
@@ -93,21 +94,11 @@ export function buildBlockMessage(
   fileBytes: number,
   capBytes: number,
 ): string {
-  const lines: string[] = []
-  lines.push('[claude-md-size-guard] Blocked: CLAUDE.md too large.')
-  lines.push(`  File:        ${filePath}`)
-  lines.push(`  File size:   ${fileBytes} bytes`)
-  lines.push(`  Cap:         ${capBytes} bytes (whole file)`)
-  lines.push(`  Over by:     ${fileBytes - capBytes} bytes`)
-  lines.push('')
-  lines.push('  CLAUDE.md is load-bearing in-context for every session, and')
-  lines.push('  the fleet block is duplicated across ~12 socket-* repos. The')
-  lines.push('  40KB ceiling forces ruthless reference-deferral:')
-  lines.push('')
-  lines.push('    1. State the invariant + one-line "Why" inline.')
-  lines.push('    2. Move detail to `docs/agents.md/fleet/<topic>.md`.')
-  lines.push('    3. Link from the rule: `[Full details](docs/agents.md/...)`.')
-  return lines.join('\n') + '\n'
+  return verdictLine(
+    'block',
+    'claude-md-size-guard',
+    `CLAUDE.md too large — ${filePath} would be ${fileBytes} bytes, over the ${capBytes}-byte whole-file cap by ${fileBytes - capBytes} — move detail to docs/agents.md/fleet/<topic>.md and link it from the rule bullet\n`,
+  )
 }
 
 export function getCap(): number {

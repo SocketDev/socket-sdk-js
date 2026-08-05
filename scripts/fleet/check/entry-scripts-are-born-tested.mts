@@ -72,14 +72,19 @@ export function grandfatheredScripts(repoRoot: string = REPO_ROOT): string[] {
  */
 export function scanUntested(repoRoot: string = REPO_ROOT): Finding[] {
   const testNames = new Set(
-    globSync(['test/**/*.test.mts'], { absolute: false, cwd: repoRoot }).map(
-      f => path.basename(f),
-    ),
+    globSync(['test/**/*.test.mts'], {
+      absolute: false,
+      cwd: repoRoot,
+      // A workspace member's test tree can sit beside hundreds of installed
+      // packages — walking them OOMs the scan (socket-lib, 352 projects).
+      ignore: ['**/node_modules/**'],
+    }).map(f => path.basename(f)),
   )
   const findings: Finding[] = []
   const files = globSync(['scripts/repo/**/*.mts'], {
     absolute: false,
     cwd: repoRoot,
+    ignore: ['**/node_modules/**'],
   })
   for (let i = 0, { length } = files; i < length; i += 1) {
     const rel = files[i]!

@@ -33,6 +33,7 @@ import {
   readUserText,
   stripCodeFences,
 } from '../_shared/transcript.mts'
+import { verdictContinuation, verdictLine } from '../_shared/verdict.mts'
 
 const STOP_PATTERNS: ReadonlyArray<{ label: string; regex: RegExp }> = [
   {
@@ -183,8 +184,9 @@ export const check = (payload: ToolCallPayload): GuardResult => {
   }
   const text = stripCodeFences(rawText)
 
-  // Check if any STOP pattern fires.
-  const hits: Array<{ label: string; snippet: string }> = []
+  // Check if any STOP pattern fires. The snippet quotes the matched text —
+  // that is the evidence the verdict shows.
+  const hits: string[] = []
   for (let i = 0, { length } = STOP_PATTERNS; i < length; i += 1) {
     const pattern = STOP_PATTERNS[i]!
     const match = pattern.regex.exec(text)
@@ -193,10 +195,8 @@ export const check = (payload: ToolCallPayload): GuardResult => {
     }
     const start = Math.max(0, match.index - 20)
     const end = Math.min(text.length, match.index + match[0].length + 40)
-    hits.push({
-      label: pattern.label,
-      snippet: text.slice(start, end).replace(/\s+/g, ' ').trim(),
-    })
+    // Capped so a long menu-question match stays a readable one-liner.
+    hits.push(text.slice(start, end).replace(/\s+/g, ' ').trim().slice(0, 100))
   }
   if (hits.length === 0) {
     return undefined
@@ -210,46 +210,20 @@ export const check = (payload: ToolCallPayload): GuardResult => {
     return undefined
   }
 
-  const lines = [
-    '[dont-stop-mid-queue-nudge] Assistant turn announces stopping or asks a menu question without user authorization:',
-    '',
-  ]
+  // One line per hit: the quoted snippet is the evidence, the fix rides the
+  // first line. Doctrine lives in the hook README, not here.
+  const lines: string[] = []
   for (let i = 0, { length } = hits; i < length; i += 1) {
-    const hit = hits[i]!
-    lines.push(`  • "${hit.label}" — …${hit.snippet}…`)
+    lines.push(
+      i === 0
+        ? verdictLine(
+            'warn',
+            'dont-stop-mid-queue-nudge',
+            `stop/menu tell "…${hits[i]}…" — pick the next queue item and start it now`,
+          )
+        : verdictContinuation(`"…${hits[i]}…"`),
+    )
   }
-  lines.push('')
-  lines.push(
-    '  ⚠  Action for the NEXT turn: do NOT wait for the user to answer.',
-  )
-  lines.push('      Identify the next item in the queue (or, if the queue is')
-  lines.push(
-    '      unclear, pick the highest-value remaining item and SAY which',
-  )
-  lines.push("      one you're picking), then START WORK on it immediately.")
-  lines.push('')
-  lines.push(
-    '  Why: the user gave you a queue ("complete each one," "keep going,"',
-  )
-  lines.push(
-    '  "do them all," "100%," "hammer it out") and asking "what\'s next?"',
-  )
-  lines.push(
-    '  / "pick one or in order?" re-litigates intent already given. Pick',
-  )
-  lines.push('  and execute; the user can redirect mid-turn if needed.')
-  lines.push('')
-  lines.push(
-    '  Legitimate stops: the user said "stop," "pause," "we\'re done,"',
-  )
-  lines.push(
-    '  "enough for now," or similar. Or you hit a genuine blocker (off-',
-  )
-  lines.push(
-    '  machine action needed, build cycle measured in hours, etc.) and',
-  )
-  lines.push('  named it concretely.')
-  lines.push('')
   return notify(lines.join('\n'))
 }
 

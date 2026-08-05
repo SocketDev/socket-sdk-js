@@ -28,6 +28,7 @@ import {
   readUserText,
   stripCodeFences,
 } from '../_shared/transcript.mts'
+import { verdictContinuation, verdictLine } from '../_shared/verdict.mts'
 
 // Phrases that indicate the assistant brushed past the question.
 const DEFLECTION_PATTERNS: ReadonlyArray<{ label: string; regex: RegExp }> = [
@@ -144,20 +145,16 @@ export const check = (payload: ToolCallPayload): GuardResult => {
 
   const userSnippet = recentUser.slice(0, 200).replace(/\s+/g, ' ').trim()
   const lines = [
-    '[answer-questions-nudge] User asked a passing question; assistant turn brushed past it without answering:',
-    '',
-    `  User: "${userSnippet}${recentUser.length > 200 ? '…' : ''}"`,
-    '',
-    '  Deflection phrases detected in assistant turn:',
+    verdictLine(
+      'warn',
+      'answer-questions-nudge',
+      `reply brushed past the question "${userSnippet}${recentUser.length > 200 ? '…' : ''}" — answer it inline (1-2 sentences), then continue the in-flight work`,
+    ),
   ]
   for (let i = 0, { length } = hits; i < length; i += 1) {
     const hit = hits[i]!
-    lines.push(`    • "${hit.label}" — …${hit.snippet}…`)
+    lines.push(verdictContinuation(`• "${hit.label}" — …${hit.snippet}…`))
   }
-  lines.push('')
-  lines.push(
-    '  Answer the question inline (one or two sentences) BEFORE / ALONGSIDE the current work. Not every user comment is a pivot — when a question is in passing, lend a few tokens to it. Continue the in-flight work right after.',
-  )
 
   return notify(lines.join('\n'))
 }

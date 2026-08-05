@@ -114,7 +114,7 @@ export function grandfatheredHooks(repoRoot: string = REPO_ROOT): string[] {
 export function scanHandTypedVerdicts(repoRoot: string = REPO_ROOT): Finding[] {
   const files = globSync(
     ['.claude/hooks/fleet/*/index.mts', '.claude/hooks/repo/*/index.mts'],
-    { absolute: false, cwd: repoRoot },
+    { absolute: false, cwd: repoRoot, ignore: ['**/node_modules/**'] },
   )
   const findings: Finding[] = []
   for (let i = 0, { length } = files; i < length; i += 1) {

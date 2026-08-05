@@ -40,6 +40,7 @@
 
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import { suppressionCoversLine } from '../_shared/markers.mts'
+import { verdictContinuation, verdictLine } from '../_shared/verdict.mts'
 // CROSS_REPO_ANY_RE (built from the canonical FLEET_REPO_NAMES roster) is
 // imported from the gate-free cross-tree _shared/cross-repo.mts — the SAME
 // regex the commit-time scanCrossRepoPaths uses, so the two can't drift (was
@@ -70,26 +71,28 @@ const EXEMPT_PATH_PATTERNS: RegExp[] = [
 
 export function emitBlock(filePath: string, hits: Hit[]): string {
   const lines: string[] = []
-  lines.push('[cross-repo-guard] Blocked: cross-repo path reference found')
-  lines.push(
-    '  Use `@socketsecurity/lib-stable/<subpath>` or `@socketsecurity/registry-stable/<subpath>`',
-  )
-  lines.push(
-    '  imports instead. Path-based references break in CI / fresh clones.',
-  )
-  lines.push(`  File:    ${filePath}`)
   const hs = hits.slice(0, 3)
   for (let i = 0, { length } = hs; i < length; i += 1) {
     const h = hs[i]!
-    lines.push(`  Line ${h.lineNumber}: ${h.line.trim()}`)
-    lines.push(`  Match:           ${h.matched.trim()}`)
+    if (i === 0) {
+      lines.push(
+        verdictLine(
+          'block',
+          'cross-repo-guard',
+          `cross-repo path "${h.matched.trim()}" at ${filePath}:${h.lineNumber} — import \`@socketsecurity/lib-stable/<subpath>\` (or registry-stable) instead; per-line opt-out: \`// socket-lint: allow cross-repo\` above it`,
+        ),
+      )
+    } else {
+      lines.push(
+        verdictContinuation(
+          `"${h.matched.trim()}" at ${filePath}:${h.lineNumber}`,
+        ),
+      )
+    }
   }
   if (hits.length > 3) {
-    lines.push(`  …and ${hits.length - 3} more.`)
+    lines.push(verdictContinuation(`…and ${hits.length - 3} more.`))
   }
-  lines.push(
-    '  Opt-out for one line (rare): add `// socket-lint: allow cross-repo` on its own line above it.',
-  )
   return lines.join('\n')
 }
 

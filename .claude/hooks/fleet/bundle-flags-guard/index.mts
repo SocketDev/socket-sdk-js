@@ -31,6 +31,7 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import { resolveEditedText } from '../_shared/payload.mts'
+import { verdictContinuation, verdictLine } from '../_shared/verdict.mts'
 
 // Bundler config filenames the hook scrutinizes. Match basename only;
 // `*.config.ts` style files live wherever the package author put them.
@@ -241,26 +242,17 @@ export const hook = defineHook({
       return undefined
     }
 
-    const lines: string[] = [
-      '[bundle-flags-guard] Blocked: shipped-build flag flipped to true',
-      '',
-      `  File: ${filePath}`,
-      '',
-    ]
-    for (let i = 0, { length } = findings; i < length; i += 1) {
-      const f = findings[i]!
-      const loc = f.line > 0 ? ` (line ${f.line})` : ''
-      lines.push(`  • \`${f.key}\`${loc}: ${f.source}`)
-    }
-    lines.push(
-      '',
-      '  Shipped bundles must not emit source maps, declaration maps,',
-      '  or minified output. Maps leak source paths and bloat artifacts;',
-      '  minification obscures stack traces and complicates security review.',
-      '',
-      '  Fix: set the flag to `false` (or remove it — `false` is the default',
-      '  for fleet packages).',
+    const details = findings.map(
+      f => `\`${f.key}\`${f.line > 0 ? ` (line ${f.line})` : ''}: ${f.source}`,
     )
+    const lines = [
+      verdictLine(
+        'block',
+        'bundle-flags-guard',
+        `blocked ${details[0]!} in ${filePath} — set it to \`false\` or remove it (shipped bundles stay map-free + unminified)`,
+      ),
+      ...details.slice(1).map(d => verdictContinuation(d)),
+    ]
     return block(lines.join('\n'))
   }),
   event: 'PreToolUse',

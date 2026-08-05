@@ -242,6 +242,7 @@ export function scan(repoRoot: string = REPO_ROOT): Finding[] {
   const files = globSync(['scripts/fleet/**/*.mts', 'scripts/repo/**/*.mts'], {
     absolute: false,
     cwd: repoRoot,
+    ignore: ['**/node_modules/**'],
   })
   const findings: Finding[] = []
   for (let i = 0, { length } = files; i < length; i += 1) {
