@@ -221,7 +221,7 @@ ${{ inputs.test-log }}
 <details>
 <summary><b>Step 3: open the PR only when step 2 exited 0</b> — the title format, and copying the paths outside the allowlist into the body so a reviewer sees them</summary>
 
-3. Open the pull request ONLY if step 2 exited 0. Use the `create_pull_request`
+1. Open the pull request ONLY if step 2 exited 0. Use the `create_pull_request`
    safe output, title `${{ inputs.pr-title-prefix }} (<YYYY-MM-DD>)`, with a body
    noting the update and the fixes applied. The script prints any paths outside
    `${{ inputs.validate-file-patterns }}`; copy that list into the PR body so a

@@ -412,14 +412,55 @@ export const FLEET_CATALOG_YAML = path.join(
 )
 
 /**
+ * Absolute path to a given repo root's `package.json`.
+ */
+export function resolvePackageJsonPath(repoRoot: string): string {
+  return path.join(repoRoot, 'package.json')
+}
+
+/**
  * Absolute path to the repo's `package.json`.
  */
-export const PACKAGE_JSON = path.join(REPO_ROOT, 'package.json')
+export const PACKAGE_JSON = resolvePackageJsonPath(REPO_ROOT)
+
+/**
+ * Absolute path to a given repo root's `pnpm-lock.yaml`. Tooling that analyzes
+ * an arbitrary checkout (a fleet member, a test fixture tree) resolves it from
+ * here instead of rebuilding the segment.
+ */
+export function resolvePnpmLockPath(repoRoot: string): string {
+  return path.join(repoRoot, 'pnpm-lock.yaml')
+}
+
+/**
+ * Absolute path to a given repo root's pnpm virtual store — the
+ * `node_modules/.pnpm` directory holding one folder per resolved package, which
+ * is where a dependency's own installed manifest lives.
+ */
+export function resolvePnpmVirtualStoreDir(repoRoot: string): string {
+  return path.join(repoRoot, 'node_modules', '.pnpm')
+}
 
 /**
  * Absolute path to the repo's `pnpm-lock.yaml`.
  */
-export const PNPM_LOCK = path.join(REPO_ROOT, 'pnpm-lock.yaml')
+export const PNPM_LOCK = resolvePnpmLockPath(REPO_ROOT)
+
+/**
+ * Absolute path to a given repo root's `FLEET_CANONICAL_OVERRIDES` pin manifest
+ * — the wheelhouse-owned source of the `overrides:` block every member carries.
+ * Only the wheelhouse has one, so a caller checks existence before reading.
+ */
+export function resolveOverridePinManifestPath(repoRoot: string): string {
+  return path.join(
+    repoRoot,
+    'scripts',
+    'repo',
+    'sync-scaffolding',
+    'manifest',
+    'catalog-overrides.mts',
+  )
+}
 
 /**
  * Absolute path to the release pipeline runner. Callers that re-enter the
@@ -566,4 +607,54 @@ export function loadSocketWheelhouseConfig(
     location,
     value: parsed as Record<string, unknown>,
   }
+}
+
+/**
+ * Whether a socket-wheelhouse marker describes a repo that compiles Rust, by
+ * EITHER route: its primary `build.type` is `rust`, or it declares a non-empty
+ * `capabilities.cargo` naming Rust workspaces inside an otherwise-TypeScript
+ * repo.
+ *
+ * The two declarations are independent — a mixed-language repo carries the
+ * capability with a non-rust build type — so anything keyed on one alone misses
+ * the other route. Both owe an exact toolchain pin, since an unpinned repo
+ * compiles on whatever rustup defaults to, which silently ignores the
+ * `coverage(off)` markers and differs between a developer's machine and CI.
+ *
+ * The non-empty test matches how the Rust coverage lane activates: the lane
+ * registry prunes a cargo capability declaring no paths, so an empty list means
+ * no Rust runs and no pin is owed.
+ *
+ * THE authority for that question — the pin gate and the cascade's conditional
+ * trigger both route through this, so the answer can never differ between them.
+ */
+export function markerCompilesRust(value: Record<string, unknown>): boolean {
+  const build = value['build']
+  if (
+    typeof build === 'object' &&
+    build !== null &&
+    !Array.isArray(build) &&
+    (build as Record<string, unknown>)['type'] === 'rust'
+  ) {
+    return true
+  }
+  const capabilities = value['capabilities']
+  if (
+    typeof capabilities !== 'object' ||
+    capabilities === null ||
+    Array.isArray(capabilities)
+  ) {
+    return false
+  }
+  const cargoPaths = (capabilities as Record<string, unknown>)['cargo']
+  return Array.isArray(cargoPaths) && cargoPaths.length > 0
+}
+
+/**
+ * Whether the repo at `repoRoot` compiles Rust. An absent or unreadable marker
+ * reads as false: a repo that never declared Rust is not owed a pin.
+ */
+export function repoCompilesRust(repoRoot: string = REPO_ROOT): boolean {
+  const loaded = loadSocketWheelhouseConfig(repoRoot)
+  return loaded ? markerCompilesRust(loaded.value) : false
 }

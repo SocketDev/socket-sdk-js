@@ -94,7 +94,13 @@
     "get-green": "node scripts/fleet/get-green.mts",
     "gen:llms-txt": "node scripts/fleet/gen/llms-txt.mts",
     "weekly-update:ci": "gh workflow run weekly-update.lock.yml",
-    "prune:backups": "node scripts/fleet/backup-branches.mts prune"
+    "prune:backups": "node scripts/fleet/backup-branches.mts prune",
+    "commits:strip-attribution": "node scripts/fleet/strip-ai-attribution.mts",
+    "npm:auth": "node scripts/fleet/npm-web-auth.mts",
+    "pr:collapse-bots": "node scripts/fleet/collapse-bot-comments.mts",
+    "ruleset:bypass": "node scripts/fleet/grant-ruleset-bypass.mts",
+    "soak:bypass": "node scripts/fleet/soak-bypass.mts",
+    "trust": "node scripts/fleet/publish-infra/npm/trust.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
@@ -103,6 +109,7 @@
     "@babel/traverse": "7.29.7",
     "@babel/types": "7.29.7",
     "@oxlint/migrate": "1.52.0",
+    "@playwright/mcp": "catalog:",
     "@redwoodjs/agent-ci": "catalog:",
     "@shadscan/cli": "catalog:",
     "@sinclair/typebox": "catalog:",
@@ -135,7 +142,10 @@
     "magic-string": "0.30.21",
     "markdownlint-cli2": "catalog:",
     "mdast-util-from-markdown": "catalog:",
+    "mdast-util-gfm": "catalog:",
+    "mdast-util-to-markdown": "catalog:",
     "micromark": "catalog:",
+    "micromark-extension-gfm": "catalog:",
     "neosanitize": "catalog:",
     "nock": "catalog:",
     "npm-high-impact": "catalog:",

@@ -35,15 +35,17 @@ import { parseGitHubSlug, rawBaseUrl } from '../_shared/github-raw-url.mts'
 import { writeThroughMirrorLock } from '../_shared/mirror-lock.mts'
 
 /**
- * Rewrite the README's RELATIVE `assets/…` refs (both `<img src="assets/…">`
- * and markdown `](assets/…)`) to absolute `${baseUrl}assets/…`. Absolute refs
- * (the socket.dev badge, any https link) are untouched — only the leading
+ * Rewrite the README's RELATIVE `assets/…` refs (`<img src="assets/…">`, the
+ * `<picture><source srcset="assets/…">` dark/light variants, and markdown
+ * `](assets/…)`) to absolute `${baseUrl}assets/…`. Absolute refs (the
+ * socket.dev badge, any https link) are untouched — only the leading
  * `assets/` sentinel is matched. Idempotent: an already-absolute ref has no
  * leading `assets/` to match. Pure.
  */
 export function pinReadmeAssets(readme: string, baseUrl: string): string {
   return readme
     .replaceAll('src="assets/', `src="${baseUrl}assets/`)
+    .replaceAll('srcset="assets/', `srcset="${baseUrl}assets/`)
     .replaceAll('](assets/', `](${baseUrl}assets/`)
 }
 

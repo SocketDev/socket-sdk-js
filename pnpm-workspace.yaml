@@ -64,7 +64,7 @@ overrides:
   'mime-types@>=3': '3.0.2'
   'minimatch@>=3': '10.2.6'
   'minipass@>=4': '7.1.3'
-  'postcss@>=8': '8.5.24'
+  'postcss@>=8': '8.5.25'
   'safe-buffer': 'npm:@socketregistry/safe-buffer@1.0.9'
   'safer-buffer': 'npm:@socketregistry/safer-buffer@1.0.10'
   'semver@>=5.0.0 <7.6.0': '7.8.5'
@@ -89,14 +89,11 @@ overrides:
   'vite': 'catalog:'
   'which@>=4': '7.0.0'
 
-# Refuse to run if the pnpm version on PATH differs from the packageManager
-# field in package.json. Our setup action pins pnpm via external-tools.json;
-# any drift should fail fast, not silently auto-download via @pnpm/exe
-# (which in rc.5 leaves a placeholder launcher that errors at runtime).
 pmOnFail: warn
 
 catalog:
   '@anthropic-ai/claude-code': 2.1.220
+  '@playwright/mcp': 0.0.78
   '@redwoodjs/agent-ci': 0.17.1
   '@shadscan/cli': 0.7.0
   '@sinclair/typebox': 0.34.52
@@ -109,8 +106,8 @@ catalog:
   # self-reference. Build / hook / script / config code uses the
   # -stable name. See socket-wheelhouse@92cd3e3 for full rationale.
   '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.2'
-  '@socketsecurity/lib': 6.6.0
-  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.6.0'
+  '@socketsecurity/lib': 6.7.0
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.7.0'
   '@socketsecurity/registry': 2.0.5
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.5'
   '@socketsecurity/sdk': 4.1.4
@@ -130,7 +127,10 @@ catalog:
   'fast-check': 4.9.0
   'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
+  'mdast-util-gfm': 3.1.0
+  'mdast-util-to-markdown': 2.1.2
   'micromark': 4.0.2
+  'micromark-extension-gfm': 3.0.0
   'minimatch': 10.2.6
   'neosanitize': 0.3.0
   # Pinned back 15.0.0 -> 14.0.16 on 2026-07-27: 15.0.0 ships

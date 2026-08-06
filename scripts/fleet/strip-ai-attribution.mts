@@ -40,7 +40,7 @@ interface GitRunResult {
   stdout: string
 }
 
-function git(
+export function git(
   args: readonly string[],
   options?:
     | {
@@ -63,7 +63,7 @@ function git(
   return { status: r.status ?? 1, stdout: String(r.stdout ?? '').trim() }
 }
 
-function gitOrDie(
+export function gitOrDie(
   args: readonly string[],
   what: string,
   options?:
@@ -248,6 +248,8 @@ const SCRIPT_META: ScriptMeta = {
   --dry-run     preview which commits would be reworded`,
 }
 
+/* c8 ignore start - entrypoint guard; exercised via subprocess */
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
 }
+/* c8 ignore stop */

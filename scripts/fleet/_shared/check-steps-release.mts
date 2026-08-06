@@ -304,6 +304,18 @@ export function buildReleaseAndDocsSteps(): CheckStep[] {
     // Runs per-tree (imports the member's own scripts/repo/bootstrap/fleet.mjs);
     // vacuous pass where that fetcher is absent.
     () => run('node', ['scripts/fleet/check/thin-untrack-set-is-ci-safe.mts']),
+    // The other half of a thin member's CI contract: untracking the payload is
+    // only safe if every workflow can FETCH it back. The wheelhouse release is
+    // private and a workflow's own GITHUB_TOKEN cannot read it, so each fleet
+    // install/checkout step must pass the payload-token inputs that mint an App
+    // token. Omitting them fails at install, before any test runs — and it is
+    // invisible until the member goes thin, which is how ultrathink shipped
+    // nine unwired workflows and went red on every run for three days.
+    () =>
+      run('node', [
+        'scripts/fleet/check/thin-workflow-payloads-are-fetchable.mts',
+        '--quiet',
+      ]),
     // Every slashed pattern in .config/fleet/.prettierignore must be `**/`-anchored
     // or it silently matches nothing (oxfmt roots the matcher at the ignore file's
     // dir via Gitignore::new). Catches the footgun where a bare `vendor/**` looks

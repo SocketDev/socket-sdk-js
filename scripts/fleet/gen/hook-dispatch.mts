@@ -269,7 +269,7 @@ export const TABLE_OUTPUTS: ReadonlyArray<readonly [TableVariant, string]> = [
   ['excluded', DISPATCH_TABLE_EXCLUDED_PATH],
 ]
 
-function main(): void {
+export function main(): void {
   // A bundle-only member has no per-hook SOURCE dirs — a regen over the absent
   // dirs renders EMPTY tables + manifest and overwrites the release-shipped
   // full ones (and --check would false-fail comparing empty-vs-shipped). The
@@ -380,7 +380,7 @@ function main(): void {
   )
 }
 
-const SCRIPT_META: ScriptMeta = {
+export const SCRIPT_META: ScriptMeta = {
   describe:
     'generate the static hook dispatch table the rolldown hook bundle is built from',
   help: `Usage: node scripts/fleet/gen/hook-dispatch.mts [flags]

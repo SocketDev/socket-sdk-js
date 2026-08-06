@@ -555,7 +555,7 @@ export async function main(): Promise<void> {
   }
 }
 
-const SCRIPT_META: ScriptMeta = {
+export const SCRIPT_META: ScriptMeta = {
   describe:
     'prunes GitHub Actions cache entries to keep a repo under the fleet cache budget',
   help: `Usage: node scripts/fleet/prune-actions-caches.mts [options]

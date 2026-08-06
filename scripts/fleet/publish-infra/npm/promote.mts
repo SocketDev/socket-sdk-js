@@ -135,7 +135,7 @@ export async function publishedVersion(
   }
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const argv = process.argv.slice(2)
   const version = flag(argv, '--version')
   if (!version) {
@@ -241,7 +241,7 @@ async function main(): Promise<void> {
   }
 }
 
-const SCRIPT_META: ScriptMeta = {
+export const SCRIPT_META: ScriptMeta = {
   describe:
     'promotes a staged npm package to public, then cuts its tag and GitHub release',
   help: `Usage: node scripts/fleet/publish-infra/npm/promote.mts [flags]
@@ -251,6 +251,8 @@ const SCRIPT_META: ScriptMeta = {
   --skip-reconcile    skip the post-promote release-gap reconcile`,
 }
 
+/* c8 ignore start - entrypoint guard; exercised via subprocess */
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
 }
+/* c8 ignore stop */

@@ -3,7 +3,7 @@
  *   (docs/agents.md/fleet/self-describing-scripts.md): a NEW repo-owned entry
  *   script is born with a unit test. Scans every `scripts/repo/**` `.mts`
  *   carrying a real top-level entry guard (the same parsed scope test
- *   `entry-scripts-self-describe` uses) and flags each one that has no
+ *   `entry-scripts-are-self-describing` uses) and flags each one that has no
  *   mirror-named `<name>.test.mts` anywhere under `test/` — unless the
  *   member's `.config/repo/socket-wheelhouse.json` grandfathers it under
  *   `bornTested.grandfathered`.
@@ -37,7 +37,7 @@ import {
 } from '../paths.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
 import { runMain } from '../_shared/run-main.mts'
-import { hasTopLevelEntryGuard } from './entry-scripts-self-describe.mts'
+import { hasTopLevelEntryGuard } from './entry-scripts-are-self-describing.mts'
 
 import type { ScriptMeta } from '../_shared/run-main.mts'
 
@@ -135,7 +135,7 @@ const SCRIPT_META: ScriptMeta = {
   --update-baseline  rewrite bornTested.grandfathered in .config/repo/socket-wheelhouse.json to the current untested set`,
 }
 
-function main(): number {
+export function main(): number {
   if (process.argv.includes('--update-baseline')) {
     const written = updateBaseline()
     const location = findSocketWheelhouseConfig()

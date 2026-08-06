@@ -186,7 +186,7 @@ export function findUnfoldedSections(
  * Tracked markdown worth scanning. Sourced from git so vendored and ignored
  * trees never enter the sweep.
  */
-async function trackedMarkdown(): Promise<string[]> {
+export async function trackedMarkdown(): Promise<string[]> {
   const result = await spawn('git', ['ls-files', '-z', '*.md'], {
     cwd: REPO_ROOT,
     stdioString: true,
@@ -196,7 +196,7 @@ async function trackedMarkdown(): Promise<string[]> {
     .filter(Boolean)
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const hits: UnfoldedSection[] = []
   const files = await trackedMarkdown()
   for (let i = 0, { length } = files; i < length; i += 1) {
