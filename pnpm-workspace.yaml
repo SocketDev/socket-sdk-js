@@ -105,9 +105,75 @@ overrides:
   'yaml@2': '2.9.0'
 
   # Repo-specific overrides below.
+  # Dedup: @grpc/proto-loader 0.7 (dockerode direct) vs 0.8 (via @grpc/grpc-js,
+  # also a dockerode dep). The 0.7->0.8 diff only touches an internal
+  # `createMessageDefinition` helper signature; the public `loadSync`/`load`
+  # API dockerode's session.js calls is unchanged. Collapse unscoped to 0.8.1.
+  '@grpc/proto-loader': '0.8.1'
+  # Dedup compat shim: @polka/url 0.5 (polka, via dtu-github-actions) vs
+  # 1.0.0-next (sirv). See the patchedDependencies comment for the API break
+  # + the shim that restores it.
+  '@polka/url': '1.0.0-next.29'
+  # Dedup: @types/unist is types-only (no runtime), pulled transitively by the
+  # markdown tooling at both v2 and v3. Collapse v2→v3 — a types-only major is
+  # not type-checked transitively (skipLibCheck), so the redirect is safe and
+  # drops one duplicate from the dev tree.
+  '@types/unist@2': '3.0.3'
+  # Dedup compat shim: ansi-regex 5 (CJS yargs@17 cluster) vs 6 (ESM,
+  # markdownlint). See the patchedDependencies comment for the shim.
+  'ansi-regex': '6.2.2'
+  # Dedup: color-convert 0.5.3 is a declared-but-unused dependency of
+  # css-color-converter@2.0.0 (badge-maker) — its lib/index.js never
+  # `require`s color-convert at all, so the 0.5.3 resolution is dead weight.
+  # Collapse unscoped to color-convert 2.0.1 (already present via
+  # ansi-styles -> wrap-ansi -> cliui -> yargs).
+  'color-convert': '2.0.1'
+  # Dedup: commander 8 (katex's cli.js, via micromark-extension-math ->
+  # markdownlint) vs 11 (svgo). katex's cli.js only uses `.version()`,
+  # `.option()`, `.parse()`, `.opts()` — stable across commander 8-11.
+  # Verified: program.parse(['-i','in.tex']).opts() returns {input:'in.tex'}
+  # under commander@11.1.0. Collapse unscoped to 11.1.0.
+  'commander': '11.1.0'
+  # Dedup compat shim: content-type 1 (body-parser direct) vs 2 (via type-is,
+  # also a body-parser dep). See the patchedDependencies comment for the API
+  # break + the shim that restores it.
+  'content-type': '2.0.0'
+  # Dedup: css-tree 2.2.1 (csso, pinned ~2.2.0, via svgo) vs 3.2.1 (svgo
+  # direct). css-tree 3's changelog lists deep AST-shape breaks (Block/Ratio/
+  # MediaFeature node shape, List.getSize()->size), but none touch the
+  # surface csso actually exercises: functionally verified csso.minify()
+  # (restructure on/off, !important merging, shorthand collapse, @supports,
+  # @font-face/unicode-range, duplicate url() backgrounds) and a full
+  # svgo.optimize() pass (preset-default, inlineStyles + minifyStyles) both
+  # forced onto css-tree@3.2.1 and produced correct output. Collapse unscoped
+  # to 3.2.1.
+  'css-tree': '3.2.1'
   'defu': '>=6.1.7'
+  'is-interactive': 'npm:@socketregistry/is-interactive@1.0.6'
+  'is-unicode-supported': 'npm:@socketregistry/is-unicode-supported@1.0.5'
   'js-yaml': '4.3.0'
+  'json-stable-stringify': 'npm:@socketregistry/json-stable-stringify@1.0.14'
+  # Dependabot transitive-advisory pin (soaked, semver-compatible).
+  'markdown-it': '14.3.0'
+  # Dedup: picomatch 2 (micromatch, via fast-glob -> globby ->
+  # markdownlint-cli2) vs 4 (fdir/tinyglobby, via vite/vitest). micromatch's
+  # `picomatch(glob, options, returnState)` call and its
+  # `require('picomatch/lib/utils')` surface (isObject, isWindows,
+  # toPosixSlashes) are unchanged; the one behavior diff (utils.isWindows()
+  # no longer reads an options override) is never hit — neither fast-glob nor
+  # globby ever pass a `windows` option. Collapse unscoped to 4.0.4.
+  'picomatch': '4.0.5'
   'protobufjs': '7.6.5'
+  'rolldown': 'catalog:'
+  # sharp 0.35.0 dropped its install script (source compile is opt-in); pin the
+  # logo generator's sharp to 0.35.3 so it stays on a no-build-script line — its
+  # prebuilt @img/sharp-* binaries cover the rasterize + animated-GIF encode.
+  'sharp': '0.35.3'
+  'string-width': '8.2.2'
+  # Dedup compat shim: strip-ansi 6 (CJS yargs@17 cluster) vs 7 (ESM,
+  # via string-width@8 -> markdownlint). See the patchedDependencies comment
+  # for the shim.
+  'strip-ansi': '7.2.0'
   # advisories #51 / #54 (medium) — bump to latest 6.x patch
   'undici': '6.28.0'
   'vite': 'catalog:'
@@ -153,6 +219,12 @@ catalog:
   '@types/semver': 7.7.1
   '@types/shell-quote': 1.7.5
   'compromise': 14.16.0
+  # comptime 0.1.0 — Zig-inspired build-time evaluation for Rolldown/Vite.
+  # Wraps comptime(() => expr) calls; the Rolldown plugin evaluates them at
+  # build time and replaces the call site with the serialized literal result.
+  # Use in rolldown.config.mts for any repo with a Rolldown build.
+  # published: 2026-05-07 (26 days, past 7-day soak)
+  'comptime': 0.1.0
   # fast-check — property-based testing for pure fleet-script logic (pin
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
@@ -230,6 +302,7 @@ catalog:
   'ecc-agentshield': 1.4.0
   'npm-run-all2': 9.0.3
   'rolldown': 1.2.3
+  'rolldown-plugin-dts': 0.28.0
   'svgo': 4.0.2
   'vite': 8.2.0
   'vitiate': 0.3.1
