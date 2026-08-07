@@ -22,6 +22,7 @@ import { buildConfig } from '../../.config/repo/rolldown.config.mts'
 import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.mts'
 import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
+import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -427,7 +428,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((e: unknown) => {
-  logger.error(e)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch((e: unknown) => {
+    logger.error(e)
+    process.exitCode = 1
+  })
+}

@@ -26,6 +26,7 @@ export const config: ExportsConfig = {
     'dist/constants.d.mts',
     'dist/events-v1.d.mts',
     'dist/file-upload.d.mts',
+    'dist/form-data-entry.d.mts',
     'dist/full-scans-v1.d.mts',
     'dist/http-client.d.mts',
     'dist/quota-utils.d.mts',
@@ -47,6 +48,11 @@ export const config: ExportsConfig = {
     // re-trip the validator on every dependency bump.
     'dist/promises-*.js',
     'dist/rolldown-runtime-*.js',
+    // The vendored form-data module graph: the externals build splits the
+    // form-data npm module into this root-level chunk, and the declaration
+    // build emits its matching graph leaf. Shipped via `files`, never an
+    // exported subpath.
+    'dist/form-data.js',
   ],
   outDir: 'dist',
 }

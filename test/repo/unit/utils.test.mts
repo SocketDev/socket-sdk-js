@@ -96,7 +96,8 @@ describe('Path Resolution', () => {
       expect(result).toHaveLength(2)
       /* Suffix-based assertions — matching a specific repo dir
        * name breaks when the test runs from a git worktree whose
-       * path segment differs from the primary checkout. */
+       * path segment differs from the primary checkout.
+       */
       expect(result[0]).toMatch(/\/package\.json$/)
       expect(result[1]).toMatch(/\/src\/index\.ts$/)
       for (let i = 0, { length } = result; i < length; i += 1) {

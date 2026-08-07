@@ -15,6 +15,7 @@ import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { createSectionHeader } from '@socketsecurity/lib-stable/stdio/header'
+import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -174,7 +175,7 @@ async function main(): Promise<void> {
 
     // Build task list
     if (cleanAll || values['cache']) {
-      // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- deletion-target glob, not a cache location.
+      // oxlint-disable-next-line socket/prefer-repo-root-dot-cache -- deletion-target glob, not a cache location.
       tasks.push({ name: 'cache', pattern: '**/.cache' })
     }
 
@@ -230,7 +231,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((e: unknown) => {
-  logger.error(e)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch((e: unknown) => {
+    logger.error(e)
+    process.exitCode = 1
+  })
+}

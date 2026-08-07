@@ -32,6 +32,7 @@ import {
 
 import type { StrictTypeConfig } from './generate-strict-types-emit.mts'
 import type { AstNode } from './generate-strict-types-lib.mts'
+import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 const rootPackageJsonPath = findUpSync('package.json', {
@@ -402,7 +403,9 @@ ${generateWrapperTypes()}
   }
 }
 
-main().catch((e: unknown) => {
-  logger.error(e)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch((e: unknown) => {
+    logger.error(e)
+    process.exitCode = 1
+  })
+}

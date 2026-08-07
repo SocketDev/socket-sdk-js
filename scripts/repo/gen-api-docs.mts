@@ -22,6 +22,7 @@ import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { extractMethods, renderApiDocs } from './gen-api-docs-lib.mts'
+import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 const rootPackageJsonPath = findUpSync('package.json', {
@@ -55,4 +56,6 @@ function main(): void {
   )
 }
 
-main()
+if (isMainModule(import.meta.url)) {
+  main()
+}

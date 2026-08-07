@@ -67,6 +67,7 @@ jobs:
           # fleet release bundle from the private wheelhouse.
           payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+          socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
       - name: Configure push credentials
         env:
           GH_TOKEN: ${{ github.token }}
