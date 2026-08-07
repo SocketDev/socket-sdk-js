@@ -9,6 +9,10 @@
     "from": "npm-registry",
     "type": "js"
   },
+  "bundle": {
+    "ref": "fleet-pack-7c30644757d49008b9fa8536609855c6f35a13cc",
+    "cascadeSha": "7c30644757d49008b9fa8536609855c6f35a13cc"
+  },
   "docs": {
     "llmsTxt": true
   },
