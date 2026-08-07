@@ -2913,6 +2913,7 @@ test/fleet/publish-infra/cargo/placeholder.test.mts
 test/fleet/publish-infra/npm/placeholder.test.mts
 test/fleet/scripts/setup.mts
 test/fleet/unit/comment-voice.test.mts
+scripts/fleet/check/member-fetcher-matches-pinned-pack.mts
 # </fleet>
 # <repo>
 # </repo>

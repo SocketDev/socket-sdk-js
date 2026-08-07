@@ -181,9 +181,21 @@ overrides:
   'vite': 'catalog:'
   'which@>=4': '7.0.0'
 
+# pnpm 11's packageManager-version-check failure policy. `warn` lets the
+# install proceed with a mismatched pnpm (emitting a warning) rather than
+# hard-failing. `error` is the default when the field is absent — socket-lib
+# had `error` while the wheelhouse lacked the field, which blocked commits
+# under a dev pnpm that differed from the `packageManager` pin. `warn` keeps
+# the pin informational without blocking CI or local dev.
 pmOnFail: warn
 
 catalog:
+  # agent-ci runs a repo's GitHub Actions workflows locally in Docker so a
+  # change can be validated before it's pushed (see the `agent-ci` skill).
+  # The published package is a self-contained Node CLI (`dist/cli.js`) — no
+  # platform-binary optionalDependencies, despite the monorepo's internal
+  # workspace layout. dtu-github-actions is its GitHub-Actions parser, pinned
+  # explicitly (not left transitive) so its version is uniform fleet-wide.
   '@redwoodjs/agent-ci': 0.17.1
   '@ultrathink/acorn.rs.wasm': 0.1.1
   'brace-expansion': 5.0.9
