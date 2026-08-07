@@ -26,7 +26,8 @@ const isCoverageEnabled =
   process.env.npm_lifecycle_event?.includes('coverage') ||
   process.argv.some(arg => arg.includes('coverage'))
 
-// oxlint-disable-next-line socket/no-default-export -- vitest config loader requires the default export.
+// The vitest config loader requires the default export.
+// oxlint-disable-next-line socket/no-default-export -- loader contract
 export default defineConfig({
   cacheDir: path.join(REPO_CACHE_DIR, 'vitest'),
   test: {

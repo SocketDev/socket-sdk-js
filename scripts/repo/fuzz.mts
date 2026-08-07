@@ -133,7 +133,9 @@ export function sweepOrphanedShmSegments(): void {
 if (isMainModule(import.meta.url)) {
   sweepOrphanedShmSegments()
 
-  // oxlint-disable-next-line socket/prefer-async-spawn -- sync-required: top-level CLI runner, exits with the child's code
+  // Sync is required here: this top-level CLI runner exits with the
+  // child's code.
+  // oxlint-disable-next-line socket/prefer-async-spawn -- sync CLI runner
   const result = spawnSync(
     VITEST_BIN,
     // No `--config`: vitest auto-discovers the repo-root vitest.config.mts, which

@@ -125,7 +125,9 @@ export const getMethodsByPermissions = memoize(
           )
         })
         .map(([methodName]) => methodName)
-        // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); .map already returns a fresh array so in-place sort is safe.
+        // toSorted throws on Node <20 (engines floor 18.20.8); .map already
+        // returns a fresh array so the in-place sort is safe.
+        // oxlint-disable-next-line unicorn/no-array-sort -- fresh array
         .sort()
     )
   },
@@ -145,7 +147,9 @@ export const getMethodsByQuotaCost = memoize(
       Object.entries(reqs.api)
         .filter(([, requirement]) => requirement.quota === quotaCost)
         .map(([methodName]) => methodName)
-        // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); .map already returns a fresh array so in-place sort is safe.
+        // toSorted throws on Node <20 (engines floor 18.20.8); .map already
+        // returns a fresh array so the in-place sort is safe.
+        // oxlint-disable-next-line unicorn/no-array-sort -- fresh array
         .sort()
     )
   },
