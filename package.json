@@ -108,7 +108,8 @@
     "npm:staged": "node scripts/fleet/publish-pipeline.mts --status",
     "hide-comments": "node scripts/fleet/hide-comments.mts",
     "npm:trust": "node scripts/fleet/publish-infra/npm/trust.mts",
-    "prune:branch-backups": "node scripts/fleet/backup-branches.mts prune"
+    "prune:branch-backups": "node scripts/fleet/backup-branches.mts prune",
+    "preflight": "node scripts/fleet/preflight.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
