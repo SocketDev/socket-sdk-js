@@ -4,7 +4,9 @@
  *   parse and transform them into strict versions with required fields properly
  *   marked.
  */
-// oxlint-disable-next-line socket/prefer-async-spawn -- single one-shot oxfmt invocation; sync API keeps this codegen pipeline strictly serial.
+// A single one-shot oxfmt invocation; the sync API keeps this codegen
+// pipeline strictly serial.
+// oxlint-disable-next-line socket/prefer-async-spawn -- serial codegen
 import { spawnSync } from 'node:child_process'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
@@ -237,7 +239,7 @@ export async function updateIndexExports(): Promise<void> {
   const newExport = `export type {\n  ${typeNames.join(',\n  ')},\n} from './types-strict'`
 
   // Replace the old export
-  const newIndexContent = indexContent.replace(importRegex, newExport)
+  const newIndexContent = indexContent.replace(importRegex, () => newExport)
 
   // Write back to file
   await fs.writeFile(indexPath, newIndexContent, 'utf8')
