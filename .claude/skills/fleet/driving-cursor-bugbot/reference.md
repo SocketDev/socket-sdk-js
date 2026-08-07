@@ -2,7 +2,7 @@
 
 API surface, GraphQL queries, and reply templates for the `driving-cursor-bugbot` skill. The decision flow lives in [`SKILL.md`](SKILL.md).
 
-## Phase 1 — Inventory
+## Phase 1 - Inventory
 
 List Bugbot findings as one-liners:
 
@@ -13,10 +13,10 @@ gh api "repos/{owner}/{repo}/pulls/<PR#>/comments" \
 
 Each finding has:
 
-- `id` — comment ID (used for replies + resolution).
-- `path` — file the finding is on.
-- `line` — line number on that file.
-- `body` — first line is the title (`### Title`); full body has `Description`, severity (Low / Medium / High), and rule (when triggered by a learned rule).
+- `id` - comment ID (used for replies + resolution).
+- `path` - file the finding is on.
+- `line` - line number on that file.
+- `body` - first line is the title (`### Title`); full body has `Description`, severity (Low / Medium / High), and rule (when triggered by a learned rule).
 
 Fetch the full body for one finding:
 
@@ -27,7 +27,7 @@ gh api "repos/{owner}/{repo}/pulls/comments/<id>" \
 
 The `<!-- BUGBOT` marker separates the human-readable finding from the bot's metadata; strip everything after for clean reading.
 
-## Phase 4 — Replying on inline threads
+## Phase 4 - Replying on inline threads
 
 **Critical**: replies go on the inline review-comment thread, not as a detached PR comment.
 
@@ -36,10 +36,10 @@ gh api "repos/{owner}/{repo}/pulls/<PR#>/comments/<comment-id>/replies" \
   -X POST -f body="…"
 ```
 
-After replying, **resolve the thread**: the reply alone doesn't auto-resolve — resolution is a GraphQL mutation:
+After replying, **resolve the thread**: the reply alone doesn't auto-resolve - resolution is a GraphQL mutation:
 
 <details>
-<summary><b>The two-step resolve mutation</b> — map a comment <code>databaseId</code> to its <code>PRRT_</code> thread node ID, then call <code>resolveReviewThread</code> on it</summary>
+<summary><b>The two-step resolve mutation</b> - map a comment <code>databaseId</code> to its <code>PRRT_</code> thread node ID, then call <code>resolveReviewThread</code> on it</summary>
 
 ```bash
 # Step 1: get the thread node ID (PRRT_…) for a given comment databaseId.
@@ -71,10 +71,10 @@ mutation($threadId: ID!) {
 
 ### When to resolve
 
-- **`real`, fixed** — resolve after the fix commit lands and the reply is posted.
-- **`already-fixed`** — resolve immediately after the reply, the fix already exists.
-- **`false-positive`** — resolve immediately after the reply, _unless_ the verdict is contested by the reviewer.
-- **`wont-fix`** — do NOT resolve. The reviewer decides; leave it open as an open question.
+- **`real`, fixed** - resolve after the fix commit lands and the reply is posted.
+- **`already-fixed`** - resolve immediately after the reply, the fix already exists.
+- **`false-positive`** - resolve immediately after the reply, _unless_ the verdict is contested by the reviewer.
+- **`wont-fix`** - do NOT resolve. The reviewer decides; leave it open as an open question.
 
 ## Reply templates
 
@@ -90,7 +90,7 @@ Keep replies short. Bugbot doesn't read them, but the human reviewer does.
 
 - **Won't fix**: `Out of scope for this PR — <rationale>. Tracking as <issue/PR ref> if a follow-up is appropriate.`
 
-## Phase 5 — Title + body realignment
+## Phase 5 - Title + body realignment
 
 After fixing Bugbot findings, scope often expands:
 

@@ -15,7 +15,7 @@ rg -rln pattern      # parses as: rg --replace 'ln' pattern
 Instead of listing files (`-l`) with line numbers (`-n`), every match is
 rewritten to the literal text `ln`. The command exits 0, so a caller
 checking only the exit code never sees the corruption. This shape has
-bitten agent sessions repeatedly — the flags read like a normal cluster.
+bitten agent sessions repeatedly - the flags read like a normal cluster.
 
 ## Why it blocks
 
@@ -33,10 +33,10 @@ value-taking flag before it: `-rn`, `-rl`, `-rc`, `-rln`, `-orn`.
 
 ## What stays silent
 
-- `rg --replace <text> <pattern>` — the long spelling, unambiguous.
-- `rg -r <text> <pattern>` — standalone `-r`; the next argument is the
+- `rg --replace <text> <pattern>` - the long spelling, unambiguous.
+- `rg -r <text> <pattern>` - standalone `-r`; the next argument is the
   replacement, as written.
-- `rg -nr <text> <pattern>` — `r` last in the cluster; same deal.
+- `rg -nr <text> <pattern>` - `r` last in the cluster; same deal.
 - Clusters where an earlier value-taking flag consumes the `r` (`-ern`
   is `--regexp 'rn'`, a different mistake).
 - Anything after a literal `--` (patterns/paths, not flags).

@@ -42,7 +42,7 @@ patterns from screens, and sequencing from flows when the task has multiple step
   dominant direction and preserve its sharp traits. Secondary references may add narrow
   details only.
 <details>
-<summary><b>The other eleven rules</b> — reject category reflexes twice, grid backgrounds only for grid products, do not change token meanings, respect imagery guidance, no generic design skill as a parallel authority, specific research output, no design from vibe memory, synthesize before implementation, a brief is not a build target, image generation only when it changes the outcome, validate after building</summary>
+<summary><b>The other eleven rules</b> - reject category reflexes twice, grid backgrounds only for grid products, do not change token meanings, respect imagery guidance, no generic design skill as a parallel authority, specific research output, no design from vibe memory, synthesize before implementation, a brief is not a build target, image generation only when it changes the outcome, validate after building</summary>
 
 - **Reject category reflexes twice.** First reject the default aesthetic implied by the
   product category. Then reject the predictable anti-default; choose a direction grounded
@@ -116,7 +116,7 @@ would materially change the result; otherwise make reasonable assumptions and pr
 Clarify:
 
 <details>
-<summary><b>Detail</b> — the full list (9 entries)</summary>
+<summary><b>Detail</b> - the full list (9 entries)</summary>
 
 - what is being designed
 - platform: web, iOS, or both
@@ -237,7 +237,7 @@ For any visual design task, start here.
 Recommended loop:
 
 <details>
-<summary><b>Detail</b> — the full list (36 entries)</summary>
+<summary><b>Detail</b> - the full list (36 entries)</summary>
 
 1. Search 3-5 different visual angles.
 2. Include one broad aesthetic query.
@@ -330,7 +330,7 @@ solve a specific UI problem.
 Good screen queries:
 
 <details>
-<summary><b>Detail</b> — the full list (21 entries)</summary>
+<summary><b>Detail</b> - the full list (21 entries)</summary>
 
 - pricing page annual monthly toggle
 - feature comparison table

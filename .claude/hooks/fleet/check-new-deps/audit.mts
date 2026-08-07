@@ -286,7 +286,7 @@ const KNOWN_GOOD_NAMES: Record<string, string[]> = {
     'fastify',
     'koa',
     'axios',
-    // socket-lint: allow eslint-biome-ref -- popular-package allowlist entry, not a config ref.
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- popular-package allowlist entry, not a config ref.
     'eslint',
     'prettier',
     'vitest',

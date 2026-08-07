@@ -41,7 +41,6 @@
  * Themes (via html[data-theme="..."]):
  *   light       Default. Cream + ink for product surfaces.
  *   dark        Charcoal + lavender for devtools / power-user contexts.
- *   synthwave   Neon pink on deep purple — Socket-branded celebration.
  *   system      Follows OS via prefers-color-scheme.
  *
  * How to import:
@@ -180,55 +179,6 @@ html[data-theme='dark'] {
 }
 
 /* ── 4. Synthwave theme — Socket-branded glow ── */
-html[data-theme='synthwave'] {
-  /* Gradient bg for hero / celebration surfaces */
-  --background: radial-gradient(
-    ellipse at top right,
-    #3a2450 0%,
-    #2a1b3d 40%,
-    #1a0f2e 100%
-  );
-  --foreground: #f8f0ff;
-  --card: #2a1b3d;
-  --card-foreground: #f8f0ff;
-  --popover: #241633;
-  --popover-foreground: #f8f0ff;
-  --primary: var(--socket-pink); /* #ff00aa — Socket-branded synthwave */
-  --primary-foreground: #1a0f2e;
-  --secondary: #241633;
-  --secondary-foreground: #f8f0ff;
-  --muted: #241633;
-  --muted-foreground: #c8b8e8;
-  --accent: rgba(255, 0, 170, 0.18);
-  --accent-foreground: #f8f0ff;
-  --destructive: #ff6b9d;
-  --destructive-foreground: #1a0f2e;
-  --border: #3d2a5a;
-  --input: #3d2a5a;
-  --ring: var(--socket-pink);
-
-  --border-strong: #5a3d7a;
-
-  /* Marketing surfaces — neon hero treatment */
-  --mkt-bg: #1a0f2e;
-  --mkt-fg: #f8f0ff;
-  --mkt-border: var(--socket-pink);
-  --mkt-glow: rgba(255, 0, 170, 0.34);
-
-  /* Status — synthwave pulls neon */
-  --status-success: #50fa7b;
-  --status-warning: #f1fa8c;
-  --status-alert: #ffb86c;
-  --status-info: #8be9fd;
-
-  /* Shadows — colored glow for synthwave aesthetic */
-  --shadow-sm: 0 1px 2px rgba(255, 0, 170, 0.1);
-  --shadow-md: 0 2px 12px rgba(255, 0, 170, 0.15);
-  --shadow-lg: 0 8px 32px rgba(255, 0, 170, 0.2);
-
-  color-scheme: dark;
-}
-
 /* ── 5. System (follows OS) ──
    When data-theme="system", default to light tokens (set above on :root) and
    override with the dark token block when the OS reports prefers-color-scheme:

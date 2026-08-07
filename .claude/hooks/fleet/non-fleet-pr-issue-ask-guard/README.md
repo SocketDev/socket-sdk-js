@@ -4,7 +4,7 @@ PreToolUse hook that blocks `gh pr create` / `gh issue create` / `gh release cre
 
 ## Rule
 
-Public-facing artifacts (PRs, issues, releases) on non-fleet repos go out under the user's gh identity. They're permanent on the upstream side once posted — closing one with an "opened in error" comment doesn't fully un-publish it: the email notification fires, the issue number is consumed, the upstream maintainers see the noise.
+Public-facing artifacts (PRs, issues, releases) on non-fleet repos go out under the user's gh identity. They're permanent on the upstream side once posted - closing one with an "opened in error" comment doesn't fully un-publish it: the email notification fires, the issue number is consumed, the upstream maintainers see the noise.
 
 The fleet rule: **never submit to a non-fleet repo without explicit per-action confirmation**. Captured plan text + batched "do all N tasks" directives are NOT standing authorization to post under your identity.
 
@@ -19,13 +19,13 @@ Blocks when the resolved slug is not in the fleet roster (`_shared/fleet-repos.m
 
 ## Bypass
 
-Type `Allow non-fleet-publish bypass` verbatim in a recent user turn. Per the fleet bypass-phrase convention. Single-action: a phrase from a previous turn doesn't carry forward indefinitely — the hook reads the active session's transcript.
+Type `Allow non-fleet-publish bypass` verbatim in a recent user turn. Per the fleet bypass-phrase convention. Single-action: a phrase from a previous turn doesn't carry forward indefinitely - the hook reads the active session's transcript.
 
 ## Why a hook
 
 A captured-plan task that says "file an upstream issue" isn't permission to run `gh issue create` against that repo. Working a deferred-tasks list, an agent fires `gh issue create --repo <upstream>/<repo> ...` straight from the captured plan without re-confirming; by the time the user says "don't create an issue", the background `gh` call has already completed and the issue is live until closed post-hoc.
 
-This hook makes the rule enforceable at edit time — the bg call blocks before the API request fires.
+This hook makes the rule enforceable at edit time - the bg call blocks before the API request fires.
 
 ## Fail-open
 

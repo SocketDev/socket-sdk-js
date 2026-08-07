@@ -1,6 +1,6 @@
 # prefer-type-import-guard
 
-PreToolUse (Edit/Write) hook — the edit-time half of the `socket/prefer-separate-type-import` lint rule. Blocks writing an inline `type` specifier inside a value import.
+PreToolUse (Edit/Write) hook - the edit-time half of the `socket/prefer-separate-type-import` lint rule. Blocks writing an inline `type` specifier inside a value import.
 
 ## What it catches
 

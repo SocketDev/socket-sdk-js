@@ -37,7 +37,7 @@ A comment that opens with a pointer phrase and contains no detectable claim shap
 ## Scope
 
 - Source-file extensions only: `.ts`, `.mts`, `.cts`, `.js`, `.mjs`, `.cjs`, `.tsx`, `.jsx`.
-- Skips `test/` directories and `*.test.*` files — illustrative pointer-only comments are common there and not the failure mode this hook targets.
+- Skips `test/` directories and `*.test.*` files - illustrative pointer-only comments are common there and not the failure mode this hook targets.
 
 ## Behavior
 

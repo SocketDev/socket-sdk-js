@@ -4,7 +4,7 @@ PreToolUse hook on `Agent` / `Task`, non-blocking. Points out that the previous 
 
 ## Why
 
-`agent-prompt-budget-guard` refuses an open-ended brief and caps a scoped one at five minutes. Work that used to be a single long spawn now has to be split into several scoped ones — and that split only pays off if the pieces run at the same time. Fired one per turn, the pieces cost the same wall-clock as the one long spawn they replaced.
+`agent-prompt-budget-guard` refuses an open-ended brief and caps a scoped one at five minutes. Work that used to be a single long spawn now has to be split into several scoped ones - and that split only pays off if the pieces run at the same time. Fired one per turn, the pieces cost the same wall-clock as the one long spawn they replaced.
 
 The numbers behind the message are measured: a tight brief runs 6.4-7.4 seconds per tool call, an open-ended one 13.6-43.8, and every spawn pays roughly 15 seconds of fixed startup. Batching the spawns pays that startup once in parallel rather than serially, and it stops each agent from waiting out the other's full run.
 

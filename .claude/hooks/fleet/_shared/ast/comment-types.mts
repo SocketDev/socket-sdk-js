@@ -147,7 +147,8 @@ export function classifyCommentContent(
   if (kind === 'MultiLineBlock' || kind === 'SingleLineBlock') {
     // Legal: `/*!` opener OR contains `@license` / `@preserve`.
     const isLegalMarker = fullText.startsWith('/*!')
-    // socket-lint: allow uncommented-regex -- @license / @preserve annotation.
+    // @license / @preserve annotation.
+    // oxlint-disable-next-line socket/require-regex-comment -- @license /
     const hasLegalAnnotation = /@(?:license|preserve)\b/.test(body)
     // Jsdoc: `/**` opener (but NOT `/***`).
     const isJsdoc = fullText.startsWith('/**') && !fullText.startsWith('/***')
@@ -161,23 +162,27 @@ export function classifyCommentContent(
     if (isLegalMarker || hasLegalAnnotation) {
       return 'Legal'
     }
-    // socket-lint: allow uncommented-regex -- #__PURE__ annotation, trimmed body.
+    // #__PURE__ annotation, trimmed body.
+    // oxlint-disable-next-line socket/require-regex-comment -- #__PURE__
     if (/^\s*#__PURE__\s*$/.test(trimmedBody)) {
       return 'Pure'
     }
-    // socket-lint: allow uncommented-regex -- #__NO_SIDE_EFFECTS__ annotation.
+    // oxlint-disable-next-line socket/require-regex-comment -- annotation shape
     if (/^\s*#__NO_SIDE_EFFECTS__\s*$/.test(trimmedBody)) {
       return 'NoSideEffects'
     }
-    // socket-lint: allow uncommented-regex -- @vite-ignore magic comment.
+    // @vite-ignore magic comment.
+    // oxlint-disable-next-line socket/require-regex-comment -- @vite-ignore
     if (/@vite-ignore\b/.test(body)) {
       return 'Vite'
     }
-    // socket-lint: allow uncommented-regex -- webpackXxx: magic comment.
+    // Magic comment.
+    // oxlint-disable-next-line socket/require-regex-comment -- webpackXxx
     if (/\bwebpack[A-Z]\w*\s*:/.test(body)) {
       return 'Webpack'
     }
-    // socket-lint: allow uncommented-regex -- turbopackXxx: magic comment.
+    // Magic comment.
+    // oxlint-disable-next-line socket/require-regex-comment -- turbopackXxx
     if (/\bturbopack[A-Z]\w*\s*:/.test(body)) {
       return 'Turbopack'
     }

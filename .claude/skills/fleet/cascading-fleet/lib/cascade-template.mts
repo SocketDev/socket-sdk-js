@@ -117,7 +117,7 @@ const OWNER_MAP = ROSTER.owners
 function ownerOf(repo: string): string {
   return OWNER_MAP.get(repo) ?? 'SocketDev'
 }
-// socket-lint: allow cross-repo
+// oxlint-disable-next-line socket/no-cross-repo-path -- cascade writes there
 const WH_SCRIPT = path.join(
   PROJECTS,
   'socket-wheelhouse',
@@ -126,7 +126,7 @@ const WH_SCRIPT = path.join(
   'sync-scaffolding',
   'cli.mts',
 )
-// socket-lint: allow cross-repo
+// oxlint-disable-next-line socket/no-cross-repo-path -- cascade writes there
 const CLEANUP_SCRIPT = path.join(
   PROJECTS,
   'socket-wheelhouse',

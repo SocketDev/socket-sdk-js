@@ -1,4 +1,5 @@
-/* oxlint-disable socket/no-status-emoji -- this file IS the rule definition; emoji literals are lookup-table data, not real usage. */
+/* oxlint-disable socket/no-status-emoji -- this file IS the rule definition */
+// Emoji literals are lookup-table data, not real usage.
 
 /**
  * @file Ban status-symbol emoji literals (✓ ✔ ❌ ✗ ⚠ ⚠️ ❗ ✅ ❎ ☑) inside string
@@ -12,7 +13,8 @@
  *   picks the right method).
  */
 
-/* oxlint-disable socket/no-status-emoji -- this rule defines the emoji table it bans. */
+/* oxlint-disable socket/no-status-emoji -- this rule defines the emoji table */
+// This rule defines the emoji table it bans.
 
 import type { AstNode, RuleContext, RuleFixer } from '../../lib/rule-types.mts'
 
@@ -143,7 +145,7 @@ const rule = {
 
       // Build the replacement.
       const quote = literalNode.raw[0]
-      const newLiteral = `${quote}${leadInfo.restAfter.replace(new RegExp(quote, 'g'), '\\' + quote)}${quote}`
+      const newLiteral = `${quote}${leadInfo.restAfter.replace(new RegExp(quote, 'g'), () => '\\' + quote)}${quote}`
 
       return (fixer: RuleFixer) => [
         fixer.replaceText(callee, `logger.${method}`),
@@ -198,5 +200,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

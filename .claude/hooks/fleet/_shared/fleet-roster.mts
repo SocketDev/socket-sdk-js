@@ -50,24 +50,47 @@ export type FleetOptIn = (typeof KNOWN_OPT_INS)[number]
 // `publishes`, so a new channel validates only after it is added here. Kept
 // sorted.
 //   - binary: signed executables attached to a GitHub release.
+//   - browser-extension: published to the Chrome Web Store and AMO from a
+//     signed zip.
 //   - cargo: a crate on crates.io.
-//   - custom: a channel with its own publisher (an editor or browser
-//     extension marketplace).
 //   - github-action: consumed as `owner/repo@<tag>` straight from the git
 //     tree. Named for the channel rather than a bare `action`, which reads as
 //     any generic action.
 //   - js: an npm package.
 //   - none: nothing ships; the repo is consumed in place or internal only.
+//   - vscode-extension: published to the VS Code Marketplace and Open VSX by
+//     `vsce` / `ovsx` from a VSIX.
+//
+// Each channel names ONE publisher, so a reader can tell which packager runs,
+// which credential it needs, and which listing a version lands on. Extension
+// channels are spelled out because VS Code has no recognized short form.
 export const KNOWN_PUBLISH_TARGETS = [
   'binary',
+  'browser-extension',
   'cargo',
-  'custom',
   'github-action',
   'js',
   'none',
+  'vscode-extension',
 ] as const
 
 export type FleetPublishTarget = (typeof KNOWN_PUBLISH_TARGETS)[number]
+
+/**
+ * Channels with no fleet release surface: nothing ships at all, or the member's
+ * OWN packager ships it (`vsce`/`ovsx`, the Chrome Web Store / AMO) rather than
+ * the fleet npm / cargo / GitHub-release pipeline.
+ *
+ * This is what the retired `custom` channel meant. It was split into the two
+ * extension channels, so the onboarding stages ask this list instead of naming
+ * channels one at a time - a future self-published channel joins here once and
+ * both stages inherit it.
+ */
+export const NON_FLEET_RELEASE_TARGETS: readonly FleetPublishTarget[] = [
+  'browser-extension',
+  'none',
+  'vscode-extension',
+]
 
 /**
  * Identify the canonical repo name for the checkout at `cwd`. Prefer the GitHub
@@ -343,8 +366,8 @@ export function isSquashOptIn(repoRoot: string): boolean {
 }
 
 /**
- * True when the checkout at `repoRoot` is a thin-distribution consumer — it
- * untracks the wholly-fleet payload and fetches it from the release bundle.
+ * True when the checkout at `repoRoot` is a fleet-pack-distribution consumer —
+ * it untracks the wholly-fleet payload and fetches it from the release bundle.
  *
  * Thin is not an opt-in: EVERY roster member is a thin consumer. Two shapes
  * fall outside it, by identity rather than configuration:
@@ -354,7 +377,7 @@ export function isSquashOptIn(repoRoot: string): boolean {
  * - The wheelhouse itself — it PRODUCES the bundle, so fetching its own payload
  *   would be circular; the producer is never a consumer.
  */
-export function isThinMember(repoRoot: string): boolean {
+export function isFleetPackConsumer(repoRoot: string): boolean {
   const roster = loadRosterFromRepo(repoRoot)
   if (!roster) {
     return false

@@ -14,7 +14,7 @@
 ## Checkpointing (runs before Phase 0 and after every phase)
 
 On large finding batches a full run can exhaust context or hit rate limits
-mid-way — particularly Phase 3, which verifies `candidates × votes` times. Phase
+mid-way - particularly Phase 3, which verifies `candidates × votes` times. Phase
 state persists to `./.triage-state/` so a fresh session can resume without
 re-asking the interview or re-running verifiers.
 
@@ -25,21 +25,21 @@ directly. Never pass payload via heredoc or stdin; target-derived strings could
 collide with the heredoc delimiter and break out to shell. The Write→`--from`
 pattern keeps repo-derived bytes out of Bash argv.
 
-State files in `./.triage-state/` (add it to `.gitignore` — it is scratch):
+State files in `./.triage-state/` (add it to `.gitignore` - it is scratch):
 
 <details>
-<summary><b>Detail</b> — Start of run: resume check, End of every phase N, End of run</summary>
+<summary><b>Detail</b> - Start of run: resume check, End of every phase N, End of run</summary>
 
-- `progress.json` — **single source of truth** for resume position:
+- `progress.json` - **single source of truth** for resume position:
   `{"status": "running"|"complete", "phase_done": N, "shards_done": [...]}`.
   Resume decisions read ONLY this file, never a glob of `phase*.json` or shard
   files (stale files from a prior run must not be trusted).
-- `phaseN.json` — data payload for phase N (schemas at the tail of each phase
+- `phaseN.json` - data payload for phase N (schemas at the tail of each phase
   section below).
-- `_chunk.tmp` — transient payload buffer; overwritten before every
+- `_chunk.tmp` - transient payload buffer; overwritten before every
   `save`/`shard`/`append` call.
 
-**Start of run — resume check.** Bash:
+**Start of run - resume check.** Bash:
 `node .claude/skills/fleet/_shared/scripts/checkpoint.mts load ./.triage-state`
 
 - `status == "absent"` OR `"complete"`, OR `--fresh` in `$ARGUMENTS` → **fresh
@@ -49,7 +49,7 @@ State files in `./.triage-state/` (add it to `.gitignore` — it is scratch):
 - `status == "running"` with `phase_done == N` → **resume.** Read
   `./.triage-state/phase0.json` through `phaseN.json` **in order** (and any
   `shard_*.json` files listed in `shards_done`), merging keys into working state
-  (later files override earlier — checkpoints may be deltas). Print `Resuming
+  (later files override earlier - checkpoints may be deltas). Print `Resuming
   from checkpoint: Phase N complete`, and **skip directly to Phase N+1**.
 
 **End of every phase N.** Two tool calls:
@@ -81,7 +81,7 @@ verification and ranking. Batch into one or two calls of up to four questions.
 Expect free-text answers via "Other"; the options are prompts, not constraints.
 
 <details>
-<summary><b>Detail</b> — Round 1, Round 2</summary>
+<summary><b>Detail</b> - Round 1, Round 2</summary>
 
 **Round 1** (single AskUserQuestion call):
 
@@ -177,7 +177,7 @@ If nothing parseable is found, stop and report what was seen.
 
 ### 1b. Normalize fields
 
-Once 1a has produced the raw records array, the normalization is deterministic —
+Once 1a has produced the raw records array, the normalization is deterministic -
 hand it to the engine:
 
 ```bash
@@ -190,14 +190,14 @@ It applies the source-key alias map (`path`/`location.file`/`filename` → `file
 `name`/`summary`/`message` → `title`; `details`/`report`/`body`/`evidence` →
 `description`; `confidence`/`score`/`certainty` → `scanner_confidence`,
 normalized to 0.0-1.0; and the rest), assigns `f001`, `f002`, … in ingest order
-(by `scanner_confidence` desc when most records carry it — a scheduling prior
-that does not affect verdicts), records `missing_fields`, and — for any finding
-with no `file` — emits the fixed **unlocatable** envelope (`verdict:
+(by `scanner_confidence` desc when most records carry it - a scheduling prior
+that does not affect verdicts), records `missing_fields`, and - for any finding
+with no `file` - emits the fixed **unlocatable** envelope (`verdict:
 false_positive`, `verify_verdict: needs_manual_test`, `confidence: 0`,
 `refute_reasons: ["doesnt_exist"]`, the human-review rationale). The constant
 verdict shape lives in the engine so a confident verdict is never emitted on a
 finding that couldn't be located, and an unlocatable never enters dedup. **Pull
-what's present; never guess what's absent** is the engine's contract — the
+what's present; never guess what's absent** is the engine's contract - the
 alias table is its `FIELD_ALIASES`, unit-tested.
 
 ### 1c. Locate the target codebase
@@ -232,7 +232,7 @@ Cluster findings where all of:
 - same `file` (after path normalization), AND
 - same `category` (case-insensitive, punctuation stripped), AND
 - `line` numbers within 10 of each other. Both-missing matches; one-side-missing
-  does NOT — a line-less record must not absorb a located one.
+  does NOT - a line-less record must not absorb a located one.
 
 Within each cluster, the canonical is the record with the fewest `missing_fields`;
 ties break to lowest `id`. Every other member gets `verdict: duplicate`,
@@ -246,7 +246,7 @@ id/file/line/category/title (enough to cluster, not enough to leak one scanner's
 reasoning into another finding's verification). Prompt:
 
 <details>
-<summary><b>Detail</b> — `You are`, `findings are`, `DISTINCT if`</summary>
+<summary><b>Detail</b> - `You are`, `findings are`, `DISTINCT if`</summary>
 
 ```
 You are deduplicating security findings before expensive verification. Two
@@ -303,8 +303,8 @@ spots).
 
 ### Run the verifiers as a Workflow
 
-Use a `Workflow` — the fleet's sanctioned fan-out, same as `scanning-quality` —
-not ad-hoc `Task` spawns. Each `agent()` call gets a fresh, isolated context — it
+Use a `Workflow` - the fleet's sanctioned fan-out, same as `scanning-quality` -
+not ad-hoc `Task` spawns. Each `agent()` call gets a fresh, isolated context - it
 sees only the 3a prompt plus the single finding under review. This is what
 guarantees verifier independence: a fork or shared context would inherit every
 other finding's prose and the prior verifiers' reasoning, re-introducing the
@@ -314,7 +314,7 @@ Pass `VERDICT_SCHEMA` so each verifier returns validated structured output
 instead of a trailing text block the orchestrator re-parses:
 
 <details>
-<summary><b>Detail</b> — the worked steps (2 snippets)</summary>
+<summary><b>Detail</b> - the worked steps (2 snippets)</summary>
 
 ```
 VERDICT_SCHEMA = {
@@ -350,7 +350,7 @@ const results = await pipeline(
 )
 ```
 
-`agentType: 'Explore'` keeps verifiers read-only — they cannot build, run, or
+`agentType: 'Explore'` keeps verifiers read-only - they cannot build, run, or
 mutate the target, which is the actual safety property this phase depends on.
 
 </details>
@@ -358,7 +358,7 @@ mutate the target, which is the actual safety property this phase depends on.
 ### 3a. Verifier prompt (assemble once per candidate)
 
 <details>
-<summary><b>The verifier prompt in full</b> — the read-only scope rules, the untrusted-finding warning, the four-step read / trace / hunt / stress-test procedure, the 16 numbered exclusion rules, and the bars for TRUE_POSITIVE, FALSE_POSITIVE, and CANNOT_VERIFY</summary>
+<summary><b>The verifier prompt in full</b> - the read-only scope rules, the untrusted-finding warning, the four-step read / trace / hunt / stress-test procedure, the 16 numbered exclusion rules, and the bars for TRUE_POSITIVE, FALSE_POSITIVE, and CANNOT_VERIFY</summary>
 
 ```
 You are a skeptical security engineer adversarially verifying ONE finding from an
@@ -460,7 +460,7 @@ via the structured-output tool.
 </details>
 
 Findings with a `file` but no `line` get **one** verifier vote regardless of
-`--votes` — a file-level sweep doesn't benefit from voting.
+`--votes` - a file-level sweep doesn't benefit from voting.
 
 ### 3c. Tally votes
 
@@ -470,7 +470,7 @@ that vote as `cannot_verify` with `confidence: 0` and `refute_reasons:
 ["verifier_error"]`. The remaining votes still decide. Build:
 
 <details>
-<summary><b>Detail</b> — Decide verdict, Checkpoint</summary>
+<summary><b>Detail</b> - Decide verdict, Checkpoint</summary>
 
 - `vote_breakdown`: `{"true_positive": x, "false_positive": y, "cannot_verify": z}`
 - `confidence`: mean confidence across votes agreeing with the majority, 1 dp.
@@ -516,7 +516,7 @@ Run one `agent()` per confirmed finding (Workflow, `agentType: 'Explore'`,
 `RANK_SCHEMA`). Prompt:
 
 <details>
-<summary><b>Detail</b> — `You are`, `happened; assume`, `scanner claimed.`</summary>
+<summary><b>Detail</b> - `You are`, `happened; assume`, `scanner claimed.`</summary>
 
 ```
 You are assigning severity to a CONFIRMED security finding. Verification already
@@ -603,10 +603,10 @@ Attach as `owner_hint`; state the source. For non-true-positive findings,
 ### 6a + 6b. Sort + write `./TRIAGE.json` (engine)
 
 The sort, the summary counts, and the every-finding-once invariant are
-deterministic — hand the triaged findings to the engine:
+deterministic - hand the triaged findings to the engine:
 
 <details>
-<summary><b>Detail</b> — the worked steps (2 snippets)</summary>
+<summary><b>Detail</b> - the worked steps (2 snippets)</summary>
 
 ```bash
 node scripts/fleet/triaging-findings/cli.mts report --from ./.triage-state/triaged.json --out-json ./TRIAGE.json
@@ -617,7 +617,7 @@ node scripts/fleet/triaging-findings/cli.mts report --from ./.triage-state/triag
 then `false_positive`; within true positives by `severity` HIGH>MEDIUM>LOW, then
 `confidence` desc, then `severity_alignment` desc; others by id), computes the
 summary counts, **asserts every input id appears exactly once** (a dropped,
-duplicated, or invented id throws — the report is never silently lossy), writes
+duplicated, or invented id throws - the report is never silently lossy), writes
 the envelope below to `./TRIAGE.json`, and prints the Phase-6d terminal summary
 to stdout. Don't print the JSON to the terminal; the engine writes file-only.
 
@@ -653,7 +653,7 @@ file only.
 
 Build it one chunk at a time so a stalled chunk loses one section, not the file.
 
-**Step 1 — header.** Write tool → `./TRIAGE.md` (clobbers any prior file):
+**Step 1 - header.** Write tool → `./TRIAGE.md` (clobbers any prior file):
 
 ```
 # Triage Report
@@ -671,7 +671,7 @@ Context: {mode}; environment = {environment}; scoring = {scoring}; {votes}-vote 
 <details>
 <summary><b>Steps 2 and 3</b>: the per-finding section shape and the Dropped table</summary>
 
-**Step 2 — per finding.** For each true_positive in severity order: Write the
+**Step 2 - per finding.** For each true_positive in severity order: Write the
 section to `./.triage-state/_chunk.tmp`, then `checkpoint.mts append ./TRIAGE.md
 --from ./.triage-state/_chunk.tmp`. Section shape:
 
@@ -687,7 +687,7 @@ section to `./.triage-state/_chunk.tmp`, then `checkpoint.mts append ./TRIAGE.md
 {if needs_manual_test: > Recommend a human build a PoC; static reasoning hit its limit.}
 ```
 
-**Step 3 — footer.** Write the Dropped table to `_chunk.tmp`, then `checkpoint.mts
+**Step 3 - footer.** Write the Dropped table to `_chunk.tmp`, then `checkpoint.mts
 append ./TRIAGE.md --from ./.triage-state/_chunk.tmp`:
 
 ```
@@ -706,6 +706,6 @@ append ./TRIAGE.md --from ./.triage-state/_chunk.tmp`:
 ### 6d. Terminal summary
 
 The `report` engine call (6a/6b) already prints the counts line, the
-HIGH/MEDIUM/LOW split, and the top HIGH title + owner to stdout — relay it. Add
+HIGH/MEDIUM/LOW split, and the top HIGH title + owner to stdout - relay it. Add
 the top 3 refute reasons and "Wrote ./TRIAGE.md and ./TRIAGE.json". Keep it under
 ~12 lines.

@@ -1,6 +1,6 @@
 # stale-node-modules-nudge
 
-**Type:** PostToolUse reminder (Bash) — nudges, never blocks.
+**Type:** PostToolUse reminder (Bash) - nudges, never blocks.
 
 **Trigger:** a Bash command's output contains either face of the same
 worktree-removal dangle:
@@ -27,6 +27,6 @@ install --config.confirmModulesPurge=false`, in the MAIN checkout, then
 retry. The `--config.confirmModulesPurge=false` flag lets pnpm
 remove+rebuild the modules dir with no TTY prompt, so the fix runs in the
 `!`-channel and CI. Does not run the install or retry, and does not
-suggest `--no-verify` — the break is transient, not a reason to bypass.
+suggest `--no-verify` - the break is transient, not a reason to bypass.
 
-**Bypass:** none — informational only (exit 0).
+**Bypass:** none - informational only (exit 0).

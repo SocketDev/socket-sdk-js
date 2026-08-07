@@ -3,7 +3,7 @@
 `PreToolUse(Bash)` blocker that refuses screen capture. A screenshot is an
 exfiltration surface: it can capture any window on the user's display (a
 password manager, a 2FA code, another app) and write it to a file the agent
-then reads. Fleet tooling never screenshots the live desktop — the visual-verify
+then reads. Fleet tooling never screenshots the live desktop - the visual-verify
 flow renders a *known* page or extension popup to PNG via the
 `rendering-chromium-to-png` skill (headless Chromium), which captures no desktop
 state.

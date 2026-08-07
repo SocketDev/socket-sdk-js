@@ -6,8 +6,8 @@ PreToolUse hook that blocks `git commit -m <msg>` invocations whose message does
 
 A `git log` is the canonical history of a repo. Two failure modes pollute it:
 
-1. **Format drift** — free-form titles ("update stuff", "fix typo", "WIP") make CHANGELOG generation impossible and obscure intent.
-2. **AI attribution** — "Generated with Claude", `Co-Authored-By: Claude`, robot-emoji tag lines, `<noreply@anthropic.com>` footers, and the auto-appended `Claude-Session:` trailer leak the authorship model into history.
+1. **Format drift** - free-form titles ("update stuff", "fix typo", "WIP") make CHANGELOG generation impossible and obscure intent.
+2. **AI attribution** - "Generated with Claude", `Co-Authored-By: Claude`, robot-emoji tag lines, `<noreply@anthropic.com>` footers, and the auto-appended `Claude-Session:` trailer leak the authorship model into history.
 
 The fleet bans both. This hook is the commit-time gate; `commit-pr-nudge` is the Stop-time draft check (defense in depth).
 
@@ -15,17 +15,17 @@ The fleet bans both. This hook is the commit-time gate; `commit-pr-nudge` is the
 
 Block examples:
 
-- `git commit -m "update stuff"` — no type, blocked.
-- `git commit -m "feat:"` — empty description, blocked.
-- `git commit -m "FEAT: parser"` — uppercase type, blocked.
-- `git commit -m "feature(parser): X"` — `feature` not in the allowed list, blocked.
+- `git commit -m "update stuff"` - no type, blocked.
+- `git commit -m "feat:"` - empty description, blocked.
+- `git commit -m "FEAT: parser"` - uppercase type, blocked.
+- `git commit -m "feature(parser): X"` - `feature` not in the allowed list, blocked.
 - `git commit -m "fix: bug
 
-  Co-Authored-By: Claude"` — AI-attribution footer, blocked.
+  Co-Authored-By: Claude"` - AI-attribution footer, blocked.
 
 - `git commit -m "feat: thing
 
-  🤖 Generated with Claude"` — robot-emoji tag, blocked.
+  🤖 Generated with Claude"` --robot-emoji tag, blocked.
 
 Allow examples:
 
@@ -42,8 +42,8 @@ Allow examples:
 
 Per the fleet's `Allow <X> bypass` convention:
 
-- `Allow commit-format bypass` — type/format issue (e.g. bringing in a fixup commit with a pre-existing message).
-- `Allow ai-attribution bypass` - for the AI-attribution check specifically. Use sparingly — only when a commit legitimately documents the forbidden strings (e.g. a CLAUDE.md edit that quotes them).
+- `Allow commit-format bypass` - type/format issue (e.g. bringing in a fixup commit with a pre-existing message).
+- `Allow ai-attribution bypass` - for the AI-attribution check specifically. Use sparingly - only when a commit legitimately documents the forbidden strings (e.g. a CLAUDE.md edit that quotes them).
 
 Type the canonical phrase verbatim in a recent user message; the hook then allows the next matching commit.
 

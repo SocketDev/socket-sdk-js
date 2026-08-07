@@ -21,7 +21,7 @@ export function joinWords(parts: readonly string[]): string {
 export function cyrillic(word: string): string {
   const a = String.fromCodePoint(0x04_30)
   const e = String.fromCodePoint(0x04_35)
-  return word.replace(/a/g, a).replace(/e/g, e)
+  return word.replace(/a/g, () => a).replace(/e/g, () => e)
 }
 
 // A single zero-width space (U+200B).

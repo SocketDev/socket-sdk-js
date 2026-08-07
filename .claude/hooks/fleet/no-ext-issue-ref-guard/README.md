@@ -15,9 +15,9 @@ up pinging the upstream maintainer N times.
 
 ## Allowed
 
-- Bare `#123` — resolves against the current repo, no cross-repo leak.
-- `SocketDev/<repo>#<num>` — same org, fine to ping (case-insensitive).
-- `https://github.com/SocketDev/...` — same org.
+- Bare `#123` - resolves against the current repo, no cross-repo leak.
+- `SocketDev/<repo>#<num>` - same org, fine to ping (case-insensitive).
+- `https://github.com/SocketDev/...` - same org.
 
 ## Blocked
 

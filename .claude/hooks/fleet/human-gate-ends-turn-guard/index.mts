@@ -14,7 +14,7 @@
 //
 // Scope: the LAST gate in the reply. A numbered queue (`[1/3]`, `[2/3]`, …)
 // renders several gates together and prose between them is part of the queue,
-// so only trailing content after the final `Then:` line is judged.
+// so only trailing content after the final `Me:` line is judged.
 //
 // A closing code fence is allowed, because the fleet renders gates inside a
 // fenced block so the operator can copy lane A verbatim. Fences are NOT
@@ -39,9 +39,10 @@ import { verdictContinuation, verdictLine } from '../_shared/verdict.mts'
 // words "human gate" in ordinary prose do not arm the guard.
 const GATE_HEADER_RE = /🖐\s+HUMAN GATE\b/g
 
-// The gate's terminator. `formatHumanGate` always emits `Then:` last, so the
-// gate block ends at the end of that line.
-const GATE_TERMINATOR_RE = /^[^\S\n]*Then:.*$/m
+// The gate's terminator. `formatHumanGate` emits `Me:` last — it carries the
+// resume that used to live on its own `Then:` line — so the gate block ends at
+// the end of that line.
+const GATE_TERMINATOR_RE = /^[^\S\n]*Me:.*$/m
 
 // What may follow the final gate: blank lines and a closing code fence. A
 // fence line is allowed anywhere in the trailing span rather than only first,
@@ -66,7 +67,7 @@ export function findTextAfterGate(text: string): TrailingGateText | undefined {
   const afterHeader = text.slice(lastHeader.index + lastHeader[0].length)
   const terminator = GATE_TERMINATOR_RE.exec(afterHeader)
   if (!terminator) {
-    // A gate with no `Then:` line is malformed rather than trailing-text. Gate
+    // A gate with no `Me:` line is malformed rather than trailing-text. Gate
     // SHAPE is a separate concern, so stand down instead of mis-reporting.
     return undefined
   }

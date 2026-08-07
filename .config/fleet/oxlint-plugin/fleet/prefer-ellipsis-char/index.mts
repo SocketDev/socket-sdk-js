@@ -18,7 +18,7 @@
  *     fixing. Autofix: replaces the matched word-final `...` run with `…`.
  *     Allowed (skipped):
  *   - The plugin's own rules/ + test/ files (fixtures contain `...` as data).
- *   - Any text carrying a `socket-lint: allow literal-ellipsis` comment.
+ *   - Any text carrying a `oxlint-disable-next-line socket/prefer-ellipsis-char` comment.
  */
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
@@ -52,8 +52,6 @@ const WORD_FINAL_ELLIPSIS_RE_G = new RegExp(
   'g',
 )
 
-const BYPASS_RE = /socket-lint:\s*allow\s+literal-ellipsis/
-
 const rule = {
   meta: {
     type: 'suggestion',
@@ -66,7 +64,7 @@ const rule = {
     fixable: 'code',
     messages: {
       literalEllipsis:
-        'Three literal dots `...` in text — use the ellipsis character `…` (U+2026). It reads as one glyph and matches fleet typography. (Spread/rest `...` operators are not flagged.) For an intentional three-dot form, add `// socket-lint: allow literal-ellipsis`.',
+        'Three literal dots `...` in text — use the ellipsis character `…` (U+2026). It reads as one glyph and matches fleet typography. (Spread/rest `...` operators are not flagged.) For an intentional three-dot form, add `// oxlint-disable-next-line socket/prefer-ellipsis-char`.',
     },
     schema: [],
   },
@@ -77,7 +75,10 @@ const rule = {
       return {}
     }
 
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/prefer-ellipsis-char',
+    )
     // The fixer needs the node's raw source text to rewrite the dot-run.
     const sourceCode = context.getSourceCode
       ? context.getSourceCode()
@@ -137,5 +138,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

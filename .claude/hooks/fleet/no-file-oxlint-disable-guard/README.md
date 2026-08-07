@@ -2,7 +2,7 @@
 
 PreToolUse hook that blocks Edit/Write tool calls introducing a file-scope `oxlint-disable <rule>` comment.
 
-File-scope disables (without `-next-line`) silently exempt every line of the file from a fleet rule — including lines added later by editors who never saw the disable. Inline `oxlint-disable-next-line <rule> -- <reason>` per call site forces a fresh justification next to each banned usage.
+File-scope disables (without `-next-line`) silently exempt every line of the file from a fleet rule - including lines added later by editors who never saw the disable. Inline `oxlint-disable-next-line <rule> -- <reason>` per call site forces a fresh justification next to each banned usage.
 
 ## Allowed
 
@@ -17,8 +17,8 @@ File-scope disables (without `-next-line`) silently exempt every line of the fil
 
 ## Exemptions
 
-Files under the plugin's rule subtree (`.config/fleet/oxlint-plugin/{fleet,repo}/<id>/`, holding each rule's `index.mts` + its `test/`) may file-scope-disable their own rule — the banned shape is lookup-table data in the rule definition or test fixture.
+Files under the plugin's rule subtree (`.config/fleet/oxlint-plugin/{fleet,repo}/<id>/`, holding each rule's `index.mts` + its `test/`) may file-scope-disable their own rule - the banned shape is lookup-table data in the rule definition or test fixture.
 
 ## Bypass
 
-No bypass — fix the underlying issue (use an inline `oxlint-disable-next-line <rule> -- <reason>` at the specific call site instead of a file-scope disable).
+No bypass - fix the underlying issue (use an inline `oxlint-disable-next-line <rule> -- <reason>` at the specific call site instead of a file-scope disable).

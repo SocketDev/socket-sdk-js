@@ -32,7 +32,7 @@ Three offences, evaluated against every path the command would stage:
 | Shape                                                             | Block? |
 | ----------------------------------------------------------------- | ------ |
 | `link → <its own path>` (self-referential)                        | yes    |
-| `a/b/link → ..` (target is an ancestor — traversal loops)         | yes    |
+| `a/b/link → ..` (target is an ancestor - traversal loops)         | yes    |
 | `link → /Users/me/projects/repo/thing` (absolute, inside the repo) | yes    |
 | any `node_modules` path, symlink or not                           | yes    |
 | `packages/a/link → ../b/target` (relative, outside its subtree)   | no     |
@@ -40,7 +40,7 @@ Three offences, evaluated against every path the command would stage:
 | `git commit`, `git status`, anything that is not `git add`        | no     |
 
 Relative symlinks are legitimate and several fleet repos track them. Only the
-three shapes above are offences — a guard that blocks real work gets bypassed
+three shapes above are offences - a guard that blocks real work gets bypassed
 and then ignored.
 
 ## How it decides what would be staged
@@ -58,8 +58,8 @@ path is then `lstat`ed in the worktree; a symlink's body is read with
 `readlink` (both work on a dangling link, which is the incident's shape) and
 handed to the shared classifier.
 
-When git cannot answer — not a repo, git missing, a pathspec that matches
-nothing — the guard falls back to the literal path arguments, and otherwise
+When git cannot answer - not a repo, git missing, a pathspec that matches
+nothing - the guard falls back to the literal path arguments, and otherwise
 fails **open**.
 
 Interactive adds (`-i`, `-p`, `-e`) are skipped: git refuses to pair them with

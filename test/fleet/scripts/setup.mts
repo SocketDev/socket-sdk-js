@@ -64,7 +64,9 @@ expect.extend({
 })
 
 declare module 'vitest' {
-  // oxlint-disable-next-line typescript/no-explicit-any -- declaration merging requires the exact upstream type parameters (vitest's Matchers<T = any>).
+  // Declaration merging requires the exact upstream type parameters (vitest's
+  // Matchers<T = any>).
+  // oxlint-disable-next-line typescript/no-explicit-any -- declaration merging
   interface Matchers<T = any> {
     // Assert the received path string contains `expected` after both are
     // normalized to "/" separators — cross-platform path assertions without

@@ -9,7 +9,7 @@ PreToolUse Edit/Write hook that blocks introducing `<script defer>` or
 Per HTML spec, `defer` and `async` are no-ops on inline (no-src)
 `<script>` tags. The script executes immediately, even though the author
 intent is "wait for DOMContentLoaded." Browsers don't warn. The failure
-mode is a silently broken page — code styles `<pre><code>` blocks that
+mode is a silently broken page - code styles `<pre><code>` blocks that
 don't exist yet, etc.
 
 This pattern bit a fleet project twice. The fix is the
@@ -45,7 +45,7 @@ Type the canonical phrase in a new message:
 
     Allow inline-defer bypass
 
-Use sparingly — the bug is silent in production.
+Use sparingly - the bug is silent in production.
 
 ## Companion: oxlint rule
 

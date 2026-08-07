@@ -134,7 +134,8 @@ export function autoCascade(repoDir: string): {
   const r = spawnSync(
     'node',
     ['scripts/repo/sync-scaffolding/cli.mts', '--target', '.', '--fix'],
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- null-proto options-bag idiom: `__proto__: null` keeps the options prototype-free but changes the literal's inferred type, so the double cast is required to pass it as SpawnSyncOptions.
+    // null-proto options-bag idiom: `__proto__: null` keeps the options prototype-free but changes the literal's inferred type, so the double cast is required to pass it as SpawnSyncOptions.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- proto
     {
       __proto__: null,
       cwd: repoDir,

@@ -8,7 +8,7 @@ consumer-bearing subtrees (`upstream/`, `additions/source-patched/`).
 
 Past incident: an agent stripped a CSS class because repo-root grep
 found 0 hits. The project's upstream bundle (in `upstream/`) hydrated
-from that class — the rendered page went blank in production.
+from that class - the rendered page went blank in production.
 
 Repo-root grep doesn't see code in `upstream/` / `vendor/` / etc. when
 those are gitignored or submodules. This hook surfaces the reminder to
@@ -27,7 +27,7 @@ grep those subtrees BEFORE relying on a "0 consumers" finding.
 
 ## Not a block
 
-False-positive surface is real — not every CSS class removal is a
+False-positive surface is real - not every CSS class removal is a
 hydration target. The reminder lets the agent verify with a grep
 against the listed subtrees, then continue. The user can also ignore
 the reminder if they've already verified.

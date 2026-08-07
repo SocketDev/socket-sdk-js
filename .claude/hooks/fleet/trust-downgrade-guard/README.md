@@ -1,7 +1,7 @@
 # trust-downgrade-guard
 
 PreToolUse hook. Blocks any action that **weakens a supply-chain trust gate**
-unless the user typed `Allow trust-downgrade bypass` — and the bypass is
+unless the user typed `Allow trust-downgrade bypass` - and the bypass is
 **single-use, never persisted**.
 
 ## What it blocks
@@ -23,7 +23,7 @@ flag mentioned inside an unrelated quoted string does not false-fire):
 
 - sets `trustPolicy` to anything but `no-downgrade`
 - lowers `minimumReleaseAge` below the fleet floor (10080)
-- lowers the npm `min-release-age` (days) in `.npmrc` below its floor (7) —
+- lowers the npm `min-release-age` (days) in `.npmrc` below its floor (7) -
   the npm-side parallel of the pnpm `minimumReleaseAge` soak
 - rewrites `pnpm-workspace.yaml` without `trustPolicy: no-downgrade` or
   `blockExoticSubdeps: true`
@@ -33,15 +33,15 @@ flag mentioned inside an unrelated quoted string does not false-fire):
 `Allow trust-downgrade bypass` authorizes exactly **one** downgrade. The guard
 counts prior downgrade actions in the assistant tool-use history (mirrors
 `release-workflow-guard`'s per-dispatch model) and requires an unconsumed phrase
-occurrence. A persisted bypass — an env var, or a phrase that opens the door for
-every future downgrade — is _itself_ a trust downgrade, so it's disallowed by
+occurrence. A persisted bypass - an env var, or a phrase that opens the door for
+every future downgrade - is _itself_ a trust downgrade, so it's disallowed by
 design. Each downgrade needs its own freshly-typed phrase.
 
 ## The right fix instead of a downgrade
 
 A stale lockfile rejected by `no-downgrade` (e.g. after bumping a dep whose old
 version lost provenance) is fixed by **adding the soak / exclude entry for the
-specific version and re-resolving** — never by disabling the policy.
+specific version and re-resolving** - never by disabling the policy.
 
 ## Why
 
@@ -52,7 +52,7 @@ trust gate" states the rule; this hook enforces it.
 
 ## Related
 
-- `minimum-release-age-guard` / `soak-exclude-date-guard` — the soak side.
-- `check-new-deps` — Socket-scores new deps at edit time.
-- `release-workflow-guard` — the single-use-bypass pattern this mirrors.
+- `minimum-release-age-guard` / `soak-exclude-date-guard` - the soak side.
+- `check-new-deps` - Socket-scores new deps at edit time.
+- `release-workflow-guard` - the single-use-bypass pattern this mirrors.
 - CLAUDE.md → "Never weaken a supply-chain trust gate".

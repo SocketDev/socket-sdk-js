@@ -22,10 +22,10 @@ Workflow dispatches are **irrevocable**:
   cut are forever.
 - Container workflows push immutable image tags.
 - Even workflows that _advertise_ a `dry_run` input still treat the
-  dispatch itself as a prod trigger — the workflow runs and counts
+  dispatch itself as a prod trigger - the workflow runs and counts
   for downstream CI gating; only specific steps may be skipped.
 
-The cost of blocking a legitimate dispatch is one re-prompt — the
+The cost of blocking a legitimate dispatch is one re-prompt - the
 user types the command in their own terminal. The cost of letting
 through a wrong dispatch is irreversible. So the hook errs strict.
 
@@ -51,7 +51,7 @@ a Claude session:
 
 - The user runs it from a plain shell outside Claude, or
 - Triggers it via the GitHub Actions UI, or
-- Types `! gh workflow run ...` at a Claude prompt — the leading
+- Types `! gh workflow run ...` at a Claude prompt - the leading
   `!` runs the command in the user's session, where this hook
   doesn't fire.
 
@@ -79,23 +79,23 @@ a Claude session:
 
 ## Exit codes
 
-- `0` — command is not a workflow dispatch; pass through.
-- `2` — command is a workflow dispatch; block + write the reason to
+- `0` - command is not a workflow dispatch; pass through.
+- `2` - command is a workflow dispatch; block + write the reason to
   stderr.
 
 ## Sibling hooks
 
 The "blocking, not priming" pattern is shared across three hooks:
 
-- [`token-guard`](../token-guard/) — blocks Bash calls that would
+- [`token-guard`](../token-guard/) - blocks Bash calls that would
   leak literal secrets to stdout.
-- [`path-guard`](../path-guard/) — blocks Edit/Write calls that
+- [`path-guard`](../path-guard/) - blocks Edit/Write calls that
   build inline multi-stage paths.
 - `release-workflow-guard` (this one).
 
 The other public-surface hooks ([`private-name-nudge`](../private-name-nudge/),
 [`public-surface-nudge`](../public-surface-nudge/)) only
-**prime** — they exit 0 after writing a reminder. The shared rule
+**prime** - they exit 0 after writing a reminder. The shared rule
 for which side of the fence a hook lands on: block when the harm of
 a wrong fire is irreversible; prime when it's recoverable.
 

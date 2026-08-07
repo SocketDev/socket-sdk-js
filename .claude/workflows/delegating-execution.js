@@ -217,9 +217,10 @@ phase('Plan')
 const planPromptText = buildPlanPrompt(task, sensitivity)
 // big-brain tier: planning is where reasoning pays (token-spend); model/effort
 // routed by sensitivity above.
-// socket-lint: allow top-level-await -- Workflow script body executed directly
+// Workflow script body executed directly.
 // by the Claude Code harness (top-level `phase`/`agent`/`return` are harness
 // globals), never bundled to CJS.
+// oxlint-disable-next-line socket/no-top-level-await -- Workflow script body
 const plan = await agent(planPromptText, {
   effort: bigBrain.effort,
   label: 'plan',
@@ -239,9 +240,10 @@ if (!plan || !plan.planDocPath) {
 phase('Execute')
 const executePromptText = buildExecutePrompt(plan.planDocPath, task)
 // floor tier: execution follows the written plan verbatim.
-// socket-lint: allow top-level-await -- Workflow script body executed directly
+// Workflow script body executed directly.
 // by the Claude Code harness (top-level `phase`/`agent`/`return` are harness
 // globals), never bundled to CJS.
+// oxlint-disable-next-line socket/no-top-level-await -- Workflow script body
 const exec = await agent(executePromptText, {
   effort: FLOOR.effort,
   label: 'execute',
@@ -253,9 +255,10 @@ const exec = await agent(executePromptText, {
 phase('Review')
 const reviewPromptText = buildReviewPrompt(plan.planDocPath, task, sensitivity)
 // big-brain tier: review is where reasoning pays; same model/effort as plan.
-// socket-lint: allow top-level-await -- Workflow script body executed directly
+// Workflow script body executed directly.
 // by the Claude Code harness (top-level `phase`/`agent`/`return` are harness
 // globals), never bundled to CJS.
+// oxlint-disable-next-line socket/no-top-level-await -- Workflow script body
 const review = await agent(reviewPromptText, {
   effort: bigBrain.effort,
   label: 'review',
@@ -276,9 +279,10 @@ if (review && review.verdict === 'approve' && findings.length === 0) {
     JSON.stringify(findings),
   )
   // floor tier: applying enumerated findings is mechanical, bounded by the list.
-  // socket-lint: allow top-level-await -- Workflow script body executed directly
+  // Workflow script body executed directly.
   // by the Claude Code harness (top-level `phase`/`agent`/`return` are harness
   // globals), never bundled to CJS.
+  // oxlint-disable-next-line socket/no-top-level-await -- Workflow script body
   followup = await agent(followupPromptText, {
     effort: FLOOR.effort,
     label: 'followup',

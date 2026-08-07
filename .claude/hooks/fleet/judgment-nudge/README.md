@@ -9,7 +9,7 @@ CLAUDE.md "Judgment & self-evaluation":
 - "Default to perfectionist when you have latitude."
 - "If a fix fails twice: stop, re-read top-down, state where the mental model was wrong, try something fundamentally different."
 
-Hedging undermines those rules — it offloads judgment back to the user instead of executing the perfectionist default.
+Hedging undermines those rules - it offloads judgment back to the user instead of executing the perfectionist default.
 
 ## What it catches
 
@@ -31,7 +31,7 @@ Flags first-person modals in judgment contexts:
 - `we might want to consider`
 - `I may pick the simpler approach`
 
-The compromise.js library tags verbs with POS so we can distinguish judgment hedges ("I could go") from technical conditionals ("the parser could throw") — regex alone would false-positive on the latter.
+The compromise.js library tags verbs with POS so we can distinguish judgment hedges ("I could go") from technical conditionals ("the parser could throw") - regex alone would false-positive on the latter.
 
 **Fail-open**: if compromise.js fails to load, the hook degrades to a regex-only fallback that catches the most common shape but misses some context.
 
@@ -41,15 +41,15 @@ Stop hooks fire after the assistant has produced its response. Blocking would tr
 
 ## Relationship to other reminders
 
-- `excuse-detector` — catches fix-vs-defer choice menus
-- `reply-prose-nudge` (perfectionist group) — catches speed-vs-depth choice menus
-- `judgment-nudge` (this) — catches hedging within a single position
+- `excuse-detector` - catches fix-vs-defer choice menus
+- `reply-prose-nudge` (perfectionist group) - catches speed-vs-depth choice menus
+- `judgment-nudge` (this) - catches hedging within a single position
 
 All three address the same underlying anti-pattern: offloading judgment the assistant should have made.
 
 ## Dependencies
 
-- `compromise@14.15.1` — NLP library for POS-tagged modal-verb detection. Lazy-loaded; optional.
+- `compromise@14.15.1` - NLP library for POS-tagged modal-verb detection. Lazy-loaded; optional.
 
 ## Test
 

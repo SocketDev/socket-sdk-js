@@ -585,5 +585,6 @@ export function leadingIndent(sourceCode: AstNode, node: AstNode): string {
   return /^\s*/.exec(indent)?.[0] ?? ''
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

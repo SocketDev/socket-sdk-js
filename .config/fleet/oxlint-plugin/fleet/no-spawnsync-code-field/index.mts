@@ -21,8 +21,6 @@
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
-const ALLOW_RE = /socket-lint:\s*allow\s+spawnsync-code-field/
-
 // The always-undefined property. node's SpawnSyncReturns exposes the exit code
 // as `.status`; `.code` is the async-spawn error shape, never on a sync result.
 const BAD_PROP = 'code'
@@ -89,7 +87,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, ALLOW_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-spawnsync-code-field',
+    )
     // Identifiers bound to a `spawnSync(...)` call (`const r = spawnSync(...)`),
     // bucketed by enclosing function scope. A file-wide set cross-contaminates
     // sibling functions: one function's `const r = spawnSync(...)` must not
@@ -156,5 +157,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

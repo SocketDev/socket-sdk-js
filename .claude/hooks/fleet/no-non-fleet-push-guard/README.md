@@ -37,7 +37,7 @@ cascade target.
 
 In priority order:
 
-1. `git -C <dir> push …` — the explicit `-C` dir.
+1. `git -C <dir> push …` - the explicit `-C` dir.
 2. A leading `cd <dir>` in the command chain (`cd X && git push`),
    resolved against the process cwd for relative paths.
 3. The hook's process cwd.
@@ -49,7 +49,7 @@ Then `git -C <dir> remote get-url origin` → slug via `slugFromRemoteUrl`
 
 Any resolution ambiguity (no `git push` found, dir unreadable, no
 `origin`, unparseable remote URL) → allow. Under-blocking is recoverable
-— the operator reverts a stray push; a false block wedges a valid
+- the operator reverts a stray push; a false block wedges a valid
 workflow. The guard only fires when it can positively identify a
 non-fleet origin slug.
 
@@ -76,6 +76,6 @@ through:
 
 Remaining limits of any static parser (shared with
 `gh-token-hygiene-guard`): a binary fully sourced from a variable
-(`g=git; $g push`) can't be statically resolved to `git` — the parser
+(`g=git; $g push`) can't be statically resolved to `git` - the parser
 FLAGS it as opaque (`hasOpaqueInvocation`) but this guard doesn't act on
 that today; and an alias or wrapper script that pushes is out of scope.

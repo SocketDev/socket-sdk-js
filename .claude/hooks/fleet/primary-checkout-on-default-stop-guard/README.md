@@ -5,7 +5,7 @@ branch.
 
 Companion to `primary-checkout-branch-guard` (PreToolUse). That guard blocks a
 `git checkout`/`git switch` typed as a Bash command; this one catches the
-*result* at turn-end regardless of source — a checkout run inside a script, a
+*result* at turn-end regardless of source - a checkout run inside a script, a
 Makefile target, or any tool that shells git internally slips past PreToolUse,
 but this lock reads the actual on-disk branch and blocks if the primary drifted
 off its default.

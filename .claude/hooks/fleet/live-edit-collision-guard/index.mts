@@ -52,7 +52,9 @@ import type { ToolCallPayload } from '../_shared/payload.mts'
 import type { GuardResult } from '../_shared/guard.mts'
 
 function getProjectDir(): string {
-  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- reads the agent-provided CLAUDE_PROJECT_DIR first; process.cwd() is only the fallback when that env var is absent
+  // Reads the agent-provided CLAUDE_PROJECT_DIR first; process.cwd() is only
+  // the fallback when that env var is absent.
+  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- reads
   return process.env['CLAUDE_PROJECT_DIR'] ?? process.cwd()
 }
 

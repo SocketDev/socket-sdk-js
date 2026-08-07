@@ -19,7 +19,7 @@ The hook makes this discoverable. Without it, the rejection error leaves the ope
 
 1. PostToolUse on every `Bash` call.
 2. Filters to commands matching `\bgit\s+push\b`.
-3. Inspects `tool_response` for the enterprise-ruleset rejection pattern (both `Repository rule violations found` AND `Changes must be made through a pull request` must be present — single-match would false-fire on generic push errors).
+3. Inspects `tool_response` for the enterprise-ruleset rejection pattern (both `Repository rule violations found` AND `Changes must be made through a pull request` must be present - single-match would false-fire on generic push errors).
 4. On match: writes a stderr reminder to Claude with:
    - The property name + required literal-string value (`"true"`)
    - The current property value (queried via `gh api repos/{owner}/{repo}/properties/values`)
@@ -32,7 +32,7 @@ The hook **does not** modify the property or retry the push. The operator decide
 
 - Exit 0 with stderr message on match (informational, doesn't block).
 - Exit 0 silent on any non-match path (wrong tool, wrong command, no ruleset error).
-- Exit 0 silent on any internal error (fail-open — a bad hook deploy can't suppress legitimate push errors).
+- Exit 0 silent on any internal error (fail-open - a bad hook deploy can't suppress legitimate push errors).
 
 ## When NOT to expect a reminder
 
@@ -41,10 +41,10 @@ The hook **does not** modify the property or retry the push. The operator decide
 - The push wasn't actually `git push` (e.g. `gh push` or `git-lfs push`).
 - The repo isn't under the Socket enterprise ruleset.
 
-The pattern requires both error lines for a tight match — generic "permission denied" or "branch protection" failures don't trip it.
+The pattern requires both error lines for a tight match - generic "permission denied" or "branch protection" failures don't trip it.
 
 ## See also
 
-- `docs/agents.md/fleet/push-policy.md` — full rationale + operator flow.
-- `scripts/_shared/repo-properties.mts` — `canSkipReviewGate()` implementation used by the cascade.
-- `.claude/hooks/fleet/pr-vs-push-default-nudge/` — sibling hook for the reverse case (Claude opening a PR when direct push would have worked).
+- `docs/agents.md/fleet/push-policy.md` - full rationale + operator flow.
+- `scripts/_shared/repo-properties.mts` - `canSkipReviewGate()` implementation used by the cascade.
+- `.claude/hooks/fleet/pr-vs-push-default-nudge/` - sibling hook for the reverse case (Claude opening a PR when direct push would have worked).

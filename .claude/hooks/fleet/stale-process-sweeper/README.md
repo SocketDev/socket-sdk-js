@@ -9,14 +9,14 @@ gradually exhaust system memory.
 > scripts that run at specific lifecycle points. A `Stop` hook like
 > this one fires _after_ Claude finishes a turn (a unit of work that
 > ends with the model handing the conversation back to the user).
-> Stop hooks can do cleanup, log diagnostics, or — like this one —
+> Stop hooks can do cleanup, log diagnostics, or - like this one -
 > reap orphans.
 
 ## Why orphans pile up
 
 Vitest's `forks` pool spawns one Node worker per CPU. When the parent
-runner exits abnormally — a `Bash` tool timeout, a `SIGINT` from the
-user, a pre-commit hook crash — the workers stay alive holding
+runner exits abnormally - a `Bash` tool timeout, a `SIGINT` from the
+user, a pre-commit hook crash - the workers stay alive holding
 roughly 80–100 MB of RSS each. Tools like `tsgo` and `esbuild` have
 similar long-lived service processes that can outlive their parent.
 
@@ -39,7 +39,7 @@ a _real_ in-progress run), and sends them `SIGTERM`.
 
 ## Kill-everything mode (`--all`)
 
-The default Stop-hook sweep is conservative — only orphans + wedged
+The default Stop-hook sweep is conservative - only orphans + wedged
 workers, never healthy live-parent work. Run the hook directly with
 `--all` (or `--force`) for an explicit "stop all background processing
 and reap orphans now":
@@ -50,8 +50,8 @@ node .claude/hooks/fleet/stale-process-sweeper/index.mts --all
 
 `--all` SIGKILLs every matched build/test worker regardless of parent
 liveness, **and** additionally reaps a set of orphaned AI-agent
-processes that only this mode considers (and only when orphaned —
-PPID 1 or dead parent — so a live sibling session is never touched):
+processes that only this mode considers (and only when orphaned -
+PPID 1 or dead parent - so a live sibling session is never touched):
 
 | Pattern              | What it matches                                                   |
 | -------------------- | ----------------------------------------------------------------- |
@@ -65,13 +65,13 @@ PPID 1 or dead parent — so a live sibling session is never touched):
   Those are part of an in-progress run; killing them would break
   legitimate work.
 - The Claude Code process itself or its parent terminal.
-- **Session-critical daemons** (`isSessionCriticalDaemon`) — the
+- **Session-critical daemons** (`isSessionCriticalDaemon`) - the
   headroom proxy that backs `ANTHROPIC_BASE_URL` runs detached
   (PPID 1) on purpose; it is never swept, even under `--all`, because
   killing it would break the live session running the sweep.
-- AI-agent processes with a **live** parent, a real running session —
+- AI-agent processes with a **live** parent, a real running session -
   even under `--all`, only orphaned agents are reaped.
-- Anything outside the pattern list. The sweeper is conservative —
+- Anything outside the pattern list. The sweeper is conservative -
   if a stuck process isn't pattern-matched, it survives.
 
 ## Wiring
@@ -106,7 +106,7 @@ vitest-worker=29240(95MB), vitest-worker=33278(93MB), …
 ```
 
 The line goes to stderr. Stop-hook output is shown to the user, not
-the model — useful diagnostic, doesn't pollute Claude's context.
+the model - useful diagnostic, doesn't pollute Claude's context.
 
 ## Testing
 

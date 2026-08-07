@@ -270,6 +270,7 @@ export function offsetToLineCol(
  */
 export function splitLines(source: string): string[] {
   // Single regex pass: collapse `\r\n` and bare `\r` to `\n`, then split.
-  // socket-lint: allow uncommented-regex -- newline normalization, described above.
+  // Newline normalization, described above.
+  // oxlint-disable-next-line socket/require-regex-comment -- newline
   return source.replace(/\r\n?/g, '\n').split('\n')
 }

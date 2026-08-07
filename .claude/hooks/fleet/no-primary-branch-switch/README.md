@@ -23,9 +23,9 @@ standalone hook that lived outside the managed fleet.
 
 A `git` command whose effective working tree is the primary checkout:
 
-- `git checkout <branch>` / `git switch <branch>` — switch existing
-- `git checkout -b <name>` / `git switch -c <name>` — create + switch
-- `git checkout -` / `git switch -` — previous-branch shorthand (still moves HEAD)
+- `git checkout <branch>` / `git switch <branch>` - switch existing
+- `git checkout -b <name>` / `git switch -c <name>` - create + switch
+- `git checkout -` / `git switch -` - previous-branch shorthand (still moves HEAD)
 
 The effective directory honors a leading `cd <dir> &&` and the git op's own
 `-C <path>`, so a switch aimed at the primary from a worktree cwd is still
@@ -34,8 +34,8 @@ caught.
 ## What it allows
 
 - File-restore forms: `git checkout -- <path>`, `git checkout .`,
-  `git checkout <ref> <path>` (two positional args) — never a branch switch
-- Any branch op inside a **linked worktree** — the sanctioned place for branch work
+  `git checkout <ref> <path>` (two positional args) - never a branch switch
+- Any branch op inside a **linked worktree** - the sanctioned place for branch work
 - Anything that is not a git branch-switch
 
 ## Classification

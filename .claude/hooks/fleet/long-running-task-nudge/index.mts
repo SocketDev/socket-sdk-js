@@ -389,7 +389,9 @@ function readBashTaskRecords(tasksDir: string): BashTaskRecord[] {
         continue
       }
       try {
-        // oxlint-disable-next-line socket/prefer-exists-sync -- statSync for mtime, not existence; we need the modification timestamp
+        // StatSync for mtime, not existence; we need the modification
+        // timestamp.
+        // oxlint-disable-next-line socket/prefer-exists-sync -- statSync
         const stat = statSync(path.join(tasksDir, entry.name))
         out.push({
           id: entry.name.slice(0, -'.output'.length),
@@ -479,7 +481,8 @@ function readAgentRecords(subagentsDir: string): AgentRecord[] {
       }
       const id = entry.slice(0, -'.jsonl'.length)
       try {
-        // oxlint-disable-next-line socket/prefer-exists-sync -- statSync for ctime/mtime, not existence; we need the timestamps
+        // StatSync for ctime/mtime, not existence; we need the timestamps.
+        // oxlint-disable-next-line socket/prefer-exists-sync -- statSync
         const stat = statSync(path.join(subagentsDir, entry))
         out.push({
           ctimeMs: stat.ctimeMs,
@@ -545,7 +548,9 @@ export function sweepStaleSeenStores(
       }
       const fp = path.join(storeDir, entry)
       try {
-        // oxlint-disable-next-line socket/prefer-exists-sync -- statSync for mtime, not existence; we need the modification timestamp
+        // StatSync for mtime, not existence; we need the modification
+        // timestamp.
+        // oxlint-disable-next-line socket/prefer-exists-sync -- statSync
         if (now - statSync(fp).mtimeMs > ttlMs) {
           safeDeleteSync(fp)
         }

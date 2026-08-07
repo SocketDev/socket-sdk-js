@@ -38,7 +38,8 @@ import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
 // builds a list: name=$( ... find/ls/grep -l/rg -l ... ) or any $( ) that
 // pipes through `tr '\n' ' '`.
 const LIST_ASSIGN_RE =
-  // socket-lint: allow uncommented-regex -- broken down in the comment above.
+  // Broken down in the comment above.
+  // oxlint-disable-next-line socket/require-regex-comment -- broken down
   /(?:^|[\s;&|(])(?<name>[A-Za-z_]\w*)=\$\((?<rhs>[^)]*)\)/g
 
 // A QUOTED assignment whose value is a space-joined literal list —
@@ -46,7 +47,8 @@ const LIST_ASSIGN_RE =
 // as ONE argument exactly like the command-substitution case (the `git commit
 // -o "$paths"` footgun: the whole string becomes a single pathspec).
 const LITERAL_ASSIGN_RE =
-  // socket-lint: allow uncommented-regex -- quoted assign; value in <val>.
+  // Value in <val>.
+  // oxlint-disable-next-line socket/require-regex-comment -- quoted assign
   /(?:^|[\s;&|(])(?<name>[A-Za-z_]\w*)=(?<q>["'])(?<val>[^"']*)\k<q>/g
 
 // A list-producing right side: newline-to-space flattening, or a

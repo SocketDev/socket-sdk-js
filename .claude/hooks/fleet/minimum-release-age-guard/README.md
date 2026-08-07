@@ -12,7 +12,7 @@ in the suspicion window for typosquats, postinstall malware, and supply-chain
 attacks that haven't yet been caught by Socket / npm / community signal.
 
 `minimumReleaseAge.exclude[]` opts specific packages OUT of the soak. Every
-entry is a malware-protection hole — and most attempts to add to it are
+entry is a malware-protection hole - and most attempts to add to it are
 quick-fix shortcuts to install a package that just published, not legitimate
 emergency CVE patches.
 
@@ -46,5 +46,5 @@ as YAML (permissive, narrow to the `minimumReleaseAge.exclude` block), then
 computes the set difference. Names added → block. Names removed or unchanged
 → pass.
 
-Fails open on YAML parse errors — better to under-block than to brick edits
+Fails open on YAML parse errors - better to under-block than to brick edits
 when the file is in a transient bad state.

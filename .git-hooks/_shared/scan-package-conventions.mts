@@ -122,7 +122,7 @@ export const scanNpxDlx = (text: string): LineHit[] =>
 // Inline backtick spans (a single `npm install foo` in prose) are
 // NOT scanned; only block-level fences.
 //
-// Suppression: a line containing `socket-lint: allow pnpm-first`
+// Suppression: a line containing `oxlint-disable-next-line socket/docs-lead-with-pnpm`
 // anywhere in the fence, or just above it, skips that block.
 
 // Match shell install commands at line start (allowing leading
@@ -140,7 +140,11 @@ const NPM_YARN_INSTALL_LINE_RE =
 // just count fences as we go and treat alternating opens/closes.
 const FENCE_OPEN_RE = /^\s*(?:```|~~~)/
 
-const PNPM_FIRST_SUPPRESS_RE = /socket-lint:\s*allow\s+pnpm-first\b/
+// Block-level, so it stays local rather than using the shared line matcher: a
+// marker anywhere in the fence (or on the line above it) excuses the whole
+// block, which is not a per-line question.
+const PNPM_FIRST_SUPPRESS_RE =
+  /oxlint-disable-(?:next-)?line\s+socket\/docs-lead-with-pnpm\b/
 
 export const scanDocsPnpmFirst = (text: string): LineHit[] => {
   const hits: LineHit[] = []

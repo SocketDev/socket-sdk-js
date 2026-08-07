@@ -15,6 +15,10 @@
 // Informational; never blocks.
 
 import { AI_SLOP_PATTERNS } from '../_shared/ai-slop-patterns.mts'
+import {
+  refDestinationHint,
+  sessionRefProviders,
+} from '../_shared/ref-providers.mts'
 import { ensureAgentMemoryEntry } from '../_shared/agent-memory.mts'
 import type { AgentMemoryEntry } from '../_shared/agent-memory.mts'
 import { defineHook, notify, runHook } from '../_shared/guard.mts'
@@ -219,16 +223,22 @@ const SELF_NARRATION: ReminderGroup = {
 
 export const NAMED_TASK_REFS: ReminderGroup = {
   closingHint:
-    'CLAUDE.md "Identifying users" / vocabulary: a task or issue number is a session-local pointer — pair it with its subject on first mention ("#12 (remove npm-run-all2)"). Bare #N reads as jargon to anyone without the task list open.',
+    'CLAUDE.md "Identifying users" / vocabulary: a task or issue number is a session-local pointer — pair it with its subject on first mention ("#12 (remove npm-run-all2)"), or make it a clickable markdown link. Bare #N reads as jargon to anyone without the task list open, and renders as dead text outside GitHub.',
   name: 'named-task-refs-nudge',
   patterns: [
     {
-      label: 'bare task/issue ref (#N with no name)',
+      label: 'bare task/issue ref (#N, neither named nor linked)',
       // A `#N` token that is NOT part of an owner/repo#N GitHub ref (word or
-      // slash immediately before), NOT a markdown heading, and NOT followed
-      // by a parenthesized name binding it.
-      regex: /(?<![\w/])#\d+\b(?!\s*\()/,
-      why: 'Name the task on first mention: "#12 (remove npm-run-all2)". The number is the pointer; the name is the content.',
+      // slash immediately before), NOT a markdown heading, NOT followed by a
+      // parenthesized name binding it, and NOT the text of a markdown link.
+      //
+      // The link carve-out matters because `[#123](url)` is the form CLAUDE.md
+      // asks for on any surface GitHub does not autolink: a `[` immediately
+      // before and a `](` immediately after mean the number already carries its
+      // destination. Without this the nudge flagged the very shape it should be
+      // steering toward, which is worse than staying silent.
+      regex: /(?<![\w/[])#\d+\b(?!\s*[(\]])/,
+      why: 'Name the task on first mention ("#12 (remove npm-run-all2)") or link it ("[#12](https://github.com/owner/repo/pull/12)"). The number is the pointer; the name or the link is the content.',
     },
   ],
 }
@@ -275,7 +285,21 @@ export const check = async (payload: ToolCallPayload): Promise<GuardResult> => {
     // eslint-disable-next-line no-await-in-loop
     const hits = await scanReminderText(text, group.patterns)
     if (hits.length > 0) {
-      blocks.push(formatReminderBlock(group.name, hits, group.closingHint))
+      // A bare reference gets the destination appended, resolved from the
+      // trackers this session actually used. Which tracker a token belongs to is
+      // unanswerable from its shape — `ENG-456` is a Linear issue and `SHA-256`
+      // is a hash — so the evidence in the transcript decides it, and a session
+      // with no tracker evidence gets the plain hint.
+      const hint =
+        group.name === NAMED_TASK_REFS.name
+          ? [
+              group.closingHint,
+              refDestinationHint(sessionRefProviders(payload.transcript_path)),
+            ]
+              .filter(Boolean)
+              .join(' ')
+          : group.closingHint
+      blocks.push(formatReminderBlock(group.name, hits, hint))
     }
   }
   if (blocks.length === 0) {

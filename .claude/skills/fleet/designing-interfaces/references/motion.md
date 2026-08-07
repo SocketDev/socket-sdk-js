@@ -9,11 +9,11 @@
 - [Tools, anti-patterns, and checklist](#7-libraries-and-tools)
 - [Token system and resources](#appendix-complete-token-system)
 
-Motion in product UI serves three purposes. If an animation doesn't do at least one—remove it.
+Motion in product UI serves three purposes. If an animation doesn't do at least one-remove it.
 
-1. **Feedback** — "I pressed this and it worked"
-2. **Continuity** — "Here's where the element went and where it came from"
-3. **Hierarchy** — "Look here, this is important"
+1. **Feedback** - "I pressed this and it worked"
+2. **Continuity** - "Here's where the element went and where it came from"
+3. **Hierarchy** - "Look here, this is important"
 
 ---
 
@@ -25,11 +25,11 @@ Before adding motion, answer these questions:
 |----------|----------------|
 | **Product UI or marketing?** | Product: subtle, fast, functional. Marketing: more expressive allowed. |
 | **How often is this triggered?** | High-frequency (hover, typing): faster. Low-frequency (modal open): can be slower. |
-| **Does this help or distract?** | If you can't justify the animation's purpose—don't add it. |
+| **Does this help or distract?** | If you can't justify the animation's purpose-don't add it. |
 
 **Hard rule:**
 
-> When in doubt — shorter, subtler, or none. Motion that doesn't serve function is noise.
+> When in doubt - shorter, subtler, or none. Motion that doesn't serve function is noise.
 
 ---
 
@@ -59,7 +59,7 @@ From essential to risky. Start at Level 1, add higher levels only when justified
 - Reorder, filter chips, drag-and-drop
 - List item add/remove
 
-**Goal:** Cognitive economy—less "what just happened?"
+**Goal:** Cognitive economy-less "what just happened?"
 
 ### Level 4: Expressive (Rare in Product)
 
@@ -335,14 +335,14 @@ Things that instantly make motion feel cheap:
 
 ### Red Flags
 
-- ❌ **300–600ms on hover/buttons** — feels sluggish
-- ❌ **Linear easing** — robotic, unnatural
-- ❌ **Everything animates at once** — no attention hierarchy
-- ❌ **Infinite loops in product screens** — distracting
-- ❌ **Inconsistent timings** — 200ms here, 400ms there, chaos
-- ❌ **Large movements without reduced-motion** — accessibility fail
-- ❌ **Bounce/spring that doesn't settle** — "jello" effect
-- ❌ **Animation for animation's sake** — if you can't justify it, remove it
+- ❌ **300–600ms on hover/buttons** - feels sluggish
+- ❌ **Linear easing** - robotic, unnatural
+- ❌ **Everything animates at once** - no attention hierarchy
+- ❌ **Infinite loops in product screens** - distracting
+- ❌ **Inconsistent timings** - 200ms here, 400ms there, chaos
+- ❌ **Large movements without reduced-motion** - accessibility fail
+- ❌ **Bounce/spring that doesn't settle** - "jello" effect
+- ❌ **Animation for animation's sake** - if you can't justify it, remove it
 
 ### Critical: Never Use `transition: all`
 
@@ -426,7 +426,7 @@ User input should be able to interrupt any animation mid-flight:
 4. Is there a reduced-motion variant?
 5. Would removing it hurt the UX?
 
-If you answered "no" to #1 or #5—remove the animation.
+If you answered "no" to #1 or #5-remove the animation.
 
 ---
 
@@ -442,9 +442,9 @@ If you answered "no" to #1 or #5—remove the animation.
 - [ ] **Every animation has a purpose** (feedback/continuity/hierarchy)
 - [ ] **Consistent across similar components**
 - [ ] **Performance tested** on slower devices
-- [ ] **No `transition: all`** — list properties explicitly
+- [ ] **No `transition: all`** - list properties explicitly
 - [ ] **`transform-origin`** set for scale/rotate animations
-- [ ] **Animations interruptible** — respond to user input mid-animation
+- [ ] **Animations interruptible** - respond to user input mid-animation
 
 ---
 
@@ -453,7 +453,7 @@ If you answered "no" to #1 or #5—remove the animation.
 Reference implementation:
 
 <details>
-<summary><b>Detail</b> — the commands</summary>
+<summary><b>Detail</b> - the commands</summary>
 
 ```css
 :root {
@@ -508,11 +508,11 @@ Reference implementation:
 
 ## Resources
 
-- **Material Design Motion** — Easing, duration, tokens, systematic approach
-- **Apple HIG Motion** — Platform conventions, reduced motion criteria
-- **Motion.dev / Framer Motion docs** — Spring/tween/layout animations
-- **Web Animations API (MDN)** — Native browser animation capabilities
+- **Material Design Motion** - Easing, duration, tokens, systematic approach
+- **Apple HIG Motion** - Platform conventions, reduced motion criteria
+- **Motion.dev / Framer Motion docs** - Spring/tween/layout animations
+- **Web Animations API (MDN)** - Native browser animation capabilities
 
 ---
 
-*Motion is restraint. Fast, purposeful, accessible. If you can't explain why it's there—remove it.*
+*Motion is restraint. Fast, purposeful, accessible. If you can't explain why it's there-remove it.*

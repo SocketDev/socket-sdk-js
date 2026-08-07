@@ -14,21 +14,21 @@ tool's home and used it to distribute an infostealer + proxyware. A good-faith
 engineer or agent seeing that hostname in a failing fetch could "fix" it into
 a gh-aw `allowDomains` list, a firewall config, or a doc link. Every denylist
 entry carries a dated reason and its advisory, and the block message prints
-them verbatim — for the fake-Corepack entry that includes where the REAL
+them verbatim - for the fake-Corepack entry that includes where the REAL
 Corepack lives, so nobody "corrects" the entry.
 
 ## What it blocks
 
 Any Edit/Write/MultiEdit whose about-to-land content carries a denied host
 (boundary-aware, subdomains included) or a denied filename IOC. Egress
-surfaces — `.github/workflows/**`, any `*.lock.yml`, and
-`.config/fleet/egress-allowlist.json` — are blocked unconditionally.
+surfaces - `.github/workflows/**`, any `*.lock.yml`, and
+`.config/fleet/egress-allowlist.json` - are blocked unconditionally.
 
 ## What it does NOT block
 
 - Edits to the denylist surfaces themselves: `_shared/denied-domains.mts`,
   this guard, the commit-time check, and their basename-matched tests.
-- A CHANGELOG — change-description prose, never loaded as active config.
+- A CHANGELOG - change-description prose, never loaded as active config.
 - A markdown doc under `docs/` whose content carries the explicit
   IOC-citation marker comment, citing the IOC as an IOC:
   `<!-- fleet:denied-domains:ioc-citation -->`. Never valid on an egress

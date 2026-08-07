@@ -1,6 +1,6 @@
 # commit-size-nudge
 
-**PreToolUse (Bash) — nudge, never blocks.**
+**PreToolUse (Bash) - nudge, never blocks.**
 
 On a `git commit`, warns when the STAGED diff exceeds **~200 changed lines of
 authored source**. Fleet commits stay small (one logical change) so they land

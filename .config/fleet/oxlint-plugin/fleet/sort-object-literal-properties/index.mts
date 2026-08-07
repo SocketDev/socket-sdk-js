@@ -33,8 +33,6 @@ import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext, RuleFixer } from '../../lib/rule-types.mts'
 import { isLockstepMirror } from '../../lib/lockstep-mirror.mts'
 
-const BYPASS_RE = /socket-lint:\s*allow\s+object-property-order\b/
-
 // __proto__ markers always lead. Lower than any real key so they sort first.
 const PROTO_KEY = '\u0000'
 
@@ -65,7 +63,10 @@ const rule = {
     const sourceCode = context.getSourceCode
       ? context.getSourceCode()
       : context.sourceCode
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/sort-object-literal-properties',
+    )
 
     // Sort key for a Property node. __proto__ markers sort first; everything
     // else by its static key name. Returns undefined for shapes we can't key
@@ -302,5 +303,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

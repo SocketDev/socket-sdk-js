@@ -16,15 +16,13 @@
  *   binding-resolution pass risks a collision, so the author does the rename
  *   (matching `options-param-naming`'s report-only stance). Skips `.d.ts`
  *   mirrors external signatures, and test files, throwaway helpers. Bypass: a
- *   `socket-lint: allow bag-param-optionality-naming` comment.
+ *   `oxlint-disable-next-line socket/bag-param-optionality-naming` comment.
  */
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
-
-const BYPASS_RE = /socket-lint:\s*allow\s+bag-param-optionality-naming/
 
 interface ParamName {
   readonly node: AstNode
@@ -66,14 +64,17 @@ const rule = {
     schema: [],
     messages: {
       requiredShouldBeConfig:
-        'a REQUIRED options-bag param must be named `config` (normalized local `cfg`), not `options` — `options` is reserved for an OPTIONAL bag. Bypass: add a `socket-lint: allow bag-param-optionality-naming` comment.',
+        'a REQUIRED options-bag param must be named `config` (normalized local `cfg`), not `options` — `options` is reserved for an OPTIONAL bag. Bypass: add a `oxlint-disable-next-line socket/bag-param-optionality-naming` comment.',
       optionalShouldBeOptions:
-        'an OPTIONAL options-bag param must be named `options` (normalized local `opts`), not `config` — `config` is reserved for a REQUIRED bag. Bypass: add a `socket-lint: allow bag-param-optionality-naming` comment.',
+        'an OPTIONAL options-bag param must be named `options` (normalized local `opts`), not `config` — `config` is reserved for a REQUIRED bag. Bypass: add a `oxlint-disable-next-line socket/bag-param-optionality-naming` comment.',
     },
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/bag-param-optionality-naming',
+    )
     // Normalize once, then every check runs on the same `/`-separated path;
     // the directory test is a plain segment check, not a separator regex.
     const filename = normalizePath(
@@ -124,5 +125,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

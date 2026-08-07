@@ -62,6 +62,12 @@
 // additions/source-patched/) are filtered out — they're under
 // .gitignore rules and not the failure mode this hook targets.
 //
+// The fleet-pack payload (_shared/fleet-pack-payload.mts) is filtered out for
+// a stronger reason: in a thin consumer those ~2,000 untracked files are the
+// fetched payload, and committing them would undo the thin conversion. They
+// are not "dirt this session forgot to land" — they are state no one is ever
+// allowed to land, so counting them would block every turn-end forever.
+//
 // Auto-lander lock-step (_shared/landable.mts): a path the auto-lander
 // (land-work.mts) will not hand-commit — generated (lockfile, hook bundle,
 // build/coverage output), unmerged (conflict), or both-touched (staged +
@@ -92,6 +98,7 @@ import {
   readActorLedger,
   resolveStoreRoot,
 } from '../_shared/active-edits-ledger.mts'
+import { isFleetPackPayloadPath } from '../_shared/fleet-pack-payload.mts'
 import { readSessionTouchedPaths } from '../_shared/foreign-paths.mts'
 import { isBothTouched, isGenerated, isUnmerged } from '../_shared/landable.mts'
 import {
@@ -192,7 +199,16 @@ export function parsePorcelain(out: string): DirtyEntry[] {
     // (staged+worktree differ — concurrent authorship it won't blend). Blocking
     // on any of these strands the turn on work `git commit -o` can't cleanly
     // land. Shared classifiers keep the two mechanisms from drifting.
-    if (isGenerated(filePath) || isUnmerged(status) || isBothTouched(status)) {
+    // The fleet-pack payload is EXPECTED state in a consumer, not dirt: the
+    // release delivers it, `prepare` fetches it, `.gitignore` keeps it out of
+    // the index, and committing it would undo the thin conversion. Counting it
+    // would block every turn-end demanding a commit that must never happen.
+    if (
+      isFleetPackPayloadPath(filePath) ||
+      isGenerated(filePath) ||
+      isUnmerged(status) ||
+      isBothTouched(status)
+    ) {
       continue
     }
     entries.push({ status, path: filePath })

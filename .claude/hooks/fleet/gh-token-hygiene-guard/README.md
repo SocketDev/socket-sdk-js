@@ -23,10 +23,10 @@ github.com` is always allowed (re-stamps the file). This cap lives
    enforce a scope allowlist; gh forces `gist` as a minimum, so the
    practical floor is `read:org, repo, gist`). To add the scope:
    - Type `Allow workflow-scope bypass` in chat. **The phrase alone is
-     not enough** — an attacker who forges the chat-typed slot still
+     not enough** - an attacker who forges the chat-typed slot still
      can't proceed without your physical presence.
    - The hook runs **OS physical-presence authentication** (Touch ID /
-     YubiKey / fingerprint — see "Physical-presence auth" below).
+     YubiKey / fingerprint - see "Physical-presence auth" below).
    - On success, `gh auth refresh -h github.com -s workflow` is let
      through and the hook records a **session-bound** grant at
      `~/.claude/gh-workflow-grant` (body = `<session_id>\n<unix_ms>`).
@@ -47,13 +47,13 @@ The dispatch gate also covers the API shape
 
 Two files under `~/.claude/`:
 
-- `gh-token-issued-at` — local timestamp of the last `gh auth login` /
+- `gh-token-issued-at` - local timestamp of the last `gh auth login` /
   `gh auth refresh`. Drives the 8h age check. First run stamps "now"
   and treats the token as fresh (so the hook ships without forcing
   every dev to re-auth on upgrade).
-- `gh-workflow-grant` — **session-bound** marker for an unconsumed
+- `gh-workflow-grant` - **session-bound** marker for an unconsumed
   workflow-dispatch authorization. Body is `<session_id>\n<unix_ms>`.
-  Presence alone is insufficient — the dispatch step cross-checks the
+  Presence alone is insufficient - the dispatch step cross-checks the
   recorded `session_id` against the current Claude session. Deleted as
   soon as a dispatch is let through.
 
@@ -63,7 +63,7 @@ Two files under `~/.claude/`:
   could be pre-created by a malicious postinstall (`touch
 ~/.claude/gh-workflow-grant`) before Claude even launches. Binding
   the grant to the `session_id` the harness provides means a planted
-  grant from another process / session is rejected — the attacker
+  grant from another process / session is rejected - the attacker
   can't guess a session id the hook will later receive.
 - **Physical presence on top of the chat phrase.** The single most
   dangerous capability (dispatching workflows with access to all repo
@@ -71,7 +71,7 @@ Two files under `~/.claude/`:
   hardware-key check, not just a chat phrase that an injected agent
   could emit.
 - **Absolute `/usr/bin/` paths for sudo / dscl / osascript.** Defeats
-  PATH-hijack — a postinstall that drops `~/.local/bin/sudo` can't
+  PATH-hijack - a postinstall that drops `~/.local/bin/sudo` can't
   intercept the auth call. (`gh` itself stays PATH-resolved; there's
   no single canonical path across Homebrew / Intel / Linux.)
 - **Known gaps** (documented in
@@ -86,7 +86,7 @@ Two files under `~/.claude/`:
 None. The hook is failsafe-deny on its core invariants and
 fail-closed on the auth path (no working physical-presence method →
 block, never silently pass). There is **no test-only env-var
-override** — `SOCKET_GH_HYGIENE_TEST_AUTH` was removed 2026-05-26
+override** - `SOCKET_GH_HYGIENE_TEST_AUTH` was removed 2026-05-26
 because an attacker who planted it in a shell rc / `.envrc` / VS Code
 terminal env would have bypassed Touch ID. The OS-auth path is
 intentionally unreachable in unit tests and is exercised by manual
@@ -110,7 +110,7 @@ confirmation after the chat phrase. What works per platform:
 **MDM detection is filesystem-only.** The hook checks for known
 blocker install paths (`/Library/Application Support/iru`,
 `/usr/local/jamf/bin/jamf`, `/Library/Mosyle`, `/Library/Kandji`, …)
-with `existsSync` — it never invokes osascript to probe, because the
+with `existsSync` - it never invokes osascript to probe, because the
 probe itself triggers the block toast.
 
 ### Linux setup (one-time)
@@ -135,14 +135,14 @@ fprintd-enroll
 #   auth sufficient pam_fprintd.so
 ```
 
-Verify either with `sudo -k && sudo -n true` — a silent exit 0 means
+Verify either with `sudo -k && sudo -n true` - a silent exit 0 means
 the hook will recognize it as a physical-presence success.
 
 ## macOS Touch ID setup (one time, recommended on Sonoma+)
 
 The hook prints these instructions on first use if Touch ID isn't
 configured. Run once to enable Touch ID as a sudo auth method (sudo
-falls back to the password prompt if Touch ID is unavailable —
+falls back to the password prompt if Touch ID is unavailable -
 declined, no fingerprint enrolled, lid closed):
 
 ```sh
@@ -154,7 +154,7 @@ EOF
 > **Copy-paste verbatim.** The closing `EOF` must start at column 0
 > (no leading whitespace) or the heredoc will not terminate and
 > your shell will hang waiting for input. Same constraint applies
-> to the body lines — they're sent to `tee` as-is. If you indented
+> to the body lines - they're sent to `tee` as-is. If you indented
 > this block when transcribing it, strip the indent.
 
 After this, every bypass-authorized refresh pops a Touch ID dialog
@@ -162,31 +162,31 @@ After this, every bypass-authorized refresh pops a Touch ID dialog
 
 ### What the command does, line by line
 
-- **`sudo tee /etc/pam.d/sudo_local`** — writes to `/etc/pam.d/sudo_local`, which requires root; `sudo tee` is the canonical "write a file as root from a normal shell" pattern. `tee` reads stdin and writes the file; `sudo` elevates `tee`. Plain `> /etc/pam.d/sudo_local` redirection wouldn't work because the redirect happens in your unprivileged shell BEFORE sudo runs. This first sudo invocation prompts for your password the conventional way (since Touch ID isn't set up yet); every sudo after this point gets the Touch ID option.
+- **`sudo tee /etc/pam.d/sudo_local`** - writes to `/etc/pam.d/sudo_local`, which requires root; `sudo tee` is the canonical "write a file as root from a normal shell" pattern. `tee` reads stdin and writes the file; `sudo` elevates `tee`. Plain `> /etc/pam.d/sudo_local` redirection wouldn't work because the redirect happens in your unprivileged shell BEFORE sudo runs. This first sudo invocation prompts for your password the conventional way (since Touch ID isn't set up yet); every sudo after this point gets the Touch ID option.
 
-- **`/etc/pam.d/sudo_local`** — the official macOS PAM extension point introduced in macOS Sonoma (14). Apple created it so users can layer auth methods on sudo without modifying `/etc/pam.d/sudo`, which is replaced on every macOS update. `/etc/pam.d/sudo`'s first line is `auth include sudo_local`, which pulls in whatever you put here. The file doesn't exist by default; creating it is what activates the extension.
+- **`/etc/pam.d/sudo_local`** - the official macOS PAM extension point introduced in macOS Sonoma (14). Apple created it so users can layer auth methods on sudo without modifying `/etc/pam.d/sudo`, which is replaced on every macOS update. `/etc/pam.d/sudo`'s first line is `auth include sudo_local`, which pulls in whatever you put here. The file doesn't exist by default; creating it is what activates the extension.
 
 - **`<<'EOF' ... EOF`**, a [heredoc](https://en.wikipedia.org/wiki/Here_document). Everything between the markers becomes stdin for `tee`. The single quotes around the opening `'EOF'` disable shell variable / backtick expansion inside the body, `$foo` and `` ` `` stay literal. Conservative default for config files.
 
-- **`auth       sufficient     pam_tid.so`** — the PAM directive. Three fields:
-  - **`auth`** — the module-type. PAM stacks split into `auth`, `account`, `password`, and `session`; only `auth` modules participate in the "prove who you are" phase that sudo cares about.
-  - **`sufficient`** — the control flag. PAM evaluates auth modules top-to-bottom; `sufficient` means "if this succeeds, the whole stack succeeds; if it fails, ignore and try the next module". So Touch ID is given first chance, and if you decline the dialog or no fingerprint is enrolled, sudo silently falls through to the password prompt.
-  - **`pam_tid.so`** — Apple's Touch ID PAM module shipped at `/usr/lib/pam/pam_tid.so.2`. Pops the system Touch ID dialog and reports success / failure to PAM. Requires Touch ID hardware (M-series MacBook, Touch ID Magic Keyboard, or unlocked Apple Watch).
+- **`auth       sufficient     pam_tid.so`** - the PAM directive. Three fields:
+  - **`auth`** - the module-type. PAM stacks split into `auth`, `account`, `password`, and `session`; only `auth` modules participate in the "prove who you are" phase that sudo cares about.
+  - **`sufficient`** - the control flag. PAM evaluates auth modules top-to-bottom; `sufficient` means "if this succeeds, the whole stack succeeds; if it fails, ignore and try the next module". So Touch ID is given first chance, and if you decline the dialog or no fingerprint is enrolled, sudo silently falls through to the password prompt.
+  - **`pam_tid.so`** - Apple's Touch ID PAM module shipped at `/usr/lib/pam/pam_tid.so.2`. Pops the system Touch ID dialog and reports success / failure to PAM. Requires Touch ID hardware (M-series MacBook, Touch ID Magic Keyboard, or unlocked Apple Watch).
 
 ### Why `sufficient` and not `required`?
 
 The four PAM control flags:
 
-- **`required`** — must succeed; failure recorded but stack keeps evaluating
-- **`requisite`** — must succeed; failure short-circuits immediately
-- **`sufficient`** — succeeds the whole stack on success; failure ignored, falls through
-- **`optional`** — result ignored
+- **`required`** - must succeed; failure recorded but stack keeps evaluating
+- **`requisite`** - must succeed; failure short-circuits immediately
+- **`sufficient`** - succeeds the whole stack on success; failure ignored, falls through
+- **`optional`** - result ignored
 
 We use `sufficient` because Touch ID should be an **alternative** to typing the password, not a precondition. Lid closed, no fingerprint enrolled, declined dialog, broken sensor → sudo silently moves to the password path. No friction, no lockout.
 
 ### Why not edit `/etc/pam.d/sudo` directly?
 
-You can; it's a text file. But macOS updates replace it on every system upgrade — your edit silently disappears after the next macOS minor release. `sudo_local` is preserved across upgrades; that's its whole purpose.
+You can; it's a text file. But macOS updates replace it on every system upgrade - your edit silently disappears after the next macOS minor release. `sudo_local` is preserved across upgrades; that's its whole purpose.
 
 ### Verifying it works
 
@@ -205,7 +205,7 @@ sudo rm /etc/pam.d/sudo_local
 
 Back to default. On a non-MDM Mac the osascript password dialog still
 works (slower). On an MDM-managed Mac, removing Touch ID leaves **no**
-working path — re-enable it or dispatch from elsewhere.
+working path - re-enable it or dispatch from elsewhere.
 
 ## Tests
 
@@ -233,6 +233,6 @@ through a workspace install that currently has unrelated drift).
 
 The OS physical-presence path (Touch ID / pam_u2f / pam_fprintd /
 osascript) and the MDM-blocker filesystem detection are **not** unit
-tested — they're OS-specific and were removed from the test surface
+tested - they're OS-specific and were removed from the test surface
 when the `SOCKET_GH_HYGIENE_TEST_AUTH` override was deleted. Verify
 manually on the target machine.

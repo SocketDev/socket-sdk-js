@@ -40,6 +40,6 @@ Silent unless files were found. Output goes to stderr:
 
 ## Bypass
 
-None — `.DS_Store` is never wanted in a repo. If you have a reason
+None - `.DS_Store` is never wanted in a repo. If you have a reason
 to keep one (very rare; testing macOS-specific tooling), name it
 `.DS_Store.fixture` and adjust the test.

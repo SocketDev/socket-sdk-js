@@ -16,7 +16,7 @@ testing, then open the per-language reference for the harness.
 | **Any untrusted-input boundary**, such as a parser, decoder, config/manifest loader, wire-format reader, or **native C++/Rust module**, that must not crash/hang/corrupt on any input | **coverage-guided fuzzing** (Tier 2) | Finds crash / memory-safety / security inputs with no spec; replayable corpus |
 | A **stateful SUT invariant** over synthetic worlds (cascade parity, `check↔fix` idempotence) | **hand-rolled seeded** (Tier 3) | Drives the real SUTs over generated repo trees; deterministic replay |
 
-Property/fuzz tests **complement** example tests — they don't replace them.
+Property/fuzz tests **complement** example tests - they don't replace them.
 Keep a few concrete `test('…')` cases as living documentation; add a property
 or fuzz test for the "for all inputs" claim.
 
@@ -47,22 +47,22 @@ canonical reference where a surface is implemented in several languages (see
 
 "A bug here = red CI everywhere" surfaces. Property/fuzz them first:
 
-- **Version + pin math** — `compareSemver`, `extractPinVersion`, `derivePins`,
+- **Version + pin math** - `compareSemver`, `extractPinVersion`, `derivePins`,
   `applyPins` (`sync-package-manager-pins.mts`), `majorBoundedRange`.
   Properties: total order; `derivePins` always yields a valid `>=x <y`;
   `applyPins` is idempotent.
-- **Config / marker validation** — `readSocketWheelhouseConfig`,
+- **Config / marker validation** - `readSocketWheelhouseConfig`,
   `validateBundleBlock`. Property: never throws on arbitrary input; accepts iff
   genuinely valid.
-- **Cascade `check ↔ fix` idempotence** (Tier 3) — for arbitrary synthetic
+- **Cascade `check ↔ fix` idempotence** (Tier 3) - for arbitrary synthetic
   trees: `collectFindings(applyFixes(x))` is clean (a fix never leaves a
   fixable finding), `applyFixes∘applyFixes = applyFixes`, and a fixer never
   mutates a path outside its finding's scope.
-- **Untrusted-input boundaries (Tier 2)** — sdxgen's manifest/lockfile parsers,
+- **Untrusted-input boundaries (Tier 2)** - sdxgen's manifest/lockfile parsers,
   ultrathink's `acorn` JS/TS parser (every lane), envrypt's `.env` parse
   pipeline + ECIES decrypt, decmpfs's compression reader, and abitious's hybrid
-  `.node` reader. A **native module is the top priority** — a crafted input can
-  overflow/UAF the C++/Rust, which a JS-level test never sees — so fuzz the
+  `.node` reader. A **native module is the top priority** - a crafted input can
+  overflow/UAF the C++/Rust, which a JS-level test never sees - so fuzz the
   native code directly with libFuzzer/cargo-fuzz + ASan/UBSan, not only through
   the JS boundary.
 
@@ -71,46 +71,46 @@ canonical reference where a surface is implemented in several languages (see
 When ONE surface is implemented in several languages (acorn's parser: Rust /
 Go / C++ / TS), the fuzzers are lock-step, exactly like the parsers: **Rust is
 the canonical fuzzer and the source of truth; the other lanes are ports.** The
-shared contract — corpus format, adversarial dictionary, classification
-taxonomy, repro-dump shape — is defined ONCE at the package level and every
+shared contract - corpus format, adversarial dictionary, classification
+taxonomy, repro-dump shape - is defined ONCE at the package level and every
 lane's harness points at it, so a seed added for one lane is a seed for all.
 The reference implementation is `packages/acorn/fuzz/` (the shared substrate)
 with per-lane harnesses under `lang/<lang>/fuzz/`. Any accept-here /
 reject-there split across lanes is a `divergence` finding, not a silent fixup.
 
 A single-language surface (envrypt, decmpfs, abitious, sdxgen) needs no shared
-substrate — its one lane's `fuzz/` tree IS the source of truth.
+substrate - its one lane's `fuzz/` tree IS the source of truth.
 
 ## Beyond the default engine
 
 The natives above (cargo-fuzz, `go test -fuzz`, libFuzzer) are the right
-DEFAULT — lowest friction, lock-step across lanes, replayable corpus. Escalate
+DEFAULT - lowest friction, lock-step across lanes, replayable corpus. Escalate
 only for a proven need; each reference names the concrete tool + when:
 
-- **Continuous fuzzing (biggest lever): ClusterFuzzLite** — runs the SAME
+- **Continuous fuzzing (biggest lever): ClusterFuzzLite** - runs the SAME
   libFuzzer/AFL++/honggfuzz targets in CI (GitHub Actions) on every PR + a
   batch cron, with corpus accretion, coverage reports, and crash bisection.
-  Language-agnostic (C/C++/Rust/Go). This is the upgrade that matters most —
+  Language-agnostic (C/C++/Rust/Go). This is the upgrade that matters most -
   a fuzzer that runs once in CI finds little; one that runs continuously with a
   growing corpus finds the deep bugs. Adopt it before reaching for a fancier
   local engine.
-- **Alternative engines** — AFL++ (better mutators/schedulers, persistent
+- **Alternative engines** - AFL++ (better mutators/schedulers, persistent
   mode), Honggfuzz (hardware-feedback), and LLVM **Centipede** (distributed,
   the modern libFuzzer successor) beat libFuzzer on some targets. In Rust,
   **bolero** lets ONE harness run under libFuzzer / AFL++ / honggfuzz / the Kani
-  model-checker without a rewrite — the cheapest way to A/B engines.
-- **Structure-aware fuzzing** — for grammars/wire formats, mutate the STRUCTURE
+  model-checker without a rewrite - the cheapest way to A/B engines.
+- **Structure-aware fuzzing** - for grammars/wire formats, mutate the STRUCTURE
   not raw bytes: Rust `arbitrary` (already used), `libprotobuf-mutator` (C++),
   fuzzed-typed Go harnesses. Reaches valid-but-adversarial inputs a byte
   mutator wastes cycles rediscovering.
-- **More sanitizers** — ASan (heap/stack), UBSan (UB), MSan (uninitialized
-  reads — C++ only, needs an instrumented libc++), TSan (data races). Layer
+- **More sanitizers** - ASan (heap/stack), UBSan (UB), MSan (uninitialized
+  reads - C++ only, needs an instrumented libc++), TSan (data races). Layer
   ASan+UBSan by default; add MSan/TSan for a specific bug class.
 
 ## Conventions (all languages)
 
 - A discovered counterexample becomes a **pinned regression test** (example
-  test / committed corpus entry) next to the property — regression +
+  test / committed corpus entry) next to the property - regression +
   documentation.
 - **Corpus + dictionary are committed** so a crash is replayable and coverage
   accrues across runs. Seed with real inputs (conformance suites, fixtures).
@@ -120,7 +120,7 @@ only for a proven need; each reference names the concrete tool + when:
   fuzzers).
 - **Read the exit-code contract** in the language reference before wiring CI:
   `0` = clean, a crash code = fail + upload the minimized artifact, a timeout
-  code = hang. Never treat "exit 1 = crash found" — the codes are tool- and
+  code = hang. Never treat "exit 1 = crash found" - the codes are tool- and
   version-specific.
 - A fuzzer build/run that can't find its toolchain **reports the exact install
-  command and exits non-zero — it never fabricates a pass.**
+  command and exits non-zero - it never fabricates a pass.**

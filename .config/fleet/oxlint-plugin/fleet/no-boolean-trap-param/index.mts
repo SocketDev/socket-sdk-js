@@ -13,15 +13,11 @@
  *
  *   - A single boolean param alone — a pure predicate (`isValid(v: boolean)`).
  *   - Overload signatures (no function body — type-only contracts).
- *   - Bypass: a `socket-lint: allow boolean-trap` comment on the function.
+ *   - Bypass: a `oxlint-disable-next-line socket/no-boolean-trap-param` comment on the function.
  */
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
-
-// socket-lint: allow boolean-trap -- opt-out for a signature where a positional
-// boolean is genuinely the clearest shape (rare).
-const BYPASS_RE = /socket-lint:\s*allow\s+boolean-trap/
 
 // Is a param's type annotation `boolean`, or a union that includes `boolean`
 // (e.g. `boolean | undefined`)? Handles the optional `flag?: boolean` form too
@@ -51,13 +47,16 @@ const rule = {
     },
     messages: {
       banned:
-        'boolean positional param `{{name}}` — callers write `foo(x, true)` where the flag is meaningless at the call site. Use an options object: `foo(x, { {{name}}: true })`. Bypass: add a `socket-lint: allow boolean-trap` comment.',
+        'boolean positional param `{{name}}` — callers write `foo(x, true)` where the flag is meaningless at the call site. Use an options object: `foo(x, { {{name}}: true })`. Bypass: add a `oxlint-disable-next-line socket/no-boolean-trap-param` comment.',
     },
     schema: [],
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-boolean-trap-param',
+    )
 
     function check(node: AstNode): void {
       // Overload / type-only signatures have no body — skip.
@@ -88,5 +87,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

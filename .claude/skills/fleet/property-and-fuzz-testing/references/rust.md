@@ -1,13 +1,13 @@
 # Rust property + fuzz
 
-## Tier 1 — proptest (property)
+## Tier 1 - proptest (property)
 
 `proptest` (explicit `Strategy` objects, good shrinking) over `quickcheck` for
 new property tests; put them in a `#[cfg(test)] mod tests` next to the impl.
 Round-trip + oracle properties for parsers/encoders; a discovered
 counterexample becomes a pinned `#[test]`.
 
-## Tier 2 — cargo-fuzz (libFuzzer) + ASan/UBSan
+## Tier 2 - cargo-fuzz (libFuzzer) + ASan/UBSan
 
 **The canonical fleet lane.** Reference implementations:
 `packages/acorn/lang/rust/fuzz/`, the multi-lane source of truth, and
@@ -26,10 +26,10 @@ fuzz/
   run.sh                # single source of the per-target flags (local == CI)
 ```
 
-### `fuzz/Cargo.toml` — the two non-obvious rules
+### `fuzz/Cargo.toml` - the two non-obvious rules
 
 <details>
-<summary><b>The manifest</b> — an empty <code>[workspace]</code> table so a root build never sweeps the fuzzer in, plus an inverted <code>[profile.release]</code> that turns <code>debug-assertions</code> and <code>overflow-checks</code> back on</summary>
+<summary><b>The manifest</b> - an empty <code>[workspace]</code> table so a root build never sweeps the fuzzer in, plus an inverted <code>[profile.release]</code> that turns <code>debug-assertions</code> and <code>overflow-checks</code> back on</summary>
 
 ```toml
 [workspace]                       # EMPTY table → standalone workspace, so a
@@ -113,16 +113,16 @@ bound one input, `-dict=fuzz.dict`.
 envrypt commits `fuzz/no-unsafe-without-fuzz.sh`: any crate that ships `unsafe`
 MUST have a fuzz target covering the unsafe path. Wire it into the repo's
 `check`/CI so unsafe code can't land unfuzzed. decmpfs (raw attribute streams)
-and abitious (hybrid `.node` reader) both have unsafe decode paths — that gate
+and abitious (hybrid `.node` reader) both have unsafe decode paths - that gate
 is the point.
 
 ## Escalation
 
 - **ClusterFuzzLite** for continuous CI fuzzing (corpus accretion + coverage +
-  bisection) — the biggest lever; adopt before a fancier local engine.
-- **bolero** — write ONE harness runnable under libFuzzer / AFL++ / honggfuzz /
+  bisection) - the biggest lever; adopt before a fancier local engine.
+- **bolero** - write ONE harness runnable under libFuzzer / AFL++ / honggfuzz /
   the **Kani** model checker; cheapest way to A/B engines or add bounded proof.
 - **arbitrary** derive for structure-aware inputs when raw bytes waste cycles
   rediscovering a valid header/frame.
 - **LibAFL** only for a bespoke, long-running campaign that the above can't
-  express — heavyweight.
+  express - heavyweight.

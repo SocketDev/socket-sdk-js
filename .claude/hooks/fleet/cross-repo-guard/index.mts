@@ -23,7 +23,7 @@
 //
 // Exit code 2 makes Claude Code refuse the edit so the diff never
 // lands. Doc lines that legitimately need to mention a path can carry
-// the canonical opt-out marker `// socket-lint: allow cross-repo`
+// the canonical opt-out marker `// oxlint-disable-next-line socket/no-cross-repo-path`
 // (`#`/`/*` accepted).
 //
 // Scope:
@@ -79,7 +79,7 @@ export function emitBlock(filePath: string, hits: Hit[]): string {
         verdictLine(
           'block',
           'cross-repo-guard',
-          `cross-repo path "${h.matched.trim()}" at ${filePath}:${h.lineNumber} — import \`@socketsecurity/lib-stable/<subpath>\` (or registry-stable) instead; per-line opt-out: \`// socket-lint: allow cross-repo\` above it`,
+          `cross-repo path "${h.matched.trim()}" at ${filePath}:${h.lineNumber} — import \`@socketsecurity/lib-stable/<subpath>\` (or registry-stable) instead; per-line opt-out: \`// oxlint-disable-next-line socket/no-cross-repo-path\` above it`,
         ),
       )
     } else {

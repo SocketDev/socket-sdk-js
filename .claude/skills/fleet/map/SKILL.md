@@ -37,7 +37,7 @@ need.
 - Read-only. The engine never writes; it only emits the skeleton.
 - This is for NAVIGATION (understanding where code lives). When you are editing a
   file and need exact byte context, a full read is still correct.
-- The engine is `scripts/fleet/gen/repo-map.mts` — this skill is a thin wrapper;
+- The engine is `scripts/fleet/gen/repo-map.mts` - this skill is a thin wrapper;
   fix parsing/behavior there, not here.
 </constraints>
 

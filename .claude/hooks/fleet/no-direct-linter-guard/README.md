@@ -2,7 +2,7 @@
 
 PreToolUse(Bash) hook that blocks invoking a linter or formatter binary
 directly. The fleet runs lint/format only through the repo scripts (`pnpm run
-lint` / `fix` / `check` / `format`) and the `scripts/fleet/*` wrappers — those
+lint` / `fix` / `check` / `format`) and the `scripts/fleet/*` wrappers - those
 own the explicit `-c .config/fleet/<oxlintrc|oxfmtrc>` flag and the ignore set.
 
 ## What it catches
@@ -38,7 +38,7 @@ re-introduces every one of these. The committed-state companion is
 `socket/no-other-linters-guard`.
 
 The scripts' own internal `node_modules/.bin/oxlint` spawns are child processes,
-not Claude Bash invocations, so this hook never sees them — only a top-level
+not Claude Bash invocations, so this hook never sees them - only a top-level
 direct call is blocked.
 
 ## Bypass
@@ -47,6 +47,6 @@ Type `Allow direct-linter bypass` in a recent turn (for a genuine one-off).
 
 ## Exit codes
 
-- `0` — pass (not Bash, a script wrapper, a non-format command, or bypassed)
-- `2` — block
+- `0` - pass (not Bash, a script wrapper, a non-format command, or bypassed)
+- `2` - block
 - Fails open on any internal error.

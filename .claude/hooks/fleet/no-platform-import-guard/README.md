@@ -21,9 +21,9 @@ build time. Hard-coding `/node` in a browser build ships the wrong HTTP stack.
 
 ## Exemptions
 
-- Files inside `src/http-request/` — they form the implementation and may
+- Files inside `src/http-request/` - they form the implementation and may
   reference siblings directly.
-- Line preceded by `// no-platform-http-import: <reason>` — inline disable
+- Line preceded by `// no-platform-http-import: <reason>` - inline disable
   for files that genuinely must pin a platform (e.g. a server-only util).
 
 ## Bypass

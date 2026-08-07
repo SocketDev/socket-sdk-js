@@ -98,9 +98,10 @@ const RESULT_SCHEMA = {
 
 phase('Reconcile')
 
-// socket-lint: allow top-level-await -- Workflow script body executed directly
+// Workflow script body executed directly.
 // by the Claude Code harness (top-level `phase`/`agent`/`return` are harness
 // globals), never bundled to CJS.
+// oxlint-disable-next-line socket/no-top-level-await -- Workflow script body
 const results = await parallel(
   TARGETS.map(repo => () => {
     const skipList = ROSTER.filter(r => r !== repo).join(',')

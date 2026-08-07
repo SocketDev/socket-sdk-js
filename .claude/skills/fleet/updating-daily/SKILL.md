@@ -20,7 +20,7 @@ The daily, cheap maintenance pass: promote dependency soak-exclusions that have 
 
 ## What it does NOT do
 
-- **npm version bumps.** That's the weekly `/updating` umbrella's job (taze, lockstep, submodules). Daily is soak-promotion only — small, predictable, safe to run unattended.
+- **npm version bumps.** That's the weekly `/updating` umbrella's job (taze, lockstep, submodules). Daily is soak-promotion only - small, predictable, safe to run unattended.
 - **Add exclusions.** Adding a soak-bypass is the `Allow minimumReleaseAge bypass` flow, not this skill.
 - **Touch repo-local non-exclude settings.** Only `minimumReleaseAgeExclude` entries are promoted; the rest of `pnpm-workspace.yaml` is untouched.
 
@@ -28,9 +28,9 @@ The daily, cheap maintenance pass: promote dependency soak-exclusions that have 
 
 | #   | Phase     | Outcome                                                                                                                                                               |
 | --- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Promote   | `node scripts/fleet/check/soak-excludes-have-dates.mts --fix` removes every entry whose `removable:` date has passed — the bullet plus its `# published/removable` annotation. |
+| 1   | Promote   | `node scripts/fleet/check/soak-excludes-have-dates.mts --fix` removes every entry whose `removable:` date has passed - the bullet plus its `# published/removable` annotation. |
 | 2   | Reconcile | If step 1 changed `pnpm-workspace.yaml`, run `pnpm install` so the lockfile matches the slimmed catalog/exclude set.                                                  |
-| 3   | Report    | If nothing was promoted, exit cleanly with no diff — the workflow opens no PR. Otherwise the changed files (`pnpm-workspace.yaml` + `pnpm-lock.yaml`) become the PR.  |
+| 3   | Report    | If nothing was promoted, exit cleanly with no diff - the workflow opens no PR. Otherwise the changed files (`pnpm-workspace.yaml` + `pnpm-lock.yaml`) become the PR.  |
 
 ## Run
 

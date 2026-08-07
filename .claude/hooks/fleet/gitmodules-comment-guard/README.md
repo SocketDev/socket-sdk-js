@@ -10,7 +10,7 @@ it.
 The Socket fleet's lockstep harness uses the `# slug-version` annotation
 to surface upstream version drift in its update reports. Without it,
 `pnpm run lockstep` can't tell whether a submodule pin reflects v1.0 or
-v3.5 of the upstream — the report is meaningless. Adding the comment
+v3.5 of the upstream - the report is meaningless. Adding the comment
 costs one line; missing it silently breaks the drift surface.
 
 ## Conventional shape
@@ -35,19 +35,19 @@ The slug is short (no path); the version is whatever upstream tags
 
 ## What's not enforced
 
-- `ignore = dirty` — conventional but not blocked here. (It's a
+- `ignore = dirty` - conventional but not blocked here. (It's a
   parallel-Claude-sessions concern, not a build break.)
-- Repository URL format / branch — those don't affect lockstep.
+- Repository URL format / branch - those don't affect lockstep.
 
 ## Override marker
 
 For a legitimate one-off where the comment doesn't apply:
 
 ```gitmodules
-[submodule "..."] # socket-lint: allow gitmodules-no-comment
+[submodule "..."] # oxlint-disable-next-line socket/gitmodules-entry-has-comment
 ```
 
-Don't reach for this — fix the comment instead.
+Don't reach for this - fix the comment instead.
 
 ## Wiring
 

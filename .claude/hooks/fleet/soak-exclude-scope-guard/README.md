@@ -18,7 +18,7 @@ A common mistake is reaching for `overrides:` to get around the
 soak. Overrides pin a version but do NOT exempt it from
 `minimumReleaseAge`: pnpm still soak-checks the resolved version, so
 overriding to a too-new release stays blocked. The gate is doing
-its job — the right move is to wait for the 7-day window to pass.
+its job - the right move is to wait for the 7-day window to pass.
 
 Example: an automated PR that drops a third-party scope like
 `@types/*` into `minimumReleaseAgeExclude` across sibling

@@ -37,7 +37,7 @@ Pattern-matching tests, sample documentation, and example configs are tempting p
 - scoped: `@acme/widget`, `@acme/types`
 - versioned: `acme-foo@1.0.0`, `@acme/widget@2.0.0`
 
-The bypass comment (`socket-lint: allow eslint-biome-ref -- <reason>`) exists for genuinely irreplaceable cases - testing the lint rule itself, or quoting a real `.eslintrc.json` file path inside a migration script. Renaming the fixture is preferred over the bypass.
+The bypass comment (`oxlint-disable-next-line socket/no-eslint-biome-config-ref -- <reason>`) exists for genuinely irreplaceable cases - testing the lint rule itself, or quoting a real `.eslintrc.json` file path inside a migration script. Renaming the fixture is preferred over the bypass.
 
 ## Linear refs
 

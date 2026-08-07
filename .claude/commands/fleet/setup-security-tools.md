@@ -1,5 +1,5 @@
 ---
-description: Install all Socket security tools — SFW, AgentShield, Zizmor, TruffleHog, Trivy, OpenGrep, and more. Also prompts for the API token and persists it to the OS keychain. Run /setup-repo for the full onboarding wizard.
+description: Install all Socket security tools - SFW, AgentShield, Zizmor, TruffleHog, Trivy, OpenGrep, and more. Also prompts for the API token and persists it to the OS keychain. Run /setup-repo for the full onboarding wizard.
 ---
 
 Install all Socket security tools for local development.
@@ -10,7 +10,7 @@ Install all Socket security tools for local development.
 | --------------- | ----------------------------------------------------------------- |
 | **AgentShield** | Scans Claude config for prompt injection and secrets              |
 | **Zizmor**      | Static analysis for GitHub Actions workflows                      |
-| **SFW**         | Socket Firewall — intercepts package installs to scan for malware |
+| **SFW**         | Socket Firewall - intercepts package installs to scan for malware |
 | **TruffleHog**  | Secret scanning                                                   |
 | **Trivy**       | Container and filesystem vulnerability scanning                   |
 | **OpenGrep**    | Semantic code analysis                                            |
@@ -20,12 +20,12 @@ Also: API token prompt → OS keychain, native messaging host, shell rc bridge.
 
 ## Sub-commands (run individually if needed)
 
-- `/setup-token` — token + keychain only
-- `/setup-native-host` — Chrome native host manifest
-- `/setup-trusted-publisher-extension` — Trusted Publisher extension
-- `/setup-sfw` — SFW only
-- `/setup-agentshield` — AgentShield only
-- `/setup-zizmor` — Zizmor only
+- `/setup-token` - token + keychain only
+- `/setup-native-host` - Chrome native host manifest
+- `/setup-trusted-publisher-extension` - Trusted Publisher extension
+- `/setup-sfw` - SFW only
+- `/setup-agentshield` - AgentShield only
+- `/setup-zizmor` - Zizmor only
 
 ## Run everything
 
@@ -41,6 +41,6 @@ export PATH="$HOME/.socket/_wheelhouse/shims:$PATH"
 
 ## Notes
 
-- Safe to re-run (idempotent — skips tools already at current version)
+- Safe to re-run (idempotent - skips tools already at current version)
 - Token is stored in the OS keychain, NOT in `.env.local`
 - `/update-security` will check for new versions of these tools

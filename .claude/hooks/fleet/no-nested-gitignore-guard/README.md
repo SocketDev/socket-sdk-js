@@ -1,7 +1,7 @@
 # no-nested-gitignore-guard
 
 PreToolUse (Write/Edit/MultiEdit) guard. Blocks CREATING a nested per-directory
-`.gitignore` in a fleet repo — every ignore entry belongs in the single root
+`.gitignore` in a fleet repo - every ignore entry belongs in the single root
 `.gitignore` (fleet block from `FLEET_ENTRIES` + the repo-owned block).
 
 - **Allowed:** the repo root `.gitignore`, and `template/<archetype>/.gitignore`
@@ -13,7 +13,7 @@ PreToolUse (Write/Edit/MultiEdit) guard. Blocks CREATING a nested per-directory
 - **Bypass:** `Allow nested-gitignore bypass` (typed verbatim in a recent turn).
 
 Fix a would-be nested entry with a `**/`-anchored line in the root `.gitignore`
-— it reaches any depth including the `template/base/` mirror.
+- it reaches any depth including the `template/base/` mirror.
 
 The `isNestedGitignore` predicate is shared with the commit-/CI-time belt check
 `scripts/fleet/check/gitignore-is-single-file.mts` so the two never diverge.

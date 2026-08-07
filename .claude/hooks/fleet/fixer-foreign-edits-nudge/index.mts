@@ -12,7 +12,8 @@
 
 import path from 'node:path'
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- PreToolUse hook: one short git status; the dispatcher runs hooks synchronously
+// One short git status; the dispatcher runs hooks synchronously.
+// oxlint-disable-next-line socket/prefer-async-spawn -- PreToolUse hook
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import {

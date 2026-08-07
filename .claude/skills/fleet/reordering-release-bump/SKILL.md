@@ -13,7 +13,7 @@ metadata:
 
 Make an already-landed `chore: bump version to X.Y.Z` commit the **latest** commit again, when
 cascades / fixes / features landed on top of it after the bump. Reorders history so the bump is at
-the tip, repoints the `vX.Y.Z` tag, and force-pushes — losing zero work (the tree stays byte-for-byte
+the tip, repoints the `vX.Y.Z` tag, and force-pushes - losing zero work (the tree stays byte-for-byte
 identical; only the bump's POSITION moves).
 
 This is NOT a new release. The bump + its CHANGELOG entry already exist; this only relocates them. For
@@ -21,7 +21,7 @@ a fresh version, do a normal forward bump instead.
 
 ## Run
 
-The runner is **dry-run by default** — it reports old tip → new tip, the bump SHA, the backup branch
+The runner is **dry-run by default** - it reports old tip → new tip, the bump SHA, the backup branch
 name, and confirms the tree is identical without pushing. Inspect that, then rerun with `--apply`.
 
 ```bash
@@ -37,7 +37,7 @@ See [`lib/reorder-bump.mts`](lib/reorder-bump.mts) for the 7-phase implementatio
 | #   | Phase           | What it does                                                                                          |
 | --- | --------------- | ---------------------------------------------------------------------------------------------------- |
 | 1   | Pre-flight      | Resolve default branch (main → master fallback); `fetch --tags`; find the bump commit + its version. |
-| 2   | Verify          | Bump touches exactly `package.json` + `CHANGELOG.md` — else abort.                                    |
+| 2   | Verify          | Bump touches exactly `package.json` + `CHANGELOG.md` - else abort.                                    |
 | 3   | Backup          | Push `$ORIGIN_TIP:refs/heads/backup-YYYYMMDD-HHMMSS` before any destructive op.                       |
 | 4   | Reorder         | In a throwaway worktree: `rebase --onto <bump>^ <bump> HEAD`, then `cherry-pick <bump>` to the tip.   |
 | 5   | Integrity       | `git diff <orig-tip> HEAD` must be EMPTY (HARD exit otherwise); tip subject must name the version.    |
@@ -61,8 +61,8 @@ that phrase (ask via `AskUserQuestion` if unsure) before invoking with `--apply`
   the guard does not fire.
 - The reorder runs entirely in a **throwaway sibling worktree** (`<repo>-reorder`); the primary
   checkout is never touched (parallel-Claude rule).
-- A non-empty integrity diff is a **HARD `process.exit(1)`** — the whole point is that only POSITION
+- A non-empty integrity diff is a **HARD `process.exit(1)`** - the whole point is that only POSITION
   moved, so any content change means corruption and the push must not happen.
 
 If a fresh worktree's pre-push hook crashes with `ERR_MODULE_NOT_FOUND @socketsecurity/lib-stable`,
-run `pnpm i` in the worktree first — the hook needs its deps.
+run `pnpm i` in the worktree first - the hook needs its deps.

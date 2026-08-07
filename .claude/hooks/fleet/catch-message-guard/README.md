@@ -3,10 +3,10 @@
 PreToolUse Edit/Write hook covering two related rules for `catch`
 blocks in JS / TS code:
 
-1. **Bare `${e.message}` blocked** — must route through
+1. **Bare `${e.message}` blocked** - must route through
    `errorMessage(e)` (or an `instanceof Error` guard) so non-Error
    throws don't print `"undefined"`.
-2. **Binding name must be `e`** — fleet convention. `err`, `error`,
+2. **Binding name must be `e`** - fleet convention. `err`, `error`,
    etc. drift over time and break the recipe in the bypass report.
 
 ## Why

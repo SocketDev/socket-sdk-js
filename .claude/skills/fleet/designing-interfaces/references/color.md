@@ -25,7 +25,7 @@ Before touching palettes, answer these questions:
 
 **Hard rule:**
 
-> When in doubt — fewer colors, more neutrals, stricter purpose. Restraint beats "colorful."
+> When in doubt - fewer colors, more neutrals, stricter purpose. Restraint beats "colorful."
 
 This single rule eliminates 50% of AI-slop before you start.
 
@@ -86,7 +86,7 @@ Neutrals are 70–90% of your UI. This is where you win or lose.
 
 **Hard rules:**
 - Never use pure `#000` on white as body text
-- Don't make text gray "for breathing room" — spacing creates breathing room, not faded text
+- Don't make text gray "for breathing room" - spacing creates breathing room, not faded text
 
 ### 2.2 Primary Accent
 
@@ -107,10 +107,10 @@ One brand color. It should:
 ### 2.3 Semantic Colors
 
 Usually 3-4:
-- **Success** — Green (confirmations, completion)
-- **Warning** — Amber/Yellow (attention needed)
-- **Danger** — Red (errors, destructive actions)
-- **Info** - Blue (neutral information) — optional
+- **Success** - Green (confirmations, completion)
+- **Warning** - Amber/Yellow (attention needed)
+- **Danger** - Red (errors, destructive actions)
+- **Info** - Blue (neutral information) - optional
 
 **Important:** Semantics work through pairs, not single colors.
 
@@ -177,7 +177,7 @@ Hover and Active should be:
 
 ## 4. Contrast and Readability
 
-Not about checking boxes — about actual readability.
+Not about checking boxes - about actual readability.
 
 ### Minimum Requirements
 
@@ -189,9 +189,9 @@ Not about checking boxes — about actual readability.
 
 ### Common Failures
 
-1. **Secondary text too pale** — The #1 issue. If it looks fine on your Retina display at noon, it fails on cheap monitors at 9pm.
+1. **Secondary text too pale** - The #1 issue. If it looks fine on your Retina display at noon, it fails on cheap monitors at 9pm.
 
-2. **Text on tinted backgrounds** — "Almost readable" text on colored backgrounds fails in real conditions (tired eyes, ambient light, older monitors).
+2. **Text on tinted backgrounds** - "Almost readable" text on colored backgrounds fails in real conditions (tired eyes, ambient light, older monitors).
 
 ### Practical Check
 
@@ -250,7 +250,7 @@ In dark UI, surfaces and layers communicate through:
 Browser-level settings that most developers miss:
 
 <details>
-<summary><b>Detail</b> — the worked steps (3 snippets)</summary>
+<summary><b>Detail</b> - the worked steps (3 snippets)</summary>
 
 ```html
 <!-- In <head> — tells browser UI elements to use dark mode -->
@@ -286,6 +286,47 @@ Browser-level settings that most developers miss:
 ```
 
 </details>
+
+### The toggle has two states, never three
+
+Offer **what you see** and **the other one**. A Light / Dark / System triplet
+exposes the data model instead of serving the need: nobody opens a theme menu to
+express a preference about the future, they open it because the screen is wrong
+*now*. The third control is cognitive load for a state the toggle can reach on
+its own.
+
+Two states in the UI, three values in storage:
+
+| Stored | Meaning |
+| --- | --- |
+| *nothing* | Follow the OS. The default, and where every user starts. |
+| `light` | Explicit override, stored only when the OS says dark. |
+| `dark` | Explicit override, stored only when the OS says light. |
+
+The rule that makes this work: **store an override only when the target differs
+from the OS preference; otherwise clear it.**
+
+```js
+// `target` is the mode the user just asked for.
+const stored = target === systemPreference ? null : target
+```
+
+Compare the TARGET against the OS, not the stored value. That is what returns a
+user to OS-following on the second press without a third button, and it keeps
+the control honest if the OS flipped underneath an override — clearing to
+"follow the OS" there would leave the screen unchanged and read as a dead
+control.
+
+Two things that look like polish and are not:
+
+- **Do not re-evaluate the OS preference except at user interaction.** Silently
+  dropping someone's override because the OS changed at sunset undoes a choice
+  they made deliberately.
+- **Keep an explicit override even when it happens to match the OS.** It stops
+  matching the moment the OS changes, which is exactly when the user wanted it.
+
+Socket ships one theme, **socketeer**, in a light and a dark mode. There is no
+third mode to select, so there is nothing for a third toggle position to say.
 
 ---
 
@@ -404,11 +445,11 @@ Gradients are allowed when:
 
 ### Rules
 
-1. **Gradient is never the only way to make something visible** — If removing the gradient makes the element invisible, redesign.
+1. **Gradient is never the only way to make something visible** - If removing the gradient makes the element invisible, redesign.
 
-2. **Subtle > dramatic** — Direction and angle matter more than color variety.
+2. **Subtle > dramatic** - Direction and angle matter more than color variety.
 
-3. **Text on gradients** — Ensure contrast works across the entire gradient, not just the start.
+3. **Text on gradients** - Ensure contrast works across the entire gradient, not just the start.
 
 ```css
 /* Acceptable */
@@ -441,24 +482,24 @@ Every LLM, every AI code generator, every design tool defaults to indigo/violet 
 3. Is there a semantic reason (not just "looks modern")?
 4. Would a senior designer question this choice?
 
-**If you can't answer YES to at least one of these—choose a different color.**
+**If you can't answer YES to at least one of these-choose a different color.**
 
 Safe alternatives when you need an accent:
-- Blue (`#2563eb`) — trust, stability, professional
-- Teal (`#0d9488`) — fresh, modern, distinctive
-- Green (`#16a34a`) — growth, success, natural
-- Orange (`#ea580c`) — energy, action, warmth
+- Blue (`#2563eb`) - trust, stability, professional
+- Teal (`#0d9488`) - fresh, modern, distinctive
+- Green (`#16a34a`) - growth, success, natural
+- Orange (`#ea580c`) - energy, action, warmth
 - Brand-specific color from research
 
 **The rule:** Indigo is BANNED unless explicitly justified by brand requirements.
 
 ### Other Red Flags
 
-- **Multiple competing accents** — One primary. Others should be clearly secondary or semantic
-- **Random hex in components** — Should use tokens
-- **Pure black on white** — Use near-black (#0b0b0b)
-- **Every state is a new color** — Hover/active should be predictable shifts
-- **Dark theme = inverted** — Needs separate neutrals
+- **Multiple competing accents** - One primary. Others should be clearly secondary or semantic
+- **Random hex in components** - Should use tokens
+- **Pure black on white** - Use near-black (#0b0b0b)
+- **Every state is a new color** - Hover/active should be predictable shifts
+- **Dark theme = inverted** - Needs separate neutrals
 
 ### Quick Test
 
@@ -480,7 +521,7 @@ Safe alternatives when you need an accent:
 - [ ] **Tokens named by purpose** (bg, text, border, primary)
 - [ ] **Dark theme is separate**, not inverted
 - [ ] **Semantics don't clash** with primary
-- [ ] **No random hex** in components — all from tokens
+- [ ] **No random hex** in components - all from tokens
 - [ ] **Contrast passes** WCAG AA (4.5:1 body, 3:1 large)
 - [ ] **Gradients are rare** and localized
 - [ ] **`color-scheme`** set on `<html>` for dark mode (fixes scrollbars, inputs)
@@ -493,7 +534,7 @@ Safe alternatives when you need an accent:
 Reference implementation with all tokens:
 
 <details>
-<summary><b>Detail</b> — the commands</summary>
+<summary><b>Detail</b> - the commands</summary>
 
 ```css
 :root {

@@ -24,9 +24,9 @@ Before choosing fonts, answer these questions:
 
 **Default approach:**
 
-> When in doubt — go denser, simpler, and more neutral. Clarity beats decoration in most product interfaces.
+> When in doubt - go denser, simpler, and more neutral. Clarity beats decoration in most product interfaces.
 
-This mindset helps avoid over-designed typography in functional contexts. For branding, editorial, or creative products — different rules apply.
+This mindset helps avoid over-designed typography in functional contexts. For branding, editorial, or creative products - different rules apply.
 
 ---
 
@@ -67,7 +67,7 @@ A consistent scale creates visual rhythm. Pick a ratio, stick to it.
 |-------|------------|----------|
 | Minor Second | 1.067 | Dense UI, dashboards |
 | Major Second | 1.125 | Compact interfaces |
-| **Minor Third** | **1.200** | **General purpose — default choice** |
+| **Minor Third** | **1.200** | **General purpose - default choice** |
 | Major Third | 1.250 | Marketing, editorial |
 | Perfect Fourth | 1.333 | Bold, expressive layouts |
 | Golden Ratio | 1.618 | Rare: hero sections only |
@@ -112,7 +112,7 @@ A consistent scale creates visual rhythm. Pick a ratio, stick to it.
 
 ## 3. Font Pairing
 
-**Most successful SaaS products use one font family.** Two fonts adds complexity — make sure it's justified.
+**Most successful SaaS products use one font family.** Two fonts adds complexity - make sure it's justified.
 
 ### The One-Font Rule
 
@@ -127,7 +127,7 @@ Three fonts = almost never
 - Content-heavy products (editorial, documentation)
 - There's real art direction, not just "looks nice"
 
-If you don't have a strong reason — one font, different weights.
+If you don't have a strong reason - one font, different weights.
 
 ### If You Must Pair
 
@@ -138,9 +138,9 @@ If you don't have a strong reason — one font, different weights.
 | Mono accent | JetBrains Mono (code) + Inter (UI) |
 
 **Pairing rules:**
-1. Contrast in structure — serif with sans, not two serifs
-2. Similar x-height — letters feel proportional
-3. Intentional contrast — mixing eras (Didot + geometric) can work as a deliberate choice, not an accident
+1. Contrast in structure - serif with sans, not two serifs
+2. Similar x-height - letters feel proportional
+3. Intentional contrast - mixing eras (Didot + geometric) can work as a deliberate choice, not an accident
 
 ### Safe Font Choices by Product Type
 
@@ -170,10 +170,10 @@ Typography in a vacuum doesn't exist. Most "bad" interfaces look bad because of 
 
 ### Rules That Actually Work
 
-- **Never pure black** — Use `#0B0B0B` – `#111`, not `#000`
-- **Body text minimum** — Never below 60% opacity for readable text
-- **Fewer shades, stable usage** — 3-4 text colors max, used consistently
-- **Disabled is rare** — If you have lots of disabled text, redesign
+- **Never pure black** - Use `#0B0B0B` – `#111`, not `#000`
+- **Body text minimum** - Never below 60% opacity for readable text
+- **Fewer shades, stable usage** - 3-4 text colors max, used consistently
+- **Disabled is rare** - If you have lots of disabled text, redesign
 
 ### Anti-pattern
 
@@ -258,10 +258,10 @@ Line height (leading) affects readability more than any other property.
 
 ### Principles
 
-1. **Longer lines need more leading** — 80+ characters? Use 1.6–1.7
-2. **Shorter lines need less** — 40 characters? 1.4 is fine
-3. **Headlines are tight** — Multi-line headlines at 1.5 look broken
-4. **Sans-serif needs more** — Add 0.1 compared to serif
+1. **Longer lines need more leading** - 80+ characters? Use 1.6–1.7
+2. **Shorter lines need less** - 40 characters? 1.4 is fine
+3. **Headlines are tight** - Multi-line headlines at 1.5 look broken
+4. **Sans-serif needs more** - Add 0.1 compared to serif
 
 ---
 
@@ -308,7 +308,7 @@ Letter-spacing is one of the most overlooked properties in web typography. It's 
 
 ### Why It Matters
 
-Professional typography isn't just about choosing fonts—it's about the space BETWEEN letters. This single property can make the difference between "looks off" and "looks polished."
+Professional typography isn't just about choosing fonts-it's about the space BETWEEN letters. This single property can make the difference between "looks off" and "looks polished."
 
 **Without proper tracking:**
 - ALL CAPS looks cramped and cheap
@@ -359,7 +359,7 @@ Uppercase text usually benefits from positive letter-spacing. Default behavior f
 }
 ```
 
-### Small Text Rule — Often Forgotten
+### Small Text Rule - Often Forgotten
 
 Text below 14px needs extra tracking for readability:
 
@@ -450,7 +450,7 @@ When displaying numbers that need to align (tables, prices, stats):
 }
 ```
 
-**Why:** Default proportional figures make `111` narrower than `999`. Tabular figures give each digit equal width — essential for columns, counters, prices.
+**Why:** Default proportional figures make `111` narrower than `999`. Tabular figures give each digit equal width - essential for columns, counters, prices.
 
 ### Text Wrapping for Headings
 
@@ -477,14 +477,14 @@ either blindly to nav, buttons, tables, badges, code, form controls, or dense UI
 Still inspect the actual breakpoints. If wrapping is still awkward, adjust copy, max-width,
 font-size, or line-height instead of trusting CSS alone.
 
-**Browser support:** Modern browsers. Graceful degradation — no harm if unsupported.
+**Browser support:** Modern browsers. Graceful degradation - no harm if unsupported.
 
 ### Content Overflow
 
 Text containers must handle long content:
 
 <details>
-<summary><b>Detail</b> — the worked steps (2 snippets)</summary>
+<summary><b>Detail</b> - the worked steps (2 snippets)</summary>
 
 ```css
 /* Truncate single line */
@@ -594,10 +594,10 @@ Beautiful typography on a slow page is bad typography.
 
 ### Rules
 
-- **≤2 font families** — One is better
-- **≤3 weights per family** — 400, 500, 600 covers 95% of needs
-- **Variable fonts preferred** — One file, all weights
-- **System stack is fine** — Often better than custom fonts
+- **≤2 font families** - One is better
+- **≤3 weights per family** - 400, 500, 600 covers 95% of needs
+- **Variable fonts preferred** - One file, all weights
+- **System stack is fine** - Often better than custom fonts
 
 ### System Font Stack
 
@@ -610,7 +610,7 @@ This loads instantly, looks native, and is perfectly professional.
 
 ### Performance Rule
 
-> If typography is beautiful but the page loads slow — it's bad typography.
+> If typography is beautiful but the page loads slow - it's bad typography.
 
 ---
 
@@ -620,14 +620,14 @@ Things that instantly reveal AI-generated or amateur design:
 
 ### Instant Red Flags
 
-- **10+ text sizes** — Scale should have 6-8 max
-- **Gray text on gray background** — Contrast failure
-- **Bold in body text** — Flattens hierarchy
-- **Centered paragraphs** — Only for short marketing copy
-- **Decorative display font without intent** — Should serve brand or product personality, not just decoration
-- **ALL CAPS without letter-spacing** — Always needs tracking
-- **Inconsistent spacing** — Random gaps between elements
-- **Too many font weights** — 400/500/600 is enough
+- **10+ text sizes** - Scale should have 6-8 max
+- **Gray text on gray background** - Contrast failure
+- **Bold in body text** - Flattens hierarchy
+- **Centered paragraphs** - Only for short marketing copy
+- **Decorative display font without intent** - Should serve brand or product personality, not just decoration
+- **ALL CAPS without letter-spacing** - Always needs tracking
+- **Inconsistent spacing** - Random gaps between elements
+- **Too many font weights** - 400/500/600 is enough
 
 ### Quick Test
 
@@ -657,9 +657,9 @@ Clear hierarchy guides the eye. Test by squinting.
 
 ### Hierarchy Test
 
-1. **Squint test** — Can you see 3 clear levels?
-2. **5-second test** — What do users see first?
-3. **Scan test** — Can you skim headings?
+1. **Squint test** - Can you see 3 clear levels?
+2. **5-second test** - What do users see first?
+3. **Scan test** - Can you skim headings?
 
 ### Anti-patterns
 
@@ -698,7 +698,7 @@ Clear hierarchy guides the eye. Test by squinting.
 Reference implementation with all tokens:
 
 <details>
-<summary><b>Detail</b> — the commands</summary>
+<summary><b>Detail</b> - the commands</summary>
 
 ```css
 :root {

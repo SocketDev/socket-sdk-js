@@ -8,11 +8,11 @@ The fleet rule "Never fork fleet-canonical files locally" (CLAUDE.md fleet block
 
 Fleet-canonical surfaces (anything tracked by `socket-wheelhouse/scripts/sync-scaffolding/manifest.mts`):
 
-- `.config/fleet/oxlint-plugin/` — oxlint plugin index + rules
-- `.git-hooks/` — commit-msg / pre-commit / pre-push entry shims + .mts helpers (git invokes the shims when `core.hooksPath` is set to this directory)
-- `.claude/hooks/` — PreToolUse / PostToolUse hooks
-- `.claude/skills/_shared/` — shared skill helpers
-- `docs/agents.md/` — CLAUDE.md offshoot references
+- `.config/fleet/oxlint-plugin/` - oxlint plugin index + rules
+- `.git-hooks/` - commit-msg / pre-commit / pre-push entry shims + .mts helpers (git invokes the shims when `core.hooksPath` is set to this directory)
+- `.claude/hooks/` - PreToolUse / PostToolUse hooks
+- `.claude/skills/_shared/` - shared skill helpers
+- `docs/agents.md/` - CLAUDE.md offshoot references
 
 When Claude tries to Edit/Write a file under one of these prefixes in a fleet member (any repo with `CLAUDE.md` carrying a `<fleet-canonical>` block marker such as `<!-- <fleet-canonical> -->`, except `socket-wheelhouse/template/`), the hook exits 2 with a stderr message that:
 
@@ -21,7 +21,7 @@ When Claude tries to Edit/Write a file under one of these prefixes in a fleet me
 3. Provides the exact `sync-scaffolding` command to cascade.
 4. Documents the bypass phrase.
 
-Edits inside `socket-wheelhouse/template/` are ALLOWED — that IS the canonical home.
+Edits inside `socket-wheelhouse/template/` are ALLOWED - that IS the canonical home.
 
 ## Bypass
 
@@ -40,9 +40,9 @@ The hook catches the failure mode where Claude reaches for a "quick fix" in a do
 For each Edit/Write/MultiEdit call:
 
 1. Resolve `tool_input.file_path` to an absolute path.
-2. Check if the path contains `/socket-wheelhouse/template/` — if yes, allow.
+2. Check if the path contains `/socket-wheelhouse/template/` - if yes, allow.
 3. Walk up directories looking for a fleet repo root: `package.json` AND `CLAUDE.md` carrying a `<fleet-canonical>` block marker (`<!-- <fleet-canonical> -->`).
-4. If no fleet repo root is found - the file is outside any fleet repo — allow.
+4. If no fleet repo root is found - the file is outside any fleet repo - allow.
 5. Compute the file path relative to the repo root.
 6. **Wheelhouse-own-README exemption:** if the path is the root `README.md` AND the repo is the wheelhouse itself (identified by a `template/CLAUDE.md` marker via `isWheelhouseRoot`), allow. The wheelhouse's root README is authored repo content (`# socket-wheelhouse`, real badges), not a cascade copy of `template/README.md`. That template file is the `<REPO_NAME>` placeholder fresh repos adopt, a different file: the cascade synthesizes each downstream README from the placeholder and never overwrites the wheelhouse's own. A downstream repo has no `template/`, so its root README is already non-canonical and reaches this point allowed anyway.
 7. **Fleet-block exemption:** if the file carries `<fleet-canonical>` block markers (`<!-- <fleet-canonical> -->` … `<!-- </fleet-canonical> -->`, on disk or in the incoming content), it's a hybrid whose content outside the markers is repo-owned, so allow. The sync's fleet-block check re-validates the marked region at commit time.
@@ -55,10 +55,10 @@ The hook fails open on its own bugs (exit 0 + stderr log) so a bad deploy can't 
 
 ## Companion files
 
-- `index.mts` — the hook itself.
-- `test/index.test.mts` — node:test specs.
-- `package.json` — workspace declaration so `taze` can see the hook's deps.
-- `tsconfig.json` — fleet-canonical TS config.
+- `index.mts` - the hook itself.
+- `test/index.test.mts` - node:test specs.
+- `package.json` - workspace declaration so `taze` can see the hook's deps.
+- `tsconfig.json` - fleet-canonical TS config.
 
 ## Adding a new canonical surface
 

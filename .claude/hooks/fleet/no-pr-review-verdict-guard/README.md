@@ -1,6 +1,6 @@
 # no-pr-review-verdict-guard
 
-PreToolUse (Bash) guard. Blocks a `gh pr review` that renders a **verdict** —
+PreToolUse (Bash) guard. Blocks a `gh pr review` that renders a **verdict** -
 `--approve` / `-a` or `--request-changes` / `-r`.
 
 ## Why
@@ -14,12 +14,12 @@ comment-only rule in the fleet PR-review doctrine
 ## What passes
 
 - `gh pr review --comment` / `-c` (a comment-only review).
-- `gh pr comment` — a plain PR comment.
+- `gh pr comment` - a plain PR comment.
 - Any command without a `gh pr review` verdict flag.
 
 The command is parsed with the fleet shell tokenizer (`_shared/shell-command.mts`),
 so a quoted `--approve` inside a comment body or a sibling command cannot
-false-fire — the flag only counts when it rides `gh pr review`'s own args.
+false-fire - the flag only counts when it rides `gh pr review`'s own args.
 
 ## Bypass
 

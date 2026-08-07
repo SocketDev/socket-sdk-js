@@ -29,14 +29,14 @@ AgentShield scans `.claude/` for Claude Code configuration risks. Rules grouped 
 | `env-var-with-value`      | `"FOO_TOKEN=actual-value"` in settings env blocks (env var set to a literal secret, not `${FOO_TOKEN}`) | CRITICAL         |
 | `dotfile-leak`            | `.env*` paths written to MCP server configs where the path would be cat'd                               | HIGH             |
 
-**Fix**: replace the literal with an environment-variable reference (`${TOKEN_NAME}`) or move the secret into the shell environment and read via `process.env`. Never commit literals even if redacted with asterisks — git history preserves them.
+**Fix**: replace the literal with an environment-variable reference (`${TOKEN_NAME}`) or move the secret into the shell environment and read via `process.env`. Never commit literals even if redacted with asterisks - git history preserves them.
 
 ### Tool-allowlist rules
 
 | Rule                      | What it flags                                                               | Default severity |
 | ------------------------- | --------------------------------------------------------------------------- | ---------------- |
 | `bash-wildcard-allowlist` | `"Bash(*)"` or `"Bash(.*)"` in allow list                                   | HIGH             |
-| `overly-broad-glob`       | `"Read(/**)"` or a home-directory wildcard — broader than the work requires | MEDIUM           |
+| `overly-broad-glob`       | `"Read(/**)"` or a home-directory wildcard - broader than the work requires | MEDIUM           |
 | `unknown-tool-allowed`    | A tool name not recognized by Claude Code's catalog                         | MEDIUM           |
 
 **Fix**: narrow the allow list to the specific commands / paths the workflow actually uses. The allow list is a security boundary, not a convenience list.
@@ -46,7 +46,7 @@ AgentShield scans `.claude/` for Claude Code configuration risks. Rules grouped 
 | Rule                               | What it flags                                                                                                              | Default severity |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | `instruction-override-in-agent-md` | Text in agent / skill markdown that looks like "ignore previous instructions" or asks Claude to override its system prompt | HIGH             |
-| `executable-content-in-md`         | Shell-looking blocks not fenced as code — Claude may execute them literally                                                | MEDIUM           |
+| `executable-content-in-md`         | Shell-looking blocks not fenced as code - Claude may execute them literally                                                | MEDIUM           |
 | `external-url-to-fetch`            | Hard-coded URLs to fetch third-party content at runtime without a SHA pin                                                  | MEDIUM           |
 
 **Fix**: fence all shell blocks as markdown code blocks. Pin any external fetch by SHA. Never include "override this" language in agent definitions.
@@ -81,12 +81,12 @@ Zizmor scans `.github/workflows/*.yml`. Top-severity rules:
 
 | Rule                          | What it flags                                                                                                          | Default severity |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| `unpinned-action`             | `uses: actions/checkout@v4` (tag — mutable) instead of `@<full-sha>`                                                   | HIGH             |
+| `unpinned-action`             | `uses: actions/checkout@v4` (tag - mutable) instead of `@<full-sha>`                                                   | HIGH             |
 | `template-injection`          | `${{ github.event.issue.title }}` interpolated into a `run:` step without pre-validation                               | CRITICAL         |
 | `excessive-permissions`       | `permissions: write-all` or `permissions: contents: write` when the job only reads                                     | HIGH             |
 | `secret-in-env-at-step-level` | `env:` block at step level carrying a secret other jobs in the workflow can't see                                      | MEDIUM           |
-| `pull-request-target-no-ref`  | `pull_request_target` trigger with no `ref:` — default checks out main, but the PR's code runs via an embedded command | CRITICAL         |
-| `bash-at-step-level-no-shell` | `run:` without `shell: bash` — bash-specific syntax fails on Windows runners                                           | LOW              |
+| `pull-request-target-no-ref`  | `pull_request_target` trigger with no `ref:` - default checks out main, but the PR's code runs via an embedded command | CRITICAL         |
+| `bash-at-step-level-no-shell` | `run:` without `shell: bash` - bash-specific syntax fails on Windows runners                                           | LOW              |
 | `artifact-upload-secret`      | An action uploads artifacts from a path that may contain a secret                                                      | HIGH             |
 
 **Fix**: pin every action SHA (use `# v4` trailing comment for human readability). For `template-injection`, stash the untrusted input in an env var first, then reference that env var in the shell:
@@ -119,7 +119,7 @@ When CLAUDE.md enumerates _forbidden token prefixes_ (like the token-guard hook 
 
 ### "Unpinned action" on a reusable workflow call
 
-Reusable workflows referenced via `uses: owner/repo/.github/workflows/file.yml@ref` — zizmor flags if `ref` isn't a full SHA. Same rule as for regular actions. Pin the SHA.
+Reusable workflows referenced via `uses: owner/repo/.github/workflows/file.yml@ref` - zizmor flags if `ref` isn't a full SHA. Same rule as for regular actions. Pin the SHA.
 
 **Resolution**: pin the SHA with a trailing version comment.
 
@@ -141,7 +141,7 @@ Trusted context fields (`github.run_id`, `github.sha`, `github.ref_name`) are zi
 
 ### "Dotfile leak" for `.env.example`
 
-`.env.example` is by convention a _template_ for developers — no real values. If AgentShield flags it, it's a false positive.
+`.env.example` is by convention a _template_ for developers - no real values. If AgentShield flags it, it's a false positive.
 
 **Resolution**: rename to `.env.example.template` if AgentShield insists, or add a path-specific ignore.
 
@@ -154,7 +154,7 @@ Trusted context fields (`github.run_id`, `github.sha`, `github.ref_name`) are zi
 When triaging findings, decide whether to treat a finding at default severity or promote / demote.
 
 <details>
-<summary><b>Detail</b> — the commands</summary>
+<summary><b>Detail</b> - the commands</summary>
 
 ```
  ┌─────────────────────────────────────────────────────────┐
@@ -284,7 +284,7 @@ Shell-style substitution reads from the environment at skill-run time; the liter
 
 ## 6. When to skip a check (and how)
 
-Skipping a rule is sometimes correct — when the finding is a documented false positive, or when the rule's cost outweighs its value for this repo.
+Skipping a rule is sometimes correct - when the finding is a documented false positive, or when the rule's cost outweighs its value for this repo.
 
 ### AgentShield
 
@@ -345,10 +345,10 @@ Read in this order:
 
 ## 8. Cross-references
 
-- **SKILL.md** — the phased scan workflow.
-- `.claude/skills/_shared/security-tools.md` — tool detection (AgentShield, zizmor) + install paths.
-- `.claude/skills/_shared/report-format.md` — grade rubric + HANDOFF block format.
-- `.claude/skills/_shared/env-check.md` — common environment prep.
-- `.claude/agents/security-reviewer.md` — the agent that produces the final grade.
-- [AgentShield docs](https://github.com/socketdev/agentshield) — upstream tool.
-- [zizmor docs](https://woodruffw.github.io/zizmor/) — upstream tool.
+- **SKILL.md** - the phased scan workflow.
+- `.claude/skills/_shared/security-tools.md` - tool detection (AgentShield, zizmor) + install paths.
+- `.claude/skills/_shared/report-format.md` - grade rubric + HANDOFF block format.
+- `.claude/skills/_shared/env-check.md` - common environment prep.
+- `.claude/agents/security-reviewer.md` - the agent that produces the final grade.
+- [AgentShield docs](https://github.com/socketdev/agentshield) - upstream tool.
+- [zizmor docs](https://woodruffw.github.io/zizmor/) - upstream tool.

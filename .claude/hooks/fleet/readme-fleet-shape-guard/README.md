@@ -8,9 +8,9 @@ Root READMEs across fleet repos drift in four predictable ways: (a) the canonica
 
 The fleet has matching surfaces at three layers:
 
-- **Lint-time** — `template/.config/fleet/markdownlint-rules/socket-{readme-required-sections, readme-social-badges, no-private-wheelhouse-leak, no-relative-sibling-script}.mts`.
-- **Sync-time** — `scripts/sync-scaffolding/checks/readme-skeleton-drift.mts` (report-only; no autofix because README content is contextual).
-- **Edit-time** — this hook. Fires at the earliest surface, before the drift can be committed or pushed.
+- **Lint-time** - `template/.config/fleet/markdownlint-rules/socket-{readme-required-sections, readme-social-badges, no-private-wheelhouse-leak, no-relative-sibling-script}.mts`.
+- **Sync-time** - `scripts/sync-scaffolding/checks/readme-skeleton-drift.mts` (report-only; no autofix because README content is contextual).
+- **Edit-time** - this hook. Fires at the earliest surface, before the drift can be committed or pushed.
 
 ## How
 
@@ -20,7 +20,7 @@ On `Edit` / `MultiEdit` / `Write` whose `file_path` resolves to the repo-root `R
 2. Runs four checks: section list (5 required, in order); `socket-wheelhouse` mention (outside fenced code blocks); sibling-repo relative path patterns; canonical social-follow badge presence (X / Twitter + Bluesky).
 3. If any check fires AND the user hasn't typed the bypass phrase, exits 2 with a stderr explaining which rule was hit, the canonical fix, and the bypass instructions.
 
-Nested READMEs (`packages/*/README.md`, `docs/*/README.md`, etc.) are silently ignored — they're scoped docs with their own shape.
+Nested READMEs (`packages/*/README.md`, `docs/*/README.md`, etc.) are silently ignored - they're scoped docs with their own shape.
 
 ## Bypass
 
@@ -32,5 +32,5 @@ The hook fails open on its own bugs (exit 0 + stderr log) so a buggy hook can't 
 
 ## Related
 
-- `.claude/hooks/fleet/no-meta-comments-guard/` — structural template; same `_shared/transcript.mts` bypass pattern.
-- `.claude/hooks/fleet/plan-location-guard/` — same PreToolUse + bypass shape, blocking on file-path classification.
+- `.claude/hooks/fleet/no-meta-comments-guard/` - structural template; same `_shared/transcript.mts` bypass pattern.
+- `.claude/hooks/fleet/plan-location-guard/` - same PreToolUse + bypass shape, blocking on file-path classification.

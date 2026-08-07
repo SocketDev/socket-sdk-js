@@ -22,7 +22,7 @@
 //     `{ opts: number }` type member are NOT flagged — they are not a param
 //     binding named `opts`.
 //   - `.d.ts` mirrors, external-package signatures, and test files are exempt.
-//   - A line carrying `// socket-lint: allow options-param-naming` (same line
+//   - A line carrying `// oxlint-disable-next-line socket/options-param-naming` (same line
 //     as the param or the line before the function) is exempt for one-offs.
 //
 // Bypass phrase: `Allow options-param-naming bypass`, whole session.
@@ -32,11 +32,12 @@
 // fail-open. The hook fails OPEN on its own bugs (exit 0 + stderr log) so a
 // bad deploy can't brick the session.
 
+import { suppressionCoversLine } from '../_shared/markers.mts'
 import { offsetToLineCol, tryParse } from '../_shared/ast/core.mts'
 import type { AcornNode } from '../_shared/ast/core.mts'
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 
-const ALLOW_MARKER = '// socket-lint: allow options-param-naming'
+const ALLOW_MARKER = '// oxlint-disable-next-line socket/options-param-naming'
 const BANNED_PARAM_NAME = 'opts'
 
 // File extensions where the convention applies. `.d.ts` is handled separately
@@ -139,11 +140,9 @@ export function applyAllowMarkerFilter(
   const out: Offense[] = []
   for (let i = 0, { length } = offsets; i < length; i += 1) {
     const { line } = offsetToLineCol(source, offsets[i]!)
-    /* c8 ignore next - offsetToLineCol always maps to an existing line; defensive fallback */
-    const onLine = lines[line - 1] ?? ''
-    /* c8 ignore next - lines[line-2] is always present when line>=2 for valid source; defensive fallback */
-    const prev = line >= 2 ? (lines[line - 2] ?? '') : ''
-    if (onLine.includes(ALLOW_MARKER) || prev.includes(ALLOW_MARKER)) {
+    // `line` is 1-based; the reader indexes the array, and it knows which
+    // spelling covers the line itself versus the one above.
+    if (suppressionCoversLine(lines, line - 1, 'options-param-naming')) {
       continue
     }
     out.push({ line })

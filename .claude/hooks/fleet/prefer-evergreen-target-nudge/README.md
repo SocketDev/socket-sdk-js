@@ -1,6 +1,6 @@
 # prefer-evergreen-target-nudge
 
-Claude Code **Stop** hook (nudge — never blocks, always exits 0).
+Claude Code **Stop** hook (nudge - never blocks, always exits 0).
 
 ## Why
 

@@ -77,7 +77,7 @@ Two platform constraints shape this model (verified against GitHub docs,
 
 Scheduled workflows (`on: schedule`) register their cron from the DEFAULT
 branch's committed file, so every workflow stays git-tracked even in a thin
-member ([`thin-distribution.md`](thin-distribution.md)).
+member ([`fleet-pack-distribution.md`](fleet-pack-distribution.md)).
 
 ## Internal action-pin staleness: the implicit data edge
 

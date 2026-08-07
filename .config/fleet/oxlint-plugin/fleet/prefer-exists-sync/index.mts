@@ -29,10 +29,7 @@ import {
   appendImportFixes,
   summarizeImportTarget,
 } from '../../_shared/inject-import.mts'
-import {
-  makeBypassChecker,
-  socketLintAllowRe,
-} from '../../lib/comment-markers.mts'
+import { makeBypassChecker } from '../../lib/comment-markers.mts'
 
 import type { AstNode, RuleContext, RuleFixer } from '../../lib/rule-types.mts'
 
@@ -41,12 +38,6 @@ const STAT_METHODS = new Set(['lstat', 'lstatSync', 'stat', 'statSync'])
 const WRAPPER_NAMES = new Set(['fileExists', 'isDir', 'isFile', 'pathExists'])
 
 const EXISTS_SYNC_IMPORT_LINE = "import { existsSync } from 'node:fs'"
-
-// The escape the `stat` message promises. A stat kept for its METADATA — size,
-// mtime, mode — is legitimate and must stay a stat call, which this rule's own
-// header says. Until now the message named a way out that did not exist, so
-// such a call had no way to pass.
-const STAT_BYPASS_RE = socketLintAllowRe('stat-for-metadata')
 
 /**
  * @type {import('eslint').Rule.RuleModule}
@@ -64,7 +55,7 @@ const rule = {
     messages: {
       access:
         'fs.{{method}}() — use existsSync from node:fs for existence checks. fs.access throws on missing files (forces try/catch); existsSync returns boolean directly.',
-      stat: 'fs.{{method}}() — if you only need to know whether the path exists, use existsSync from node:fs. If you need the metadata (size, mtime), keep stat and mark the line `socket-lint: allow stat-for-metadata` with the reason.',
+      stat: 'fs.{{method}}() — if you only need to know whether the path exists, use existsSync from node:fs. If you need the metadata (size, mtime), keep stat and mark the line `oxlint-disable-next-line socket/prefer-exists-sync` with the reason.',
       fileExists:
         'Custom `{{name}}` wrapper — use existsSync from node:fs directly.',
     },
@@ -72,7 +63,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const hasStatBypass = makeBypassChecker(context, STAT_BYPASS_RE)
+    const hasStatBypass = makeBypassChecker(
+      context,
+      'socket/prefer-exists-sync',
+    )
     const sourceCode = context.getSourceCode
       ? context.getSourceCode()
       : context.sourceCode
@@ -194,5 +188,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

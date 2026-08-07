@@ -23,25 +23,25 @@ For every Skill tool call, appends a single line to
 
     <ISO-timestamp>\t<skill-name>\t<cwd>
 
-- `ISO-timestamp` — UTC `YYYY-MM-DDTHH:MM:SS.sssZ`
-- `skill-name` — the `skill` argument the Skill tool was invoked with
-- `cwd` — `process.cwd()` at hook time (proxy for "which repo")
+- `ISO-timestamp` - UTC `YYYY-MM-DDTHH:MM:SS.sssZ`
+- `skill-name` - the `skill` argument the Skill tool was invoked with
+- `cwd` - `process.cwd()` at hook time (proxy for "which repo")
 
 Tab-separated so `audit-skill-usage.mts` can `split('\t')` without
 worrying about embedded spaces or commas. Newline at end.
 
 ## What it does NOT do
 
-- Block — fails open on every error path. Never costs the user a
+- Block - fails open on every error path. Never costs the user a
   Skill call.
-- Phone home — the log file lives on local disk only. The aggregator
+- Phone home - the log file lives on local disk only. The aggregator
   surveys the same disk.
-- Capture arguments — only the skill name is recorded. Per-call args
+- Capture arguments - only the skill name is recorded. Per-call args
   may contain user content; out of scope for usage telemetry.
 
 ## Bypass
 
-None — the hook is read-only telemetry. If you want to disable it
+None - the hook is read-only telemetry. If you want to disable it
 in a specific session, `unset SOCKET_SKILL_USAGE_LOG` (it defaults
 to the canonical path; setting it empty disables the write).
 
@@ -62,5 +62,5 @@ is the consumer.
 `~/.claude/projects/*/.skill-usage.log`, groups by skill name, emits
 a histogram + per-skill freshness (last-seen date). Skills with zero
 invocations in the last 30 days are candidates for removal per
-CLAUDE.md _Compound lessons_ — if nobody uses it, it isn't earning
+CLAUDE.md _Compound lessons_ - if nobody uses it, it isn't earning
 its CLAUDE.md cite.

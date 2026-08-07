@@ -28,7 +28,9 @@ const PLUGIN_INDEX = path.resolve(
  * Build the minimal .oxlintrc.json that enables ONE socket plugin rule plus the
  * plugin's JS entry point.
  */
-// oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet optional-explicit-undefined convention: the explicit | undefined on an optional is intentional, not redundant.
+// Fleet optional-explicit-undefined convention: the explicit | undefined on an
+// optional is intentional, not redundant.
+// oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet
 export function buildConfig(
   ruleName: string,
   ruleOptions?: unknown | undefined,

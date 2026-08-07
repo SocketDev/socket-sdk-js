@@ -2,11 +2,11 @@
 
 `PreToolUse(Edit|Write)` blocker for `.github/workflows/*.yml` that combines the three high-risk patterns:
 
-1. `on: pull_request_target` — runs in the BASE repo's context with secrets.
-2. `actions/checkout` with `ref: ${{ github.event.pull_request.head.* }}` — checks out the FORK's code (attacker-controlled).
+1. `on: pull_request_target` - runs in the BASE repo's context with secrets.
+2. `actions/checkout` with `ref: ${{ github.event.pull_request.head.* }}` - checks out the FORK's code (attacker-controlled).
 3. Subsequent execute-fork-code step (`pnpm i`, `npm i`, `yarn`, `bun i`, `pip install`, `cargo build`, `go build`, `make`, etc.).
 
-When all three are present, a fork PR can exfiltrate the base repo's secrets via a malicious `prepare` / `postinstall` script or build step. `--ignore-scripts` neutralizes installs but not builds — the hook only treats install-script-bypassed installs as safe; build steps still trip.
+When all three are present, a fork PR can exfiltrate the base repo's secrets via a malicious `prepare` / `postinstall` script or build step. `--ignore-scripts` neutralizes installs but not builds - the hook only treats install-script-bypassed installs as safe; build steps still trip.
 
 ## Coverage relative to zizmor
 
@@ -16,7 +16,7 @@ This hook adds the **specific exploitation path**: not "you used a dangerous tri
 
 ## Bypass
 
-`Allow pr-target-execution bypass` in a recent user turn. Rare — the safer patterns (split workflows, `labeled`-gated triggers, never check out fork code in privileged context) cover ~all legitimate use cases.
+`Allow pr-target-execution bypass` in a recent user turn. Rare - the safer patterns (split workflows, `labeled`-gated triggers, never check out fork code in privileged context) cover ~all legitimate use cases.
 
 ## Reference
 

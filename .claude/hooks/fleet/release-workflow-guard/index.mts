@@ -160,7 +160,9 @@ export function countPriorDispatches(
   } catch {
     return 0
   }
-  // oxlint-disable-next-line socket/sort-set-args -- two derived forms of one workflow name (the value + its extension-stripped form); Set membership order is immaterial.
+  // Two derived forms of one workflow name (the value + its extension-stripped
+  // form); Set membership order is immaterial.
+  // oxlint-disable-next-line socket/sort-set-args -- two derived forms of one
   const accepted = new Set([workflow, workflow.replace(/\.(?:yaml|yml)$/i, '')])
   let count = 0
   const lines = raw.split('\n')
@@ -325,7 +327,8 @@ export function dispatchLedgerReport(
   }
   const lines = raw.split('\n')
   const deniedIds = collectHookDeniedToolUseIds(lines)
-  // oxlint-disable-next-line socket/sort-set-args -- two derived forms of one workflow name; membership order is immaterial.
+  // Two derived forms of one workflow name; membership order is immaterial.
+  // oxlint-disable-next-line socket/sort-set-args -- two derived forms of one
   const accepted = new Set([workflow, workflow.replace(/\.(?:yaml|yml)$/i, '')])
   const needles = phrases.map(p => normalizeBypassText(p))
   let credits = 0
@@ -675,7 +678,8 @@ export function resolveSearchRoots(command: string): string[] {
     /* c8 ignore stop */
   }
   if (!projectDir) {
-    // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- documented last resort, see resolution order above: env unset AND the module-path walk found no .github/workflows; the invoking shell's directory is the only remaining candidate for the workflow root.
+    // documented last resort, see resolution order above: env unset AND the module-path walk found no .github/workflows; the invoking shell's directory is the only remaining candidate for the workflow root.
+    // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- doc'd
     projectDir = process.cwd()
   }
   const repoMatch = GH_REPO_FLAG_RE.exec(command)
@@ -697,7 +701,8 @@ export function resolveSearchRoots(command: string): string[] {
   // workflow YAML when the user types `cd ../sibling && gh workflow
   // run ...` from a session pinned to a different project.
   const roots: string[] = [projectDir]
-  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- deliberate live-cwd probe, see comment above: the invoking shell's directory is added as a SECONDARY workflow root when it differs from projectDir; an anchored path would make the branch dead.
+  // deliberate live-cwd probe, see comment above: the invoking shell's directory is added as a SECONDARY workflow root when it differs from projectDir; an anchored path would make the branch dead.
+  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- chosen
   const cwd = process.cwd()
   if (
     cwd !== projectDir &&

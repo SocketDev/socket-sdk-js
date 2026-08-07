@@ -2,7 +2,7 @@
 
 PreToolUse hook that blocks a `git commit -m <msg>` /
 `--message=<msg>` tool call whose subject line is a content-free
-placeholder — `wip`, `init`, `initial`, `test`, `tmp`, `temp`,
+placeholder - `wip`, `init`, `initial`, `test`, `tmp`, `temp`,
 `update`, `fix`, `changes`, `commit`, `.`, or an empty subject (see
 the full denylist in `.git-hooks/_shared/commit-subject.mts`).
 
@@ -46,11 +46,11 @@ turn, then retry. The phrase authorises the next blocked
 - `tool_name !== 'Bash'`.
 - Commands that are not a `git commit` invocation.
 - `git commit` with no inline `-m` / `--message` subject (uses
-  `-F file`, `-e` editor, or a bare `git commit`) — the editor /
+  `-F file`, `-e` editor, or a bare `git commit`) - the editor /
   file / the `commit-msg` git-stage backstop owns those forms.
 
 ## Failure mode
 
 Fails open: any internal error logs to stderr and exits 0. The hook
-is a quality gate, not a hard dependency — it never wedges the
+is a quality gate, not a hard dependency - it never wedges the
 operator's flow.

@@ -5,7 +5,7 @@ Blocks `gh pr create` / `gh pr new` when the target repo is **socket-wheelhouse*
 The wheelhouse has never used pull requests: work lands by committing and
 pushing to local `main`, which is canonical and fast-moving. Parallel sessions
 land constantly and an auto-committing cascade gate flattens in-flight drift,
-so a PR against that trunk goes stale within minutes — it collects unrelated
+so a PR against that trunk goes stale within minutes - it collects unrelated
 cascade commits, fails checks purely from staleness, and needs rebuilding
 against a moving target. All of that is work the PR itself created.
 
@@ -16,7 +16,7 @@ Two independent signals; either one fires:
 1. An explicit `--repo <owner/repo>` / `-R <owner/repo>` (or a URL) on the
    `gh pr create` command that resolves to `SocketDev/socket-wheelhouse`.
 2. Otherwise, the origin remote of the directory the command runs in (a
-   leading `cd <dir>`, else the hook cwd — resolved via the shared
+   leading `cd <dir>`, else the hook cwd - resolved via the shared
    `extractGitCwd`) resolving to `SocketDev/socket-wheelhouse` via
    `git remote get-url origin`.
 
@@ -25,9 +25,9 @@ handled; comparison is case-insensitive and `.git`-suffix tolerant.
 
 ## What it allows
 
-- `gh pr create` against any **non-wheelhouse** repo — most fleet members and
+- `gh pr create` against any **non-wheelhouse** repo - most fleet members and
   every external repo are PR-based, and this must not touch them.
-- `gh pr view|list|checks|comment|edit|close|merge` — a bot or an outside
+- `gh pr view|list|checks|comment|edit|close|merge` - a bot or an outside
   contributor can still open a PR against the mirror, and refusing to read or
   answer it would be worse than the problem.
 - `git push`, `gh release`, and any non-`pr create` command.

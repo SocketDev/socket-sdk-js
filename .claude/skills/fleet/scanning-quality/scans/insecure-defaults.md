@@ -4,14 +4,14 @@ Look for fail-open security defaults, hardcoded credentials, and "lazy default" 
 
 ## Mission
 
-Identify configurations where the **default** path is the unsafe one — the value used when the user / env / config didn't say otherwise. A default that fails open is a default that ships.
+Identify configurations where the **default** path is the unsafe one - the value used when the user / env / config didn't say otherwise. A default that fails open is a default that ships.
 
 ## Scan targets
 
 - All `.env.example`, `.env.template`, `*.config.{js,mjs,ts,mts}` files.
 - Constructor / function defaults: `function foo(opt = { secure: false })`, `class Foo { constructor(opt = {}) { … }`.
 - Boolean-default parameters where the safe choice is `true` and the code defaults to `false` (or vice versa).
-- Environment-variable fallbacks: `process.env.X || 'fallback'` — is the fallback safe?
+- Environment-variable fallbacks: `process.env.X || 'fallback'` - is the fallback safe?
 - Hook / middleware order: is the auth check skippable when a flag is missing?
 - Workflow `if:` conditions that skip security gates on non-default branches.
 
@@ -31,8 +31,8 @@ Identify configurations where the **default** path is the unsafe one — the val
 
 1. Walk the targets enumerated above.
 2. For each match, capture: file:line, the default value, the safe alternative, the impact if the default ships.
-3. Cross-check against fleet rules from CLAUDE.md — a rule violation makes the finding Critical regardless of upstream behavior.
-4. Don't flag test fixtures clearly under `__fixtures__/`, `test/`, `tests/`, or `*.test.{js,ts,mts}` — those are scoped to tests by convention.
+3. Cross-check against fleet rules from CLAUDE.md - a rule violation makes the finding Critical regardless of upstream behavior.
+4. Don't flag test fixtures clearly under `__fixtures__/`, `test/`, `tests/`, or `*.test.{js,ts,mts}` - those are scoped to tests by convention.
 
 ## Output shape
 
@@ -50,9 +50,9 @@ Identify configurations where the **default** path is the unsafe one — the val
 
 ## Severity rubric
 
-- **Critical** — secret leaked / auth skipped / encryption disabled by default.
-- **High** — security check made optional, or default does not enforce a fleet rule.
-- **Medium** — observability / audit defaults that mask incidents.
+- **Critical** - secret leaked / auth skipped / encryption disabled by default.
+- **High** - security check made optional, or default does not enforce a fleet rule.
+- **Medium** - observability / audit defaults that mask incidents.
 
 ## Source
 

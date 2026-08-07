@@ -14,7 +14,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { readFileForScan, shouldSkipFile } from './file-scan.mts'
 import { gitLines } from './git.mts'
-import { socketLintMarkerFor, stripTemplateLayer } from './scan-core.mts'
+import { stripTemplateLayer, suppressionFor } from './scan-core.mts'
 import { scanCrossRepoPaths, scanLoggerLeaks } from './scan-code-refs.mts'
 import {
   scanAwsKeys,
@@ -121,7 +121,7 @@ export const scanFilesInRange = (range: string): number => {
           '`C:\\Users\\<USERNAME>\\...` (Windows). Env vars also work ' +
           '(`$HOME`, `${USER}`). For documentation lines that need the ' +
           'literal form, put the marker ' +
-          `\`${socketLintMarkerFor(file, 'personal-path')}\` on its own line above it.`,
+          `\`${suppressionFor(file, 'personal-path')}\` on its own line above it.`,
       )
       errors++
     }
@@ -215,8 +215,8 @@ export const scanFilesInRange = (range: string): number => {
         logger.info(
           'Use `getDefaultLogger()` from `@socketsecurity/lib-stable/logger/default`. ' +
             'For a deliberate raw write, put the marker on its own line above ' +
-            'the call: `// socket-lint: allow console` for `console.*`, or ' +
-            '`// socket-lint: allow process-stdio` for `process.std{out,err}.write` ' +
+            'the call: `// oxlint-disable-next-line socket/no-console-prefer-logger` for `console.*`, or ' +
+            '`// oxlint-disable-next-line socket/no-direct-stream-write` for `process.std{out,err}.write` ' +
             '(the id must match the call kind — that is what `scanLoggerLeaks` keys on). ' +
             'no-malformed-bypass-marker rejects the trailing form.',
         )
@@ -253,7 +253,7 @@ export const scanFilesInRange = (range: string): number => {
         logger.info(
           'Cross-repo paths are forbidden — import via the published npm ' +
             'package (`@socketsecurity/lib-stable/<subpath>`) instead. For doc ' +
-            `lines, append \`${socketLintMarkerFor(file, 'cross-repo')}\`.`,
+            `lines, append \`${suppressionFor(file, 'cross-repo')}\`.`,
         )
         errors++
       }

@@ -13,7 +13,7 @@ and it drifts the tree off its pin.
 ## The incident
 
 A fleet lint autofix rewrote `null` to `undefined` inside
-`upstream/actions-checkout/__test__/*.test.ts` — the upstream's own tests. The
+`upstream/actions-checkout/__test__/*.test.ts` - the upstream's own tests. The
 drift stayed invisible until lockstep rows were added and the harness reported:
 
 ```
@@ -28,7 +28,7 @@ reached it. This guard catches **any** writer rather than one lint path.
 - Restoring a tree TO its pin. That runs through git
   (`git -C upstream/<name> checkout --detach <ref>`), which this hook never
   sees; `no-revert-guard` carves it out separately.
-- Anything with `FLEET_SYNC=1` set — the cascade materializes and repins
+- Anything with `FLEET_SYNC=1` set - the cascade materializes and repins
   upstream trees and is the sanctioned writer.
 
 ## Bypass

@@ -30,11 +30,10 @@ export {
 
 // Scanning kernel: line-splitting, marker/doc-context detection, LineHit shape.
 export {
-  aliasMatches,
   isInsideBackticks,
   lineIsSuppressed,
   looksLikeDocumentation,
-  socketLintMarkerFor,
+  suppressionFor,
   splitLines,
   stripTemplateLayer,
   suppressionCoversLine,
@@ -142,11 +141,15 @@ if (nodeMajor < NODE_MIN_MAJOR) {
   // status-emoji glyph) so the no-status-emoji lint rule stays clean
   // — the lint rule's recommendation (use logger.fail()) doesn't
   // apply when the entire branch is the logger-unavailable bail.
-  // oxlint-disable-next-line socket/no-module-eval-side-effects -- Node-floor bail before any import resolves; raw stderr is the only channel here.
+  // Node-floor bail, before any import resolves: raw stderr is the only
+  // channel available here.
+  // oxlint-disable-next-line socket/no-module-eval-side-effects -- floor bail
   process.stderr.write(
     `\x1b[0;31mHook requires Node >= ${NODE_MIN_MAJOR}.0.0 (have v${process.versions.node})\x1b[0m\n`,
   )
-  // oxlint-disable-next-line socket/no-module-eval-side-effects -- Node-floor bail before any import resolves; raw stderr is the only channel here.
+  // Node-floor bail, before any import resolves: raw stderr is the only
+  // channel available here.
+  // oxlint-disable-next-line socket/no-module-eval-side-effects -- floor bail
   process.stderr.write(
     'Install Node 24+ — these hooks rely on default-on .mts type stripping.\n',
   )

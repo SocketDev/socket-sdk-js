@@ -179,7 +179,7 @@ export function resolveEditedText(
       if (!text.includes(oldStr)) {
         return undefined
       }
-      text = text.replace(oldStr, newStr)
+      text = text.replace(oldStr, () => newStr)
     }
     return text
   }
@@ -189,7 +189,7 @@ export function resolveEditedText(
     if (!current.includes(oldStr)) {
       return undefined
     }
-    return current.replace(oldStr, newStr)
+    return current.replace(oldStr, () => newStr)
   }
   return undefined
 }

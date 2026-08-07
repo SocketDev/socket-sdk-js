@@ -9,7 +9,7 @@ The `--experimental-strip-types` flag became:
 - **Stable** in Node 22.6 (renamed to `--strip-types`, flag still accepted as alias).
 - **Default-on** in Node 24+.
 
-The fleet runs Node 22.6+ everywhere. Passing the flag is dead weight — it's a no-op on every supported runtime, emits a deprecation warning on some, and usually signals a stale copy-pasted invocation that was lifted from a Node 22.0–22.5 era guide.
+The fleet runs Node 22.6+ everywhere. Passing the flag is dead weight - it's a no-op on every supported runtime, emits a deprecation warning on some, and usually signals a stale copy-pasted invocation that was lifted from a Node 22.0–22.5 era guide.
 
 ## What it blocks
 
@@ -25,7 +25,7 @@ The hook reads the Claude Code PreToolUse JSON payload from stdin, inspects `too
 
 ## Bypass
 
-None. If a tool genuinely needs the flag (e.g. you're testing Node behavior on a stale runtime), invoke node directly without going through Bash, or pin a specific older Node version in the script. There is no allowlist — every fleet repo runs Node 22.6+.
+None. If a tool genuinely needs the flag (e.g. you're testing Node behavior on a stale runtime), invoke node directly without going through Bash, or pin a specific older Node version in the script. There is no allowlist - every fleet repo runs Node 22.6+.
 
 ## Test
 

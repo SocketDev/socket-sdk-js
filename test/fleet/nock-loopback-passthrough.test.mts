@@ -52,9 +52,10 @@ afterAll(async () => {
 })
 
 it('passes a fetch POST with a body through to an allowed loopback host', async () => {
-  // socket-lint: allow global-fetch -- the regression under guard lives in the
+  // The regression under guard lives in the.
   // interceptors fetch bypass path; httpRequest goes over node:http and would
   // never exercise it.
+  // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- the
   const res = await fetch(`${baseUrl}/echo`, {
     body: 'hello from the fleet',
     method: 'POST',

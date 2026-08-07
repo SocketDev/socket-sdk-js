@@ -14,9 +14,9 @@ unverified claim from landing.
 
 Two surfaces, one matcher:
 
-- `stop-claim-verify-nudge` (Stop) nudges at turn-end — catches the claim
+- `stop-claim-verify-nudge` (Stop) nudges at turn-end - catches the claim
   even on a turn that doesn't commit.
-- `unbacked-claim-commit-guard` (this, PreToolUse) hard-blocks the commit/push —
+- `unbacked-claim-commit-guard` (this, PreToolUse) hard-blocks the commit/push -
   the unverified claim can't land.
 
 Both consume `_shared/unbacked-claims.mts` (`CLAIM_RULES` / `findUnbackedClaims`
@@ -25,10 +25,10 @@ Both consume `_shared/unbacked-claims.mts` (`CLAIM_RULES` / `findUnbackedClaims`
 ## Trigger
 
 Fires on `Bash` when the command invokes `git commit` or `git push` (parsed
-with the shared shell parser — sees through chains and `git -C`). Pull / fetch /
+with the shared shell parser - sees through chains and `git -C`). Pull / fetch /
 status don't land work, so they don't fire.
 
 ## Bypass
 
-Type `Allow unbacked-claim bypass` in a recent user turn — when the claim is
+Type `Allow unbacked-claim bypass` in a recent user turn - when the claim is
 true but verified outside this session, or is acceptable to land.

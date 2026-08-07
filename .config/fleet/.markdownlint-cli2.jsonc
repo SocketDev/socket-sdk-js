@@ -74,6 +74,11 @@
     // Template sources (e.g. Eta `<%~ it.readme %>` package-README
     // scaffolds) are generators, not prose — their output is what gets
     // linted, in the repo it lands in.
+    // Both layouts: the pre-segregation `scripts/templates/` and the
+    // segregated `scripts/repo/templates/`. A repo-owned templates dir moving
+    // under scripts/repo/ must not start failing MD041 on files that are
+    // scaffolding, not documents.
+    "**/scripts/**/templates/**",
     "**/scripts/templates/**",
     // .claude/ markdown is internal scaffolding (hook READMEs, agent
     // role files, skill SKILL.mds, command reminders) — scoped docs

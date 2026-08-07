@@ -1,7 +1,7 @@
 # land-fast-nudge
 
 Stop hook. Nudges at turn-end when the checkout is on the default branch
-(main / master) and local HEAD has **diverged** from origin — it is BOTH
+(main / master) and local HEAD has **diverged** from origin - it is BOTH
 ahead AND behind `origin/<branch>`.
 
 A diverged default branch is the state where a direct `git push` is
@@ -15,7 +15,7 @@ lint gate, cherry-picks the local-only commits onto a throwaway
 `origin/<base>` worktree, and fast-forwards (never force). The fleet lints
 as it edits, so this needs no heavy re-run.
 
-Only fires when BOTH ahead AND behind — ahead-only is the
+Only fires when BOTH ahead AND behind - ahead-only is the
 `unpushed-main-nudge`'s job, behind-only just needs a pull.
 
 Fails open: any hook error is swallowed so a reminder bug never disrupts

@@ -1,7 +1,7 @@
 # parallel-agent-removal-nudge
 
 Stop hook. At turn-end, lists files THIS session previously **Read** that
-have since vanished or moved on disk — without this session running `rm`
+have since vanished or moved on disk - without this session running `rm`
 / `git rm` / `safeDelete` / `unlink` / `git mv` on them. That asymmetry
 (I read it, I didn't delete it, it's gone) is the fingerprint of another
 Claude session sharing the same `.git/` removing or moving files
@@ -34,11 +34,11 @@ that gap.
 
 ## Companion hooks
 
-- `parallel-agent-edit-guard` — PreToolUse block on Writes to foreign
+- `parallel-agent-edit-guard` - PreToolUse block on Writes to foreign
   files.
-- `parallel-agent-staging-guard` — PreToolUse block on destructive git
+- `parallel-agent-staging-guard` - PreToolUse block on destructive git
   ops while foreign paths exist.
-- `parallel-agent-on-stop-nudge` — Stop reminder for dirty foreign
+- `parallel-agent-on-stop-nudge` - Stop reminder for dirty foreign
   paths.
 
 This hook is the fourth surface in the family: the **read-then-gone**
@@ -46,7 +46,7 @@ detector. The three together cover write/git/dirty/vanished.
 
 ## Bypass
 
-No bypass — it's a reminder (exit 0), not a block.
+No bypass - it's a reminder (exit 0), not a block.
 
 ## Related
 

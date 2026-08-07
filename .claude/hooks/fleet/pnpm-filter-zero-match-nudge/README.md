@@ -1,6 +1,6 @@
 # pnpm-filter-zero-match-nudge
 
-**Type:** PostToolUse reminder (Bash) — nudges, never blocks.
+**Type:** PostToolUse reminder (Bash) - nudges, never blocks.
 
 **Trigger:** a Bash command containing `--filter`, AND the tool output contains
 "No projects matched the filters".
@@ -12,6 +12,6 @@ that looks successful but ran no scripts at all.
 
 **Action:** prints a nudge naming the failure and suggesting
 `pnpm ls --filter <name> --depth -1` to verify the package name. Does NOT
-block — the Bash tool has already completed.
+block - the Bash tool has already completed.
 
-**Bypass:** none — informational only (exit 0).
+**Bypass:** none - informational only (exit 0).

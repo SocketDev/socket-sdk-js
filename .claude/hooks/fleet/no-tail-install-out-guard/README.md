@@ -25,10 +25,10 @@ Leading `NAME=value` env assignments (`CI=true pnpm i`) don't disguise the match
 
 ## What it does NOT block
 
-- `pnpm i | grep -i warning` — grep scans the full output, exactly the recommended replacement.
-- `pnpm i && echo done | tail -5` — the tail consumes `echo`, not pnpm. The `&&` separates independent commands.
-- `git log | tail -20`, `ls | head -10`, `find … | head -1` — not install/check output.
-- `pnpm test | tee log.txt` — tee passes through; no truncation.
+- `pnpm i | grep -i warning` - grep scans the full output, exactly the recommended replacement.
+- `pnpm i && echo done | tail -5` - the tail consumes `echo`, not pnpm. The `&&` separates independent commands.
+- `git log | tail -20`, `ls | head -10`, `find … | head -1` - not install/check output.
+- `pnpm test | tee log.txt` - tee passes through; no truncation.
 
 ## How
 
@@ -38,7 +38,7 @@ Fails open on malformed payloads or parse errors (exit 0).
 
 ## Bypass
 
-None. The replacement is always available — `grep -iE "warning|error|ignored|fail"` (or any scan over the full output) gives the same context savings without hiding errors above the footer.
+None. The replacement is always available - `grep -iE "warning|error|ignored|fail"` (or any scan over the full output) gives the same context savings without hiding errors above the footer.
 
 ## Test
 

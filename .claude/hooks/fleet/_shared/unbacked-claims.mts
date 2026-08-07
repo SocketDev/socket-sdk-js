@@ -41,6 +41,35 @@ export interface ClaimRule {
   readonly label: string
 }
 
+/**
+ * A claim that names whose finding it is. Attribution is the SANCTIONED form:
+ * "the other agent reported the suite is green" is honest about its source, so
+ * it is not a restated-as-mine assertion and does not need a receipt.
+ *
+ * Exported so the boundary between relaying and asserting is testable.
+ */
+export const ATTRIBUTED_RE =
+  /\b(?:you (?:mentioned|said)|(?:he|it|she|they) (?:claim(?:ed|s)?|report(?:ed|s)?|said)|(?:a peer|another|the other|the) (?:agent|bot|run|session)\b[^.!?\n]{0,20}\b(?:claim(?:ed|s)?|report(?:ed|s)?|said)|according to|per (?:the|their) (?:message|report|run))/i
+
+/**
+ * The sentence of `text` containing `match`, so an attribution counts only
+ * where it actually sits. A "they said" three paragraphs away does not excuse a
+ * bare assertion here.
+ *
+ * Exported for tests.
+ */
+export function sentenceAround(text: string, index: number): string {
+  const start = Math.max(
+    text.lastIndexOf('.', index),
+    text.lastIndexOf('\n', index),
+  )
+  const dot = text.indexOf('.', index)
+  const newline = text.indexOf('\n', index)
+  const ends = [dot, newline].filter(n => n !== -1)
+  const end = ends.length ? Math.min(...ends) : text.length
+  return text.slice(start + 1, end)
+}
+
 export const CLAIM_RULES: readonly ClaimRule[] = [
   {
     label: 'tests pass',
@@ -54,6 +83,42 @@ export const CLAIM_RULES: readonly ClaimRule[] = [
       { args: ['test', 'nextest'], binary: 'cargo' },
     ],
     hint: 'run the test command (`pnpm test` / `vitest run <file>` / `cargo test`) or qualify the claim',
+  },
+  {
+    // A metric relayed from a peer agent, a task notification, or an earlier
+    // context, restated as this session's finding. The number is what makes it
+    // read as measured — "18563 passed" is a receipt, and a receipt has to come
+    // from a command this session actually ran.
+    //
+    // Attribution is the sanctioned form and deliberately does NOT match: "the
+    // other agent reports the suite is green" is honest about its source. What
+    // is caught is the bare assertion.
+    label: 'suite metric',
+    claim:
+      // A count next to a pass/green/fail verdict, or a "full/whole suite" verdict.
+      /\b(?:\d{2,}\s+(?:fail(?:ed|ing)?|green|pass(?:ed|ing)?)|(?:entire|full|whole)\s+suite\b[^.!?\n]{0,20}\b(?:green|pass(?:ed|es|ing)?))\b/i,
+    backedBy: [/\bvitest\b/],
+    commands: [
+      { args: ['test'], binary: 'pnpm' },
+      { args: ['--test'], binary: 'node' },
+      { args: ['test', 'nextest'], binary: 'cargo' },
+    ],
+    hint: 'run the suite yourself, or attribute it ("the other agent reported…") — a relayed count is a lead, not a receipt',
+  },
+  {
+    // Git state asserted with no read behind it. A peer agent's "everything is
+    // pushed" was wrong the moment they said it, because the tree moved.
+    label: 'git state',
+    claim:
+      /\b(?:all(?: of)? (?:it|the (?:commits?|work)|this)|everything)\b[^.!?\n]{0,30}\b(?:are |is |landed|on origin|pushed)\b|\bnothing (?:is )?(?:left|uncommitted|unpushed)\b/i,
+    backedBy: [/\bgit\b/],
+    commands: [
+      {
+        args: ['status', 'log', 'rev-list', 'rev-parse', 'diff'],
+        binary: 'git',
+      },
+    ],
+    hint: 'read the state (`git status` / `git rev-list --count origin/main..HEAD`) before asserting it',
   },
   {
     label: 'build succeeds',
@@ -155,7 +220,12 @@ export function findUnbackedClaims(
   const out: UnbackedClaim[] = []
   for (let i = 0, { length } = CLAIM_RULES; i < length; i += 1) {
     const rule = CLAIM_RULES[i]!
-    if (!rule.claim.test(text)) {
+    const hit = rule.claim.exec(text)
+    if (!hit) {
+      continue
+    }
+    // Attributed in its own sentence: relaying, not asserting.
+    if (ATTRIBUTED_RE.test(sentenceAround(text, hit.index))) {
       continue
     }
     const backed =

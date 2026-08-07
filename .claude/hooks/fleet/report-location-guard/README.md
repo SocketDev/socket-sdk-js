@@ -2,7 +2,7 @@
 
 PreToolUse(Edit/Write/MultiEdit) guard. Sibling of `plan-location-guard`.
 Blocks report-shaped `.md` writes to committable (tracked) paths, steering them
-to `<repo-root>/.claude/reports/<name>.md` — uncommittable by default.
+to `<repo-root>/.claude/reports/<name>.md` - uncommittable by default.
 
 ## Trigger
 

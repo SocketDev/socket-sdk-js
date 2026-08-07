@@ -48,4 +48,4 @@ large PR is the correct action.
 - A command that is not `gh pr create` / `gh pr new`.
 - A PR whose diff is ~200 changed lines or fewer.
 - The diff can't be computed (not a git repo, base ref absent, git
-  errored) — the hook fails open, no reminder.
+  errored) - the hook fails open, no reminder.

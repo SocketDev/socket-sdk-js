@@ -81,9 +81,9 @@ Budget tiers:
 
 ## Companion: `auditing-gha`
 
-Some CI failures aren't code; they're GitHub Actions policy. If you see `denied by enterprise admin` or `the action <name> is not allowed to be used`, that's a GH org-level setting drift, not a code fix. Run `/audit-gha-settings <owner/repo>` (when available) to diff the repo's policy + allowlist against the fleet baseline. The baseline policy is **Allow enterprise, and select non-enterprise, actions and reusable workflows**, and the allowlist must be a superset of the canonical patterns in `.claude/skills/fleet/auditing-gha/canonical-patterns.mts` — the single source of truth, enforced against the template's workflow surface by the `gha-allowlist-matches-template-uses` fleet check, so this document intentionally does not carry a copy that can drift.
+Some CI failures aren't code; they're GitHub Actions policy. If you see `denied by enterprise admin` or `the action <name> is not allowed to be used`, that's a GH org-level setting drift, not a code fix. Run `/audit-gha-settings <owner/repo>` (when available) to diff the repo's policy + allowlist against the fleet baseline. The baseline policy is **Allow enterprise, and select non-enterprise, actions and reusable workflows**, and the allowlist must be a superset of the canonical patterns in `.claude/skills/fleet/auditing-gha/canonical-patterns.mts` - the single source of truth, enforced against the template's workflow surface by the `gha-allowlist-matches-template-uses` fleet check, so this document intentionally does not carry a copy that can drift.
 
-Each canonical entry has a named consumer — a template workflow/composite, or a fleet member's own workflow declared in `EXTERNALLY_CONSUMED_PATTERNS`. Removing one breaks its consumer at plan time. Add a new entry only with a real consumer, then run the auditing-gha `--conform` pass across the fleet roster so repo settings pick it up.
+Each canonical entry has a named consumer - a template workflow/composite, or a fleet member's own workflow declared in `EXTERNALLY_CONSUMED_PATTERNS`. Removing one breaks its consumer at plan time. Add a new entry only with a real consumer, then run the auditing-gha `--conform` pass across the fleet roster so repo settings pick it up.
 
 ## Anti-patterns
 

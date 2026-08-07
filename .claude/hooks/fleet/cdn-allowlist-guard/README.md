@@ -25,7 +25,7 @@ URL is not flagged.
 ecosystem advertises. It is public knowledge, not a secret. **Never add an
 internal host** (`*.svc.cluster.local`, a private staging URL): that is infra
 topology and a public-surface-hygiene violation. A fetch to an internal host is
-correctly blocked by this guard — route it through the proper service client,
+correctly blocked by this guard - route it through the proper service client,
 don't allowlist it.
 
 ## Bypass

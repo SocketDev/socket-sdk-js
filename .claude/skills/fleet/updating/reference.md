@@ -1,9 +1,9 @@
 # updating reference
 
-Long-form details for the `updating` umbrella skill — phase scripts, exit-code semantics, and per-mode contracts. The orchestration story lives in [`SKILL.md`](SKILL.md).
+Long-form details for the `updating` umbrella skill - phase scripts, exit-code semantics, and per-mode contracts. The orchestration story lives in [`SKILL.md`](SKILL.md).
 
 Phase numbers below match SKILL.md's table. Phase 1 (Validate
-environment) is procedural and has no bash — see the SKILL.md
+environment) is procedural and has no bash - see the SKILL.md
 description directly. Phase 5 (Security advisories) and Phase 7
 (Coverage badge) are documented in their respective sub-skill
 references: [`../updating-security/reference.md`](../updating-security/reference.md)
@@ -11,7 +11,7 @@ and [`../updating-coverage/SKILL.md`](../updating-coverage/SKILL.md).
 
 ## Phase scripts
 
-### Phase 2 — npm packages
+### Phase 2 - npm packages
 
 ```bash
 pnpm run update
@@ -27,7 +27,7 @@ else
 fi
 ```
 
-### Phase 3 — Validate lockstep manifest (if `lockstep.json` exists)
+### Phase 3 - Validate lockstep manifest (if `lockstep.json` exists)
 
 ```bash
 if [ -f lockstep.json ]; then
@@ -50,13 +50,13 @@ fi
 | 1    | Schema violation, missing file, or unreachable baseline | Stop and investigate via `scripts/fleet/lockstep/schema.mts` and the failing row's `local_*`/`upstream` fields. Do not auto-retry.                                                                                                                       |
 | 2    | Drift detected                                          | Phase 4 invokes `updating-lockstep`. Auto-bumps mechanical `version-pin` rows per `upgrade_policy`; everything else (`file-fork` / `feature-parity` / `spec-conformance` / `lang-parity` / `locked` version-pins) becomes advisory in the PR body. |
 
-`locked` version-pin rows never auto-bump — they need a coordinated upstream change first (e.g., `temporal-rs` is `locked` because Node vendors it and bumping is gated on a Node bump landing first).
+`locked` version-pin rows never auto-bump - they need a coordinated upstream change first (e.g., `temporal-rs` is `locked` because Node vendors it and bumping is gated on a Node bump landing first).
 
 If `lockstep.json` does NOT exist, skip Phase 3 entirely.
 
-### Phase 4 — Apply drift + non-lockstep submodules
+### Phase 4 - Apply drift + non-lockstep submodules
 
-**4a. lockstep drift** — if Phase 3 reported exit 2:
+**4a. lockstep drift** - if Phase 3 reported exit 2:
 
 ```bash
 if [ "$LOCKSTEP_EXIT" = "2" ]; then
@@ -66,13 +66,13 @@ if [ "$LOCKSTEP_EXIT" = "2" ]; then
 fi
 ```
 
-`updating-lockstep` auto-bumps `version-pin` rows whose `upgrade_policy` is `track-latest` or `major-gate` (patch/minor only — majors → advisory), and emits an advisory block for everything else. Each auto-bumped row becomes its own atomic commit.
+`updating-lockstep` auto-bumps `version-pin` rows whose `upgrade_policy` is `track-latest` or `major-gate` (patch/minor only - majors → advisory), and emits an advisory block for everything else. Each auto-bumped row becomes its own atomic commit.
 
-**4b. Non-lockstep submodules** — invoke each repo-specific `updating-*` sub-skill (e.g. `updating-node`, `updating-curl`) for submodules NOT claimed by a lockstep `version-pin` row. These sub-skills handle build inputs that aren't tracked in lockstep (cache-versions bumps, patch regeneration, etc.).
+**4b. Non-lockstep submodules** - invoke each repo-specific `updating-*` sub-skill (e.g. `updating-node`, `updating-curl`) for submodules NOT claimed by a lockstep `version-pin` row. These sub-skills handle build inputs that aren't tracked in lockstep (cache-versions bumps, patch regeneration, etc.).
 
 If no `.gitmodules` exists, skip 4b.
 
-### Phase 6 — Workflow SHA pins
+### Phase 6 - Workflow SHA pins
 
 Resolve the default branch (per CLAUDE.md _Default branch fallback_), then compare:
 
@@ -91,12 +91,12 @@ else
 fi
 ```
 
-### Phase 8 — GitHub settings drift (skip in CI)
+### Phase 8 - GitHub settings drift (skip in CI)
 
 `scripts/lint-github-settings.mts` audits repo + Actions settings
 against the fleet baseline. Read-only by default; surfaces findings
 with a fixUrl for each (operator clicks through to apply). The
-underlying script's CI-skip is intentional — it has its own 7-day
+underlying script's CI-skip is intentional - it has its own 7-day
 local cache and the umbrella honours that.
 
 ```bash
@@ -114,11 +114,11 @@ fi
 
 Common finding shapes (full taxonomy in `scripts/lint-github-settings.mts`):
 
-- `doesnt-touch-customers must match visibility` — public→`false`, private→`true`. Manual fix at `…/settings/custom-properties`.
-- `GitHub App must be installed: <slug>` — install via `https://github.com/apps/<slug>`. Current required apps: `claude`, `cursor`, `socket-security`, `socket-security-staging`, `socket-trufflehog`.
-- `<repo-setting> must be <value>` — usually fixable via `--fix` (needs `repo:admin`) or the GitHub UI link in the finding.
+- `doesnt-touch-customers must match visibility` - public→`false`, private→`true`. Manual fix at `…/settings/custom-properties`.
+- `GitHub App must be installed: <slug>` - install via `https://github.com/apps/<slug>`. Current required apps: `claude`, `cursor`, `socket-security`, `socket-security-staging`, `socket-trufflehog`.
+- `<repo-setting> must be <value>` - usually fixable via `--fix` (needs `repo:admin`) or the GitHub UI link in the finding.
 
-### Phase 9 — Final validation (skip in CI)
+### Phase 9 - Final validation (skip in CI)
 
 ```bash
 if [ "$CI" = "true" ] || [ -n "$GITHUB_ACTIONS" ]; then
@@ -130,10 +130,10 @@ else
 fi
 ```
 
-### Phase 10 — Report
+### Phase 10 - Report
 
 <details>
-<summary><b>Report template</b> — the "Update Complete" block: the updates-applied table, commits created, validation lines, and next steps for interactive vs CI mode</summary>
+<summary><b>Report template</b> - the "Update Complete" block: the updates-applied table, commits created, validation lines, and next steps for interactive vs CI mode</summary>
 
 ```
 ## Update Complete
@@ -172,7 +172,7 @@ fi
 ### CI mode (`CI=true` or `GITHUB_ACTIONS`)
 
 - Create atomic commits per category (npm, lockstep auto-bumps, submodule bumps).
-- Skip Phase 6 build/test validation — CI validates separately.
+- Skip Phase 6 build/test validation - CI validates separately.
 - Workflow handles push and PR creation.
 
 ### Interactive mode (default)
@@ -184,5 +184,5 @@ fi
 ## Failure recovery
 
 - **Phase 3 exit 1 (schema error):** stop. Read `scripts/fleet/lockstep/schema.mts` output and the offending row's `local_*` / `upstream` fields. Fix the manifest, then re-run.
-- **Phase 4a (lockstep drift) commits but Phase 6 tests fail:** the per-row commits are atomic — `git revert <sha>` for the offending row, leave the others, file an advisory.
+- **Phase 4a (lockstep drift) commits but Phase 6 tests fail:** the per-row commits are atomic - `git revert <sha>` for the offending row, leave the others, file an advisory.
 - **Phase 5 stale SHA pin:** repin `.github/workflows/_local-not-for-reuse-*.yml` manually against `origin/$BASE`, then re-run the check.

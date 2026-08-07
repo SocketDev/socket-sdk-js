@@ -2,7 +2,7 @@
 
 PreToolUse Bash hook (blocking, exit 2) that HARD-BLOCKS any command opening a
 pull request to land a **version bump**. The bump commit belongs directly on the
-default branch — the local release pipeline's bump stage puts it there, and the
+default branch - the local release pipeline's bump stage puts it there, and the
 CI bump lands it through the release App.
 
 ## What it catches
@@ -18,7 +18,7 @@ CI bump lands it through the release App.
   `chore: bump version to 6.5.2`, `chore(release): 6.5.2`, any `bump version`
   phrasing.
 - A `--body-file` / `-F` payload carrying a bump SUBJECT line. The body is held
-  to the strict subject patterns only — prose that merely mentions bumping is
+  to the strict subject patterns only - prose that merely mentions bumping is
   not a bump PR.
 
 The GitHub API:
@@ -31,8 +31,8 @@ The GitHub API:
   method spelling is read: `--method POST`, `--method=POST`, `--request POST`,
   `-X POST`, `-XPOST`.
 
-Detection is **AST-based** — the shell-quote-backed `shell-command.mts` parser,
-not regex over the raw string — so `&&` chains, quoting, `$(…)` substitution,
+Detection is **AST-based** - the shell-quote-backed `shell-command.mts` parser,
+not regex over the raw string - so `&&` chains, quoting, `$(…)` substitution,
 and a literal `"gh pr create"` inside a `grep` string are all handled.
 
 ## Why
@@ -51,7 +51,7 @@ repo's release the same way, so this is not gated on fleet membership.
 
 ## Skipped scenarios
 
-- An ordinary feature PR — `gh pr create --head feat/foo --title "fix: thing"`.
+- An ordinary feature PR - `gh pr create --head feat/foo --title "fix: thing"`.
 - Reading or editing an existing PR (`gh pr view/list/checks/comment`,
   `gh api repos/o/r/pulls/12`).
 - A `/pulls` GET, or any explicit non-POST method.
@@ -63,6 +63,6 @@ Type `Allow version-bump-pr bypass` in a recent message.
 
 ## Exit codes
 
-- `2` — blocked: the PR head, title, or body file is version-bump shaped.
-- `0` — allowed (ordinary PR, read-only `gh pr` / API call, or the bypass
+- `2` - blocked: the PR head, title, or body file is version-bump shaped.
+- `0` - allowed (ordinary PR, read-only `gh pr` / API call, or the bypass
   phrase is present).

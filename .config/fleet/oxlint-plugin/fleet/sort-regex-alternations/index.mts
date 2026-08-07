@@ -20,6 +20,7 @@
  *     alternations, reports without autofix.
  */
 
+import { suppressionWaives } from '../../../../../.claude/hooks/fleet/_shared/suppression-rules.mts'
 import { markerOnlyLineAllows } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext, RuleFixer } from '../../lib/rule-types.mts'
 import { isLockstepMirror } from '../../lib/lockstep-mirror.mts'
@@ -43,18 +44,10 @@ interface AlternationGroup {
   start: number
 }
 
-const SOCKET_LINT_MARKER_RE =
-  /(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+(?<tag>[\w-]+))?/
-
 const SIMPLE_ALT_ELEMENT_RE = /^[\w\-:./]+$/
 
 function isLineMarkered(line: string): boolean {
-  const m = line.match(SOCKET_LINT_MARKER_RE)
-  if (!m) {
-    return false
-  }
-  const tag = m.groups?.['tag']
-  return !tag || tag === 'regex-alternation-order'
+  return suppressionWaives(line, 'socket/sort-regex-alternations')
 }
 
 /**
@@ -236,7 +229,7 @@ const rule = {
       unsorted:
         'Regex alternation `({{actual}})` is not sorted alphanumerically. Expected `({{sorted}})`.',
       unsortedNoFix:
-        'Regex alternation `({{actual}})` is not sorted alphanumerically. Expected `({{sorted}})`. (Not auto-fixed: contains non-literal elements; sort manually or add `// socket-lint: allow regex-alternation-order` on its own line above if the order is intentional.)',
+        'Regex alternation `({{actual}})` is not sorted alphanumerically. Expected `({{sorted}})`. (Not auto-fixed: contains non-literal elements; sort manually or add `// oxlint-disable-next-line socket/sort-regex-alternations` on its own line above if the order is intentional.)',
     },
     schema: [],
   },
@@ -331,5 +324,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

@@ -45,7 +45,7 @@ covers the env-expansion opt-out, which those did not.
 ## What it does NOT block
 
 - `NPM_CONFIG_USERCONFIG` pointed at a HOME / absolute non-repo `.npmrc`, or
-  `/dev/null` — those don't trust a repo file.
+  `/dev/null` - those don't trust a repo file.
 - An edit to a non-committed scratch file.
 - A documentation mention of the var name with no assignment.
 
@@ -53,7 +53,7 @@ covers the env-expansion opt-out, which those did not.
 
 `Allow npmrc-trust-optout bypass` (verbatim, recent user turn). The only
 legitimate case is a CI image that builds exclusively trusted first-party repos.
-Use sparingly — the protection should stay on everywhere else.
+Use sparingly - the protection should stay on everywhere else.
 
 ## Detection
 

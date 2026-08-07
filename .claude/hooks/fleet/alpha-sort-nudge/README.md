@@ -40,7 +40,7 @@ non-code surfaces had no enforcement. This hook closes that gap at edit time.
 
 ## Companion files
 
-- `index.mts` — the hook; `findUnsortedBlocks(filePath, content)` is the pure,
+- `index.mts` - the hook; `findUnsortedBlocks(filePath, content)` is the pure,
   exported detector.
-- `test/index.test.mts` — node:test specs.
-- `package.json` — workspace declaration so `taze` can see the hook's deps.
+- `test/index.test.mts` - node:test specs.
+- `package.json` - workspace declaration so `taze` can see the hook's deps.

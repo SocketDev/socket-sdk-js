@@ -23,7 +23,7 @@
  *     call — i.e. NOT `spawn(...).process` and NOT a destructured `const {
  *     process } = spawn(...)`. Report-only: the fix is contextual (route
  *     through `.process`, or `await` the wrapper), so the human picks. Bypass:
- *     a `socket-lint: allow bare-spawn-access` comment.
+ *     a `oxlint-disable-next-line socket/no-bare-spawn-childproc-access` comment.
  */
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
@@ -48,8 +48,6 @@ const CHILDPROC_MEMBERS = new Set([
   'stdout',
   'unref',
 ])
-
-const ALLOW_RE = /socket-lint:\s*allow\s+bare-spawn-access/
 
 // Is this call expression a `spawn(...)` (bare or `x.spawn(...)`) — the fleet
 // wrapper? We match the callee NAME `spawn`; the lib has a single spawn export
@@ -94,7 +92,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, ALLOW_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-bare-spawn-childproc-access',
+    )
     // Identifiers bound to a bare `spawn(...)` call this file. `const c =
     // spawn(...)` adds `c`; `const c = spawn(...).process` and
     // `const { process } = spawn(...)` do NOT, those already route correctly.
@@ -139,5 +140,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

@@ -20,10 +20,7 @@
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-import {
-  makeBypassChecker,
-  socketLintAllowRe,
-} from '../../lib/comment-markers.mts'
+import { makeBypassChecker } from '../../lib/comment-markers.mts'
 
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
@@ -54,12 +51,6 @@ function isSourceOperand(node: AstNode): boolean {
   )
 }
 
-// The rule's scope note already exempts "a general text/source processor".
-// A module that lives under scripts/ but IS such a processor — a scanner
-// whose whole job is reading other files' text for smells — has no typed
-// export to import instead, so it says so on the line.
-const SCANNER_BYPASS_RE = socketLintAllowRe('source-scanner')
-
 const rule = {
   meta: {
     type: 'problem',
@@ -78,7 +69,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const isScannerLine = makeBypassChecker(context, SCANNER_BYPASS_RE)
+    const isScannerLine = makeBypassChecker(
+      context,
+      'socket/no-source-sniffing',
+    )
     const filename = normalizePath(
       context.filename ?? context.getFilename?.() ?? '',
     )
@@ -123,5 +117,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

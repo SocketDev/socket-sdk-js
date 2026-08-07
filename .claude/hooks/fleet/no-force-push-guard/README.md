@@ -27,7 +27,7 @@ Pinning `--force-with-lease` to the exact expected remote sha, rather than leavi
 
 ## Inline sentinel: `SQUASH_HISTORY=1`
 
-The `squashing-history` skill force-pushes the collapsed default branch as an intrinsic part of the squash — the tree is byte-verified identical to a backup branch first. A command prefixed with `SQUASH_HISTORY=1` is checked against `_shared/squash-sentinel.mts`'s hardened shape (exactly one un-chained `git push --force`/`--force-with-lease`/`-f` to a bare remote plus at most one plain branch ref, no refspec, `--mirror`, `--all`, `--delete`, or `--no-verify`) and, when it matches, passes without the typed phrase. Any deviation falls back to needing the phrase.
+The `squashing-history` skill force-pushes the collapsed default branch as an intrinsic part of the squash - the tree is byte-verified identical to a backup branch first. A command prefixed with `SQUASH_HISTORY=1` is checked against `_shared/squash-sentinel.mts`'s hardened shape (exactly one un-chained `git push --force`/`--force-with-lease`/`-f` to a bare remote plus at most one plain branch ref, no refspec, `--mirror`, `--all`, `--delete`, or `--no-verify`) and, when it matches, passes without the typed phrase. Any deviation falls back to needing the phrase.
 
 ## How the bypass works
 
@@ -47,9 +47,9 @@ Fails open on its own bugs (exit 0 + stderr log): the same trade-off every fleet
 
 ## Companion files
 
-- `index.mts` — the hook itself
-- `package.json` — declares the hook as a workspace package
-- `tsconfig.json` — fleet-canonical TS config for hooks
+- `index.mts` - the hook itself
+- `package.json` - declares the hook as a workspace package
+- `tsconfig.json` - fleet-canonical TS config for hooks
 
 ## Test
 

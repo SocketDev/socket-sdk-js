@@ -5,7 +5,7 @@ PreToolUse hook that blocks two empty-commit shapes the fleet bans
 
 1. `git commit --allow-empty` (with or without `-m`, also covers
    `--allow-empty-message`).
-2. `git cherry-pick --allow-empty` / `--keep-redundant-commits` —
+2. `git cherry-pick --allow-empty` / `--keep-redundant-commits` -
    replaying a no-content commit forward.
 
 ## Why blocking
@@ -36,5 +36,5 @@ or `git cherry-pick` invocation within the conversation window.
 ## Failure mode
 
 Fails open: any internal error logs to stderr and exits 0. The hook
-is a quality gate, not a hard dependency — it never wedges the
+is a quality gate, not a hard dependency - it never wedges the
 operator's flow.

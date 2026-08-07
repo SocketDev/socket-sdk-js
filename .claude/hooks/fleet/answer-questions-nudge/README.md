@@ -8,16 +8,16 @@
 
 The hook fires on `Stop` and only emits a reminder when both conditions hold:
 
-1. The most recent user turn contains a question — `?` punctuation, or interrogative leading (`is`, `should`, `do we`, `would`, `can we`, `where`, `why`, `what`, `how`, `which`).
+1. The most recent user turn contains a question - `?` punctuation, or interrogative leading (`is`, `should`, `do we`, `would`, `can we`, `where`, `why`, `what`, `how`, `which`).
 2. The most recent assistant turn either contains a deflection phrase or doesn't contain text that looks like an answer (no statement-shape sentence touching the question keywords).
 
 ## Exception
 
-Questions containing an explicit pivot signal (`now do X` / `instead let's` / `switch to` / `stop and`) are **redirects, not passing questions**. The hook skips those — the right response is to pivot, not to answer inline.
+Questions containing an explicit pivot signal (`now do X` / `instead let's` / `switch to` / `stop and`) are **redirects, not passing questions**. The hook skips those - the right response is to pivot, not to answer inline.
 
 ## Bypass
 
-No bypass — the reminder never blocks. Answer the passing question or pivot.
+No bypass - the reminder never blocks. Answer the passing question or pivot.
 
 ## Why this hook exists
 

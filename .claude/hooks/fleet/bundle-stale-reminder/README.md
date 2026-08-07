@@ -11,8 +11,8 @@ Import-safe fleet hooks are rolldown-bundled into `.claude/hooks/fleet/_dist/fle
 After any `Edit` or `Write`:
 
 1. Decide whether the edited path is a hook-bundle source.
-2. Compare the source's mtime against `_dist/fleet-pack.cjs` — a missing bundle counts as stale.
-3. If stale, return a `notify` verdict — the reminder lands on stderr. It never blocks (PostToolUse can't reject the prior call); it always exits 0.
+2. Compare the source's mtime against `_dist/fleet-pack.cjs` - a missing bundle counts as stale.
+3. If stale, return a `notify` verdict - the reminder lands on stderr. It never blocks (PostToolUse can't reject the prior call); it always exits 0.
 
 Rebuild with:
 
@@ -22,7 +22,7 @@ node scripts/fleet/build-hook-bundle.mts
 
 ## Bypass
 
-Type `Allow hook-bundle-current bypass` to silence the reminder when the rebuild is genuinely deferred. The slug is declared as `bypass` metadata on the hook's `defineHook` spec, so the framework wires phrase detection and appends the uniform footer naming the exact phrase — the message never hand-writes it.
+Type `Allow hook-bundle-current bypass` to silence the reminder when the rebuild is genuinely deferred. The slug is declared as `bypass` metadata on the hook's `defineHook` spec, so the framework wires phrase detection and appends the uniform footer naming the exact phrase - the message never hand-writes it.
 
 ## Test
 

@@ -8,10 +8,10 @@ Homebrew is not hardened to the 6.0.0 supply-chain posture.
 Homebrew 6.0.0 ([release notes](https://brew.sh/2026/06/11/homebrew-6.0.0/))
 added two opt-in supply-chain controls plus the version floor they depend on:
 
-- **Tap trust** — `HOMEBREW_REQUIRE_TAP_TRUST=1` refuses to evaluate a
+- **Tap trust** - `HOMEBREW_REQUIRE_TAP_TRUST=1` refuses to evaluate a
   third-party tap's code until it is explicitly trusted (`brew trust …`).
   Closes the tap-as-RCE surface ([Tap-Trust](https://docs.brew.sh/Tap-Trust)).
-- **Cask checksums** — `HOMEBREW_CASK_OPTS_REQUIRE_SHA=1` refuses a cask whose
+- **Cask checksums** - `HOMEBREW_CASK_OPTS_REQUIRE_SHA=1` refuses a cask whose
   download has no pinned checksum (`sha256 :no_check`)
   ([Supply-Chain-Security](https://docs.brew.sh/Supply-Chain-Security)).
 
@@ -36,7 +36,7 @@ A Bash command invoking `brew` while the machine reports either:
 | `HOMEBREW_CASK_OPTS_REQUIRE_SHA` unset | `export HOMEBREW_CASK_OPTS_REQUIRE_SHA=1`                 |
 
 `setup-security-tools` persists both env knobs into the managed shell-rc block.
-A machine without `brew` on PATH (`absent`) passes — the check is not
+A machine without `brew` on PATH (`absent`) passes - the check is not
 applicable (CI runners legitimately lack brew).
 
 ## Bypass
@@ -51,5 +51,5 @@ node .claude/hooks/fleet/setup-security-tools/install.mts
 
 sets both env knobs. Upgrade Homebrew itself with `brew update && brew upgrade`.
 
-Fails open on parse / payload errors (exit 0) — a guard bug must not wedge every
+Fails open on parse / payload errors (exit 0) - a guard bug must not wedge every
 Bash call.

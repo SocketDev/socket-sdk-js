@@ -1,4 +1,6 @@
-/* oxlint-disable socket/no-package-manager-auto-update-reenable -- this file IS the rule definition; the re-enable strings are lookup-table data, not real usage. */
+/* oxlint-disable socket/no-package-manager-auto-update-reenable -- this file */
+// This file IS the rule definition; the re-enable strings are lookup-table
+// data, not real usage.
 
 /**
  * @file Flag committed code / config that RE-ENABLES a package manager's
@@ -145,5 +147,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

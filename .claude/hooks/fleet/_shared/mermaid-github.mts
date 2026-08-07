@@ -112,14 +112,14 @@ export function analyzeMermaidSource(source: string): MermaidAnalysis {
         line: 1,
         message: `sequence diagramMarginX ${init.marginX ?? 'unset'} < ${SEQUENCE_MARGIN_X} — GitHub scales wide SVGs down, shrinking margins with them`,
       })
-      fixed = fixed.replace(/%%\{init:[\s\S]*?\}%%/, SEQUENCE_INIT)
+      fixed = fixed.replace(/%%\{init:[\s\S]*?\}%%/, () => SEQUENCE_INIT)
     }
     const participants = sequenceParticipants(fixed)
     const last = participants[participants.length - 1]
     const first = participants[0]
     if (last && first && last !== first) {
       const noteRe = new RegExp(
-        `^(\\s*)Note right of ${last.replace(/[-\\^$*+?.()|[\]{}]/g, String.raw`\$&`)}\\s*:`,
+        `^(\\s*)Note right of ${last.replace(/[-\\^$*+?.()|[\]{}]/g, () => String.raw`\$&`)}\\s*:`,
         'gm',
       )
       const lines = fixed.split('\n')
@@ -133,7 +133,10 @@ export function analyzeMermaidSource(source: string): MermaidAnalysis {
           })
         }
       }
-      fixed = fixed.replace(noteRe, `$1Note over ${first},${last}:`)
+      fixed = fixed.replace(
+        noteRe,
+        (_, ws) => `${ws}Note over ${first},${last}:`,
+      )
     }
   } else if (isFlowchart) {
     if (!init.present) {
@@ -149,7 +152,7 @@ export function analyzeMermaidSource(source: string): MermaidAnalysis {
         line: 1,
         message: `flowchart diagramPadding ${init.padding ?? 'unset'} < ${FLOWCHART_PADDING}`,
       })
-      fixed = fixed.replace(/%%\{init:[\s\S]*?\}%%/, FLOWCHART_INIT)
+      fixed = fixed.replace(/%%\{init:[\s\S]*?\}%%/, () => FLOWCHART_INIT)
     }
   }
 

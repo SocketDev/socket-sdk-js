@@ -108,11 +108,13 @@ export function findTemplateLiterals(
         // (Identifier / `)` / `]`). If found, this is a tagged
         // template; the tag changes semantics so we skip.
         let i = start - 1
-        // socket-lint: allow uncommented-regex -- whitespace scan, described above.
+        // Whitespace scan, described above.
+        // oxlint-disable-next-line socket/require-regex-comment -- whitespace
         while (i >= 0 && /\s/.test(source[i]!)) {
           i -= 1
         }
-        // socket-lint: allow uncommented-regex -- tag-prefix char, described above.
+        // Tag-prefix char, described above.
+        // oxlint-disable-next-line socket/require-regex-comment -- tag-prefix
         if (i >= 0 && /[\w$)\]]/.test(source[i]!)) {
           return
         }

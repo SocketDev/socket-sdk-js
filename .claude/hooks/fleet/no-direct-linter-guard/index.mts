@@ -50,10 +50,12 @@ import { parseCommands } from '../_shared/shell-command.mts'
 // Linter/formatter binaries banned as a bare/direct invocation. Matched on the
 // command's basename, so the `node_modules/.bin/<tool>` path form is caught too.
 const BANNED_BINARIES: ReadonlySet<string> = new Set([
-  // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data: banned-binary list, not a config reference.
+  // Detection data: banned-binary list, not a config reference.
+  // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
   'biome',
   'dprint',
-  // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data: banned-binary list, not a config reference.
+  // Detection data: banned-binary list, not a config reference.
+  // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
   'eslint',
   'gofmt',
   'oxfmt',

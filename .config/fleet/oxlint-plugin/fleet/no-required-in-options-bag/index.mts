@@ -12,7 +12,7 @@
  *   `createBackoff(ms, options?)`. Report-only, never auto-fixed: hoisting a
  *   member reshapes the API and every call site, so the author does it.
  *   Skips `.d.ts`, mirrors external signatures, and test files (throwaway
- *   helpers). Bypass: a `socket-lint: allow no-required-in-options-bag`
+ *   helpers). Bypass: a `oxlint-disable-next-line socket/no-required-in-options-bag`
  *   comment.
  */
 
@@ -20,8 +20,6 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
-
-const BYPASS_RE = /socket-lint:\s*allow\s+no-required-in-options-bag/
 
 const OPTIONS_PARAM_NAMES = new Set(['options', 'opts'])
 
@@ -67,12 +65,15 @@ const rule = {
     schema: [],
     messages: {
       requiredInOptionsBag:
-        'a required member in an options bag — an option the caller MUST pass is not an option; hoist it to a positional parameter (`fn(required, options?)`) or move the bag to a required `config`. Bypass: add a `socket-lint: allow no-required-in-options-bag` comment.',
+        'a required member in an options bag — an option the caller MUST pass is not an option; hoist it to a positional parameter (`fn(required, options?)`) or move the bag to a required `config`. Bypass: add a `oxlint-disable-next-line socket/no-required-in-options-bag` comment.',
     },
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-required-in-options-bag',
+    )
     // Normalize once, then every check runs on the same `/`-separated path;
     // the directory test is a plain segment check, not a separator regex.
     const filename = normalizePath(
@@ -157,5 +158,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

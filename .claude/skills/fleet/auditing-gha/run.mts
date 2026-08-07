@@ -462,7 +462,9 @@ export function parseArgs(argv: readonly string[]): {
       fleet = true
     } else if (a === '--help' || a === '-h') {
       logger.info(
-        // oxlint-disable-next-line socket/no-logger-newline-literal -- CLI help text is intentionally a single multi-line block; splitting would garble the columnar formatting users expect.
+        // CLI help text is intentionally a single multi-line block; splitting
+        // would garble the columnar formatting users expect.
+        // oxlint-disable-next-line socket/no-logger-newline-literal -- CLI help
         `Usage: node run.mts [--json] [--conform] [--fleet] [<owner/repo>...]
 
 Checks GH Actions permissions + allowlist against the fleet baseline.

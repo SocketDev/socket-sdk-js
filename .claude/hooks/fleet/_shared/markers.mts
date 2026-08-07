@@ -1,84 +1,85 @@
 /*
- * @file Canonical opt-out marker handling shared across hooks. The fleet `//
- *   socket-lint: allow <rule>` marker has two surfaces:
+ * @file Canonical opt-out marker handling shared across hooks. The fleet uses
+ *   oxlint's own directive spelling - `// oxlint-disable-line socket/<rule>` for
+ *   the line it sits on, `// oxlint-disable-next-line socket/<rule>` on its own
+ *   line for the line below - so one grammar covers the lint rules and the
+ *   hook/scanner checks alike, and nobody has to remember a second one. The
+ *   older `socket-lint: allow` spelling is gone, not deprecated.
  *
- *   1. `.claude/hooks/*-guard/index.mts` (PreToolUse hooks, Claude Code).
- *   2. `.git-hooks/_helpers.mts` (pre-commit / pre-push scanners). Both surfaces
- *      need the same regex, the same suppression check, and the same alias map.
- *      Defining them in one place means a future `RULE_ALIASES` addition can't
- *      silently diverge between the two — the "Marker name was logger, now it's
- *      console" episode showed why inline-duplicating the alias check is a
- *      footgun.
+ *   The GRAMMAR and the name table live in `suppression-rules.mts`, which the
+ *   git-hook scanners read too. This module owns what that one does not: the
+ *   PLACEMENT questions oxlint answers by position rather than by text — which
+ *   line a directive covers, and when one is sitting somewhere it cannot work.
+ *   Two copies of the grammar would drift into disagreeing about whether a line
+ *   was waived, which is the footgun the "marker name was logger, now it's
+ *   console" episode already demonstrated once.
  */
 
-// `<comment-prefix>` is `#`, `//`, or `/*` to match shell, JS/TS, and
-// C-block comment lexers. The capture group catches the optional rule
-// name (`socket-lint: allow personal-path` → `'personal-path'`); the
-// bare form (`socket-lint: allow`) leaves capture undefined and means
-// "blanket suppress every scanner on this line."
-export const SOCKET_LINT_MARKER_RE: RegExp =
-  /(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+([\w-]+))?/
+import {
+  suppressionWaivesNextLine,
+  suppressionWaivesOwnLine,
+} from './suppression-rules.mts'
 
 /**
- * Legacy marker names recognized as equivalent to a current rule for one
- * deprecation cycle. Keys are aliases; values are the canonical rule name. The
- * match is bidirectional in `aliasMatches` so callers can ask either side.
+ * True when `line` carries a suppression waiving `rule`.
  *
- * Add entries when renaming a rule. Drop them after one cycle.
- */
-export const RULE_ALIASES: Readonly<Record<string, string>> = Object.freeze({
-  __proto__: null,
-  // `logger` was the original marker when the scanner only flagged
-  // process.std{out,err}.write; renamed to `console` once console.*
-  // entered scope. Keep the alias one cycle so existing markers in
-  // downstream repos don't have to migrate atomically.
-  logger: 'console',
-} as unknown as Record<string, string>)
-
-/**
- * True when `marker` and `rule` name the same logical rule, either directly or
- * via a `RULE_ALIASES` entry in either direction.
- */
-export function aliasMatches(marker: string, rule: string): boolean {
-  if (marker === rule) {
-    return true
-  }
-  return RULE_ALIASES[marker] === rule || RULE_ALIASES[rule] === marker
-}
-
-/**
- * True when `line` carries a marker that suppresses `rule`. A bare
- * `socket-lint: allow`, no rule name, is treated as a blanket allow and returns
- * true for every `rule`.
- *
- * `rule === undefined` means "is any marker present at all" — used by generic
- * line-iteration helpers that don't carry a rule context.
+ * A thin pass-through to the shared reader, kept so a Claude-hook caller reads
+ * grammar and placement from one import instead of two.
  */
 export function lineIsSuppressed(
   line: string,
   rule?: string | undefined,
 ): boolean {
-  const m = line.match(SOCKET_LINT_MARKER_RE)
-  if (!m) {
-    return false
-  }
-  // No rule named on the marker → blanket allow.
-  if (!m[1]) {
-    return true
-  }
-  if (rule === undefined) {
-    return true
-  }
-  return aliasMatches(m[1], rule)
+  return rule !== undefined && suppressionWaivesOwnLine(line, rule)
 }
 
-// A line that is ONLY an opt-out marker comment — the marker right after the
+// A line that is ONLY a `-next-line` directive — the directive right after the
 // comment opener, optionally a `-- reason` tail, optionally a block-comment
 // close. Such a line covers the LINE BELOW it, so a long pragma can sit above
 // the code it excuses instead of trailing it. Prose that merely mentions the
-// marker mid-sentence has text before it and does not match.
-export const SOCKET_LINT_MARKER_ONLY_LINE_RE: RegExp =
-  /^\s*(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+([\w-]+))?(?:\s*\*\/|\s+--.*)?\s*$/
+// directive mid-sentence has text before it and does not match.
+//
+// Answers PLACEMENT only. Which rules a directive names is
+// `suppression-rules.mts`'s question, so the rule token is not captured here.
+export const OXLINT_DISABLE_NEXT_LINE_RE: RegExp =
+  /^\s*(?:#|<!--|\/\*|\/\/)\s*oxlint-disable-next-line(?:\s+socket\/(?:[\w-]+))?(?:\s*(?:-->|\*\/)|\s+--.*)?\s*$/
+
+/**
+ * A `-next-line` directive sitting at the END of a line of code. It reads like
+ * a same-line opt-out and silently is not one: oxlint applies it to the line
+ * BELOW, so the line it trails stays unsuppressed and the line under it gets
+ * excused by accident. The same-line spelling is `oxlint-disable-line`.
+ *
+ * Upstream defines `-next-line` as "the line following the comment" and `-line`
+ * as "the current line", so the first belongs on its own line above and the
+ * second trails: https://oxc.rs/docs/guide/usage/linter/ignore-comments.html.
+ *
+ * Exported so a check can find these mechanically rather than by review - the
+ * marker migration produced them in bulk, which is exactly the shape that hides
+ * in a 300-file diff.
+ *
+ * @example
+ *   // Correct: the directive is alone on its line, so it covers the line below.
+ *   // oxlint-disable-next-line no-console
+ *   console.log('excused')
+ *
+ *   // Correct: the directive trails, so it covers the line it sits on.
+ *   console.log('excused') // oxlint-disable-line no-console
+ *
+ *   // WRONG, and what this pattern finds: reads as a same-line waiver, but the
+ *   // console.log stays flagged and the NEXT line is excused by accident.
+ *   console.log('still flagged') // oxlint-disable-next-line no-console
+ */
+export const MISPLACED_TRAILING_NEXT_LINE_RE: RegExp =
+  /\S[^\n]*?(?:#|<!--|\/\*|\/\/)\s*oxlint-disable-next-line\b/
+
+/**
+ * True when `line` is code with a `-next-line` directive trailing it, which
+ * suppresses the wrong line.
+ */
+export function hasMisplacedTrailingDirective(line: string): boolean {
+  return MISPLACED_TRAILING_NEXT_LINE_RE.test(line)
+}
 
 /**
  * True when `lines[index]` is suppressed for `rule` — by a marker on the line
@@ -90,19 +91,11 @@ export function suppressionCoversLine(
   index: number,
   rule?: string | undefined,
 ): boolean {
-  if (lineIsSuppressed(lines[index] ?? '', rule)) {
-    return true
-  }
-  if (index <= 0) {
+  if (rule === undefined) {
     return false
   }
-  const m = (lines[index - 1] ?? '').match(SOCKET_LINT_MARKER_ONLY_LINE_RE)
-  if (!m) {
-    return false
-  }
-  // Bare marker or no rule context → blanket allow, same as the inline form.
-  if (!m[1] || rule === undefined) {
-    return true
-  }
-  return aliasMatches(m[1], rule)
+  return (
+    suppressionWaivesOwnLine(lines[index] ?? '', rule) ||
+    (index > 0 && suppressionWaivesNextLine(lines[index - 1] ?? '', rule))
+  )
 }

@@ -9,7 +9,7 @@ clock, so it never logs you out mid-session.
 > If you haven't worked with Claude Code hooks before: hooks are tiny
 > scripts that run at specific lifecycle points. A `Stop` hook like
 > this one fires _after_ Claude finishes a turn. Stop hooks are a
-> good place for periodic maintenance — they have access to your
+> good place for periodic maintenance - they have access to your
 > shell environment but don't gate any tool calls.
 
 ## Why automatic logout
@@ -19,7 +19,7 @@ Long-lived auth tokens live in well-known files: `~/.npmrc`,
 your OS keychain. A compromised dev workstation has a wide blast
 radius on those files. Periodic auto-revocation tightens the window
 where a stolen token is useful, and forces explicit re-authentication
-— which is itself a small phishing-defense moment ("did I really
+- which is itself a small phishing-defense moment ("did I really
 mean to publish?").
 
 ## Defaults
@@ -28,9 +28,9 @@ mean to publish?").
   idle (no Stop events) this long; active work keeps resetting the
   clock. Set `SOCKET_AUTH_ROTATION_INTERVAL_HOURS=4` to loosen, `=0` to
   rotate on every Stop event.
-- **Mode**: auto-logout — the hook _acts_, not just warns.
+- **Mode**: auto-logout - the hook _acts_, not just warns.
 - **Default skip-list**: `gh` is skipped because Claude Code itself
-  uses `gh` for `gh pr edit` etc. — auto-revoking it would break the
+  uses `gh` for `gh pr edit` etc. - auto-revoking it would break the
   agent.
 - **CI**: hook short-circuits when `CI` env var is set.
 
@@ -70,7 +70,7 @@ The hook **automatically deletes the file** once the timestamp is
 reached. No manual cleanup needed.
 
 Snoozes that are malformed, empty, or unreadable are also auto-deleted
-on the next run — fail-safe so a corrupted file can't permanently
+on the next run - fail-safe so a corrupted file can't permanently
 disable rotation.
 
 `.claude/*.snooze` is gitignored; project-local snoozes never leak into
@@ -90,7 +90,7 @@ echo vault >> .claude/auth-rotation.services-skip
 ```
 
 One id per line. Lines starting with `#` are comments. Service ids
-are stable — see the table above.
+are stable - see the table above.
 
 ## Wiring
 

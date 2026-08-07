@@ -54,7 +54,7 @@ Contractions are fine. Casual is fine. A `:)` or `~~strikethrough~~` is fine whe
 
 ## Ask when collaborating
 
-A question pulls people in. "What do you think?" or "@person — thoughts?" beats a wall of unilateral justification. Credit good work plainly: "good catch", "nice, the perf is rad".
+A question pulls people in. "What do you think?" or "@person - thoughts?" beats a wall of unilateral justification. Credit good work plainly: "good catch", "nice, the perf is rad".
 
 ## Write like a decisive, generous maintainer
 
@@ -84,8 +84,8 @@ These render on every GitHub prose surface (PR/issue bodies, comments, reviews, 
 
 A body that has earned multiple folds follows one shape, settled on 2026-08-04 across several service-extraction and endpoint PRs:
 
-1. **Intro prose** — the problem, what this PR does about it, and what deliberately does not change for anyone. Full sentences a junior developer can follow; no Summary/Changes/Testing scaffolding headers.
-2. **A bolded status paragraph, not an "Actions needed" list.** One paragraph that leads with the ship reality (`**Not live yet.**`, `**Ships provisional.**`, `**Nothing changes until a workflow opts in.**`), carries what other people must do in prose, and points at the first fold for the detail. Never write a bullet like "Review — nothing is blocked on me"; the reviewer knows what reviewing is.
+1. **Intro prose** - the problem, what this PR does about it, and what deliberately does not change for anyone. Full sentences a junior developer can follow; no Summary/Changes/Testing scaffolding headers.
+2. **A bolded status paragraph, not an "Actions needed" list.** One paragraph that leads with the ship reality (`**Not live yet.**`, `**Ships provisional.**`, `**Nothing changes until a workflow opts in.**`), carries what other people must do in prose, and points at the first fold for the detail. Never write a bullet like "Review - nothing is blocked on me"; the reviewer knows what reviewing is.
 3. **Folds grouped under `##` category headings, deployment first.** The reader deciding "can this merge, and what happens when it deploys" outranks the reader studying the design. Order: *Deployment & rollout* (or *Ship state*, *Release & rollout*) first, then *Design & behavior*, then *Branch history* when rebases need explaining, then *Validation* / *Testing & review* last.
 4. **Bot-owned tails stay untouched.** A `CURSOR_SUMMARY` block or similar at the bottom belongs to its bot; restructuring around it, never through it.
 
@@ -125,7 +125,7 @@ GitHub renders five blockquote alerts: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`
 
 ### Autolinks and permalinks
 
-Bare references autolink: `#123`, `owner/repo#123` for cross-repo, full commit SHAs, and `@user`. Paste a file permalink with a line range (press `y` in the file view for the canonical URL, then select the lines) and GitHub embeds the code snippet inline in the body — better than a re-typed excerpt because it cannot drift.
+Bare references autolink: `#123`, `owner/repo#123` for cross-repo, full commit SHAs, and `@user`. Paste a file permalink with a line range (press `y` in the file view for the canonical URL, then select the lines) and GitHub embeds the code snippet inline in the body - better than a re-typed excerpt because it cannot drift.
 
 ### Footnotes
 

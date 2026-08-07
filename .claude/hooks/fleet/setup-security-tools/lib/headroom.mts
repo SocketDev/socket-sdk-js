@@ -177,7 +177,9 @@ async function refreshSymlink(
   linkPath: string,
   type: 'dir' | 'file',
 ): Promise<void> {
-  // oxlint-disable-next-line socket/prefer-exists-sync -- lstat detects a broken symlink that existsSync, follows the link, would miss, leaving it stale.
+  // Lstat detects a broken symlink that existsSync, follows the link, would
+  // miss, leaving it stale.
+  // oxlint-disable-next-line socket/prefer-exists-sync -- lstat detects
   const linkExists = await fs
     .lstat(linkPath)
     .then(() => true)

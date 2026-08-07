@@ -100,7 +100,7 @@ export function isSearchCommand(command: string): boolean {
     // doesn't widen the match.
     const firstSegment = command.split(/[|;&]/)[0] ?? command
     // r/R anywhere in a short-flag cluster (`-r`, `-Rn`, `-nr`) or the long
-    // `--recursive`. socket-lint: allow uncommented-regex
+    // `--recursive`. oxlint-disable-next-line socket/require-regex-comment
     return /\bgrep\b[^|;&]*(?:\s--recursive\b|\s-[A-Za-z]*[rR][A-Za-z]*\b)/.test(
       firstSegment,
     )

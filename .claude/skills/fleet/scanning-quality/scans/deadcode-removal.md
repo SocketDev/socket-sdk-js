@@ -1,21 +1,21 @@
 # Deadcode-removal scan
 
-Identifies dead source files, unused exports, stale lint-disable directives, and test-only helpers (helpers whose only consumer is the colocated `.test.mts`). Reports candidates; the active deletion loop lives in any of the existing refactor skills the user prefers — this scan is read-only.
+Identifies dead source files, unused exports, stale lint-disable directives, and test-only helpers (helpers whose only consumer is the colocated `.test.mts`). Reports candidates; the active deletion loop lives in any of the existing refactor skills the user prefers - this scan is read-only.
 
 ## Mission
 
 Surface four shapes of dead code:
 
-1. **Whole dead files** — source files with no importers anywhere (excluding their own test). Examples this scan caught in past sessions: `rich-progress.mts`, `bordered-input.mts`, `result-assertions.mts` (entire test-helper modules), `build-pipeline.mts`, `extraction-cache.mts`.
-2. **Test-only helpers** - exports whose ONLY non-self consumer is the colocated `<file>.test.mts`. The helper exists for the test; the test exists for the helper; nothing real calls either. Per the fleet rule discussion: _exports exist for tests_ — but if NOTHING in `src/` reaches the helper, both should be deleted together.
-3. **Stale lint-disable directives** — `// eslint-disable-next-line <rule>` or `// oxlint-disable-next-line <rule>` comments where the rule no longer fires on the line below (rule was relaxed, the offending construct was rewritten, etc.). Detected via `oxlint --report-unused-disable-directives`.
-4. **Dead string-literal constants** — `const FOO = '...'` declarations with zero readers, including the declaring file. Often a leftover from a colocation pass that dropped `export` from a now-unused symbol.
+1. **Whole dead files** - source files with no importers anywhere (excluding their own test). Examples this scan caught in past sessions: `rich-progress.mts`, `bordered-input.mts`, `result-assertions.mts` (entire test-helper modules), `build-pipeline.mts`, `extraction-cache.mts`.
+2. **Test-only helpers** - exports whose ONLY non-self consumer is the colocated `<file>.test.mts`. The helper exists for the test; the test exists for the helper; nothing real calls either. Per the fleet rule discussion: _exports exist for tests_ - but if NOTHING in `src/` reaches the helper, both should be deleted together.
+3. **Stale lint-disable directives** - `// eslint-disable-next-line <rule>` or `// oxlint-disable-next-line <rule>` comments where the rule no longer fires on the line below (rule was relaxed, the offending construct was rewritten, etc.). Detected via `oxlint --report-unused-disable-directives`.
+4. **Dead string-literal constants** - `const FOO = '...'` declarations with zero readers, including the declaring file. Often a leftover from a colocation pass that dropped `export` from a now-unused symbol.
 
 ## Inputs
 
-- `git ls-files` — to enumerate tracked source + test files.
-- `pnpm exec oxlint --config .config/fleet/oxlintrc.json --report-unused-disable-directives .` — canonical detector for shape (3). Treat oxlint's emit as authoritative.
-- `tsc --noEmit` with `noUnusedLocals` — surfaces shape (4) (constants/types with no readers including self).
+- `git ls-files` - to enumerate tracked source + test files.
+- `pnpm exec oxlint --config .config/fleet/oxlintrc.json --report-unused-disable-directives .` - canonical detector for shape (3). Treat oxlint's emit as authoritative.
+- `tsc --noEmit` with `noUnusedLocals` - surfaces shape (4) (constants/types with no readers including self).
 
 ## Skip when
 
@@ -26,7 +26,7 @@ Surface four shapes of dead code:
 
 🚨 **Never drop the `export` keyword on a top-level function** to make it "file-private." The fleet rule `socket/export-top-level-functions` REQUIRES `export` on every top-level helper, with companion rule `socket/sort-source-methods` enforcing visibility-group ordering.
 
-**Why:** _Exports exist for tests._ The colocated `.test.mts` imports internal helpers directly and asserts on them — that's the testability contract. Dropping `export` breaks the test's import. Past incident: a "colocate unused exports" sweep across 52 files in `packages/cli/src` triggered 141 lint violations and had to be reverted in `cdbbcf2f7`. Memory entry: `feedback-export-top-level-functions.md`.
+**Why:** _Exports exist for tests._ The colocated `.test.mts` imports internal helpers directly and asserts on them - that's the testability contract. Dropping `export` breaks the test's import. Past incident: a "colocate unused exports" sweep across 52 files in `packages/cli/src` triggered 141 lint violations and had to be reverted in `cdbbcf2f7`. Memory entry: `feedback-export-top-level-functions.md`.
 
 **Correct surgical moves for a "test-only helper":**
 
@@ -65,19 +65,19 @@ grep -c "Unused (oxlint|eslint)-disable" /tmp/oxlint-disable.out
 
 For each match: the directive line should be deleted. Common stale patterns:
 
-- `// eslint-disable-next-line no-await-in-loop` — oxlint doesn't know this rule, so the disable is unused.
-- `// eslint-disable-next-line n/no-process-exit` — same.
-- `// oxlint-disable-next-line socket/prefer-cached-for-loop` — rule was relaxed for destructuring patterns; the disable is now dead noise.
-- `/* oxlint-disable-next-line socket/no-file-scope-oxlint-disable */` at line 1 of a file pointing at a block-disable on line 2 — when line 2 gets removed in an earlier strip, this one becomes orphaned.
+- `// eslint-disable-next-line no-await-in-loop` - oxlint doesn't know this rule, so the disable is unused.
+- `// eslint-disable-next-line n/no-process-exit` - same.
+- `// oxlint-disable-next-line socket/prefer-cached-for-loop` - rule was relaxed for destructuring patterns; the disable is now dead noise.
+- `/* oxlint-disable-next-line socket/no-file-scope-oxlint-disable */` at line 1 of a file pointing at a block-disable on line 2 - when line 2 gets removed in an earlier strip, this one becomes orphaned.
 
 ### Shape 4: dead constants
 
-Run `tsc --noEmit` (with `noUnusedLocals` enabled in tsconfig). Each `TS6133: 'X' is declared but its value is never read` finding is a dead constant/type/function — usually surfaced after a strip of stale disables removed the last consumer. Delete entirely.
+Run `tsc --noEmit` (with `noUnusedLocals` enabled in tsconfig). Each `TS6133: 'X' is declared but its value is never read` finding is a dead constant/type/function - usually surfaced after a strip of stale disables removed the last consumer. Delete entirely.
 
 ## Output shape
 
 <details>
-<summary><b>Report template</b> — one block per shape with its per-candidate fields and action line, closing on the LOC-plus-count total</summary>
+<summary><b>Report template</b> - one block per shape with its per-candidate fields and action line, closing on the LOC-plus-count total</summary>
 
 ```
 ### Deadcode Removal
@@ -112,20 +112,20 @@ Total: shape-1 LOC × N + shape-2 LOC × N + N stale directives + N dead constan
 
 Before deleting ANY candidate, run both checks:
 
-1. `tsc --noEmit -p packages/<pkg>/tsconfig.json` — must pass after the proposed delete.
-2. `pnpm exec oxlint --config .config/fleet/oxlintrc.json .` — must report zero violations after the proposed delete.
+1. `tsc --noEmit -p packages/<pkg>/tsconfig.json` - must pass after the proposed delete.
+2. `pnpm exec oxlint --config .config/fleet/oxlintrc.json .` - must report zero violations after the proposed delete.
 
-If lint surfaces new `socket/export-top-level-functions` violations after a colocate-style change, **revert the change immediately**. Don't try to "fix" the lint by changing function order or adding disable comments — the rule wants the `export` keyword.
+If lint surfaces new `socket/export-top-level-functions` violations after a colocate-style change, **revert the change immediately**. Don't try to "fix" the lint by changing function order or adding disable comments - the rule wants the `export` keyword.
 
 ## When to escalate
 
 - Shape-1 candidates totaling >500 LOC: high-confidence cleanup, hand off to a refactor pass.
 - Shape-3 with >100 stale directives: indicates a recent rule-tightening cycle; consider opening a PR with just the strip.
-- If `socket/export-top-level-functions` violations exceed 5 in a single file, the file is probably mid-refactor — pause the scan on that file and surface as a Medium finding for the author to resolve before another sweep.
+- If `socket/export-top-level-functions` violations exceed 5 in a single file, the file is probably mid-refactor - pause the scan on that file and surface as a Medium finding for the author to resolve before another sweep.
 
 ## Cross-references
 
-- `feedback-export-top-level-functions.md` — memory entry capturing the rule's intent and the past colocate incident.
-- `socket/export-top-level-functions` — fleet oxlint rule in `template/.config/fleet/oxlint-plugin/`.
-- `socket/sort-source-methods` — companion rule for visibility-group ordering.
-- `feedback_repo_hygiene.md` — broader hygiene guidance ("No doc litter, pin deps, etc.").
+- `feedback-export-top-level-functions.md` - memory entry capturing the rule's intent and the past colocate incident.
+- `socket/export-top-level-functions` - fleet oxlint rule in `template/.config/fleet/oxlint-plugin/`.
+- `socket/sort-source-methods` - companion rule for visibility-group ordering.
+- `feedback_repo_hygiene.md` - broader hygiene guidance ("No doc litter, pin deps, etc.").

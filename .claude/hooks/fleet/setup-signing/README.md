@@ -2,7 +2,7 @@
 
 Install-only helper that configures git commit signing. Paired with
 the pre-commit signing-config gate and pre-push signed-commits
-enforcement — those hooks REQUIRE signing; this helper makes the
+enforcement - those hooks REQUIRE signing; this helper makes the
 one-time setup mechanical.
 
 ## Usage
@@ -17,13 +17,13 @@ node .claude/hooks/fleet/setup-signing/install.mts --force    # overwrite existi
 
 The helper picks the FIRST available signing method in this order:
 
-1. **1Password SSH agent** — checks the agent socket and queries
+1. **1Password SSH agent** - checks the agent socket and queries
    `ssh-add -L`. Recommended path: keys never touch disk, biometric
    unlock on use.
-2. **SSH key on disk** — `~/.ssh/id_ed25519.pub` (preferred), then
+2. **SSH key on disk** - `~/.ssh/id_ed25519.pub` (preferred), then
    `id_ecdsa.pub`, then `id_rsa.pub`. Sets `user.signingkey` to the
    `.pub` path (git's documented convention for SSH signing).
-3. **GPG secret key** — `gpg --list-secret-keys --with-colons` first
+3. **GPG secret key** - `gpg --list-secret-keys --with-colons` first
    `sec:` entry. Sets `user.signingkey` to the long key ID and
    `gpg.format=openpgp`.
 

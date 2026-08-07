@@ -1,6 +1,6 @@
 # fixes-need-tests-nudge
 
-**PreToolUse (Bash) — nudge, never blocks.**
+**PreToolUse (Bash) - nudge, never blocks.**
 
 On a `git commit`, reminds when the STAGED change set touches authored source
 but carries no test-file change. A code fix ships the unit test that covers the
@@ -15,9 +15,9 @@ It is the commit-time enforcer for the "Delegated fix-work standards" rule in
 Authored source is a JS/TS file (`.ts` / `.mts` / `.cts` / `.tsx` / `.js` /
 `.mjs` / `.cjs` / `.jsx`) that is **not**:
 
-- a test file — `*.test.*` / `*.spec.*` / `*.vitest.*`, or anything under a
+- a test file - `*.test.*` / `*.spec.*` / `*.vitest.*`, or anything under a
   `test/`, `tests/`, or `__tests__/` directory;
-- generated / mechanical — a `build/**` or `dist/**` tree, the `_shared/`
+- generated / mechanical - a `build/**` or `dist/**` tree, the `_shared/`
   bundle, a `*.min.*` artifact, a `*.generated.*` output, `fleet-pack.cjs`, or
   `index.cjs`;
 - a build/tool config (`*.config.*`) or a bare type declaration (`*.d.ts`).

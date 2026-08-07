@@ -210,7 +210,9 @@ interface RunResult {
 
 export function printHelp(): void {
   logger.info(
-    // oxlint-disable-next-line socket/no-logger-newline-literal -- CLI help text is intentionally a single multi-line block; splitting would garble the columnar formatting users expect.
+    // CLI help text is intentionally a single multi-line block; splitting would
+    // garble the columnar formatting users expect.
+    // oxlint-disable-next-line socket/no-logger-newline-literal -- CLI help
     `Usage: node run.mts [--workflow .github/workflows/<wf>.yml] [--no-matrix]
                     [--retry <runner-name> [--from-step N]] [--github-token [T]]
                     [--budget-sec N]

@@ -25,14 +25,14 @@ const EXT = '(?:json|ya?ml|toml)'
 // A `.config/<file>.<ext>` reference where the segment after `.config/` is NOT
 // `repo/` or `fleet/`.
 const LOOSE_LITERAL_RE =
-  // socket-lint: allow uncommented-regex -- described above.
+  // oxlint-disable-next-line socket/require-regex-comment -- described above.
   new RegExp(`\\.config/(?!repo/|fleet/)[A-Za-z0-9._-]+\\.${EXT}\\b`)
 
 // A `path.join(…, '.config', '<file>.<ext>')` pair — the segregated forms
 // interpose `'repo'`/`'fleet'`, so a config-ext directly after `'.config'` is
 // loose.
 const LOOSE_JOIN_RE =
-  // socket-lint: allow uncommented-regex -- described above.
+  // oxlint-disable-next-line socket/require-regex-comment -- described above.
   new RegExp(
     `['"\`]\\.config['"\`]\\s*,\\s*['"\`][A-Za-z0-9._-]+\\.${EXT}['"\`]`,
   )

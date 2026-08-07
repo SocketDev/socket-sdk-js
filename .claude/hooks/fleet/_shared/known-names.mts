@@ -195,12 +195,12 @@ export function escapeRegExp(text: string): string {
 export function blankNonProse(text: string): string {
   const blank = (s: string): string => s.replace(/[^\n]/g, ' ')
   return text
-    .replace(/```[\s\S]*?```/g, blank)
-    .replace(/~~~[\s\S]*?~~~/g, blank)
-    .replace(/`[^`\n]*`/g, blank)
-    .replace(/\]\([^)]*\)/g, blank)
-    .replace(/<https?:\/\/[^>]*>/g, blank)
-    .replace(/<[^>]+>/g, blank)
+    .replace(/```[\s\S]*?```/g, match => blank(match))
+    .replace(/~~~[\s\S]*?~~~/g, match => blank(match))
+    .replace(/`[^`\n]*`/g, match => blank(match))
+    .replace(/\]\([^)]*\)/g, match => blank(match))
+    .replace(/<https?:\/\/[^>]*>/g, match => blank(match))
+    .replace(/<[^>]+>/g, match => blank(match))
 }
 
 export function findBareKnownNames(

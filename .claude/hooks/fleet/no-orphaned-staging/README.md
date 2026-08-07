@@ -9,7 +9,7 @@ Fleet rule from CLAUDE.md ("Don't leave the worktree dirty"):
 
 > Stage only when you're about to commit. `git add` and `git commit`
 > belong on the same line (chained with `&&`) OR in the same Bash
-> call. Don't stage as a side-effect of "preparing" — staging is a
+> call. Don't stage as a side-effect of "preparing" - staging is a
 > commit-time action.
 
 A turn that ends with staged-but-uncommitted hunks is the failure
@@ -17,7 +17,7 @@ mode the rule warns against. Common causes:
 
 1. The agent ran `git add` but forgot the `git commit`.
 2. A pre-commit hook failed and left the index half-cooked.
-3. The agent staged "for later" — exactly what this rule forbids.
+3. The agent staged "for later" - exactly what this rule forbids.
 
 All three look identical to the next session: a populated index of
 unknown provenance. The reminder makes the dangling state visible
@@ -25,7 +25,7 @@ at the turn that created it.
 
 ## Output
 
-Stderr only. Exit code always 0 — informational, never blocks
+Stderr only. Exit code always 0 - informational, never blocks
 (Stop hooks can't refuse anything anyway; the turn already ended).
 
 ```
@@ -44,6 +44,6 @@ you're about to commit".
 
 ## Bypass
 
-No bypass — it's a reminder (exit 0), not a block. During intentional
+No bypass - it's a reminder (exit 0), not a block. During intentional
 mid-refactor pauses or worktree migrations where staged state is the
 work-product, the stderr note is informational and safe to ignore.

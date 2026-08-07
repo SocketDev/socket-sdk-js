@@ -269,9 +269,9 @@ button, a {
 
 ### AutoFocus Rules
 
-- Desktop only — avoid on mobile (opens keyboard unexpectedly)
+- Desktop only - avoid on mobile (opens keyboard unexpectedly)
 - Single primary input per page maximum
-- Must be justified — not "just because"
+- Must be justified - not "just because"
 
 ```jsx
 /* ✅ Desktop-only autofocus */
@@ -501,17 +501,17 @@ Writing that converts.
 
 Flag these during code review:
 
-- [ ] `user-scalable=no` or `maximum-scale=1` — disables zoom, accessibility violation
-- [ ] `onPaste` with `preventDefault` — blocks paste, user hostile
-- [ ] `transition: all` — performance killer, unpredictable
-- [ ] `outline: none` without `:focus-visible` replacement — breaks keyboard nav
-- [ ] `<div onClick>` for navigation — use `<a>` or `<Link>`
-- [ ] `<div>` or `<span>` as buttons — use `<button>`
-- [ ] Images without `width`/`height` — causes CLS
+- [ ] `user-scalable=no` or `maximum-scale=1` - disables zoom, accessibility violation
+- [ ] `onPaste` with `preventDefault` - blocks paste, user hostile
+- [ ] `transition: all` - performance killer, unpredictable
+- [ ] `outline: none` without `:focus-visible` replacement - breaks keyboard nav
+- [ ] `<div onClick>` for navigation - use `<a>` or `<Link>`
+- [ ] `<div>` or `<span>` as buttons - use `<button>`
+- [ ] Images without `width`/`height` - causes CLS
 - [ ] Large arrays `.map()` without virtualization (50+ items)
-- [ ] Form inputs without labels — accessibility fail
+- [ ] Form inputs without labels - accessibility fail
 - [ ] Icon buttons without `aria-label`
-- [ ] Hardcoded date/number formats — use `Intl.DateTimeFormat`, `Intl.NumberFormat`
+- [ ] Hardcoded date/number formats - use `Intl.DateTimeFormat`, `Intl.NumberFormat`
 - [ ] `autoFocus` without clear justification
 
 ---

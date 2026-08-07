@@ -6,7 +6,7 @@ PreToolUse Edit/Write hook that blocks a CLAUDE.md edit which would push the **w
 
 Every byte in CLAUDE.md is load-bearing in-context tokens for every Claude session opened in the repo, and the fleet-canonical block is duplicated across ~12 `socket-*` repos. The 40 KB ceiling forces ruthless reference-deferral:
 
-- New fleet rules stay **terse + reference-deferred** — state the invariant + a one-line "Why" + a link to `docs/agents.md/fleet/<topic>.md` for the full pattern catalog.
+- New fleet rules stay **terse + reference-deferred** - state the invariant + a one-line "Why" + a link to `docs/agents.md/fleet/<topic>.md` for the full pattern catalog.
 - Accidental size growth is caught at edit time, before the bytes propagate via `sync-scaffolding`.
 
 ## How
@@ -16,7 +16,7 @@ Fires on Edit/Write/MultiEdit tool calls targeting a `CLAUDE.md`. For Write it m
 ## Cap
 
 - **Default:** 40 KB (40 960 bytes), the whole file.
-- **Override:** set `CLAUDE_MD_BYTES=<n>` in env (legacy `CLAUDE_MD_FLEET_BLOCK_BYTES` is read as a fallback). Rarely needed — bumping the cap should be a deliberate fleet-wide decision.
+- **Override:** set `CLAUDE_MD_BYTES=<n>` in env (legacy `CLAUDE_MD_FLEET_BLOCK_BYTES` is read as a fallback). Rarely needed - bumping the cap should be a deliberate fleet-wide decision.
 
 ## Bypass
 

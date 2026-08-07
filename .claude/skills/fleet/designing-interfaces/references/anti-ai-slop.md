@@ -26,9 +26,9 @@ Cards are the second most common AI-slop pattern. AI models wrap everything in r
 
 **RULE: Default is NO cards. Use sections, columns, dividers, or media blocks instead.**
 
-Cards are only justified when they are the container for a user interaction (clickable item, form, expandable panel). If removing the border, shadow, background, or radius doesn't hurt interaction or understanding — it's not a card, remove it.
+Cards are only justified when they are the container for a user interaction (clickable item, form, expandable panel). If removing the border, shadow, background, or radius doesn't hurt interaction or understanding - it's not a card, remove it.
 
-Ask: "Is this a card because the user needs to interact with this container, or because I couldn't think of another way to group things?" If the latter — remove the card.
+Ask: "Is this a card because the user needs to interact with this container, or because I couldn't think of another way to group things?" If the latter - remove the card.
 
 ---
 
@@ -36,7 +36,7 @@ Ask: "Is this a card because the user needs to interact with this container, or 
 
 AI models default to dark backgrounds. Dark-by-default is an AI fingerprint just like indigo.
 
-**RULE: Unless the brief explicitly asks for dark — use light mode.**
+**RULE: Unless the brief explicitly asks for dark - use light mode.**
 
 Dark mode is a deliberate brand choice, not a default. When a brief says nothing about color mode, light mode is the professional baseline.
 
@@ -57,7 +57,7 @@ tools, enterprise SaaS, fintech, dashboards, or functional product UI without re
 and Refero research justify it.**
 
 <details>
-<summary><b>Justifying the direction</b> — the four questions to answer first, the sharper alternatives to reach for instead, and the decorative one-word serif fingerprint to avoid</summary>
+<summary><b>Justifying the direction</b> - the four questions to answer first, the sharper alternatives to reach for instead, and the decorative one-word serif fingerprint to avoid</summary>
 
 Before using it, you must be able to explain:
 1. Why this product needs an editorial or literary voice.
@@ -95,9 +95,9 @@ Use instead: icon libraries (Lucide, Phosphor, Heroicons), Unicode symbols (→ 
 
 ## 🚨 THE #6 TELL: LEFT ACCENT STRIPE
 
-The colored vertical bar on the left edge of a card (`border-left: 4px solid <accent>`). AI models add it for "visual interest" — but in shipped products this stripe is reserved for elements that carry meaning: callouts, alerts, active list items, status, priority.
+The colored vertical bar on the left edge of a card (`border-left: 4px solid <accent>`). AI models add it for "visual interest" - but in shipped products this stripe is reserved for elements that carry meaning: callouts, alerts, active list items, status, priority.
 
-**RULE: Only use a side accent stripe when it communicates something — status, priority, owner, or selection. Never as decoration.**
+**RULE: Only use a side accent stripe when it communicates something - status, priority, owner, or selection. Never as decoration.**
 
 If you can't say in one word what the color means, remove the stripe.
 
@@ -262,7 +262,7 @@ available and appropriate.
 Before shipping any design:
 
 <details>
-<summary><b>Detail</b> — the commands</summary>
+<summary><b>Detail</b> - the commands</summary>
 
 ```
 □ Accent color is NOT indigo/violet
@@ -299,7 +299,7 @@ Run these against your design before shipping:
 
 **Image test:** If the first viewport works fine without the hero image → the image is too weak. Make it dominant or remove it.
 
-**Brand test:** If the brand disappears after hiding the nav → hierarchy is too weak. Make brand louder — bigger logo, brand color in hero, distinctive typography.
+**Brand test:** If the brand disappears after hiding the nav → hierarchy is too weak. Make brand louder - bigger logo, brand color in hero, distinctive typography.
 
 **Copy test:** If deleting 30% of copy improves the page → keep deleting. AI over-writes; real designers edit down.
 

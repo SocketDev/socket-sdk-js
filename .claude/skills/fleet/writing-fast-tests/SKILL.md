@@ -16,7 +16,7 @@ parallel file → isolated run.** Reach for the next one only when the previous
 one genuinely cannot express the behaviour.
 
 This skill covers how to make a suite fast. What an assertion may say is a
-separate contract — assert outcomes and exit codes rather than message prose,
+separate contract - assert outcomes and exit codes rather than message prose,
 never re-implement the logic under test, never scan source text. See
 [`test-layout`](../../../../docs/agents.md/fleet/test-layout.md) → "What to
 assert". A fake for I/O is right; a fake for LOGIC defeats the test.
@@ -38,7 +38,7 @@ That is ~68,000×. One cover run captured **2454 spawned children**; at 136 ms
 each that is ~334 s of process boot, roughly 78% of a 430 s unit run.
 
 So: export the pure decision function and assert against it. A hook, a CLI, and
-a codemod all have one — if yours doesn't, that's the refactor.
+a codemod all have one - if yours doesn't, that's the refactor.
 
 ```ts
 // Fast: the matcher is a pure function of its input.
@@ -66,7 +66,7 @@ If a file has N spawns for N assertions, collapse it: keep one, convert the rest
 ## 3. Share expensive setup, never per-test
 
 Build a fixture repo, parse a config, or compile an artifact **once per file**
-at module scope or in `beforeAll` — not in `beforeEach`. A `git init` per test
+at module scope or in `beforeAll` - not in `beforeEach`. A `git init` per test
 is a spawn per test wearing a different hat.
 
 Share read-only fixtures freely. Only deep-copy when a test mutates one, and
@@ -77,10 +77,10 @@ prefer designing the test not to mutate.
 vitest runs files in parallel workers. Most "flaky under parallel" is a test
 reaching for a shared global. Keep files independent:
 
-- **Temp dirs**: `mkdtempSync(path.join(os.tmpdir(), 'my-fixture-'))` — never a
+- **Temp dirs**: `mkdtempSync(path.join(os.tmpdir(), 'my-fixture-'))` - never a
   fixed path two files can both claim.
-- **Ports**: bind `:0` and read back the assigned port — never a constant.
-- **cwd**: pass `{ cwd }` to the call; never `process.chdir` (banned fleet-wide —
+- **Ports**: bind `:0` and read back the assigned port - never a constant.
+- **cwd**: pass `{ cwd }` to the call; never `process.chdir` (banned fleet-wide -
   it is process-global, so it corrupts every other worker in flight).
 - **Env**: pass env into the function; never mutate `process.env` and hope.
 - **Git**: fixtures build their own repo + bare origin on disk so `git ls-remote`
@@ -90,13 +90,13 @@ reaching for a shared global. Keep files independent:
 ## 5. Isolate only when you have proven contention
 
 `describe.sequential`, a `--no-file-parallelism` file, or a dedicated tier is a
-real cost — it serializes what the machine could overlap. Justify it with a
+real cost - it serializes what the machine could overlap. Justify it with a
 named shared resource (one git index, a singleton, a fixed socket), and write
 that resource into a comment. "It felt flaky" is not a justification; find the
 shared state instead.
 
-Genuinely heavy suites — external spec suites, cross-impl parity, built-artifact
-checks — do not belong in the unit tier at all. List their globs under
+Genuinely heavy suites - external spec suites, cross-impl parity, built-artifact
+checks - do not belong in the unit tier at all. List their globs under
 `vitest.conformanceExclude` in `.config/repo/socket-wheelhouse.json` and pair
 them with a `test:conformance` runner.
 
@@ -104,7 +104,7 @@ them with a `test:conformance` runner.
 
 `no-unmocked-net-guard` and `no-unmocked-ai-guard` block live calls, and a
 network round trip dwarfs everything above. Mock at the boundary. Fake timers
-beat `await sleep(500)` — a sleep is dead wall-clock in every future run.
+beat `await sleep(500)` - a sleep is dead wall-clock in every future run.
 
 ## Reviewing an existing slow suite
 
@@ -112,7 +112,7 @@ beat `await sleep(500)` — a sleep is dead wall-clock in every future run.
    `for f in $(rg -l 'spawn\(' test/); do echo "$(rg -c 'spawn\(' $f) $f"; done | sort -rn | head`
 2. For the top files, ask per spawn: *does this assert process behaviour, or
    just logic?* Convert the logic ones.
-3. Re-measure. Report the before/after wall clock — a speedup claim needs a
+3. Re-measure. Report the before/after wall clock - a speedup claim needs a
    receipt like any other.
 
 ## Completion criterion

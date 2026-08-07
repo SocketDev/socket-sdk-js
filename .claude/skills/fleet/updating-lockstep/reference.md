@@ -1,22 +1,22 @@
 # updating-lockstep reference
 
-Long-form details for the `updating-lockstep` skill — phase scripts, per-kind action policy, advisory format, and CI-mode emission. The orchestration story lives in [`SKILL.md`](SKILL.md).
+Long-form details for the `updating-lockstep` skill - phase scripts, per-kind action policy, advisory format, and CI-mode emission. The orchestration story lives in [`SKILL.md`](SKILL.md).
 
 ## Per-kind action policy
 
 | Kind               | Drift signal                                           | Action                                                                                                                                               |
 | ------------------ | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `version-pin`      | Upstream commits on default ref since pinned SHA       | **Auto-bump** per `upgrade_policy`: `track-latest` → advance to latest stable tag; `major-gate` → advance patch/minor only; `locked` → advisory only |
-| `file-fork`        | Upstream file changed since `forked_at_sha`            | **Advisory** — note in PR body; do NOT auto-merge (forks carry local deltas that need human review)                                                  |
-| `feature-parity`   | Parity score below `criticality/10` floor              | **Advisory** — note in PR body; human decides implement vs downgrade criticality                                                                     |
-| `spec-conformance` | Spec submodule moved                                   | **Advisory** — note in PR body; human decides whether to bump `spec_version`                                                                         |
-| `lang-parity`      | Port divergence / `rejected` anti-pattern reintroduced | **Advisory** — note in PR body; humans fix the port or update the manifest                                                                           |
+| `file-fork`        | Upstream file changed since `forked_at_sha`            | **Advisory** - note in PR body; do NOT auto-merge (forks carry local deltas that need human review)                                                  |
+| `feature-parity`   | Parity score below `criticality/10` floor              | **Advisory** - note in PR body; human decides implement vs downgrade criticality                                                                     |
+| `spec-conformance` | Spec submodule moved                                   | **Advisory** - note in PR body; human decides whether to bump `spec_version`                                                                         |
+| `lang-parity`      | Port divergence / `rejected` anti-pattern reintroduced | **Advisory** - note in PR body; humans fix the port or update the manifest                                                                           |
 
 The umbrella rule: **`version-pin` is mechanical** (safe to auto-apply with `track-latest` / `major-gate` policies); everything else is **advisory** (upstream semantics and local deltas matter, humans decide).
 
 ## Phase scripts
 
-### Phase 1 — Pre-flight
+### Phase 1 - Pre-flight
 
 ```bash
 test -f lockstep.json || { echo "no lockstep.json; skill n/a"; exit 0; }
@@ -28,7 +28,7 @@ git status --porcelain | grep -v '^??' && { echo "dirty tree; aborting"; exit 1;
 [ "$CI" = "true" ] || [ -n "$GITHUB_ACTIONS" ] && CI_MODE=true || CI_MODE=false
 ```
 
-### Phase 2 — Collect + plan drift
+### Phase 2 - Collect + plan drift
 
 ```bash
 pnpm run lockstep --json > /tmp/lockstep-report.json
@@ -37,17 +37,17 @@ node scripts/fleet/lockstep/auto-bump.mts --plan --report /tmp/lockstep-report.j
 
 `auto-bump.mts --plan` partitions the report into:
 
-- **auto** — version-pin rows with an actionable `upgrade_policy` (`track-latest` / `major-gate`) AND a resolvable newer stable tag. Each carries the already-resolved `targetTag`.
-- **advisory** - everything else with `severity != "ok"`, plus any version-pin that can't auto-bump (locked, no-newer-tag, or a major bump gated by `major-gate`) — surfaced as an advisory line, never silently dropped.
+- **auto** - version-pin rows with an actionable `upgrade_policy` (`track-latest` / `major-gate`) AND a resolvable newer stable tag. Each carries the already-resolved `targetTag`.
+- **advisory** - everything else with `severity != "ok"`, plus any version-pin that can't auto-bump (locked, no-newer-tag, or a major bump gated by `major-gate`) - surfaced as an advisory line, never silently dropped.
 
 `--tags <tags.json>` is `{ "<upstream>": ["<tag>", …] }`: the fetched tags per upstream, via `git -C <submodule> tag` after `git fetch --tags`. Omit it and the auto list resolves no targets: the rows fall to advisory with "no parseable stable tags". If both lists are empty: exit 0 with "no lockstep drift". The partition + the entire tag-scheme/semver/major-gate resolution, the old Phase 3a/3b inline jq, live in the engine. See its unit tests for the four tag schemes.
 
-### Phase 3 — Auto-bump version-pin rows
+### Phase 3 - Auto-bump version-pin rows
 
 For each row in the **auto** list, in manifest declaration order:
 
 <details>
-<summary><b>Detail</b> — 3c. Check out + capture new SHA, 3d. Update lockstep.json + .gitmodules, 3e. Validate + commit</summary>
+<summary><b>Detail</b> - 3c. Check out + capture new SHA, 3d. Update lockstep.json + .gitmodules, 3e. Validate + commit</summary>
 
 **3a. Resolve the upstream submodule + fetch tags**
 
@@ -58,14 +58,14 @@ git fetch origin --tags --quiet
 OLD_SHA=$(git rev-parse HEAD)
 ```
 
-**3b. Find the target tag — already resolved by the planner.**
+**3b. Find the target tag - already resolved by the planner.**
 
 The Phase-2 `auto-bump.mts --plan` output carries each auto row's `targetTag`,
 resolved by the engine's tag resolver: it filters pre-release tags (the
 stability filter below), detects the scheme (`v1.2.3` / `1.2.3` /
 `<prefix>-1.2.3` / `<prefix>_1_2_3`), semver-sorts within the current prefix,
 and applies the policy (`major-gate` surfaces a major jump as advisory rather
-than bumping). Use `targetTag` from the plan — don't re-derive it in shell.
+than bumping). Use `targetTag` from the plan - don't re-derive it in shell.
 
 **3c. Check out + capture new SHA**
 
@@ -88,7 +88,7 @@ jq --arg id "$ROW_ID" --arg sha "$NEW_SHA" --arg tag "$LATEST" \
   lockstep.json > lockstep.json.tmp && mv lockstep.json.tmp lockstep.json
 ```
 
-Update the submodule ref + its `.gitmodules` version comment through the canonical owner — don't hand-edit the comment (that re-implements `gen/gitmodules-hash.mts`):
+Update the submodule ref + its `.gitmodules` version comment through the canonical owner - don't hand-edit the comment (that re-implements `gen/gitmodules-hash.mts`):
 
 ```bash
 node scripts/fleet/gen/gitmodules-hash.mts --set "$SUBMODULE" "$LATEST"
@@ -120,7 +120,7 @@ Record the bumped row in the summary accumulator.
 
 </details>
 
-### Phase 4 — Advisory composition
+### Phase 4 - Advisory composition
 
 For each row in **advisory**, accumulate a markdown line:
 
@@ -133,12 +133,12 @@ For each row in **advisory**, accumulate a markdown line:
 - **version-pin** `<id>`: upgrade_policy=locked — skipped.
 ```
 
-### Phase 5 — Report + emit
+### Phase 5 - Report + emit
 
 Final human-readable report to stdout:
 
 <details>
-<summary><b>Detail</b> — the worked steps (3 snippets)</summary>
+<summary><b>Detail</b> - the worked steps (3 snippets)</summary>
 
 ```
 ## updating-lockstep report

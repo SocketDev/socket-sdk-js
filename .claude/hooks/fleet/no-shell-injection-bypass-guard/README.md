@@ -1,6 +1,6 @@
 # no-shell-injection-bypass-guard
 
-**Type:** PreToolUse(Bash) hook (BLOCK — exit 2).
+**Type:** PreToolUse(Bash) hook (BLOCK - exit 2).
 
 ## Trigger
 
@@ -8,16 +8,16 @@ Blocks a Bash command that uses an evasion-only shell construct which routes
 around the fleet's command allowlists + `findInvocation` deny rules by hiding or
 rewriting the command the parser sees:
 
-1. **Zsh EQUALS expansion** — a base command starting with `=` (`=curl x`
+1. **Zsh EQUALS expansion** - a base command starting with `=` (`=curl x`
    expands to `$(which curl) x` and runs `/usr/bin/curl`, but the parsed base
    token is `=curl`, so a `Bash(curl:*)` deny never fires).
-2. **Process substitution** — `<(…)`, `>(…)`, `=(…)` run an inner command whose
+2. **Process substitution** - `<(…)`, `>(…)`, `=(…)` run an inner command whose
    name no allowlist inspects.
-3. **Zsh-module exfil / exec / file-IO builtins** — `zmodload` and the builtins
+3. **Zsh-module exfil / exec / file-IO builtins** - `zmodload` and the builtins
    it enables (`ztcp`, `zpty`, `sysopen`/`sysread`/`syswrite`/`sysseek`), plus
    `emulate -c` (eval-equivalent). Blocked as defense-in-depth.
 
-**Not blocked:** `$(…)`, `${…}`, and backticks — legitimate and common in fleet
+**Not blocked:** `$(…)`, `${…}`, and backticks - legitimate and common in fleet
 Bash (e.g. the default-branch recipe). Detection is AST-based (the fleet shell
 parser, not raw-string regex), per `no-command-regex-in-hooks-guard`.
 

@@ -22,7 +22,7 @@ a positional source-file argument:
 **Why:** when a workflow sets `TARGET_ARCH: ${{ matrix.arch }}` and a
 make-driven builder script inherits it, every Linux + darwin platform
 red-lines at `make` because gcc treats the arch string as a source-file
-argument. The fix is a single line — read the value, then drop it from
+argument. The fix is a single line - read the value, then drop it from
 the spawned env:
 
     const TARGET_ARCH = process.env.TARGET_ARCH || process.arch
@@ -45,7 +45,7 @@ or `scripts/` does ALL of:
 3. Does NOT contain `delete process.env.TARGET_ARCH` anywhere in
    the after-text.
 
-The check is conservative — it errs toward false-negatives (allow
+The check is conservative - it errs toward false-negatives (allow
 edits the hook can't classify) over false-positives.
 
 ## Bypass

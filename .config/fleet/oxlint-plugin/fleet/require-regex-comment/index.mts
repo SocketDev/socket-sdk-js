@@ -23,7 +23,7 @@
  *   - Test files (`*.test.mts` / `*.test.ts`): a regex in `assert.match` /
  *     `expect().toMatch` is an assertion documented by the test's own name.
  *     Escape (per-call-site, when a complex pattern is still obvious in
- *     context): add `// socket-lint: allow uncommented-regex` on its own line above the regex's
+ *     context): add `// oxlint-disable-next-line socket/require-regex-comment` on its own line above the regex's
  *     line. Report-only — NO deterministic autofix: a comment's CONTENT can't
  *     be mechanically derived from the pattern. The AI-fix orchestrator
  *     (`scripts/fleet/ai-lint-fix/`) handles this rule: it reads each flagged
@@ -40,6 +40,11 @@
 // can't statically detect `parse` on regjsparser's exports, so the named form
 // throws at source-load time in the wheelhouse. In source form it resolves from
 // the rule's own package.json (`regjsparser` is a declared dependency).
+import {
+  suppressedRuleNames,
+  SUPPRESSION_RE,
+  suppressionWaives,
+} from '../../../../../.claude/hooks/fleet/_shared/suppression-rules.mts'
 import regjsparser from 'regjsparser'
 
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
@@ -60,16 +65,8 @@ interface RegjsNode {
   alternatives?: RegjsNode[] | undefined
 }
 
-const SOCKET_LINT_MARKER_RE =
-  /(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+(?<tag>[\w-]+))?/
-
 function isLineMarkered(line: string): boolean {
-  const m = line.match(SOCKET_LINT_MARKER_RE)
-  if (!m) {
-    return false
-  }
-  const tag = m.groups?.['tag']
-  return !tag || tag === 'uncommented-regex'
+  return suppressionWaives(line, 'socket/require-regex-comment')
 }
 
 /**
@@ -82,7 +79,7 @@ function isLineMarkered(line: string): boolean {
  * before the real breakdown comment sitting above it.
  */
 function isAnyLintDirectiveLine(line: string): boolean {
-  return SOCKET_LINT_MARKER_RE.test(line)
+  return suppressedRuleNames(line).length > 0
 }
 
 // Node kinds that make a disjunction BRANCH dense to read: a characterClass is
@@ -244,8 +241,8 @@ function lineHasComment(line: string | undefined): boolean {
   if (!line) {
     return false
   }
-  // Drop any socket-lint directive before looking for a real comment.
-  const withoutDirective = line.replace(SOCKET_LINT_MARKER_RE, '')
+  // Drop any suppression directive before looking for a real comment.
+  const withoutDirective = line.replace(SUPPRESSION_RE, '')
   return (
     withoutDirective.includes('//') ||
     withoutDirective.includes('/*') ||
@@ -265,7 +262,7 @@ const rule = {
     // No deterministic fix — the AI-fix step writes the comment content.
     messages: {
       uncommented:
-        'Complex regex `{{pattern}}` (combines groups / alternation / lookaround / backreference) has no adjacent explanatory comment. Add a `//` breakdown on the line above (what each part matches) for a junior reader, or add `// socket-lint: allow uncommented-regex` on its own line above if it is obvious in context.',
+        'Complex regex `{{pattern}}` (combines groups / alternation / lookaround / backreference) has no adjacent explanatory comment. Add a `//` breakdown on the line above (what each part matches) for a junior reader, or add `// oxlint-disable-next-line socket/require-regex-comment` on its own line above if it is obvious in context.',
     },
     schema: [],
   },
@@ -347,5 +344,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

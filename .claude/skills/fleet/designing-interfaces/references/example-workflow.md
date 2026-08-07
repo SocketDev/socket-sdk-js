@@ -58,7 +58,7 @@ Primary foundation: data infrastructure website.
 Borrowed details:
 
 <details>
-<summary><b>Detail</b> — the worked steps (2 snippets)</summary>
+<summary><b>Detail</b> - the worked steps (2 snippets)</summary>
 
 - From editorial SaaS: tighter type hierarchy and low color discipline.
 - From productivity: more generous section spacing and softer proof blocks.
@@ -161,7 +161,7 @@ Open relevant flows with `refero_get_flow`.
 ### Research Summary
 
 <details>
-<summary><b>The written summary</b> — styles, screens and flows reviewed, the visual direction with its reference lock and borrowed details, the product patterns, and the journey logic</summary>
+<summary><b>The written summary</b> - styles, screens and flows reviewed, the visual direction with its reference lock and borrowed details, the product patterns, and the journey logic</summary>
 
 ```text
 Research summary:
@@ -232,7 +232,7 @@ Journey logic:
 ### Page Structure
 
 <details>
-<summary><b>The six sections in order</b> — pricing header, plan cards, operational value strip, feature comparison, enterprise proof, FAQ</summary>
+<summary><b>The six sections in order</b> - pricing header, plan cards, operational value strip, feature comparison, enterprise proof, FAQ</summary>
 
 ```text
 1. Pricing header

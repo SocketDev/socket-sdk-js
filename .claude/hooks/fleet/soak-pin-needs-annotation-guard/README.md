@@ -8,10 +8,10 @@ matching `{ published, removable }` annotation in `release-age-annotations.mts`.
 
 `EXPECTED_RELEASE_AGE_EXCLUDE` enforces pin ↔ annotation parity at MODULE LOAD
 (it throws). Without this guard, a missing annotation surfaces only when the
-cascade crashes mid-run — a confusing, late failure. This front-runs it: the
+cascade crashes mid-run - a confusing, late failure. This front-runs it: the
 moment you add `'pkg@1.2.3'` to the soak list, the guard checks the annotations
 registry and, if the date annotation is missing, blocks with the exact line to
-add. No bypass — the fix is deterministic.
+add. No bypass - the fix is deterministic.
 
 ## Fix
 

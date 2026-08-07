@@ -12,7 +12,7 @@ rule count stops matching the rule-file count.
 It never checks the rule count, so a green lint can hide a fully-disabled plugin. This hook catches the
 breakage in-session, the moment it's introduced, before it cascades out to the fleet.
 
-**Blocking:** no — PostToolUse, reporting only (exit 0). The edit already landed; the hook
+**Blocking:** no - PostToolUse, reporting only (exit 0). The edit already landed; the hook
 surfaces the problem rather than gating it. The commit-time gate
 `scripts/fleet/check/oxlint-plugin-loads.mts` (run by `pnpm check` / pre-push) is the
 fail-closed backstop.

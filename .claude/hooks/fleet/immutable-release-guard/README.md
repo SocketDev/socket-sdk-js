@@ -9,7 +9,7 @@ GitHub immutable releases ([GA 2025-10-28](https://github.blog/changelog/2025-10
 auto-generate a Sigstore-bundle release attestation at publish-time over
 the locked asset set. The single-call `gh release create` form combines
 create + upload + publish into one action, which can race the
-attestation hash before all assets land — the resulting release may
+attestation hash before all assets land - the resulting release may
 publish without a verifiable attestation.
 
 The fleet rule is the 3-step pattern:
@@ -40,7 +40,7 @@ Type the canonical phrase in a new message:
 
     Allow immutable-release-pattern bypass
 
-Use sparingly — releases without verifiable attestations defeat the
+Use sparingly - releases without verifiable attestations defeat the
 supply-chain audit trail downstream consumers rely on.
 
 ## Detection

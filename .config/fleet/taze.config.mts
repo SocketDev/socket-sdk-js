@@ -21,7 +21,8 @@ import {
   UPDATE_PINNED_TOOLCHAIN,
 } from '../../scripts/fleet/constants/socket-scopes.mts'
 
-// oxlint-disable-next-line socket/no-default-export -- taze loads its config via default export per the documented API.
+// Taze loads its config via default export per the documented API.
+// oxlint-disable-next-line socket/no-default-export -- taze loads its config
 export default defineConfig({
   // Interactive mode disabled for automation.
   interactive: false,

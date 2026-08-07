@@ -30,7 +30,7 @@ Code fences are stripped first so quoted phrases don't false-positive.
 
 ### Behavioral signal
 
-The current turn edits a fleet-canonical file (hook / skill / agent / lint rule / CLAUDE.md / fleet script / fleet doc) that a prior turn within the same session also edited. Repeated edits to the same canonical surface without a rule-promotion `**Why:**` citation is the actual compound-lessons-into-rules pattern — prose may or may not mention it.
+The current turn edits a fleet-canonical file (hook / skill / agent / lint rule / CLAUDE.md / fleet script / fleet doc) that a prior turn within the same session also edited. Repeated edits to the same canonical surface without a rule-promotion `**Why:**` citation is the actual compound-lessons-into-rules pattern - prose may or may not mention it.
 
 Lookback: 5 prior assistant turns (cheap on long transcripts, broad enough to catch "fix it again 4 turns later").
 
@@ -45,7 +45,7 @@ Surfaces that count:
 - `scripts/fleet/**`
 - `docs/agents.md/fleet/**`
 
-Edits to non-fleet-canonical paths (`src/`, `test/`, repo-local `.claude/hooks/repo/`) don't fire — those aren't fleet-shared surfaces, so the compound-lessons-into-rules pattern doesn't apply.
+Edits to non-fleet-canonical paths (`src/`, `test/`, repo-local `.claude/hooks/repo/`) don't fire - those aren't fleet-shared surfaces, so the compound-lessons-into-rules pattern doesn't apply.
 
 ## Suppression
 
@@ -64,7 +64,7 @@ Stop hooks fire after the turn. Blocking would just truncate the assistant's res
 
 ## Bypass
 
-No bypass — the reminder never blocks.
+No bypass - the reminder never blocks.
 
 ## Test
 

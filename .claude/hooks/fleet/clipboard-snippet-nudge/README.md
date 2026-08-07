@@ -1,8 +1,8 @@
 # clipboard-snippet-nudge
 
-PostToolUse(Write) nudge. When a run/paste snippet — a script the **user** is
+PostToolUse(Write) nudge. When a run/paste snippet - a script the **user** is
 meant to run (`.sh` / `.bash` / `.zsh` / `.js` / `.mjs` / `.cjs` / `.mts` /
-`.ts` / `.py`) — is written into the session scratchpad on macOS, it suggests:
+`.ts` / `.py`) - is written into the session scratchpad on macOS, it suggests:
 
 > `pbcopy < <file>` puts it on the user's clipboard so they don't copy it out of
 > the scrolling terminal.

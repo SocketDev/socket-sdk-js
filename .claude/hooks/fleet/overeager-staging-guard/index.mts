@@ -35,7 +35,7 @@
 //
 // Bypass:
 //   - `Allow add-all bypass` in a recent user turn — disables layer 1.
-//   - `Allow index-sweep bypass` — lets a bare commit take the whole index.
+//   - `Allow git commit-all bypass` — lets a bare commit take the whole index.
 //
 // Reads a Claude Code PreToolUse JSON payload from stdin:
 //   { "tool_name": "Bash",
@@ -71,9 +71,10 @@ import { operatorBypassPresent } from '../_shared/transcript.mts'
 export const triggers: readonly string[] = ['git']
 
 const BYPASS_PHRASES = ['Allow add-all bypass'] as const
-// Separate phrase for the index-sweep block: it's a different decision from the
-// `git add -A` block, so it gets its own bypass.
-const COMMIT_SWEEP_BYPASS = ['Allow index-sweep bypass'] as const
+// Separate phrase for the commit-all block: it's a different decision from the
+// `git add -A` block, so it gets its own bypass. ("commit-all" is the plain
+// name for committing everything in the git index / staging area.)
+const COMMIT_SWEEP_BYPASS = ['Allow git commit-all bypass'] as const
 
 export function getRepoDir(command: string, cwd?: string | undefined): string {
   // The repo the `git` command actually runs in — `git -C <dir>`, a leading
@@ -323,7 +324,7 @@ export function checkCommand(command: string, payload: ToolCallPayload) {
           : '    git commit -o path/to/your-file.ts',
         '',
         '  Bypass (only if you genuinely mean to commit the whole index):',
-        '    user types "Allow index-sweep bypass" in chat, then retry.',
+        '    user types "Allow git commit-all bypass" in chat, then retry.',
       ].join('\n'),
     )
   }
@@ -334,7 +335,7 @@ export function checkCommand(command: string, payload: ToolCallPayload) {
 export const check = bashGuard(checkCommand)
 
 export const hook = defineHook({
-  bypass: ['add-all', 'index-sweep'],
+  bypass: ['add-all', 'git commit-all'],
   bypassMode: 'manual',
   check,
   event: 'PreToolUse',

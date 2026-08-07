@@ -186,7 +186,7 @@ const RE_ESCAPE = /[.*+?^${}()|[\]\\]/g
  * match. Case-insensitive.
  */
 export function deniedHostRe(host: string): RegExp {
-  const esc = host.replace(RE_ESCAPE, String.raw`\$&`)
+  const esc = host.replace(RE_ESCAPE, (match: string) => `\\${match}`)
   // Boundary shape documented in the doc comment above.
   // oxlint-disable-next-line socket/require-regex-comment -- documented above
   return new RegExp(`(?:^|[^a-z0-9-])${esc}(?![a-z0-9-])`, 'i')

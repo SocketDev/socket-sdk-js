@@ -11,9 +11,9 @@ metadata:
 
 **Rule:** every programmatic Claude callsite sets four flags. Skip any one and a future edit silently widens the surface.
 
-## First: prefer the lib helper — don't hand-roll the flags
+## First: prefer the lib helper - don't hand-roll the flags
 
-🚨 For Node scripts / hooks, use **`spawnAiAgent` from `@socketsecurity/lib-stable/ai/spawn`** with a tier from the `AI_PROFILE` ladder in `@socketsecurity/lib-stable/ai/profiles`. It enforces the four flags at the type level (`SpawnAiAgentOptions` requires `tools` / `disallow` / `permissionMode`), translates them per-agent (claude / codex / gemini / opencode), and owns `--no-session-persistence`, `--add-dir`, and the 529-overload retry. Hand-rolling a `spawn('claude', [...flags])` is how the flag set drifts — and the `prefer-async-spawn` lint rule flags the raw spawn anyway.
+🚨 For Node scripts / hooks, use **`spawnAiAgent` from `@socketsecurity/lib-stable/ai/spawn`** with a tier from the `AI_PROFILE` ladder in `@socketsecurity/lib-stable/ai/profiles`. It enforces the four flags at the type level (`SpawnAiAgentOptions` requires `tools` / `disallow` / `permissionMode`), translates them per-agent (claude / codex / gemini / opencode), and owns `--no-session-persistence`, `--add-dir`, and the 529-overload retry. Hand-rolling a `spawn('claude', [...flags])` is how the flag set drifts --and the `prefer-async-spawn` lint rule flags the raw spawn anyway.
 
 ```ts
 import { AI_PROFILE } from '@socketsecurity/lib-stable/ai/profiles'
@@ -27,14 +27,14 @@ const { exitCode, stdout } = await spawnAiAgent({
 })
 ```
 
-`AI_PROFILE` is a capability ladder, least → most capable — pick the narrowest tier that works:
+`AI_PROFILE` is a capability ladder, least → most capable - pick the narrowest tier that works:
 
-- `.read` — scan / classify. Read/Grep/Glob/WebFetch/WebSearch. No Edit/Write/Bash.
-- `.edit` — in-place edits only. Read/Edit/Grep/Glob. No Write/MultiEdit/Bash (can't create files).
-- `.create` — edit AND create files. Adds Write/MultiEdit. Still no Bash.
-- `.full` — `.create` + Bash allowlisted to git/pnpm/node.
+- `.read` - scan / classify. Read/Grep/Glob/WebFetch/WebSearch. No Edit/Write/Bash.
+- `.edit` - in-place edits only. Read/Edit/Grep/Glob. No Write/MultiEdit/Bash (can't create files).
+- `.create` - edit AND create files. Adds Write/MultiEdit. Still no Bash.
+- `.full` - `.create` + Bash allowlisted to git/pnpm/node.
 
-Every tier also denies `Agent` (no sub-agent escape). Spread a tier and override per call (`tools`/`disallow` to tighten further, `model`, `addDirs`). The raw SDK/CLI recipes below are the underlying contract — reach for them only when you genuinely can't use the helper (e.g. a workflow-YAML `run:` step with no Node).
+Every tier also denies `Agent` (no sub-agent escape). Spread a tier and override per call (`tools`/`disallow` to tighten further, `model`, `addDirs`). The raw SDK/CLI recipes below are the underlying contract - reach for them only when you genuinely can't use the helper (e.g. a workflow-YAML `run:` step with no Node).
 
 ## The four flags
 
@@ -92,7 +92,7 @@ claude --print \
 
 ## Recipe: agent that needs Bash (e.g. `/updating`: pnpm + git + jq)
 
-Narrow `Bash(...)` patterns surgically. Block dangerous Bash patterns explicitly. Fleet rules: no `npx`/`pnpm dlx`/`yarn dlx`; no `curl`/`wget` exfil; no destructive `rm -rf`; no `sudo`. Build the deny list as shell vars so the `npx`/`dlx` denials can carry the `# zizmor:` exemption marker — the pre-commit `scanNpxDlx` hook treats those literal strings as the prohibited tools, not as exemptions, unless the line is tagged:
+Narrow `Bash(...)` patterns surgically. Block dangerous Bash patterns explicitly. Fleet rules: no `npx`/`pnpm dlx`/`yarn dlx`; no `curl`/`wget` exfil; no destructive `rm -rf`; no `sudo`. Build the deny list as shell vars so the `npx`/`dlx` denials can carry the `# zizmor:` exemption marker - the pre-commit `scanNpxDlx` hook treats those literal strings as the prohibited tools, not as exemptions, unless the line is tagged:
 
 ```yaml
 DISALLOW_BASE='Agent Task NotebookEdit WebFetch WebSearch Bash(curl:*) Bash(wget:*) Bash(rm -rf*) Bash(sudo:*)'
@@ -125,6 +125,6 @@ The four-flag lockdown is enforced at edit time by `.claude/hooks/fleet/claude-l
 
 ## Existing fleet callsites
 
-- `scripts/fleet/ai-lint-fix/claude.mts`: `runClaudeFix()` spawns the edit-only agent per file via `spawnAiAgent({ ...AI_PROFILE.edit })`, the locked-down four-flag wrapper — model and effort picked per-file by the caller's `escalateTier()`.
+- `scripts/fleet/ai-lint-fix/claude.mts`: `runClaudeFix()` spawns the edit-only agent per file via `spawnAiAgent({ ...AI_PROFILE.edit })`, the locked-down four-flag wrapper - model and effort picked per-file by the caller's `escalateTier()`.
 - `socket-registry/.github/workflows/weekly-update.md`: the gh-aw reusable workflow (`engine: claude`, `max-ai-credits`, network allowlist, safe-output PR). Replaced the legacy `claude --print` reusable.
 - `socket-lib/tools/prim/src/disambiguate.mts`: read-only recipe above (`query()` SDK form).

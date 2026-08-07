@@ -6,7 +6,7 @@ Stop hook that warns when an assistant turn's Write / Edit / NotebookEdit tool c
 
 CLAUDE.md "File size" rule:
 
-> Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, split along natural seams — group by domain, not line count; name files for what's in them; co-locate helpers with consumers. Exceptions: a single function that legitimately needs the space (note it inline), or a generated artifact.
+> Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, split along natural seams - group by domain, not line count; name files for what's in them; co-locate helpers with consumers. Exceptions: a single function that legitimately needs the space (note it inline), or a generated artifact.
 
 The intent is to catch the slide where a file gradually accumulates 600, then 700, then 1200 lines because nobody noticed each individual edit pushing it over. The hook surfaces the count alongside the edit so the next turn can act on it.
 
@@ -22,8 +22,8 @@ For each target `file_path`, it reads the current on-disk state (post-edit, sinc
 
 | Cap  | Threshold      | Action                             |
 | ---- | -------------- | ---------------------------------- |
-| Soft | 501-1000 lines | Warning — start planning the split |
-| Hard | 1001+ lines    | Stronger warning — split now       |
+| Soft | 501-1000 lines | Warning - start planning the split |
+| Hard | 1001+ lines    | Stronger warning - split now       |
 
 ## Exempt paths
 
@@ -35,7 +35,7 @@ Generated / vendored / build-output paths are skipped to avoid noise:
 - `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `Cargo.lock`
 - `*.d.ts`, `*.d.ts.map`, `*.tsbuildinfo`, `*.map`
 
-The skip list errs on the side of suppressing false positives — genuine in-scope files past the cap will still surface.
+The skip list errs on the side of suppressing false positives - genuine in-scope files past the cap will still surface.
 
 ## Why it doesn't block
 

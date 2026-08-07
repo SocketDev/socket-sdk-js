@@ -21,10 +21,10 @@ trigger (`issues` / `issue_comment` / `pull_request` / `pull_request_target`),
 the file must declare:
 
 1. an explicit `permissions:` block (least-privilege `GITHUB_TOKEN`; the default
-   inherited scope is broad — zizmor's `excessive-permissions` catches this at
+   inherited scope is broad - zizmor's `excessive-permissions` catches this at
    CI time, this catches it at edit time), and
 2. the agent-surface lockdown `with:` inputs: `allowed_tools` +
-   `disallowed_tools` + a non-default `permission_mode` — the same four-flag
+   `disallowed_tools` + a non-default `permission_mode` - the same four-flag
    discipline `locking-down-claude` requires for headless `claude`.
 
 A workflow gated only on `push` / `workflow_dispatch` / `schedule` processes no

@@ -23,7 +23,7 @@ any of them are known malware or have critical security alerts, and
 3. It detects the file type and extracts dependency names from the
    new content.
 4. For an `Edit` (not a `Write`), it diffs new content vs. old, so
-   only _newly added_ dependencies get checked — existing deps
+   only _newly added_ dependencies get checked - existing deps
    aren't re-scanned every time you bump an unrelated version.
 5. It builds a [Package URL (PURL)](https://github.com/package-url/purl-spec)
    for each new dep and calls Socket.dev's `checkMalware` API.
@@ -38,7 +38,7 @@ any of them are known malware or have critical security alerts, and
 ## Flow diagram
 
 <details>
-<summary><b>ASCII flow</b> — stdin intake, dep diffing against <code>old_string</code>, PURL build, the <code>sdk.checkMalware</code> call with its two batching modes, and the three exits</summary>
+<summary><b>ASCII flow</b> - stdin intake, dep diffing against <code>old_string</code>, PURL build, the <code>sdk.checkMalware</code> call with its two batching modes, and the three exits</summary>
 
 ```
 Claude wants to edit package.json
@@ -95,16 +95,16 @@ manifest a few times in one session.
 
 ## Slopsquatting defense (Threat 2.2)
 
-AI agents sometimes hallucinate package names that don't exist —
+AI agents sometimes hallucinate package names that don't exist -
 attackers register those names and wait. This hook detects every
 "not found" response from the Socket.dev firewall API and counts it
 in a persistent cacache-backed TTL cache (7-day window, keyed by
-`{ecosystem}/{namespace?}/{name}` — version stripped so a burst of
+`{ecosystem}/{namespace?}/{name}` - version stripped so a burst of
 fake `@1`/`@2`/`@3` requests counts as one). After three attempts on
 the same nonexistent name, the hook surfaces a warning to stderr with
 a "did you mean" hint when the typo is close to a known package.
 
-The cache survives across sessions and processes — an attacker can't
+The cache survives across sessions and processes - an attacker can't
 shake the counter by triggering a new Claude session.
 
 ## Audit log
@@ -112,18 +112,18 @@ shake the counter by triggering a new Claude session.
 Every invocation appends one JSONL record per checked dependency to
 `~/.claude/audit/check-new-deps.jsonl`. Each record has:
 
-- `ts` — timestamp (ms)
-- `repo` — basename of `process.cwd()`
-- `type` — ecosystem (`npm`, `pypi`, `cargo`, …)
-- `name` — package name
-- `namespace?` — scope/group when present
-- `version?` — version range when present in the manifest
-- `verdict` — one of `allow` / `block` / `notfound` / `unknown`
-- `reason?` — block reason (only set when `verdict === 'block'`)
-- `session?` — Claude session id (derived from `transcript_path`)
+- `ts` - timestamp (ms)
+- `repo` - basename of `process.cwd()`
+- `type` - ecosystem (`npm`, `pypi`, `cargo`, …)
+- `name` - package name
+- `namespace?` - scope/group when present
+- `version?` - version range when present in the manifest
+- `verdict` - one of `allow` / `block` / `notfound` / `unknown`
+- `reason?` - block reason (only set when `verdict === 'block'`)
+- `session?` - Claude session id (derived from `transcript_path`)
 
 The log is **LOCAL ONLY**. Nothing in this file leaves the
-developer's machine via this hook — no outbound channel is added.
+developer's machine via this hook - no outbound channel is added.
 Private package names already pass through the Socket.dev API call
 (unchanged from the original behavior); the audit log just records
 locally what was checked.
@@ -155,9 +155,9 @@ The hook is registered in `.claude/settings.json`:
 All dependencies use `catalog:` references from the workspace root
 (`pnpm-workspace.yaml`):
 
-- `@socketsecurity/sdk-stable` — Socket.dev SDK v4, exposes `checkMalware()`.
-- `@socketsecurity/lib-stable` — shared constants and path utilities.
-- `@socketregistry/packageurl-js-stable` — Package URL (PURL) parsing.
+- `@socketsecurity/sdk-stable` - Socket.dev SDK v4, exposes `checkMalware()`.
+- `@socketsecurity/lib-stable` - shared constants and path utilities.
+- `@socketregistry/packageurl-js-stable` - Package URL (PURL) parsing.
 
 ## Exit codes
 
@@ -175,8 +175,8 @@ and are required to be byte-identical across every fleet repo.
 
 ## Files
 
-- `index.mts` — main hook (dep extraction + Socket.dev API check)
-- `audit.mts` — slopsquatting tracking + audit log
-- `types.mts` — shared type definitions
-- `package.json` / `tsconfig.json` — workspace and TS config
-- `test/extract-deps.test.mts` — unit + integration tests
+- `index.mts` - main hook (dep extraction + Socket.dev API check)
+- `audit.mts` - slopsquatting tracking + audit log
+- `types.mts` - shared type definitions
+- `package.json` / `tsconfig.json` - workspace and TS config
+- `test/extract-deps.test.mts` - unit + integration tests

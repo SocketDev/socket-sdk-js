@@ -2,8 +2,8 @@
 
 A **Claude Code hook** that runs before `Edit` or `Write` tool calls
 on TypeScript source files and **blocks** edits that introduce direct
-stream writes — `process.stderr.write`, `process.stdout.write`,
-`console.log` / `error` / `warn` / `info` / `debug` — into source
+stream writes - `process.stderr.write`, `process.stdout.write`,
+`console.log` / `error` / `warn` / `info` / `debug` - into source
 code that's supposed to use a logger.
 
 > If you haven't worked with Claude Code hooks before: hooks are tiny
@@ -42,10 +42,10 @@ The hook is intentionally narrow:
 - **Fires** on `Edit` and `Write` calls.
 - **Inspects** files matching `*.{ts,mts,tsx,cts}` under repo source.
 - **Exempts** `.claude/hooks/`, `.git-hooks/`, `scripts/`, tests,
-  fixtures, and external/vendored code — those have legitimate
+  fixtures, and external/vendored code - those have legitimate
   reasons to write directly.
-- **Exempts** lines tagged `# socket-lint: allow console` (canonical
-  per-line opt-out — names the construct being allowed, not the
+- **Exempts** lines tagged `# oxlint-disable-next-line socket/no-console-prefer-logger` (canonical
+  per-line opt-out - names the construct being allowed, not the
   recommended replacement). The bare form `# socket-lint: allow`
   also works for blanket suppression. Legacy `allow logger` is
   accepted as an alias for one deprecation cycle.

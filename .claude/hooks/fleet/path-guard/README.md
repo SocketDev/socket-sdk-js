@@ -17,7 +17,7 @@ sentence:
 
 ## Why this rule exists
 
-Build outputs typically nest deep — `build/<mode>/<platform>/out/Final/<bin>`.
+Build outputs typically nest deep - `build/<mode>/<platform>/out/Final/<bin>`.
 If three different scripts all `path.join(...)` their own version of
 that path, a refactor that changes the layout breaks one or two of
 them silently. Centralizing the construction in a single `paths.mts`
@@ -31,12 +31,12 @@ scan at `pnpm check` time, catching anything this hook missed.
 
 | Rule                                        | Example that gets blocked                             | Fix                                                                                                                                                      |
 | ------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A** — multi-stage path constructed inline | `path.join(PKG, 'build', mode, 'out', 'Final', name)` | Move the construction into the package's `scripts/paths.mts` (or use `getFinalBinaryPath` from `build-infra/lib/paths`); import the computed value here. |
-| **B** — cross-package path traversal        | `path.join(PKG, '..', 'lief-builder', 'build', ...)`  | Add `lief-builder: workspace:*` as a dependency; import its `paths.mts` via the workspace `exports` field.                                               |
+| **A** - multi-stage path constructed inline | `path.join(PKG, 'build', mode, 'out', 'Final', name)` | Move the construction into the package's `scripts/paths.mts` (or use `getFinalBinaryPath` from `build-infra/lib/paths`); import the computed value here. |
+| **B** - cross-package path traversal        | `path.join(PKG, '..', 'lief-builder', 'build', ...)`  | Add `lief-builder: workspace:*` as a dependency; import its `paths.mts` via the workspace `exports` field.                                               |
 
 The hook fires on `Edit` and `Write` tool calls when the target path
 ends in `.mts` or `.cts`. Other extensions (`.ts`, `.mjs`, `.js`,
-`.yml`, `.json`, `.md`) pass through — TS path code lives in `.mts`
+`.yml`, `.json`, `.md`) pass through - TS path code lives in `.mts`
 per fleet convention, and other file types are covered by the
 `scripts/fleet/check/paths-are-canonical.mts` gate at commit time.
 
@@ -48,11 +48,11 @@ per fleet convention, and other file types are covered by the
 - Edits to this hook's own files (the test suite has to enumerate
   the same patterns).
 - `path.join` calls with a single stage segment, e.g.
-  `path.join(packageRoot, 'build', 'temp')` — that's a one-off
+  `path.join(packageRoot, 'build', 'temp')` - that's a one-off
   helper path, not a multi-stage build output.
 - `path.join` calls with no stage segments at all (most
   general-purpose joins).
-- Any string concatenation that doesn't go through `path.join` —
+- Any string concatenation that doesn't go through `path.join` -
   the hook is regex-based and intentionally narrow.
 
 ## Stage segments the hook recognizes
@@ -63,8 +63,8 @@ lowercase directory-name siblings used by some builders:
 `Final`, `Release`, `Stripped`, `Compressed`, `Optimized`, `Synced`,
 `wasm`, `downloaded`
 
-Two or more in the same `path.join` call — or one stage segment plus
-one of `'build'`/`'out'` plus one mode (`'dev'`/`'prod'`) — triggers
+Two or more in the same `path.join` call - or one stage segment plus
+one of `'build'`/`'out'` plus one mode (`'dev'`/`'prod'`) - triggers
 Rule A.
 
 ## Known sibling packages (for Rule B)
@@ -83,7 +83,7 @@ When a new package joins the workspace, add it to
 
 ## Fail-open on hook bugs
 
-If the hook itself crashes, it writes a log line and exits `0` —
+If the hook itself crashes, it writes a log line and exits `0` -
 i.e. _the edit is allowed_. A buggy security hook that blocks
 everything is worse than one that temporarily lets things through.
 The companion `scripts/fleet/check/paths-are-canonical.mts` gate at commit time catches

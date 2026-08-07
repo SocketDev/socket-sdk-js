@@ -22,11 +22,11 @@ Parsed via the shared `commandsFor` AST helper (sees through chains / quotes /
 ## Why
 
 npm's preferred OTP flow opens a browser and waits on an interactive TTY prompt
-("Authenticate your account at: <url>"). The `!`-prefixed Bash channel — and any
-headless driver — is not a TTY, so that prompt is swallowed and the command dies
+("Authenticate your account at: <url>"). The `!`-prefixed Bash channel - and any
+headless driver - is not a TTY, so that prompt is swallowed and the command dies
 with `npm error code EOTP` without ever opening the browser.
 
-**Why:** an OTP-gated `npm` op run through the `!` channel loops on `EOTP` —
+**Why:** an OTP-gated `npm` op run through the `!` channel loops on `EOTP` -
 the interactive "open a browser" step never fires without a TTY. The reminder
 steers the user to run it in a real terminal (preferred, browser auth) and
 offers `--otp=<code>` only as the no-TTY fallback.
@@ -41,5 +41,5 @@ Stderr reminder, exit 0 (nudge, not block). Skipped when:
 
 ## Bypass
 
-No bypass — it's a reminder (exit 0), not a block. Adding `--otp=<code>`
+No bypass - it's a reminder (exit 0), not a block. Adding `--otp=<code>`
 to the command (the no-TTY fallback) already suppresses the nudge.

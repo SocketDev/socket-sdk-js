@@ -13,26 +13,26 @@ toolchain, enforced.
 
 ## What's blocked (edit-time)
 
-1. **Foreign config files** — creating/editing a `biome.json(c)`, `.eslintrc*`,
+1. **Foreign config files** - creating/editing a `biome.json(c)`, `.eslintrc*`,
    `eslint.config.*`, `.prettierrc*`, `prettier.config.*`, or `.dprint.json*`.
-2. **Foreign packages in `package.json`** — adding `@biomejs/biome`, `eslint`,
+2. **Foreign packages in `package.json`** - adding `@biomejs/biome`, `eslint`,
    `@eslint/*`, `@typescript-eslint/*`, `prettier`, `dprint`, `rome`, or the
    `eslint-config-*` / `eslint-plugin-*` / `prettier-plugin-*` / `@<scope>/eslint-*`
    families to any dependency block.
 
 ## What's exempt
 
-**Vendored upstream trees** — any path under `upstream/`, `vendor/`,
+**Vendored upstream trees** - any path under `upstream/`, `vendor/`,
 `third_party/`, `external/`, or a package dir ending `-upstream`. We never touch
 upstream files, and upstream ships its own tooling (out of fleet-tooling scope).
 
-**Host-test deps (`fleet.hostTestDeps`)** — a package whose code ADAPTS TO a
+**Host-test deps (`fleet.hostTestDeps`)** - a package whose code ADAPTS TO a
 foreign tool (e.g. converts plugins into ESLint rules) legitimately needs that
 tool installed to integration-test against. It declares the exemption
 explicitly in its `package.json`:
 
 <details>
-<summary><b>hostTestDeps contract</b> — the <code>package.json</code> declaration plus the three conditions the allowance requires: exact name match, <code>devDependencies</code>/<code>peerDependencies</code> only, and no package script invoking the binary</summary>
+<summary><b>hostTestDeps contract</b> - the <code>package.json</code> declaration plus the three conditions the allowance requires: exact name match, <code>devDependencies</code>/<code>peerDependencies</code> only, and no package script invoking the binary</summary>
 
 ```json
 {
@@ -43,14 +43,14 @@ explicitly in its `package.json`:
 The allowance holds only while ALL of:
 
 1. the dep name is listed in `fleet.hostTestDeps` (exact match);
-2. the dep lives only in `devDependencies` / `peerDependencies` — a runtime
+2. the dep lives only in `devDependencies` / `peerDependencies` - a runtime
    `dependencies` / `optionalDependencies` entry ships the tool to consumers
    and stays blocked;
 3. no package script invokes the tool's binary (including via `npx` /
-   `pnpm exec`) — running it makes it a lint/format gate, which is exactly
+   `pnpm exec`) - running it makes it a lint/format gate, which is exactly
    what this rule forbids.
 
-Foreign **config files stay blocked unconditionally** — host APIs used in tests
+Foreign **config files stay blocked unconditionally** - host APIs used in tests
 (ESLint `RuleTester` / `Linter`, Babel programmatic transforms) need no config
 file. The contract + audit logic live in `_shared/foreign-linters.mts`, shared
 with the committed-state check.
@@ -60,10 +60,10 @@ with the committed-state check.
 ## Defense in depth
 
 This guard is the **edit-time block**. It complements:
-- `socket/no-eslint-biome-config-ref` — **reports** stale string refs to legacy
+- `socket/no-eslint-biome-config-ref` - **reports** stale string refs to legacy
   tools in TS/JS source (lint rule).
-- `scripts/fleet/check/linters-are-oxlint-oxfmt-only.mts` — gates **committed
-  state** — a hard gate in `check --all`.
+- `scripts/fleet/check/linters-are-oxlint-oxfmt-only.mts` - gates **committed
+  state** - a hard gate in `check --all`.
 
 ## Fix
 

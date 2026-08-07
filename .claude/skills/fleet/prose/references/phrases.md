@@ -95,7 +95,7 @@ Kill all adverbs. No -ly words. No softeners, no intensifiers, no hedges.
 Specific offenders:
 
 <details>
-<summary><b>Detail</b> — the full list (22 entries)</summary>
+<summary><b>Detail</b> - the full list (22 entries)</summary>
 
 - "really"
 - "just"

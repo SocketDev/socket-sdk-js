@@ -1,6 +1,6 @@
 # error-message-quality-nudge
 
-Stop hook that inspects code blocks the assistant wrote for low-quality error message strings — `throw new Error("invalid")`, `throw new RangeError("failed")`, etc.
+Stop hook that inspects code blocks the assistant wrote for low-quality error message strings - `throw new Error("invalid")`, `throw new RangeError("failed")`, etc.
 
 ## Why
 
@@ -8,10 +8,10 @@ CLAUDE.md "Error messages":
 
 > An error message is UI. The reader should fix the problem from the message alone. Four ingredients in order:
 >
-> 1. **What** — the rule, not the fallout (`must be lowercase`, not `invalid`)
-> 2. **Where** — exact file/line/key/field/flag
-> 3. **Saw vs. wanted** — bad value and the allowed shape/set
-> 4. **Fix** — one imperative action (`rename the key to …`)
+> 1. **What** - the rule, not the fallout (`must be lowercase`, not `invalid`)
+> 2. **Where** - exact file/line/key/field/flag
+> 3. **Saw vs. wanted** - bad value and the allowed shape/set
+> 4. **Fix** - one imperative action (`rename the key to …`)
 
 This hook catches the trivial-vague case: a `throw new <X>Error(...)` whose entire message is a single vague word or short phrase with no field, no value, no rule.
 
@@ -29,12 +29,12 @@ This hook catches the trivial-vague case: a `throw new <X>Error(...)` whose enti
 
 ## What it does NOT catch
 
-The check is intentionally conservative — only the trivially-vague cases. Skipped:
+The check is intentionally conservative - only the trivially-vague cases. Skipped:
 
 - Messages containing `:` (signals a field-path prefix like `"user.email: must be lowercase"`)
-- Messages containing quoted values (`"`, `` ` ``) — suggests "saw vs. wanted" content
+- Messages containing quoted values (`"`, `` ` ``) - suggests "saw vs. wanted" content
 - Messages longer than 40 chars (likely have the four ingredients spread across the sentence)
-- Dynamic templates with `${...}` — the static check can't know the interpolated content
+- Dynamic templates with `${...}` - the static check can't know the interpolated content
 
 Conservative by design: the goal is to flag the cases that are 100% definitely wrong, not to grade every message. The user reads the warning and decides if there are deeper quality issues to address.
 

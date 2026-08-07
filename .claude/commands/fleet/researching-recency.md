@@ -1,5 +1,5 @@
 ---
-description: Research what the dev community is actually saying and shipping about a tool, library, language, or maintainer over the last 30 days — fans out across GitHub, Hacker News, Reddit, Lobsters, dev.to (opt-in X/Bluesky), ranks by real engagement, and synthesizes a cited brief. Read-only.
+description: Research what the dev community is actually saying and shipping about a tool, library, language, or maintainer over the last 30 days - fans out across GitHub, Hacker News, Reddit, Lobsters, dev.to (opt-in X/Bluesky), ranks by real engagement, and synthesizes a cited brief. Read-only.
 ---
 
 Run the `researching-recency` skill.

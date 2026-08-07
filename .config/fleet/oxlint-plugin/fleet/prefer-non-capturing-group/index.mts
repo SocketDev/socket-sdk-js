@@ -26,13 +26,14 @@
  *   - Single-character groups holding a single alternation element only when the
  *     regex flags include `g`/`y`/`d`: those modes change capture semantics
  *     enough that we keep hands off.
- *   - The line carries `// socket-lint: allow capture` (or `# / /*` variants).
+ *   - The line carries `// oxlint-disable-next-line socket/prefer-non-capturing-group` (or `# / /*` variants).
  *     This rule encodes a small but persistent cleanup the fleet keeps wanting:
  *     regex alternation groups written `(md|mdx)` when `(?:md|mdx)` was meant —
  *     no replacement, no `match[N]` indexing — wastes a capture allocation per
  *     match.
  */
 
+import { suppressionWaives } from '../../../../../.claude/hooks/fleet/_shared/suppression-rules.mts'
 import { markerOnlyLineAllows } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
@@ -41,9 +42,6 @@ interface CaptureGroup {
   end: number
   inner: string
 }
-
-const SOCKET_LINT_MARKER_RE =
-  /(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+(?<tag>[\w-]+))?/
 
 // Markers that indicate at least one regex in the file uses captures.
 // Conservative — any single hit disables autofix for the whole file
@@ -91,12 +89,7 @@ const CAPTURE_USAGE_RES: readonly RegExp[] = [
 ]
 
 function isLineMarkered(line: string): boolean {
-  const m = line.match(SOCKET_LINT_MARKER_RE)
-  if (!m) {
-    return false
-  }
-  const tag = m.groups?.['tag']
-  return !tag || tag === 'capture'
+  return suppressionWaives(line, 'socket/prefer-non-capturing-group')
 }
 
 /**
@@ -184,7 +177,7 @@ const rule = {
     // only; the author chooses non-capturing vs named.
     messages: {
       captureGroup:
-        'Numbered capturing group `({{inner}})` is not referenced in THIS file. If its capture is unused, make it non-capturing `(?:{{inner}})`. If it IS used — including via `match[N]` / `$N` in another file — convert it to a NAMED capture `(?<name>{{inner}})` (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Named_capturing_group) so the intent is explicit and later edits do not renumber it. Or add `// socket-lint: allow capture` on its own line above if the capture is intentional.',
+        'Numbered capturing group `({{inner}})` is not referenced in THIS file. If its capture is unused, make it non-capturing `(?:{{inner}})`. If it IS used — including via `match[N]` / `$N` in another file — convert it to a NAMED capture `(?<name>{{inner}})` (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Named_capturing_group) so the intent is explicit and later edits do not renumber it. Or add `// oxlint-disable-next-line socket/prefer-non-capturing-group` on its own line above if the capture is intentional.',
     },
     schema: [],
   },
@@ -252,5 +245,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

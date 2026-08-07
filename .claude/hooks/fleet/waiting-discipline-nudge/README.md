@@ -1,13 +1,13 @@
 # waiting-discipline-nudge
 
 PreToolUse Bash hook. Fires before a foreground command blocks on a long
-`sleep` — bare, or chained with a poll like `sleep 540 && gh api …/runs` —
+`sleep` - bare, or chained with a poll like `sleep 540 && gh api …/runs` -
 and draws the waiting-discipline rule while the silence can still be avoided.
 
 ## The rule
 
-1. A job that notifies on completion — a background task, a Workflow run,
-   `gh run watch` running as a background job — is never watched with a
+1. A job that notifies on completion - a background task, a Workflow run,
+   `gh run watch` running as a background job - is never watched with a
    blocking sleep. Background it, say what is running and what event comes
    next, then end the turn.
 2. When polling is genuinely required because nothing notifies, cap each
@@ -23,11 +23,11 @@ A `Bash` command whose longest single `sleep` invocation totals
 GNU duration semantics: multiple arguments sum, `s`/`m`/`h`/`d` suffixes
 apply. The max across invocations is used because a poll between two sleeps
 breaks the silence. Detached commands (`run_in_background: true`) are skipped
-— a background shell does not silence the turn.
+- a background shell does not silence the turn.
 
 ## Verdict
 
-Notify — never blocks. Shares `WAITING_DISCIPLINE_GUIDANCE` with
+Notify - never blocks. Shares `WAITING_DISCIPLINE_GUIDANCE` with
 `long-running-task-nudge` via `_shared/waiting-discipline.mts` so the rule
 wording cannot drift between the two surfaces.
 

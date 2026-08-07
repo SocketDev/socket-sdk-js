@@ -25,8 +25,9 @@
  *   spawn(...); c.stdout.on(...)`) is a different bug caught by
  *   `socket/no-bare-spawn-childproc-access`. Report-only: the right fix is
  *   contextual (await the wrapper, or pass `stdio` options), so the human
- *   picks. Bypass: a `socket-lint: allow spawn-stream-double-consume` comment
- *   on or just above the flagged line.
+ *   picks. Bypass: a `oxlint-disable-next-line
+ *   socket/no-spawn-stream-double-consume` comment on or just above the flagged
+ *   line.
  */
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
@@ -42,8 +43,6 @@ import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 const CRASH_METHOD = 'setEncoding'
 
 const STREAM_PROPS = new Set(['stderr', 'stdout'])
-
-const ALLOW_RE = /socket-lint:\s*allow\s+spawn-stream-double-consume/
 
 // Is this call expression a `spawn(...)` (bare or `x.spawn(...)`) — the fleet
 // wrapper? Mirrors no-bare-spawn-childproc-access: match the callee NAME
@@ -88,7 +87,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, ALLOW_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-spawn-stream-double-consume',
+    )
     // Identifiers bound to a bare `spawn(...)` call (`const c = spawn(...)`).
     const spawnNames = new Set<string>()
     // Identifiers bound to a spawn child's `.process` (the ChildProcess).
@@ -228,5 +230,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

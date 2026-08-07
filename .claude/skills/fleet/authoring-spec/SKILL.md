@@ -8,7 +8,7 @@ metadata:
 
 # authoring-spec
 
-Turn the conversation + codebase understanding into a spec. Do NOT interview — just
+Turn the conversation + codebase understanding into a spec. Do NOT interview - just
 synthesize what you already know. Adapted from `mattpocock/to-spec`; the natural
 input to `decomposing-tickets`. Two fleet additions: test seams are a first-class
 output, and every spec names its **enforcement plan**.
@@ -21,7 +21,7 @@ respect ADRs in the area.
 ## 2. Identify the test seams
 
 Sketch the seams at which the feature is tested. Prefer **existing** seams; use the
-**highest** seam possible; the fewer across the codebase the better — the ideal is
+**highest** seam possible; the fewer across the codebase the better - the ideal is
 one. New seams go in at the highest point. Fleet seam doctrine:
 [`test-layout`](../../../../docs/agents.md/fleet/test-layout.md) (public interface, no
 source-text assertions). Check the seams with the user before writing.
@@ -31,7 +31,7 @@ source-text assertions). Check the seams with the user before writing.
 Sections: **Problem** (user's perspective) · **Solution** (user's perspective) ·
 **User Stories** (a long numbered "As an <actor>, I want <feature>, so that
 <benefit>" list, exhaustive) · **Implementation Decisions** (modules, interfaces,
-schema/API contracts — no file paths or code snippets, they go stale; exception: a
+schema/API contracts - no file paths or code snippets, they go stale; exception: a
 prototype snippet that encodes a decision more precisely than prose) · **Testing
 Decisions** (what makes a good test here, which modules, prior art) · **Enforcement
 plan** · **Out of Scope**.
@@ -53,7 +53,7 @@ ref, no bare `#N`.
 
 Publish to the tracker (GitHub via `gh`, or the Linear MCP `save_document` /
 `save_issue` tool) with the ready-for-agent triage label. Publishing is mutating +
-outward-facing — confirm the destination first.
+outward-facing - confirm the destination first.
 
 ## Completion criterion
 

@@ -1,7 +1,7 @@
 # personal-path-guard
 
 PreToolUse hook that blocks an `Edit` / `Write` whose about-to-land
-content carries a hardcoded personal path — a local USERNAME leak:
+content carries a hardcoded personal path - a local USERNAME leak:
 
 - `/Users/<name>/...` (macOS)
 - `/home/<name>/...` (Linux)
@@ -16,7 +16,7 @@ flagged: `~/...`, `$HOME/...`, and the canonical placeholders
 This is the edit-time twin of the commit-time `scanPersonalPaths` check
 in `.git-hooks/fleet/pre-commit.mts`. Without it, a hardcoded
 `/Users/jdalton/...` path lands on disk and is only caught later when
-`git commit` runs the pre-commit scanner — long after the model has
+`git commit` runs the pre-commit scanner - long after the model has
 moved on. Blocking at Write/Edit time means the leak is fixed in the
 same turn it is introduced. The regex shape and the per-line opt-out
 marker are kept in lock-step with `PERSONAL_PATH_RE` and
@@ -26,11 +26,14 @@ gates never disagree on what counts as a leak.
 ## Bypass
 
 There is no chat bypass phrase. For a line that must keep the literal
-path (rare — usually documentation), append the per-line marker the
-commit-time scanner also honors:
+path (rare - usually documentation), place the waiver marker on its own
+line above it - the placement the commit-time scanner honors. The
+example below shows the shape with an env-var placeholder standing in
+for the literal home prefix, so the example itself is not a leak:
 
 ```
-/Users/jdalton/x // socket-lint: allow personal-path
+// oxlint-disable-next-line socket/personal-path-placeholders -- doc example
+$HOME/example/path
 ```
 
 The bare `// socket-lint: allow` form blanket-suppresses every scanner
@@ -42,12 +45,12 @@ on that line.
 - Empty content.
 - Pure-placeholder lines (`/Users/<user>/`, `$HOME`, `${USER}` forms).
 - `node_modules/`, `vendor/`, `upstream/`, `external/`, `third_party/`,
-  and lockfiles — they legitimately carry absolute machine paths and
+  and lockfiles - they legitimately carry absolute machine paths and
   are not author-written source.
-- Lines marked `// socket-lint: allow personal-path`.
+- Lines marked `// oxlint-disable-next-line socket/personal-path-placeholders`.
 
 ## Failure mode
 
 Fails open: any internal error logs to stderr and exits 0. The hook is
-a quality gate, not a hard dependency — it never wedges the operator's
+a quality gate, not a hard dependency - it never wedges the operator's
 flow.

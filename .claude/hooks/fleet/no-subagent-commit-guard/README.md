@@ -1,6 +1,6 @@
 # no-subagent-commit-guard
 
-**PreToolUse (Bash) — guard, blocks (exit 2).**
+**PreToolUse (Bash) - guard, blocks (exit 2).**
 
 Blocks a `git commit` / `git push` issued from a subagent turn. A delegated
 work-product agent returns its work as a report and stops; the parent
@@ -28,7 +28,7 @@ platform lets it pin.
 
 ## Bypass
 
-`Allow subagent-commit bypass` in a recent turn — for the agents whose job is a
+`Allow subagent-commit bypass` in a recent turn - for the agents whose job is a
 commit flow: the `fix` agent's surgical `git commit -o`, and the history-rewrite
 skills.
 

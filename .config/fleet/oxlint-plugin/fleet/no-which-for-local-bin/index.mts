@@ -21,7 +21,7 @@
  *
  *   - The plugin's own rules/ + test/ files (this file names the banned commands
  *     as lookup-table data / fixtures).
- *   - Lines carrying a `socket-lint: allow which-lookup` comment — for the rare
+ *   - Lines carrying a `oxlint-disable-next-line socket/no-which-for-local-bin` comment — for the rare
  *     case that legitimately needs a global PATH search (e.g. locating the
  *     user's real `git` / system tool, not a project dependency).
  */
@@ -46,9 +46,6 @@ import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 const SHELL_LOOKUP_RE =
   /^(?:command\s+-[vV]|type\s+-P|where|which)\s+[\w./@+-]+$/
 
-// socket-lint: allow which-lookup -- this marker string is the rule's own bypass token, not a real usage.
-const BYPASS_RE = /socket-lint:\s*allow\s+which-lookup/
-
 /**
  * True when `value` is a string that invokes a PATH-lookup command, either as a
  * bare command name (argv[0] form) or as the head of a shell string.
@@ -68,7 +65,7 @@ const rule = {
     },
     messages: {
       whichLookup:
-        '`{{cmd}}` shells out to search the GLOBAL PATH for a binary — fleet binaries live in `node_modules/.bin`. Use `whichSync(name, { path: <binDir>, nothrow: true })` from @socketsecurity/lib-stable/bin/which (handles the `.cmd` wrapper + existence check), or resolve the `.bin` path directly. If you really need a global lookup (system git, etc.), add `// socket-lint: allow which-lookup`.',
+        '`{{cmd}}` shells out to search the GLOBAL PATH for a binary — fleet binaries live in `node_modules/.bin`. Use `whichSync(name, { path: <binDir>, nothrow: true })` from @socketsecurity/lib-stable/bin/which (handles the `.cmd` wrapper + existence check), or resolve the `.bin` path directly. If you really need a global lookup (system git, etc.), add `// oxlint-disable-next-line socket/no-which-for-local-bin`.',
     },
     schema: [],
   },
@@ -80,7 +77,10 @@ const rule = {
       return {}
     }
 
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-which-for-local-bin',
+    )
 
     function check(node: AstNode, value: unknown): void {
       if (typeof value !== 'string' || !isWhichLookup(value)) {
@@ -111,5 +111,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

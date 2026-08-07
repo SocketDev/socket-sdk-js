@@ -25,27 +25,34 @@
     root.innerHTML =
       '<style>' +
       ':host{position:fixed;top:0;left:0;z-index:2147483647;pointer-events:none}' +
-      '.ribbon{position:fixed;top:26px;left:-34px;transform:rotate(-45deg);' +
+      // Long enough that both ends run off-screen past the corner cut — a
+      // band that stops short reads as a sticker, not a ribbon.
+      '.ribbon{position:fixed;top:124px;left:-240px;transform:rotate(-45deg);' +
       'display:flex;align-items:center;justify-content:center;gap:3px;' +
-      'width:150px;padding:4px 0;pointer-events:auto;cursor:pointer;' +
+      'width:760px;padding:7px 0;pointer-events:auto;cursor:pointer;' +
       'background:#fde8f3;border:1px solid rgba(140,80,255,.35);' +
       'box-shadow:0 2px 6px rgba(0,0,0,.25);' +
-      'font:700 11px/1.2 system-ui,sans-serif;letter-spacing:.08em;' +
-      'user-select:none}' +
+      'font:700 15px/1.2 system-ui,sans-serif;letter-spacing:.06em;' +
+      'user-select:none;border:1px solid rgba(140,80,255,.35);' +
+      'color:inherit;text-align:center}' +
+      '.ribbon:focus-visible{outline:3px solid #6d28d9;outline-offset:2px}' +
       // The shield rides the ribbon's -45° tilt (no counter-rotation) so it
       // leans with the band instead of standing upright inside it. Oversized
-      // against the band's height on purpose — it overhangs the ribbon edges
-      // and the drop shadow lifts it off the strip.
-      '.ribbon svg{width:28px;height:28px;' +
+      // against the band's height on purpose: it overhangs the ribbon edges
+      // and the drop shadow lifts it off the strip. The size is what makes an
+      // agent-driven window recognizable from across a desk, which is the
+      // whole job, so it reads large rather than tastefully small.
+      '.ribbon svg{width:56px;height:56px;' +
       'filter:drop-shadow(0 1px 2px rgba(0,0,0,.35)) drop-shadow(0 2px 6px rgba(140,80,255,.45))}' +
       // Deep Socket purple for the label, darkening along the run.
       '.label{background:linear-gradient(90deg,#8c50ff,#6d28d9);' +
       '-webkit-background-clip:text;background-clip:text;color:transparent}' +
       '</style>' +
-      '<div class="ribbon" title="Click to hide — this browser is agent-driven (Playwright MCP)">' +
+      '<button type="button" class="ribbon" title="Click to hide" ' +
+      'aria-label="Agent driven by Playwright MCP. Activate to hide this banner.">' +
       SHIELD +
-      '<span class="label">AGENT</span>' +
-      '</div>'
+      '<span class="label">Agent driven by Playwright MCP</span>' +
+      '</button>'
     root.querySelector('.ribbon').addEventListener('click', () => host.remove())
     document.body.appendChild(host)
   }

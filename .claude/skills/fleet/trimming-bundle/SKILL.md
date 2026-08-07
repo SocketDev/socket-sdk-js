@@ -36,7 +36,7 @@ Before doing anything else:
 [ -f .config/repo/rolldown/lib-stub.mts ] || {
   echo "ERROR: .config/repo/rolldown/lib-stub.mts is missing."
   echo "Cascade it from socket-wheelhouse:"
-  echo "  cd /Users/<user>/projects/socket-wheelhouse &&" # socket-lint: allow cross-repo
+  echo "  cd /Users/<user>/projects/socket-wheelhouse &&" # oxlint-disable-next-line socket/no-cross-repo-path
   echo "  node scripts/repo/sync-scaffolding/cli.mts --target <this-repo> --fix"
   exit 1
 }
@@ -74,7 +74,7 @@ pnpm test
 `measure-bundle.mts` emits `{ bundleSizeBytes, perFileSizes (heaviest-first),
 preconditions (dist exists / rolldown.config imports createLibStubPlugin /
 lib-stub.mts present), rawDistImportSurvey (the deduped dist import specifiers,
-at full subpath granularity) }`. It MEASURES only — the candidate discovery +
+at full subpath granularity) }`. It MEASURES only - the candidate discovery +
 HIGH/MEDIUM/LOW grading in Phase 2 stay your call (the static signal is
 ambiguous; the engine deliberately renders no verdict). Record:
 
@@ -121,7 +121,7 @@ If any of these find a hit, the candidate is reachable; skip it. Only candidates
 
 ### Phase 4: Run the deterministic trim loop
 
-The stub → rebuild → test → keep-or-revert loop is **scripted** — it's
+The stub → rebuild → test → keep-or-revert loop is **scripted** - it's
 mechanical and attribution-sensitive, so it's not the model's to run by hand.
 Hand the candidate tokens you graded in Phases 2–3 to `lib/trim-loop.mts`:
 
@@ -137,14 +137,14 @@ stub without building). The loop, one candidate at a time:
 2. `pnpm build` + `pnpm test`.
 3. **Keeps** the stub only if tests still pass AND the bundle shrank; otherwise
    **reverts** it. The per-candidate `verdict` is one of: `kept`,
-   `reverted-tests` (candidate IS reached — Phase 3 missed an import path,
-   investigate), `reverted-no-shrink` (regex didn't match the resolved path —
+   `reverted-tests` (candidate IS reached - Phase 3 missed an import path,
+   investigate), `reverted-no-shrink` (regex didn't match the resolved path -
    adjust the basename/fragment, it's stable across pnpm hoisting), or
    `reverted-grew` (stub overhead exceeded the saving).
 
 The loop owns one-at-a-time discipline and the size-delta bookkeeping so failure
 attribution stays clean. The JSON result carries `keptCandidates`,
-`totalSavedBytes`, and a per-candidate `outcomes` array — read it to decide which
+`totalSavedBytes`, and a per-candidate `outcomes` array - read it to decide which
 kept stubs need a Phase 5 WHY comment.
 
 ### Phase 5: Document the kept stubs
@@ -183,7 +183,7 @@ The `bundle-trim` scan in `scanning-quality/scans/bundle-trim.md` runs the disco
 
 ## Companion: deduping-dependencies
 
-Before stubbing, collapse duplicate majors with `/deduping-dependencies` — a bundle that pulls two copies of a utility (e.g. `string-width@4` + `@8`) ships both. For bundled outputs that skill prefers the ESM major (tree-shakes smaller) and forces it where the break is module-format-only; one deduped copy beats two stubbed ones.
+Before stubbing, collapse duplicate majors with `/deduping-dependencies` - a bundle that pulls two copies of a utility (e.g. `string-width@4` + `@8`) ships both. For bundled outputs that skill prefers the ESM major (tree-shakes smaller) and forces it where the break is module-format-only; one deduped copy beats two stubbed ones.
 
 ## Failure modes
 

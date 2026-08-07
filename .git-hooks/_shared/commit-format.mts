@@ -13,7 +13,10 @@
 //
 // Spec: https://www.conventionalcommits.org/en/v1.0.0/
 
-// oxlint-disable-next-line socket/no-agent-brand-assumption -- real Claude-specific integration: "the Claude tool-call guard" names the .claude/hooks/ PreToolUse guard, which only exists for Claude Code, not generic agent guidance.
+// Real Claude-specific integration: "the Claude tool-call guard" names the
+// .claude/hooks/ PreToolUse guard, which only exists for Claude Code, not
+// generic agent guidance.
+// oxlint-disable-next-line socket/no-agent-brand-assumption -- real
 export const ALLOWED_TYPES = [
   'build',
   'chore',

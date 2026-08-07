@@ -12,6 +12,12 @@
 // miss, re-flagging code that's intentionally raw where it actually runs. One
 // strip here lets all the prefix exemptions stay layer-agnostic (and keeps the
 // pre-move flat `template/` path matching for downstream repos not yet moved).
+import {
+  ruleNameForMarker,
+  suppressionWaivesNextLine,
+  suppressionWaivesOwnLine,
+} from '../../.claude/hooks/fleet/_shared/suppression-rules.mts'
+
 export const stripTemplateLayer = (p: string): string =>
   p
     .replace(/^template\/(?:base|mono|solo)\//, 'template/')
@@ -56,8 +62,6 @@ export const splitLines = (text: string): string[] =>
 // Legacy `# zizmor: ...` markers are still recognized for one cycle so
 // existing files don't have to be rewritten in the same change that
 // renames the marker.
-const SOCKET_LINT_MARKER_RE =
-  /(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+([\w-]+))?/
 
 // The oxlint-shaped spelling of the same opt-out, so one comment form works
 // whichever enforcer owns the rule. oxlint disables a PLUGIN rule natively
@@ -70,28 +74,15 @@ const SOCKET_LINT_MARKER_RE =
 // oxlint's two directives map onto the two positions this file already has:
 // `-line` suppresses the line it sits on, `-next-line` the one below. Matching
 // that split exactly means a reader never has to remember which enforcer a
-// rule belongs to.
-const OXLINT_DISABLE_LINE_RE =
-  /(?:#|\/\*|\/\/)\s*oxlint-disable-line\s+socket\/([\w-]+)/
+// rule belongs to. `suppressionWaives` owns the grammar for both, so this file
+// carries no pattern of its own.
 
 /**
  * The rule id an opt-out on `line` names, in either spelling. `matched` is
  * false when the line carries no opt-out at all; `id` is undefined for the
  * bare `socket-lint: allow` blanket form, which names no rule. Pure.
  */
-export function lineMarkerId(line: string): {
-  id: string | undefined
-  matched: boolean
-} {
-  const oxlint = line.match(OXLINT_DISABLE_LINE_RE)
-  if (oxlint) {
-    return { id: oxlint[1], matched: true }
-  }
-  const legacy = line.match(SOCKET_LINT_MARKER_RE)
-  return legacy
-    ? { id: legacy[1], matched: true }
-    : { id: undefined, matched: false }
-}
+const LEGACY_ZIZMOR_MARKER_RE = /(?:#|\/\*|\/\/)\s*zizmor:\s*[\w-]+/
 
 // File extensions whose natural comment syntax is `//` (C-family + cousins).
 // Anything else falls through to `#` (shell / YAML / TOML / Dockerfile /
@@ -100,37 +91,22 @@ const SLASH_COMMENT_EXT_RE =
   /\.(m?ts|tsx|cts|m?js|jsx|cjs|rs|go|c|cc|cpp|cxx|h|hpp|java|swift|kt|scala|dart|php|css|scss|less)$/i
 
 /**
- * Pick the natural per-line opt-out marker for a host file.
+ * The suppression a contributor should paste into `filePath` to waive `rule`.
  *
- * The marker regex above accepts `#`, `//`, and `/*` prefixes — but error
- * messages should print the _one_ form a contributor would actually paste into
- * that file. TS edits get `// socket-lint: allow <rule>`; YAML gets `#
- * socket-lint: allow <rule>`. Same rule, different comment lexer.
+ * Prints the ONE comment form that file's lexer takes — `//` for the C-family,
+ * `#` for shell / YAML / TOML — so the fix an error message offers is copyable
+ * rather than a grammar the reader has to adapt.
+ *
+ * `rule` may be a scanner's historical opt-out name; the table resolves it to
+ * the rule the directive now spells, so a scanner keeps its own vocabulary and
+ * still emits something the linter honors.
  */
-export const socketLintMarkerFor = (filePath: string, rule: string): string =>
-  SLASH_COMMENT_EXT_RE.test(filePath)
-    ? `// socket-lint: allow ${rule}`
-    : `# socket-lint: allow ${rule}`
-const LEGACY_ZIZMOR_MARKER_RE = /(?:#|\/\*|\/\/)\s*zizmor:\s*[\w-]+/
-
-// Aliases: legacy marker names recognized as equivalent to a current
-// rule for one deprecation cycle, so callers can rename the canonical
-// rule without breaking files that still carry the old marker.
-//
-// Add entries as `<alias>: <canonical>`; both directions match in the
-// comparison below.
-const RULE_ALIASES = new Map<string, string>([
-  // 'logger' was the original name when the scanner only flagged
-  // process.std{out,err}.write; it now flags console.* too, so the
-  // canonical marker is 'console'. Keep 'logger' for one cycle.
-  ['logger', 'console'],
-])
-
-export function aliasMatches(marker: string, rule: string): boolean {
-  if (marker === rule) {
-    return true
-  }
-  return RULE_ALIASES.get(marker) === rule || RULE_ALIASES.get(rule) === marker
+export const suppressionFor = (filePath: string, rule: string): string => {
+  const named = ruleNameForMarker(rule) ?? `socket/${rule}`
+  const directive = `oxlint-disable-next-line ${named} -- <reason>`
+  return SLASH_COMMENT_EXT_RE.test(filePath)
+    ? `// ${directive}`
+    : `# ${directive}`
 }
 
 export function lineIsSuppressed(
@@ -140,56 +116,13 @@ export function lineIsSuppressed(
   if (LEGACY_ZIZMOR_MARKER_RE.test(line)) {
     return true
   }
-  const { id, matched } = lineMarkerId(line)
-  if (!matched) {
-    return false
-  }
-  // No rule named on the marker → blanket allow.
-  if (!id) {
-    return true
-  }
-  // Marker named a specific rule → suppress when the names match
-  // directly OR through an alias.
-  return rule === undefined || aliasMatches(id, rule)
+  // The linter's own directive is the fleet's ONE suppression syntax. A caller
+  // with no rule in hand cannot be answered — there is no blanket form to fall
+  // back on, which is the point: a waiver names what it waives. Same-line means
+  // `-disable-line`; a trailing `-next-line` points at the line below.
+  return rule !== undefined && suppressionWaivesOwnLine(line, rule)
 }
 
-// A line that is ONLY an opt-out marker comment — the marker right after the
-// comment opener, optionally a `-- reason` tail, optionally a block-comment
-// close. Such a line covers the LINE BELOW it, so a long pragma can sit above
-// the code it excuses instead of trailing it. Mirrors
-// SOCKET_LINT_MARKER_ONLY_LINE_RE in .claude/hooks/fleet/_shared/markers.mts.
-const SOCKET_LINT_MARKER_ONLY_LINE_RE =
-  /^\s*(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+([\w-]+))?(?:\s*\*\/|\s+--.*)?\s*$/
-
-// The oxlint-shaped spelling of the same own-line form. `-next-line` is
-// oxlint's own name for "covers the line below", which is exactly what this
-// position already meant.
-const OXLINT_DISABLE_NEXT_LINE_RE =
-  /^\s*(?:#|\/\*|\/\/)\s*oxlint-disable-next-line\s+socket\/([\w-]+)(?:\s*\*\/|\s+--.*)?\s*$/
-
-/**
- * The rule id an own-line opt-out above a statement names, in either spelling,
- * or undefined when the line is not an own-line opt-out. A bare
- * `socket-lint: allow` returns a match with no id — the blanket form. Pure.
- */
-export function ownLineMarkerId(line: string): {
-  id: string | undefined
-  matched: boolean
-} {
-  const oxlint = line.match(OXLINT_DISABLE_NEXT_LINE_RE)
-  if (oxlint) {
-    return { id: oxlint[1], matched: true }
-  }
-  const legacy = line.match(SOCKET_LINT_MARKER_ONLY_LINE_RE)
-  return legacy
-    ? { id: legacy[1], matched: true }
-    : { id: undefined, matched: false }
-}
-
-/**
- * True when `lines[index]` is suppressed for `rule` — by a marker on the line
- * itself, or by a marker-only comment line directly above it.
- */
 export function suppressionCoversLine(
   lines: readonly string[],
   index: number,
@@ -201,15 +134,11 @@ export function suppressionCoversLine(
   if (index <= 0) {
     return false
   }
-  const { id, matched } = ownLineMarkerId(lines[index - 1] ?? '')
-  if (!matched) {
-    return false
-  }
-  // Bare marker or no rule context → blanket allow, same as the inline form.
-  if (!id || rule === undefined) {
-    return true
-  }
-  return aliasMatches(id, rule)
+  // `-disable-next-line` on the line above covers this one.
+  return (
+    rule !== undefined &&
+    suppressionWaivesNextLine(lines[index - 1] ?? '', rule)
+  )
 }
 
 // Heuristic context flags: lines that look like "this is a doc example"

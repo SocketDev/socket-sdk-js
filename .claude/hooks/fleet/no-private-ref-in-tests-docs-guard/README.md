@@ -4,7 +4,7 @@ Blocks `Write`/`Edit` of a unit-test or documentation file whose new content
 references non-public infrastructure: a `SocketDev/<repo>` slug outside the
 fleet roster, a `linear.app` issue URL, or a Slack thread link.
 
-Tests and docs ship in public repos and survive history squashes — a private
+Tests and docs ship in public repos and survive history squashes - a private
 repo name, ticket reference, or thread link in them is a durable leak. Use
 fictional slugs (`acme/widgets`) in tests; omit internal references from docs.
 The fleet roster (`fleet-repos.json`) is the sole sanctioned place private

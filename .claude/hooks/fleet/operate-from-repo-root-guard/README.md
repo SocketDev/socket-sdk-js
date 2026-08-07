@@ -1,9 +1,9 @@
 # operate-from-repo-root-guard
 
-**Type:** PreToolUse guard (Bash) — BLOCKS.
+**Type:** PreToolUse guard (Bash) - BLOCKS.
 
 **Trigger:** a Bash command line with a `cd <subpackage>` segment
-immediately followed by a `pnpm` / `npm` / `yarn` segment — e.g.
+immediately followed by a `pnpm` / `npm` / `yarn` segment - e.g.
 `cd packages/foo && pnpm test`.
 
 **Why:** in a pnpm workspace, running a package manager from a

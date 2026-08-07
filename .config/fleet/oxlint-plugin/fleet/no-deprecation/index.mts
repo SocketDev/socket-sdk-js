@@ -12,13 +12,14 @@
  *   lint precisely; it lives in the topic doc. Skips:
  *
  *   - Test files (`*.test.*`) — fixtures legitimately embed the marker.
- *   - A line carrying `socket-lint: allow deprecated-marker` (the rare case of
+ *   - A line carrying `oxlint-disable-next-line socket/no-deprecation` (the rare case of
  *     quoting an upstream API's own `@deprecated` in a comment).
  *
  *   No autofix — deleting deprecated code + rewiring its callers is not a
  *   mechanical specifier rewrite; the author does the removal.
  */
 
+import { suppressionWaives } from '../../../../../.claude/hooks/fleet/_shared/suppression-rules.mts'
 import { isTestFile } from '../../lib/test-file.mts'
 import type { RuleContext } from '../../lib/rule-types.mts'
 
@@ -29,9 +30,13 @@ import type { RuleContext } from '../../lib/rule-types.mts'
 const DEPRECATION_ANNOTATION_RE =
   /^\s*(?:\*|\/\*\*?|\/\/)\s*@(?:deprecated|obsolete)\b/
 
-// socket-lint: allow deprecated-marker -- opt-out for a comment quoting an
+// Opt-out for a comment quoting an.
 // upstream API's own deprecation tag verbatim.
-const BYPASS_RE = /socket-lint:\s*allow\s+deprecated-marker/
+// oxlint-disable-next-line socket/no-deprecation -- opt-out for a comment
+
+function waivesHere(text: string): boolean {
+  return suppressionWaives(text, 'socket/no-deprecation')
+}
 
 const rule = {
   meta: {
@@ -44,7 +49,7 @@ const rule = {
     },
     messages: {
       banned:
-        "`@deprecated` marker — the fleet deletes, it does not deprecate. Remove the code and its call sites in this change; there are no legacy fallbacks or back-compat aliases kept 'until consumers migrate'. If you are quoting an upstream API's own tag, add `// socket-lint: allow deprecated-marker` on its own line above.",
+        "`@deprecated` marker — the fleet deletes, it does not deprecate. Remove the code and its call sites in this change; there are no legacy fallbacks or back-compat aliases kept 'until consumers migrate'. If you are quoting an upstream API's own tag, add `// oxlint-disable-next-line socket/no-deprecation` on its own line above.",
     },
     schema: [],
   },
@@ -73,7 +78,7 @@ const rule = {
           : String(rawText).split('\n')
         for (let i = 0; i < lines.length; i += 1) {
           const line = lines[i]!
-          if (!DEPRECATION_ANNOTATION_RE.test(line) || BYPASS_RE.test(line)) {
+          if (!DEPRECATION_ANNOTATION_RE.test(line) || waivesHere(line)) {
             continue
           }
           const column = line.length - line.trimStart().length
@@ -87,5 +92,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

@@ -55,9 +55,10 @@ const REPORT_SCHEMA = {
 }
 
 phase('Build')
-// socket-lint: allow top-level-await -- Workflow script body executed directly
+// Workflow script body executed directly.
 // by the Claude Code harness (top-level `phase`/`agent`/`return` are harness
 // globals), never bundled to CJS.
+// oxlint-disable-next-line socket/no-top-level-await -- Workflow script body
 const build = await agent(
   [
     'Rebuild the repo-map skeleton cache for this repository.',
@@ -84,9 +85,10 @@ if (!build || build.outcome !== 'built') {
 }
 
 phase('Report')
-// socket-lint: allow top-level-await -- Workflow script body executed directly
+// Workflow script body executed directly.
 // by the Claude Code harness (top-level `phase`/`agent`/`return` are harness
 // globals), never bundled to CJS.
+// oxlint-disable-next-line socket/no-top-level-await -- Workflow script body
 const report = await agent(
   [
     'Read .repo-map/index.txt (the repo-map cache roll-up just rebuilt).',

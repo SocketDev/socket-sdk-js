@@ -40,7 +40,7 @@ replaced or removed, it and every one of its call sites go in the same change.
 
 ## Bypass
 
-`// socket-lint: allow deprecated-marker` on the offending line, reserved for
+`// oxlint-disable-next-line socket/no-deprecation` on the offending line, reserved for
 the rare case of a comment quoting an upstream API's own `@deprecated` tag
 verbatim. Deprecating fleet code is never a valid reason.
 

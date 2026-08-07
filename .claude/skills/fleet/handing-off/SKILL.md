@@ -31,7 +31,7 @@ Write a handoff document so a fresh agent can continue the work without re-loadi
 
 ## Where to save
 
-Use `.claude/reports/<YYYY-MM-DD>-<slug>-handoff.md`. The `.claude/reports/` directory is gitignored fleet-wide (per CLAUDE.md "Generated reports" rule), so the doc stays local — no risk of committing a stale handoff. Slug is short kebab-case from the focus (e.g. `rolldown-cascade`, `bugbot-cleanup`).
+Use `.claude/reports/<YYYY-MM-DD>-<slug>-handoff.md`. The `.claude/reports/` directory is gitignored fleet-wide (per CLAUDE.md "Generated reports" rule), so the doc stays local - no risk of committing a stale handoff. Slug is short kebab-case from the focus (e.g. `rolldown-cascade`, `bugbot-cleanup`).
 
 ```bash
 mkdir -p .claude/reports
@@ -41,7 +41,7 @@ PATH=".claude/reports/${DATE}-<slug>-handoff.md"
 
 ## What NOT to include
 
-- The full conversation — the next agent reads commits + diffs, not transcripts.
+- The full conversation - the next agent reads commits + diffs, not transcripts.
 - Code listings that exist verbatim in source files (link instead).
 - Decisions already captured in commit messages or ADRs (cite the SHA / file).
 - A retrospective "what I learned" section unless it's load-bearing for the next agent's choices.

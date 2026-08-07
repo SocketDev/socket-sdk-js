@@ -1,6 +1,6 @@
 # Differential scan
 
-Security-focused review of the **diff** between the current branch and a base ref. Different from `reviewing-code`'s general review — this scan looks specifically at security regressions introduced by the diff.
+Security-focused review of the **diff** between the current branch and a base ref. Different from `reviewing-code`'s general review - this scan looks specifically at security regressions introduced by the diff.
 
 ## Mission
 
@@ -8,7 +8,7 @@ Treat every line that changed since the base ref as a candidate for a security r
 
 ## Scope
 
-- Range: `git diff <base> HEAD`. Default base resolves via the fleet's default-branch fallback — prefer `origin/main`, fall back to `origin/master`:
+- Range: `git diff <base> HEAD`. Default base resolves via the fleet's default-branch fallback - prefer `origin/main`, fall back to `origin/master`:
 
   ```bash
   BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
@@ -18,33 +18,33 @@ Treat every line that changed since the base ref as a candidate for a security r
   git diff "origin/$BASE" HEAD -- <file globs>
   ```
 
-- Filter: code files only — `.{ts,mts,tsx,js,mjs,cjs,jsx,go,rs,py,sh}` and YAML workflows.
+- Filter: code files only - `.{ts,mts,tsx,js,mjs,cjs,jsx,go,rs,py,sh}` and YAML workflows.
 - Skip: test fixtures, snapshot files, lockfiles, generated bundles.
 
 ## What this scan looks for
 
 | Class                                  | Trigger pattern                                                                                                                           |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Newly-introduced fetch / network calls | `+\s*fetch\(`, `+\s*axios\.`, raw `https.request(` — does the new call go to a trusted host? Is the URL constructed from untrusted input? |
-| Newly-introduced env-var reads         | `+\s*process\.env\.` — does the diff add a new env input? Where is it validated?                                                          |
-| Newly-introduced filesystem ops        | `+\s*fs\.(rm\|writeFile\|chmod)` — does the path come from input?                                                                         |
+| Newly-introduced fetch / network calls | `+\s*fetch\(`, `+\s*axios\.`, raw `https.request(` - does the new call go to a trusted host? Is the URL constructed from untrusted input? |
+| Newly-introduced env-var reads         | `+\s*process\.env\.` - does the diff add a new env input? Where is it validated?                                                          |
+| Newly-introduced filesystem ops        | `+\s*fs\.(rm\|writeFile\|chmod)` - does the path come from input?                                                                         |
 | Permissions / role changes             | `permissions:`, `if: github.actor`, role assignments in DB migrations                                                                     |
-| Disabled checks                        | `+\s*//\s*eslint-disable`, `+\s*@ts-ignore`, `skip:`, `if: false` — the diff added a bypass                                               |
-| Commented-out security code            | `^-\s*(verify\|validate\|assert)` — the diff removed a check                                                                              |
-| New raw SQL / shell exec               | `+\s*\$\{.*\}\s*\)` inside a `query(` or `exec(` — interpolation into a sensitive sink                                                    |
+| Disabled checks                        | `+\s*//\s*eslint-disable`, `+\s*@ts-ignore`, `skip:`, `if: false` - the diff added a bypass                                               |
+| Commented-out security code            | `^-\s*(verify\|validate\|assert)` - the diff removed a check                                                                              |
+| New raw SQL / shell exec               | `+\s*\$\{.*\}\s*\)` inside a `query(` or `exec(` - interpolation into a sensitive sink                                                    |
 | Token / secret string changes          | any `+` line that mentions `token`, `secret`, `password`, `key` and isn't a type / label                                                  |
 
 ## Method
 
 1. Resolve the diff: `git diff --no-color <base> HEAD -- <file globs>`.
 2. For each hunk, classify changes against the table above.
-3. Cross-reference with `_shared/variant-analysis.md` — if the diff introduces a pattern flagged here, search the rest of the repo for that pattern (it may already be wrong elsewhere too).
+3. Cross-reference with `_shared/variant-analysis.md` - if the diff introduces a pattern flagged here, search the rest of the repo for that pattern (it may already be wrong elsewhere too).
 4. Skip noise: pure renames, formatting-only diffs, generated file regenerations.
 
 ## Output shape
 
 <details>
-<summary><b>Report skeleton</b> — the header counts plus two finding lists: findings introduced by the diff, and safety mechanisms the diff removed</summary>
+<summary><b>Report skeleton</b> - the header counts plus two finding lists: findings introduced by the diff, and safety mechanisms the diff removed</summary>
 
 ```
 ### Differential Scan (base: <ref>)
@@ -80,7 +80,7 @@ Lines removed: D
 
 ## When to skip
 
-- Pure dependency bumps — the bump is what `updating-lockstep` reviews.
+- Pure dependency bumps - the bump is what `updating-lockstep` reviews.
 - Branches with zero code changes (docs-only / config-only diffs unrelated to security).
 
 ## Source

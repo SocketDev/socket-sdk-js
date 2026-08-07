@@ -120,7 +120,9 @@ function pruneStaleBlobs(keepBlobPath) {
         name.startsWith(entryPrefix)
       ) {
         try {
-          // oxlint-disable-next-line socket/prefer-safe-delete -- dep-0 hook-dispatch .cjs: cannot import lib safeDelete; unlink is fail-open-wrapped, prune of an orphan blob
+          // Dep-0 hook-dispatch .cjs: cannot import lib safeDelete; unlink is
+          // fail-open-wrapped, prune of an orphan blob.
+          // oxlint-disable-next-line socket/prefer-safe-delete -- dep-0
           fs.unlinkSync(path.join(dir, name))
         } catch {
           // Fail-open: an undeletable orphan is harmless — the launcher only

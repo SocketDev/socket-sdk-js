@@ -51,7 +51,8 @@ const TASK_PATTERNS: ReadonlyArray<{
     // Newline or line-start, comment marker, then a task/plan label keyword + colon.
     re: /(^|\n)\s*(?:#|-|\*|\/\*|\/\/)\s*(?:note from (?:brief|plan|task)|plan|task)\s*:/i,
     stripPrefix:
-      // socket-lint: allow uncommented-regex
+      // Shape described above.
+      // oxlint-disable-next-line socket/require-regex-comment -- shape
       /^(\s*(?:#|-|\*|\/\*|\/\/)\s*)(?:note from (?:brief|plan|task)|plan|task)\s*:\s*/i,
   },
   {
@@ -66,7 +67,8 @@ const TASK_PATTERNS: ReadonlyArray<{
     // Newline or line-start, comment marker, then a roadmap keyword + numeric/roman marker.
     re: /(^|\n)\s*(?:#|-|\*|\/\*|\/\/)\s*(?:iteration|milestone|phase|sprint|step|tier)\s+(?:[0-9]+[a-z]*|i{1,3}|iv|v|vi{0,3}|ix|x)\b/i,
     stripPrefix:
-      // socket-lint: allow uncommented-regex
+      // Shape described above.
+      // oxlint-disable-next-line socket/require-regex-comment -- shape
       /^(\s*(?:#|-|\*|\/\*|\/\/)\s*)(?:iteration|milestone|phase|sprint|step|tier)\s+(?:[0-9]+[a-z]*|i{1,3}|iv|v|vi{0,3}|ix|x)\s*[:.-]?\s*/i,
   },
 ]
@@ -126,7 +128,8 @@ const TASK_BODY_PATTERNS: ReadonlyArray<{
     // Body starts with a roadmap keyword followed by a numeric or roman-numeral marker.
     re: /^\s*(?:iteration|milestone|phase|sprint|step|tier)\s+(?:[0-9]+[a-z]*|i{1,3}|iv|v|vi{0,3}|ix|x)\b/i,
     stripBody:
-      // socket-lint: allow uncommented-regex
+      // Shape described above.
+      // oxlint-disable-next-line socket/require-regex-comment -- shape
       /^\s*(?:iteration|milestone|phase|sprint|step|tier)\s+(?:[0-9]+[a-z]*|i{1,3}|iv|v|vi{0,3}|ix|x)\s*[:.-]?\s*/i,
   },
 ]

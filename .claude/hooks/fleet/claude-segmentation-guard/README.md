@@ -6,13 +6,13 @@ PreToolUse Edit/Write hook that blocks new files/directories at dangling top-lev
 
 Every entry under those four directories must live under one of:
 
-- `<kind>/fleet/<name>/` — wheelhouse-canonical entries: the wheelhouse template ships an entry with this name.
-- `<kind>/repo/<name>/` — repo-only entries (everything else).
-- `<kind>/_<name>/` — internals folder (`_shared` and friends).
+- `<kind>/fleet/<name>/` - wheelhouse-canonical entries: the wheelhouse template ships an entry with this name.
+- `<kind>/repo/<name>/` - repo-only entries (everything else).
+- `<kind>/_<name>/` - internals folder (`_shared` and friends).
 
 Top-level dangling entries like `.claude/skills/foo/SKILL.md` shadow the canonical `.claude/skills/fleet/foo/SKILL.md` copy and break skill resolution in unpredictable ways.
 
-Left unchecked, dangling top-level entries accumulate across the fleet — duplicate top-level skill directories shadow their `fleet/<name>/` counterparts and break resolution. The cleanup script (`node scripts/fleet/check/claude-dirs-are-segmented.mts --fix`) resolves them in bulk; this hook prevents the regression at edit time.
+Left unchecked, dangling top-level entries accumulate across the fleet - duplicate top-level skill directories shadow their `fleet/<name>/` counterparts and break resolution. The cleanup script (`node scripts/fleet/check/claude-dirs-are-segmented.mts --fix`) resolves them in bulk; this hook prevents the regression at edit time.
 
 ## What it blocks
 

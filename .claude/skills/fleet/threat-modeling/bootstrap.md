@@ -62,14 +62,14 @@ out of Bash argv.
 State files in `./.threat-model-state/`:
 
 <details>
-<summary><b>Detail</b> — Start of run: resume check, End of every stage N, End of run</summary>
+<summary><b>Detail</b> - Start of run: resume check, End of every stage N, End of run</summary>
 
-- `progress.json` — single source of truth: `{"status": "running"|"complete",
+- `progress.json` - single source of truth: `{"status": "running"|"complete",
   "stage_done": N}`. Resume decisions read ONLY this file.
-- `stageN.json` — data payload for stage N (schemas at the tail of each stage).
-- `_chunk.tmp` — transient payload buffer.
+- `stageN.json` - data payload for stage N (schemas at the tail of each stage).
+- `_chunk.tmp` - transient payload buffer.
 
-**Start of run — resume check.** Bash:
+**Start of run - resume check.** Bash:
 `node .claude/skills/fleet/_shared/scripts/checkpoint.mts load ./.threat-model-state`
 
 - `status == "absent"` OR `"complete"`, OR `--fresh` → **fresh start.** Bash:
@@ -91,10 +91,10 @@ State files in `./.threat-model-state/`:
 
 ---
 
-## Stage 1 — Research swarm
+## Stage 1 - Research swarm
 
 Goal: gather everything needed to fill sections 1-3 and the vuln working table,
-in parallel. Run the agents below **concurrently** — either as a `Workflow` (the
+in parallel. Run the agents below **concurrently** - either as a `Workflow` (the
 fleet's sanctioned fan-out, structured-output schemas per agent) or a single
 batch of `Task` calls. Each agent gets a narrow brief, the absolute path to
 `<target-dir>`, and the read-only restriction verbatim. You synthesize in Stage 2.
@@ -103,7 +103,7 @@ Skip the swarm and run the briefs yourself sequentially if `<target-dir>` is
 small (<50 source files) or `--depth recon` is set.
 
 <details>
-<summary><b>Detail</b> — the full table (17 rows)</summary>
+<summary><b>Detail</b> - the full table (17 rows)</summary>
 
 | Agent | Brief | Returns |
 | --- | --- | --- |
@@ -143,13 +143,13 @@ swarm ran inline, populate the same keys from your sequential passes.
 
 ---
 
-## Stage 2 — Synthesize
+## Stage 2 - Synthesize
 
 Turn the swarm returns into `## 1-3` of the schema plus a vuln working table.
 This stage runs in the orchestrating agent; it's the join.
 
 <details>
-<summary><b>Detail</b> — Section 1: System context, Section 2: Assets, Section 3: Entry points & trust boundaries, Vuln working table, Checkpoint</summary>
+<summary><b>Detail</b> - Section 1: System context, Section 2: Assets, Section 3: Entry points & trust boundaries, Vuln working table, Checkpoint</summary>
 
 **Section 1: System context.** From the Docs reader's summary plus your own glance
 at the tree, write 1-2 paragraphs: what it is, language, rough size, who embeds or
@@ -162,7 +162,7 @@ deploys it, where it runs.
 reader rows. Dedupe, name the trust boundary for each, list which section 2 assets
 are reachable. Supply-chain, build-time, and infra/IAM surfaces **are** entry
 points even though no runtime input crosses them. **Every row here must get at
-least one threat in Stage 3 or 4** — the coverage invariant the emit-time check
+least one threat in Stage 3 or 4** - the coverage invariant the emit-time check
 enforces.
 
 **Vuln working table.** Concatenate rows from History miner + Advisory fetcher +
@@ -185,7 +185,7 @@ Then `checkpoint.mts save ./.threat-model-state 2 synthesize --key stage --from
 
 ---
 
-## Stage 3 — Generalize: vulns → threats
+## Stage 3 - Generalize: vulns → threats
 
 ### 3a. Cluster
 
@@ -212,7 +212,7 @@ For each cluster, assign `actor` (from the entry point), `impact` (from asset +
 bug class), `likelihood` (start from evidence: ≥1 confirmed past vuln in this
 surface → at least `likely`; public/active exploit → `almost_certain`; no
 evidence but siblings found + well-known technique → `possible`; adjust down for
-controls), `controls` (grep for stack-relevant mitigations — size caps, input
+controls), `controls` (grep for stack-relevant mitigations - size caps, input
 validation, sandboxing; ASLR/stack-protector/CFI; parameterized queries; auth
 middleware/CSRF/CSP; rate limiting; `none` if none), `status` (`unmitigated`
 unless a control fully closes it), and `recommended_mitigation` (working notes,
@@ -233,14 +233,14 @@ Then `checkpoint.mts save ./.threat-model-state 3 generalize --key stage --from
 
 ---
 
-## Stage 4 — Gap-fill: the part past vulns can't give you
+## Stage 4 - Gap-fill: the part past vulns can't give you
 
 Past vulnerabilities are biased toward what's already been found. For **every
 section 3 entry point that has no section 4 row yet**, walk STRIDE and add the
 plausible ones:
 
 <details>
-<summary><b>Detail</b> — the full table (6 rows)</summary>
+<summary><b>Detail</b> - the full table (6 rows)</summary>
 
 | | For this entry point, could an attacker… |
 | --- | --- |
@@ -278,7 +278,7 @@ Then `checkpoint.mts save ./.threat-model-state 4 gap-fill --key stage --from
 
 ---
 
-## Stage 5 — Emit
+## Stage 5 - Emit
 
 **Coverage check (before writing the file).** For every section 3 entry point,
 confirm at least one section 4 row names it in the `surface` column. Match on the
@@ -297,7 +297,7 @@ class-level mitigation, listing `threat_ids`, `closes_class` (yes/partial),
 `effort` (S/M/L). If two clusters share a control, emit one row with both ids.
 
 <details>
-<summary><b>Writing the file out</b> — chunked assembly in cwd via <code>checkpoint.mts append</code>, the single final Write to <code>&lt;target-dir&gt;/THREAT_MODEL.md</code>, the <code>## 7. Provenance</code> fields, and the closing <code>done</code> checkpoint</summary>
+<summary><b>Writing the file out</b> - chunked assembly in cwd via <code>checkpoint.mts append</code>, the single final Write to <code>&lt;target-dir&gt;/THREAT_MODEL.md</code>, the <code>## 7. Provenance</code> fields, and the closing <code>done</code> checkpoint</summary>
 
 Assemble the file **incrementally** in `./.threat-model-state/THREAT_MODEL.md`
 (one chunk per `## N.` section), then copy the assembled result to

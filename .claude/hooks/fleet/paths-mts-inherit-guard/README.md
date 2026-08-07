@@ -6,7 +6,7 @@ from the nearest ancestor `paths.mts` via `export *`.
 
 ## Why
 
-`paths.mts` is per-package — like `package.json`, every package that
+`paths.mts` is per-package - like `package.json`, every package that
 has a `scripts/` dir has its own. Sub-packages must `export *` from
 the nearest ancestor so `REPO_ROOT`, `CONFIG_DIR`,
 `NODE_MODULES_CACHE_DIR`, etc. aren't re-derived (and don't drift).
@@ -20,7 +20,7 @@ The fleet rule from CLAUDE.md (1 path, 1 reference):
 
 ## Allowed shapes
 
-Repo-root paths module — no ancestor exists; nothing to inherit from.
+Repo-root paths module - no ancestor exists; nothing to inherit from.
 Skipped. The canonical location is `scripts/fleet/paths.mts` after the
 `scripts/{fleet,repo}` segmentation; the pre-segmentation `scripts/paths.mts`
 is also recognized for repos that haven't moved yet.
@@ -50,7 +50,7 @@ const REPO_ROOT = fileURLToPath(import.meta.url).split('/scripts/')[0]
 
 `Allow paths-mts-inherit bypass` (verbatim, in a recent user turn).
 Use when a sub-package's paths.mts genuinely needs to be self-
-contained — but this is rare; if you're tempted, double-check the
+contained - but this is rare; if you're tempted, double-check the
 inheritance pattern.
 
 ## Cited from CLAUDE.md

@@ -43,7 +43,7 @@ export const FORBIDDEN_LOGGER_CALLS: ReadonlyArray<{
 
 // Find every direct logger-leak call in `source` via the AST. Returns one entry
 // per call site with its line, the dotted call, and the canonical replacement.
-// Per-line `// socket-lint: allow console` suppression is the CALLER's job
+// Per-line `// oxlint-disable-next-line socket/no-console-prefer-logger` suppression is the CALLER's job
 // each tree applies its own marker semantics.
 export function findLoggerLeaks(source: string): LoggerLeak[] {
   const leaks: LoggerLeak[] = []

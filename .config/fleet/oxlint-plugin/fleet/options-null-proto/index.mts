@@ -62,8 +62,6 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
-const BYPASS_RE = /socket-lint:\s*allow\s+options-null-proto/
-
 const OPTIONS_NAMES = new Set(['options', 'opts'])
 
 // A param whose name is `options` / `opts` (plain Identifier or optional
@@ -209,13 +207,16 @@ const rule = {
     fixable: 'code',
     messages: {
       banned:
-        'reads `{{name}}` without normalizing it — a caller could pass a polluted prototype. Use `{ __proto__: null, ...{{name}} }` before destructuring/accessing. Bypass: add a `socket-lint: allow options-null-proto` comment.',
+        'reads `{{name}}` without normalizing it — a caller could pass a polluted prototype. Use `{ __proto__: null, ...{{name}} }` before destructuring/accessing. Bypass: add a `oxlint-disable-next-line socket/options-null-proto` comment.',
     },
     schema: [],
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/options-null-proto',
+    )
     const source = context.sourceCode ?? context.getSourceCode?.()
 
     // Test files mock options-shaped objects freely (a `function(opts)` test
@@ -381,5 +382,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

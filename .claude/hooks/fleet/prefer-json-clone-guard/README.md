@@ -6,9 +6,9 @@ without the canonical per-line opt-out comment.
 
 ## Why this rule
 
-For the JSON-roundtrippable subset — anything that came from
+For the JSON-roundtrippable subset - anything that came from
 `JSON.parse`, anything you'd happily round-trip through
-`JSON.stringify` and back — `JSON.parse(JSON.stringify(x))` is
+`JSON.stringify` and back - `JSON.parse(JSON.stringify(x))` is
 **3-5× faster** than `structuredClone(x)`. The browser/Node
 `structuredClone` runs the full HTML structured-clone algorithm:
 type tagging, transferable handling, prototype preservation, cycle
@@ -56,7 +56,7 @@ const copy = structuredClone(value)
   (`.ts` / `.mts` / `.cts` / `.js` / `.mjs` / `.cjs`).
 - The immediately-preceding line must contain
   `oxlint-disable-next-line socket/no-structured-clone-prefer-json`.
-- Lines marked `// socket-lint: allow structured-clone` are also
+- Lines marked `// oxlint-disable-next-line socket/no-structured-clone-prefer-json` are also
   exempt for one-off pre-rule legacy cases.
 
 ## What's exempt
@@ -71,10 +71,10 @@ const copy = structuredClone(value)
 For a legitimate one-off:
 
 ```ts
-const copy = structuredClone(value) // socket-lint: allow structured-clone
+const copy = structuredClone(value) // oxlint-disable-next-line socket/no-structured-clone-prefer-json
 ```
 
-Don't reach for this — add the `oxlint-disable-next-line` with a
+Don't reach for this - add the `oxlint-disable-next-line` with a
 rationale instead, so the lint rule keeps the per-callsite gate.
 
 ## Bypass phrase

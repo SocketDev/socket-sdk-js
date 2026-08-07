@@ -21,19 +21,19 @@ deltas, percentages, and commit SHAs age into a changelog and leak detail.
 ## DRY
 
 Detection (`findDatedCitations`) and surface scoping (`isRuleProseSurface`) live
-in `_shared/dated-citation.mts` — the same module that backs the commit-time
+in `_shared/dated-citation.mts` - the same module that backs the commit-time
 `check/rule-citations-are-generic.mts`. One matcher, two enforcement points,
 no drift.
 
 ## Why a guard (was a reminder)
 
 The reminder nudged at exit 0 and, in practice, was never wired into
-`settings.json` — so it never fired. The commit-time check still hard-blocks,
+`settings.json` - so it never fired. The commit-time check still hard-blocks,
 but a green edit-time experience let dated citations land and only fail later.
 This guard blocks at edit time, the fast-feedback half of the defense-in-depth
 pair.
 
 ## Bypass
 
-Type `Allow dated-citation bypass` in a recent user turn — for the rare case
+Type `Allow dated-citation bypass` in a recent user turn - for the rare case
 where a date is genuinely load-bearing in the prose.

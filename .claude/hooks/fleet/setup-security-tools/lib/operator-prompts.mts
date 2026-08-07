@@ -54,7 +54,9 @@ export async function promptSecret(prompt: string): Promise<string> {
   // during the prompt — that's how readline echoes typed characters,
   // and we want them invisible.
   const muted = new (class extends (await import('node:stream')).Writable {
-    // oxlint-disable-next-line socket/no-underscore-identifier -- `_write` is Node's Writable internal-write method; the leading underscore is the stream API contract, not a privacy marker.
+    // `_write` is Node's Writable internal-write method; the leading underscore
+    // is the stream API contract, not a privacy marker.
+    // oxlint-disable-next-line socket/no-underscore-identifier -- `_write`
     override _write(chunk: unknown, enc: unknown, cb: () => void): void {
       void chunk
       void enc

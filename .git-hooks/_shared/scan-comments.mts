@@ -91,7 +91,7 @@ import type { LineHit } from './scan-core.mts'
 //   • A standalone version / date token (`v2.3.1`, `2026-06-24`, `as of
 //     2026-…`, `fixed in 26`) is not a PR number — the verb-framed issue-ref
 //     arms require a LITERAL `#`, so a bare number/date never matches.
-//   • Per-line opt-out: `// socket-lint: allow pr-process-comment` (or the `#`
+//   • Per-line opt-out: `// oxlint-disable-next-line socket/no-pr-process-comment` (or the `#`
 //     form for shell/YAML) — the rare legitimate process reference. Default is
 //     BLOCK.
 //

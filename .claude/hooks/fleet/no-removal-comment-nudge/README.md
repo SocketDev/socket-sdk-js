@@ -6,7 +6,7 @@ phrase ("moved to", "now lives in", "managed below", etc.).
 
 A comment explaining where something went belongs at the ADD site (next to the
 import, call, or config that replaces the deleted code). At the removal site
-it is orphaned noise — the reader has nothing to attach it to. See
+it is orphaned noise - the reader has nothing to attach it to. See
 [`docs/agents.md/fleet/parser-comments.md`](../../../../docs/agents.md/fleet/parser-comments.md).
 
 ## What it flags
@@ -33,7 +33,7 @@ An `Edit`/`MultiEdit` is flagged when **both** hold:
 - Write tool (no `old_string`/`new_string` distinction).
 - Edits where only comments changed (no code line removed).
 - Relocation comments already present in `old_string` (not newly added).
-- Pointer comments without a relocation phrase (`// see X` — that's
+- Pointer comments without a relocation phrase (`// see X` - that's
   `pointer-comment-nudge`'s domain).
 
 ## Heuristic limitation
@@ -50,11 +50,11 @@ is informational on stderr.
 
 ## Bypass
 
-No bypass phrase — this hook never blocks.
+No bypass phrase - this hook never blocks.
 
 ## Companion files
 
-- `index.mts` — the hook; `detectRemovalComment(old, new)` is the pure
+- `index.mts` - the hook; `detectRemovalComment(old, new)` is the pure
   exported detector.
-- `test/repo/integration/hooks/no-removal-comment-nudge.test.mts` — vitest
+- `test/repo/integration/hooks/no-removal-comment-nudge.test.mts` - vitest
   integration tests (spawn-based, never self-import).

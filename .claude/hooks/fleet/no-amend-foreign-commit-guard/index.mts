@@ -31,7 +31,9 @@
 // Bypass: `Allow amend-foreign bypass` (the rare intentional amend of an older
 // own-commit). Exit 0 allow / 2 block. Fails open on any internal error.
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- PreToolUse hook needs a sync git read to gate the command before it runs; typed string return.
+// PreToolUse hook needs a sync git read to gate the command before it runs;
+// typed string return.
+// oxlint-disable-next-line socket/prefer-async-spawn -- PreToolUse hook
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { isSquashOptIn } from '../_shared/fleet-roster.mts'

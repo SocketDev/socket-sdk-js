@@ -4,9 +4,9 @@ Every plan is written for an executor model that has **zero context**: it has no
 
 Three properties make a plan executable by a weaker model:
 
-1. **Self-contained context** — everything needed is in the file: paths, code excerpts, conventions, commands.
-2. **Verification gates** — every step ends with a command and its expected result. The executor never has to *judge* whether it succeeded.
-3. **Hard boundaries and escape hatches** — explicit out-of-scope list, and "STOP and report" conditions instead of letting the model improvise when reality doesn't match the plan.
+1. **Self-contained context** - everything needed is in the file: paths, code excerpts, conventions, commands.
+2. **Verification gates** - every step ends with a command and its expected result. The executor never has to *judge* whether it succeeded.
+3. **Hard boundaries and escape hatches** - explicit out-of-scope list, and "STOP and report" conditions instead of letting the model improvise when reality doesn't match the plan.
 
 File naming: `plans/NNN-short-slug.md`, numbered in recommended execution order.
 
@@ -196,12 +196,12 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 
 </details>
 
-## Quality bar — check before finishing each plan
+## Quality bar - check before finishing each plan
 
 - Could a model that has never seen this repo execute this with only the plan file and the repo? If any step requires knowledge from the advisor session, inline that knowledge.
 - Is every verification a command with an expected result, not a judgment ("make sure it works")?
 - Does every step name exact files and symbols, not "the relevant module"?
 - Are the STOP conditions specific to this plan's actual risks, not boilerplate?
 - Would a reviewer reading only "Why this matters" + "Done criteria" understand what they're approving?
-- No secret values anywhere in the file — locations and credential types only.
+- No secret values anywhere in the file - locations and credential types only.
 - "Planned at" SHA is filled in and the in-scope paths in the drift check match the Scope section.

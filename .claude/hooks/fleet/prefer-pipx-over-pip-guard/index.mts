@@ -204,7 +204,7 @@ export const hook = defineHook({
         if (!currentText.includes(oldStr)) {
           return undefined
         }
-        const afterText = currentText.replace(oldStr, newStr)
+        const afterText = currentText.replace(oldStr, () => newStr)
         // Only flag NEW violations the edit introduces.
         const beforeFindings = findPipInstalls(currentText).map(
           f => `${f.line}:${f.source}`,

@@ -3,11 +3,11 @@
 PreToolUse hook that blocks `pip install <pkg>`, `pip3 install <pkg>`,
 and `python -m pip install <pkg>` in two surfaces:
 
-1. **Bash tool invocations** — direct CLI commands.
+1. **Bash tool invocations** - direct CLI commands.
 2. **Edit / Write tool** operations on Dockerfiles, shell scripts
    (`.sh` / `.bash`), and Python helpers that add `pip install` lines.
 
-The rule: **fleet tools install via `pipx` at a pinned version** —
+The rule: **fleet tools install via `pipx` at a pinned version** -
 `pipx install <pkg>==<exact-version>` or `pipx install git+<url>@<sha>`.
 Bare `pip install <pkg>` pollutes the global / user `site-packages`
 and leaves the version range floating (catastrophic for reproducibility).
@@ -35,12 +35,12 @@ The hook fires on:
 
 It does NOT block:
 
-- `pip install pipx` — bootstrapping pipx itself is the canonical
+- `pip install pipx` - bootstrapping pipx itself is the canonical
   recovery when pipx is absent. Recognized literal allowlist.
-- `pip install -e .` — editable install of the current project; not
+- `pip install -e .` - editable install of the current project; not
   the same anti-pattern (it doesn't pull from PyPI, it links a local
   source dir). Recognized when `.` is the target.
-- `pip install -r requirements.txt` — requirements files have pinned
+- `pip install -r requirements.txt` - requirements files have pinned
   versions per project convention; pipx doesn't handle multi-package
   manifests. Recognized when `-r` flag is present.
 - Comments mentioning `pip install` (error-message instructions
@@ -54,7 +54,7 @@ Type the canonical phrase in a new message:
 
     Allow pip-install bypass
 
-Use sparingly — a genuine `pip install` in build code is almost
+Use sparingly - a genuine `pip install` in build code is almost
 always a sign the rule is right and the code is wrong. Bypass only
 for upstream-vendor Dockerfiles you don't control AND can't carve
 out (most upstream Dockerfiles you copy can be modified).
@@ -92,7 +92,7 @@ For first-time setup on a machine without pipx:
 node .claude/hooks/fleet/setup-pipx/install.mts
 ```
 
-Cross-platform — mac / linux / windows. Picks the right pipx
+Cross-platform - mac / linux / windows. Picks the right pipx
 installer for the host (brew / apt / yum / apk / vanilla Python).
 
 </details>

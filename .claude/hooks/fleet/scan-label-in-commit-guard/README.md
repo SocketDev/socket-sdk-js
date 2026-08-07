@@ -8,7 +8,7 @@ whose message body contains scan-report-internal labels (`B1`, `M9`,
 
 `/fleet:scanning-quality` and `/fleet:scanning-security` assign scratch-pad IDs
 like `B5` ("Blocker #5") or `M9` ("Medium #9") to findings inside a
-review session. The label has meaning **only within the report** —
+review session. The label has meaning **only within the report** -
 a future reader of `git log` doesn't have the report and cannot
 decode "fix B5" or "addresses M9".
 
@@ -28,7 +28,7 @@ extracts the message body from:
 - `git commit --message=<msg>` / `--message <msg>`
 - `git commit -F <file>` / `--file=<file>` / `--file <file>`
 
-`git commit` without `-m`/`-F` opens the editor — those messages are
+`git commit` without `-m`/`-F` opens the editor - those messages are
 reviewed by the operator, so the hook doesn't fire.
 
 Fenced code blocks (` ``` `) are stripped before scanning so

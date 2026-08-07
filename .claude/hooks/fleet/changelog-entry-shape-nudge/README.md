@@ -27,8 +27,8 @@ mid-work. Prose quality (`anti-prose-guard`) and impl-detail
 
 ## Bypass
 
-None — it never blocks. Rewrite the entry as a bullet + agents.md link.
+None - it never blocks. Rewrite the entry as a bullet + agents.md link.
 
 ## Exit codes
 
-- `0` — always (warning only). Fails open on any internal error.
+- `0` - always (warning only). Fails open on any internal error.

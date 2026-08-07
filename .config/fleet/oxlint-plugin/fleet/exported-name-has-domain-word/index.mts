@@ -78,5 +78,7 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint loads a rule module via dynamic import and expects the rule object as the default export.
+// Oxlint loads a rule module via dynamic import and expects the rule object as
+// the default export.
+// oxlint-disable-next-line socket/no-default-export -- oxlint loads a rule
 export default rule

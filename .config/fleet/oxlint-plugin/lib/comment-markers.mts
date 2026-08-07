@@ -1,8 +1,9 @@
 /**
  * @file Shared "is there a bypass marker adjacent to this node?" scanner used
  *   by the rules that support an inline opt-out comment
- *   (`no-which-for-local-bin` → `socket-lint: allow which-lookup`,
- *   `prefer-ellipsis-char` → `socket-lint: allow literal-ellipsis`,
+ *   (`no-which-for-local-bin` → `oxlint-disable-next-line
+ *   socket/no-which-for-local-bin`, `prefer-ellipsis-char` →
+ *   `oxlint-disable-next-line socket/prefer-ellipsis-char`,
  *   `use-fleet-canonical-api-token-getter` → `socket-api-token-getter: allow
  *   direct-env`). Why a source-text line scan instead of the AST comment APIs:
  *   at the catalog-pinned oxlint version the plugin engine's
@@ -17,6 +18,10 @@
  *   genuinely adjacent, not somewhere arbitrary earlier in the file.
  */
 
+import {
+  ruleNameForMarker,
+  suppressionWaives,
+} from '../../../../.claude/hooks/fleet/_shared/suppression-rules.mts'
 import type { AstNode, RuleContext } from './rule-types.mts'
 
 // How far up a contiguous leading-comment block to look for a bypass marker,
@@ -75,18 +80,20 @@ export const SOCKET_LINT_ALLOW_WELL_FORMED_RE =
 export const SOCKET_LINT_MARKER_ONLY_LINE_RE: RegExp =
   /^\s*(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+([\w-]+))?(?:\s*\*\/|\s+--.*)?\s*$/
 
+// A line that carries a comment and nothing else, which is the placement
+// this helper exists to recognize.
+const COMMENT_ONLY_LINE_RE = /^\s*(?:#|\/\*|\/\/)/
+
 /**
- * True when `line` is a marker-only comment line whose opt-out covers `id`
- * (bare `allow` covers every rule). Line-scanning rules pair this with their
- * own same-line check so BOTH marker placements work:
+ * True when `line` is a suppression comment on a line of its own that waives
+ * `id`. Line-scanning rules pair this with their own same-line check so both
+ * placements work:
  * `isLineMarkered(ownLine) || markerOnlyLineAllows(lineAbove, '<id>')`.
+ *
+ * `id` may be the rule's historical opt-out name; the table resolves it.
  */
 export function markerOnlyLineAllows(line: string, id: string): boolean {
-  const m = line.match(SOCKET_LINT_MARKER_ONLY_LINE_RE)
-  if (!m) {
-    return false
-  }
-  return !m[1] || m[1] === id
+  return COMMENT_ONLY_LINE_RE.test(line) && suppressionWaives(line, id)
 }
 
 /**
@@ -111,7 +118,9 @@ export function makeBypassCommentChecker(
   context: RuleContext,
   id: string,
 ): (node: AstNode) => boolean {
-  return makeBypassChecker(context, socketLintAllowRe(id))
+  // `id` is the rule's historical opt-out name; the table resolves it to the
+  // rule the directive now spells, so callers keep their own id.
+  return makeBypassChecker(context, ruleNameForMarker(id) ?? `socket/${id}`)
 }
 
 /**
@@ -157,13 +166,36 @@ function nodeStartLine(node: AstNode, sourceText: string): number {
 }
 
 /**
- * Build a `hasBypassComment(node)` predicate for `bypassRe`, reading the source
- * once. True when the marker is on the node's own line or in the contiguous
- * comment block immediately above it.
+ * Build a `hasBypassComment(node)` predicate for `rule`, reading the source
+ * once. True when a `-disable-next-line` naming that rule is on the node's own
+ * line or in the contiguous comment block immediately above it.
+ *
+ * Takes a RULE NAME rather than a regex now: the fleet has one suppression
+ * syntax, so every caller was passing a regex that spelled the same thing a
+ * different way. `suppressionWaives` reads the comma-separated list, so one
+ * directive can waive several rules and this agrees with oxlint about which.
  */
 export function makeBypassChecker(
   context: RuleContext,
-  bypassRe: RegExp,
+  rule: string,
+): (node: AstNode) => boolean {
+  return makeLineMatcher(context, {
+    test: (line: string): boolean => suppressionWaives(line, rule),
+  })
+}
+
+/**
+ * The same walk as {@link makeBypassChecker}, driven by a raw pattern instead
+ * of a rule name: true when `bypassRe` matches the node's own line or a line in
+ * the contiguous comment block above it.
+ *
+ * A handful of rules own a marker family of their own, named after the API they
+ * steer callers toward rather than `socket/<rule>`. They read through here so
+ * the fleet suppression table keeps describing exactly one grammar.
+ */
+export function makeLineMatcher(
+  context: RuleContext,
+  bypassRe: { test: (line: string) => boolean },
 ): (node: AstNode) => boolean {
   const sourceText = sourceTextOf(context)
   const sourceLines = sourceText.split('\n')

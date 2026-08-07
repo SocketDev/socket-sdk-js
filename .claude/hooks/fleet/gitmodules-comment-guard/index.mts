@@ -23,7 +23,7 @@
 // Scope:
 //   - Fires on Edit and Write tool calls.
 //   - Only inspects `.gitmodules` at the repo root.
-//   - Lines marked `# socket-lint: allow gitmodules-no-comment` are
+//   - Lines marked `# oxlint-disable-next-line socket/gitmodules-entry-has-comment` are
 //     exempt for one-off legitimate cases.
 //
 // The hook fails OPEN on its own bugs (exit 0 + stderr log) so a bad
@@ -32,7 +32,8 @@
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-const ALLOW_MARKER = '# socket-lint: allow gitmodules-no-comment'
+const ALLOW_MARKER =
+  '# oxlint-disable-next-line socket/gitmodules-entry-has-comment'
 
 // Match `[submodule "PATH"]` with PATH captured. Tolerant of
 // whitespace and quoting variations.
@@ -102,7 +103,7 @@ export const check = editGuard((filePath, content) => {
       '\n  # semver-7.7.4\n  [submodule "packages/.../upstream/semver"]\n' +
       '\nThe slug should be a short name (no path); the version is\n' +
       'whatever the upstream tags (v25.9.0, 1.7.19, liburing-2.14, etc.).\n' +
-      '\nOne-off override: add `# socket-lint: allow gitmodules-no-comment` on its own line above\n' +
+      '\nOne-off override: add `# oxlint-disable-next-line socket/gitmodules-entry-has-comment` on its own line above\n' +
       'to the [submodule] line.\n',
   )
 })

@@ -69,7 +69,9 @@ export interface InstallGitHubToolConfig {
  * by opengrep manylinux/osx assets)
  */
 export async function runInstallGitHubReleaseTool(
-  // oxlint-disable-next-line no-shadow -- required config param name matches the module-level tool-manifest `config` by convention
+  // Required config param name matches the module-level tool-manifest `config`
+  // by convention.
+  // oxlint-disable-next-line no-shadow -- required config param name matches
   config: InstallGitHubToolConfig,
 ): Promise<boolean> {
   const cfg = { __proto__: null, ...config } as InstallGitHubToolConfig
@@ -184,7 +186,9 @@ export async function runInstallGitHubReleaseTool(
  * synthesizing one from `tool.version`.
  */
 export async function runInstallGitHubReleaseToolWithTag(
-  // oxlint-disable-next-line no-shadow -- required config param name matches the module-level tool-manifest `config` by convention
+  // Required config param name matches the module-level tool-manifest `config`
+  // by convention.
+  // oxlint-disable-next-line no-shadow -- required config param name matches
   config: InstallGitHubToolConfig & { tag: string },
 ): Promise<boolean> {
   const cfg = { __proto__: null, ...config } as InstallGitHubToolConfig & {

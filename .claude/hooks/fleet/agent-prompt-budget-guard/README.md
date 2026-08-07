@@ -8,7 +8,7 @@ a **done-condition**, meaning an explicit statement of what finished looks
 like. Either one alone is enough to pass. Both must be missing before it fires.
 
 [`agent-delegation`](../../../../docs/agents.md/fleet/agent-delegation.md)
-already requires both, and picks the tiers — sanity ~2 min, second
+already requires both, and picks the tiers - sanity ~2 min, second
 implementation ~5 min, deep rescue ~15 min. Nothing enforced it: on 2026-08-03
 seven subagents ran 40-129 minutes each, 117-203 tool calls, every brief
 bundling several deliverables behind an open-ended investigation with no budget.
@@ -16,7 +16,7 @@ bundling several deliverables behind an open-ended investigation with no budget.
 ## Why a guard and not a nudge
 
 A `notify` verdict exits 0, and on the PreToolUse path exit-0 stderr is
-transcript decoration — the **block** message is what is handed back to the
+transcript decoration - the **block** message is what is handed back to the
 spawning model, which is the only party who can fix the prompt. The advisory
 form of this law also already lost: the doctrine was written down, five
 spawn-time nudges were live, and the fan-out shipped anyway.
@@ -30,7 +30,7 @@ bought at the detector instead of by weakening the verdict.
 
 Fires only when **all** hold:
 
-- the tool is `Task` or `Agent` (a `SendMessage` resume is never matched — it
+- the tool is `Task` or `Agent` (a `SendMessage` resume is never matched - it
   inherits the original brief's budget),
 - the prompt is at least **500 words** (short one-shots pass through),
 - the prompt carries an **open-ended signal** (`audit`, `investigate`,
@@ -49,7 +49,7 @@ Both were measured against 2,100 real spawns from 2026-07-01 to 2026-08-03
 rather than picked by feel.
 
 <details>
-<summary><b>Detail</b> — Bypass</summary>
+<summary><b>Detail</b> - Bypass</summary>
 
 | Setting | First cut | Shipped | Why it moved |
 | --- | --- | --- | --- |
@@ -67,7 +67,7 @@ the floor must stay silent, exactly at the floor must block, and the constant
 itself must land in the 200-1000 band. Move it outside that band and the suite
 goes red on purpose.
 
-Detection is regex over prose — no shell binary appears in any pattern, so
+Detection is regex over prose - no shell binary appears in any pattern, so
 `no-hook-cmd-regex-guard` does not apply. Plain `.includes` cannot express
 "N minutes" or "N tool calls", which are the natural spellings the doctrine
 asks us to accept.

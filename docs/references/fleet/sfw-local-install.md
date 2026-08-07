@@ -1,8 +1,8 @@
-# Socket Firewall — local install
+# Socket Firewall - local install
 
 Install Socket Firewall (sfw) enterprise on your dev machine so every
-package fetch — `npm install`, `pnpm add`, `cargo build`, `pip install`,
-etc. — runs through the same firewall checks that CI runs. Mirrors the
+package fetch - `npm install`, `pnpm add`, `cargo build`, `pip install`,
+etc. - runs through the same firewall checks that CI runs. Mirrors the
 shim setup in [`SocketDev/socket-registry/.github/actions/setup`](https://github.com/SocketDev/socket-registry/blob/main/.github/actions/setup/action.yml)
 exactly, so local and CI behavior stay aligned.
 
@@ -19,7 +19,7 @@ exactly, so local and CI behavior stay aligned.
 ### 1. Persist the API token to the OS keychain
 
 Use the canonical wheelhouse rotator. **Never** hand-edit dotfiles
-(`~/.sfw.config`, `.env`, etc.) — see CLAUDE.md _Token hygiene_ for
+(`~/.sfw.config`, `.env`, etc.) - see CLAUDE.md _Token hygiene_ for
 the rule.
 
 ```bash
@@ -46,7 +46,7 @@ Pull the version + sha256 from `socket-registry/.config/repo/external-tools.json
 (canonical fleet pin):
 
 <details>
-<summary><b>Detail</b> — `TOOLS=~/projects/socket-registry/.config/repo/external-tools.json`, `SFW_VERSION=$(node`, `PLATFORM=darwin-arm64`</summary>
+<summary><b>Detail</b> - `TOOLS=~/projects/socket-registry/.config/repo/external-tools.json`, `SFW_VERSION=$(node`, `PLATFORM=darwin-arm64`</summary>
 
 ```bash
 TOOLS=~/projects/socket-registry/.config/repo/external-tools.json
@@ -74,11 +74,11 @@ ln -sfn "$RACK/sfw" ~/.socket/_wheelhouse/bin/sfw
 
 ### 3. Generate the shims
 
-The fleet bootstrap owns shim generation — one deterministic generator,
+The fleet bootstrap owns shim generation - one deterministic generator,
 no hand-saved script:
 
 <details>
-<summary><b>Detail</b> — `node scripts/fleet/setup/tools.mjs`</summary>
+<summary><b>Detail</b> - `node scripts/fleet/setup/tools.mjs`</summary>
 
 ```bash
 node scripts/fleet/setup/tools.mjs
@@ -88,8 +88,8 @@ It writes the shims into `~/.socket/_wheelhouse/bin/` (the one PATH
 entry, where they co-live with the flat racked-tool handles like
 `bin/sfw`). Re-run it whenever you install or uninstall a wrapped tool.
 
-The shim list — `npm yarn pnpm pip pip3 uv cargo` (enterprise adds
-`gem bundler nuget`, plus `go` on Linux) — mirrors socket-registry's
+The shim list - `npm yarn pnpm pip pip3 uv cargo` (enterprise adds
+`gem bundler nuget`, plus `go` on Linux) - mirrors socket-registry's
 setup action. For each command:
 
 - Racked tools (npm/pnpm/uv) wrap the PINNED rack binary
@@ -99,11 +99,11 @@ setup action. For each command:
 - Each shim exports a per-tool `SOCKET_SHIM_ACTIVE_<CMD>` sentinel before
   handing off to sfw. A re-entrant invocation (a child process the wrapped
   tool spawns, or the tool re-invoking its own name via a bare PATH lookup)
-  sees the sentinel already set and execs the real binary directly — PATH
+  sees the sentinel already set and execs the real binary directly - PATH
   itself is never touched, so every OTHER racked shim (`uv`, `cargo`, …)
   stays resolvable by the tool's own children.
 - The wrapper **exports `SFW_UNKNOWN_HOST_ACTION=ignore`** (so non-
-  allowlisted hosts pass through unscored instead of being blocked —
+  allowlisted hosts pass through unscored instead of being blocked -
   sfw-free ignores this var since it hardcodes 'ignore' internally; sfw-
   enterprise reads it and would otherwise default to 'block'), and
   execs `<sfw> <real> "$@"`.
@@ -118,7 +118,7 @@ See the canonical CI version in
 [socket-registry/.github/actions/setup/action.yml](https://github.com/SocketDev/socket-registry/blob/main/.github/actions/setup/action.yml)
 under the "Create sfw shims" step. (An older per-machine rack at
 `~/.socket/sfw/shims` with its own `regenerate-shims.sh` may still exist
-on long-lived machines; it is legacy — prefer the fleet generator.)
+on long-lived machines; it is legacy - prefer the fleet generator.)
 
 </details>
 
@@ -142,7 +142,7 @@ The sfw version + per-platform sha256s live in
 `socket-registry/.config/repo/external-tools.json`. <!-- docs-refs-ignore: cross-repo pointer into the socket-registry checkout --> When CI bumps that file, your
 local install drifts. Re-run the install steps above whenever you pull
 socket-registry. The local file `~/.socket/_wheelhouse/bin/sfw-<old-version>` is
-safe to keep — the `sfw` symlink is what matters.
+safe to keep - the `sfw` symlink is what matters.
 
 CLAUDE.md's "Drift watch" rule applies here: if you see a different sfw
 version pinned in another fleet repo, opt for the latest. The repo with
@@ -154,7 +154,7 @@ the newer version is canonical.
 PATH="${PATH/$HOME\/.socket\/_wheelhouse\/bin:/}" npm install
 ```
 
-Useful when debugging an install issue you suspect sfw is causing — but
+Useful when debugging an install issue you suspect sfw is causing - but
 prefer to file a real fix rather than living in bypass mode.
 
 ## Uninstall

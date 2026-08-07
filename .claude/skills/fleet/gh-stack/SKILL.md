@@ -21,7 +21,7 @@ collide across worktrees, so never operate on the same stack concurrently.
 Run every command and stop on the first failure:
 
 <details>
-<summary><b>Detail</b> — the worked steps (2 snippets)</summary>
+<summary><b>Detail</b> - the worked steps (2 snippets)</summary>
 
 ```bash
 git --version

@@ -83,10 +83,6 @@
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
-// Snapshot-eligible TLA reuses `socket/no-top-level-await`'s bypass marker:
-// an ESM-only entry that never gets bundled to CJS / snapshot can opt out.
-const TLA_BYPASS_RE = /socket-lint:\s*allow\s+top-level-await/
-
 // ───────────────────────── extension point ─────────────────────────
 // The denylists below are the WHOLE extensible surface. A newly-discovered
 // snapshot blocker or import-time handle is a ONE-LINE addition to the relevant
@@ -285,7 +281,7 @@ const rule = {
       eagerChildProcess:
         '`child_process.{{member}}` at module eval spawns/forks on import — a side effect every consumer pays. Move the spawn inside the function that needs it.',
       snapshotTopLevelAwait:
-        'Top-level `await` in a snapshot-eligible module (it freezes into the V8 dispatch bundle). The snapshot build pass is synchronous, so a module-scope `await` aborts `--build-snapshot`. Move it inside `run()` (the dispatcher awaits the hook), or opt out with `// socket-lint: allow top-level-await -- <reason>` if this file is genuinely never bundled.',
+        'Top-level `await` in a snapshot-eligible module (it freezes into the V8 dispatch bundle). The snapshot build pass is synchronous, so a module-scope `await` aborts `--build-snapshot`. Move it inside `run()` (the dispatcher awaits the hook), or opt out with `// oxlint-disable-line socket/no-top-level-await -- <reason>` if this file is genuinely never bundled.',
       eagerGlobalCapture:
         "Bare `{{name}}` reference at module eval — this global is NOT defined everywhere ({{name}} is absent in the V8 snapshot builder and, for SharedArrayBuffer, in non-cross-origin-isolated browsers), so this line is a module-eval ReferenceError there. Capture it guarded: `typeof {{name}} === 'undefined' ? undefined : {{name}}`, or reference it lazily inside the function that needs it.",
       snapshotDynamicImport:
@@ -308,7 +304,7 @@ const rule = {
         : ((sourceCode as { text?: string | undefined })?.text ?? '')
     const eligible = isSnapshotEligible(filename, source)
     const hasTlaBypass = eligible
-      ? makeBypassChecker(context, TLA_BYPASS_RE)
+      ? makeBypassChecker(context, 'socket/no-top-level-await')
       : undefined
 
     const listener: Record<string, (node: AstNode) => void> = {
@@ -524,5 +520,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

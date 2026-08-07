@@ -1,6 +1,6 @@
 # no-vitest-double-dash-guard
 
-**Type:** PreToolUse(Bash) hook (BLOCK — exit 2).
+**Type:** PreToolUse(Bash) hook (BLOCK - exit 2).
 
 ## Trigger
 
@@ -23,7 +23,7 @@ The `--` is consumed by the script runner (pnpm/npm) as its own
 args-separator, so vitest receives **no positional filter** and runs the
 **entire suite** instead of the one file you targeted. The full suite can be
 minutes; in a few fleet repos it sweeps `.claude/hooks` tests and hangs. The
-intent is always "run this one file" — the `--` silently defeats it.
+intent is always "run this one file" - the `--` silently defeats it.
 
 The fix is to drop the `--`; the positional path forwards fine without it:
 
@@ -32,7 +32,7 @@ pnpm test test/foo.test.mts
 node_modules/.bin/vitest run test/foo.test.mts
 ```
 
-This recurs across socket-cli, socket-registry, and socket-mcp — promoted to
+This recurs across socket-cli, socket-registry, and socket-mcp - promoted to
 one fleet guard rather than three repo-local copies.
 
 ## Bypass

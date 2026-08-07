@@ -28,7 +28,7 @@ Trivy, OpenGrep, uv) + a few misc tools (cdxgen, synp, janus).
 This leaf is a thin re-entry point that imports from the umbrella's
 `lib/installers.mts` and runs ONLY the firewall installer. The token
 resolution / keychain / shell-rc bridge / --rotate prompt all use the
-umbrella's exported helpers — single source of truth.
+umbrella's exported helpers - single source of truth.
 
 ## What gets installed
 

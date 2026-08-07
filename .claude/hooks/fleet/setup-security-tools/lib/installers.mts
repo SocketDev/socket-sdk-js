@@ -230,7 +230,9 @@ interface NpmToolInstallConfig {
  * AgentShield comment for the documented case).
  */
 export async function setupNpmTool(
-  // oxlint-disable-next-line no-shadow -- required config param name matches the module-level tool-manifest `config` by convention
+  // Required config param name matches the module-level tool-manifest `config`
+  // by convention.
+  // oxlint-disable-next-line no-shadow -- required config param name matches
   config: NpmToolInstallConfig,
 ): Promise<boolean> {
   const { displayName, name, tool } = {

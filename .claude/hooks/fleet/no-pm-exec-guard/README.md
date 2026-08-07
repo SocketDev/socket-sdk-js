@@ -15,12 +15,12 @@ substring.
 
 **`<pm> exec`** runs an already-installed `node_modules/.bin` binary but wraps it
 in the package manager's startup + (in this fleet) the Socket Firewall
-interception layer on every call — pure overhead. During the 2026-06-03 slowdown
+interception layer on every call - pure overhead. During the 2026-06-03 slowdown
 investigation, bare `node_modules/.bin/tsgo` ran in 422ms vs the multi-second
 `pnpm exec tsgo`. Run the bin directly (`node_modules/.bin/<tool>`) or via
 `pnpm run <script>`.
 
-**`npx` / `dlx`** FETCH + execute unpinned code — a supply-chain risk. The
+**`npx` / `dlx`** FETCH + execute unpinned code - a supply-chain risk. The
 `socket/no-npx-dlx` oxlint rule already bans these in committed source, but a
 Claude Bash invocation runs before any lint, so this hook is the run-time block.
 Add the dep and run it installed, or use `pipx` / `node_modules/.bin`.
@@ -31,6 +31,6 @@ Type `Allow pm-exec bypass` in a recent turn.
 
 ## Exit codes
 
-- `0` — pass (not Bash, no `<pm> exec`, or bypassed)
-- `2` — block
+- `0` - pass (not Bash, no `<pm> exec`, or bypassed)
+- `2` - block
 - Fails open on any internal error.

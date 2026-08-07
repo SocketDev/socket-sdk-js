@@ -11,13 +11,13 @@ metadata:
 # looping-quality
 
 A thin **loop counter** over the [`scanning-quality`](../scanning-quality/SKILL.md)
-primitive. `scanning-quality` is one pass — fan out finders, dedup, verify,
+primitive. `scanning-quality` is one pass - fan out finders, dedup, verify,
 produce an A-F report. This skill wraps it in an iterate-fix-recheck loop: scan,
 fix the findings, scan again, until the report is clean or the iteration cap is
 hit. All the scanning logic lives in `scanning-quality`; this skill only adds the
 counter and the fix-and-recheck cadence.
 
-**Interactive only** — this skill makes code changes and commits. Do not use as
+**Interactive only** - this skill makes code changes and commits. Do not use as
 an automated pipeline gate (that's what a single `scanning-quality` report is
 for).
 
@@ -42,7 +42,7 @@ Track an iteration counter `N`, starting at 1, capped at `MAX_ITERATIONS = 5`.
 - Fix every finding, not just the easy ones.
 - One commit per iteration; the iteration number is in the commit subject so the
   trend is visible in `git log`.
-- Run tests after each fix batch — a fix that breaks the build is not a fix.
+- Run tests after each fix batch - a fix that breaks the build is not a fix.
 - The heavy scanning work is delegated to `scanning-quality` (which pins opus);
   this skill just orchestrates the loop, so it runs on a lighter model.
 - Report the final state: iterations run, findings fixed, anything still open at

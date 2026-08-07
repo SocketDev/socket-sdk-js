@@ -6,7 +6,7 @@ manager's auto-update is still enabled on this machine.
 ## Why
 
 A package manager that auto-updates can change a tool's version underneath a
-build / scan, add latency, or pull an unsoaked package — a reproducibility +
+build / scan, add latency, or pull an unsoaked package - a reproducibility +
 supply-chain hazard. The disable-knob lives outside the repo (env vars, npmrc,
 chocolatey.config, winget settings) so it drifts per machine. This hook is the
 point-of-use enforcement; `scripts/fleet/audit-package-manager-auto-update.mts`

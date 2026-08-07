@@ -15,11 +15,6 @@
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
-// socket-lint: allow top-level-await -- opt-out for ESM-only entry points
-// that never get bundled to CJS (e.g. a pure-ESM CLI script that runs via
-// node --experimental-vm-modules and ships nothing to the CJS bundle).
-const BYPASS_RE = /socket-lint:\s*allow\s+top-level-await/
-
 const FUNCTION_TYPES = new Set<string>([
   'ArrowFunctionExpression',
   'FunctionDeclaration',
@@ -59,7 +54,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-top-level-await',
+    )
     return {
       AwaitExpression(node: AstNode) {
         if (hasEnclosingFunction(node)) {
@@ -93,5 +91,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

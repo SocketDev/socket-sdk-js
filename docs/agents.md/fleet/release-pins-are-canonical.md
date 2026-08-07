@@ -43,7 +43,7 @@ and never false-greens.
 
 The release bundle is deterministic: a member's pinned `bundle.cascadeSha` must
 equal the `templateSha` of the release at `bundle.ref` (the lock-step invariant,
-see [`thin-distribution.md`](thin-distribution.md)). A fuzzy ref resolves
+see [`fleet-pack-distribution.md`](fleet-pack-distribution.md)). A fuzzy ref resolves
 differently over time, so the pin would silently drift and the lock-step verify
 could no longer hold. Keeping the ergonomics at the input layer and persisting
 only exact values is what keeps the bundle reproducible.
@@ -59,7 +59,7 @@ Both are unit-tested in `test/repo/unit/release-pins-are-canonical.test.mts`.
 
 ## See also
 
-- [`thin-distribution.md`](thin-distribution.md) - the bundle-pin + lock-step
+- [`fleet-pack-distribution.md`](fleet-pack-distribution.md) - the bundle-pin + lock-step
   invariant this canonicality rule protects.
 - [`lockstep.md`](lockstep.md) - the separate upstream-drift harness (same word,
   different subsystem).

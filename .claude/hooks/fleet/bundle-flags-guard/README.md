@@ -17,7 +17,7 @@ Two fleet rules collapse here:
    security review of shipped JS. The fleet ships readable bundles.
 
 Both rules apply to **shipped** output (`dist/`, `build/`,
-`packages/*/build/`) — not local IDE tooling or one-off scripts.
+`packages/*/build/`) - not local IDE tooling or one-off scripts.
 
 ## What it blocks
 
@@ -34,7 +34,7 @@ The block fires only on **transitions** (key absent or `false` →
 `true`). It does not fire on:
 
 - Files that already had the key `true` before the edit (you can't
-  fix it without first writing the bad state — bypass is for that).
+  fix it without first writing the bad state - bypass is for that).
 - Removals (`true → false` → never blocks).
 - Comments containing the key.
 - Test-only configs under `**/test/**` or `**/__tests__/**`.

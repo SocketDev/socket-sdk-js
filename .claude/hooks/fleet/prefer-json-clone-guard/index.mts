@@ -25,7 +25,7 @@
 //     references are skipped — they're not CallExpression nodes.
 //   - The IMMEDIATELY-PRECEDING line must contain
 //     `oxlint-disable-next-line socket/no-structured-clone-prefer-json`.
-//   - Lines marked `// socket-lint: allow structured-clone` are also
+//   - Lines marked `// oxlint-disable-next-line socket/no-structured-clone-prefer-json` are also
 //     exempt for one-off legitimate cases.
 //
 // Bypass phrase: `Allow no-structured-clone-prefer-json bypass`.
@@ -38,11 +38,10 @@
 // The hook fails OPEN on its own bugs (the runner logs + exit 0) so a
 // bad hook deploy can't brick the session.
 
+import { suppressionCoversLine } from '../_shared/markers.mts'
 import { findBareCallsTo } from '../_shared/ast/calls.mts'
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import type { GuardResult } from '../_shared/guard.mts'
-
-const ALLOW_MARKER = '// socket-lint: allow structured-clone'
 
 // File extensions where the rule applies. Markdown / JSON / YAML /
 // generated `.d.ts` etc. are exempt.
@@ -51,8 +50,8 @@ const APPLICABLE_EXTS = new Set(['.cjs', '.cts', '.js', '.mjs', '.mts', '.ts'])
 /**
  * Apply the secondary per-line allow marker filter. The AST helper already
  * strips calls preceded by an `oxlint-disable-next-line` comment; this catches
- * the older `// socket-lint: allow structured-clone` shape (same-line or
- * preceding-line).
+ * the older `// oxlint-disable-next-line
+ * socket/no-structured-clone-prefer-json` shape (same-line or preceding-line).
  */
 export function applyAllowMarkerFilter(
   source: string,
@@ -62,12 +61,15 @@ export function applyAllowMarkerFilter(
   const out: Offense[] = []
   for (let i = 0, { length } = candidates; i < length; i += 1) {
     const c = candidates[i]!
-    const line = lines[c.line - 1] ?? ''
-    if (line.includes(ALLOW_MARKER)) {
-      continue
-    }
-    const prev = c.line >= 2 ? (lines[c.line - 2] ?? '') : ''
-    if (prev.includes(ALLOW_MARKER)) {
+    // `c.line` is 1-based; one call covers both placements, and it knows which
+    // spelling covers the line itself versus the one above.
+    if (
+      suppressionCoversLine(
+        lines,
+        c.line - 1,
+        'no-structured-clone-prefer-json',
+      )
+    ) {
       continue
     }
     out.push({ line: c.line, text: c.text })
@@ -124,7 +126,7 @@ export const check = editGuard((filePath, content): GuardResult => {
       '  // oxlint-disable-next-line socket/no-structured-clone-prefer-json -- <reason>\n' +
       '  const copy = structuredClone(value)\n' +
       '\n' +
-      'One-off override: add `// socket-lint: allow structured-clone` on its own line above\n' +
+      'One-off override: add `// oxlint-disable-next-line socket/no-structured-clone-prefer-json` on its own line above\n' +
       'to the line.\n',
   )
 })

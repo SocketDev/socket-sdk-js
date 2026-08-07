@@ -4,7 +4,7 @@
 
 ## Why
 
-Fleet repos read `template/CLAUDE.md` as the source of truth for behavioral rules. A hook without a corresponding CLAUDE.md entry is policy that exists in code but not on paper — users get blocked by a rule they never read.
+Fleet repos read `template/CLAUDE.md` as the source of truth for behavioral rules. A hook without a corresponding CLAUDE.md entry is policy that exists in code but not on paper - users get blocked by a rule they never read.
 
 This hook closes that drift the moment it would land. Without the CLAUDE.md entry, the hook commit is refused.
 
@@ -20,9 +20,9 @@ The pattern: **one minimal line, attached to the rule it enforces**, with the pa
 
 Accepted variants:
 
-- ``(enforced by `.claude/hooks/my-rule/`)`` — preferred
-- ``(enforced by `.claude/hooks/my-rule`)`` — trailing slash optional
-- `` enforced by `.claude/hooks/my-rule/` `` — without parens (less common but accepted)
+- ``(enforced by `.claude/hooks/my-rule/`)`` - preferred
+- ``(enforced by `.claude/hooks/my-rule`)`` - trailing slash optional
+- `` enforced by `.claude/hooks/my-rule/` `` - without parens (less common but accepted)
 
 ## Why wheelhouse-only
 
@@ -30,9 +30,9 @@ Downstream fleet repos receive their CLAUDE.md and hook code via `sync-scaffoldi
 
 ## Skipped paths
 
-- `template/.claude/hooks/_shared/...` — helpers, not hooks
-- `test/*.test.mts` — test files
-- `new-hook-claude-md-guard` itself — chicken-and-egg
+- `template/.claude/hooks/_shared/...` - helpers, not hooks
+- `test/*.test.mts` - test files
+- `new-hook-claude-md-guard` itself - chicken-and-egg
 - Any hook listed in `WHEELHOUSE_ONLY_HOOKS` in index.mts
 
 ## Bypass

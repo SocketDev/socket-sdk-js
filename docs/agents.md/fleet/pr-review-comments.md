@@ -33,7 +33,7 @@ the author.
   wrapped in `<blockquote>` (opened on the line after `</summary>`, closed on
   the line before `</details>`) so the expanded content renders indented
   under its summary instead of flush with it.
-- **Suggested remediations are labeled `Fix idea 💡:`** - always with the bulb.
+- **Suggested remediations are labeled `Suggestion 💡:`** - always with the bulb.
 - **Smaller-items bullets carry their own circles.** Inside the trailing
   "Smaller items" fold, each bullet starts with its own `<abbr>`-wrapped
   circle, and the fold's summary circle matches the most severe bullet inside.
@@ -102,7 +102,7 @@ One-line intro: what was traced and the shape of the result.
 <blockquote>
 
 Mechanism first, then the step-by-step failure scenario, then
-Fix idea 💡: the concrete remediation.
+Suggestion 💡: the concrete remediation.
 
 </blockquote>
 </details>
@@ -118,6 +118,35 @@ Fix idea 💡: the concrete remediation.
 
 Closing verdict referencing item 1 _(short title)_.
 ```
+
+## Inline comments with suggestions
+
+The rules above govern the summary comment. An INLINE comment, anchored to diff
+lines and usually carrying a ```suggestion block, is a different shape with its
+own failure modes. The law is code:
+`scripts/fleet/_shared/review-comment-law.mts` (`REVIEW_COMMENT_LAW`,
+`REVIEW_COMMENT_LAW_PROMPT`, and the advisory `reviewCommentSmells`).
+
+Written in the order a comment is built, which is the lesson - anchor it, shape
+the suggestion, then write the prose:
+
+- **Compute the anchor from the diff hunks.** GitHub needs a new-file line that
+  exists in the diff; an estimate either 422s or lands on unrelated code.
+- **A suggestion replaces its range exactly** - the anchored lines and the block
+  are a 1:1 swap.
+- **Absorb an adjacent comment, never stack on it.** When the anchored code sits
+  under an explanatory comment, extend the anchor upward and rewrite it, so the
+  fix cannot leave a stale sentence behind.
+- **Match the target file's comment density, measured.** Comment frequency is
+  per-file; count the lines rather than guessing.
+- **Name a constant, never a bare literal**, except at the constant's own
+  definition site or where the file's convention is already literal.
+- **One or two sentences, then the suggestion.** The block carries the detail.
+- **Name the file, not its role** - a path, not "the runbook".
+- **An unanchorable finding goes in the review body** with one clause saying
+  why, never on an invented nearby anchor.
+- **Do not cite a convention the target repo does not enforce.** Fleet doctrine
+  stops at the fleet boundary; with no guard present, mark the note a preference.
 
 ## Driving review bots by directive comment
 

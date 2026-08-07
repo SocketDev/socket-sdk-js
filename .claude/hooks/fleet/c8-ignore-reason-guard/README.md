@@ -9,13 +9,13 @@ The fleet rule (`docs/agents.md/fleet/c8-ignore-directives.md`): a coverage
 ignore is for external-library paths and genuinely-unreachable branches only,
 and every directive must state _why_ in the same comment. A reason lets a
 reader distinguish a principled ignore from a coverage dodge on core SDK logic
-(which is forbidden — write a test instead).
+(which is forbidden - write a test instead).
 
 ## Triggers
 
 - A `c8`/`v8` `ignore next`/`ignore start` directive with no `- <reason>` /
   `— <reason>` trailing text, in a `.ts`/`.mts`/`.cts`/`.js`/… source file.
-- `ignore stop` is exempt — its paired `start` carries the reason.
+- `ignore stop` is exempt - its paired `start` carries the reason.
 - `test/`, `fixtures/`, `external/`, `vendor/` paths are exempt.
 
 ## Bypass

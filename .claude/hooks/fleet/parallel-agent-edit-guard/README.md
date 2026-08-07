@@ -1,7 +1,7 @@
 # parallel-agent-edit-guard
 
 PreToolUse (Edit / Write / NotebookEdit) hook. Blocks a write whose target
-file is **another agent's in-flight work** — dirty in this checkout, not
+file is **another agent's in-flight work** - dirty in this checkout, not
 authored by this session, and changed recently. Writing it would silently
 clobber the other agent's uncommitted edits.
 
@@ -17,13 +17,13 @@ Only when the **edit target** is foreign (see `_shared/foreign-paths.mts`):
   ignored).
 
 Editing your own files, a fresh file nobody has touched, or any file when
-no parallel agent is active — all pass through.
+no parallel agent is active - all pass through.
 
 ## Why
 
 When two Claude sessions (or a Claude session plus a Codex companion) share
 one checkout, one session can repeatedly re-cascade a file the other is
-editing — silently reverting the other session's type-error fixes one Edit
+editing - silently reverting the other session's type-error fixes one Edit
 at a time. The clobbered fixes only stick once both sessions stop touching
 the same files.
 
@@ -33,9 +33,9 @@ that overwrites a file. This hook closes that gap at the write itself.
 
 ## Companion hooks
 
-- `parallel-agent-staging-guard` — refuses git ops that sweep/destroy
+- `parallel-agent-staging-guard` - refuses git ops that sweep/destroy
   foreign work.
-- `parallel-agent-on-stop-nudge` — surfaces the foreign-path signal at
+- `parallel-agent-on-stop-nudge` - surfaces the foreign-path signal at
   turn end (informational).
 
 All three share the `_shared/foreign-paths.mts` heuristic.
@@ -43,8 +43,8 @@ All three share the `_shared/foreign-paths.mts` heuristic.
 ## Bypass
 
 - User types `Allow parallel-agent-edit bypass` in chat (case-sensitive),
-  then retry — one action.
-- `FLEET_SYNC=1` in env — cascade scripts run in a fresh worktree off
+  then retry - one action.
+- `FLEET_SYNC=1` in env - cascade scripts run in a fresh worktree off
   `origin/main`, so there is no parallel-session hazard.
 
 Fails open on hook bugs (exit 0 + stderr log).

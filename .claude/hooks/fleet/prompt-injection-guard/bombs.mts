@@ -47,7 +47,10 @@ export interface BombScanOptions {
 // combining diacritical blocks only — the marks of Arabic, Devanagari, Hebrew,
 // Thai, and the other non-Latin scripts sit outside them, and no script stacks 8
 // of these on one base.
-// oxlint-disable-next-line eslint/no-misleading-character-class -- the combining-mark ranges ARE the detector's subject; this class deliberately matches stacked combining diacritics, which is exactly what the rule flags as "misleading."
+// The combining-mark ranges ARE the detector's subject; this class deliberately
+// matches stacked combining diacritics, which is exactly what the rule flags as
+// "misleading".
+// oxlint-disable-next-line eslint/no-misleading-character-class -- the subject
 const ZALGO_RE = /[̀-ͯ҃-҉᪰-᫿᷀-᷿⃐-⃿︠-︯]{8,}/
 
 // Nested-quantifier patterns that backtrack catastrophically: `(a+)+`, `(.*)*`,

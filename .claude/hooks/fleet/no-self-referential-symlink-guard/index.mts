@@ -46,7 +46,8 @@ import { lstatSync, readlinkSync } from 'node:fs'
 import path from 'node:path'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
-// oxlint-disable-next-line socket/prefer-async-spawn -- a PreToolUse guard returns its verdict synchronously; git must answer inline.
+// A PreToolUse guard returns its verdict synchronously; git must answer inline.
+// oxlint-disable-next-line socket/prefer-async-spawn -- a PreToolUse guard
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { extractGitCwd } from '../_shared/git-cwd.mts'

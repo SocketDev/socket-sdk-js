@@ -122,12 +122,12 @@
     {
       "name": "socket-vscode",
       "description": "VS Code extension for socket.dev",
-      "publishes": ["custom"]
+      "publishes": ["vscode-extension"]
     },
     {
       "name": "socket-webext",
       "description": "Browser extension for socket.dev",
-      "publishes": ["custom"]
+      "publishes": ["browser-extension"]
     },
     {
       "name": "socket-wheelhouse",

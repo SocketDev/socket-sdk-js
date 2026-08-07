@@ -247,8 +247,7 @@ html[data-theme='light'] .modal-backdrop,
   background: rgba(180, 170, 200, 0.35);
 }
 
-html[data-theme='dark'] .modal-backdrop,
-html[data-theme='synthwave'] .modal-backdrop {
+html[data-theme='dark'] .modal-backdrop {
   background: rgba(15, 5, 30, 0.5);
 }
 

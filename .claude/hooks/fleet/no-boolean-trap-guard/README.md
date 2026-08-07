@@ -1,7 +1,7 @@
 # no-boolean-trap-guard
 
 PreToolUse Write/Edit guard that blocks introducing a boolean positional
-parameter in a TypeScript function signature — the
+parameter in a TypeScript function signature - the
 [boolean-trap](https://ariya.io/2011/08/hall-of-api-shame-boolean-trap)
 antipattern.
 
@@ -35,7 +35,7 @@ options param `?: TypedOptions | undefined`; body resolves via the
 
 ## Allowed
 
-- A function with a **single** boolean param and no other params —
+- A function with a **single** boolean param and no other params -
   predicate pattern (`isEnabled(value: boolean)`).
 - `boolean` fields inside an interface body (not params).
 - Generated / dist / build files.

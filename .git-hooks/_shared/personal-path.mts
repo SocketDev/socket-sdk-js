@@ -23,21 +23,19 @@ export const PERSONAL_PATH_PLACEHOLDER_RE =
   /(?:\/Users\/<[^>]*>\/|\/home\/<[^>]*>\/|C:\\Users\\<[^>]*>\\|\/Users\/\$\{?[A-Z_]+\}?\/|\/home\/\$\{?[A-Z_]+\}?\/)/
 
 // Well-known CI / system home dirs whose "username" is a service account, not a
-// oxlint-disable-next-line socket/personal-path-placeholders -- `runner` is a known CI service account, not a personal leak.
-// person — so `/home/runner/...` (GitHub Actions), `/home/ubuntu/...` etc. are
-// oxlint-disable-next-line socket/personal-path-placeholders -- `runner` is a known CI service account, not a personal leak.
-// not personal leaks. gh-aw's compiled `.lock.yml` emits `/home/runner/work/...`
-// tool-cache mounts; those are correct, not a leak. Matched as the path's
-// username segment only.
+// person, so the GitHub Actions and Ubuntu CI homes below are not personal
+// leaks. gh-aw's compiled `.lock.yml` emits tool-cache mounts under the runner
+// home; those are correct, not a leak. Matched as the path's username segment
+// only.
+// oxlint-disable-next-line socket/personal-path-placeholders -- `runner` is CI
 export const KNOWN_NON_PERSONAL_PATH_RE =
   /(?:\/Users\/(?:runner)\/|\/home\/(?:circleci|runner|ubuntu|vscode|vsts)\/)/
 
 // True when a line is a PURE placeholder: it matches the placeholder shape AND
 // nothing real remains after stripping every placeholder. Such lines are
 // documentation, so the scanners skip them. A line whose only "personal" paths
-// oxlint-disable-next-line socket/personal-path-placeholders -- `runner` is a known CI service account, not a personal leak.
-// are well-known CI/system homes (e.g. /home/runner/) is also pure — those
-// usernames are service accounts, not people.
+// are well-known CI/system homes (e.g. `/home/<user>/` for a CI service
+// account) is also pure, because those usernames are not people.
 export function isPurePlaceholder(line: string): boolean {
   const hasPlaceholder = PERSONAL_PATH_PLACEHOLDER_RE.test(line)
   const hasCiHome = KNOWN_NON_PERSONAL_PATH_RE.test(line)

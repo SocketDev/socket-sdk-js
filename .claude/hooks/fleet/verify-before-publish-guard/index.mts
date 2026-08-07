@@ -88,7 +88,8 @@ const PROSE_VALUE_FLAGS: ReadonlySet<string> = new Set([
   '-m',
 ])
 // The inline `--flag=value` forms of the same prose flags.
-// socket-lint: allow uncommented-regex
+// Shape described above.
+// oxlint-disable-next-line socket/require-regex-comment -- shape described
 const PROSE_INLINE_FLAG_RE = /^--(?:body|message|notes|title)=/
 
 // How many prior assistant turns to scan for a registry-read receipt.

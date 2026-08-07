@@ -50,7 +50,7 @@
 
 **After:**
 
-> "Speed, quality, cost—pick two."
+> "Speed, quality, cost-pick two."
 
 **Changes:** Single sentence. No performative emphasis.
 

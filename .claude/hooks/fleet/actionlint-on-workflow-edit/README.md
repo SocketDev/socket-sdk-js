@@ -2,11 +2,11 @@
 
 PostToolUse Edit/Write hook that runs local `actionlint` against any
 `.github/workflows/*.y*ml` file after the edit. Reports any actionlint
-errors via stderr; never blocks — the edit already landed.
+errors via stderr; never blocks - the edit already landed.
 
 ## Why
 
-GitHub Actions' YAML parser fails silently — a malformed workflow shows
+GitHub Actions' YAML parser fails silently - a malformed workflow shows
 "0 jobs" on the next push with no error in the UI. `actionlint` catches
 the same YAML / shell / SHA-pin issues locally, instantly. The fleet
 already has actionlint installed on dev machines (homebrew default

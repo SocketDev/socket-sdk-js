@@ -1,8 +1,8 @@
 # no-tsx-guard
 
-**Type:** PreToolUse guard (Bash) — BLOCKS (exit 2).
+**Type:** PreToolUse guard (Bash) - BLOCKS (exit 2).
 
-**Trigger:** a Bash command that runs `tsx` or `ts-node` — either as the
+**Trigger:** a Bash command that runs `tsx` or `ts-node` - either as the
 binary (`tsx foo.mts`, `tsx watch`, `ts-node script.ts`) or as a Node
 loader (`node --import tsx`, `node --loader tsx`, `node --require
 ts-node/register`, `node --experimental-loader tsx`, glued `=` forms

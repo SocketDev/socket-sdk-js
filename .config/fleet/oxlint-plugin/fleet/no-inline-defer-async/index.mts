@@ -21,11 +21,6 @@ import type { AstNode, RuleContext, RuleFixer } from '../../lib/rule-types.mts'
 
 const SCRIPT_OPENER_RE = /<script\b(?<attrs>[^>]*)>/gi
 
-// socket-lint: allow inline-defer -- opt-out for a string that contains a
-// `<script ...>` snippet as DATA (e.g. a hook's own diagnostic text describing
-// the banned shape), not as real inline-script markup.
-const BYPASS_RE = /socket-lint:\s*allow\s+inline-defer/
-
 interface Match {
   /**
    * Full matched `<script ...>` opener.
@@ -92,7 +87,10 @@ const rule = {
     const sourceCode = context.getSourceCode
       ? context.getSourceCode()
       : context.sourceCode
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-inline-defer-async',
+    )
 
     function checkLiteralText(
       node: AstNode,
@@ -177,5 +175,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

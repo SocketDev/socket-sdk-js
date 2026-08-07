@@ -1,6 +1,6 @@
 # cascade-first-triage-nudge
 
-**Type:** Stop hook (soft reminder — never blocks).
+**Type:** Stop hook (soft reminder - never blocks).
 
 ## Trigger
 
@@ -20,14 +20,14 @@ wheelhouse" / "incomplete cascade").
 
 Member repos hold byte-copies of wheelhouse-canonical content. A missing or
 unregistered canonical artifact in a member is almost always an **incomplete
-cascade** — the cascade skips a fleet dir whose template source is git-dirty —
+cascade** - the cascade skips a fleet dir whose template source is git-dirty -
 not a real bug. Debugging or hand-patching the member's copy wastes cycles on
-code you don't own there — the fix lives upstream in the wheelhouse template,
+code you don't own there - the fix lives upstream in the wheelhouse template,
 and re-cascading propagates it.
 
 ## Bypass
 
-None — it's a non-blocking reminder. Acknowledge the cascade-first path (or
+None - it's a non-blocking reminder. Acknowledge the cascade-first path (or
 genuinely confirm the artifact is absent from the wheelhouse too) and it stays
 quiet.
 

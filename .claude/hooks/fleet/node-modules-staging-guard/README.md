@@ -26,7 +26,7 @@ Committing the dir is never the right answer.
 | `git add -f .claude/hooks/foo/package-lock.json`                   | yes    |
 | `git add -f some-other-gitignored-file`                            | no     |
 | `git add .claude/hooks/foo/index.mts` (no `-f`)                    | no     |
-| `git add node_modules/...` (no `-f` — gitignore catches it anyway) | no     |
+| `git add node_modules/...` (no `-f` - gitignore catches it anyway) | no     |
 
 ## Bypass
 

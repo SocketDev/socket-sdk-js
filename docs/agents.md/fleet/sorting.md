@@ -34,7 +34,7 @@ These are the exact semantics every `socket/sort-*` lint rule uses.
   module scope (and inside `export const` / `export default`) sort
   alphanumerically. Exception: `__proto__: null` always comes first, ahead of
   any data key. Object literals that are position-bearing (HTTP header order,
-  protocol field order) opt out with `// socket-lint: allow object-property-order`.
+  protocol field order) opt out with `// oxlint-disable-next-line socket/sort-object-literal-properties`.
   Enforced by `socket/sort-object-literal-properties`.
 - **Method / function placement**: within a module, sort top-level functions
   alphabetically. Private functions (lowercase / un-exported) sort first,
@@ -61,7 +61,7 @@ These are the exact semantics every `socket/sort-*` lint rule uses.
   Capturing, non-capturing, and named-capture groups all follow the rule.
   Auto-fixable when every alternative is a simple literal. Order-bearing
   alternations (rare; markup parsers where `<!--|-->` would silently mismatch if
-  reordered) add `// socket-lint: allow regex-alternation-order` on its own line
+  reordered) add `// oxlint-disable-next-line socket/sort-regex-alternations` on its own line
 above. Enforced by
   `socket/sort-regex-alternations`.
 - **String-equality disjunctions**: `x === 'a' || x === 'b' || x === 'c'` reads

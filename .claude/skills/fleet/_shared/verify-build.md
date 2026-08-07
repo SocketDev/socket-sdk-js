@@ -6,9 +6,9 @@ Shared build/test/lint validation. Referenced by skills that modify code or depe
 
 Run in order, stop on first failure:
 
-1. `pnpm run fix --all` — auto-fix lint and formatting issues
-2. `pnpm run check --all` — lint + typecheck + validation (read-only, fails on violations)
-3. `pnpm test` — full test suite
+1. `pnpm run fix --all` - auto-fix lint and formatting issues
+2. `pnpm run check --all` - lint + typecheck + validation (read-only, fails on violations)
+3. `pnpm test` - full test suite
 
 ## CI Mode
 

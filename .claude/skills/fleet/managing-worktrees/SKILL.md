@@ -50,7 +50,7 @@ If `$TASK_NAME` collides with an existing branch, fail with the conflict. Never 
 For each open PR on the current GitHub repo, ensure a worktree exists at `../<repo>-pr-<num>/`. Idempotent: skip PRs whose worktree already exists.
 
 <details>
-<summary><b>Detail</b> — `gh auth`, `REPO_NAME=$(basename`, `gh pr`</summary>
+<summary><b>Detail</b> - `gh auth`, `REPO_NAME=$(basename`, `gh pr`</summary>
 
 ```bash
 gh auth status >/dev/null  # fail loudly if not authenticated
@@ -82,7 +82,7 @@ This is the multi-Claude review setup: each open PR gets its own checkout so a p
 
 Remove a worktree when its **working tree is clean** AND it has **nothing left to land**. "Nothing to land" means the branch is **fully merged into the remote's default branch** (every commit is already an ancestor of `origin/<base>`), OR the branch is **100% landed** (each ahead commit is content-equivalent to the base: its work arrived via a squash-merge, auto-land, or rebase, proven per commit with in-memory `git merge-tree`, so a history squash can't hide it), OR the **branch no longer exists on the remote AND the worktree is not ahead of the base**. A worktree **ahead of the base with content the base lacks** is kept, because a local-only branch never pushed (e.g. an isolation worktree) reads as "branch gone from remote" yet carries unpushed work that pruning would destroy. That holds even when its branch is gone from the remote.
 
-This is the same removability predicate (`decideWorktree`) the fleet-wide `tidying-worktrees` sweep applies — Mode 3 is the single-repo entry to that one engine, so it inherits the load-bearing `aheadOfBase` guard rather than re-deriving a weaker check in shell.
+This is the same removability predicate (`decideWorktree`) the fleet-wide `tidying-worktrees` sweep applies - Mode 3 is the single-repo entry to that one engine, so it inherits the load-bearing `aheadOfBase` guard rather than re-deriving a weaker check in shell.
 
 ```bash
 # Dry-run (default): report what WOULD be pruned in the CURRENT checkout.
@@ -92,7 +92,7 @@ node .claude/skills/fleet/tidying-worktrees/lib/tidy-worktrees.mts --here
 node .claude/skills/fleet/tidying-worktrees/lib/tidy-worktrees.mts --here --fix
 ```
 
-`--here` resolves the current checkout's git toplevel (not a `$PROJECTS` sibling) and runs the engine against only that repo. The engine never discards work: a dirty tree is kept, a worktree ahead of the base is kept, and removal uses the clean-tree-gated `--force` only to clear the submodule-worktree guard. After pruning, `pnpm i` in the primary checkout — a `git worktree remove` can dangle the main checkout's `node_modules` symlinks (per the _Don't leave the worktree dirty_ rule); the engine prints that reminder.
+`--here` resolves the current checkout's git toplevel (not a `$PROJECTS` sibling) and runs the engine against only that repo. The engine never discards work: a dirty tree is kept, a worktree ahead of the base is kept, and removal uses the clean-tree-gated `--force` only to clear the submodule-worktree guard. After pruning, `pnpm i` in the primary checkout - a `git worktree remove` can dangle the main checkout's `node_modules` symlinks (per the _Don't leave the worktree dirty_ rule); the engine prints that reminder.
 
 ### Mode 4: `land`
 
@@ -115,16 +115,16 @@ node .claude/skills/fleet/managing-worktrees/lib/land.mts <sha-a> <sha-b> --push
 node .claude/skills/fleet/managing-worktrees/lib/land.mts --last 2 --push --local
 ```
 
-The cherry-pick runs per commit with an outcome table: a content-equivalent commit (already landed via a squash-merge or auto-land — the headline scenario) is DROPPED as `skipped-already-landed`, and only a real conflict aborts. To see per-commit landed/unlanded/superseded verdicts for every worktree before landing anything, run the read-only audit: `node .claude/skills/fleet/tidying-worktrees/lib/tidy-worktrees.mts --audit`.
+The cherry-pick runs per commit with an outcome table: a content-equivalent commit (already landed via a squash-merge or auto-land - the headline scenario) is DROPPED as `skipped-already-landed`, and only a real conflict aborts. To see per-commit landed/unlanded/superseded verdicts for every worktree before landing anything, run the read-only audit: `node .claude/skills/fleet/tidying-worktrees/lib/tidy-worktrees.mts --audit`.
 
-The lint re-assert is the contract: a clean diff lands instantly; a lint failure ABORTS; the lint-as-edit contract was bypassed → `pnpm run fix` + re-commit. Only pass `--no-verify-lint` when the checkout genuinely can't run oxlint (no `node_modules`) AND you know the diff was lint-clean at edit time. The throwaway worktree + branch are cleaned up automatically; the `git push --no-verify` is deliberate — the diff is lint-verified above, and a fresh worktree's hooks can't load the lib.
+The lint re-assert is the contract: a clean diff lands instantly; a lint failure ABORTS; the lint-as-edit contract was bypassed → `pnpm run fix` + re-commit. Only pass `--no-verify-lint` when the checkout genuinely can't run oxlint (no `node_modules`) AND you know the diff was lint-clean at edit time. The throwaway worktree + branch are cleaned up automatically; the `git push --no-verify` is deliberate - the diff is lint-verified above, and a fresh worktree's hooks can't load the lib.
 
 ## Safety contract
 
 This skill respects four CLAUDE.md rules:
 
 1. **Parallel Claude sessions**: only ever creates new worktrees; never `checkout`-s an existing one.
-2. **Don't leave the worktree dirty**: refuses to `prune` a dirty tree OR one ahead of the base with unpushed commits — Mode 3 delegates the decision to the shared `decideWorktree` predicate, so the guard can't drift.
+2. **Don't leave the worktree dirty**: refuses to `prune` a dirty tree OR one ahead of the base with unpushed commits - Mode 3 delegates the decision to the shared `decideWorktree` predicate, so the guard can't drift.
 3. **Public-surface hygiene**: task names must not contain customer / company / internal-tool names. The skill does no redaction; the user picks a clean name.
 4. **Default branch fallback**: every base-branch lookup follows the `main → master → assume main` chain via `git symbolic-ref refs/remotes/origin/HEAD`. Never hard-code one or the other.
 

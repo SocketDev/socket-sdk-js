@@ -4,7 +4,7 @@
 
 import { SOCKET_PUBLIC_API_KEY } from '@socketsecurity/lib-stable/constants/socket'
 
-import { scanLines } from './scan-core.mts'
+import { lineIsSuppressed, scanLines } from './scan-core.mts'
 // Personal-path matcher lives in the gate-free _shared/personal-path.mts so the
 // edit-time personal-path-guard shares THIS code, was a lock-step inline copy.
 import {
@@ -52,18 +52,22 @@ export const SOCKET_SECURITY_ENV = SOCKET_TOKEN_ENV_NAMES[0]!
 // token we deliberately ship). Used by scanners to drop allowlisted
 // hits without losing each hit's original lineNumber.
 //
-// Previous version allowlisted any line containing the bare substring
-// '.example' — too broad. Real keys on lines that mention `.example`
-// anywhere (TLD, paths, prose like "see .example below") were silently
-// allowlisted. Now we require either an explicit per-line marker or
-// the canonical fixture filename pattern `.env.example`.
-const SOCKET_API_KEY_ALLOW_MARKER = 'socket-lint: allow socket-api-key'
+// The `.env.example` requirement is deliberate: allowlisting any line
+// containing the bare substring '.example' was too broad, because real keys
+// on lines that mention `.example` anywhere - a TLD, a path, prose like
+// "see .example below" - were silently allowlisted.
+//
+// The per-line waiver goes through the shared matcher instead of a
+// hard-coded spelling: a TRAILING marker on the offending line is
+// `oxlint-disable-line socket/socket-api-token-env`, own-line semantics,
+// and hard-coding one spelling as a substring is exactly how a scanner
+// and the linter drift apart.
 const isAllowedApiKey = (line: string): boolean =>
   line.includes(SOCKET_PUBLIC_API_KEY) ||
   line.includes(FAKE_TOKEN_MARKER) ||
   line.includes(FAKE_TOKEN_LEGACY) ||
   SOCKET_TOKEN_ENV_NAMES.some(name => line.includes(name)) ||
-  line.includes(SOCKET_API_KEY_ALLOW_MARKER) ||
+  lineIsSuppressed(line, 'socket-api-token-env') ||
   line.includes('.env.example')
 
 // Drops any line that matches an allowlist entry. Kept for callers

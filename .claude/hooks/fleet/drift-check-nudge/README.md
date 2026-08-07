@@ -10,7 +10,7 @@ Fleet repos drift fast when one repo bumps a shared resource and the others aren
 
 Assistant turn that:
 
-1. Mentions a drift surface — `external-tools.json`, `template/CLAUDE.md`, `template/.claude/hooks/`, `.github/actions/`, `lockstep.json`, `setup-and-install`, `cache-versions.json`, `.gitmodules`.
+1. Mentions a drift surface - `external-tools.json`, `template/CLAUDE.md`, `template/.claude/hooks/`, `.github/actions/`, `lockstep.json`, `setup-and-install`, `cache-versions.json`, `.gitmodules`.
 2. AND uses an edit verb (`updated`, `edited`, `bumped`, `added`, `removed`, `landed`, etc.).
 3. AND does NOT mention `cascade` / `sync` / `drift` / `fleet` / `other repos` / `downstream` / `chore(wheelhouse)` / `re-cascade`.
 

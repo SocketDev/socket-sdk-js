@@ -13,7 +13,7 @@ redesign a product without the [Designing Interfaces](../designing-interfaces/SK
 ## Workflow
 
 1. For a React shadcn app, run the deterministic shadscan audit first per
-   [shadscan-audit.md](references/shadscan-audit.md) — it produces the missing
+   [shadscan-audit.md](references/shadscan-audit.md) - it produces the missing
    UI fundamentals report from static evidence before anything renders.
 2. Capture the affected route and viewport(s) with
    [rendering-chromium-to-png](../rendering-chromium-to-png/SKILL.md).

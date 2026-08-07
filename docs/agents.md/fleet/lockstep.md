@@ -7,9 +7,9 @@ conformance, and sibling language ports. One manifest declares what must stay
 in step; `pnpm run lockstep` reports where it hasn't.
 
 Not to be confused with `scripts/repo/gen/bootstrap/src/lockstep.mts`, which enforces the
-thin-distribution bundle-pin invariant (`bundle.cascadeSha === templateSha`):
+fleet-pack-distribution bundle-pin invariant (`bundle.cascadeSha === templateSha`):
 same word, different subsystem (see
-[`thin-distribution.md`](thin-distribution.md)).
+[`fleet-pack-distribution.md`](fleet-pack-distribution.md)).
 
 ## The manifest
 

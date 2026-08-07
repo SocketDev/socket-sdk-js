@@ -8,14 +8,14 @@ metadata:
 
 # opening-pr
 
-Ship a change as a PR that actually **fixes the thing** AND **proves it** — a PR
+Ship a change as a PR that actually **fixes the thing** AND **proves it** - a PR
 without a test or a named verification path is not done. The sibling of
 `decomposing-tickets`: that one writes the work down, this one lands it.
 
 ## 1. Understand the target
 
 Read the issue / finding / request and the affected code. If it's a findings
-report, this is the `fix` agent's job — deterministic fixers first, AI-patch the
+report, this is the `fix` agent's job - deterministic fixers first, AI-patch the
 residue. If it's a feature or bug, drive it test-first with `building-tdd`.
 
 ## 2. Fix it
@@ -24,15 +24,15 @@ Apply the change. Deterministic fixers (`pnpm run fix` / `format` / the finding'
 named script) run before any hand patch ([`code-first-then-ai`](../../../rules/fleet/code-first-then-ai.md)).
 Smallest change that resolves the target; don't refactor unrelated code.
 
-## 3. Verify — the non-negotiable step
+## 3. Verify - the non-negotiable step
 
 The change MUST carry one of:
 
 - A **unit/integration test** at the correct seam that goes red without the fix and
-  green with it (the default — drive it via `building-tdd`; seam doctrine:
+  green with it (the default - drive it via `building-tdd`; seam doctrine:
   [`test-layout`](../../../../docs/agents.md/fleet/test-layout.md)), OR
 - A **named verification path** when a test genuinely can't reach it (a `pnpm`
-  command, a check script, a reproducible manual step) — stated explicitly in the
+  command, a check script, a reproducible manual step) - stated explicitly in the
   PR body, never "trust me".
 
 Run `pnpm run check` + `pnpm test <file>` and confirm green. No green verification,
@@ -50,17 +50,17 @@ real customer/company name, no private repo, no Linear ref, no bare `#N` (use
 Every `<details>` fold obeys the PR-body law
 ([`pr-body-law.mts`](../../../../scripts/fleet/_shared/pr-body-law.mts), whose
 `PR_BODY_LAW_PROMPT` carries the four rules verbatim for a subagent prompt):
-the `<summary>` carries the claim (bold noun phrase, em dash, specific finding —
+the `<summary>` carries the claim (bold noun phrase, em dash, specific finding -
 never `What changed`), the fold opens with its takeaway and supports it after,
 three or more parallel items become a table rather than a bullet run or a
 paragraph, and a status section uses labeled lines (**Ran** / **Did not run** /
 **Trade-off** / **CI is unaffected**). `prBodySmells(body)` reads a draft body
-and names the folds that miss — advisory, not a gate.
+and names the folds that miss - advisory, not a gate.
 
 ## 5. Open it
 
 Commit on a branch, using a worktree if the primary checkout has other sessions,
-then push and run `gh pr create`. Opening a PR is outward-facing — confirm the base branch + that
+then push and run `gh pr create`. Opening a PR is outward-facing - confirm the base branch + that
 the diff is the intended scope first.
 
 ## Completion criterion

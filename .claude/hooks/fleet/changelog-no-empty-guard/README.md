@@ -14,7 +14,7 @@ The hook walks the post-edit content line by line. A `### <SectionName>` heading
 - A `## [` version heading
 - End of file
 
-Blank lines between the heading and the next heading don't count — only "no actual bullets in the section."
+Blank lines between the heading and the next heading don't count - only "no actual bullets in the section."
 
 ## Bypass
 

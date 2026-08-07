@@ -27,7 +27,7 @@ Type the canonical phrase in a new message:
 
     Allow codex-write bypass
 
-Use sparingly — the regression risk is real.
+Use sparingly - the regression risk is real.
 
 ## Wiring
 

@@ -1,6 +1,6 @@
 # Icons & Glyphs Guide
 
-In product UI, treat icons as typography — functional, not decorative.
+In product UI, treat icons as typography - functional, not decorative.
 
 ---
 
@@ -68,7 +68,7 @@ One language per product. No exceptions.
 
 ## Icon + Text Pairing
 
-Starting point — adjust based on visual testing:
+Starting point - adjust based on visual testing:
 
 | Text Size | Icon Size |
 |-----------|-----------|
@@ -84,9 +84,9 @@ Starting point — adjust based on visual testing:
 
 ## Color
 
-**Default:** `currentColor` — inherits text color, syncs with themes automatically.
+**Default:** `currentColor` - inherits text color, syncs with themes automatically.
 
-**Semantic:** Red (error), green (success), amber (warning) — only for status, never decoration.
+**Semantic:** Red (error), green (success), amber (warning) - only for status, never decoration.
 
 **Contrast:** Meaningful icons need **3:1 ratio** (WCAG non-text). Applies to icon buttons, toggles, status indicators.
 
@@ -163,4 +163,4 @@ Best when icons must match text weight dynamically.
 
 ---
 
-*Icons are typography. Consistent, optical, accessible. If it doesn't read instantly—simplify.*
+*Icons are typography. Consistent, optical, accessible. If it doesn't read instantly-simplify.*

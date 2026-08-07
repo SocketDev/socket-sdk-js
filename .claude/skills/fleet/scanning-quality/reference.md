@@ -49,7 +49,7 @@ Each scan spawns a general-purpose subagent. Customize the templates below per r
 **Prompt template:**
 
 <details>
-<summary><b>Critical-bug prompt</b> — patterns for null/undefined access, unhandled promises, race conditions, type coercion, resource leaks, and prototype pollution, plus the finding output format and quality guidelines</summary>
+<summary><b>Critical-bug prompt</b> - patterns for null/undefined access, unhandled promises, race conditions, type coercion, resource leaks, and prototype pollution, plus the finding output format and quality guidelines</summary>
 
 ```
 Your task is to perform a critical-bug scan on the codebase. Identify bugs that could cause crashes, data corruption, or security vulnerabilities.
@@ -152,7 +152,7 @@ Scan systematically and report all critical bugs found. If no critical bugs are 
 **Prompt template:**
 
 <details>
-<summary><b>Logic-error prompt</b> — patterns for off-by-one bounds, weak type guards, edge cases such as empty input and unvalidated <code>parseInt</code>, and algorithm correctness in parsing, semver, paths, and dedup</summary>
+<summary><b>Logic-error prompt</b> - patterns for off-by-one bounds, weak type guards, edge cases such as empty input and unvalidated <code>parseInt</code>, and algorithm correctness in parsing, semver, paths, and dedup</summary>
 
 ```
 Your task is to detect logic errors in the codebase that could produce incorrect output. Focus on algorithm correctness, edge case handling, and data validation.
@@ -240,7 +240,7 @@ Analyze systematically and report all logic errors found. If no errors are found
 **Prompt template:**
 
 <details>
-<summary><b>Caching prompt</b> — patterns for invalidation and version drift, cache-key sufficiency, corruption from partial writes, concurrency races on create/restore/cleanup, and edge cases such as empty files and oversize entries</summary>
+<summary><b>Caching prompt</b> - patterns for invalidation and version drift, cache-key sufficiency, corruption from partial writes, concurrency races on create/restore/cleanup, and edge cases such as empty files and oversize entries</summary>
 
 ```
 Your task is to analyze caching implementation for correctness, staleness bugs, and performance issues. Focus on cache corruption, invalidation failures, and race conditions.
@@ -330,7 +330,7 @@ Analyze the caching implementation thoroughly and report all issues found. If th
 **Prompt template:**
 
 <details>
-<summary><b>Workflow prompt</b> — patterns for cross-platform scripts, script error handling and exit codes, import conventions, <code>package.json</code> script chaining, git hooks, CI configuration, and the one-off package-runner anti-pattern</summary>
+<summary><b>Workflow prompt</b> - patterns for cross-platform scripts, script error handling and exit codes, import conventions, <code>package.json</code> script chaining, git hooks, CI configuration, and the one-off package-runner anti-pattern</summary>
 
 ```
 Your task is to identify issues in the project's development workflows, build scripts, and CI configuration that could cause build failures, test flakiness, or poor developer experience.
@@ -435,7 +435,7 @@ Analyze workflow files systematically and report all issues found. If workflows 
 **Prompt template:**
 
 <details>
-<summary><b>zizmor prompt</b> — how to run and parse <code>zizmor .github/workflows/</code>, plus the template-injection, cache-poisoning, and credential-exposure patterns and the finding output format</summary>
+<summary><b>zizmor prompt</b> - how to run and parse <code>zizmor .github/workflows/</code>, plus the template-injection, cache-poisoning, and credential-exposure patterns and the finding output format</summary>
 
 ```
 Your task is to run zizmor on GitHub Actions workflows to identify template injection, cache poisoning, and other workflow security issues.
@@ -509,7 +509,7 @@ For a deeper workflow security pass (AgentShield + zizmor + grading), invoke the
 **Prompt template:**
 
 <details>
-<summary><b>Documentation prompt</b> — the verify-against-code procedure plus patterns for package names, command examples, file paths, API docs, configuration, version information, and missing documentation</summary>
+<summary><b>Documentation prompt</b> - the verify-against-code procedure plus patterns for package names, command examples, file paths, API docs, configuration, version information, and missing documentation</summary>
 
 ```
 Your task is to verify documentation accuracy by comparing documented behavior, examples, commands, and API descriptions against the actual codebase.
@@ -636,12 +636,12 @@ Impact: [Why this matters]
 
 ## Scan priority order
 
-1. **critical** — most important, run first
-2. **logic** — correctness
-3. **cache** — staleness / correctness (skip if no caching)
-4. **workflow** — developer experience
-5. **security** — workflow-level security
-6. **documentation** — accuracy
+1. **critical** - most important, run first
+2. **logic** - correctness
+3. **cache** - staleness / correctness (skip if no caching)
+4. **workflow** - developer experience
+5. **security** - workflow-level security
+6. **documentation** - accuracy
 
 ---
 
@@ -652,7 +652,7 @@ Impact: [Why this matters]
 Use this format for the Phase 8 report:
 
 <details>
-<summary><b>Report skeleton</b> — the full Phase 8 markdown: header counts, dependency updates, structural validation, the four severity sections, scan coverage, and recommendations</summary>
+<summary><b>Report skeleton</b> - the full Phase 8 markdown: header counts, dependency updates, structural validation, the four severity sections, scan coverage, and recommendations</summary>
 
 ```markdown
 # Quality Scan Report
@@ -768,7 +768,7 @@ The user can request specific scan types. Report only includes requested scan ty
 Report these final metrics when Phase 9 completes:
 
 <details>
-<summary><b>Completion block</b> — the printout: dependency updates, structural validation, cleanup, scans completed, findings by severity, files scanned, duration, then critical issues and next steps</summary>
+<summary><b>Completion block</b> - the printout: dependency updates, structural validation, cleanup, scans completed, findings by severity, files scanned, duration, then critical issues and next steps</summary>
 
 ```
 Quality Scan Complete

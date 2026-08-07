@@ -1,7 +1,7 @@
 /*
  * @file Tell a real opt-out marker from a MENTION of one.
  *
- *   `// socket-lint: allow console` in a comment is a marker. The same text
+ *   `// oxlint-disable-next-line socket/no-console-prefer-logger` in a comment is a marker. The same text
  *   inside a string literal is documentation — a guard's help text, a rule's
  *   error message, a doc example. A regex cannot separate them, and that one
  *   confusion has now broken three separate efforts:

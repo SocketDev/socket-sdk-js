@@ -62,7 +62,9 @@ const LOGGER_METHODS = new Set([
   'warn',
 ])
 
-/* oxlint-disable socket/no-status-emoji -- this rule defines the emoji→method table it scans for. */
+// This rule defines the emoji→method table it scans for.
+
+/* oxlint-disable socket/no-status-emoji -- emoji table data */
 // Mirrors @socketsecurity/lib-stable/logger/default's LOG_SYMBOLS (built by
 // `symbols-builder.ts`). Each method has a Unicode form + an ASCII
 // fallback, plus variants authors commonly hand-type:
@@ -257,10 +259,14 @@ const rule = {
      */
     function quoteString(value: string): string {
       if (!value.includes("'")) {
-        // oxlint-disable-next-line socket/prefer-normalize-path -- escaping backslashes in string output, not normalizing a path separator
+        // Escaping backslashes in string output, not normalizing a path
+        // separator.
+        // oxlint-disable-next-line socket/prefer-normalize-path -- escaping
         return `'${value.replace(/\\/g, '\\\\').replace(/\n/g, '\\n')}'`
       }
-      // oxlint-disable-next-line socket/prefer-normalize-path -- escaping backslashes in string output, not normalizing a path separator
+      // Escaping backslashes in string output, not normalizing a path
+      // separator.
+      // oxlint-disable-next-line socket/prefer-normalize-path -- escaping
       return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`
     }
 
@@ -551,5 +557,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

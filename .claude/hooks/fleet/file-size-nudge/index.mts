@@ -52,7 +52,8 @@ const FILE_WRITING_TOOLS = new Set(['Edit', 'NotebookEdit', 'Write'])
 // would noise up every turn that touches a vendored file.
 const SKIP_PATH_SUBSTRINGS: readonly string[] = [
   '/node_modules/',
-  // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- repo-root `.cache/` exemption, distinct from .cache
+  // Repo-root `.cache/` exemption, distinct from .cache.
+  // oxlint-disable-next-line socket/prefer-repo-root-dot-cache -- repo-root
   '/.cache/',
   '/coverage/',
   '/coverage-isolated/',

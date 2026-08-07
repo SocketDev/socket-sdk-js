@@ -36,9 +36,9 @@ import {
   scanSocketApiKeys,
   shouldSkipFile,
   shouldSkipSourceScan,
-  socketLintMarkerFor,
   stagedIndexIsEmpty,
   stripTemplateLayer,
+  suppressionFor,
 } from '../_shared/helpers.mts'
 
 const logger = getDefaultLogger()
@@ -244,7 +244,7 @@ const main = (): number => {
           '`/Users/<user>/...` (macOS), `/home/<user>/...` (Linux), or ' +
           '`C:\\Users\\<USERNAME>\\...` (Windows). Env vars also work ' +
           '(`$HOME`, `${USER}`). For documentation lines that need the ' +
-          `literal form, append the marker \`${socketLintMarkerFor(file, 'personal-path')}\`.`,
+          `literal form, append the marker \`${suppressionFor(file, 'personal-path')}\`.`,
       )
       errors++
     }
@@ -420,7 +420,7 @@ const main = (): number => {
       logger.info(
         "Use 'pnpm exec <package>' or 'pnpm run <script>' instead. For " +
           'documentation lines that need the literal `npx` form, append ' +
-          `the marker \`${socketLintMarkerFor(file, 'npx')}\`.`,
+          `the marker \`${suppressionFor(file, 'npx')}\`.`,
       )
       errors++
     }
@@ -431,7 +431,7 @@ const main = (): number => {
   // Fleet rule: user-facing install commands in docs lead with the
   // pnpm form. npm/yarn fallbacks come after. Block-only — inline
   // backtick spans are not scanned. Suppress per-block with
-  // `socket-lint: allow pnpm-first`.
+  // `oxlint-disable-next-line socket/docs-lead-with-pnpm`.
   logger.info('Checking docs lead with pnpm install commands…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
@@ -528,7 +528,7 @@ const main = (): number => {
       logger.info(
         'Use `getDefaultLogger()` from `@socketsecurity/lib-stable/logger/default`. ' +
           'For documentation lines that need the literal call, append ' +
-          `the marker \`${socketLintMarkerFor(file, 'logger')}\`.`,
+          `the marker \`${suppressionFor(file, 'logger')}\`.`,
       )
       errors++
     }
@@ -580,7 +580,7 @@ const main = (): number => {
           'are forbidden — they assume sibling-clone layout and break in CI / fresh clones. ' +
           'Import via the published npm package instead (`@socketsecurity/lib-stable/<subpath>`, ' +
           `\`@socketsecurity/registry-stable/<subpath>\`). For documentation lines that need the ` +
-          `literal path, append the marker \`${socketLintMarkerFor(file, 'cross-repo')}\`.`,
+          `literal path, append the marker \`${suppressionFor(file, 'cross-repo')}\`.`,
       )
       errors++
     }
@@ -603,7 +603,7 @@ const main = (): number => {
   // citation. The exemption is the one file-scan.mts already documents:
   // markdown, docs, JSON, and YAML reference these patterns legitimately.
   // shouldSkipFile still exempts tests/fixtures. Per-line opt-out:
-  // `// socket-lint: allow pr-process-comment`.
+  // `// oxlint-disable-next-line socket/no-pr-process-comment`.
   logger.info('Checking comments for PR-process / step-N references…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
@@ -628,7 +628,7 @@ const main = (): number => {
           'perf-"quest" sequence markers and process-framed PR/issue refs ' +
           '(`(#1234)`, `[#5638]`, `PR #88`, `added in #41`) — process belongs in ' +
           'the PR description and git history. For a rare legitimate reference, ' +
-          `append the marker \`${socketLintMarkerFor(file, 'pr-process-comment')}\`.`,
+          `append the marker \`${suppressionFor(file, 'pr-process-comment')}\`.`,
       )
       errors++
     }

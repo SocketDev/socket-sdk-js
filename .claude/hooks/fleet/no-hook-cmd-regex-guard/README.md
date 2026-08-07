@@ -19,7 +19,7 @@ edit away from a guard that's bypassable or over-broad.
 A regex literal whose body names a shell binary (`git`, `gh`, `npm`,
 `pnpm`, `yarn`, `npx`, `node`, `docker`, `cargo`, `pip`, `uv`,
 `taskkill`) adjacent to a whitespace/boundary metachar (`\b`, `\s`,
-` +`, `^`, `|`) — the signature of matching a command line:
+` +`, `^`, `|`) - the signature of matching a command line:
 
 ```
 /\bgit\s+push\b/        ✗  → commandsFor(cmd, 'git').some(c => c.args.includes('push'))
@@ -29,11 +29,11 @@ A regex literal whose body names a shell binary (`git`, `gh`, `npm`,
 
 ## What it does NOT flag
 
-- A binary name without a boundary metachar (`/gitignore/` — a path).
+- A binary name without a boundary metachar (`/gitignore/` - a path).
 - Non-command regexes (version strings, paths, prose).
 - Files outside `.claude/hooks/`.
 - This guard's own source + tests (they discuss the banned shape).
-- The regex genuinely matches tool **stdout**, not a command line —
+- The regex genuinely matches tool **stdout**, not a command line -
   bypass with `Allow command-regex bypass`.
 
 ## Note

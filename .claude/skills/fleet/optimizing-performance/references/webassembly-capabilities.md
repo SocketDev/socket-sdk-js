@@ -9,7 +9,7 @@ when a measured workload benefits. Feature tables change faster than deployed ru
 1. Build a portable baseline (bulk memory/SIMD only where the support policy allows).
 2. Compile each feature variant with the intended toolchain and flags.
 3. At install/CI time, validate and instantiate the actual bytes on the supported Node,
-   browser, and embedding versions—not merely `typeof WebAssembly`.
+   browser, and embedding versions-not merely `typeof WebAssembly`.
 4. Choose a variant through a small probe, cache the outcome, and retain the baseline
    fallback. Test feature and fallback paths for identical results.
 

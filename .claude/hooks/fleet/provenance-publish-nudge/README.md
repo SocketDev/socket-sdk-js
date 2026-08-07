@@ -25,7 +25,7 @@ For the resolved name@version:
 4. Otherwise: warn to stderr listing the missing signals and pointing
    at `scripts/fleet/check/provenance-is-attested.mts` for follow-up.
 
-The hook never fails the turn — Stop hooks shouldn't gate. The warning
+The hook never fails the turn - Stop hooks shouldn't gate. The warning
 surfaces; the operator decides what to do.
 
 ## State
@@ -36,7 +36,7 @@ Bumping the version resets the throttle (different stateKey).
 
 ## Bypass
 
-No bypass — it's a reminder (exit 0), not a block. A 404 (release in
+No bypass - it's a reminder (exit 0), not a block. A 404 (release in
 flight) or both trust signals present already keeps it silent.
 
 ## Why this exists

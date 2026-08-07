@@ -2,7 +2,7 @@
 
 `PreToolUse(Bash)` reminder hook. Fires when a `git revert <ref>` command targets a commit that's still local-only (not yet on `origin/<current-branch>`).
 
-For unpushed commits, `git reset --soft HEAD~N` or `git rebase -i HEAD~N` cleanly drops the commit. A revert commit just adds a noisy `Revert "..."` entry to local history that gets pushed along with everything else. Revert commits are the right call **only** when the change is already on the remote — you can't rewrite shared history there.
+For unpushed commits, `git reset --soft HEAD~N` or `git rebase -i HEAD~N` cleanly drops the commit. A revert commit just adds a noisy `Revert "..."` entry to local history that gets pushed along with everything else. Revert commits are the right call **only** when the change is already on the remote - you can't rewrite shared history there.
 
 ## Behavior
 
@@ -18,7 +18,7 @@ For unpushed commits, `git reset --soft HEAD~N` or `git rebase -i HEAD~N` cleanl
 - `tool_name !== 'Bash'`.
 - Command doesn't contain `git revert` outside quoted strings.
 - Command has `--no-commit` or `--no-edit` (advanced workflows).
-- Target ref can't be resolved (defensive — never false-positive on weird shapes).
+- Target ref can't be resolved (defensive - never false-positive on weird shapes).
 
 ## Why a reminder, not a block
 

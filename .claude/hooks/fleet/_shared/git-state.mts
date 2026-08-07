@@ -7,7 +7,9 @@
  *   source of truth so the two paths can't drift.
  */
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- hook + sync runner need sync stdin/stdout + typed string return; v5 lib spawnSync omits 'encoding'.
+// Hook + sync runner need sync stdin/stdout + typed string return; v5 lib
+// spawnSync omits 'encoding'.
+// oxlint-disable-next-line socket/prefer-async-spawn -- hook + sync runner
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { existsSync } from 'node:fs'
 import path from 'node:path'

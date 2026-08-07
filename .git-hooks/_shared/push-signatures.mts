@@ -51,7 +51,7 @@ export const readAllowedSignerKeys = (): Set<string> => {
       return out
     }
     const expanded = file.startsWith('~')
-      ? file.replace(/^~/, process.env['HOME'] ?? '')
+      ? file.replace(/^~/, () => process.env['HOME'] ?? '')
       : file
     if (!existsSync(expanded)) {
       return out

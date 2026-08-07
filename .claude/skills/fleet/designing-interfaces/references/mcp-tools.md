@@ -22,7 +22,7 @@ visual polish.
 What results contain:
 
 <details>
-<summary><b>Detail</b> — the full list (14 entries)</summary>
+<summary><b>Detail</b> - the full list (14 entries)</summary>
 
 - style UUID
 - title
@@ -80,7 +80,7 @@ material.
 What results may include:
 
 <details>
-<summary><b>Detail</b> — the full table (3 rows)</summary>
+<summary><b>Detail</b> - the full table (3 rows)</summary>
 
 - visual thesis / north star
 - colors and usage roles
@@ -125,7 +125,7 @@ hierarchy, copy, states, and product-specific patterns.
 Parameters:
 
 <details>
-<summary><b>Detail</b> — the full table (3 rows)</summary>
+<summary><b>Detail</b> - the full table (3 rows)</summary>
 
 | Parameter | Type | Required | Notes |
 |-----------|------|----------|-------|

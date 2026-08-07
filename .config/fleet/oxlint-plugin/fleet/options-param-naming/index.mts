@@ -54,8 +54,6 @@ import { makeBypassChecker } from '../../lib/comment-markers.mts'
 
 import type { AstNode, RuleContext, RuleFixer } from '../../lib/rule-types.mts'
 
-const BYPASS_RE = /socket-lint:\s*allow\s+options-param-naming/
-
 const BANNED_PARAM_NAME = 'opts'
 const CANONICAL_PARAM_NAME = 'options'
 
@@ -184,15 +182,18 @@ const rule = {
     hasSuggestions: true,
     messages: {
       banned:
-        'name the options-bag param `options`, not `opts` — `opts` is reserved for the normalized local (`const opts = { __proto__: null, ...options }`). Bypass: add a `socket-lint: allow options-param-naming` comment.',
+        'name the options-bag param `options`, not `opts` — `opts` is reserved for the normalized local (`const opts = { __proto__: null, ...options }`). Bypass: add a `oxlint-disable-next-line socket/options-param-naming` comment.',
       bannedNoFix:
-        'name the options-bag param `options`, not `opts`, but a param named `options` already exists here — rename by hand to resolve the clash. Bypass: add a `socket-lint: allow options-param-naming` comment.',
+        'name the options-bag param `options`, not `opts`, but a param named `options` already exists here — rename by hand to resolve the clash. Bypass: add a `oxlint-disable-next-line socket/options-param-naming` comment.',
     },
     schema: [],
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/options-param-naming',
+    )
 
     // `.d.ts` mirrors external signatures; test files author throwaway helpers.
     // Neither is a production options reader the convention governs.
@@ -269,5 +270,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

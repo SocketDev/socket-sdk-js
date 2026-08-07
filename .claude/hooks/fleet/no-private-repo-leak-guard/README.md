@@ -8,7 +8,7 @@ repo. Enforcement twin of `private-name-nudge`, which only reminds.
 
 A review reply on a public PR walked through a private repo's internal file
 paths and queue configuration. `private-name-nudge` fired its reminder and
-the agent posted anyway — a nudge is attention priming, not enforcement.
+the agent posted anyway - a nudge is attention priming, not enforcement.
 Private repo names, internal paths, and architecture details on a public
 surface disclose infrastructure that is deliberately non-public. This guard
 makes the rule refuse the call instead of asking nicely.
@@ -27,10 +27,10 @@ On a `Bash` tool call the guard:
    GraphQL `repository(owner:…, name:…)` literals). If every resolved target
    is a private repo, the post is internal conversation and passes. A target
    that cannot be resolved, such as a GraphQL call addressed only by node id,
-   is treated as public — strict by default.
+   is treated as public - strict by default.
 
 <details>
-<summary><b>Steps 3 through 5</b> — the runtime-derived private-repo roster cached for 24h, the qualified plus bare two-tier match that decides a block, and failing closed when no roster loads</summary>
+<summary><b>Steps 3 through 5</b> - the runtime-derived private-repo roster cached for 24h, the qualified plus bare two-tier match that decides a block, and failing closed when no roster loads</summary>
 
 3. Loads the repo rosters for the trusted owners (the targets' owners and
    the cwd origin's owner) via `gh repo list <owner> --json name,visibility`,
@@ -47,7 +47,7 @@ On a `Bash` tool call the guard:
    the bare tier declines still blocks in qualified form.
 5. Fails CLOSED when no roster can be loaded: the post needs the network
    anyway, so a working `gh` is a fair precondition. A cached roster past
-   its TTL counts as absent — certifying prose against a day-old view of the
+   its TTL counts as absent - certifying prose against a day-old view of the
    org is the failure this guard exists to prevent.
 
 </details>
@@ -57,9 +57,9 @@ On a `Bash` tool call the guard:
 `index.mts` is the orchestrator only. The parts are split so each is
 testable on its own:
 
-- `outbound-prose.mts` — what the command publishes, and where it writes.
-- `roster.mts` — which repository names under an owner are private.
-- `leak-scan.mts` — the qualified and bare two-tier matcher.
+- `outbound-prose.mts` - what the command publishes, and where it writes.
+- `roster.mts` - which repository names under an owner are private.
+- `leak-scan.mts` - the qualified and bare two-tier matcher.
 
 Specs live at
 `test/repo/integration/hooks/no-private-repo-leak-guard.test.mts`.
@@ -67,7 +67,7 @@ Specs live at
 ## Fix
 
 Remove the private reference entirely. Describe the fact without naming the
-repo or its internal paths — "checked server-side", "our shared template".
+repo or its internal paths - "checked server-side", "our shared template".
 Do not substitute a placeholder that hints at the name.
 
 ## Bypass

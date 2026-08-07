@@ -21,14 +21,12 @@
  *      placement of the merge point that depends on the surrounding logic.
  *
  *   Report-only: the message names the spread-copy fix, and the author applies
- *   it with full context. Bypass: a `socket-lint: allow options-param-mutation`
+ *   it with full context. Bypass: a `oxlint-disable-next-line socket/no-options-param-mutation`
  *   comment on or above the assignment.
  */
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
-
-const BYPASS_RE = /socket-lint:\s*allow\s+options-param-mutation/
 
 const WATCHED_PARAM_NAMES = new Set(['options', 'opts'])
 
@@ -44,13 +42,16 @@ const rule = {
     fixable: undefined,
     messages: {
       mutated:
-        "`{{name}}.{{prop}}` is a direct write to the `{{name}}` param — the caller's object is mutated in place. Use a spread-copy local instead: `const merged = { ...{{name}}, {{prop}}: <value> }` (or the null-proto form per `options-null-proto`). Bypass: add a `socket-lint: allow options-param-mutation` comment.",
+        "`{{name}}.{{prop}}` is a direct write to the `{{name}}` param — the caller's object is mutated in place. Use a spread-copy local instead: `const merged = { ...{{name}}, {{prop}}: <value> }` (or the null-proto form per `options-null-proto`). Bypass: add a `oxlint-disable-next-line socket/no-options-param-mutation` comment.",
     },
     schema: [],
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-options-param-mutation',
+    )
 
     // Track which param names are options/opts in the current function scope.
     // Each frame also records locals that re-declare a watched name, so a
@@ -144,5 +145,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

@@ -24,12 +24,10 @@
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-import { makeBypassChecker } from '../../lib/comment-markers.mts'
+import { makeLineMatcher } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
 const FLAGGED_PROPERTIES = new Set(['SOCKET_API_KEY', 'SOCKET_API_TOKEN'])
-
-const BYPASS_RE = /socket-api-token-getter:\s*allow direct-env/
 
 export function isProcessEnv(node: AstNode): boolean {
   if (node.type !== 'MemberExpression') {
@@ -54,6 +52,13 @@ export function isProcessEnv(node: AstNode): boolean {
   }
   return true
 }
+
+// This rule's opt-out is its OWN marker family, spelled after the getter it
+// steers callers toward rather than `socket/<rule>`. It stays a regex reader:
+// the fleet suppression table covers `oxlint-disable`-shaped waivers, and
+// folding a differently-named marker into it would make one table describe two
+// grammars.
+const BYPASS_RE = /socket-api-token-getter:\s*allow direct-env/
 
 const rule = {
   meta: {
@@ -82,7 +87,7 @@ const rule = {
       return {}
     }
 
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeLineMatcher(context, BYPASS_RE)
 
     function reportName(node: AstNode, name: string) {
       if (hasBypassComment(node)) {
@@ -124,5 +129,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

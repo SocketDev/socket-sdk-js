@@ -15,7 +15,7 @@ so a stamped store stays stamped. Full rationale:
 ## Scope
 
 - Fires on `…/.claude/projects/<slug>/memory/<name>.md` only.
-- Skips the store's `MEMORY.md` index — it carries no frontmatter and states no
+- Skips the store's `MEMORY.md` index - it carries no frontmatter and states no
   rule.
 - Skips every markdown file outside a memory store.
 - Fails open when the payload carries no readable written text.
@@ -24,7 +24,7 @@ so a stamped store stays stamped. Full rationale:
 
 The guard asks one decidable question: is there a non-empty `enforcement:` key?
 It never judges whether the disposition names a real enforcer. That judgment is
-`uncodified-lesson-nudge`'s job — a Stop hook, non-blocking, which fires when a
+`uncodified-lesson-nudge`'s job - a Stop hook, non-blocking, which fires when a
 memory has an enforceable always/never/MUST shape but cites no enforcer. Two
 concerns, two surfaces; keep them separate.
 

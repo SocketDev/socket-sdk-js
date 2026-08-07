@@ -12,15 +12,15 @@ This file is referenced by `scanning-quality` (variant-analysis scan type), `sca
 
 For every confirmed finding, run three searches before closing it out:
 
-1. **Same file, different lines** — the antipattern often clusters within the file that exhibits it. Read the whole file, not just the diff.
-2. **Sibling files, same shape** — `rg`/`grep` for the same call, the same condition, the same data flow. If the bug was `if (foo == null)`, search for that exact shape.
-3. **Cross-package, same concept** — does another package own a parallel implementation? If `socket-cli` has the bug, does `socket-registry` have it too? Fleet drift loves to hide variants.
+1. **Same file, different lines** - the antipattern often clusters within the file that exhibits it. Read the whole file, not just the diff.
+2. **Sibling files, same shape** - `rg`/`grep` for the same call, the same condition, the same data flow. If the bug was `if (foo == null)`, search for that exact shape.
+3. **Cross-package, same concept** - does another package own a parallel implementation? If `socket-cli` has the bug, does `socket-registry` have it too? Fleet drift loves to hide variants.
 
 ## What counts as "the same shape"
 
 | Bug class          | What to search for                                                           |
 | ------------------ | ---------------------------------------------------------------------------- |
-| Missing null check | the call before the access — `foo.bar()` where `foo` could be undefined      |
+| Missing null check | the call before the access - `foo.bar()` where `foo` could be undefined      |
 | Race condition     | the lock primitive + the call sequence                                       |
 | Path construction  | literal `path.join('build', …)` outside the canonical `paths.mts`            |
 | Insecure default   | the option name, the boolean default, the env-var fallback                   |
@@ -44,7 +44,7 @@ Variants should be batched into the same fix commit when mechanical (one find/re
 ## Don't
 
 - Don't variant-hunt for style nits. Reserve this for correctness / security / fleet-drift findings.
-- Don't expand the search radius past one repo without writing it down — cross-fleet variants get a `chore(wheelhouse): cascade <fix>` PR per the _Drift watch_ rule.
+- Don't expand the search radius past one repo without writing it down - cross-fleet variants get a `chore(wheelhouse): cascade <fix>` PR per the _Drift watch_ rule.
 - Don't skip the search because the finding "looks unique." Looking unique is exactly when the search pays off.
 - Don't FIX the variant in a cascaded path. When a sweep edits matches, EXCLUDE the cascade-owned trees and `.claude/worktrees/`. Note: the cascade-owned trees are `scripts/fleet/`, `.config/fleet/`, `.claude/hooks/fleet/`, `.git-hooks/`, `.claude/skills/fleet/`, and `docs/agents.md/fleet/`. Those flow FROM `socket-wheelhouse/template/`; editing them downstream forks a canonical file (trips `no-fleet-fork-guard`) and the next cascade clobbers it. Fix cascaded matches in the wheelhouse `template/` copy once, then cascade. `.claude/worktrees/` holds stale per-workflow checkouts whose hits are false positives. Grep with these exclusions when verifying a sweep is complete, not just when editing.
 

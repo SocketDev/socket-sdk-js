@@ -1,6 +1,6 @@
 # test-script-defers-guard
 
-**Type:** PreToolUse guard (Edit/Write/MultiEdit) — BLOCKS (exit 2).
+**Type:** PreToolUse guard (Edit/Write/MultiEdit) - BLOCKS (exit 2).
 
 **Trigger:** an Edit/Write/MultiEdit to a `package.json` whose incoming
 content adds a `test`/`test:*` script that invokes a raw test-runner binary
@@ -14,7 +14,7 @@ silently reports a green pass instead of failing loud. CLAUDE.md "Tests are
 vitest via…".
 
 **Exempt:** the hook / lint-rule / git-hook tier's own package.json
-(`.claude/hooks/**`, `.config/fleet/oxlint-plugin/**`, `.git-hooks/**`) —
+(`.claude/hooks/**`, `.config/fleet/oxlint-plugin/**`, `.git-hooks/**`) -
 its canonical form IS `node --test test/*.test.mts`.
 
 **Fix the message gives:**
@@ -25,9 +25,9 @@ its canonical form IS `node --test test/*.test.mts`.
 turn.
 
 **Companion surfaces:**
-- Check script `scripts/fleet/check/test-scripts-are-deferred.mts` — full-scan
+- Check script `scripts/fleet/check/test-scripts-are-deferred.mts` - full-scan
   of every fleet `package.json` file; report-only by default, `--strict`
   fails on any violation.
 
-**Fails open** on parse / payload errors (exit 0) — a guard bug must not
+**Fails open** on parse / payload errors (exit 0) - a guard bug must not
 wedge every Edit call.

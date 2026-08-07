@@ -23,5 +23,5 @@ migration steps: [`golden-fixtures`](../../../../docs/agents.md/fleet/golden-fix
 
 ## Bypass
 
-`Allow golden-fixture-naming bypass` — rare; e.g. a third-party tool that
+`Allow golden-fixture-naming bypass` - rare; e.g. a third-party tool that
 hard-codes the `.expected.json` filename.

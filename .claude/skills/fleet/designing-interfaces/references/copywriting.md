@@ -8,13 +8,13 @@ How to write copy people read, trust, remember, and act on.
 
 People do not read copy. They make decisions.
 
-Copy is not content. Copy is an interface between a person and a next step. If text does not help someone understand, choose, or act — it actively hurts the design.
+Copy is not content. Copy is an interface between a person and a next step. If text does not help someone understand, choose, or act - it actively hurts the design.
 
 ---
 
 ## The Order of Great Copy
 
-**Clarity > Respect > Character** — always in this order.
+**Clarity > Respect > Character** - always in this order.
 
 - **Clarity**: without it, copy fails
 - **Respect**: without it, copy irritates
@@ -43,12 +43,12 @@ Dead copy is abstract, generic, safe, interchangeable. Signal: it could live on 
 
 Any good piece of copy answers:
 
-1. **Context** — Where is the user right now?
-2. **Job to be done** — What are they trying to accomplish?
-3. **Solution** — What do you offer?
-4. **Outcome** — What changes for them?
-5. **Conditions** — Limits, tradeoffs, requirements
-6. **Next step** — What should they do now?
+1. **Context** - Where is the user right now?
+2. **Job to be done** - What are they trying to accomplish?
+3. **Solution** - What do you offer?
+4. **Outcome** - What changes for them?
+5. **Conditions** - Limits, tradeoffs, requirements
+6. **Next step** - What should they do now?
 
 If copy feels empty, one of these is missing.
 
@@ -70,7 +70,7 @@ If copy feels empty, one of these is missing.
 
 Bad: OK, Submit, Confirm
 
-Good — action + object:
+Good - action + object:
 - Create project
 - Save changes
 - Invite teammates
@@ -160,7 +160,7 @@ If nothing is quotable, nothing sticks.
 
 ## Product UI Copy
 
-On dashboards, settings, and admin panels — copy exists to orient, report status, and enable action. Not to inspire, persuade, or build brand.
+On dashboards, settings, and admin panels - copy exists to orient, report status, and enable action. Not to inspire, persuade, or build brand.
 
 **Principle: Orientation + Status + Action. Not Promise + Mood + Brand Voice.**
 
@@ -173,7 +173,7 @@ On dashboards, settings, and admin panels — copy exists to orient, report stat
 | "Insights That Matter" | "Search Metrics" |
 | "Your Team at a Glance" | "Team Activity" |
 
-**Litmus test:** If an operator scans only headings, labels, and numbers, can they understand the page? If no — rewrite.
+**Litmus test:** If an operator scans only headings, labels, and numbers, can they understand the page? If no - rewrite.
 
 ### Avoid on Operational Surfaces
 

@@ -76,7 +76,10 @@ function deferAsyncLocalStorage(src: string): string {
   // above (it no longer contains `<name>.`), so this only touches read sites.
   for (let i = 0, { length } = names; i < length; i += 1) {
     const name = names[i]!
-    out = out.replace(new RegExp(`\\b${name}\\.`, 'g'), `__get_${name}().`)
+    out = out.replace(
+      new RegExp(`\\b${name}\\.`, 'g'),
+      () => `__get_${name}().`,
+    )
   }
   return out
 }

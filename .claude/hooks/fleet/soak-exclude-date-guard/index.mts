@@ -24,7 +24,7 @@
 //   - Scope-glob entries (`@socketsecurity/*`, `@socketregistry/*`, etc.) —
 //     persistent fleet policy, not a time-bound bypass.
 //   - Bare-name entries without `@version`, also persistent.
-//   - Lines marked `# socket-lint: allow soak-exclude-no-date-annotation`.
+//   - Lines marked `# oxlint-disable-next-line socket/soak-exclude-has-date`.
 //
 // Bypass: `Allow soak-exclude-no-date-annotation bypass` (typed verbatim
 // by the user) for one-off legitimate cases.
@@ -32,10 +32,9 @@
 // The hook fails OPEN on its own bugs (allow + stderr log) so a bad
 // hook deploy can't brick the session.
 
+import { lineIsSuppressed } from '../_shared/markers.mts'
 import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
-
-const ALLOW_MARKER = '# socket-lint: allow soak-exclude-no-date-annotation'
 
 // Matches the section header for the soak-exclude block.
 const SECTION_HEADER = /^minimumReleaseAgeExclude:\s*$/
@@ -103,7 +102,7 @@ export function findOrphanEntries(text: string): OrphanReport[] {
     // prevents ENTRY_RE from matching — the continue here is structurally
     // unreachable in practice, a code path the regex composition forecloses.
     /* c8 ignore start - ENTRY_RE's trailing `['"]?\s*$` prevents a line with the allow marker from matching */
-    if (line.includes(ALLOW_MARKER)) {
+    if (lineIsSuppressed(line, 'soak-exclude-has-date')) {
       continue
     }
     /* c8 ignore stop */
@@ -163,7 +162,7 @@ export const check = editGuard((filePath, content) => {
       `  # published: ${today} | removable: ${exampleRemovable}\n` +
       "  - 'pkg@1.2.3'\n" +
       '\n' +
-      'One-off override: add `# socket-lint: allow soak-exclude-no-date-annotation` on its own line above\n' +
+      'One-off override: add `# oxlint-disable-next-line socket/soak-exclude-has-date` on its own line above\n' +
       'to the bullet line.\n',
   )
 })

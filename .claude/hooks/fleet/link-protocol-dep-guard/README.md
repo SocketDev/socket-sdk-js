@@ -9,8 +9,8 @@ spec is a `link:`/`file:` local path, or a `workspace:` range.
 **A `link:` means a package needs publishing.** The spec points a
 dependency at a local path, which carries no registry identity and no
 integrity hash. The install resolves to whatever happens to sit at that
-path on the machine running it, and on a fresh clone — CI, a new
-contributor, a release runner — to nothing at all. The reason the path
+path on the machine running it, and on a fresh clone - CI, a new
+contributor, a release runner - to nothing at all. The reason the path
 is there is almost always that the package it names is **unpublished**,
 so the fix is release work: reserve the name and wire trusted publishing
 (`scripts/fleet/publish-infra/{npm,cargo}/placeholder.mts`,
@@ -22,7 +22,7 @@ version the tree happens to carry, and pnpm expands the range at publish
 time into a range every consumer inherits.
 
 The fleet's preference order among the pinned forms is **`catalog:` >
-exact `1.2.3` > `workspace:1.2.3`** — a catalog entry pins just as hard
+exact `1.2.3` > `workspace:1.2.3`** - a catalog entry pins just as hard
 and one central bump upgrades every repo, where the other two cost a
 manifest bump per dependent on each release. Full order, the blocked
 forms, and the `peerDependencies` exemption:
@@ -43,7 +43,7 @@ An Edit/Write to a `package.json` that ADDS (or changes the value of) a
     devDependencies
     optionalDependencies
     peerDependencies
-    overrides            (walked recursively — overrides nest)
+    overrides            (walked recursively - overrides nest)
     resolutions          (walked recursively)
     pnpm.overrides       (walked recursively)
 
@@ -52,11 +52,11 @@ diffs before-vs-after and reports only what the edit introduces.
 
 ## What it does NOT block
 
-- `catalog:` — PREFERRED. A catalog entry is itself exact-pinned in
+- `catalog:` - PREFERRED. A catalog entry is itself exact-pinned in
   `.config/fleet/pnpm-workspace.fleet.yaml`, so `catalog:` pins as hard
   as a literal version while keeping one central bump site.
 - An exact registry version (`1.2.3`, `npm:alias@1.2.3`).
-- `workspace:1.2.3` — legal, and a FALLBACK rather than a destination.
+- `workspace:1.2.3` - legal, and a FALLBACK rather than a destination.
   The check reports these under a "prefer `catalog:`" heading as the
   conversion backlog; it never fails on them, because a repo whose
   sibling is unpublished has nowhere else to go.

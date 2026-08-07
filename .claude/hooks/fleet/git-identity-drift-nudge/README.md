@@ -1,6 +1,6 @@
 # git-identity-drift-nudge
 
-**Type:** Stop reminder — nudges, never blocks.
+**Type:** Stop reminder - nudges, never blocks.
 
 **Trigger:** at turn-end, the effective git `user.email` for the project
 dir (local over global, the value git would stamp on a commit) is a
@@ -33,4 +33,4 @@ covers the already-set EFFECTIVE identity at a different boundary (Stop),
 catching a mid-session drift the SessionStart probe missed. Both key off
 the same `_shared/git-identity.mts` patterns.
 
-**Bypass:** none — informational only (exit 0).
+**Bypass:** none - informational only (exit 0).

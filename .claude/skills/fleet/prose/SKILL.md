@@ -17,19 +17,19 @@ Hardik Pandya wrote the upstream version (`stop-slop`). MIT-licensed. Source: ht
 
 Fleet doctrine (voice, evidence standard, anti-patterns, surface routing) is codified in `.claude/rules/fleet/prose-style-and-doctrine.md` and `docs/agents.md/fleet/prose-style-and-doctrine.md`. Both are loaded by the skill; future skills (to-pr, to-tickets, to-spec) reuse the same reference.
 
-## Fleet surfaces — two modes
+## Fleet surfaces - two modes
 
 This skill runs in two modes. Both strip the AI-slop the Core Rules target; the conversational mode adds brevity + voice on top.
 
 **Route by surface:**
 
-- Targeting a `docs/**` file, README, CHANGELOG, GitHub Release notes, or API-reference prose → **documentation mode** — the Core Rules below, unchanged.
-- Targeting a PR description / comment (`gh pr create/edit/comment --body`), an issue body or reply (`gh issue create/comment`), a review comment, a Discussion, a Linear issue/comment, a status summary, or a multi-paragraph commit _body_ → **conversational mode**: the Core Rules **plus** [references/conversational.md](references/conversational.md) (lead with the point, be brief, show the receipt, use the maintainer voice, and drop AI scaffolding; when a body earns structure, use GitHub advanced formatting — `<details>` folds with specific summaries, at most one `> [!NOTE]`-family alert, `- [ ]` task lists, autolinks/permalinks, sparing footnotes).
+- Targeting a `docs/**` file, README, CHANGELOG, GitHub Release notes, or API-reference prose → **documentation mode** - the Core Rules below, unchanged.
+- Targeting a PR description / comment (`gh pr create/edit/comment --body`), an issue body or reply (`gh issue create/comment`), a review comment, a Discussion, a Linear issue/comment, a status summary, or a multi-paragraph commit _body_ → **conversational mode**: the Core Rules **plus** [references/conversational.md](references/conversational.md) (lead with the point, be brief, show the receipt, use the maintainer voice, and drop AI scaffolding; when a body earns structure, use GitHub advanced formatting - `<details>` folds with specific summaries, at most one `> [!NOTE]`-family alert, `- [ ]` task lists, autolinks/permalinks, sparing footnotes).
 
 **Documentation mode applies to:**
 
 - CHANGELOG entries, README sections, `docs/` markdown, GitHub Release notes, API-reference prose. Complete + precise + durable; length serves correctness.
-- Code-format bare library/tool names in prose (e.g. `rustls`, `rolldown`, `reqwest`) — they read as code, not prose. The `prose-code-format-nudge` hook flags them on `*.md` edits, off a shared dictionary (`.claude/hooks/fleet/_shared/known-names.mts`) derived from the repo's own manifests; that lib is the single source of truth for this check.
+- Code-format bare library/tool names in prose (e.g. `rustls`, `rolldown`, `reqwest`) - they read as code, not prose. The `prose-code-format-nudge` hook flags them on `*.md` edits, off a shared dictionary (`.claude/hooks/fleet/_shared/known-names.mts`) derived from the repo's own manifests; that lib is the single source of truth for this check.
 
 **Conversational mode applies to:**
 
@@ -59,7 +59,7 @@ If an edit changes meaning or loses the author's voice, revert it. Never rewrite
 
 2. **Break formulaic structures.** Avoid binary contrasts, negative listings, dramatic fragmentation, rhetorical setups, false agency. See [references/structures.md](references/structures.md).
 
-3. **Keep the idiom.** Sayings in the maintainer's Gen X / late-millennial register - "earning its keep", "not my first rodeo", "side quest" — are ENCOURAGED, one per thought, decorating a plain claim rather than replacing it. Do not strip them as slop; the removal lists never included them. See [references/idioms.md](references/idioms.md).
+3. **Keep the idiom.** Sayings in the maintainer's Gen X / late-millennial register - "earning its keep", "not my first rodeo", "side quest" - are ENCOURAGED, one per thought, decorating a plain claim rather than replacing it. Do not strip them as slop; the removal lists never included them. See [references/idioms.md](references/idioms.md).
 
 4. **Prefer active voice when it clarifies the actor.** Keep passive constructions when they are more precise or the actor is intentionally unknown. Avoid inanimate objects performing human actions ("the complaint becomes a fix").
 
@@ -89,7 +89,7 @@ Before delivering prose:
 - Vague declarative ("The implications are significant")? Name the specific implication.
 - Narrator-from-a-distance ("Nobody designed this")? Put the reader in the scene.
 - Meta-joiners ("The rest of this essay...")? Delete. Let the essay move.
-- Did an edit strip a saying ("earning its keep", "side quest")? Restore it — idioms are voice, not slop (references/idioms.md).
+- Did an edit strip a saying ("earning its keep", "side quest")? Restore it - idioms are voice, not slop (references/idioms.md).
 
 ## Scoring
 

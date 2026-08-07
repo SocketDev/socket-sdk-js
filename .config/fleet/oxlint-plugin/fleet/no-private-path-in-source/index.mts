@@ -14,6 +14,7 @@
  *   which the author must judge.
  */
 
+import { suppressionWaives } from '../../../../../.claude/hooks/fleet/_shared/suppression-rules.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
 // Pattern set, byte-identical to _shared/private-paths.mts (separate bundle
@@ -47,9 +48,6 @@ const PLACEHOLDER_MATCH_RE =
 
 // A comment carrying any same-intent opt-out marker is exempt — the author is
 // deliberately SHOWING the pattern, a doc example, this repo's own report path.
-// Mirrors the commit-time check's SUPPRESS_RE so the two surfaces agree.
-const SUPPRESS_RE =
-  /socket-lint:\s*allow\s+(?:cross-repo|personal-path|private-path)\b/
 
 /**
  * The first NON-placeholder private-path match in `value`, or undefined.
@@ -71,6 +69,15 @@ export function firstPrivatePath(
     }
   }
   return undefined
+}
+
+// Mirrors the commit-time check's waiver set so the two surfaces agree.
+function waivesPrivatePath(text: string): boolean {
+  return (
+    suppressionWaives(text, 'socket/no-private-path-in-source') ||
+    suppressionWaives(text, 'socket/personal-path-placeholders') ||
+    suppressionWaives(text, 'socket/no-cross-repo-path')
+  )
 }
 
 const rule = {
@@ -100,7 +107,7 @@ const rule = {
           : []
         for (let i = 0, { length } = comments; i < length; i += 1) {
           const comment = comments[i]!
-          if (SUPPRESS_RE.test(comment.value)) {
+          if (waivesPrivatePath(String(comment.value ?? ''))) {
             continue
           }
           const hit = firstPrivatePath(comment.value)
@@ -118,5 +125,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

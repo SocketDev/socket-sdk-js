@@ -22,7 +22,7 @@ A genuinely-uninstalled new dependency (absent from the `.pnpm` store too, usual
 
 ## Self-imposed constraint: Node built-ins only
 
-This hook is the safety net for "the lib is unresolvable"; it must not itself depend on anything installed via pnpm. The entire import surface is `node:fs`, `node:path`, `node:child_process`, `node:url`. It *spawns* `pnpm` for the gutted repair, but never *imports* a pnpm-installed module, so it works even when every such module is broken, which is the whole point. This is the documented exemption from `prefer-async-spawn-guard` — the recovery net cannot route through the lib it recovers.
+This hook is the safety net for "the lib is unresolvable"; it must not itself depend on anything installed via pnpm. The entire import surface is `node:fs`, `node:path`, `node:child_process`, `node:url`. It *spawns* `pnpm` for the gutted repair, but never *imports* a pnpm-installed module, so it works even when every such module is broken, which is the whole point. This is the documented exemption from `prefer-async-spawn-guard` - the recovery net cannot route through the lib it recovers.
 
 ## Fail-open
 

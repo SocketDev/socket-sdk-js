@@ -25,7 +25,7 @@ import type { LineHit } from './scan-core.mts'
 // directly. Two leak shapes, each with its own opt-out marker so a reviewer
 // can tell which exemption was granted:
 //   - `console.{log,error,warn,info,debug}` → marker
-//     `// socket-lint: allow console` (`allow logger` accepted as a legacy
+//     `// oxlint-disable-next-line socket/no-console-prefer-logger` (`allow logger` accepted as a legacy
 //     alias for one deprecation cycle).
 //   - `process.std{out,err}.write` → marker `// socket-lint: allow
 //     process-stdio`, reserved for a CLI whose stdio IS a protocol a caller
@@ -51,7 +51,7 @@ export function suggestLoggerReplacement(line: string): string {
 }
 
 // Merged entry point: every console.* / process.std*.write leak, deduped by
-// line. Per-line `// socket-lint: allow console` (or `allow process-stdio` for
+// line. Per-line `// oxlint-disable-next-line socket/no-console-prefer-logger` (or `allow process-stdio` for
 // the stdio form) suppresses a hit, matching the old skipDocs semantics.
 export function scanLoggerLeaks(text: string): LineHit[] {
   const lines = splitLines(text)
@@ -92,7 +92,7 @@ export function scanLoggerLeaks(text: string): LineHit[] {
 // The right way is to import from the published npm package
 // (`@socketsecurity/lib-stable/...`, `@socketsecurity/registry-stable/...`).
 // Scanner detects both shapes; suppress with the canonical marker
-// `<comment-prefix> socket-lint: allow cross-repo`.
+// `<comment-prefix> oxlint-disable-next-line socket/no-cross-repo-path`.
 
 // CROSS_REPO_ANY_RE (built from the canonical FLEET_REPO_NAMES) is imported
 // from the gate-free _shared/cross-repo.mts — the SAME regex the edit-time

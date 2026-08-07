@@ -17,6 +17,6 @@ rather than blocks.
 **Trigger:** a `Task` tool call whose `prompt` contains a commit/push/land
 signal (matched with plain `.includes`, never a command-parsing regex).
 
-**Bypass:** none — it never blocks.
+**Bypass:** none - it never blocks.
 
 Detail: [`agent-delegation`](../../../../docs/agents.md/fleet/agent-delegation.md).

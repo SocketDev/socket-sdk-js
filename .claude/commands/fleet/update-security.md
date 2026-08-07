@@ -2,7 +2,7 @@
 description: Resolve open GitHub Dependabot security alerts on the current repo via the updating-security skill.
 ---
 
-Walk open Dependabot security alerts and fix each one — direct
+Walk open Dependabot security alerts and fix each one - direct
 deps via `pnpm update`, transitives via `pnpm.overrides`,
 unfixable advisories via principled dismissal. Per-alert atomic
 commits with `chore(security): …` titles. Validates with

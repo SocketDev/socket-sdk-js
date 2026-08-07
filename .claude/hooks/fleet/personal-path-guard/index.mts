@@ -83,7 +83,7 @@ export function scanPersonalPaths(content: string): PersonalPathHit[] {
     if (isPurePlaceholder(line)) {
       continue
     }
-    // Per-line opt-out: `// socket-lint: allow personal-path` — the same
+    // Per-line opt-out: `// oxlint-disable-next-line socket/personal-path-placeholders` — the same
     // marker the commit-time scanner honors via skipDocs.
     if (suppressionCoversLine(lines, i, 'personal-path')) {
       continue
@@ -122,7 +122,7 @@ export function formatBlockMessage(
   )
   out.push('  Env vars also work: `$HOME`, `${USER}`, `~/`.')
   out.push(
-    '  For a line that must keep the literal form, add `// socket-lint: allow personal-path -- <reason>` on its own line above it.',
+    '  For a line that must keep the literal form, add `// oxlint-disable-line socket/personal-path-placeholders -- <reason>` on its own line above it.',
   )
   out.push('')
   return out.join('\n')

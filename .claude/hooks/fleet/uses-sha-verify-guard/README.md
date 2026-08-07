@@ -4,7 +4,7 @@ PreToolUse hook that blocks Edit/Write tool calls introducing GitHub URL pins th
 
 ## What it enforces
 
-Every GitHub URL pin across the fleet needs a full 40-char commit SHA that resolves. Truncated SHAs (`3d33ecebbb` — 10 chars), version tags (`v1.2.3`), branch names (`main`), and SHAs that don't resolve via `gh api repos/<owner>/<repo>/commits/<sha>` are all blocked.
+Every GitHub URL pin across the fleet needs a full 40-char commit SHA that resolves. Truncated SHAs (`3d33ecebbb` - 10 chars), version tags (`v1.2.3`), branch names (`main`), and SHAs that don't resolve via `gh api repos/<owner>/<repo>/commits/<sha>` are all blocked.
 
 Three surfaces:
 
@@ -14,7 +14,7 @@ Three surfaces:
 | `.gitmodules`                                              | BOTH `# <name>-<version> sha256:<64-hex>` comment AND `ref = <40-hex>` field per `[submodule]` block |
 | `package.json`                                             | `git+https://github.com/<owner>/<repo>(.git)?#<40-hex>` for any GitHub-URL dep specifier             |
 
-The `.gitmodules` content-hash (`sha256:`) and the `ref =` (commit SHA) are both required — the comment is the upstream-archive content-hash pin (drift-watch signal); the `ref` is what `git submodule update` checks out.
+The `.gitmodules` content-hash (`sha256:`) and the `ref =` (commit SHA) are both required - the comment is the upstream-archive content-hash pin (drift-watch signal); the `ref` is what `git submodule update` checks out.
 
 ### The `sha256:` content-hash
 

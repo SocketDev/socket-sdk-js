@@ -22,7 +22,7 @@
 //   - Only inspects `.ts` / `.mts` / `.cts` / `.tsx` source files.
 //     Hooks, git-hooks, scripts, tests, fixtures, external/vendored
 //     code are exempt — see EXEMPT_PATH_PATTERNS.
-//   - Lines marked `// socket-lint: allow console` are exempt.
+//   - Lines marked `// oxlint-disable-next-line socket/no-console-prefer-logger` are exempt.
 //
 // AST-based detector (acorn-wasm in `_shared/ast/`).
 // Replaced the regex implementation that had to compensate for
@@ -89,8 +89,8 @@ export function emitBlock(filePath: string, hits: Hit[]): string {
     out.push(`  …and ${hits.length - 3} more.`)
   }
   out.push(
-    '  Opt-out for one line (rare): add `// socket-lint: allow console` on its own line above for a ' +
-      '`console.*` call, or `// socket-lint: allow process-stdio` for a raw ' +
+    '  Opt-out for one line (rare): add `// oxlint-disable-next-line socket/no-console-prefer-logger` on its own line above for a ' +
+      '`console.*` call, or `// oxlint-disable-next-line socket/no-direct-stream-write` for a raw ' +
       '`process.std{out,err}.write` (the id must match the call kind).',
   )
   out.push('')
@@ -127,8 +127,8 @@ export function scan(source: string): Hit[] {
   for (const leak of findLoggerLeaks(source)) {
     // Per-line allow marker, keyed by leak kind so the edit-time guard agrees
     // with the pre-push `scanLoggerLeaks`: `console.*` waives with
-    // `// socket-lint: allow console`, raw `process.std*.write` waives with the
-    // more deliberate `// socket-lint: allow process-stdio`. The marker sits on
+    // `// oxlint-disable-next-line socket/no-console-prefer-logger`, raw `process.std*.write` waives with the
+    // more deliberate `// oxlint-disable-next-line socket/no-direct-stream-write`. The marker sits on
     // the call's own line, or alone on the line above it.
     const rule = leak.fullCall.startsWith('process.')
       ? 'process-stdio'
@@ -219,7 +219,7 @@ export function emitDecorationBlock(
     out.push(`  …and ${decos.length - 3} more.`)
   }
   out.push(
-    '  Opt-out for one line (rare): add `// socket-lint: allow logger-decoration` on its own line above.',
+    '  Opt-out for one line (rare): add `// oxlint-disable-next-line socket/no-logger-newline-literal` on its own line above.',
   )
   out.push('')
   return out.join('\n')

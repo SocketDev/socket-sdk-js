@@ -20,7 +20,7 @@ The `submodules-are-sparse-or-annotated` gate (`scripts/fleet/check/`) fails `ch
 
 ### 1. Determine (analyze what consumes the submodule)
 
-First gather the evidence — one deterministic pass that `rg`s every submodule, applies the outside-only filter, and buckets the surviving hits by file type:
+First gather the evidence - one deterministic pass that `rg`s every submodule, applies the outside-only filter, and buckets the surviving hits by file type:
 
 ```bash
 node scripts/fleet/optimizing-submodules/collect-submodule-consumers.mts --pretty
@@ -28,19 +28,19 @@ node scripts/fleet/optimizing-submodules/collect-submodule-consumers.mts --prett
 
 It emits, per submodule, the OUTSIDE-only consumer hits bucketed `rust` / `cpp` / `go` / `jsts` / `testCorpus` / `build` / `other`, the current sparse/verify state, the on-disk tree size (the why-bother signal), and an `internalHitCount`, the self-references it excluded. Plain (no `--pretty`) emits the same as a JSON envelope. It renders **no verdict**. That is your call from the buckets. Read each bucket and interpret it:
 
-- Rust (`Cargo.toml` / `build.rs`): a **path/git** dep is consumption; a `version = "=x"` crates.io pin is NOT — the code comes from the registry, the submodule is reference-only.
+- Rust (`Cargo.toml` / `build.rs`): a **path/git** dep is consumption; a `version = "=x"` crates.io pin is NOT - the code comes from the registry, the submodule is reference-only.
 - C/C++ (`CMakeLists.txt` / `binding.gyp`): which subdir does `add_subdirectory` / a `*_DIR` var point at?
 - Go (`go.mod`): a registry module is not the submodule.
 - JS/TS (imports / `package.json` / vitest): a `workspace:*` fork supersedes the submodule.
 - Test corpora: in the conformance runner under `test/`, find the **exact fixture subdir** it walks.
 - Build/bench scripts.
 
-**Trap — internal self-references (now handled by the collector).** A vendored crate's own files reference each other (e.g. blake3's `b3sum/Cargo.toml` has `path = ".."`). Those are the submodule consuming itself, NOT your repo consuming it. The collector already drops every hit inside `upstream/<name>/` (the `isInsideSubmodule` filter) and reports the count as `internalHitCount`, so the over-check that filter prevents is code, not a hand-discipline.
+**Trap - internal self-references (now handled by the collector).** A vendored crate's own files reference each other (e.g. blake3's `b3sum/Cargo.toml` has `path = ".."`). Those are the submodule consuming itself, NOT your repo consuming it. The collector already drops every hit inside `upstream/<name>/` (the `isInsideSubmodule` filter) and reports the count as `internalHitCount`, so the over-check that filter prevents is code, not a hand-discipline.
 
 Outcomes per submodule:
 - **Subtree-consumed** → the minimal pattern (e.g. `c`, `src`, `tests files-toml-1.0.0`, `files`).
 - **Reference-only** (pin tracking, crates.io/npm dep, lockstep metadata, a doc cites it) → a minimal `README.md` (or the specific cited files) so the dir isn't empty but pulls ~nothing.
-- **Genuinely whole-tree** — a crate built from its entire source with no separable subtree → no sparse; annotate the block `# full-checkout: <reason>`.
+- **Genuinely whole-tree** - a crate built from its entire source with no separable subtree → no sparse; annotate the block `# full-checkout: <reason>`.
 
 ### 2. Apply (scripted)
 
@@ -59,7 +59,7 @@ node scripts/fleet/git-partial-submodule.mts save-sparse <path>   # writes the f
 
 `add --sparse` (clone sparse) and `restore-sparse` (re-apply the recorded field) are the other primitives.
 
-### 3. Verify (prove it by building — this step is law, not habit)
+### 3. Verify (prove it by building - this step is law, not habit)
 
 A too-narrow pattern breaks the build only at use, so static analysis can pass it through. The verify is enforced by code, not left to discretion. Declare the consumer in `.gitmodules` next to the sparse pattern:
 
@@ -68,7 +68,7 @@ verify = pnpm --filter @x/parser test     # the command that builds against the 
 verify = none                              # reference-only — nothing builds against it
 ```
 
-Then prove it: `verify-submodule-sparse.mts --run <name|path>` sparse-clones the submodule per its recorded pattern and runs the declared `verify =` command. Green → the pattern is build-sufficient. Fail → it's too narrow — a needed path isn't checked out; widen and re-run.
+Then prove it: `verify-submodule-sparse.mts --run <name|path>` sparse-clones the submodule per its recorded pattern and runs the declared `verify =` command. Green → the pattern is build-sufficient. Fail → it's too narrow - a needed path isn't checked out; widen and re-run.
 
 ```bash
 node scripts/fleet/verify-submodule-sparse.mts --run <name|path>   # prove one
@@ -76,7 +76,7 @@ node scripts/fleet/verify-submodule-sparse.mts --run-all           # CI / on-cad
 node scripts/fleet/verify-submodule-sparse.mts --check             # gate: every sparse block declares a verify =
 ```
 
-The `--check` gate (in `check --all`) fails any sparse block with no `verify =` — a pattern with no declared consumer is unproven, so it can't land. That is what makes the verify law: you cannot add a sparse pattern without naming how it is build-proven.
+The `--check` gate (in `check --all`) fails any sparse block with no `verify =` - a pattern with no declared consumer is unproven, so it can't land. That is what makes the verify law: you cannot add a sparse pattern without naming how it is build-proven.
 
 ## Removing a submodule
 
@@ -90,4 +90,4 @@ Commit `.gitmodules` + the gitlink removal together.
 
 ## Gate
 
-`node scripts/fleet/check/submodules-are-sparse-or-annotated.mts` — green when every block is sparse or `# full-checkout:`-annotated. Run it after the sweep; it is in `check --all`.
+`node scripts/fleet/check/submodules-are-sparse-or-annotated.mts` - green when every block is sparse or `# full-checkout:`-annotated. Run it after the sweep; it is in `check --all`.

@@ -20,7 +20,9 @@
  *     concern, per the single-responsibility hook rule.
  */
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- detection runs in a sync hook + sync audit script; needs typed string stdout, no async.
+// Detection runs in a sync hook + sync audit script; needs typed string stdout,
+// no async.
+// oxlint-disable-next-line socket/prefer-async-spawn -- detection runs
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import os from 'node:os'
 import process from 'node:process'

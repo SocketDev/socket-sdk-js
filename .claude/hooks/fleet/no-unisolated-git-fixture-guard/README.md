@@ -2,7 +2,7 @@
 
 PreToolUse hook that blocks Write/Edit on a test file which spawns `git` against a temp-dir fixture without isolating the inherited git environment.
 
-When such a suite runs inside the pre-commit hook, git exports `GIT_DIR` / `GIT_WORK_TREE` / `GIT_INDEX_FILE` pointing at the live repo, and git honors those over cwd-based discovery. The fixture's `git config` / `git init` / `git commit` then escape onto the real `.git/config` and HEAD — observed damage: `user.email=test@example.com` (junk-authored commits), `core.bare=true` (breaks every worktree op), and junk commits stacked on the working branch.
+When such a suite runs inside the pre-commit hook, git exports `GIT_DIR` / `GIT_WORK_TREE` / `GIT_INDEX_FILE` pointing at the live repo, and git honors those over cwd-based discovery. The fixture's `git config` / `git init` / `git commit` then escape onto the real `.git/config` and HEAD - observed damage: `user.email=test@example.com` (junk-authored commits), `core.bare=true` (breaks every worktree op), and junk commits stacked on the working branch.
 
 ## Fires when
 
@@ -20,7 +20,7 @@ A test that runs git against the real repo for read-only introspection (no temp 
 
 ## Fix
 
-Isolate every git spawn — strip the repo-pointing vars and pin the config files:
+Isolate every git spawn - strip the repo-pointing vars and pin the config files:
 
 ```js
 for (const v of ['GIT_DIR','GIT_WORK_TREE','GIT_INDEX_FILE','GIT_COMMON_DIR',

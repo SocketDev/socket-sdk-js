@@ -38,8 +38,8 @@ Reference: Shostack, *The Four Question Framework for Threat Modeling* (2024).
 Every fact you write into `THREAT_MODEL.md` carries one of two tags in your
 working notes:
 
-- `[Code-verified]` — you read the source in `<target-dir>` and confirmed it.
-- `[Owner-states]` — the owner told you and you have not (or cannot) verify it in
+- `[Code-verified]` - you read the source in `<target-dir>` and confirmed it.
+- `[Owner-states]` - the owner told you and you have not (or cannot) verify it in
   code.
 
 The final `THREAT_MODEL.md` does not include the tags inline (they would clutter
@@ -55,7 +55,7 @@ Work through the four questions in order. Within each, ask one thing at a time,
 wait for the answer, then move on. Do not dump a questionnaire. Use
 **AskUserQuestion** for the structured prompts; expect free-text via "Other".
 
-### Q1 — What are we working on?
+### Q1 - What are we working on?
 
 Goal: fill `## 1. System context`, `## 2. Assets`, `## 3. Entry points & trust
 boundaries`.
@@ -83,7 +83,7 @@ in `routes.py:88`; is that reachable in production?"
 If `--seed` was provided: read its sections 1-3, summarize back, and ask only
 "What's wrong or missing here?"
 
-### Q2 — What can go wrong?
+### Q2 - What can go wrong?
 
 Goal: fill `## 4. Threats` rows (id, threat, actor, surface, asset).
 
@@ -94,7 +94,7 @@ When the owner stalls or stays vague, switch to structured prompts. Walk each
 entry point from section 3 through STRIDE:
 
 <details>
-<summary><b>Detail</b> — the full table (6 rows)</summary>
+<summary><b>Detail</b> - the full table (6 rows)</summary>
 
 | | Ask |
 | --- | --- |
@@ -125,7 +125,7 @@ this apply? Is the actor right?" Then "What's missing?"
 
 </details>
 
-### Q3 — What are we going to do about it?
+### Q3 - What are we going to do about it?
 
 Goal: fill `impact`, `likelihood`, `status`, `controls` for every section 4 row,
 and fill `## 5. Deprioritized`.
@@ -153,7 +153,7 @@ a section 8 row. Prefer controls that survive the next bug (sandboxing, type-saf
 parsers, parameterized queries, CSP, allocation caps) over patches for the last
 one.
 
-### Q4 — Did we do a good job?
+### Q4 - Did we do a good job?
 
 Goal: validate before writing.
 

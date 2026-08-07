@@ -16,7 +16,9 @@
  *   both the background check and silent install.
  */
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- detection + apply run in a sync audit script + sync installer; need typed string stdout, no async.
+// Detection + apply run in a sync audit script + sync installer; need typed
+// string stdout, no async.
+// oxlint-disable-next-line socket/prefer-async-spawn -- detection + apply run
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import os from 'node:os'
 

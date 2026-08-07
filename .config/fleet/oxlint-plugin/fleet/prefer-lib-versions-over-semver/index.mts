@@ -20,15 +20,11 @@
  *
  *   - Files under `src/external/`, a wrapper that legitimately imports upstream.
  *   - Type-only imports (`import type … from 'semver'`) — no runtime dep.
- *   - A call site carrying `socket-lint: allow bare-semver`.
+ *   - A call site carrying `oxlint-disable-next-line socket/prefer-lib-versions-over-semver`.
  */
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
-
-// socket-lint: allow bare-semver -- opt-out for a wrapper/forwarder that
-// genuinely needs the upstream package (e.g. socket-lib's own versions/* impl).
-const BYPASS_RE = /socket-lint:\s*allow\s+bare-semver/
 
 const rule = {
   meta: {
@@ -47,7 +43,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/prefer-lib-versions-over-semver',
+    )
     const filename = context.getFilename?.() ?? context.physicalFilename ?? ''
     // A wrapper file (socket-lib's own versions/* implementation) legitimately
     // imports the upstream package. Skip everything under src/external/.
@@ -80,5 +79,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

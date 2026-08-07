@@ -136,7 +136,7 @@ async function fetchVersionInfo(
 ): Promise<RegistryVersionInfo | undefined> {
   const url = `https://registry.npmjs.org/${encodeURIComponent(name).replace('%40', '@')}/${encodeURIComponent(version)}`
   try {
-    // socket-lint: allow global-fetch -- provenance check probes the npm registry; runs as a standalone hook without the lib http-request helper wired up.
+    // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- provenance check probes the npm registry; runs as a standalone hook without the lib http-request helper wired up.
     const response = await fetch(url, {
       headers: { accept: 'application/json' },
     })

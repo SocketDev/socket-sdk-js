@@ -1,6 +1,6 @@
 # setup-claude-scanners
 
-Operator-invoked installer for **AgentShield** + **zizmor** — the two
+Operator-invoked installer for **AgentShield** + **zizmor** - the two
 claude-config / GitHub-Actions scanners. Slim leaf of the
 `setup-security-tools` umbrella.
 
@@ -29,7 +29,7 @@ This leaf is a thin re-entry point that imports `setupAgentShield`
 
 - `setupZizmor` from the umbrella's `lib/installers.mts` and runs
   ONLY those. No token resolution / keychain / shell-rc plumbing is
-  involved — the two scanners are auth-free.
+  involved - the two scanners are auth-free.
 
 ## What gets installed
 

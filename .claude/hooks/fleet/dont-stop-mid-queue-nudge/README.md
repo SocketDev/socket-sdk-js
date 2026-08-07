@@ -4,7 +4,7 @@ Stop hook that flags assistant turns announcing "I'm stopping here" / "what's ne
 
 ## Why
 
-The failure mode: the assistant finishes ONE item from a queue the user authorized as a batch, posts a status summary listing what's left, and stops — instead of continuing to the next item. The user has to re-issue "keep going" every time. That re-litigates intent the user already gave and burns the user's time on coordination instead of work.
+The failure mode: the assistant finishes ONE item from a queue the user authorized as a batch, posts a status summary listing what's left, and stops - instead of continuing to the next item. The user has to re-issue "keep going" every time. That re-litigates intent the user already gave and burns the user's time on coordination instead of work.
 
 ## What it catches
 
@@ -20,7 +20,7 @@ Stopping-announcement phrases in the last assistant turn:
 - "session totals" / "final session state" / "session summary"
 - "remaining queue:" followed by a bulleted list
 
-Code fences are stripped before matching — `// stopping here` inside a code block does not fire.
+Code fences are stripped before matching - `// stopping here` inside a code block does not fire.
 
 ## Short-circuit: user-authorized stops
 
@@ -28,9 +28,9 @@ If any of the 3 most recent user turns contains an explicit stop signal, the hoo
 
 ## What it does NOT catch
 
-- Genuine blockers ("the build needs to run for 2 hours") — those announce a wait, not a stop.
+- Genuine blockers ("the build needs to run for 2 hours") - those announce a wait, not a stop.
 - Final turns of a single-item request (no queue → nothing to mid-queue-stop).
-- The assistant deciding mid-task that it needs user input ("which option do you prefer?") — that's a clarification, not a stop.
+- The assistant deciding mid-task that it needs user input ("which option do you prefer?") - that's a clarification, not a stop.
 
 ## Why it doesn't block
 

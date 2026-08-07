@@ -11,7 +11,7 @@ not evidence of absence. The failure mode this hook catches is the assistant
 reporting "bugbot came back clean, nothing to respond to" and ending the turn
 as if the change were reviewed. On substantive diffs, the adversarial
 self-review loop routinely finds load-bearing defects that a single automated
-pass misses — including defects introduced by the previous round's own fixes.
+pass misses - including defects introduced by the previous round's own fixes.
 
 Doctrine: `docs/agents.md/fleet/adversarial-self-review.md`.
 
@@ -37,7 +37,7 @@ Any one of these in the same turn suppresses the nudge:
   description, or subagent type reads as a review (`review`, `adversar*`,
   `refut*`, `skeptic`, `red-team`).
 
-Skipping the adversarial loop is legitimate for trivial diffs — the nudge
+Skipping the adversarial loop is legitimate for trivial diffs - the nudge
 asks for that to be said explicitly rather than letting bot silence stand in
 for review.
 
@@ -50,7 +50,7 @@ nudge makes skipping a decision instead of a default.
 
 ## Bypass
 
-No bypass — the reminder never blocks.
+No bypass - the reminder never blocks.
 
 ## Test
 

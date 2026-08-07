@@ -50,7 +50,7 @@ matching `prompt-injection-guard`'s cap.
 
 ## What it reports
 
-Detection is by SHAPE, never by a vendor denylist — a denylist would name the
+Detection is by SHAPE, never by a vendor denylist - a denylist would name the
 one product it knows about and miss the next one:
 
 1. **An HTML comment addressed to an automated reader.** Invisible on the
@@ -63,11 +63,11 @@ one product it knows about and miss the next one:
 4. **The one literal honeypot marker**, which names the mechanism outright.
 5. **Standalone twelve-hex tokens**, reported alongside a directive finding.
    Twelve hex characters is also an abbreviated commit SHA, so a token on its
-   own is never a finding — every diff carries those by the dozen.
+   own is never a finding - every diff carries those by the dozen.
 
 Each finding carries its line number and a clipped excerpt. The detector lives
-in `_shared/untrusted/` — `findEmbeddedAgentDirectives` in `directive-scan.mts`
-and `findHoneypotTokens` in `honeypot-token.mts` — so a reporting path can reuse
+in `_shared/untrusted/` - `findEmbeddedAgentDirectives` in `directive-scan.mts`
+and `findHoneypotTokens` in `honeypot-token.mts` - so a reporting path can reuse
 it without importing a hook.
 
 Scanning runs three passes, the same layering `prompt-injection-guard` uses: per
@@ -97,12 +97,12 @@ Fails open on any parse or regex error.
 
 ## Bypass
 
-No bypass phrase — this hook never blocks.
+No bypass phrase - this hook never blocks.
 
 ## Companion files
 
-- `index.mts` — the hook. `describeReadingCommand(command)` and
+- `index.mts` - the hook. `describeReadingCommand(command)` and
   `readSurfaceLabel(payload)` are the exported surface resolvers;
   `formatDirectiveNudge` builds the notice.
-- `test/repo/integration/hooks/untrusted-content-directive-nudge.test.mts` —
+- `test/repo/integration/hooks/untrusted-content-directive-nudge.test.mts` -
   vitest integration tests (spawn-based, bait assembled at runtime).

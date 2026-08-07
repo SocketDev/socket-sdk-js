@@ -27,7 +27,7 @@ Master onboarding wizard. Runs each setup phase in order, skips phases already c
 | `node scripts/fleet/setup/token.mts`                       | API token → OS keychain + shell rc bridge      |
 | `node scripts/fleet/setup/claude-config.mts`               | Harden `~/.claude.json` (`copyOnSelect: false`) |
 | `node scripts/fleet/install-sfw.mts`                       | Socket Firewall shims                          |
-| `/setup-security-tools` (agentshield, zizmor)              | Security scanners — installed by the SessionStart hook, not standalone scripts |
+| `/setup-security-tools` (agentshield, zizmor)              | Security scanners - installed by the SessionStart hook, not standalone scripts |
 
 `/setup-repo` runs all scripts in the order below and produces a summary.
 
@@ -37,7 +37,7 @@ Run each phase in order. Skip any phase whose check reports "already done." Afte
 
 ---
 
-### Phase 0 — Preflight
+### Phase 0 - Preflight
 
 ```bash
 node --version          # must be >= 22.6
@@ -49,7 +49,7 @@ If Node < 22.6: stop and tell the engineer to upgrade (nvm / fnm recommended). T
 
 ---
 
-### Phase 1 — API Token
+### Phase 1 - API Token
 
 Check for an existing token:
 
@@ -73,7 +73,7 @@ Skip if the token is already present and `--rotate` was not passed.
 
 ---
 
-### Phase 2 — Shell RC Bridge
+### Phase 2 - Shell RC Bridge
 
 Ensures `SOCKET_API_KEY` is exported in the user's shell so every terminal session has it without a keychain read.
 
@@ -91,7 +91,7 @@ export SOCKET_API_KEY="$(security find-generic-password -s socket-cli -a SOCKET_
 
 ---
 
-### Phase 3 — Native Messaging Host
+### Phase 3 - Native Messaging Host
 
 Installs the Chrome native messaging host manifest so the Trusted Publisher extension can read the token from the keychain without requiring `SOCKET_API_TOKEN` in the browser environment.
 
@@ -112,7 +112,7 @@ Skip if the manifest file already exists and the token hasn't rotated.
 
 ---
 
-### Phase 4 — Security Tools
+### Phase 4 - Security Tools
 
 Runs the full security toolchain installer:
 
@@ -130,14 +130,14 @@ export PATH="$HOME/.socket/_wheelhouse/shims:$PATH"
 
 ---
 
-### Phase 5 — Repo Initialization
+### Phase 5 - Repo Initialization
 
 ```bash
 pnpm install            # install deps
 pnpm run check --all    # verify the repo is green
 ```
 
-If `pnpm run check` fails, surface the failures and stop — the repo needs fixing before it's usable.
+If `pnpm run check` fails, surface the failures and stop - the repo needs fixing before it's usable.
 
 
 ---
@@ -166,15 +166,15 @@ Pass these in chat when invoking:
 | Option               | Effect                                                             |
 | -------------------- | ------------------------------------------------------------------ |
 | `--rotate`           | Re-prompt for the API token even if one exists                     |
-| `--skip-tools`       | Skip Phase 4 (security tools) — useful on CI/headless              |
-| `--skip-native-host` | Skip Phase 3 (native messaging host) — non-browser environments    |
+| `--skip-tools`       | Skip Phase 4 (security tools) - useful on CI/headless              |
+| `--skip-native-host` | Skip Phase 3 (native messaging host) - non-browser environments    |
 | `--check`            | Check-only mode: report what's missing without installing anything |
 
 ---
 
 ## Orchestration Notes
 
-- Phases 1–4 call into `setup-security-tools/install.mts` which already handles idempotency — re-running is safe.
+- Phases 1–4 call into `setup-security-tools/install.mts` which already handles idempotency - re-running is safe.
 - Phase 3 (`installNativeHost`) is in `@socketsecurity/lib-stable/native-messaging/install`. If that module isn't built yet (pre-6.0.8), skip gracefully.
-- Never prompt interactively in CI (`getCI()` returns true). In CI, skip Phases 1–3 silently and report "CI environment — keychain setup skipped."
+- Never prompt interactively in CI (`getCI()` returns true). In CI, skip Phases 1–3 silently and report "CI environment - keychain setup skipped."
 - Phase 5 (`pnpm install + check`) is the only phase that can fail the wizard hard. All other failures are surfaced as warnings with recovery hints.

@@ -19,7 +19,7 @@ should never need to re-read the keychain.
 
 ## Allowed (not flagged)
 
-Writes and deletes — these only happen during operator-driven
+Writes and deletes - these only happen during operator-driven
 setup / rotation, never on hot paths:
 
 - `security add-generic-password` / `security delete-generic-password`
@@ -35,7 +35,7 @@ Type the canonical phrase verbatim in your next user turn:
 Allow blind-keychain-read bypass
 ```
 
-Use when you genuinely need a fresh keychain read — operator-invoked
+Use when you genuinely need a fresh keychain read - operator-invoked
 diagnostics, verifying an entry exists, etc.
 
 ## Why

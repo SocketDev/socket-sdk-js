@@ -15,7 +15,7 @@ Symptoms:
 - Push doesn't trigger anything.
 - `gh run list` shows no recent runs.
 - The YAML file _looks_ fine in an editor.
-- Actionlint catches it — but only if it's wired in.
+- Actionlint catches it - but only if it's wired in.
 
 ## What it blocks
 
@@ -34,7 +34,7 @@ Type the canonical phrase in a new message:
 
     Allow workflow-yaml-multiline-body bypass
 
-Use sparingly — the failure mode is hard to debug.
+Use sparingly - the failure mode is hard to debug.
 
 ## Detection
 

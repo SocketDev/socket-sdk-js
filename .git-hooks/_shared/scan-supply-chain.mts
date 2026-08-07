@@ -76,7 +76,8 @@ const SOAK_ANNOTATION_RE =
   /^\s*#\s+published:\s+\d{4}-\d{2}-\d{2}\s+\|\s+removable:\s+\d{4}-\d{2}-\d{2}\s*$/
 // Same opt-out the canonical soak-excludes-have-dates check honors — an entry
 // that legitimately can't carry a date annotation marks the slot above it.
-const SOAK_ALLOW_MARKER = '# socket-lint: allow soak-exclude-no-date-annotation'
+const SOAK_ALLOW_MARKER =
+  '# oxlint-disable-next-line socket/soak-exclude-has-date'
 
 export const scanSoakExcludeDateAnnotations = (text: string): LineHit[] => {
   const lines = text.split('\n')

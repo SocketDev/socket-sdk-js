@@ -13,15 +13,15 @@ metadata:
 
 OS cruft (`.DS_Store`), editor backups (`*.orig`, `*.swp`, `*~`), build stragglers
 (`*.pyc`, `__pycache__`), and stray AI/temp scratch (orphaned `/tmp/cascade-*` dirs, dry-run
-logs) accrete across the fleet. This is the conservative, no-prompt sweep that clears them —
+logs) accrete across the fleet. This is the conservative, no-prompt sweep that clears them -
 the `tidying-*` family member for junk files. It deletes ONLY paths git doesn't track and that
 don't live in a submodule, so it can never remove real work.
 
 ## When to use
 
-- **Periodic cleanup** — run on a `/loop` so junk never accumulates.
-- **Before a commit or cascade** — clear OS cruft that would otherwise ride along.
-- **After a long session** — sweep the `/tmp` scratch the fleet's own tooling leaves behind.
+- **Periodic cleanup** - run on a `/loop` so junk never accumulates.
+- **Before a commit or cascade** - clear OS cruft that would otherwise ride along.
+- **After a long session** - sweep the `/tmp` scratch the fleet's own tooling leaves behind.
 
 ## Run it
 
@@ -54,7 +54,7 @@ git-safe check, so a `--fix` run can only ever remove junk.
   `*.swp`/`*.swo`, `*~`, `*.pyc`, `__pycache__/`.
 - **Stray tmp scratch** (outside any repo): orphaned `/tmp/cascade-*` dirs + dry-run logs.
 - **Never**: a git-tracked file (a tracked file matching a junk pattern is a deliberate
-  fixture), or anything inside a submodule (it belongs to the submodule's own git — deleting
+  fixture), or anything inside a submodule (it belongs to the submodule's own git - deleting
   it would dirty the submodule). Each candidate is checked via `isUntrackedNonSubmodulePath`
   before removal; deletion uses `safeDelete` from `@socketsecurity/lib/fs/safe`.
 
@@ -67,4 +67,4 @@ This skill is the fleet-wide, multi-pattern, periodic complement.
 
 - Dry-run by default; `--fix` opts into deletion.
 - Deletes only untracked-or-ignored paths, never tracked files, never submodule-internal paths.
-- No prompting — the safety is in the predicate, not a confirmation step.
+- No prompting - the safety is in the predicate, not a confirmation step.

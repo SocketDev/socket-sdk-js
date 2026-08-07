@@ -42,7 +42,7 @@ what the branch exists to prevent.
 ## Contract
 
 - Grouping engine is shared with the auto-lander (`land-work.mts`
-  `groupPaths`/`commitMessage`) — one source of truth for what "logical"
+  `groupPaths`/`commitMessage`) - one source of truth for what "logical"
   means.
 - Bump-last invariant: a `chore: bump version to …` tip is peeled before
   grouping and cherry-picked back as the final commit.

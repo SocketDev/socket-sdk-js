@@ -16,7 +16,7 @@ These commands mutate state that belongs to other sessions:
 - **`git add -A` / `git add .`**. Sweeps in files that belong to another session's in-progress work. The `overeager-staging-guard` hook blocks these in real time (bypass: `Allow add-all bypass`).
 - **`git checkout <branch>` / `git switch <branch>`**. Yanks the working tree out from under another session editing a file on the current branch.
 - **`git reset --hard` against a non-HEAD ref**. Discards another session's commits.
-- **bare `git commit` (no pathspec) when the index holds files you didn't touch**. A bare commit commits the ENTIRE index, so another session's staged work lands under your authorship. The `overeager-staging-guard` hook blocks this and steers to `git commit -o <your-files>` (bypass: `Allow index-sweep bypass`).
+- **bare `git commit` (no pathspec) when the index holds files you didn't touch**. A bare commit commits the ENTIRE index, so another session's staged work lands under your authorship. The `overeager-staging-guard` hook blocks this and steers to `git commit -o <your-files>` (bypass: `Allow git commit-all bypass`).
 
 If a hook flags one of these, the hook is doing its job. Don't bypass.
 
@@ -42,7 +42,7 @@ Two hooks make the worktree requirement structural rather than advisory. `primar
 Parallel-session-cautious is the **default**, not a special mode. Tread, touch, and commit only the smallest set needed:
 
 1. **Stage surgically.** `git add <specific-file>`. Never `-A` / `.`, which sweeps another session's unstaged edits into your index. The `overeager-staging-guard` hook blocks broad adds at edit time.
-2. **Commit surgically.** `git commit -o <your-file> [<your-file> …]` (or `git commit … -- <paths>`). The `-o` / pathspec form commits **only** the named paths regardless of what else is staged, so even if a parallel session staged files into the shared index, they can't ride into your commit. A bare `git commit` whose index holds files this session didn't touch is **blocked** (steered to `-o`); bypass `Allow index-sweep bypass` only when you genuinely mean to commit the whole index.
+2. **Commit surgically.** `git commit -o <your-file> [<your-file> …]` (or `git commit … -- <paths>`). The `-o` / pathspec form commits **only** the named paths regardless of what else is staged, so even if a parallel session staged files into the shared index, they can't ride into your commit. A bare `git commit` whose index holds files this session didn't touch is **blocked** (steered to `-o`); bypass `Allow git commit-all bypass` only when you genuinely mean to commit the whole index.
 
 Both halves matter: surgical `git add` keeps your index clean, surgical `git commit -o` is the backstop for when the index is already polluted (another agent staged concurrently, a hook auto-staged, a prior sweep). Under heavy contention the index is rarely yours alone. Naming paths at commit time is the only reliable isolation.
 

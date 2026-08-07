@@ -32,20 +32,16 @@
 //
 // Sorted alphabetically.
 export const CANONICAL_PATTERNS: readonly string[] = [
-  'actions/cache/restore@*',
-  'actions/cache/save@*',
   'actions/cache@*',
   'actions/checkout@*',
   'actions/create-github-app-token@*',
   'actions/deploy-pages@*',
   'actions/download-artifact@*',
-  'actions/github-script@*',
   'actions/setup-go@*',
   'actions/setup-node@*',
   'actions/upload-artifact@*',
   'actions/upload-pages-artifact@*',
   'depot/setup-action@*',
-  'github/gh-aw-actions/*',
 ]
 
 // Canonical patterns whose only consumers are fleet members' OWN workflows —

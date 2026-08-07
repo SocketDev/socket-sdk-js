@@ -156,4 +156,4 @@ The `socket/no-which-for-local-bin` oxlint rule holds the PATH-trust-inversion
 discipline at edit time: it flags a bare-name resolution (`which`/`command -v`/
 `where`, or an unfiltered PATH walk) for a project-local binary instead of the
 hardened resolver described above. Bypass for a genuine global lookup:
-`// socket-lint: allow which-lookup`.
+`// oxlint-disable-next-line socket/no-which-for-local-bin`.

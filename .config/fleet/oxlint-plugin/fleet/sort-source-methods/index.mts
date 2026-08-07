@@ -21,11 +21,12 @@
  *
  *   Escape hatch: a file whose functions are intentionally grouped by call-flow
  *   / theme, a multi-step pipeline that reads top-to-bottom, opts out with a
- *   single `// socket-lint: allow source-method-order` comment anywhere in it —
+ *   single `// oxlint-disable-next-line socket/sort-source-methods` comment anywhere in it —
  *   reordering such a file to alphabetical degrades its deliberate structure for
  *   no real findability gain. Mirrors `allow object-property-order`.
  */
 
+import { suppressionWaives } from '../../../../../.claude/hooks/fleet/_shared/suppression-rules.mts'
 import { stringComparator } from '../../lib/comparators.mts'
 
 import type { AstNode, RuleContext, RuleFixer } from '../../lib/rule-types.mts'
@@ -187,14 +188,17 @@ export function trailingCommentEnd(
 /**
  * @type {import('eslint').Rule.RuleModule}
  */
-// File-level escape hatch: a `// socket-lint: allow source-method-order` comment
+// File-level escape hatch: a `// oxlint-disable-next-line socket/sort-source-methods` comment
 // anywhere in the file opts it OUT of function-order enforcement — for files whose
 // top-level functions are intentionally grouped by call-flow / theme rather than
 // alphabet (e.g. a multi-step pipeline that reads top-to-bottom, like the dep-0
 // `bootstrap/fleet.mjs` fetcher). Mirrors sort-object-literal-properties'
 // `allow object-property-order` marker; reordering such a file degrades the
 // deliberate structure for no real findability gain.
-const BYPASS_RE = /socket-lint:\s*allow\s+source-method-order\b/
+
+function waivesHere(text: string): boolean {
+  return suppressionWaives(text, 'socket/sort-source-methods')
+}
 
 const rule = {
   meta: {
@@ -233,8 +237,8 @@ const rule = {
       ? sourceCode.getAllComments()
       : []
     const bypassed = allComments.length
-      ? allComments.some((c: AstNode) => BYPASS_RE.test(String(c.value ?? '')))
-      : BYPASS_RE.test(sourceCode.text ?? '')
+      ? allComments.some((c: AstNode) => waivesHere(String(c.value ?? '')))
+      : waivesHere(sourceCode.text ?? '')
     if (bypassed) {
       return {}
     }
@@ -408,5 +412,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

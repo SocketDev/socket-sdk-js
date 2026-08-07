@@ -1,8 +1,8 @@
 # setup-security-tools
 
 A one-command setup helper that downloads and verifies Socket's three
-local security tools — **AgentShield**, **zizmor**, and **SFW (Socket
-Firewall)** — and wires them into your shell's PATH. Run it once per
+local security tools - **AgentShield**, **zizmor**, and **SFW (Socket
+Firewall)** - and wires them into your shell's PATH. Run it once per
 machine and you're set.
 
 > Despite living under `.claude/hooks/`, this isn't a Claude Code
@@ -16,7 +16,7 @@ machine and you're set.
 ### 1. AgentShield
 
 Scans your Claude Code configuration (`.claude/` directory) for
-security issues — prompt injection patterns, leaked secrets,
+security issues - prompt injection patterns, leaked secrets,
 overly-permissive tool permissions.
 
 **How it's installed**: as an npm package, downloaded via the Socket
@@ -34,10 +34,10 @@ actions, secret exposure, template injection, and permission issues.
 [zizmor's GitHub Releases](https://github.com/zizmorcore/zizmor/releases),
 SHA-256 verified against the pinned hash in `external-tools.json`,
 cached at `~/.socket/_dlx/`. If you already have zizmor installed
-via Homebrew, the download is skipped — but the script still uses
+via Homebrew, the download is skipped - but the script still uses
 its pinned version, not your system one.
 
-### 3. SFW — Socket Firewall
+### 3. SFW - Socket Firewall
 
 Intercepts package manager commands (`npm install`, `pnpm add`, etc.)
 and scans the resolved packages against Socket.dev's malware database
@@ -46,8 +46,8 @@ registry between your last `pnpm install` and now.
 
 **How it's installed**: as a native binary, downloaded from GitHub,
 SHA-256 verified, cached at `~/.socket/_dlx/`. The script also writes
-small wrapper scripts ("shims") at `~/.socket/_wheelhouse/shims/` — one per
-package manager — that transparently route commands through the
+small wrapper scripts ("shims") at `~/.socket/_wheelhouse/shims/` - one per
+package manager - that transparently route commands through the
 firewall. You make sure that directory is at the front of your PATH;
 nothing else changes about how you use the tools.
 
@@ -58,7 +58,7 @@ it installs the free build (npm, yarn, pnpm, pip, pip3, uv, cargo).
 `SOCKET_API_KEY` is the primary slot because every Socket tool
 reads it without a fallback chain. `SOCKET_API_TOKEN` (the
 forward-canonical name used in fleet docs / workflow inputs) is
-accepted as a secondary read — pass either and the bootstrap
+accepted as a secondary read - pass either and the bootstrap
 resolves it.
 
 ## How to use
@@ -91,9 +91,9 @@ without colliding.
 The `.git-hooks/pre-push` hook (also in this repo) runs
 **AgentShield** and **zizmor** automatically before every `git push`.
 A failed scan blocks the push. This means you don't have to remember
-to run `pnpm run security` manually — every push gets the check.
+to run `pnpm run security` manually - every push gets the check.
 
-SFW doesn't run from pre-push (it runs at install time instead — see
+SFW doesn't run from pre-push (it runs at install time instead - see
 the shims).
 
 ## Re-running
@@ -116,7 +116,7 @@ add it to a new Socket repo:
    `.claude/commands/setup-security-tools.md`.
 2. Make sure the consumer repo's catalog (or `dependencies`) provides
    `@socketsecurity/lib-stable` and `@socketregistry/packageurl-js-stable`.
-3. Make sure `.claude/hooks/` isn't gitignored — add
+3. Make sure `.claude/hooks/` isn't gitignored - add
    `!/.claude/hooks/` to `.gitignore` if needed.
 4. Add a `setup` script to `package.json`:
    `"setup": "node .claude/hooks/fleet/setup-security-tools/index.mts"`.
@@ -124,20 +124,20 @@ add it to a new Socket repo:
 
 ## Troubleshooting
 
-**"AgentShield install failed"** — Check that your machine can reach
+**"AgentShield install failed"** - Check that your machine can reach
 the npm registry. The dlx system caches at `~/.socket/_dlx/`. Clear
 the cache (`safe-delete ~/.socket/_dlx/`) to force a fresh download.
 
-**"zizmor found but wrong version"** — The script intentionally
+**"zizmor found but wrong version"** - The script intentionally
 downloads the pinned version into the dlx cache, ignoring whatever
 version you have via Homebrew. The pin lives in `external-tools.json`.
 
-**"No supported package managers found"** — SFW only creates shims
+**"No supported package managers found"** - SFW only creates shims
 for package managers found on your `PATH` at install time. Install
 npm/pnpm/whatever first, then re-run setup.
 
-**SFW shims not intercepting** — Make sure `~/.socket/_wheelhouse/shims` is
-at the _front_ of your `PATH`. Run `which npm` — it should point at
+**SFW shims not intercepting** - Make sure `~/.socket/_wheelhouse/shims` is
+at the _front_ of your `PATH`. Run `which npm` - it should point at
 the shim under `~/.socket/_wheelhouse/shims/`, not the real binary.
 
 ## Cross-fleet sync

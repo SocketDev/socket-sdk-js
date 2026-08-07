@@ -23,10 +23,10 @@ later. The cleanest fix is to never print the value at all.
 | Rule                                                         | Example that gets blocked                                | What to do instead                                                                                                                                                         |
 | ------------------------------------------------------------ | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Literal token in the command itself                          | `echo vtwn_abc123…`                                      | Rotate the exposed token; read tokens from `.env.local` at spawn time, never inline them.                                                                                  |
-| `env` / `printenv` / `export -p` / `set` printing everything | `env \| grep FOO` — the grep doesn't redact the value    | `env \| sed 's/=.*/=<redacted>/'`, or filter specific keys you know aren't secret.                                                                                         |
+| `env` / `printenv` / `export -p` / `set` printing everything | `env \| grep FOO` - the grep doesn't redact the value    | `env \| sed 's/=.*/=<redacted>/'`, or filter specific keys you know aren't secret.                                                                                         |
 | `.env*` read without a redactor                              | `cat .env.local`                                         | `sed 's/=.*/=<redacted>/' .env.local`, or just print key names: `grep -v '^#' .env.local \| cut -d= -f1`.                                                                  |
 | `curl -H "Authorization:"` with unfiltered stdout            | `curl -H "Authorization: Bearer $TOKEN" api.example.com` | Redirect output (`> file`, `> /dev/null`), or pipe through `jq` / `grep` / `head` / `wc` / `cut` / `awk` so the response body is processed before it hits Claude's stdout. |
-| Sensitive env var name in an `echo` / `printf` to stdout     | `echo $API_KEY`                                          | Same as above — redirect or pipe.                                                                                                                                          |
+| Sensitive env var name in an `echo` / `printf` to stdout     | `echo $API_KEY`                                          | Same as above - redirect or pipe.                                                                                                                                          |
 
 ## What it allows
 
@@ -60,7 +60,7 @@ this shape is not idle text):
 ## Fail-open on hook bugs
 
 If the hook itself crashes (a parse error, a missing dep, a typo in
-a regex), it writes a log line and exits `0` — i.e. _the command is
+a regex), it writes a log line and exits `0` - i.e. _the command is
 allowed_. The reasoning: a buggy security hook that blocks
 everything is a worse outcome than a buggy security hook that
 temporarily lets things through. The companion enforcement layers

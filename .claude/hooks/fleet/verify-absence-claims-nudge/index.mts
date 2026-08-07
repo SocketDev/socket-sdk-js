@@ -53,7 +53,8 @@ const ABSENCE_PATTERNS: ReadonlyArray<{ label: string; re: RegExp }> = [
 // Drop fenced + inline code so an example / quoted snippet doesn't trip the
 // matcher, the claim we care about is prose, not a pasted command.
 export function stripCode(text: string): string {
-  // socket-lint: allow uncommented-regex -- fenced then inline code spans.
+  // Fenced then inline code spans.
+  // oxlint-disable-next-line socket/require-regex-comment -- fenced then inline
   return text.replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]+`/g, '')
 }
 

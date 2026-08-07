@@ -18,19 +18,19 @@ The fleet tier doctrine: Fable plans, a lesser model executes, Fable reviews, th
 
 - Non-trivial build/design work: multi-file changes, new enforcement surfaces, cross-repo cascades.
 - Work whose plan is a deliverable (`plan-review-nudge` shape: numbered steps, named files + rules).
-- NOT for one-file fixes — just do them.
-- NOT for plan critique — that is `grilling-plan`; run it before this skill when the design is unsettled.
+- NOT for one-file fixes - just do them.
+- NOT for plan critique - that is `grilling-plan`; run it before this skill when the design is unsettled.
 
 ## The cycle
 
-1. **Plan** — big brain writes the numbered plan + a fenced execution prompt to `.claude/plans/`.
-2. **Execute** — floor model follows the plan verbatim in a `git worktree`.
-3. **Review** — big brain diffs the result against the plan; emits severity + `file:line` findings.
-4. **Follow-up** — floor model applies each finding, re-runs gates, commits.
+1. **Plan** - big brain writes the numbered plan + a fenced execution prompt to `.claude/plans/`.
+2. **Execute** - floor model follows the plan verbatim in a `git worktree`.
+3. **Review** - big brain diffs the result against the plan; emits severity + `file:line` findings.
+4. **Follow-up** - floor model applies each finding, re-runs gates, commits.
 
 ## Sensitivity routing
 
-Mirror — source of truth: `scripts/fleet/lib/delegating-execution/route.mts`.
+Mirror - source of truth: `scripts/fleet/lib/delegating-execution/route.mts`.
 
 | phase    | sensitivity | model               | effort      |
 |----------|-------------|---------------------|-------------|
@@ -44,7 +44,7 @@ Mirror — source of truth: `scripts/fleet/lib/delegating-execution/route.mts`.
 | followup | security    | `claude-sonnet-4-6` | `medium`    |
 
 - Benign infra/docs planning → Fable (apex tier; adaptive-only, no effort knob).
-- Security-sensitive planning (vuln analysis, supply-chain, auth/token/secret handling, exploit-adjacent, hardening) → Opus 4.8 DIRECTLY: Fable's classifiers false-positive on benign security work and the refusal→Opus fallback in `spawnAiAgent` is not live yet (upstream socket-lib; see [`fable-fallback`](../../../../docs/agents.md/fleet/fable-fallback.md)). When unsure, say `security` — the workflow also defaults to it (fail-safe).
+- Security-sensitive planning (vuln analysis, supply-chain, auth/token/secret handling, exploit-adjacent, hardening) → Opus 4.8 DIRECTLY: Fable's classifiers false-positive on benign security work and the refusal→Opus fallback in `spawnAiAgent` is not live yet (upstream socket-lib; see [`fable-fallback`](../../../../docs/agents.md/fleet/fable-fallback.md)). When unsure, say `security` - the workflow also defaults to it (fail-safe).
 
 ## How to invoke
 
@@ -62,6 +62,6 @@ Workflow({ name: "delegating-execution", args: { sensitivity: "benign" | "securi
 
 ## Backing code
 
-- `scripts/fleet/lib/delegating-execution/route.mts` — the canonical tier table.
-- `scripts/fleet/lib/delegating-execution/prompts.mts` — phase prompt builders (source of truth; the workflow JS carries a mirror).
-- `.claude/workflows/delegating-execution.js` — the Workflow runner.
+- `scripts/fleet/lib/delegating-execution/route.mts` - the canonical tier table.
+- `scripts/fleet/lib/delegating-execution/prompts.mts` - phase prompt builders (source of truth; the workflow JS carries a mirror).
+- `.claude/workflows/delegating-execution.js` - the Workflow runner.

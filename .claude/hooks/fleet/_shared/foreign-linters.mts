@@ -75,10 +75,12 @@ export function isForeignConfigFile(basename: string): boolean {
 // match on a literal here is a false positive and is locally disabled.
 export function isForeignToolPackage(name: string): boolean {
   if (
-    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data, not a config reference.
+    // Detection data, not a config reference.
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
     name === '@biomejs/biome' ||
     name === 'dprint' ||
-    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data, not a config reference.
+    // Detection data, not a config reference.
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
     name === 'eslint' ||
     name === 'prettier' ||
     name === 'rome'
@@ -86,12 +88,15 @@ export function isForeignToolPackage(name: string): boolean {
     return true
   }
   return (
-    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data, not a config reference.
+    // Detection data, not a config reference.
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
     name.startsWith('@eslint/') ||
     name.startsWith('@typescript-eslint/') ||
-    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data, not a config reference.
+    // Detection data, not a config reference.
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
     name.startsWith('eslint-config-') ||
-    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data, not a config reference.
+    // Detection data, not a config reference.
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
     name.startsWith('eslint-plugin-') ||
     name.startsWith('prettier-plugin-') ||
     /^@[^/]+\/eslint-/.test(name)
@@ -126,9 +131,11 @@ export function isTestFixture(filePath: string): boolean {
  * CLI binary a foreign package family runs as (eslint-plugin-* → eslint).
  */
 export function foreignToolBinary(name: string): string {
-  // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data, not a config reference.
+  // Detection data, not a config reference.
+  // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
   if (name === '@biomejs/biome') {
-    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data, not a config reference.
+    // Detection data, not a config reference.
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
     return 'biome'
   }
   if (name === 'dprint') {
@@ -142,7 +149,8 @@ export function foreignToolBinary(name: string): string {
   }
   // Every remaining foreign family is ESLint-adjacent (@eslint/*,
   // @typescript-eslint/*, eslint-config-*, eslint-plugin-*, @<scope>/eslint-*).
-  // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection data, not a config reference.
+  // Detection data, not a config reference.
+  // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detection
   return 'eslint'
 }
 

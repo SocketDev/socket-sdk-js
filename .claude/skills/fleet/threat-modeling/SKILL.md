@@ -17,7 +17,7 @@ and what should we do about it?"** independently of whether any specific bug has
 been found yet. It is the map; vulnerability discovery is the metal detector. A
 good threat model tells [`scanning-vulns`](../scanning-vulns/SKILL.md) where to
 look and tells [`triaging-findings`](../triaging-findings/SKILL.md) which
-findings matter — its threat-model boost reads this file's section 4.
+findings matter - its threat-model boost reads this file's section 4.
 
 **Litmus test:** If patching one line of code makes an entry disappear, it was a
 vulnerability, not a threat. A threat ("attacker achieves RCE via untrusted media
@@ -30,7 +30,7 @@ threat's likelihood score.
 
 ---
 
-## Step 0 — Safety preamble (always runs first)
+## Step 0 - Safety preamble (always runs first)
 
 This skill performs **static analysis only**. It reads source, git history, and
 any vulnerability reports the user supplies, and writes a single output file
@@ -55,12 +55,12 @@ or a human-built PoC follow-up.
 
 ---
 
-## Step 1 — Route to a mode
+## Step 1 - Route to a mode
 
 Parse `$ARGUMENTS`:
 
 <details>
-<summary><b>Detail</b> — Context durability, Interview backbone</summary>
+<summary><b>Detail</b> - Context durability, Interview backbone</summary>
 
 | First token                | Route to                                                       |
 | -------------------------- | -------------------------------------------------------------- |
@@ -120,7 +120,7 @@ of describing the system from scratch.
 
 ---
 
-## Step 2 — Shared output contract
+## Step 2 - Shared output contract
 
 All modes MUST emit `<target-dir>/THREAT_MODEL.md` conforming to `schema.md` in
 this directory. **Read `schema.md` immediately before you write the file**, not at
@@ -135,7 +135,7 @@ After writing the file, print to the user:
    `interview` pass) and the Stage-3b sibling locations (candidate leads for
    `scanning-vulns`).
 4. For `interview`: any owner statements that could not be verified in code
-   — these seed follow-up code review.
+   - these seed follow-up code review.
 
 ---
 
@@ -146,7 +146,7 @@ Both modes persist phase/stage state to a cwd-relative `*-state` dir
 .claude/skills/fleet/_shared/scripts/checkpoint.mts` so a fresh session can
 resume. Bootstrap uses `--key stage`; the helper is otherwise identical to the
 one [`triaging-findings`](../triaging-findings/SKILL.md) documents. Add the state
-dir to `.gitignore` — it is scratch. The per-stage checkpoint commands are inline
+dir to `.gitignore` - it is scratch. The per-stage checkpoint commands are inline
 in `bootstrap.md`.
 
 ---

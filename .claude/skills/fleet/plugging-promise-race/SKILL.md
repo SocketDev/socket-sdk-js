@@ -13,7 +13,7 @@ metadata:
 
 ## Patterns
 
-- **Safe** — both arms created per call:
+- **Safe** - both arms created per call:
 
   ```ts
   const value = await Promise.race([
@@ -22,7 +22,7 @@ metadata:
   ])
   ```
 
-- **Leaky** — `pool` survives across iterations, accumulating handlers:
+- **Leaky** - `pool` survives across iterations, accumulating handlers:
 
   ```ts
   while (queue.length) {

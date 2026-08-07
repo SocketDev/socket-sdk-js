@@ -37,10 +37,10 @@ Runs the repo's coverage script and rewrites the README badge so the published n
 | --- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | 1   | Discovery | Find the coverage script in `package.json` (`cover` / `coverage` / `test:cover`, in that preference).                                |
 | 2   | Run       | `pnpm run <script>`. Fail loudly if the run errors.                                                                                  |
-| 3   | Rewrite   | `node scripts/fleet/gen/coverage-badge.mts` — reads `.cache/fleet/coverage/coverage-summary.json`, rewrites the badge. |
+| 3   | Rewrite   | `node scripts/fleet/gen/coverage-badge.mts` - reads `.cache/fleet/coverage/coverage-summary.json`, rewrites the badge. |
 | 4   | Commit    | `docs(readme): refresh coverage badge to N%`. Direct-push per fleet norm.                                                            |
 
-The parse + rewrite math (read the summary, round the percent, pick the color bucket, edit the README) is owned by `scripts/fleet/gen/coverage-badge.mts` and its lib `scripts/fleet/lib/coverage-badge.mts` — the same owner the commit-time gate `scripts/fleet/check/coverage-badge-is-current.mts` reads. This skill never re-derives the number or the format in shell; if it did, the badge it wrote (e.g. two decimals, a hard-coded color) would be rejected by `check --all`. The skill is orchestration over those scripts; the judgment it keeps is surfacing a real coverage-run failure.
+The parse + rewrite math (read the summary, round the percent, pick the color bucket, edit the README) is owned by `scripts/fleet/gen/coverage-badge.mts` and its lib `scripts/fleet/lib/coverage-badge.mts` - the same owner the commit-time gate `scripts/fleet/check/coverage-badge-is-current.mts` reads. This skill never re-derives the number or the format in shell; if it did, the badge it wrote (e.g. two decimals, a hard-coded color) would be rejected by `check --all`. The skill is orchestration over those scripts; the judgment it keeps is surfacing a real coverage-run failure.
 
 ## Phase 1: discovery
 
@@ -48,7 +48,7 @@ The parse + rewrite math (read the summary, round the percent, pick the color bu
 node -e "import('./scripts/fleet/lib/coverage-badge.mts').then(m => { const s = m.coverageScriptName(process.cwd()); if (!s) { process.exit(1) } console.log(s) })"
 ```
 
-`coverageScriptName` returns the first of `cover` / `coverage` / `test:cover` declared in `package.json`, or exits non-zero when the repo tracks no coverage. That is not a failure mode — many fleet repos don't track coverage; the skill exits cleanly.
+`coverageScriptName` returns the first of `cover` / `coverage` / `test:cover` declared in `package.json`, or exits non-zero when the repo tracks no coverage. That is not a failure mode - many fleet repos don't track coverage; the skill exits cleanly.
 
 ## Phase 2: run
 
@@ -56,7 +56,7 @@ node -e "import('./scripts/fleet/lib/coverage-badge.mts').then(m => { const s = 
 pnpm run <SCRIPT>
 ```
 
-Use the standard pnpm runner so the repo's own env config (catalog versions, etc.) applies. A real coverage-run failure is surfaced, not swallowed — that's the judgment this skill keeps.
+Use the standard pnpm runner so the repo's own env config (catalog versions, etc.) applies. A real coverage-run failure is surfaced, not swallowed - that's the judgment this skill keeps.
 
 ## Phase 3: rewrite
 

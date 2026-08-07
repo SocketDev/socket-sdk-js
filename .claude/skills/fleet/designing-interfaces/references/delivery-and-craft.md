@@ -15,7 +15,7 @@ the task is non-trivial.
 Suggested format:
 
 <details>
-<summary><b>Detail</b> — `Research summary:`, `Visual direction:`, `Product patterns:`</summary>
+<summary><b>Detail</b> - `Research summary:`, `Visual direction:`, `Product patterns:`</summary>
 
 ```text
 Research summary:
@@ -56,7 +56,7 @@ After research, execute like a senior product designer. Use the bundled referenc
 when relevant; do not load every file by default.
 
 <details>
-<summary><b>Detail</b> — the full list (18 entries)</summary>
+<summary><b>Detail</b> - the full list (18 entries)</summary>
 
 - Typography: [references/typography.md](references/typography.md)
 - Color: [references/color.md](references/color.md)

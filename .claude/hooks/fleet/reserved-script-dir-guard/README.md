@@ -8,17 +8,17 @@ tooling concept.
 
 An Edit/Write whose `file_path` is under one of these `scripts/` dirs:
 
-- `scripts/build/` — collides with the `build` package.json script + the
+- `scripts/build/` - collides with the `build` package.json script + the
   `dist/` output + `scripts/build-externals/`
-- `scripts/dist/` — `dist/` is the output dir, not a script dir
-- `scripts/node_modules/` — install dir
-- `scripts/coverage/` — coverage report output
-- `scripts/cache/` — tool cache (belongs in `.cache/`)
+- `scripts/dist/` - `dist/` is the output dir, not a script dir
+- `scripts/node_modules/` - install dir
+- `scripts/coverage/` - coverage report output
+- `scripts/cache/` - tool cache (belongs in `.cache/`)
 
 ## What it allows
 
-- `scripts/fleet/**` and `scripts/repo/**` — the two canonical tiers
-- `scripts/_*/**` — internals folders
+- `scripts/fleet/**` and `scripts/repo/**` - the two canonical tiers
+- `scripts/_*/**` - internals folders
 - Any feature dir named for what it does: `scripts/bundle/`,
   `scripts/post-build/`, `scripts/build-externals/` (only the bare `build`
   segment is reserved, not `build-*` or `post-build`).
@@ -37,6 +37,6 @@ Type `Allow reserved-script-dir bypass` in a recent turn.
 
 ## Exit codes
 
-- `0` — pass (not Edit/Write, path not under a reserved dir, or bypassed)
-- `2` — block
+- `0` - pass (not Edit/Write, path not under a reserved dir, or bypassed)
+- `2` - block
 - Fails open on any internal error.

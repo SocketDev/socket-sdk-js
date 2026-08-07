@@ -6,12 +6,12 @@ CHANGELOG, and release notes. The prose skill enforces these rules at write time
 
 ## Voice
 
-- Lead with the point — the first sentence is the decision or answer; no preamble,
+- Lead with the point - the first sentence is the decision or answer; no preamble,
   no "Great question", no restating the task before answering it.
 - Default to 1-3 sentences on conversational surfaces (PR/issue/comment); cut
   anything the reader already knows.
-- Code beats prose when the answer is code — show it, don't narrate it.
-- Decide fast and name the reason + reversal condition — don't survey options;
+- Code beats prose when the answer is code - show it, don't narrate it.
+- Decide fast and name the reason + reversal condition - don't survey options;
   decide, state why, state what would change it, move on.
 - For a breaking or architectural decision, name the migration path. Ask focused
   stakeholders for input when their code or users are affected.
@@ -26,10 +26,10 @@ CHANGELOG, and release notes. The prose skill enforces these rules at write time
 - Every technical claim needs a receipt from this session: a commit SHA, a
   `file:line` reference, a benchmark output. Never assert "faster/works/fixed"
   without a tool call that produced the result.
-- Subagent output counts and file lists are leads, not facts — grep/read before
+- Subagent output counts and file lists are leads, not facts - grep/read before
   relaying them.
-- A self-reported detail — a PR author's "I ran X" / "my machine is on 1.15.7",
-  a bot's claim, a teammate's count — is a lead, not your finding. Verify it
+- A self-reported detail - a PR author's "I ran X" / "my machine is on 1.15.7",
+  a bot's claim, a teammate's count - is a lead, not your finding. Verify it
   from a source you can read, or attribute it ("you mentioned…"); never
   restate someone else's unverified claim as your own verified fact. Note: a
   readable source means the repo or a tool call. Half a claim being checkable
@@ -38,9 +38,9 @@ CHANGELOG, and release notes. The prose skill enforces these rules at write time
 ## Finishing
 
 - Finish the task; capture side-quests as a note + an ask, don't chase them.
-- Default to the high-bar invariant when unsure — quality is the baseline, not a
+- Default to the high-bar invariant when unsure - quality is the baseline, not a
   stretch goal.
-- A standard that isn't executable is policy on paper — correct once → promote to
+- A standard that isn't executable is policy on paper - correct once → promote to
   a hook, lint rule, or check.
 
 ## Anti-patterns
@@ -57,7 +57,7 @@ by `convo-prose-nudge` on PR/issue bodies:
   helps!", trailing summary that restates the opening.
 - **Diff narration:** describing what the code change already shows.
 - **Hedge-stacking:** "essentially", "fundamentally", "simply", "just",
-  "basically" — cut them.
+  "basically" - cut them.
 - **Em-dashes:** every one of them, not just chains. One U+2014 on an outbound
   surface already reads as an agent tell. The fix is mechanical, so it stays
   reviewable: replace the em-dash with a plain hyphen and leave the spacing
@@ -67,8 +67,8 @@ by `convo-prose-nudge` on PR/issue bodies:
   applies the swap; the burn-down list in
   `scripts/fleet/constants/prose-em-dash-burn-down.json` names the files still
   owed the rewrite and only ever shrinks.
-- **"not X, it's Y" contrast pairs** — state the positive directly.
-- **Honesty announcements:** "to be honest", "if I'm honest" — and the bare
+- **"not X, it's Y" contrast pairs** - state the positive directly.
+- **Honesty announcements:** "to be honest", "if I'm honest" - and the bare
   qualifier ("honest status", "the honest answer"); just say it. The shared
   `_shared/honesty-framing.mts` matcher treats any `honest`/`honestly`/`honesty`
   token as a verdict.

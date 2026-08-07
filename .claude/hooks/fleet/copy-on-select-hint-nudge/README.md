@@ -1,6 +1,6 @@
 # copy-on-select-hint-nudge
 
-**Type:** SessionStart hook (NUDGE — informational, never blocks).
+**Type:** SessionStart hook (NUDGE - informational, never blocks).
 
 ## Trigger
 
@@ -32,6 +32,6 @@ config + terminal combo that reliably produces the surprise.
 
 ## Bypass
 
-None — it only prints informational text and cannot block or mutate anything.
+None - it only prints informational text and cannot block or mutate anything.
 To stop the hint, re-enable copy-on-select (`copyOnSelect: true`), which also
 removes it from the fleet `HARDENED_GLOBAL_CONFIG`.

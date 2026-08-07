@@ -22,15 +22,11 @@
  *   - A rest param (`...args`) — variadic by design, not a placeholder trap.
  *   - A tail already made of destructured object patterns — that IS the fix.
  *   - Overload signatures (no function body — type-only contracts).
- *   - Bypass: a `socket-lint: allow optional-positional-trap` comment.
+ *   - Bypass: a `oxlint-disable-next-line socket/no-optional-positional-trap` comment.
  */
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
-
-// socket-lint: allow optional-positional-trap -- opt-out for a signature whose
-// optional tail is fixed by an external contract we do not own.
-const BYPASS_RE = /socket-lint:\s*allow\s+optional-positional-trap/
 
 const DEFAULT_THRESHOLD = 3
 
@@ -105,7 +101,7 @@ const rule = {
     },
     messages: {
       banned:
-        '{{count}} trailing optional positional params ({{names}}) — a caller who wants only the last one must pass `undefined` placeholders for the rest, and adding a param later silently breaks positional callers. Collapse them into one options object: `fn(…, { {{names}} })`. Bypass: add a `socket-lint: allow optional-positional-trap` comment.',
+        '{{count}} trailing optional positional params ({{names}}) — a caller who wants only the last one must pass `undefined` placeholders for the rest, and adding a param later silently breaks positional callers. Collapse them into one options object: `fn(…, { {{names}} })`. Bypass: add a `oxlint-disable-next-line socket/no-optional-positional-trap` comment.',
     },
     schema: [
       {
@@ -119,7 +115,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeBypassChecker(
+      context,
+      'socket/no-optional-positional-trap',
+    )
     const configured = context.options?.[0]?.threshold
     const threshold =
       typeof configured === 'number' && configured >= 2
@@ -164,5 +163,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

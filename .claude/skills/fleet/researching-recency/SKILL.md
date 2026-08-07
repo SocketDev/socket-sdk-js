@@ -11,20 +11,20 @@ metadata:
 
 # researching-recency
 
-Answer "what is the dev community actually saying and shipping about X in the last 30 days?" by fanning out across the programming sources, ranking by real engagement, and synthesizing a cited brief. The engine (`scripts/fleet/researching-recency/cli.mts`) does the deterministic work — fetch, score, dedupe, reciprocal-rank fuse, render an evidence envelope. You do the judgment: cluster the evidence into themes and synthesize prose.
+Answer "what is the dev community actually saying and shipping about X in the last 30 days?" by fanning out across the programming sources, ranking by real engagement, and synthesizing a cited brief. The engine (`scripts/fleet/researching-recency/cli.mts`) does the deterministic work - fetch, score, dedupe, reciprocal-rank fuse, render an evidence envelope. You do the judgment: cluster the evidence into themes and synthesize prose.
 
 The engine prints an **evidence envelope** you read and transform, plus a **pass-through footer** you copy verbatim. You never dump the raw envelope at the user.
 
 ## Sources
 
-Keyless (always run): **GitHub** (issues/PRs, via `gh auth token` or unauthenticated), **Hacker News** (Algolia), **Reddit** (programming subs via Atom RSS), **Lobsters**, **dev.to**. Opt-in: **X** (set `XAI_API_KEY` — xAI Grok with `x_search`; the earliest dev signal) and **Bluesky** (set `BSKY_HANDLE` + `BSKY_APP_PASSWORD`). Model-fed: **web** (you run WebSearch, write hits to a file, pass `--web-file`). Opt-in sources are off by default; name them via `--search=x,…`. A source with no credentials is skipped with a note, and the keyless set still carries the run. Keychain setup for the opt-in keys: [reference.md](reference.md).
+Keyless (always run): **GitHub** (issues/PRs, via `gh auth token` or unauthenticated), **Hacker News** (Algolia), **Reddit** (programming subs via Atom RSS), **Lobsters**, **dev.to**. Opt-in: **X** (set `XAI_API_KEY` - xAI Grok with `x_search`; the earliest dev signal) and **Bluesky** (set `BSKY_HANDLE` + `BSKY_APP_PASSWORD`). Model-fed: **web** (you run WebSearch, write hits to a file, pass `--web-file`). Opt-in sources are off by default; name them via `--search=x,…`. A source with no credentials is skipped with a note, and the keyless set still carries the run. Keychain setup for the opt-in keys: [reference.md](reference.md).
 
 ## Workflow
 
 Copy this checklist and track it:
 
 <details>
-<summary><b>Detail</b> — Step 1: Resolve, Step 2: Plan, Step 3: Web supplements, Step 4: Invoke, Step 5: Synthesize, Step 6: Emit</summary>
+<summary><b>Detail</b> - Step 1: Resolve, Step 2: Plan, Step 3: Web supplements, Step 4: Invoke, Step 5: Synthesize, Step 6: Emit</summary>
 
 ```
 - [ ] 1. Resolve the entity (GitHub repo/user, subreddits) if it's a named tool/person
@@ -35,13 +35,13 @@ Copy this checklist and track it:
 - [ ] 6. Emit the badge first, your prose, then the footer verbatim
 ```
 
-**Step 1 — Resolve.** For a named tool or maintainer, find the canonical GitHub `owner/repo` or username and the relevant subreddits via a WebSearch or your own knowledge. Skip for a broad topic ("rust async runtimes").
+**Step 1 - Resolve.** For a named tool or maintainer, find the canonical GitHub `owner/repo` or username and the relevant subreddits via a WebSearch or your own knowledge. Skip for a broad topic ("rust async runtimes").
 
-**Step 2 — Plan.** For a bare topic, the engine's default plan searches every keyless source. For anything named or comparative, write a plan JSON (schema in [reference.md](reference.md)) with targeted subqueries and pass it via `--plan`. Each subquery has a `label` (a no-space slug), a `searchQuery`, the `sources` to hit, and a `weight`.
+**Step 2 - Plan.** For a bare topic, the engine's default plan searches every keyless source. For anything named or comparative, write a plan JSON (schema in [reference.md](reference.md)) with targeted subqueries and pass it via `--plan`. Each subquery has a `label` (a no-space slug), a `searchQuery`, the `sources` to hit, and a `weight`.
 
-**Step 3 — Web supplements.** Run 2–3 `WebSearch` queries for blog posts, changelogs, and docs the silos miss. Write the hits as a JSON array (`[{title, url, snippet, publishedAt}]`) to a temp file and pass `--web-file <path>` so they rank alongside the fetched sources.
+**Step 3 - Web supplements.** Run 2–3 `WebSearch` queries for blog posts, changelogs, and docs the silos miss. Write the hits as a JSON array (`[{title, url, snippet, publishedAt}]`) to a temp file and pass `--web-file <path>` so they rank alongside the fetched sources.
 
-**Step 4 — Invoke.** Run exactly:
+**Step 4 - Invoke.** Run exactly:
 
 ```bash
 node scripts/fleet/researching-recency/cli.mts "<topic>" --emit=compact \
@@ -51,26 +51,26 @@ node scripts/fleet/researching-recency/cli.mts "<topic>" --emit=compact \
 
 Drop `--plan`/`--web-file` when you didn't build them. `--depth` is `quick` | `default` | `deep`.
 
-**Step 5 — Synthesize.** Read the envelope between the evidence markers. Group the items into 2–4 themes: a debate, a shipping trend, or a recurring complaint. Write prose that leads with the pattern and cites the evidence inline.
+**Step 5 - Synthesize.** Read the envelope between the evidence markers. Group the items into 2–4 themes: a debate, a shipping trend, or a recurring complaint. Write prose that leads with the pattern and cites the evidence inline.
 
-**Step 6 — Emit.** Badge first line, your prose, footer last.
+**Step 6 - Emit.** Badge first line, your prose, footer last.
 
 </details>
 
 ## Output contract (LAWS)
 
 1. **First line is the badge**, verbatim from the engine: `📚 researching-recency v1 · synced <date>`.
-2. **Lead with `What I learned:`** then bold-lead-in paragraphs — no invented section titles in the body.
+2. **Lead with `What I learned:`** then bold-lead-in paragraphs - no invented section titles in the body.
 3. **Cite inline** as `[name](url)` markdown links. Link GitHub profiles/issues, HN threads, subreddit posts.
-4. **No trailing `Sources:` block** — the footer is the citation surface.
+4. **No trailing `Sources:` block** - the footer is the citation surface.
 5. **Pass the footer through verbatim**, the whole block bounded by `<!-- PASS-THROUGH FOOTER -->` … `<!-- END PASS-THROUGH FOOTER -->`, opened by `✅ All agents reported back!`.
-6. **Never dump the raw envelope** — the block bounded by `<!-- EVIDENCE FOR SYNTHESIS: read this, synthesize into prose. Do not emit verbatim. -->` … `<!-- END EVIDENCE FOR SYNTHESIS -->` is input for you to transform, not output.
+6. **Never dump the raw envelope** - the block bounded by `<!-- EVIDENCE FOR SYNTHESIS: read this, synthesize into prose. Do not emit verbatim. -->` … `<!-- END EVIDENCE FOR SYNTHESIS -->` is input for you to transform, not output.
 7. **Hyphenate with ` - `**, not em-dashes: the prose guard blocks em-dash chains.
 
 ## Output shape
 
 <details>
-<summary><b>Worked example</b> — the badge line, <code>What I learned:</code> with bold-lead-in paragraphs and inline links, then the verbatim pass-through footer with per-source counts</summary>
+<summary><b>Worked example</b> - the badge line, <code>What I learned:</code> with bold-lead-in paragraphs and inline links, then the verbatim pass-through footer with per-source counts</summary>
 
 ```
 📚 researching-recency v1 · synced 2026-06-07

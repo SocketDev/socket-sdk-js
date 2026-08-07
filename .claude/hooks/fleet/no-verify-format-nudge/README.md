@@ -19,7 +19,7 @@ node_modules/.bin/oxfmt -c .config/fleet/oxfmtrc.json <files>
 git add <files> && git commit --amend --no-edit --no-verify
 ```
 
-Always exits 0 — a reminder, never a block. `--no-verify` is legitimate and is already gated behind the `Allow no-verify bypass` phrase by `no-revert-guard`.
+Always exits 0 - a reminder, never a block. `--no-verify` is legitimate and is already gated behind the `Allow no-verify bypass` phrase by `no-revert-guard`.
 
 ## Failing open
 
@@ -27,6 +27,6 @@ Any error (not a git repo, no `oxfmt` binary, spawn failure) exits 0 with no out
 
 ## Related
 
-- `pre-commit-race-nudge` — the index-race sibling reminder on `--no-verify`.
-- `no-revert-guard` — gates `--no-verify` behind the `Allow no-verify bypass` phrase.
+- `pre-commit-race-nudge` - the index-race sibling reminder on `--no-verify`.
+- `no-revert-guard` - gates `--no-verify` behind the `Allow no-verify bypass` phrase.
 - CLAUDE.md → "Hook bypasses require the canonical phrase".

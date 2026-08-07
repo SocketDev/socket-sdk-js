@@ -13,7 +13,7 @@ metadata:
 
 Find published API that nobody uses. A core infra lib like `@socketsecurity/lib`
 exports 500+ subpaths; some are referenced by no other fleet repo and not even
-by the lib's own internals. That dead surface is pure carrying cost — bundle
+by the lib's own internals. That dead surface is pure carrying cost - bundle
 weight, a wider type-check graph, a tax on every refactor. This skill surfaces
 it. Read-only: it reports prune candidates, it never removes an export (mirrors
 `auditing-gha`, which reports drift but flips no setting).
@@ -24,12 +24,12 @@ target; other libs get a meaningful report too.
 
 ## When to use
 
-- **On-demand surface sweep** — run this skill to list dead / single-consumer
+- **On-demand surface sweep** - run this skill to list dead / single-consumer
   exports. Dead surface accumulates silently, so sweep it on a cadence you
-  choose (there is no scheduled workflow — invoke it manually).
-- **Before a major version bump** — a `dead` or `single-consumer` export is a
+  choose (there is no scheduled workflow - invoke it manually).
+- **Before a major version bump** - a `dead` or `single-consumer` export is a
   candidate to remove (major) or inline into its one consumer.
-- **Bundle trimming** — pairs with `trimming-bundle`; an unconsumed subpath is
+- **Bundle trimming** - pairs with `trimming-bundle`; an unconsumed subpath is
   weight no downstream needs.
 
 ## What it does NOT do
@@ -39,7 +39,7 @@ target; other libs get a meaningful report too.
 - **Prove a `dead` export is safe to remove.** The scan sees only the fleet
   repos present under `$PROJECTS` (CI clones the full roster first). A repo on
   the roster but absent locally is reported `unscanned`, and any subpath with an
-  unscanned repo is classed `unverifiable` — never silently "dead".
+  unscanned repo is classed `unverifiable` - never silently "dead".
 - **Go to symbol granularity.** Classification is per-subpath (per exported
   file), not per named export. A subpath with one live symbol and ten dead ones
   reads as `consumed`. Symbol-level analysis is a future pass.
@@ -76,7 +76,7 @@ PROJECTS=~/projects \
 
 `--report` (default) writes `.claude/reports/api-surface-audit.md` (untracked,
 per the report-location rule). `--json` prints the machine-readable result to
-stdout — the cron workflow consumes this to build its issue body.
+stdout - the cron workflow consumes this to build its issue body.
 
 ## Verify before trusting
 

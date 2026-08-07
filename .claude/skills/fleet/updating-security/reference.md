@@ -83,25 +83,25 @@ soak gate hits the pin version
   → AWAITING-SOAK: skip; report in summary; do NOT modify
 ```
 
-## Pin target — highest soaked, same major as first_patched
+## Pin target - highest soaked, same major as first_patched
 
 ### Sources & precedence
 
 When figuring out what's patched and what else changed, the sources
-rank — they routinely disagree:
+rank - they routinely disagree:
 
 1. **GitHub Security Advisory** (`gh api securityAdvisory(ghsaId:…)` or
-   the alert's `security_vulnerability.first_patched_version`) — ground
+   the alert's `security_vulnerability.first_patched_version`) - ground
    truth for WHICH versions clear the CVE. Maintainers backport across
    several release lines; trust this list of patched versions.
-2. **Per-version GitHub Releases / git tags** — what shipped in a
+2. **Per-version GitHub Releases / git tags** - what shipped in a
    specific version, even one the CHANGELOG skipped.
-3. **CHANGELOG.md / HISTORY.md** — narrative of changes, but written on
+3. **CHANGELOG.md / HISTORY.md** - narrative of changes, but written on
    `main`; a backport cut on a maintenance branch may be absent.
 
 **Why this order (real incident, uuid GHSA-w5hq-g745-h8pq):** the
-advisory listed three backported patched lines — 11.1.1, 12.0.1,
-13.0.1 — but the `main` CHANGELOG jumped 11.1.0 → 12.0.0 and only
+advisory listed three backported patched lines - 11.1.1, 12.0.1,
+13.0.1 - but the `main` CHANGELOG jumped 11.1.0 → 12.0.0 and only
 documented the fix under 14.0.0. A reader trusting the CHANGELOG alone
 would have concluded the only fix was in 14.x and needlessly crossed
 two majors. The advisory said `first_patched = 11.1.1` for our range,
@@ -110,17 +110,17 @@ and that's what we pinned.
 ### Resolve the pin
 
 🚨 Do NOT pin to `^<first_patched>` or `>=<first_patched>`. The fleet
-pins EXACT versions everywhere (`uuid: 11.1.1`, never `^11.1.1`) —
+pins EXACT versions everywhere (`uuid: 11.1.1`, never `^11.1.1`) -
 ranges let a non-frozen `pnpm install` slide to an un-soaked release,
 defeating both determinism and the malware soak. Resolve the pin like
 this:
 
 <details>
-<summary><b>Detail</b> — `import`, `const major`, `const inMajor`</summary>
+<summary><b>Detail</b> - `import`, `const major`, `const inMajor`</summary>
 
 1. Take `first_patched_version` (e.g. `11.1.1`). Note its major (`11`).
 2. Keep only stable releases ≥ `first_patched_version` in that major
-   AND past the 7-day soak (publish date ≥ 7 days ago — see "Soak-gate
+   AND past the 7-day soak (publish date ≥ 7 days ago - see "Soak-gate
    interaction"). Pre-releases (`-rc`, `-beta`, `-alpha`, `-next`,
    `-canary`) are NEVER pin targets; a security pin lands on a stable
    line only.
@@ -128,7 +128,7 @@ this:
    it's higher only when a newer in-major patch has since soaked.
 4. **If no stable in-major target exists** (the fix shipped only in a
    higher major, so the in-major filter is empty), the major bump IS
-   the path — not an exception to dodge. Run the AI benignity check
+   the path - not an exception to dodge. Run the AI benignity check
    below; if it returns BENIGN, pin to the highest stable release in
    the target major and announce it. Only a BREAKING / unavailable /
    ambiguous verdict falls back to asking the user.
@@ -142,7 +142,7 @@ full set: `@socketsecurity/lib/versions/parse` (`getMajorVersion`,
 `@socketsecurity/lib/versions/range` (`filterVersions`, `maxVersion`,
 `minVersion`, `satisfiesVersion`), `@socketsecurity/lib/versions/compare`
 (`gt`/`gte`/`sort`/`rsort`). It does NOT ship a registry-version
-fetcher — get the candidate list with `npm view <pkg> versions --json`
+fetcher - get the candidate list with `npm view <pkg> versions --json`
 (or `httpJson` to the registry), then resolve in code:
 
 ```ts
@@ -166,11 +166,11 @@ if (!pinTarget) {
 
 `filterVersions` drops pre-releases and applies the range; `maxVersion`
 picks the highest. The `<${major + 1}.0.0` upper bound is what keeps
-the pin in-major — crossing a major is the separate gated path below.
+the pin in-major - crossing a major is the separate gated path below.
 
 5. **Crossing a major needs an AI benignity check + a user notice.**
    If no in-major patched release exists (the fix lives only in a
-   higher major — e.g. the dep's `9.x`/`10.x` lines were never
+   higher major - e.g. the dep's `9.x`/`10.x` lines were never
    patched and only `11.x+` carries the fix), classify the bump with
    socket-lib's locked-down AI helper before crossing:
 
@@ -236,31 +236,31 @@ the pin in-major — crossing a major is the separate gated path below.
    the surface lets the classifier ignore a breaking change in a
    method nobody calls.
 
-   `nodeFloor` = our `engines.node` — the fleet floors at `>=26.0.0`.
+   `nodeFloor` = our `engines.node` - the fleet floors at `>=26.0.0`.
    This is what makes "remove CommonJS support" benign: Node ≥22 ships
    unflagged `require(esm)` (synchronous `require()` of an ESM module),
    so a CJS-removing major still loads via `require('pkg')`. CJS
    removal is only BREAKING when the floor is Node <22.
    - `BENIGN` → cross the major, pin to the highest soaked release in
      the TARGET major, and **report it in the Phase-8 summary**
-     ("crossed uuid 9.x→11.x — AI-classified ESM-only, no API break").
+     ("crossed uuid 9.x→11.x - AI-classified ESM-only, no API break").
      The user sees it landed; they did not have to approve it inline.
    - `BREAKING` (or the AI is unavailable / ambiguous) → do NOT cross.
      Surface via `AskUserQuestion` for explicit human signoff.
 
-   Never cross a major silently — a BENIGN cross is auto-applied but
+   Never cross a major silently - a BENIGN cross is auto-applied but
    always announced; a BREAKING cross always asks first.
 
 </details>
 
-### Worked example — uuid, and why the classification is per-consumer
+### Worked example - uuid, and why the classification is per-consumer
 
 `uuid` shows that "benign across majors" is **conditional**, not a
-blanket. The advisory (GHSA-w5hq-g745-h8pq) has THREE patched lines —
+blanket. The advisory (GHSA-w5hq-g745-h8pq) has THREE patched lines -
 the fix was backported, not landed only on latest:
 
 <details>
-<summary><b>Detail</b> — the full table (10 rows)</summary>
+<summary><b>Detail</b> - the full table (10 rows)</summary>
 
 | Vulnerable range      | First patched |
 | --------------------- | ------------- |
@@ -269,21 +269,21 @@ the fix was backported, not landed only on latest:
 | `>= 13.0.0, < 13.0.1` | `13.0.1`      |
 
 (and 14.0.0 ships it too). Our 9.0.1 falls in the `< 11.1.1` range,
-so `first_patched = 11.1.1` and the resolver pins there — no major
+so `first_patched = 11.1.1` and the resolver pins there - no major
 cross needed at all.
 
 The CVE fix itself is a **behavior change to `v3()`/`v5()`/`v6()`**:
 they used to silently write out of a too-small caller buffer; now they
 throw `RangeError`. That guard is in EVERY patched release
 (11.1.1 / 12.0.1 / 13.0.1 / 14.0.0). **It is a fix, not a breaking
-change** — and that distinction is the important one for the
+change** - and that distinction is the important one for the
 classifier:
 
 - The OLD behavior (silent out-of-bounds write) WAS the vulnerability.
   A legitimate caller that passes a correctly-sized buffer never hit
   it and sees no change. The only callers that now get a `RangeError`
   are the ones that were already triggering the memory-corruption bug
-  — i.e. were already broken. Making invalid input fail loudly instead
+  - i.e. were already broken. Making invalid input fail loudly instead
   of corrupting memory does not break correct code; it is the point of
   the advisory.
 - So a security fix that hardens input validation is NEVER counted as
@@ -292,7 +292,7 @@ classifier:
   column. The classifier's question is strictly: does crossing a major
   introduce a break in code that was previously CORRECT?
 - (Our path is gaxios → `uuid.v4()`, which the guard doesn't even
-  touch — but the point stands for v3/v5/v6 callers too.)
+  touch - but the point stands for v3/v5/v6 callers too.)
 
 The per-major breaking surface, scored for a Node-26, `v4()`-only
 consumer (CHANGELOG bullets verified against
@@ -300,11 +300,11 @@ consumer (CHANGELOG bullets verified against
 
 | Major  | "Breaking" bullets (from CHANGELOG)              | Adds a break BEYOND the CVE fix, for v4()-only on Node 26?                    |
 | ------ | ------------------------------------------------ | ----------------------------------------------------------------------------- |
-| 10.0.0 | drop node@12/14                                  | No — floor drop ≤ ours; v6/v7/v8 additive                                     |
+| 10.0.0 | drop node@12/14                                  | No - floor drop ≤ ours; v6/v7/v8 additive                                     |
 | 11.0.0 | drop node@16, TS port, ESM (dual CJS)            | No                                                                            |
-| 12.0.0 | drop node@16, **remove CommonJS**                | No — Node ≥22 `require(esm)` loads the ESM build                              |
-| 13.0.0 | make browser exports default                     | No — packaging priority only                                                  |
-| 14.0.0 | drop node@18, `crypto` must be global (node@20+) | No — floor drop ≤ ours. The RangeError guard is the CVE fix, never a break. |
+| 12.0.0 | drop node@16, **remove CommonJS**                | No - Node ≥22 `require(esm)` loads the ESM build                              |
+| 13.0.0 | make browser exports default                     | No - packaging priority only                                                  |
+| 14.0.0 | drop node@18, `crypto` must be global (node@20+) | No - floor drop ≤ ours. The RangeError guard is the CVE fix, never a break. |
 
 Three things this teaches the classifier:
 
@@ -314,7 +314,7 @@ Three things this teaches the classifier:
    as the bar: dropping an already-EOL Node line is always benign;
    what matters is whether the dep's NEW floor is a still-supported
    line (Active LTS / Maintenance / Current) AND ≤ the Node we run.
-   All uuid majors here drop Node lines at or below our floor — fine.
+   All uuid majors here drop Node lines at or below our floor - fine.
    A major that required a Node newer than ours, or that's not yet a
    released line, would be BREAKING for us.
 2. **"Remove CommonJS" is benign on Node ≥22** (unflagged
@@ -323,14 +323,14 @@ Three things this teaches the classifier:
 3. **A security fix is never a breaking change.** Hardening input
    validation (uuid's silent-write → `RangeError` on a bad buffer)
    only rejects inputs that were already exploiting the bug; correct
-   callers are unaffected. Don't weigh the fix itself as a break — the
+   callers are unaffected. Don't weigh the fix itself as a break - the
    major-cross question is solely whether crossing introduces a break
    in PREVIOUSLY-CORRECT code. Still pass `apiSurfaceUsed` so the
    classifier ignores genuine breaks in methods nobody calls.
 
 For THIS alert the resolver pins `11.1.1` (first_patched's major is
 11; the resolver never looks past it), so none of the 12/13/14
-nuance even comes into play — the cross-major AI check only fires
+nuance even comes into play - the cross-major AI check only fires
 when NO in-major patched release exists. The table is here to show
 the classifier what the benign-vs-breaking line looks like in
 practice.
@@ -388,7 +388,7 @@ user via `AskUserQuestion` with the canonical bypass-phrase prompt
 ## Override-fix shape
 
 🚨 Fleet overrides live in **`pnpm-workspace.yaml`** under the
-top-level `overrides:` key — NOT `package.json` `pnpm.overrides`. And
+top-level `overrides:` key - NOT `package.json` `pnpm.overrides`. And
 they are **exact pins**, not ranges (see "Pin target" above). Add a
 `# Security: GHSA-… — <one-line why> … <relationship/path>` comment
 above each entry so the next reader knows why it's there and when it
@@ -396,7 +396,7 @@ can be removed (CVE fixed upstream → consumer bumps → override is dead
 weight):
 
 <details>
-<summary><b>Detail</b> — the worked steps (2 snippets)</summary>
+<summary><b>Detail</b> - the worked steps (2 snippets)</summary>
 
 ```yaml
 overrides:
@@ -423,7 +423,7 @@ patched version. The CVE clears on the next Dependabot rescan
 > the uuid case) bumps its own dependency past the vulnerable range,
 > the override is dead weight. `taze` understands `pnpm-workspace.yaml`
 > overrides and will offer to bump or surface them during the weekly
-> `updating` run — use `taze minor` so a stale override doesn't get
+> `updating` run - use `taze minor` so a stale override doesn't get
 > floated across a major. Re-audit overrides periodically and drop the
 > ones whose underlying CVE is resolved upstream.
 
@@ -490,7 +490,7 @@ pnpm run check --all
 ```
 
 If any commit fails the check, roll back THAT commit and continue
-to the next alert. Don't `git reset --hard` the whole chain —
+to the next alert. Don't `git reset --hard` the whole chain -
 treat each fix as independent.
 
 ## Push policy
@@ -536,7 +536,7 @@ GitHub accepts exactly these values for `dismissed_reason`:
 | ---------------- | --------------------------------------------------------------------------- |
 | `fix_started`    | A PR resolving the alert is already open in this repo.                      |
 | `inaccurate`     | The advisory mis-classifies our usage (e.g. server-only dep on a CLI repo). |
-| `no_bandwidth`   | Known, accepted, will revisit later — typical for low-severity transitives. |
+| `no_bandwidth`   | Known, accepted, will revisit later - typical for low-severity transitives. |
 | `not_used`       | Dep is in the lockfile but not actually loaded at runtime.                  |
 | `tolerable_risk` | Risk is understood and accepted; no remediation planned.                    |
 
@@ -546,12 +546,12 @@ fit.
 
 ## Failure recovery
 
-- **`gh api` 401/403** — token scope missing. Re-run
+- **`gh api` 401/403** - token scope missing. Re-run
   `gh auth refresh -s repo,security_events`.
-- **`pnpm install` resolution conflict** — usually a peerDep
+- **`pnpm install` resolution conflict** - usually a peerDep
   upper-bound. Bump the peer alongside the override.
-- **Soak guard refuses** — emergency CVE patches need
+- **Soak guard refuses** - emergency CVE patches need
   `Allow minimumReleaseAge bypass` typed verbatim by the user.
-- **Check fails after fix** — revert that one commit
+- **Check fails after fix** - revert that one commit
   (`git reset --soft HEAD~1`, undo edits in `package.json`), log
   the regression, continue to next alert.

@@ -8,7 +8,7 @@ above the bullet.
 
 ## Why this rule
 
-Soak-bypass entries are temporary by design — they exist because a
+Soak-bypass entries are temporary by design - they exist because a
 fresh release was needed faster than the 7-day soak window allows.
 Without a documented removable-on date, entries accumulate and
 nobody knows when they can safely be removed. The standard
@@ -25,7 +25,7 @@ minimumReleaseAgeExclude:
   - 'vite@8.0.13'
 ```
 
-The annotation must be the **last comment line** above the bullet —
+The annotation must be the **last comment line** above the bullet -
 contiguous, no blank line between them. `published` is the version's
 npm publish date (`npm view pkg@1.2.3 time` → look up the version-row
 date). `removable` is `published + 7d`, the natural soak-clear date.
@@ -43,19 +43,19 @@ date). `removable` is `published + 7d`, the natural soak-clear date.
 ## What's exempt
 
 - **Scope-glob entries** (`'@socketsecurity/*'`, `'@socketregistry/*'`,
-  etc.) — persistent fleet policy, not a time-bound bypass.
+  etc.) - persistent fleet policy, not a time-bound bypass.
 - **Bare-name entries** without `@version` (also persistent).
-- Lines marked `# socket-lint: allow soak-exclude-no-date-annotation`.
+- Lines marked `# oxlint-disable-next-line socket/soak-exclude-has-date`.
 
 ## Override marker
 
 For a legitimate one-off where the annotation truly doesn't apply:
 
 ```yaml
-- 'pkg@1.2.3' # socket-lint: allow soak-exclude-no-date-annotation
+- 'pkg@1.2.3' # oxlint-disable-next-line socket/soak-exclude-has-date
 ```
 
-Don't reach for this — add the annotation instead.
+Don't reach for this - add the annotation instead.
 
 ## Bypass phrase
 

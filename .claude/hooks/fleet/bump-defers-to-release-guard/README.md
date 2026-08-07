@@ -8,11 +8,11 @@ workflow/scripts.
 ## What it blocks
 
 - `node <path>/bump.mts` without `--dry-run` (a write run).
-- `npm|pnpm|yarn version <arg>` — a bare `npm version` only prints and passes.
+- `npm|pnpm|yarn version <arg>` - a bare `npm version` only prints and passes.
 
 ## What it allows
 
-- `bump.mts --dry-run` — the evidence-gathering step is always open.
+- `bump.mts --dry-run` - the evidence-gathering step is always open.
 - Any run after the user types `Allow release-bump bypass` (post
   version-naming). A major run (`--release-as major|premajor`, `npm version
   major`) additionally requires `Allow major-bump bypass`.

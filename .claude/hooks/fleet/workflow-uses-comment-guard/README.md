@@ -7,12 +7,12 @@ Actions workflow or local-action YAML without the canonical trailing
 
 ## Why this rule
 
-SHA-pinning makes `uses:` lines opaque — a reader can't tell at-a-glance
+SHA-pinning makes `uses:` lines opaque - a reader can't tell at-a-glance
 whether `27d5ce7f...` is `v5.0.5` from last week or `v3.2.1` from 2024.
 The trailing comment is the cheapest staleness signal we have outside of
 running a full drift audit. The date stamp matters as much as the
 version label: a comment that says `# v6.4.0` could have been written
-the day v6.4.0 shipped, or could be eighteen months stale — the date
+the day v6.4.0 shipped, or could be eighteen months stale - the date
 disambiguates.
 
 ## Conventional shape
@@ -32,26 +32,26 @@ when you pinned / refreshed the SHA (today's date for new pins).
 - Every `uses: <action>@<sha>` line where `<sha>` is a 40-char hex
   digest must carry a trailing `# <label> (YYYY-MM-DD)` comment.
 - The label is any non-paren text (`v1.0.0`, `main`, `27d5ce7f`).
-- The date must match the ISO `YYYY-MM-DD` shape — no `2026/05/15` or
+- The date must match the ISO `YYYY-MM-DD` shape - no `2026/05/15` or
   `15 May 2026`.
 
 ## What's not enforced
 
-- Local-action references (`uses: ./.github/actions/foo`) — they don't
+- Local-action references (`uses: ./.github/actions/foo`) - they don't
   carry SHAs.
-- Docker-image actions (`uses: docker://...`) — not SHA-pinned in the
+- Docker-image actions (`uses: docker://...`) - not SHA-pinned in the
   GitHub sense.
-- The accuracy of the label or date — that's a human-review concern.
+- The accuracy of the label or date - that's a human-review concern.
 
 ## Override marker
 
 For a legitimate one-off:
 
 ```yaml
-- uses: third-party/action@deadbeef... # socket-lint: allow uses-no-stamp
+- uses: third-party/action@deadbeef... # oxlint-disable-next-line socket/workflow-uses-has-stamp
 ```
 
-Don't reach for this — add the comment instead.
+Don't reach for this - add the comment instead.
 
 ## Wiring
 

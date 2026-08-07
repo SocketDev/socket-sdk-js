@@ -126,7 +126,9 @@ export function check(payload: ToolCallPayload): GuardResult {
   if (isOwnSessionId(companionId, payload.transcript_path)) {
     return undefined
   }
-  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- reads the agent-provided CLAUDE_PROJECT_DIR first; process.cwd() is only the fallback when that env var is absent
+  // Reads the agent-provided CLAUDE_PROJECT_DIR first; process.cwd() is only
+  // the fallback when that env var is absent.
+  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- reads
   const projectDir = process.env['CLAUDE_PROJECT_DIR'] || process.cwd()
   const file = markerFile(projectDir, companionId)
   const now = Date.now()

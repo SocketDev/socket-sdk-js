@@ -126,7 +126,9 @@ function isCommentLine(trimmed: string): boolean {
 export async function checkLoggerGuardrails(
   options: CheckLoggerGuardrailsOptions = {},
 ): Promise<CheckLoggerGuardrailsResult> {
-  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- default fallback for an explicit caller-supplied `options.cwd`, not an anchor for this file's own location
+  // Default fallback for an explicit caller-supplied `options.cwd`, not an
+  // anchor for this file's own location.
+  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- default
   const cwd = options.cwd ?? process.cwd()
   const include = options.include ?? DEFAULT_INCLUDE
   const exclude = options.exclude ?? DEFAULT_EXCLUDE

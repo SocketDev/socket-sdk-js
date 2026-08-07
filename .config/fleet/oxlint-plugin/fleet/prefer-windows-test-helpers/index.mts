@@ -27,9 +27,10 @@
  *      `itWindowsOnly` / `describeWindowsOnly`.
  *   4. Per-test timeout literal `≥ 5000` in the third positional arg of `it(...)`
  *      / `test(...)` — suggest `tolerantTimeout(N)` so the Windows leg gets the
- *      multiplier. Per-line opt-out: `// socket-lint: allow raw-windows-test`
+ *      multiplier. Per-line opt-out: `// oxlint-disable-next-line socket/prefer-windows-test-helpers`
  *      or `// oxlint-disable-next-line socket/prefer-windows-test-helpers`.
  */
+import { suppressionWaives } from '../../../../../.claude/hooks/fleet/_shared/suppression-rules.mts'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
@@ -47,8 +48,6 @@ const HELPER_DIR_PATH = 'test/fleet/_shared/lib'
 const TEST_FILE_RE = /\.(?:spec|test)\.[cm]?[jt]sx?$/
 const SMALL_SLEEP_MAX_MS = 200
 const LONG_TIMEOUT_MIN_MS = 5000
-const SOCKET_LINT_MARKER_RE =
-  /(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+(?<tag>[\w-]+))?/
 
 // Cache the opt-in result per ancestor directory so we don't re-stat for
 // every test file. The cascade is atomic: if the helper directory exists at
@@ -88,12 +87,7 @@ function findHelperFile(testFilePath: string): boolean {
 }
 
 function isLineMarkered(line: string): boolean {
-  const m = line.match(SOCKET_LINT_MARKER_RE)
-  if (!m) {
-    return false
-  }
-  const tag = m.groups?.['tag']
-  return !tag || tag === 'raw-windows-test'
+  return suppressionWaives(line, 'socket/prefer-windows-test-helpers')
 }
 
 const rule = {
@@ -233,5 +227,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

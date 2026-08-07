@@ -6,9 +6,9 @@ Stop hook that flags High/Critical severity mentions in the assistant's most-rec
 
 CLAUDE.md "Variant analysis on every High/Critical finding":
 
-> When a finding lands at severity High or Critical, search the rest of the repo for the same shape before closing it. Bugs cluster — same mental model, same antipattern. Three searches: same file, sibling files, cross-package.
+> When a finding lands at severity High or Critical, search the rest of the repo for the same shape before closing it. Bugs cluster - same mental model, same antipattern. Three searches: same file, sibling files, cross-package.
 
-This hook catches the failure mode where the assistant identifies a High/Critical issue, fixes the one instance, and moves on — without checking whether the same shape exists elsewhere in the repo.
+This hook catches the failure mode where the assistant identifies a High/Critical issue, fixes the one instance, and moves on - without checking whether the same shape exists elsewhere in the repo.
 
 ## What it catches
 
@@ -21,7 +21,7 @@ The hook scans the assistant's prose for severity labels in finding-shaped conte
 
 Code fences are stripped first so a quoted phrase doesn't false-positive (e.g., a code example mentioning a "High" enum value).
 
-If a severity mention is found, the hook then inspects the same turn's tool-use events. If **at least one** Grep / Glob / Read / Agent call ran in the turn, the hook is satisfied — the assistant did some kind of search. If zero searches ran, the warning surfaces.
+If a severity mention is found, the hook then inspects the same turn's tool-use events. If **at least one** Grep / Glob / Read / Agent call ran in the turn, the hook is satisfied - the assistant did some kind of search. If zero searches ran, the warning surfaces.
 
 This is intentionally lenient: the hook can't tell whether the search was for variants of the right thing, so it only flags the case where no search at all happened. The user reads the warning and decides if the variant analysis was sufficient.
 
@@ -31,7 +31,7 @@ Stop hooks fire after the turn. Blocking would just truncate the findings. The w
 
 ## Configuration
 
-No bypass — fix the underlying issue (do the variant search). The hook only reminds and never blocks.
+No bypass - fix the underlying issue (do the variant search). The hook only reminds and never blocks.
 
 ## Test
 

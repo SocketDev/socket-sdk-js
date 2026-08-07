@@ -1,4 +1,5 @@
-/* oxlint-disable socket/no-placeholders -- this rule documents the markers it bans. */
+/* oxlint-disable socket/no-placeholders -- this rule documents the markers */
+// This rule documents the markers it bans.
 /**
  * @file Per CLAUDE.md "Completion" rule: never leave TODO / FIXME / XXX / shims
  *   / stubs / placeholders. Finish the work 100% or ask before deferring. This
@@ -270,5 +271,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule

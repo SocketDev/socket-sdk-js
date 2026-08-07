@@ -12,7 +12,7 @@ repo into another.
 
 ## What it catches
 
-Two forbidden shapes — both name another fleet repo by path:
+Two forbidden shapes - both name another fleet repo by path:
 
 | Form                | Example                                                               | Why it's bad                                                                                                                      |
 | ------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -21,7 +21,7 @@ Two forbidden shapes — both name another fleet repo by path:
 
 ## What to do instead
 
-Import via the published npm package — every fleet repo is a real
+Import via the published npm package - every fleet repo is a real
 workspace dep:
 
 ```ts
@@ -46,7 +46,7 @@ require/import that escapes the repo.
   (`.git-hooks/_helpers.mts`), the canonical `CLAUDE.md` fleet block
   (which documents fleet repos by name), `.gitmodules`, lockfiles, and
   Claude memory files.
-- **Exempts** lines tagged `// socket-lint: allow cross-repo` (or `#`
+- **Exempts** lines tagged `// oxlint-disable-next-line socket/no-cross-repo-path` (or `#`
   / `/*` for non-TS files). The bare `// socket-lint: allow` form also
   works for blanket suppression.
 

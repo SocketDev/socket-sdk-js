@@ -13,7 +13,7 @@ when:
 
 Past pattern: agents committed UI changes (CSS, HTML, build outputs)
 before checking the rendered artifact. Wasted commits piled up per
-session — the user paraphrase was "rebuild before you fucking commit."
+session - the user paraphrase was "rebuild before you fucking commit."
 
 This hook surfaces the reminder so the agent pauses to verify the
 artifact before committing.

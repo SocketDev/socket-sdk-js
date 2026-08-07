@@ -5,9 +5,9 @@ visual examples, and the rules behind them.
 
 Two files:
 
-- `tokens.css` — every color, font, spacing, radius, shadow, and animation
+- `tokens.css` - every color, font, spacing, radius, shadow, and animation
   duration as a CSS custom property. Single source of truth.
-- `components.css` — recipes (buttons, forms, cards, modals, spinners) built
+- `components.css` - recipes (buttons, forms, cards, modals, spinners) built
   entirely from tokens. No hex literals outside `tokens.css`.
 
 Author once, theme everywhere.
@@ -18,18 +18,18 @@ This guide is one piece of the Socket design system. When you design or polish
 a Socket UI (dashboard, landing page, extension, product screen), work in this
 order:
 
-1. **Methodology first — the `refero-design` skill.** It is the default skill
+1. **Methodology first - the `refero-design` skill.** It is the default skill
    for any UI / product / visual work: research real references before
    designing, then reach for the tokens below. Don't design from generic model
    taste.
-2. **Tokens + components — this guide.** `tokens.css` + `components.css` are the
+2. **Tokens + components - this guide.** `tokens.css` + `components.css` are the
    single source of truth for color, type, spacing, motion, and the component
    recipes. Never hand-roll a hex or spacing value a token already names.
-3. **Brand assets — `assets/`.** The Socket wordmark lockups (light/dark),
+3. **Brand assets - `assets/`.** The Socket wordmark lockups (light/dark),
    favicon, avatar, shield, and follow badges live under `assets/`. The
    `assets/` subset cascades to every repo; the full kit stays in the
    wheelhouse. Use the lockup for the README `<picture>` footer and the favicon
-   for hosted surfaces — don't recreate the mark from the brand colors below.
+   for hosted surfaces - don't recreate the mark from the brand colors below.
 
 Onboarding a UI repo (e.g. meander) means opting into `docs/design/fleet/`: copy it
 once and the cascade keeps it byte-identical thereafter; your own app-specific
@@ -65,7 +65,6 @@ Four themes ship in `tokens.css`:
 ```text
   light       Default. Cream + ink for product surfaces.
   dark        Charcoal + lavender for devtools / power-user contexts.
-  synthwave   Neon pink on deep purple — Socket-branded celebration.
   system      Follows OS via prefers-color-scheme.
 ```
 
@@ -79,7 +78,7 @@ document.documentElement.setAttribute('data-theme', 'dark')
 <summary><b>ASCII swatches</b>: the four themes side by side</summary>
 
 ```text
-  light       dark        synthwave    system
+  light       dark        system
   ┌─────┐     ┌─────┐     ┌─────┐      ┌─────┐
   │ FFF │     │ 0A0 │     │ 1A0 │      │ ??? │
   │ 18Z │     │ F4Z │     │ F8F │      │ OS  │
@@ -101,13 +100,13 @@ the user's OS preference picks light or dark.
   --socket-pink    #ff00aa     ████████  Socket logo secondary
 ```
 
-These are the **logo** colors. Don't use them directly for UI chrome — they're
+These are the **logo** colors. Don't use them directly for UI chrome - they're
 loud by design. Use `--primary` (which references `--socket-purple` in light
 mode) or `--mkt-glow` instead.
 
 ### Core (shadcn) vs marketing
 
-The core UI tokens follow shadcn/ui's semantic naming — every surface has a
+The core UI tokens follow shadcn/ui's semantic naming - every surface has a
 paired `-foreground`, so text-on-surface contrast is guaranteed. Pick based on
 what you're building:
 
@@ -116,7 +115,7 @@ what you're building:
                 --background/--foreground, --card, --popover, --primary,
                 --secondary, --muted, --accent, --destructive (+ each one's
                 -foreground), --border, --input, --ring, --radius.
-                Theme-stable; the same code looks right in light/dark/synthwave.
+                Theme-stable; the same code looks right in light and dark.
 
   --mkt-*       Marketing — landing pages, docs, hero sections (Socket
                 extension). Warmer, brand-forward palette. Doesn't impose
@@ -137,7 +136,7 @@ Mockups, side-by-side:
 
 ### Status colors
 
-Semantic palette — same names across all themes, hue tuned per theme:
+Semantic palette - same names across all themes, hue tuned per theme:
 
 | Token              | Light     | Dark      | Synthwave | Use case               |
 | ------------------ | --------- | --------- | --------- | ---------------------- |
@@ -149,11 +148,11 @@ Semantic palette — same names across all themes, hue tuned per theme:
 
 Use case rules of thumb:
 
-- `success` — confirmed positive outcome. "Deploy completed", "Saved".
-- `warning` — caution; user may still be okay. "Form has stale data".
-- `alert` — in-progress with degraded path. "Retrying, may succeed".
-- `error` — failure requiring action. "Build failed".
-- `info` — neutral, non-blocking. "Tip: try the docs".
+- `success` - confirmed positive outcome. "Deploy completed", "Saved".
+- `warning` - caution; user may still be okay. "Form has stale data".
+- `alert` - in-progress with degraded path. "Retrying, may succeed".
+- `error` - failure requiring action. "Build failed".
+- `info` - neutral, non-blocking. "Tip: try the docs".
 
 ## Typography
 
@@ -165,7 +164,7 @@ Use case rules of thumb:
 Use `--font-mono` for code, package names, file paths, log lines, hashes,
 versions. Use `--font-sans` for everything else.
 
-The system fallback chain matters — Geist isn't bundled. If a project doesn't
+The system fallback chain matters - Geist isn't bundled. If a project doesn't
 ship Geist, the next entry takes over silently. On macOS that's IBM Plex Sans
 if installed, else `system-ui`. Linux/Windows have their own system fallbacks.
 All fallbacks are sans-serif, so layout doesn't reflow.
@@ -204,14 +203,14 @@ inventing intermediate values; the rhythm of the page is in the scale.
    gradient fill      neutral bg           red border          45% opacity
 ```
 
-`btn-primary` carries the brand gradient — reserve for the action you want
+`btn-primary` carries the brand gradient - reserve for the action you want
 the user to take. One primary per page region.
 
-`btn-secondary` is the workhorse — neutral chrome, for everything that isn't
+`btn-secondary` is the workhorse - neutral chrome, for everything that isn't
 the primary action.
 
 `btn-danger` for destructive verbs (Delete, Remove, Discard). The hover
-state inverts to a filled red — a built-in "wait, am I sure?" beat.
+state inverts to a filled red - a built-in "wait, am I sure?" beat.
 
 ### Form fields
 
@@ -269,7 +268,7 @@ Or with explicit toggle classes (for non-`<details>` patterns):
 ```
 
 The backdrop dims + blurs everything behind it. In light mode it's a gentle
-lavender wash; in dark / synthwave it's plum. Combine with `body:has(.modal)`
+lavender wash; in dark it's plum. Combine with `body:has(.modal)`
 to disable pointer events on the underlying chrome.
 
 ### Spinners
@@ -288,7 +287,7 @@ so it auto-themes.
 ```
 
 Text-clipped rainbow shimmer. Reserve for celebratory states (completed run,
-finished migration). Loops indefinitely once added — toggle the class off
+finished migration). Loops indefinitely once added - toggle the class off
 when the moment passes.
 
 ## Accessibility
@@ -320,9 +319,9 @@ your repo's `.config/repo/socket-wheelhouse.json` marker so the lint covers it.
 
 Use the named keyframes from `components.css`, not custom `@keyframes`:
 
-- `.spinner` — loading state, infinite rotation.
-- `.shimmer` — celebratory text effect, infinite.
-- `.pulse` — single-shot attention pulse for changing values.
+- `.spinner` - loading state, infinite rotation.
+- `.shimmer` - celebratory text effect, infinite.
+- `.pulse` - single-shot attention pulse for changing values.
 
 Durations come from the motion scale:
 
@@ -332,7 +331,7 @@ Durations come from the motion scale:
   --motion-slow    360ms    emphasis, hero treatments
 ```
 
-Never use a duration shorter than 80ms — the eye reads it as "snapped",
+Never use a duration shorter than 80ms - the eye reads it as "snapped",
 which looks broken on slower hardware.
 
 ## Terminal output
@@ -358,7 +357,7 @@ ASCII output sample:
 ```
 
 The CLI palette mirrors the CSS tokens by name. Switch terminal themes via
-`SOCKET_THEME=light|dark|synthwave` in your shell, or pass an explicit theme
+`SOCKET_THEME=light|dark` in your shell, or pass an explicit theme
 to `getPalette()`.
 
 ## Don'ts
@@ -371,11 +370,11 @@ to `getPalette()`.
 - **Don't disable a button by removing its click handler.** Apply `:disabled`
   or `aria-disabled="true"` so screen readers and keyboard users know.
 - **Don't ship contrast < 4.5:1 even if it "looks fine" on your monitor.**
-  Run the lint — your screen isn't the user's.
+  Run the lint - your screen isn't the user's.
 - **Don't write custom `@keyframes` when one of `spin` / `shimmer` /
   `pulse` already covers it.** Fewer animations = more predictable.
 - **Don't override tokens in component CSS.** If a component needs a
-  different shade, the token is wrong — fix it in `tokens.css`.
+  different shade, the token is wrong - fix it in `tokens.css`.
 
 ## Extending
 
@@ -388,12 +387,12 @@ the contrast lint to verify any combination you didn't inherit.
 ### Add a new component
 
 Write it in `components.css` using **only** tokens from `tokens.css`. No
-hex literals, no magic numbers — even `padding: 13px` is a smell (use
+hex literals, no magic numbers - even `padding: 13px` is a smell (use
 `var(--space-sm)` or add a new spacing token).
 
 ### Add a new color token
 
-Add it to all four theme blocks in `tokens.css` (light, dark, synthwave,
+Add it to all three theme blocks in `tokens.css` (light, dark,
 and the `prefers-color-scheme: dark` system override). Pick perceptually
 matched values, same lightness but different hue, so the token tells the
 same story across themes. Run the contrast lint to verify any pair against

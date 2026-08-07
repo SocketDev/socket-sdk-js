@@ -97,7 +97,7 @@ export function writeStubTokens(
   const group = tokens.length > 0 ? tokens.join('|') : ''
   return configSource.replace(
     STUB_PATTERN_RE,
-    `const stubPattern = /(?:${group})\\.js$/u`,
+    () => `const stubPattern = /(?:${group})\\.js$/u`,
   )
 }
 

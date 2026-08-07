@@ -1,14 +1,14 @@
 # dep-derived-source-nudge
 
 PostToolUse `Edit`/`Write` hook that nudges (never blocks) when an edit touches a
-manifest's dependency surface — `package.json`
+manifest's dependency surface - `package.json`
 (`dependencies`/`devDependencies`/`overrides`) or `pnpm-workspace.yaml`
 (`catalog`/`overrides`/`minimumReleaseAgeExclude`).
 
 Two things must happen before landing a manifest dep change: (1) regenerate the
 lockfile (`pnpm i` or `pnpm i --lockfile-only`) so `pnpm install --frozen-lockfile`
 passes in CI, and (2) update the canonical sources several CI gates derive from.
-Forgetting either trips CI separately — a multi-round-trip trap. The nudge names
+Forgetting either trips CI separately - a multi-round-trip trap. The nudge names
 both at the same moment. See
 [`docs/agents.md/fleet/tooling.md`](../../../../docs/agents.md/fleet/tooling.md).
 
@@ -43,11 +43,11 @@ reminder is informational on stderr.
 
 ## Bypass
 
-No bypass phrase — this hook never blocks.
+No bypass phrase - this hook never blocks.
 
 ## Companion files
 
-- `index.mts` — the hook; `touchesManifestDeps(filePath, content)` is the pure
+- `index.mts` - the hook; `touchesManifestDeps(filePath, content)` is the pure
   exported detector.
-- `test/repo/integration/hooks/dep-derived-source-nudge.test.mts` — vitest
+- `test/repo/integration/hooks/dep-derived-source-nudge.test.mts` - vitest
   integration tests (spawn-based, never self-import).

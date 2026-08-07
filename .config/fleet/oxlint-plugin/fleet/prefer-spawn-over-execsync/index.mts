@@ -28,7 +28,7 @@
  *     handled at the .config/fleet/oxlintrc.json ignorePatterns level.
  */
 
-import { makeBypassChecker } from '../../lib/comment-markers.mts'
+import { makeLineMatcher } from '../../lib/comment-markers.mts'
 import type { AstNode, RuleContext } from '../../lib/rule-types.mts'
 
 const CHILD_PROCESS_SPECIFIERS = new Set([
@@ -38,11 +38,14 @@ const CHILD_PROCESS_SPECIFIERS = new Set([
 
 const BANNED_NAMES = new Set(['execFileSync', 'execSync'])
 
-const BYPASS_RE = /prefer-spawn-over-execsync:\s*required/
-
 /**
  * @type {import('eslint').Rule.RuleModule}
  */
+// This rule's opt-out is its OWN marker family, spelled after the rule and a
+// required-ness claim rather than `socket/<rule>`. It stays a pattern reader so
+// the fleet suppression table keeps describing exactly one grammar.
+const BYPASS_RE = /prefer-spawn-over-execsync:\s*required/
+
 const rule = {
   meta: {
     type: 'problem',
@@ -63,7 +66,7 @@ const rule = {
   },
 
   create(context: RuleContext) {
-    const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
+    const hasBypassComment = makeLineMatcher(context, BYPASS_RE)
 
     return {
       ImportDeclaration(node: AstNode) {
@@ -136,5 +139,6 @@ const rule = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
+// Oxlint plugin contract requires default-exported rule object.
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract
 export default rule
