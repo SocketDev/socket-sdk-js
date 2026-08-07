@@ -614,7 +614,7 @@ export class SocketSdk {
       // otherwise append the body to the error message.
       const statusMessage = error.response?.statusText
       if (statusMessage && errorMessage.includes(statusMessage)) {
-        errorMessage = errorMessage.replace(statusMessage, trimmedBody)
+        errorMessage = errorMessage.replace(statusMessage, () => trimmedBody)
         /* c8 ignore next 2 - c8 ignored: because Node.js http always sets statusText; this else branch handles custom servers or proxies that omit it */
       } else {
         errorMessage = `${errorMessage}: ${trimmedBody}`
@@ -4688,10 +4688,8 @@ export class SocketSdk {
    * recently observed malicious / suspicious packages, paginated and filterable
    * by ecosystem, name, version, and review state.
    *
-   * @deprecated socket-lint: allow deprecated-marker -- quoting the backend
-   *   API's own deprecation: it marks the top-level `/threat-feed` route as
-   *   the deprecated form; prefer the org-scoped
-   *   {@link getOrgThreatFeedItems}.
+   * The backend marks the top-level `/threat-feed` route as the legacy form;
+   * prefer the org-scoped {@link getOrgThreatFeedItems}.
    *
    * @throws {Error} When server returns 5xx status codes
    *
