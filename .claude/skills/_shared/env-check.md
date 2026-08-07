@@ -13,7 +13,7 @@ Shared prerequisite validation for all pipelines. Run at the start of every skil
 
 - **Clean working directory**: proceed normally
 - **Dirty working directory**: warn and continue (most skills are read-only or create their own commits)
-- **CI mode**: set `CI_MODE=true` — skills should skip interactive prompts and local-only validation
+- **CI mode**: set `CI_MODE=true` - skills should skip interactive prompts and local-only validation
 - **Missing node_modules**: run `pnpm install` before proceeding
 
 ## Queue Tracking

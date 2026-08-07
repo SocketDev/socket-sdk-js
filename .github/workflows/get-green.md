@@ -1,5 +1,5 @@
 ---
-# Shared reusable get-green — gh-aw sonnet-tier worker dispatched by
+# Shared reusable get-green - gh-aw sonnet-tier worker dispatched by
 # weekly-update when a dependency update breaks tests. Edit this .md, then
 # `gh aw compile` → get-green.lock.yml (commit BOTH +
 # .github/aw/actions-lock.json).
@@ -68,25 +68,25 @@ on:
 engine:
   id: claude
 
-# Top-level, not `engine.model` — gh-aw deprecated the nested key in v0.83.x and
+# Top-level, not `engine.model` - gh-aw deprecated the nested key in v0.83.x and
 # the compiler warns on every build until it moves.
 model: claude-sonnet-4-6
 
 permissions:
   contents: read
 
-# Sonnet is the pricier escalation tier — a higher per-run cap than the haiku update.
+# Sonnet is the pricier escalation tier - a higher per-run cap than the haiku update.
 max-ai-credits: 3000
 
 # Fallback pricing for any model missing from AWF's build-time-frozen
-# ai-credits table — gh-aw v0.83.2, ADR-47687. Without it, max-ai-credits +
+# ai-credits table - gh-aw v0.83.2, ADR-47687. Without it, max-ai-credits +
 # an unknown model 400s every request: the 2026-07-25 fleet outage class.
 # Priced at the opus tier, the highest this fleet would tolerate, so an
 # unknown model is over-counted against the credit cap and trips the budget
-# early — never under-counted.
+# early - never under-counted.
 # KEY LOCATION IS SCHEMA-VERIFIED, NOT DOCS-VERIFIED: the v0.83.2 release
 # notes place this key under sandbox.agent, but the v0.83.2 schema
-# authoritatively defines it at models.default-ai-credits-pricing — see
+# authoritatively defines it at models.default-ai-credits-pricing - see
 # pkg/parser/schemas/main_workflow_schema.json at that tag, confirmed by the
 # compiled lock emitting apiProxy.defaultAiCreditsPricing. Trust the schema
 # over the release notes when moving this key on a compiler bump; gh-aw main
@@ -122,8 +122,8 @@ build/tests are failing. Fix the failures so the update can ship.
 
 ## Never write a credential into a report
 
-Everything you emit — issue bodies, comments, pull-request descriptions, and the
-`missing_data` and incomplete-result paths — is posted verbatim to a repository
+Everything you emit - issue bodies, comments, pull-request descriptions, and the
+`missing_data` and incomplete-result paths - is posted verbatim to a repository
 that may be public. Never write a string shaped like a credential into any of
 them.
 
@@ -142,13 +142,13 @@ Describe the credential instead of reproducing it. Write "the API key is missing
 from the environment", never the key itself and never a stand-in for it.
 
 These are the shapes the fleet's own scanners block. Treat any string matching
-one as unpublishable, and note the list is not exhaustive — an unfamiliar
+one as unpublishable, and note the list is not exhaustive - an unfamiliar
 vendor's key is still a key.
 
 <!-- BEGIN GENERATED token-shapes: scripts/fleet/gen/aw-token-shapes.mts -->
 
 <details>
-<summary><b>Detail</b> — the full list (25 entries)</summary>
+<summary><b>Detail</b> - the full list (25 entries)</summary>
 
 - AWS access key ID (AKIA)
 - Anthropic API key (sk-ant-)
@@ -197,10 +197,10 @@ ${{ inputs.test-log }}
 ## Steps
 
 1. Diagnose and fix the failures. Make **atomic commits**. Do NOT revert the
-   dependency updates themselves — fix the code/config that broke against the new
+   dependency updates themselves - fix the code/config that broke against the new
    versions. Do NOT push or open a PR yourself.
 
-2. Confirm green through the deterministic executor — never by reading the test
+2. Confirm green through the deterministic executor - never by reading the test
    output yourself:
 
    ```bash
@@ -214,19 +214,19 @@ ${{ inputs.test-log }}
    `get-green.mts` runs the setup + test commands, prints the log tails, and
    classifies every changed path against the allowlist. Its EXIT CODE is the
    verdict: 0 means the branch may open a pull request, non-zero means it may
-   not. That decision is not yours to make — a red branch has to reach a human,
+   not. That decision is not yours to make - a red branch has to reach a human,
    and an agent that talked itself into "close enough" is exactly what the exit
    code exists to prevent.
 
 <details>
-<summary><b>Step 3: open the PR only when step 2 exited 0</b> — the title format, and copying the paths outside the allowlist into the body so a reviewer sees them</summary>
+<summary><b>Step 3: open the PR only when step 2 exited 0</b> - the title format, and copying the paths outside the allowlist into the body so a reviewer sees them</summary>
 
 1. Open the pull request ONLY if step 2 exited 0. Use the `create_pull_request`
    safe output, title `${{ inputs.pr-title-prefix }} (<YYYY-MM-DD>)`, with a body
    noting the update and the fixes applied. The script prints any paths outside
    `${{ inputs.validate-file-patterns }}`; copy that list into the PR body so a
    reviewer sees what the fix touched beyond the manifests. If step 2 exited
-   non-zero after your best effort, do NOT open a PR — leave the branch for human
+   non-zero after your best effort, do NOT open a PR - leave the branch for human
    review and say what you tried.
 
 </details>

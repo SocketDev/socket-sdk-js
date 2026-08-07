@@ -41,7 +41,7 @@ generator's `.then` pushes its result into a small queue (`completed`), and the
 main loop awaits one promise at a time via `takeStep()`. Each generator attaches
 its handlers exactly **once per step**, so nothing stacks and nothing leaks.
 
-`running` survives only as a `Set` for pool-size accounting — how many
+`running` survives only as a `Set` for pool-size accounting - how many
 generators are still in flight. It no longer stores promises, because nothing
 races them.
 
@@ -53,7 +53,7 @@ races them.
 
 ## If you are tempted to simplify this
 
-The leak is invisible in the code that replaced it — that is the trap. A reader
+The leak is invisible in the code that replaced it - that is the trap. A reader
 who sees a completion queue and thinks "this could just be `Promise.race`" has
 no local evidence to the contrary, which is why this page exists and why
 `src/socket-sdk-class.mts` points at it.

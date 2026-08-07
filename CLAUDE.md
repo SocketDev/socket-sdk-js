@@ -137,14 +137,14 @@
 
 ## 🏗️ SDK-Specific
 
-Socket SDK for JavaScript/TypeScript — programmatic access to Socket.dev security analysis. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover`.
+Socket SDK for JavaScript/TypeScript - programmatic access to Socket.dev security analysis. Build: `pnpm run build` (esbuild → ESM, node18+); test: `pnpm test`; coverage: `pnpm run cover`.
 
 - 🚨 Never call `fetch()`; use `createGetRequest` / `createRequestWithJson` from `src/http-client.ts`. [`architecture`](docs/agents.md/repo/architecture.md)
 - 🚨 Reach an external URL by passing a different `baseUrl` to `createGetRequest`, never by dropping to `fetch()`. [`architecture`](docs/agents.md/repo/architecture.md)
 - 🚨 Source files use the `.mts` extension and carry a mandatory `@file` header. [`architecture`](docs/agents.md/repo/architecture.md)
-- 🚨 `"use strict"` is FORBIDDEN in `.mjs`/`.mts` — ES modules are already strict. [`architecture`](docs/agents.md/repo/architecture.md)
+- 🚨 `"use strict"` is FORBIDDEN in `.mjs`/`.mts` - ES modules are already strict. [`architecture`](docs/agents.md/repo/architecture.md)
 - Code is semicolon-free, enforced by oxfmt. [`architecture`](docs/agents.md/repo/architecture.md)
-- 🚨 No `any` — use `unknown` or a specific type. [`architecture`](docs/agents.md/repo/architecture.md)
+- 🚨 No `any` - use `unknown` or a specific type. [`architecture`](docs/agents.md/repo/architecture.md)
 - `logger.error('')` and `logger.log('')` need the empty-string argument. [`architecture`](docs/agents.md/repo/architecture.md)
 - 🚨 Never put `--` before a vitest test path; it runs ALL tests. [`architecture`](docs/agents.md/repo/architecture.md)
 - Full layout, command catalog, config-file table, sorting rules, testing helpers, CI mandate and SDK notes live in the architecture doc. [`architecture`](docs/agents.md/repo/architecture.md)

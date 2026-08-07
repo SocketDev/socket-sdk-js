@@ -6,7 +6,7 @@ Shared tool detection for security scanning pipelines.
 
 Installed as a pinned devDependency (`ecc-agentshield` in pnpm-workspace.yaml catalog).
 Run via: `pnpm exec agentshield scan`
-No install step needed — available after `pnpm install`.
+No install step needed - available after `pnpm install`.
 
 ## Zizmor
 
@@ -30,7 +30,7 @@ if [ -n "$ZIZMOR" ]; then "$ZIZMOR" .github/; else echo "zizmor not installed �
 
 If not available:
 
-- Warn: "zizmor not installed — run `pnpm run setup` to install"
+- Warn: "zizmor not installed - run `pnpm run setup` to install"
 - Skip the zizmor phase (don't fail the pipeline)
 
 ## Socket CLI
@@ -42,4 +42,4 @@ Detection: `command -v socket`
 If not available:
 
 - Skip socket-scan phases gracefully
-- Note in report: "Socket CLI not available — dependency scan skipped"
+- Note in report: "Socket CLI not available - dependency scan skipped"

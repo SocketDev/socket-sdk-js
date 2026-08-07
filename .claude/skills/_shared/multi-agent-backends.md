@@ -44,14 +44,14 @@ Document skips inline in whatever output the skill produces (`> Skipped pass: <r
 | `CLAUDE_MODEL`    | `opus`        | Claude model when claude is the active backend |
 | `KIMI_MODEL`      | `kimi-latest` | Kimi model when kimi is the active backend     |
 
-Don't invent per-skill env var names — reuse these. Skills that need a non-default model for a specific run accept a `--model` flag rather than introducing new env vars.
+Don't invent per-skill env var names - reuse these. Skills that need a non-default model for a specific run accept a `--model` flag rather than introducing new env vars.
 
 ## Canonical implementation
 
-`.claude/skills/reviewing-code/run.mts` is the reference implementation. New skills that need multi-agent delegation should import the same registry shape and detection function (or copy the small block until extraction is worth doing) — don't roll a parallel pattern.
+`.claude/skills/reviewing-code/run.mts` is the reference implementation. New skills that need multi-agent delegation should import the same registry shape and detection function (or copy the small block until extraction is worth doing) - don't roll a parallel pattern.
 
 ## When NOT to use
 
-- Skills that only need _one_ agent — the current Claude session driving the user. No detection needed; just do the work.
-- Skills that need a specific model unconditionally (e.g. a benchmark that compares two models — those use direct API calls, not the CLI registry).
+- Skills that only need _one_ agent - the current Claude session driving the user. No detection needed; just do the work.
+- Skills that need a specific model unconditionally (e.g. a benchmark that compares two models - those use direct API calls, not the CLI registry).
 - Per-repo fix scripts that rely on a single tool (`pnpm`, `git`, `cargo`). Tooling, not agents.

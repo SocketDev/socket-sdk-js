@@ -2,7 +2,7 @@
 
 The Socket SDK is a TypeScript client for the Socket.dev REST API. You construct one client, call methods on it, and get back a typed result object.
 
-This page explains the SDK's runtime model — construction, result shape, pagination, file uploads, quota, escape hatches, and the errors you'll actually hit. For the **per-method list** (signatures, quota costs, grouping by domain), see [API Reference](./api.md). For endpoint-level details (URL paths, request bodies, raw response shapes), see <https://docs.socket.dev/reference/>.
+This page explains the SDK's runtime model - construction, result shape, pagination, file uploads, quota, escape hatches, and the errors you'll actually hit. For the **per-method list** (signatures, quota costs, grouping by domain), see [API Reference](./api.md). For endpoint-level details (URL paths, request bodies, raw response shapes), see <https://docs.socket.dev/reference/>.
 
 ## Creating a client
 
@@ -81,7 +81,7 @@ The shapes:
 
 **Why a result object instead of throwing?** Network failures, auth failures, and validation failures are normal control flow when you're talking to a remote API. Treating them as exceptions would force every caller to wrap every call in `try`/`catch`. The result object lets you handle them as data.
 
-The exception: methods that talk to your filesystem (uploads) or that don't fit the pattern still throw on programmer errors — bad arguments, missing files, etc. Network errors from those methods are still returned in the result.
+The exception: methods that talk to your filesystem (uploads) or that don't fit the pattern still throw on programmer errors - bad arguments, missing files, etc. Network errors from those methods are still returned in the result.
 
 ## Pagination and streaming
 
@@ -139,8 +139,8 @@ See [Quota Management](./quota-management.md) for the helpers (`getQuotaCost`, `
 
 For endpoints the SDK doesn't wrap, or when you need the raw response:
 
-- **`getApi(urlPath, options?)`** — `GET` against any path under `baseUrl`. By default it throws on non-2xx; pass `{ throws: false }` to get the result object.
-- **`sendApi(urlPath, options?)`** — `POST` or `PUT` with a JSON body. Pass `{ method: 'PUT' }` to switch verbs.
+- **`getApi(urlPath, options?)`** - `GET` against any path under `baseUrl`. By default it throws on non-2xx; pass `{ throws: false }` to get the result object.
+- **`sendApi(urlPath, options?)`** - `POST` or `PUT` with a JSON body. Pass `{ method: 'PUT' }` to switch verbs.
 
 ```typescript
 const result = await client.getApi('orgs/my-org/custom-endpoint', {
@@ -155,11 +155,11 @@ These are the only methods that take a free-form URL path. Everything else is na
 
 | Status | Meaning                                       | What to do                                                         |
 | ------ | --------------------------------------------- | ------------------------------------------------------------------ |
-| `400`  | Bad request — usually a malformed argument.   | Read `result.error`; fix the call site.                            |
+| `400`  | Bad request - usually a malformed argument.   | Read `result.error`; fix the call site.                            |
 | `401`  | Bad or missing API token.                     | Check the token. Tokens are case-sensitive.                        |
 | `403`  | Token lacks the required permission.          | See `getMethodRequirements(methodName)` for what the method needs. |
 | `404`  | Resource doesn't exist (or you can't see it). | Check the slug/ID and your org membership.                         |
 | `429`  | Rate-limited or out of quota.                 | Back off; check `getQuota()` before retrying expensive calls.      |
 | `5xx`  | Server error.                                 | The SDK retries automatically up to `retries` times.               |
 
-The SDK retries `5xx` and network failures automatically. It does **not** retry `4xx` — those won't change on retry.
+The SDK retries `5xx` and network failures automatically. It does **not** retry `4xx` - those won't change on retry.

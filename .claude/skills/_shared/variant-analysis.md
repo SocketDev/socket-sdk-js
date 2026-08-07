@@ -1,6 +1,6 @@
 # Variant analysis
 
-When a finding lands — a bug, a regression, a security issue — the next question is always: **does this same shape exist anywhere else in the repo?** Variant analysis is the systematic answer.
+When a finding lands - a bug, a regression, a security issue - the next question is always: **does this same shape exist anywhere else in the repo?** Variant analysis is the systematic answer.
 
 ## Why this exists
 
@@ -12,15 +12,15 @@ This file is referenced by `scanning-quality` (variant-analysis scan type), `sca
 
 For every confirmed finding, run three searches before closing it out:
 
-1. **Same file, different lines** — the antipattern often clusters within the file that exhibits it. Read the whole file, not just the diff.
-2. **Sibling files, same shape** — `rg`/`grep` for the same call, the same condition, the same data flow. If the bug was `if (foo == null)`, search for that exact shape.
-3. **Cross-package, same concept** — does another package own a parallel implementation? If `socket-cli` has the bug, does `socket-registry` have it too? Fleet drift loves to hide variants.
+1. **Same file, different lines** - the antipattern often clusters within the file that exhibits it. Read the whole file, not just the diff.
+2. **Sibling files, same shape** - `rg`/`grep` for the same call, the same condition, the same data flow. If the bug was `if (foo == null)`, search for that exact shape.
+3. **Cross-package, same concept** - does another package own a parallel implementation? If `socket-cli` has the bug, does `socket-registry` have it too? Fleet drift loves to hide variants.
 
 ## What counts as "the same shape"
 
 | Bug class          | What to search for                                                           |
 | ------------------ | ---------------------------------------------------------------------------- |
-| Missing null check | the call before the access — `foo.bar()` where `foo` could be undefined      |
+| Missing null check | the call before the access - `foo.bar()` where `foo` could be undefined      |
 | Race condition     | the lock primitive + the call sequence                                       |
 | Path construction  | literal `path.join('build', …)` outside the canonical `paths.mts`            |
 | Insecure default   | the option name, the boolean default, the env-var fallback                   |
@@ -44,7 +44,7 @@ Variants should be batched into the same fix commit when mechanical (one find/re
 ## Don't
 
 - Don't variant-hunt for style nits. Reserve this for correctness / security / fleet-drift findings.
-- Don't expand the search radius past one repo without writing it down — cross-fleet variants get a `chore(wheelhouse): cascade <fix>` PR per the _Drift watch_ rule.
+- Don't expand the search radius past one repo without writing it down - cross-fleet variants get a `chore(wheelhouse): cascade <fix>` PR per the _Drift watch_ rule.
 - Don't skip the search because the finding "looks unique." Looking unique is exactly when the search pays off.
 
 ## Trail-of-Bits influence

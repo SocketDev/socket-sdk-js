@@ -18,26 +18,26 @@ Three places a lesson can land in this fleet:
 
 Compound a lesson **only** when one of these is true:
 
-1. **Recurrence** — the same kind of bug has now appeared 2+ times. Write down the rule that would have caught both.
-2. **High blast radius** — the bug shipped, broke a downstream user, or required a revert. The rule prevents the next shipping incident.
-3. **Drift signal** — fleet repos disagreed on the answer. The rule reconciles which answer wins.
+1. **Recurrence** - the same kind of bug has now appeared 2+ times. Write down the rule that would have caught both.
+2. **High blast radius** - the bug shipped, broke a downstream user, or required a revert. The rule prevents the next shipping incident.
+3. **Drift signal** - fleet repos disagreed on the answer. The rule reconciles which answer wins.
 
 Don't compound for one-off fixes that won't recur. Don't write a "lesson" doc when the lesson is just "we fixed it." The fleet rule **is** the lesson; if you can't crystallize it into a rule, the lesson isn't ready.
 
 ## How to compound
 
-1. **Name the rule** — one sentence, imperative voice. "Never X." "Always Y."
-2. **Cite the incident** — one-line `**Why:**` line referencing the commit, PR, or finding. Don't write a paragraph.
-3. **State the application** — one-line `**How to apply:**` line saying when the rule fires.
-4. **Land it where it'll fire** — CLAUDE.md, hook, or skill prompt. Pick the lowest-friction surface that catches the next occurrence.
+1. **Name the rule** - one sentence, imperative voice. "Never X." "Always Y."
+2. **Cite the incident** - one-line `**Why:**` line referencing the commit, PR, or finding. Don't write a paragraph.
+3. **State the application** - one-line `**How to apply:**` line saying when the rule fires.
+4. **Land it where it'll fire** - CLAUDE.md, hook, or skill prompt. Pick the lowest-friction surface that catches the next occurrence.
 
 Skip the retrospective doc. Skip the post-mortem template. The rule is the artifact.
 
 ## Anti-patterns
 
-- **The "lessons learned" graveyard** — a `docs/lessons/` folder where dated markdown files rot. Don't. The rule belongs in the live config that fires on the next run.
-- **Vague rules** — "be careful with X." Useless. If you can't write the rule as a `rg` pattern or a CLAUDE.md `🚨` line, it isn't a rule yet.
-- **Rules without why** — future readers can't judge edge cases without the original incident. Always cite.
+- **The "lessons learned" graveyard** - a `docs/lessons/` folder where dated markdown files rot. Don't. The rule belongs in the live config that fires on the next run.
+- **Vague rules** - "be careful with X." Useless. If you can't write the rule as a `rg` pattern or a CLAUDE.md `🚨` line, it isn't a rule yet.
+- **Rules without why** - future readers can't judge edge cases without the original incident. Always cite.
 
 ## Source
 

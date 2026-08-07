@@ -23,7 +23,7 @@ hatches](./concepts.md#escape-hatches).
 ## Deprecated but still present
 
 These two methods target deprecated `npm/*` operations and remain only for
-backwards compatibility. They are on their way out — prefer the org-scoped
+backwards compatibility. They are on their way out - prefer the org-scoped
 package methods (`batchOrgPackageFetch`, `batchPackageFetch`) instead.
 
 | SDK method              | OpenAPI operation       | Endpoint                              |
