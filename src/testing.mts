@@ -387,7 +387,10 @@ export function mockSdkResult<T extends SocketSdkOperations>(
   cause?: string | undefined,
 ): SocketSdkErrorResult<T>
 
-// socket-lint: allow boolean-trap -- `success` is a load-bearing type discriminant: the two overloads above narrow the return to the success or error result. An options object would lose that discrimination.
+// `success` is a load-bearing type discriminant: the two overloads above
+// narrow the return to the success or error result. An options object would
+// lose that discrimination.
+// oxlint-disable-next-line socket/no-boolean-trap-param -- type discriminant
 export function mockSdkResult<T extends SocketSdkOperations>(
   success: boolean,
   dataOrError: unknown,
