@@ -72,7 +72,7 @@
     "npm:publish": "node scripts/fleet/publish-pipeline.mts",
     "precommit": "pnpm run check --lint --staged",
     "preinstall": "node scripts/fleet/setup/bootstrap-zero-dep-packages.mjs",
-    "prepare": "node scripts/fleet/install-git-hooks.mts && node scripts/fleet/prepare.mts",
+    "prepare": "node scripts/repo/bootstrap/prepare.mts && node scripts/fleet/install-git-hooks.mts && node scripts/fleet/prepare.mts",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "security": "node scripts/fleet/security.mts",
     "setup-security-tools": "node .claude/hooks/fleet/setup-security-tools/install.mts",
