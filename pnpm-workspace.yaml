@@ -219,12 +219,6 @@ catalog:
   '@types/semver': 7.7.1
   '@types/shell-quote': 1.7.5
   'compromise': 14.16.0
-  # comptime 0.1.0 — Zig-inspired build-time evaluation for Rolldown/Vite.
-  # Wraps comptime(() => expr) calls; the Rolldown plugin evaluates them at
-  # build time and replaces the call site with the serialized literal result.
-  # Use in rolldown.config.mts for any repo with a Rolldown build.
-  # published: 2026-05-07 (26 days, past 7-day soak)
-  'comptime': 0.1.0
   # fast-check — property-based testing for pure fleet-script logic (pin
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
@@ -302,7 +296,6 @@ catalog:
   'ecc-agentshield': 1.4.0
   'npm-run-all2': 9.0.3
   'rolldown': 1.2.3
-  'rolldown-plugin-dts': 0.28.0
   'svgo': 4.0.2
   'vite': 8.2.0
   'vitiate': 0.3.1
