@@ -98,7 +98,7 @@
     "npm:auth": "node scripts/fleet/npm-auth.mts",
     "ruleset:bypass": "node scripts/fleet/grant-ruleset-bypass.mts",
     "soak:bypass": "node scripts/fleet/soak-bypass.mts",
-    "trust": "node scripts/fleet/publish-infra/npm/trust.mts",
+    "trust": "node scripts/fleet/registry-infra/npm/trust.mts",
     "strip:ai-tags": "node scripts/fleet/strip-ai-tags.mts",
     "npm:approve": "node scripts/fleet/publish-pipeline.mts --approve",
     "npm:dispatch": "gh workflow run npm-publish-packages.yml -R SocketDev/socket-registry --ref main -f publish=true",
