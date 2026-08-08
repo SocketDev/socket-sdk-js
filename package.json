@@ -102,7 +102,6 @@
     "strip:ai-tags": "node scripts/fleet/strip-ai-tags.mts",
     "npm:approve": "node scripts/fleet/publish-pipeline.mts --approve",
     "npm:dispatch": "gh workflow run npm-publish-packages.yml -R SocketDev/socket-registry --ref main -f publish=true",
-    "npm:login": "node scripts/fleet/npm-web-auth.mts login",
     "npm:staged": "node scripts/fleet/publish-pipeline.mts --status",
     "hide-comments": "node scripts/fleet/hide-comments.mts",
     "npm:trust": "node scripts/fleet/registry-infra/npm/trust.mts",
