@@ -6,7 +6,7 @@
 
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
@@ -54,7 +54,7 @@ export function resolve(
     // Only use local path if file actually exists
     if (existsSync(resolvedPath)) {
       return {
-        url: `file://${resolvedPath}`,
+        url: pathToFileURL(resolvedPath).href,
         shortCircuit: true,
       }
     }
