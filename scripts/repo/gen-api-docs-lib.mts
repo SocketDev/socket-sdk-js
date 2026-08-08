@@ -46,7 +46,7 @@ export interface MethodInfo {
  */
 export function extractMethods(): MethodInfo[] {
   const src = readFileSync(classPath, 'utf8')
-  const lines = src.split('\n')
+  const lines = src.split(/\r?\n/)
   const data = loadQuotaData()
   const methods: MethodInfo[] = []
   const seen = new Set<string>()
