@@ -13,8 +13,8 @@
     "type": "js"
   },
   "bundle": {
-    "ref": "fleet-pack-dcafeb6111c7f91f192d8d1843e222c8c04cc3d4",
-    "cascadeSha": "dcafeb6111c7f91f192d8d1843e222c8c04cc3d4"
+    "ref": "fleet-pack-290569a75ea039daaea31504b944a7fb7a6c9767",
+    "cascadeSha": "290569a75ea039daaea31504b944a7fb7a6c9767"
   },
   "docs": {
     "llmsTxt": true
