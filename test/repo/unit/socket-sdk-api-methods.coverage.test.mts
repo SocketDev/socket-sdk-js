@@ -649,6 +649,73 @@ describe('SocketSdk - API Methods Coverage', () => {
       // viewPatch returns the patch data directly, not wrapped in success/data
       expect(result).toBeDefined()
     })
+
+    it('covers fetchPatchesByCVE', async () => {
+      const result = await client.fetchPatchesByCVE(
+        'test-org',
+        'CVE-2021-44228',
+      )
+      expect(result).toBeDefined()
+    })
+
+    it('covers fetchPatchesByGHSA', async () => {
+      const result = await client.fetchPatchesByGHSA(
+        'test-org',
+        'GHSA-jfhm-5ghh-2f97',
+      )
+      expect(result).toBeDefined()
+    })
+
+    it('covers fetchPatchesByPackage', async () => {
+      const result = await client.fetchPatchesByPackage(
+        'test-org',
+        'pkg:npm/lodash@4.17.21',
+      )
+      expect(result).toBeDefined()
+    })
+
+    it('covers fetchPatchesBatch', async () => {
+      const result = await client.fetchPatchesBatch('test-org', [
+        { purl: 'pkg:npm/lodash@4.17.21' },
+      ])
+      expect(result).toBeDefined()
+    })
+
+    it('covers fetchPatchRecords', async () => {
+      const result = await client.fetchPatchRecords('test-org', [
+        'patch-uuid-123',
+      ])
+      expect(result).toBeDefined()
+    })
+
+    it('covers getPatchDiff', async () => {
+      const result = await client.getPatchDiff('test-org', 'patch-uuid-123')
+      expect(result).toBeDefined()
+    })
+
+    it('covers getPatchBlob', async () => {
+      const result = await client.getPatchBlob('test-org', 'deadbeef')
+      expect(result).toBeDefined()
+    })
+
+    it('covers getPatchPackages', async () => {
+      const result = await client.getPatchPackages('test-org', [
+        'patch-uuid-123',
+      ])
+      expect(result).toBeDefined()
+    })
+
+    it('covers patchPackageStats', async () => {
+      const result = await client.patchPackageStats('test-org', ['patch-key-1'])
+      expect(result).toBeDefined()
+    })
+
+    it('covers lookupPatchPackage', async () => {
+      const result = await client.lookupPatchPackage('test-org', [
+        'patch-key-1',
+      ])
+      expect(result).toBeDefined()
+    })
   })
 
   describe('Quota Methods', () => {

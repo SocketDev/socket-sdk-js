@@ -141,5 +141,114 @@ describe('SocketSdk - endpoint path contracts', () => {
       )
       expect(result.success).toBe(true)
     })
+
+    it('fetchPatchesByCVE GETs orgs/{org}/patches/by-cve/{cveId}', async () => {
+      nock(API)
+        .get('/v0/orgs/test-org/patches/by-cve/CVE-2021-44228')
+        .reply(200, { patches: [], canAccessPaidPatches: false })
+      const result = await getClient().fetchPatchesByCVE(
+        'test-org',
+        'CVE-2021-44228',
+      )
+      expect(result.patches).toEqual([])
+    })
+
+    it('fetchPatchesByGHSA GETs orgs/{org}/patches/by-ghsa/{ghsaId}', async () => {
+      nock(API)
+        .get('/v0/orgs/test-org/patches/by-ghsa/GHSA-jfhm-5ghh-2f97')
+        .reply(200, { patches: [], canAccessPaidPatches: false })
+      const result = await getClient().fetchPatchesByGHSA(
+        'test-org',
+        'GHSA-jfhm-5ghh-2f97',
+      )
+      expect(result.patches).toEqual([])
+    })
+
+    it('fetchPatchesByPackage GETs orgs/{org}/patches/by-package/{purl}', async () => {
+      const purl = 'pkg:npm/lodash@4.17.21'
+      nock(API)
+        .get(`/v0/orgs/test-org/patches/by-package/${encodeURIComponent(purl)}`)
+        .reply(200, { patches: [], canAccessPaidPatches: false })
+      const result = await getClient().fetchPatchesByPackage('test-org', purl)
+      expect(result.patches).toEqual([])
+    })
+
+    it('fetchPatchesBatch POSTs orgs/{org}/patches/batch', async () => {
+      nock(API)
+        .post('/v0/orgs/test-org/patches/batch', {
+          components: [{ purl: 'pkg:npm/lodash@4.17.21' }],
+        })
+        .reply(200, { packages: [], skipped: [], canAccessPaidPatches: false })
+      const result = await getClient().fetchPatchesBatch('test-org', [
+        { purl: 'pkg:npm/lodash@4.17.21' },
+      ])
+      expect(result.packages).toEqual([])
+    })
+
+    it('fetchPatchRecords POSTs orgs/{org}/patches/records', async () => {
+      nock(API)
+        .post('/v0/orgs/test-org/patches/records', {
+          uuids: ['patch-uuid-1'],
+        })
+        .reply(200, { records: {}, missing: [], forbidden: [] })
+      const result = await getClient().fetchPatchRecords('test-org', [
+        'patch-uuid-1',
+      ])
+      expect(result.records).toEqual({})
+    })
+
+    it('getPatchDiff GETs orgs/{org}/patches/diff/{uuid}', async () => {
+      nock(API)
+        .get('/v0/orgs/test-org/patches/diff/patch-uuid-1')
+        .reply(200, 'diff-bytes', { 'Content-Type': 'application/gzip' })
+      const result = await getClient().getPatchDiff('test-org', 'patch-uuid-1')
+      expect(Buffer.from(result).toString()).toBe('diff-bytes')
+    })
+
+    it('getPatchBlob GETs orgs/{org}/patches/blob/{hash}', async () => {
+      nock(API)
+        .get('/v0/orgs/test-org/patches/blob/deadbeef')
+        .reply(200, 'blob-bytes', {
+          'Content-Type': 'application/octet-stream',
+        })
+      const result = await getClient().getPatchBlob('test-org', 'deadbeef')
+      expect(Buffer.from(result).toString()).toBe('blob-bytes')
+    })
+
+    it('getPatchPackages POSTs orgs/{org}/patches/package', async () => {
+      nock(API)
+        .post('/v0/orgs/test-org/patches/package', {
+          uuids: ['patch-uuid-1'],
+        })
+        .reply(200, { results: {} })
+      const result = await getClient().getPatchPackages('test-org', [
+        'patch-uuid-1',
+      ])
+      expect(result.results).toEqual({})
+    })
+
+    it('patchPackageStats POSTs orgs/{org}/patches/package/stats', async () => {
+      nock(API)
+        .post('/v0/orgs/test-org/patches/package/stats', {
+          references: ['patch-key-1'],
+        })
+        .reply(200, { results: {} })
+      const result = await getClient().patchPackageStats('test-org', [
+        'patch-key-1',
+      ])
+      expect(result.results).toEqual({})
+    })
+
+    it('lookupPatchPackage POSTs orgs/{org}/patches/package/lookup', async () => {
+      nock(API)
+        .post('/v0/orgs/test-org/patches/package/lookup', {
+          references: ['patch-key-1'],
+        })
+        .reply(200, { results: {} })
+      const result = await getClient().lookupPatchPackage('test-org', [
+        'patch-key-1',
+      ])
+      expect(result.results).toEqual({})
+    })
   })
 })

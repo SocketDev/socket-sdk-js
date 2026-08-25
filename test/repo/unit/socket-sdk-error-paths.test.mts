@@ -405,4 +405,74 @@ describe('SocketSdk error paths - Throwing methods', () => {
     const client = createClient()
     await expect(client.viewPatch('test-org', 'patch-uuid')).rejects.toThrow()
   })
+
+  it('fetchPatchesByCVE throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.fetchPatchesByCVE('test-org', 'CVE-2021-44228'),
+    ).rejects.toThrow()
+  })
+
+  it('fetchPatchesByGHSA throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.fetchPatchesByGHSA('test-org', 'GHSA-jfhm-5ghh-2f97'),
+    ).rejects.toThrow()
+  })
+
+  it('fetchPatchesByPackage throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.fetchPatchesByPackage('test-org', 'pkg:npm/lodash@4.17.21'),
+    ).rejects.toThrow()
+  })
+
+  it('fetchPatchesBatch throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.fetchPatchesBatch('test-org', [
+        { purl: 'pkg:npm/lodash@4.17.21' },
+      ]),
+    ).rejects.toThrow()
+  })
+
+  it('fetchPatchRecords throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.fetchPatchRecords('test-org', ['patch-uuid']),
+    ).rejects.toThrow()
+  })
+
+  it('getPatchDiff throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.getPatchDiff('test-org', 'patch-uuid'),
+    ).rejects.toThrow()
+  })
+
+  it('getPatchBlob throws on 400', async () => {
+    const client = createClient()
+    await expect(client.getPatchBlob('test-org', 'deadbeef')).rejects.toThrow()
+  })
+
+  it('getPatchPackages throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.getPatchPackages('test-org', ['patch-uuid']),
+    ).rejects.toThrow()
+  })
+
+  it('patchPackageStats throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.patchPackageStats('test-org', ['patch-key-1']),
+    ).rejects.toThrow()
+  })
+
+  it('lookupPatchPackage throws on 400', async () => {
+    const client = createClient()
+    await expect(
+      client.lookupPatchPackage('test-org', ['patch-key-1']),
+    ).rejects.toThrow()
+  })
 })
