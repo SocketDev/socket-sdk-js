@@ -27,7 +27,7 @@ function readRepoFile(relativePath: string): string {
 
 describe('SocketSdkOptions carries no dead transport option', () => {
   it('does not declare an agent option', () => {
-    const types = readRepoFile('src/types.mts')
+    const types = readRepoFile('src/types/core.mts')
     const optionsBlock = types.slice(
       types.indexOf('export interface SocketSdkOptions {'),
     )

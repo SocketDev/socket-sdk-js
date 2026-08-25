@@ -84,12 +84,26 @@ export type {
   HistoricalSnapshotsListOptions,
   LicensePolicyViolations,
   UpdateOrgRepoLabelSettingBody,
-} from './types-parity.mts'
+} from './types/parity.mts'
+// Re-export patch-domain types.
+export type {
+  ArtifactPatches,
+  GetPatchPackagesResponse,
+  LookupPatchPackageResponse,
+  PatchesBatchResponse,
+  PatchFile,
+  PatchPackageStatsResponse,
+  PatchRecord,
+  PatchRecordsResponse,
+  PatchSearchResponse,
+  PatchViewResponse,
+  SecurityAlert,
+  Vulnerability,
+} from './types/patches.mts'
 // Re-export types from modules.
 export type {
   ALERT_ACTION,
   ALERT_TYPE,
-  ArtifactPatches,
   BatchPackageFetchResultType,
   BatchPackageStreamOptions,
   CompactSocketArtifact,
@@ -106,9 +120,6 @@ export type {
   MalwareCheckPackage,
   MalwareCheckResult,
   MalwareCheckScore,
-  PatchFile,
-  PatchRecord,
-  PatchViewResponse,
   TelemetryConfig,
   PostOrgTelemetryPayload,
   PostOrgTelemetryResponse,
@@ -117,7 +128,6 @@ export type {
   RequestOptions,
   RequestOptionsWithHooks,
   ResponseInfo,
-  SecurityAlert,
   SendMethod,
   SendOptions,
   SocketArtifact,
@@ -138,8 +148,7 @@ export type {
   UploadManifestFilesOptions,
   UploadManifestFilesResponse,
   UploadManifestFilesReturnType,
-  Vulnerability,
-} from './types.mts'
+} from './types/core.mts'
 // Re-export strict types for v3 API.
 export type {
   CreateFullScanOptions,
@@ -166,7 +175,7 @@ export type {
   StreamFullScanOptions,
   StrictErrorResult,
   StrictResult,
-} from './types-strict.mts'
+} from './types/strict.mts'
 // Re-export functions from modules.
 export { createUserAgentFromPkgJson } from './user-agent.mts'
 /* c8 ignore stop */

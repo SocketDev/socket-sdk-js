@@ -9,7 +9,7 @@ import { MapCtor } from '@socketsecurity/lib/primordials/map-set'
 import rootPkgJson from '../package.json' with { type: 'json' }
 import { buildSdkBaseUserAgent } from './user-agent.mts'
 
-import type { ALERT_ACTION, ALERT_TYPE } from './types.mts'
+import type { ALERT_ACTION, ALERT_TYPE } from './types/core.mts'
 
 // Re-export Socket.dev URL constants from @socketsecurity/lib
 export {

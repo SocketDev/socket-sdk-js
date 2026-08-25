@@ -43,7 +43,7 @@ if (!rootPackageJsonPath) {
 }
 const rootPath = path.dirname(rootPackageJsonPath)
 const openApiPath = path.resolve(rootPath, 'openapi.json')
-const strictTypesPath = path.resolve(rootPath, 'src/types-strict.mts')
+const strictTypesPath = path.resolve(rootPath, 'src/types/strict.mts')
 const indexExportsPath = path.resolve(rootPath, 'src/index.mts')
 
 /**

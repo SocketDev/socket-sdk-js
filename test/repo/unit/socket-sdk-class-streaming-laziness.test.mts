@@ -16,7 +16,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/socket-sdk-class.mts'
 
-import type { ArtifactPatches } from '../../../src/types.mts'
+import type { ArtifactPatches } from '../../../src/types/patches.mts'
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 
 type Gate = {

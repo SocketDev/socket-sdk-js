@@ -10,7 +10,7 @@ import { MAX_RESPONSE_SIZE } from './constants.mts'
 import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
 import type formDataExternal from './external/form-data'
-import type { RequestOptions, RequestOptionsWithHooks } from './types.mts'
+import type { RequestOptions, RequestOptionsWithHooks } from './types/core.mts'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { ReadStream } from 'node:fs'
 import type { Readable } from 'node:stream'
