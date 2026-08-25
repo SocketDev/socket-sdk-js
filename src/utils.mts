@@ -16,7 +16,7 @@ import {
 } from '@socketsecurity/lib/primordials/string'
 import { URLSearchParamsCtor } from '@socketsecurity/lib/primordials/url'
 
-import type { QueryParams } from './types.mts'
+import type { QueryParams } from './types/core.mts'
 
 /**
  * Calculate Jaccard similarity coefficient between two strings based on word

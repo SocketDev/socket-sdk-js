@@ -19,7 +19,7 @@ import type {
   SendMethod,
   SocketArtifactAlert,
   SocketArtifactWithExtras,
-} from './types.mts'
+} from './types/core.mts'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
 

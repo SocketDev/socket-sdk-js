@@ -9,7 +9,7 @@ import type {
   SocketSdkOperations,
   SocketSdkResult,
   SocketSdkSuccessResult,
-} from './types.mts'
+} from './types/core.mts'
 
 /**
  * Type guard to check if SDK result is an error.

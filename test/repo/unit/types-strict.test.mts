@@ -17,7 +17,7 @@ import type {
   FullScanResult,
   OrganizationItem,
   OrganizationsResult,
-} from '../../../src/types-strict.mts'
+} from '../../../src/types/strict.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 describe.sequential('Strict Types - v3.0', () => {

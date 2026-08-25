@@ -2,14 +2,14 @@
  * @file Option and response type aliases for the newer Socket API endpoint
  *   methods (historical/analytics, full-scan CSV/PDF exports, repo-label
  *   settings, and license-policy). Each alias is derived from the generated
- *   OpenAPI operation types (`../types/api`) so the SDK method signatures stay
- *   in lockstep with the spec instead of hand-listing the (large) historical
- *   filter query sets. Split out of `types.mts` to keep that file under the
- *   file-size cap.
+ *   OpenAPI operation types (`../../types/api`) so the SDK method signatures
+ *   stay in lockstep with the spec instead of hand-listing the (large)
+ *   historical filter query sets. Split out of `core.mts` to keep that file
+ *   under the file-size cap.
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
-import type { operations } from '../types/api'
+import type { operations } from '../../types/api'
 
 export type HistoricalAlertsListOptions = NonNullable<
   operations['historicalAlertsList']['parameters']['query']

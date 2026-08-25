@@ -4,8 +4,8 @@
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
-import type { components, operations } from '../types/api'
-import type { OpReturnType } from '../types/api-helpers'
+import type { components, operations } from '../../types/api'
+import type { OpReturnType } from '../../types/api-helpers'
 import type { Remap } from '@socketsecurity/lib/objects/types'
 import type { RequestOptions as HttpRequestOptions } from 'node:http'
 import type { ClientSessionRequestOptions } from 'node:http2'
@@ -24,52 +24,6 @@ export type Entitlement = {
 
 export type EntitlementsResponse = {
   items: Entitlement[]
-}
-
-export type PatchFile = {
-  afterHash?: string | undefined
-  beforeHash?: string | undefined
-  socketBlob?: string | null | undefined
-}
-
-export type Vulnerability = {
-  cves: string[]
-  description: string
-  severity: string
-  summary: string
-}
-
-export type SecurityAlert = {
-  description: string
-  severity: string
-  summary: string
-  cveId?: string | null | undefined
-  ghsaId?: string | null | undefined
-}
-
-export type PatchRecord = {
-  description: string
-  license: string
-  publishedAt: string
-  securityAlerts: SecurityAlert[]
-  tier: 'free' | 'paid'
-  uuid: string
-}
-
-export type PatchViewResponse = {
-  description: string
-  files: Record<string, PatchFile>
-  license: string
-  publishedAt: string
-  purl: string
-  tier: 'free' | 'paid'
-  uuid: string
-  vulnerabilities: Record<string, Vulnerability>
-}
-
-export type ArtifactPatches = {
-  artifactId: string
-  patches: PatchRecord[]
 }
 
 export interface RequestInfo {

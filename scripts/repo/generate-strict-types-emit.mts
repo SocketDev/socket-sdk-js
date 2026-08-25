@@ -1,7 +1,7 @@
 /**
  * @file Type-definition string emitters for the strict-type codegen pipeline.
  *   Houses the shared property/config interfaces plus the functions that render
- *   the generated `src/types-strict.mts` text consumed by
+ *   the generated `src/types/strict.mts` text consumed by
  *   scripts/repo/generate-strict-types.mts.
  */
 
