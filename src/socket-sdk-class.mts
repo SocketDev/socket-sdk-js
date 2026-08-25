@@ -88,7 +88,6 @@ import { pollCachedScan } from './utils/poll.mts'
 import { bufferStreamedErrorResponse } from './utils/response-stream.mts'
 
 import type {
-  ArtifactPatches,
   BatchPackageFetchResultType,
   BatchPackageStreamOptions,
   CompactSocketArtifact,
@@ -102,7 +101,6 @@ import type {
   MalwareCheckPackage,
   MalwareCheckResult,
   MalwareCheckScore,
-  PatchViewResponse,
   PostOrgTelemetryPayload,
   PostOrgTelemetryResponse,
   QueryParams,
@@ -120,7 +118,17 @@ import type {
   UploadManifestFilesError,
   UploadManifestFilesOptions,
   UploadManifestFilesReturnType,
-} from './types.mts'
+} from './types/core.mts'
+import type {
+  ArtifactPatches,
+  GetPatchPackagesResponse,
+  LookupPatchPackageResponse,
+  PatchesBatchResponse,
+  PatchPackageStatsResponse,
+  PatchRecordsResponse,
+  PatchSearchResponse,
+  PatchViewResponse,
+} from './types/patches.mts'
 import type {
   CreateOrgRepoDiffOptions,
   GetOrgFullScanCsvOptions,
@@ -131,7 +139,7 @@ import type {
   HistoricalSnapshotsListOptions,
   LicensePolicyViolations,
   UpdateOrgRepoLabelSettingBody,
-} from './types-parity.mts'
+} from './types/parity.mts'
 import type {
   CreateFullScanOptions,
   DeleteRepositoryLabelResult,
@@ -150,7 +158,7 @@ import type {
   RepositoryLabelsListResult,
   RepositoryResult,
   StrictErrorResult,
-} from './types-strict.mts'
+} from './types/strict.mts'
 import type {
   BlobsUploadData,
   BlobUploadEntry,
@@ -6695,6 +6703,334 @@ export class SocketSdk {
       const result = await this.#handleApiError<never>(e)
       throw new ErrorCtor(result.error, { cause: result.cause })
     }
+  }
+
+  /**
+   * Search for available patches that fix a specific CVE.
+   *
+   * Returns a list of patches with high-level metadata (no blob content).
+   * Use `viewPatch()` to fetch full patch details including blob content.
+   *
+   * @operationId fetchPatchesByCVE
+   *
+   * @quota 10 units
+   */
+  async fetchPatchesByCVE(
+    orgSlug: string,
+    cveId: string,
+  ): Promise<PatchSearchResponse> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/by-cve/${encodeURIComponent(cveId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as PatchSearchResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+
+  /**
+   * Search for available patches that fix a specific GHSA.
+   *
+   * Returns a list of patches with high-level metadata (no blob content).
+   * Use `viewPatch()` to fetch full patch details including blob content.
+   *
+   * @operationId fetchPatchesByGHSA
+   *
+   * @quota 10 units
+   */
+  async fetchPatchesByGHSA(
+    orgSlug: string,
+    ghsaId: string,
+  ): Promise<PatchSearchResponse> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/by-ghsa/${encodeURIComponent(ghsaId)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as PatchSearchResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+
+  /**
+   * Search for available patches for a package specified by PURL.
+   *
+   * Returns a list of patches with high-level metadata (no blob content).
+   * Use `viewPatch()` to fetch full patch details including blob content.
+   *
+   * @operationId fetchPatchesByPackage
+   *
+   * @quota 10 units
+   */
+  async fetchPatchesByPackage(
+    orgSlug: string,
+    purl: string,
+  ): Promise<PatchSearchResponse> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createGetRequest(
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/by-package/${encodeURIComponent(purl)}`,
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as PatchSearchResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+
+  /**
+   * Search for available patches for multiple packages specified by PURL.
+   *
+   * Accepts a `components` array in CycloneDX SBOM format, where each
+   * component has a `purl` field, allowing direct upload of a CDX file's
+   * components array for batch scanning.
+   *
+   * @operationId fetchPatchesBatch
+   *
+   * @quota 20 units
+   */
+  async fetchPatchesBatch(
+    orgSlug: string,
+    components: Array<{ purl: string }>,
+  ): Promise<PatchesBatchResponse> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/batch`,
+              { components },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as PatchesBatchResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+
+  /**
+   * Fetch the metadata records of multiple patches by UUID in one request:
+   * the view-endpoint shape (serving PURL, publish date, vulnerabilities,
+   * per-file before/after hashes) WITHOUT file contents.
+   *
+   * Unknown or unpublished UUIDs are listed in `missing`; patches the
+   * organization is not entitled to are listed in `forbidden`.
+   *
+   * @operationId fetchPatchRecords
+   *
+   * @quota 10 units
+   */
+  async fetchPatchRecords(
+    orgSlug: string,
+    uuids: string[],
+  ): Promise<PatchRecordsResponse> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/records`,
+              { uuids },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as PatchRecordsResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+
+  /**
+   * Get org-scoped download references for a batch of patches.
+   *
+   * Send a list of published-patch UUIDs. For each UUID the response
+   * returns either a stable, org-unique set of download references for the
+   * patched package, or a status explaining why no URL was issued.
+   *
+   * @operationId getPatchPackages
+   *
+   * @quota 20 units
+   */
+  async getPatchPackages(
+    orgSlug: string,
+    uuids: string[],
+    options?: { freeOnly?: boolean | undefined } | undefined,
+  ): Promise<GetPatchPackagesResponse> {
+    options = { __proto__: null, ...options } as typeof options
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/package`,
+              { uuids, freeOnly: options?.freeOnly },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as GetPatchPackagesResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+
+  /**
+   * High-level statistics for a batch of patch package references granted
+   * to this organization.
+   *
+   * Send a list of package references — each is the download URL, the
+   * grant token (the "patch key"), OR the patch UUID. Results are keyed by
+   * the reference string sent.
+   *
+   * @operationId patchPackageStats
+   *
+   * @quota 10 units
+   */
+  async patchPackageStats(
+    orgSlug: string,
+    references: string[],
+  ): Promise<PatchPackageStatsResponse> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/package/stats`,
+              { references },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as PatchPackageStatsResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+
+  /**
+   * Look up the patch metadata behind a batch of patch package references
+   * granted to this organization.
+   *
+   * Send a list of package references — each is either the grant token
+   * (the "patch key") or the full download URL issued. Results are keyed
+   * by the reference string sent.
+   *
+   * @operationId lookupPatchPackage
+   *
+   * @quota 10 units
+   */
+  async lookupPatchPackage(
+    orgSlug: string,
+    references: string[],
+  ): Promise<LookupPatchPackageResponse> {
+    try {
+      const data = await this.#executeWithRetry(
+        async () =>
+          await getResponseJson(
+            await createRequestWithJson(
+              'POST',
+              this.#baseUrl,
+              `orgs/${encodeURIComponent(orgSlug)}/patches/package/lookup`,
+              { references },
+              this.#reqOptionsWithHooks,
+            ),
+          ),
+      )
+      return data as LookupPatchPackageResponse
+    } catch (e) {
+      const result = await this.#handleApiError<never>(e)
+      throw new ErrorCtor(result.error, { cause: result.cause })
+    }
+  }
+
+  /**
+   * Download a compact per-file binary delta (bsdiff/BSDIFF40) archive for
+   * the patched files in this patch. The returned bytes are a `.tar.gz`
+   * whose entries are named verbatim by the manifest `file_path` and
+   * contain the BSDIFF40 bytes for that file.
+   *
+   * @operationId getPatchDiff
+   *
+   * @quota 10 units
+   */
+  async getPatchDiff(orgSlug: string, uuid: string): Promise<Uint8Array> {
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/patches/diff/${encodeURIComponent(uuid)}`
+    const url = `${this.#baseUrl}${urlPath}`
+    const res = await this.#executeWithRetry(
+      async () =>
+        await httpRequest(url, {
+          headers: this.#reqOptions.headers as Record<string, string>,
+          maxResponseSize: 100 * 1024 * 1024,
+          timeout: this.#reqOptions.timeout,
+        }),
+    )
+    if (!isResponseOk(res)) {
+      throw new ResponseError(res, 'GET Request failed', url)
+    }
+    return new Uint8Array(res.arrayBuffer())
+  }
+
+  /**
+   * Download a patch blob by its SHA256 content hash. Returns the raw
+   * binary content.
+   *
+   * @operationId getPatchBlob
+   *
+   * @quota 1 units
+   */
+  async getPatchBlob(orgSlug: string, hash: string): Promise<Uint8Array> {
+    const urlPath = `orgs/${encodeURIComponent(orgSlug)}/patches/blob/${encodeURIComponent(hash)}`
+    const url = `${this.#baseUrl}${urlPath}`
+    const res = await this.#executeWithRetry(
+      async () =>
+        await httpRequest(url, {
+          headers: this.#reqOptions.headers as Record<string, string>,
+          maxResponseSize: 100 * 1024 * 1024,
+          timeout: this.#reqOptions.timeout,
+        }),
+    )
+    if (!isResponseOk(res)) {
+      throw new ResponseError(res, 'GET Request failed', url)
+    }
+    return new Uint8Array(res.arrayBuffer())
   }
 }
 
