@@ -317,7 +317,7 @@
     "**/.github/actions/fleet/**",
     "**/.pnpm-store/**",
     "**/bootstrap/**",
-    "**/docs/agents.md/fleet/**",
+    "**/docs/fleet/agents.md/**",
     "**/scripts/fleet/**",
     "**/scripts/repo/bootstrap/**",
     "**/test/fleet/_shared/**",
