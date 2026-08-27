@@ -51,6 +51,12 @@ export const DEFAULT_POLL_INTERVAL = 2000
 // Public blob store URL for patch downloads
 export const SOCKET_PUBLIC_BLOB_STORE_URL = 'https://socketusercontent.com'
 
+// Socket.dev's published read-only demo token. It grants no account access and
+// is safe to ship; the SDK compares against it so a caller using the demo token
+// gets `publicPolicy` reshaping applied to batch artifact results.
+export const SOCKET_PUBLIC_API_TOKEN =
+  'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api'
+
 // Max components to check via parallel firewall API before switching to batch.
 export const MAX_FIREWALL_COMPONENTS = 8
 

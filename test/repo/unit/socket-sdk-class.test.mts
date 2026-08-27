@@ -1,7 +1,7 @@
 /**
  * @file Tests for streaming behavior in SocketSdk download/stream methods.
  */
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, readFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 

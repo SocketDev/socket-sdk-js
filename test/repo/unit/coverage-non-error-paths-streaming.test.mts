@@ -9,7 +9,7 @@
  *   - uploadManifestFiles edge cases (>5 invalid files, validation callback)
  */
 
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 

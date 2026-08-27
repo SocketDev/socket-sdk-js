@@ -224,8 +224,8 @@ catalog:
   # test/ code uses the canonical name because vitest aliases that
   # to local src/.
   '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.2'
-  '@socketsecurity/lib': 6.7.0
-  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.7.0'
+  '@socketsecurity/lib': 7.0.1
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@7.0.1'
   '@socketsecurity/registry': 2.0.5
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.5'
   '@socketsecurity/sdk': 4.1.4
@@ -427,18 +427,6 @@ patchedDependencies:
   # patched v10 answers that same shape.
   # On a bump, regenerate via `pnpm patch minimatch` + `pnpm patch-commit`.
   minimatch@10.2.6: patches/minimatch@10.2.6.patch
-  # phantom self-alias requires (managed by socket-wheelhouse sync; do not edit):
-  # five dist files require '@socketsecurity/lib-stable/...' but lib declares no
-  # such dependency — lib-stable is an alias of lib itself, so the require only
-  # ever resolved by per-repo virtual-store placement accident. Under
-  # enableGlobalVirtualStore the issuer path is the machine-wide store, where no
-  # alias sibling exists, so every import of the secrets/ai surface dies with
-  # Cannot find module '@socketsecurity/lib-stable/process/spawn/child' (pnpm v11
-  # does not materialize packageExtensions deps inside the links store, so the
-  # declaration alone cannot save it). The patch rewrites the five requires to
-  # the relative path inside lib itself. Rides the @socketsecurity/lib catalog
-  # pin: on a bump, regenerate via `pnpm patch @socketsecurity/lib` + `pnpm patch-commit`.
-  '@socketsecurity/lib@6.7.0': patches/@socketsecurity__lib@6.7.0.patch
 
 # Refuse transitive (sub-) deps declared via git/tarball/local-tarball
 # specs. Direct git deps in this repo are still allowed; this only

@@ -9,9 +9,9 @@ import { fileURLToPath } from 'node:url'
 
 import { rolldown, watch } from 'rolldown'
 
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
-import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { isQuiet } from '@socketsecurity/lib-stable/exe/argv/flag-predicates'
+import { parseArgs } from '@socketsecurity/lib-stable/exe/argv/parse'
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
@@ -147,7 +147,7 @@ export async function buildTypes(options: BuildOptions = {}): Promise<number> {
     args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
     command: 'pnpm',
     options: {
-      ...(WIN32 && { shell: WIN32 }),
+      ...(isWin32() && { shell: true }),
     },
   })
 

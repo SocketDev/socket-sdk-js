@@ -6,7 +6,7 @@
  *   - socket-sdk-upload-simple.test.mts
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import * as path from 'node:path'
 import { Readable } from 'node:stream'
@@ -19,6 +19,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   createRequestBodyForFilepaths,
   createUploadRequest,
+  getFormData,
 } from '../../../src/file-upload.mts'
 import { SocketSdk } from '../../../src/index.mts'
 import {
@@ -83,7 +84,9 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
     const result = createRequestBodyForFilepaths([nestedFile], tempDir)
 
     expect(result).toBeInstanceOf(FormData)
-    expect(result.getBoundary()).toBeTruthy()
+    expect(result.getHeaders()['content-type']).toMatch(
+      /^multipart\/form-data; boundary=.+/,
+    )
   })
 
   it('should handle UTF-8 filenames correctly', () => {
@@ -95,10 +98,9 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
     const result = createRequestBodyForFilepaths([testFile], tempDir)
 
     expect(result).toBeInstanceOf(FormData)
-    expect(result.getBoundary()).toBeTruthy()
     // form-data should handle UTF-8 encoding per RFC 7578
     expect(result.getHeaders()['content-type']).toMatch(
-      /^multipart\/form-data; boundary=/,
+      /^multipart\/form-data; boundary=.+/,
     )
   })
 
@@ -111,7 +113,9 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
     const result = createRequestBodyForFilepaths([utf8File], tempDir)
 
     expect(result).toBeInstanceOf(FormData)
-    expect(result.getBoundary()).toBeTruthy()
+    expect(result.getHeaders()['content-type']).toMatch(
+      /^multipart\/form-data; boundary=.+/,
+    )
   })
 
   it('should handle multiple files with UTF-8 filenames', () => {
@@ -128,7 +132,9 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
     const result = createRequestBodyForFilepaths(files, tempDir)
 
     expect(result).toBeInstanceOf(FormData)
-    expect(result.getBoundary()).toBeTruthy()
+    expect(result.getHeaders()['content-type']).toMatch(
+      /^multipart\/form-data; boundary=.+/,
+    )
   })
 })
 
@@ -221,7 +227,8 @@ describe('File Upload - createUploadRequest', () => {
   })
 
   it.skipIf(isCoverageMode)('should handle JSON body in request', async () => {
-    const jsonPart = new FormData()
+    const FormDataCtor = getFormData()
+    const jsonPart = new FormDataCtor()
     jsonPart.append(
       'package',
       JSON.stringify({ name: 'test-package', version: '1.0.0' }),

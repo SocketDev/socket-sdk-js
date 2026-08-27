@@ -9,7 +9,7 @@
  *   `socket-sdk-create-full-scan-cached-params.test.mts`.
  */
 import crypto from 'node:crypto'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 

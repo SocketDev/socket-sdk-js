@@ -2,7 +2,7 @@
  * @file Tests for multi-part upload operations (dependencies snapshot, full
  *   scan).
  */
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import * as path from 'node:path'
 

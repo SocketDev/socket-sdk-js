@@ -7,7 +7,7 @@ import type {
   SpawnSyncOptions,
 } from '@socketsecurity/lib-stable/process/spawn/types'
 
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import {
   spawn,
@@ -53,7 +53,7 @@ export async function runCommand(
   try {
     const result = await spawn(command, args, {
       stdio: 'inherit',
-      shell: WIN32,
+      shell: isWin32(),
       ...options,
     })
     return result.code
@@ -78,7 +78,7 @@ export async function runCommandQuiet(
   try {
     const result = await spawn(command, args, {
       ...options,
-      shell: WIN32,
+      shell: isWin32(),
       stdio: 'pipe',
       stdioString: true,
     })

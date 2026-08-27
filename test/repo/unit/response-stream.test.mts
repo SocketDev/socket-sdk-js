@@ -22,7 +22,9 @@ function streamingResponse(chunks: Iterable<Buffer>): HttpResponse {
     arrayBuffer: () => empty.buffer,
     body: empty,
     headers: { 'content-type': 'application/json' },
-    json: () => undefined,
+    json: <T,>(): T => {
+      throw new Error('streamingResponse fixture is read through rawResponse')
+    },
     ok: false,
     rawResponse: Readable.from(chunks) as unknown as IncomingMessage,
     status: 400,

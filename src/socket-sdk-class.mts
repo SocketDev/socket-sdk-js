@@ -10,7 +10,6 @@ import process from 'node:process'
 import { createTtlCache } from '@socketsecurity/lib/cache/ttl/store'
 import { UNKNOWN_ERROR } from '@socketsecurity/lib/constants/sentinels'
 import { getAbortSignal } from '@socketsecurity/lib/process/abort'
-import { SOCKET_PUBLIC_API_TOKEN } from '@socketsecurity/lib/constants/socket'
 import { isDebugNs } from '@socketsecurity/lib/debug/namespace'
 import { debugLog } from '@socketsecurity/lib/debug/output'
 import { errorMessage as getErrorMessage } from '@socketsecurity/lib/errors/message'
@@ -54,6 +53,7 @@ import {
   SOCKET_CONTACT_URL,
   SOCKET_DASHBOARD_URL,
   SOCKET_FIREWALL_API_URL,
+  SOCKET_PUBLIC_API_TOKEN,
   SOCKET_PUBLIC_BLOB_STORE_URL,
 } from './constants.mts'
 import {
