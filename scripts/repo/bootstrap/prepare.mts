@@ -248,6 +248,17 @@ export function log(message: string): void {
 const NOTICE_CHECK_TTL_MS = 864e5
 
 /**
+ * How long to wait before retrying after a lookup that answered nothing.
+ *
+ * A registry hiccup or an offline laptop must not blind a member for a full
+ * day, so the failed lookup is stamped as though it happened long enough ago
+ * that the next install retries within the hour. Short enough to recover from
+ * a blip, long enough that a genuinely offline machine is not retrying on
+ * every install in a loop.
+ */
+const OFFLINE_RETRY_TTL_MS = 36e5
+
+/**
  * Opportunistic update: when this cheaply learns a newer release exists, it
  * APPLIES that ref and then fires the throttled boxed notice on STDERR via the
  * fetcher's own notice machinery.
@@ -277,6 +288,7 @@ export async function maybeNotifyUpdate(): Promise<void> {
       readBundleConfig,
       readNoticeStore,
       resolveNewestRef,
+      writeNoticeStore,
     } =
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dep-0 bootstrap resolves the fetcher lazily; a static import would execute it on every prepare run
       (await import(pathToFileURL(fleet).href)) as {
@@ -295,17 +307,22 @@ export async function maybeNotifyUpdate(): Promise<void> {
         ) =>
           | { lastCheckMs: number; lastSeenRef: string | undefined }
           | undefined
-        resolveNewestRef: (repo: string) => string | undefined
+        resolveNewestRef: (repo: string) => Promise<string | undefined>
+        writeNoticeStore: (
+          dest: string,
+          store: { lastCheckMs: number; lastSeenRef: string | undefined },
+        ) => void
       }
     const cfg = readBundleConfig(REPO_ROOT)
     if (!cfg.ref) {
       return
     }
-    // Gate the NETWORK CALL, not just the display. `resolveNewestRef` hits the
-    // GitHub API, and the CI-suppress / opt-out / 24h throttle inside
+    // Gate the NETWORK CALL, not just the display. `resolveNewestRef` reaches
+    // the GHCR registry (two anonymous requests: a pull token, then the
+    // `latest` manifest), and the CI-suppress / opt-out / 24h throttle inside
     // `shouldShowNotice` ran AFTER it — so every `pnpm install`, in every CI
-    // job, paid for an API call whose result was then discarded. At fleet
-    // scale that is the shape that earns a rate limit.
+    // job, paid for a lookup whose result was then discarded. At fleet scale
+    // that is the shape that earns an anonymous-pull rate limit.
     //
     // In CI and under the opt-out nothing may be applied or printed, so the
     // call is pure waste and is skipped outright. Otherwise honor the same 24h
@@ -327,7 +344,26 @@ export async function maybeNotifyUpdate(): Promise<void> {
       return
     }
     const repo = 'SocketDev/socket-wheelhouse'
-    const newestRef = resolveNewestRef(repo)
+    const newestRef = await resolveNewestRef(repo)
+    // STAMP EVERY ANSWER, including the two that change nothing.
+    //
+    // The store used to be written only by `maybeShowUpdateNotice` below,
+    // which is reached only when an update was actually found. So for a member
+    // that is already current - the steady state, and the overwhelmingly
+    // common one - `lastCheckMs` never advanced, the TTL gate above never
+    // fired, and the registry lookup ran on EVERY `pnpm install`. The throttle
+    // only ever engaged for members that were behind, which are the ones least
+    // in need of throttling.
+    //
+    // A lookup that answered nothing is stamped short (see
+    // OFFLINE_RETRY_TTL_MS) so an outage costs an hour of freshness, not a day.
+    writeNoticeStore(REPO_ROOT, {
+      lastCheckMs:
+        newestRef === undefined
+          ? Date.now() - NOTICE_CHECK_TTL_MS + OFFLINE_RETRY_TTL_MS
+          : Date.now(),
+      lastSeenRef: newestRef,
+    })
     if (newestRef === undefined || newestRef === cfg.ref) {
       return
     }

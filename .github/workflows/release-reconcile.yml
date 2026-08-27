@@ -231,7 +231,27 @@ jobs:
           fi
           # Re-install against the content commit's lockfile so the rebuild
           # reproduces the published bytes.
-          pnpm install --frozen-lockfile
+          #
+          # The freeze cannot be a hard requirement here. A member's fleet
+          # payload is UNTRACKED, but `pnpm-workspace.yaml` registers its hook
+          # directories as workspace packages, so the payload's manifests are
+          # graded against a lockfile that predates them. The healer exists to
+          # run LATER than the publish, so the payload has almost always moved
+          # on by the time it does — and a payload carrying even one hook the
+          # content commit's lockfile never saw fails --frozen-lockfile outright.
+          # That is not a hypothetical: the heal of 7.0.0/7.0.1 met a payload
+          # holding four such hooks.
+          #
+          # Falling back does NOT loosen the gate. The verify step re-packs this
+          # tree and compares the tarball against the packument's dist digests,
+          # so an install that moved anything the package actually ships yields
+          # different bytes and the reconcile refuses without cutting a tag. The
+          # digest compare is the guarantee; the freeze is a cheap early warning
+          # that says so out loud when it cannot be had.
+          if ! pnpm install --frozen-lockfile; then
+            echo "::warning title=lockfile not frozen at the content commit::the content commit's lockfile predates the current fleet payload; re-installing unfrozen. The packument digest compare still gates the tag, so divergent bytes refuse."
+            pnpm install --no-frozen-lockfile
+          fi
       - name: Build
         run: pnpm run build
       # Tag push + immutable release cut authenticate via the release App —

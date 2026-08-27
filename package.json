@@ -119,7 +119,10 @@
     "backup": "node scripts/fleet/backup-work.mts",
     "offload:model": "node scripts/fleet/offload-model.mts",
     "setup:fireconnect": "node scripts/fleet/setup/fireconnect.mts",
-    "setup:offload-providers": "node scripts/fleet/setup/offload-providers.mts"
+    "setup:offload-providers": "node scripts/fleet/setup/offload-providers.mts",
+    "build:hook-bundle": "node scripts/fleet/build-hook-bundle.mts",
+    "build:hook-snapshot": "node scripts/fleet/build-hook-snapshot.mts",
+    "build:snapshot-launcher": "node scripts/fleet/build-snapshot-launcher.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
@@ -212,7 +215,7 @@
   "engines": {
     "node": ">=24",
     "npm": ">=12.0.2",
-    "pnpm": ">=11.0.5"
+    "pnpm": ">=12.0.0"
   },
   "allowScripts": {
     "cpu-features": false,

@@ -157,11 +157,6 @@
           "integrity": "sha512-r6YP+e2GsOklaxEf9JHrixkeR0NNkVAaMGcvwLxkt1JlYJpxFizH/LzhcsMmPSrLkELf6LNB2JL8hpDa5dBAww=="
         }
       },
-      "soakBypass": {
-        "published": "2026-08-01",
-        "removable": "2026-08-08",
-        "version": "1.29.0"
-      },
       "origin": "gh-asset"
     },
     "sfw-free": {

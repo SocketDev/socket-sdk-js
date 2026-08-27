@@ -12,7 +12,7 @@
  *   external-tools.json) and, unlike external-tools.json itself, it IS
  *   always tracked, even on a thin member. Corepack and its exact
  *   `packageManager` field are retired fleet-wide (no-corepack-guard,
- *   docs/agents.md/fleet/tooling.md), so devEngines.packageManager is the
+ *   docs/fleet/agents.md/tooling.md), so devEngines.packageManager is the
  *   ONLY bootstrap source. Its `.version` is a major-bounded SemVer RANGE
  *   (e.g. `>=11.0.0 <12.0.0`), not a concrete version, so there is no single
  *   download until it is resolved against what pnpm has actually published —

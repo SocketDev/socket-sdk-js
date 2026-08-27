@@ -87,6 +87,31 @@ export function isolateHomeEnv(): string {
     }
   }
 
+  // Pin the pnpm STORE to the real global one, before PNPM_HOME is sandboxed
+  // below. This is the destruction bug, and it cost three checkouts.
+  //
+  // pnpm 11 keeps one content-addressed store at `$PNPM_HOME/store/v11`, and a
+  // project's `node_modules` are LINKS into it — `.modules.yaml` records the
+  // `storeDir` and `virtualStoreDir` it linked against. Sandbox PNPM_HOME and
+  // any install that runs under it relocates the store into `os.tmpdir()` and
+  // relinks the whole tree there. The tree then survives only until temp is
+  // reaped, and every link dangles at once.
+  //
+  // That is the signature of all three socket-wheelhouse losses: "cannot
+  // resolve @socketsecurity/lib-stable", then "node_modules missing".
+  // Confirmed on socket-lib 2026-08-24; `pnpm install` does NOT repair it,
+  // reporting "Already up to date" while every link dangles.
+  //
+  // Pinning `store-dir` keeps the store real however PNPM_HOME moves. The
+  // sandbox still owns everything a run WRITES.
+  if (!process.env['npm_config_store_dir']) {
+    const pnpmHome = process.env['PNPM_HOME']
+    const store = pnpmHome ? path.join(pnpmHome, 'store') : undefined
+    if (store && existsSync(store)) {
+      process.env['npm_config_store_dir'] = store
+    }
+  }
+
   mkdirSync(sandbox, { recursive: true })
   for (const name of [...ISOLATED_ENV_VARS, ...EXTRA_ISOLATED_VARS]) {
     // A toolchain root is deliberately NOT sandboxed -- it was just pointed at

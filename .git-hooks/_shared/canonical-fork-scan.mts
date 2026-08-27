@@ -7,7 +7,7 @@
  *   cascade: an Edit/Write/Bash tool call, a background Workflow `agent()`
  *   subagent (whose Bash reaches PreToolUse with the PARENT transcript, so
  *   the `no-fleet-fork-guard` PreToolUse hook cannot attribute or block it —
- *   see docs/agents.md/fleet/agent-delegation.md), or a hand-run git command.
+ *   see docs/fleet/agents.md/agent-delegation.md), or a hand-run git command.
  *   A git hook fires for every commit regardless of which process or agent
  *   ran `git commit`, so this closes the gap the tool-call guard cannot
  *   reach.

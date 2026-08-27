@@ -203,7 +203,7 @@ catalog:
   # shadscan — shadcn UI audit CLI for the design skills (missing UI
   # fundamentals report). Exact-pinned; the whole package is younger than
   # the soak window, so it carries a minimumReleaseAgeExclude entry below.
-  '@shadscan/cli': 0.16.0
+  '@shadscan/cli': 0.17.0
   '@sinclair/typebox': 0.34.52
   'ecc-agentshield': 1.4.0
   'run-local-ci': 0.18.1
@@ -211,7 +211,7 @@ catalog:
   # pinned while the fleet migrates; the 0.x entry is deleted once no member
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
   # dated minimumReleaseAgeExclude entry above.
-  'typebox': 1.3.14
+  'typebox': 1.3.16
   '@socketregistry/packageurl-js': 1.5.2
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used INSIDE that same package — Node ESM treats it as a
@@ -239,7 +239,7 @@ catalog:
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
   'fast-check': 4.9.0
-  'magic-string': 1.2.0
+  'magic-string': 1.2.1
   'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   # GFM pair for render-faithful markdown parsing (tables, footnotes,
@@ -265,8 +265,8 @@ catalog:
   # candidates before simulating what a port actually cuts. Published
   # 2026-06-08, past the 7-day soak.
   'npm-high-impact': 1.13.0
-  'oxfmt': 0.63.0
-  'oxlint': 1.78.0
+  'oxfmt': 0.64.0
+  'oxlint': 1.79.0
   'oxlint-tsgolint': 7.0.2001
   # parse5 — the HTML parser half of the markdown story. mdast hands raw HTML
   # back as an opaque `html` node (README `<picture>`/`<img>` blocks), so
@@ -289,7 +289,7 @@ catalog:
   # @rolldown/binding-* + @oxc-project/types stay as soak-excluded
   # transitives (consumers depend on `rolldown` only).
   'regjsparser': 0.13.2
-  'rolldown': 1.2.4
+  'rolldown': 1.2.5
   'semver': 7.8.5
   'shell-quote': 1.10.0
   'taze': 21.1.0
@@ -299,14 +299,14 @@ catalog:
   # override below pins every transitive `vite` (vitest, @vitest/*,
   # plugin authors) to it.
   'typescript': 7.0.2
-  'vitest': 4.1.10
-  '@vitest/coverage-v8': 4.1.10
+  'vitest': 4.1.11
+  '@vitest/coverage-v8': 4.1.11
   c8: 12.0.0
   'chrome-devtools-mcp': 1.7.0
   # Playwright MCP server — agent-driven browsing with the fleet agent-banner
   # init script (see .config/fleet/playwright/).
   '@playwright/mcp': 0.0.79
-  '@vitest/ui': 4.1.10
+  '@vitest/ui': 4.1.11
   '@anthropic-ai/claude-code': 2.1.220
   '@typescript/native-preview': 7.0.0-dev.20260510.1
   '@vitiate/core': 0.3.1
@@ -436,23 +436,6 @@ patchedDependencies:
 # default is `false`; declared explicitly so a future default flip
 # can't silently widen the trust boundary.
 blockExoticSubdeps: true
-
-# Proceed with a node_modules purge WITHOUT an interactive confirm. The fleet
-# runs pnpm non-interactively everywhere (skills, scripts, hooks, agents, CI) —
-# no TTY. pnpm's default ABORTS a purge for lack of a TTY
-# (ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY), wedging any commit whose
-# pre-commit re-checks deps after a workspace/.npmrc change. Purging
-# node_modules is safe (gitignored + regenerable). Unlike CI=true this does NOT
-# force a frozen lockfile; CI keeps owning frozen-vs-update policy.
-confirmModulesPurge: false
-
-# Opt out of pnpm's packageManager-version self-check. CI installs pnpm from
-# its native bin via the shared setup workflow, not corepack, so the runner's
-# pnpm legitimately differs from the `packageManager` pin (which is
-# informational, not a version to enforce). Without this, pnpm hard-fails
-# ("This project is configured to use <pin> ... your current pnpm is <run>")
-# the moment the runner's pnpm differs from the pin.
-managePackageManagerVersions: false
 
 # Pin exact versions on `pnpm add`. Catalog and overrides should
 # also be exact pins (5.24.0, not ^5.24.0).

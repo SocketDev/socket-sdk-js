@@ -590,14 +590,12 @@ const ALWAYS_TRACKED_GITHUB_PREFIXES = [
   '.github/actions/fleet/cache-pnpm-store/',
   '.github/actions/fleet/checkout/',
   '.github/actions/fleet/debug/',
-  '.github/actions/fleet/download-artifact/',
   '.github/actions/fleet/expose-actions-runtime/',
   '.github/actions/fleet/github-payload-app-token/',
   '.github/actions/fleet/github-status-check/',
   '.github/actions/fleet/install/',
   '.github/actions/fleet/setup-and-install/',
   '.github/actions/fleet/setup/',
-  '.github/actions/fleet/upload-artifact/',
   '.github/dependabot.yml',
   '.github/workflows/',
 ]
@@ -619,6 +617,10 @@ const ALWAYS_TRACKED_PREFIXES = [
   '.editorconfig',
   '.git-hooks/',
   '.npmrc',
+  'assets/fleet/badge-follow-bluesky.svg',
+  'assets/fleet/badge-follow-x.svg',
+  'assets/fleet/socket-combomark-dark.svg',
+  'assets/fleet/socket-combomark-light.svg',
   'scripts/repo/bootstrap/',
 ]
 /**
@@ -635,8 +637,11 @@ function isAlwaysTrackedSurface(relPath) {
 /**
  * True when `relPath`, repo-relative, either separator, is part of the GitHub
  * CI surface a member must keep git-tracked even when thin — a workflow file,
- * a fleet composite action, or dependabot.yml. GitHub reads all of them from
- * the committed tree before any fetch step runs.
+ * dependabot.yml, or a `.github/actions/fleet/**` dir bundle.json marks
+ * `tracked: true` (the bootstrap-critical closure a job needs through the
+ * fleet-pack download+install). Everything else under `.github/actions/
+ * fleet/**` resolves at step-execution time from the workspace, so the pack
+ * delivers it mid-job and it stays untracked.
  */
 function isAlwaysTrackedGitHubSurface(relPath) {
   const p = relPath.replaceAll('\\', '/')
@@ -644,8 +649,10 @@ function isAlwaysTrackedGitHubSurface(relPath) {
     let i = 0, { length } = ALWAYS_TRACKED_GITHUB_PREFIXES;
     i < length;
     i += 1
-  )
-    if (p.startsWith(ALWAYS_TRACKED_GITHUB_PREFIXES[i])) return true
+  ) {
+    const prefix = ALWAYS_TRACKED_GITHUB_PREFIXES[i]
+    if (p.startsWith(prefix) || `${p}/` === prefix) return true
+  }
   return false
 }
 
@@ -745,7 +752,7 @@ function hybridBundlePaths(manifest) {
  * - A file entry with a source: kept as-is.
  * - A DIRECTORY entry: expanded into every file beneath it, each inheriting the
  *   directory's flags. 39 of the manifest's entries are whole-tree mirror roots
- *   (`scripts/fleet`, `.claude/hooks/fleet`, `docs/agents.md/fleet`) and they
+ *   (`scripts/fleet`, `.claude/hooks/fleet`, `docs/fleet/agents.md`) and they
  *   are the bulk of the payload. Expanding rather than special-casing keeps the
  *   always-tracked skip, the canonical splice and the per-file read-only lock
  *   all applying, with no second placement path to drift from the first.
@@ -2275,8 +2282,6 @@ function networkFailureMessage(config) {
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/ghcr-fetch.mts
 const GHCR_HOST = 'ghcr.io'
-const TAG_PAGE_SIZE = 100
-const MAX_TAG_PAGES = 100
 const MANIFEST_ACCEPT = [
   'application/vnd.oci.image.manifest.v1+json',
   'application/vnd.oci.image.index.v1+json',
@@ -2486,69 +2491,6 @@ async function fetchOciManifest(repo, ref, token, registry, httpFn = httpGet) {
     return fetchOciManifest(repo, sub, token, registry, httpFn)
   }
   return manifest
-}
-/**
- * Every tag the registry holds for an artifact repo, via GET
- * /v2/<repo>/tags/list.
- *
- * Dep-0 like the rest of this module: it uses the same httpGet + Bearer token
- * path as the manifest fetch, so the seed can resolve which packs exist without
- * a `gh` binary and without authenticating to a private repo. That matters
- * because the GHCR package is PUBLIC while the repo that produces it is not.
- *
- * Order is the registry's, which is NOT newest-first. A caller that needs
- * recency has to derive it from the tags themselves; the pack tags carry their
- * template SHA, so ancestry answers it without another call.
- */
-async function listOciTags(
-  repo,
-  token,
-  registry = GHCR_HOST,
-  httpFn = httpGet,
-) {
-  const tags = []
-  let url = `https://${registry}/v2/${repo}/tags/list?n=${TAG_PAGE_SIZE}`
-  let pages = 0
-  while (url !== void 0) {
-    if (pages >= MAX_TAG_PAGES)
-      throw new Error(`GHCR tag list did not terminate.
-  Where: /v2/${repo}/tags/list on ${registry}\n  Saw:   more than ${MAX_TAG_PAGES} pages of tags\n  Fix:   a truncated list would silently hide the newest pack, so this refuses rather than guessing.`)
-    const res = await httpFn(url, {
-      headers: {
-        accept: 'application/json',
-        authorization: `Bearer ${token}`,
-      },
-    })
-    if (res.status < 200 || res.status >= 300)
-      throw new Error(`GHCR tag list failed.
-  Where: ${url}\n  Saw:   HTTP ${res.status}\n  Fix:   confirm the package exists and is public.`)
-    const parsed = JSON.parse(res.body.toString('utf8'))
-    if (Array.isArray(parsed.tags)) {
-      for (const tag of parsed.tags) if (typeof tag === 'string') tags.push(tag)
-    }
-    pages += 1
-    url = nextTagPageUrl(firstHeader(res.headers['link']), registry)
-  }
-  return tags
-}
-/**
- * The next tags-list URL advertised by a Link header, or undefined at the end.
- *
- * The registry sends a path-only target, so it is resolved against the registry
- * host rather than used as-is.
- */
-function nextTagPageUrl(link, registry) {
-  if (!link) return
-  for (const part of link.split(',')) {
-    if (!part.includes('rel="next"') && !part.includes('rel=next')) continue
-    const open = part.indexOf('<')
-    const close = part.indexOf('>', open + 1)
-    if (open === -1 || close === -1) continue
-    const target = part.slice(open + 1, close).trim()
-    return target.startsWith('http')
-      ? target
-      : `https://${registry}${target.startsWith('/') ? '' : '/'}${target}`
-  }
 }
 /**
  * Choose the tarball layer from an artifact manifest: prefer a layer whose
@@ -3327,13 +3269,11 @@ export {
   installWorkspaceSegment,
   isBundleBehindLocalTemplate,
   isMainModule,
-  listOciTags,
   lockStepExitCode,
   materializeFromLocalTemplate,
   maybeShowUpdateNotice,
   mergeWorkspaceYaml,
   mergeYamlKeyBlock,
-  nextTagPageUrl,
   normalizeBundlePath,
   normalizeManifestEntryPath,
   packBeginMarker,
