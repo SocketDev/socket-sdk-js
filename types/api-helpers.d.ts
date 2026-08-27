@@ -35,33 +35,37 @@ export type OpErrorType<T> = T extends {
 }
   ? R extends Record<string | number, unknown>
     ? {
-        [K in keyof R as K extends
-          | 400
-          | 401
-          | 403
-          | 404
-          | 409
-          | 422
-          | 429
-          | 500
-          | 502
-          | 503
-          ? K
-          : never]: R[K]
+        [
+          K in keyof R as K extends
+            | 400
+            | 401
+            | 403
+            | 404
+            | 409
+            | 422
+            | 429
+            | 500
+            | 502
+            | 503
+            ? K
+            : never
+        ]: R[K]
       }[keyof {
-        [K in keyof R as K extends
-          | 400
-          | 401
-          | 403
-          | 404
-          | 409
-          | 422
-          | 429
-          | 500
-          | 502
-          | 503
-          ? K
-          : never]: R[K]
+        [
+          K in keyof R as K extends
+            | 400
+            | 401
+            | 403
+            | 404
+            | 409
+            | 422
+            | 429
+            | 500
+            | 502
+            | 503
+            ? K
+            : never
+        ]: R[K]
       }] extends { content?: { 'application/json': infer E } }
       ? E
       : { error?: string }

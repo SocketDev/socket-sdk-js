@@ -40,11 +40,11 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:npm/express@4.19.2"
-     * }
-     * ]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     }
+     *   ]
      * }
      * ```
      *
@@ -52,11 +52,11 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:pypi/django@5.0.6"
-     * }
-     * ]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     }
+     *   ]
      * }
      * ```
      *
@@ -64,11 +64,11 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:maven/log4j/log4j@1.2.17"
-     * }
-     * ]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
      * }
      * ```
      *
@@ -76,17 +76,17 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:npm/express@4.19.2"
-     * },
-     * {
-     * "purl": "pkg:pypi/django@5.0.6"
-     * },
-     * {
-     * "purl": "pkg:maven/log4j/log4j@1.2.17"
-     * }
-     * ]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     },
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     },
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
      * }
      * ```
      *
@@ -1061,11 +1061,11 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:npm/express@4.19.2"
-     * }
-     * ]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     }
+     *   ]
      * }
      * ```
      *
@@ -1073,11 +1073,11 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:pypi/django@5.0.6"
-     * }
-     * ]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     }
+     *   ]
      * }
      * ```
      *
@@ -1085,11 +1085,11 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:maven/log4j/log4j@1.2.17"
-     * }
-     * ]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
      * }
      * ```
      *
@@ -1097,17 +1097,17 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:npm/express@4.19.2"
-     * },
-     * {
-     * "purl": "pkg:pypi/django@5.0.6"
-     * },
-     * {
-     * "purl": "pkg:maven/log4j/log4j@1.2.17"
-     * }
-     * ]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/express@4.19.2"
+     *     },
+     *     {
+     *       "purl": "pkg:pypi/django@5.0.6"
+     *     },
+     *     {
+     *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+     *     }
+     *   ]
      * }
      * ```
      *
@@ -1353,23 +1353,23 @@ export interface paths {
      *
      * ```json
      * {
-     * "components": [
-     * {
-     * "purl": "pkg:npm/lodash@4.17.21"
-     * },
-     * {
-     * "purl": "pkg:npm/lodash@4.14.1"
-     * }
-     * ],
-     * "allow": [
-     * "permissive",
-     * "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
-     * ],
-     * "warn": [
-     * "copyleft",
-     * "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
-     * ],
-     * "options": ["toplevelOnly"]
+     *   "components": [
+     *     {
+     *       "purl": "pkg:npm/lodash@4.17.21"
+     *     },
+     *     {
+     *       "purl": "pkg:npm/lodash@4.14.1"
+     *     }
+     *   ],
+     *   "allow": [
+     *     "permissive",
+     *     "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+     *   ],
+     *   "warn": [
+     *     "copyleft",
+     *     "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+     *   ],
+     *   "options": ["toplevelOnly"]
      * }
      * ```
      *
@@ -1481,20 +1481,18 @@ export interface paths {
      *
      * ```json
      * {
-     * "allowedApprovalSources": [],
-     * "allowedFamilies": [],
-     * "allowedTiers": [
-     * "maximal copyleft"
-     * ],
-     * "allowedStrings": [
-     * "Parity-6.0.0",
-     * "QPL-1.0-INRIA-2004",
-     * "QPL-1.0",
-     * "RPL-1.1",
-     * "RPL-1.5"
-     * ],
-     * "allowedPURLs": [],
-     * "focusAlertsHere": false
+     *   "allowedApprovalSources": [],
+     *   "allowedFamilies": [],
+     *   "allowedTiers": ["maximal copyleft"],
+     *   "allowedStrings": [
+     *     "Parity-6.0.0",
+     *     "QPL-1.0-INRIA-2004",
+     *     "QPL-1.0",
+     *     "RPL-1.1",
+     *     "RPL-1.5"
+     *   ],
+     *   "allowedPURLs": [],
+     *   "focusAlertsHere": false
      * }
      * ```
      *
@@ -1538,12 +1536,12 @@ export interface paths {
      *
      * ```json
      * {
-     * "allowedApprovalSources": ["fsf"],
-     * "allowedPURLs": [],
-     * "allowedFamilies": ["copyleft"],
-     * "allowedTiers": ["model permissive"],
-     * "allowedStrings": ["License :: OSI Approved :: BSD License"],
-     * "focusAlertsHere": false
+     *   "allowedApprovalSources": ["fsf"],
+     *   "allowedPURLs": [],
+     *   "allowedFamilies": ["copyleft"],
+     *   "allowedTiers": ["model permissive"],
+     *   "allowedStrings": ["License :: OSI Approved :: BSD License"],
+     *   "focusAlertsHere": false
      * }
      * ```
      *
@@ -1569,10 +1567,7 @@ export interface paths {
      * ## Example request body:
      *
      * ```json
-     * [
-     * "Apache-2.0",
-     * "BSD Zero Clause License"
-     * ]
+     * ["Apache-2.0", "BSD Zero Clause License"]
      * ```
      *
      * ## Return value
@@ -7463,11 +7458,11 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:npm/express@4.19.2"
-   * }
-   * ]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     }
+   *   ]
    * }
    * ```
    *
@@ -7475,11 +7470,11 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:pypi/django@5.0.6"
-   * }
-   * ]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     }
+   *   ]
    * }
    * ```
    *
@@ -7487,11 +7482,11 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:maven/log4j/log4j@1.2.17"
-   * }
-   * ]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
    * }
    * ```
    *
@@ -7499,17 +7494,17 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:npm/express@4.19.2"
-   * },
-   * {
-   * "purl": "pkg:pypi/django@5.0.6"
-   * },
-   * {
-   * "purl": "pkg:maven/log4j/log4j@1.2.17"
-   * }
-   * ]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     },
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     },
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
    * }
    * ```
    *
@@ -23212,11 +23207,11 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:npm/express@4.19.2"
-   * }
-   * ]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     }
+   *   ]
    * }
    * ```
    *
@@ -23224,11 +23219,11 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:pypi/django@5.0.6"
-   * }
-   * ]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     }
+   *   ]
    * }
    * ```
    *
@@ -23236,11 +23231,11 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:maven/log4j/log4j@1.2.17"
-   * }
-   * ]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
    * }
    * ```
    *
@@ -23248,17 +23243,17 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:npm/express@4.19.2"
-   * },
-   * {
-   * "purl": "pkg:pypi/django@5.0.6"
-   * },
-   * {
-   * "purl": "pkg:maven/log4j/log4j@1.2.17"
-   * }
-   * ]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/express@4.19.2"
+   *     },
+   *     {
+   *       "purl": "pkg:pypi/django@5.0.6"
+   *     },
+   *     {
+   *       "purl": "pkg:maven/log4j/log4j@1.2.17"
+   *     }
+   *   ]
    * }
    * ```
    *
@@ -25335,23 +25330,23 @@ export interface operations {
    *
    * ```json
    * {
-   * "components": [
-   * {
-   * "purl": "pkg:npm/lodash@4.17.21"
-   * },
-   * {
-   * "purl": "pkg:npm/lodash@4.14.1"
-   * }
-   * ],
-   * "allow": [
-   * "permissive",
-   * "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
-   * ],
-   * "warn": [
-   * "copyleft",
-   * "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
-   * ],
-   * "options": ["toplevelOnly"]
+   *   "components": [
+   *     {
+   *       "purl": "pkg:npm/lodash@4.17.21"
+   *     },
+   *     {
+   *       "purl": "pkg:npm/lodash@4.14.1"
+   *     }
+   *   ],
+   *   "allow": [
+   *     "permissive",
+   *     "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+   *   ],
+   *   "warn": [
+   *     "copyleft",
+   *     "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+   *   ],
+   *   "options": ["toplevelOnly"]
    * }
    * ```
    *
@@ -25500,20 +25495,18 @@ export interface operations {
    *
    * ```json
    * {
-   * "allowedApprovalSources": [],
-   * "allowedFamilies": [],
-   * "allowedTiers": [
-   * "maximal copyleft"
-   * ],
-   * "allowedStrings": [
-   * "Parity-6.0.0",
-   * "QPL-1.0-INRIA-2004",
-   * "QPL-1.0",
-   * "RPL-1.1",
-   * "RPL-1.5"
-   * ],
-   * "allowedPURLs": [],
-   * "focusAlertsHere": false
+   *   "allowedApprovalSources": [],
+   *   "allowedFamilies": [],
+   *   "allowedTiers": ["maximal copyleft"],
+   *   "allowedStrings": [
+   *     "Parity-6.0.0",
+   *     "QPL-1.0-INRIA-2004",
+   *     "QPL-1.0",
+   *     "RPL-1.1",
+   *     "RPL-1.5"
+   *   ],
+   *   "allowedPURLs": [],
+   *   "focusAlertsHere": false
    * }
    * ```
    *
@@ -25556,12 +25549,12 @@ export interface operations {
    *
    * ```json
    * {
-   * "allowedApprovalSources": ["fsf"],
-   * "allowedPURLs": [],
-   * "allowedFamilies": ["copyleft"],
-   * "allowedTiers": ["model permissive"],
-   * "allowedStrings": ["License :: OSI Approved :: BSD License"],
-   * "focusAlertsHere": false
+   *   "allowedApprovalSources": ["fsf"],
+   *   "allowedPURLs": [],
+   *   "allowedFamilies": ["copyleft"],
+   *   "allowedTiers": ["model permissive"],
+   *   "allowedStrings": ["License :: OSI Approved :: BSD License"],
+   *   "focusAlertsHere": false
    * }
    * ```
    *
@@ -25620,10 +25613,7 @@ export interface operations {
    * ## Example request body:
    *
    * ```json
-   * [
-   * "Apache-2.0",
-   * "BSD Zero Clause License"
-   * ]
+   * ["Apache-2.0", "BSD Zero Clause License"]
    * ```
    *
    * ## Return value
