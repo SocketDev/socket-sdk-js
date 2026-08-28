@@ -489,7 +489,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.0.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v3.0.0) - 2025-10-23
 
-#### Removed Deprecated Methods
+### Removed Deprecated Methods
 
 The following methods mapped to deprecated `/report/*` backend endpoints and have been removed:
 
@@ -590,12 +590,14 @@ To migrate from v1.x to v2.0:
 
 1. Ensure your project supports ESM modules (Node.js 14+ with `"type": "module"` or `.mjs` extensions)
 2. Update imports from CommonJS `require()` to ESM `import` statements:
+
    ```javascript
    // Before (v1.x)
    const { SocketSdk } = require('@socketsecurity/sdk')
    // After (v2.0)
    import { SocketSdk } from '@socketsecurity/sdk'
    ```
+
 3. If your project still requires CommonJS, consider staying on v1.x or using a transpiler
 
 ### Changed
