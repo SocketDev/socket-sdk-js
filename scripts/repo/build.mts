@@ -147,7 +147,7 @@ export async function buildTypes(options: BuildOptions = {}): Promise<number> {
     args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
     command: 'pnpm',
     options: {
-      ...(isWin32() && { shell: true }),
+      shell: isWin32(),
     },
   })
 

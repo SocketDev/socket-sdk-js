@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.resolve(__dirname, '..')

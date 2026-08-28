@@ -60,7 +60,7 @@ export async function runCommand(
   } catch (e) {
     // spawn() from @socketsecurity/lib-stable throws on non-zero exit
     // Return the exit code from the error
-    if (e && typeof e === 'object' && 'code' in e) {
+    if (typeof e === 'object' && e !== null && 'code' in e) {
       return e.code as number
     }
     throw e
@@ -92,8 +92,8 @@ export async function runCommandQuiet(
     // spawn() from @socketsecurity/lib-stable throws on non-zero exit
     // Return the exit code and output from the error
     if (
-      e &&
       typeof e === 'object' &&
+      e !== null &&
       'code' in e &&
       'stdout' in e &&
       'stderr' in e

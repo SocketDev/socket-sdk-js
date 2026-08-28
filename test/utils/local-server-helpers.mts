@@ -134,7 +134,7 @@ export function setupLocalHttpServer(handler: RequestListener): () => string {
     await new Promise<void>(resolve => {
       server.listen(0, () => {
         const address = server.address()
-        if (address && typeof address === 'object') {
+        if (typeof address === 'object' && address !== null) {
           const { port } = address
           baseUrl = `http://127.0.0.1:${port}`
           resolve()

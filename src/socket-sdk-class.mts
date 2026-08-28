@@ -458,7 +458,7 @@ export class SocketSdk {
     if (typeof cacheTtl === 'number') {
       return cacheTtl
     }
-    if (cacheTtl && typeof cacheTtl === 'object') {
+    if (typeof cacheTtl === 'object' && cacheTtl !== null) {
       // Check for endpoint-specific TTL first.
       const endpointTtl = (cacheTtl as Record<string, number | undefined>)[
         endpoint
