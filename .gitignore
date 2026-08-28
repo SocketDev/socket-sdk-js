@@ -112,6 +112,10 @@ test-output.*
 # files. Keep in lock-step with RELEASE_ONLY_DIR_MIRROR_FILES (scripts/repo/
 # sync-scaffolding/dir-mirror-skip.mts). See docs/fleet/agents.md/release-vs-cascade.md.
 **/.claude/hooks/fleet/_dist/fleet-pack.cjs
+# The model-pricing module gen/model-pricing-module.mts bakes from the pricing
+# JSON so rolldown inlines the prices into fleet-pack.cjs. A build output in
+# BOTH trees, shipped in the pack, never cascaded.
+**/scripts/fleet/constants/model-pricing.generated.mts
 # Prebuilt dispatch-launcher variants (one per platform-arch), CI
 # cross-compiled and hydrated from the release bundle; the host build
 # copies its match into _shared/ instead of invoking cc. Contract:
@@ -160,6 +164,7 @@ test-output.*
 /.github/copilot-instructions.md
 /.janus/
 /.kiro/
+/.opencode/
 /.windsurf/
 /AGENTS.md
 /opencode.json

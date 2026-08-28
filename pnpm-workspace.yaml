@@ -191,7 +191,7 @@ overrides:
 pmOnFail: warn
 
 catalog:
-  '@mdn/browser-compat-data': 8.0.11
+  '@mdn/browser-compat-data': 8.0.12
   # run-local-ci (bin: local-ci, formerly published as @redwoodjs/agent-ci)
   # runs a repo's GitHub Actions workflows locally in Docker so a change can
   # be validated before it's pushed (see the `agent-ci` skill). dtu-github-
@@ -239,7 +239,7 @@ catalog:
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
   'fast-check': 4.9.0
-  'magic-string': 1.2.1
+  'magic-string': 1.2.2
   'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   # GFM pair for render-faithful markdown parsing (tables, footnotes,
