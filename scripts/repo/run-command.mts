@@ -17,6 +17,22 @@ import {
 // Initialize logger
 const logger = getDefaultLogger()
 
+/**
+ * Spawn options plus the argv the command receives. `args` rides in the bag
+ * rather than sitting in front of it, so a call site that passes only options
+ * reads as one labeled argument instead of an empty array placeholder.
+ */
+export type RunOptions = SpawnOptions & {
+  args?: readonly string[] | undefined
+}
+
+/**
+ * The sync twin of {@link RunOptions}.
+ */
+export type RunSyncOptions = SpawnSyncOptions & {
+  args?: readonly string[] | undefined
+}
+
 interface CommandSpec {
   command: string
   args?: string[] | undefined
@@ -35,11 +51,10 @@ interface QuietResult {
 export async function logAndRun(
   description: string,
   command: string,
-  args: string[] = [],
-  options: SpawnOptions = {},
+  options: RunOptions = {},
 ): Promise<number> {
   logger.log(description)
-  return runCommand(command, args, options)
+  return runCommand(command, options)
 }
 
 /**
@@ -47,14 +62,14 @@ export async function logAndRun(
  */
 export async function runCommand(
   command: string,
-  args: string[] = [],
-  options: SpawnOptions = {},
+  options: RunOptions = {},
 ): Promise<number> {
+  const { args = [], ...spawnOptions } = options
   try {
-    const result = await spawn(command, args, {
+    const result = await spawn(command, [...args], {
       stdio: 'inherit',
       shell: isWin32(),
-      ...options,
+      ...spawnOptions,
     })
     return result.code
   } catch (e) {
@@ -72,12 +87,12 @@ export async function runCommand(
  */
 export async function runCommandQuiet(
   command: string,
-  args: string[] = [],
-  options: SpawnOptions = {},
+  options: RunOptions = {},
 ): Promise<QuietResult> {
+  const { args = [], ...spawnOptions } = options
   try {
-    const result = await spawn(command, args, {
-      ...options,
+    const result = await spawn(command, [...args], {
+      ...spawnOptions,
       shell: isWin32(),
       stdio: 'pipe',
       stdioString: true,
@@ -113,12 +128,12 @@ export async function runCommandQuiet(
  */
 export function runCommandSync(
   command: string,
-  args: string[] = [],
-  options: SpawnSyncOptions = {},
+  options: RunSyncOptions = {},
 ): number {
-  const result = spawnSync(command, args, {
+  const { args = [], ...spawnOptions } = options
+  const result = spawnSync(command, [...args], {
     stdio: 'inherit',
-    ...options,
+    ...spawnOptions,
   })
   return result.status || 0
 }
@@ -128,7 +143,7 @@ export function runCommandSync(
  */
 export async function runParallel(commands: CommandSpec[]): Promise<number[]> {
   const promises = commands.map(({ args = [], command, options = {} }) =>
-    runCommand(command, args, options),
+    runCommand(command, { ...options, args }),
   )
   const results = await Promise.allSettled(promises)
   return results.map(r => (r.status === 'fulfilled' ? r.value : 1))
@@ -139,10 +154,13 @@ export async function runParallel(commands: CommandSpec[]): Promise<number[]> {
  */
 export async function runPnpmScript(
   scriptName: string,
-  extraArgs: string[] = [],
-  options: SpawnOptions = {},
+  options: RunOptions = {},
 ): Promise<number> {
-  return runCommand('pnpm', ['run', scriptName, ...extraArgs], options)
+  const { args = [], ...spawnOptions } = options
+  return runCommand('pnpm', {
+    ...spawnOptions,
+    args: ['run', scriptName, ...args],
+  })
 }
 
 /**
@@ -151,11 +169,10 @@ export async function runPnpmScript(
 export async function runSequence(commands: CommandSpec[]): Promise<number> {
   for (let i = 0, { length } = commands; i < length; i += 1) {
     const spec = commands[i]!
-    const exitCode = await runCommand(
-      spec.command,
-      spec.args ?? [],
-      spec.options ?? {},
-    )
+    const exitCode = await runCommand(spec.command, {
+      ...spec.options,
+      args: spec.args ?? [],
+    })
     if (exitCode !== 0) {
       return exitCode
     }

@@ -102,7 +102,9 @@ export async function fetchOpenApi(): Promise<void> {
     // differs from oxfmt's on fresh spec content. `run format` (not `run
     // fix`): the fix lane filters to code extensions and silently skips
     // .json, a false-green that shipped an unformatted spec to CI.
-    const exitCode = await runCommand('pnpm', ['run', 'format', 'openapi.json'])
+    const exitCode = await runCommand('pnpm', {
+      args: ['run', 'format', 'openapi.json'],
+    })
     if (exitCode !== 0) {
       throw new Error(
         `Formatting openapi.json failed with exit code ${exitCode}`,
@@ -243,7 +245,9 @@ export async function generateTypes(): Promise<void> {
   await addSdkMethodAliases(typesPath)
   // Lint + format through the package.json wrapper — it owns the configs
   // and ignore set; never a bare oxlint/oxfmt invocation.
-  const exitCode = await runCommand('pnpm', ['run', 'fix', 'types/api.d.ts'])
+  const exitCode = await runCommand('pnpm', {
+    args: ['run', 'fix', 'types/api.d.ts'],
+  })
   if (exitCode !== 0) {
     throw new Error(`Formatting types failed with exit code ${exitCode}`)
   }

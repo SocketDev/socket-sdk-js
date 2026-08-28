@@ -6284,19 +6284,14 @@ export class SocketSdk {
    * @example
    *   ;```typescript
    *   const result = await sdk.updateRepository('my-org', 'my-repo', {
-   *     description: 'Updated description',
    *     default_branch: 'develop',
    *   })
-   *
-   *   if (result.success) {
-   *     console.log('Repository updated:', result.data.name)
-   *   }
    *   ```
    *
    * @param orgSlug - Organization identifier.
    * @param repoSlug - Repository slug/name.
-   * @param params - Configuration updates (description, homepage,
-   *   default_branch, etc.)
+   * @param params - The request body: configuration updates such as
+   *   description, homepage, or default_branch.
    * @param options - Optional parameters including workspace.
    *
    * @returns Updated repository details
@@ -6314,7 +6309,7 @@ export class SocketSdk {
   async updateRepository(
     orgSlug: string,
     repoSlug: string,
-    params?: QueryParams | undefined,
+    params: QueryParams,
     options?: GetRepositoryOptions | undefined,
   ): Promise<RepositoryResult | StrictErrorResult> {
     const { workspace } = {
