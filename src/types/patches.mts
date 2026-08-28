@@ -6,6 +6,8 @@
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
+import type { FilePath, Purl, VulnerabilityId } from './keys.mts'
+
 export type PatchFile = {
   afterHash?: string | undefined
   beforeHash?: string | undefined
@@ -38,13 +40,13 @@ export type PatchRecord = {
 
 export type PatchViewResponse = {
   description: string
-  files: Record<string, PatchFile>
+  files: Record<FilePath, PatchFile>
   license: string
   publishedAt: string
   purl: string
   tier: 'free' | 'paid'
   uuid: string
-  vulnerabilities: Record<string, Vulnerability>
+  vulnerabilities: Record<VulnerabilityId, Vulnerability>
 }
 
 export type ArtifactPatches = {
@@ -59,7 +61,7 @@ export type PatchSearchResult = {
   purl: string
   tier: 'free' | 'paid'
   uuid: string
-  vulnerabilities: Record<string, Vulnerability>
+  vulnerabilities: Record<VulnerabilityId, Vulnerability>
 }
 
 export type PatchSearchResponse = {
@@ -124,7 +126,7 @@ export type PatchPackageResult = {
 }
 
 export type GetPatchPackagesResponse = {
-  results: Record<string, PatchPackageResult>
+  results: Record<Purl, PatchPackageResult>
 }
 
 export type PatchPackageStatsResult = {
@@ -139,7 +141,7 @@ export type PatchPackageStatsResult = {
 }
 
 export type PatchPackageStatsResponse = {
-  results: Record<string, PatchPackageStatsResult>
+  results: Record<Purl, PatchPackageStatsResult>
 }
 
 export type LookupPatchPackageResult = {
@@ -148,7 +150,7 @@ export type LookupPatchPackageResult = {
 }
 
 export type LookupPatchPackageResponse = {
-  results: Record<string, LookupPatchPackageResult>
+  results: Record<Purl, LookupPatchPackageResult>
 }
 
 export type PatchesSkippedComponent = {
@@ -169,17 +171,17 @@ export type PatchRecordFile = {
 
 export type PatchRecordDetail = {
   description: string
-  files: Record<string, PatchRecordFile>
+  files: Record<FilePath, PatchRecordFile>
   license: string
   publishedAt: string
   purl: string
   tier: 'free' | 'paid'
   uuid: string
-  vulnerabilities: Record<string, Vulnerability>
+  vulnerabilities: Record<VulnerabilityId, Vulnerability>
 }
 
 export type PatchRecordsResponse = {
   forbidden: string[]
   missing: string[]
-  records: Record<string, PatchRecordDetail>
+  records: Record<Purl, PatchRecordDetail>
 }

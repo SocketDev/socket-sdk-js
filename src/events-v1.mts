@@ -19,6 +19,10 @@ export type SocketEvent = {
   user_agent?: string | undefined
 }
 
+// The event payload is an open JSON document: the caller chooses the keys and
+// the API stores them as sent. There is no domain to name here, and a Map does
+// not survive JSON.stringify without a replacer, so Record is the honest shape.
+// oxlint-disable-next-line socket/prefer-refined-record -- open JSON document
 export type PostEventsData = Record<string, JsonValue>
 
 export type PostEventsResult = {

@@ -34,6 +34,13 @@ import type { StrictTypeConfig } from './generate-strict-types-emit.mts'
 import type { AstNode } from './generate-strict-types-lib.mts'
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
+/**
+ * An SDK method name, as `getOrgFullScanList`. Named so the table's key says
+ * which domain it belongs to. `src/types/keys.mts` carries the shipped twin;
+ * a tooling tree must not reach into src/, so this one stands alone.
+ */
+type ApiMethodName = string
+
 const logger = getDefaultLogger()
 const rootPackageJsonPath = findUpSync('package.json', {
   cwd: path.dirname(fileURLToPath(import.meta.url)),
@@ -50,7 +57,7 @@ const indexExportsPath = path.resolve(rootPath, 'src/index.mts')
  * Configuration for strict type generation. Maps OpenAPI operations to strict
  * type definitions.
  */
-const STRICT_TYPE_CONFIG: Record<string, StrictTypeConfig> = {
+const STRICT_TYPE_CONFIG: Record<ApiMethodName, StrictTypeConfig> = {
   // Create Full Scan Options - from CreateOrgFullScan query params
   createFullScanOptions: {
     operationId: 'CreateOrgFullScan',

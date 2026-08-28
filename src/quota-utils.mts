@@ -9,6 +9,7 @@ import { once } from '@socketsecurity/lib/memo/once'
 import { ErrorCtor } from '@socketsecurity/lib/primordials/error'
 
 import type { SocketSdkOperations } from './types/core.mts'
+import type { ApiMethodName, QuotaCost } from './types/keys.mts'
 
 export interface ApiRequirement {
   quota: number
@@ -16,7 +17,7 @@ export interface ApiRequirement {
 }
 
 export interface Requirements {
-  api: Record<string, ApiRequirement>
+  api: Record<ApiMethodName, ApiRequirement>
 }
 
 /**
@@ -68,9 +69,12 @@ export function calculateTotalQuotaCost(
  * mapping of methods to quota and permissions. Creates a fresh deep copy each
  * time to prevent external mutations.
  */
-export function getAllMethodRequirements(): Record<string, ApiRequirement> {
+export function getAllMethodRequirements(): Record<
+  ApiMethodName,
+  ApiRequirement
+> {
   const reqs = loadRequirements()
-  const result: Record<string, ApiRequirement> = {}
+  const result: Record<ApiMethodName, ApiRequirement> = {}
 
   const entries = Object.entries(reqs.api)
   for (let i = 0, { length } = entries; i < length; i += 1) {
@@ -180,9 +184,9 @@ export const getQuotaCost = memoize(
  * after load.
  */
 export const getQuotaUsageSummary = memoize(
-  (): Record<string, string[]> => {
+  (): Record<QuotaCost, ApiMethodName[]> => {
     const reqs = loadRequirements()
-    const summary: Record<string, string[]> = {}
+    const summary: Record<QuotaCost, ApiMethodName[]> = {}
 
     const entries = Object.entries(reqs.api)
     for (let i = 0, { length } = entries; i < length; i += 1) {

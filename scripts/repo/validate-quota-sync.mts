@@ -21,6 +21,13 @@ import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
+/**
+ * An SDK method name, as `getOrgFullScanList`. Named so the table's key says
+ * which domain it belongs to. `src/types/keys.mts` carries the shipped twin;
+ * a tooling tree must not reach into src/, so this one stands alone.
+ */
+type ApiMethodName = string
+
 const logger = getDefaultLogger()
 const rootPackageJsonPath = findUpSync('package.json', {
   cwd: path.dirname(fileURLToPath(import.meta.url)),
@@ -67,7 +74,7 @@ interface DataEntry {
 }
 
 interface QuotaData {
-  api: Record<string, DataEntry>
+  api: Record<ApiMethodName, DataEntry>
 }
 
 interface MethodInfo {

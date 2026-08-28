@@ -7,6 +7,8 @@
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
+import type { OrganizationSlug } from './keys.mts'
+
 /**
  * Options for create full scan.
  */
@@ -326,7 +328,7 @@ export type StreamFullScanOptions = {
 export type OrganizationsResult = {
   cause?: undefined
   data: {
-    organizations: Record<string, OrganizationItem>
+    organizations: Record<OrganizationSlug, OrganizationItem>
   }
   error?: undefined
   status: number

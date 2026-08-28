@@ -10,6 +10,8 @@ import path from 'node:path'
 
 import { isAbsolute, normalizePath } from '@socketsecurity/lib/paths/normalize'
 
+import type { FilePath } from './types/keys.mts'
+
 export type FileHashResult = {
   hash: string
   size: number
@@ -22,7 +24,7 @@ export type FullScanManifestEntry = {
 
 export type FullScanManifest = {
   algo: 'sha256'
-  files: Record<string, FullScanManifestEntry>
+  files: Record<FilePath, FullScanManifestEntry>
 }
 
 export type BlobRef = {
@@ -138,7 +140,7 @@ export async function assembleManifest(
   filepaths: string[],
 ): Promise<AssembledManifest> {
   const entries: ManifestLocalEntry[] = []
-  const files: Record<string, FullScanManifestEntry> = {}
+  const files: Record<FilePath, FullScanManifestEntry> = {}
   const seen = new Set<string>()
   const skipped: SkippedManifestPath[] = []
 
