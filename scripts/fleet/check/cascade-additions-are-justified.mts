@@ -43,11 +43,11 @@ import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { isMainModule } from '../_shared/is-main-module.mts'
-import { runMain } from '../_shared/run-main.mts'
+import { isMainModule } from '../process/is-main-module.mts'
+import { runMain } from '../process/run-main.mts'
 import { REPO_ROOT, resolveSyncScaffoldingManifestDir } from '../paths.mts'
 
-import type { ScriptMeta } from '../_shared/run-main.mts'
+import type { ScriptMeta } from '../process/run-main.mts'
 
 /**
  * The sanctioned readers. A tracked entry names exactly one.
@@ -57,6 +57,12 @@ import type { ScriptMeta } from '../_shared/run-main.mts'
  * the pack instead.
  */
 export const TRACKED_READERS: readonly string[] = [
+  // The agent harness itself, reading a file at session start. Claude Code
+  // resolves `.claude/output-styles/<name>.md` by basename when a session
+  // opens, which is before any fetch has run, so an untracked style is a
+  // style that does not exist on a fresh clone. Same argument as
+  // `editor-toolchain`: read from the committed tree at rest, no runner.
+  'agent-harness',
   'dep-0',
   'editor-toolchain',
   'git',

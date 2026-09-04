@@ -29,12 +29,12 @@ import process from 'node:process'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
-import { isMainModule } from '../_shared/is-main-module.mts'
-import { runMain } from '../_shared/run-main.mts'
+import { isMainModule } from '../process/is-main-module.mts'
+import { runMain } from '../process/run-main.mts'
 import { REPO_ROOT, resolveSyncScaffoldingManifestDir } from '../paths.mts'
 import { artifactsForTier } from './_shared/generated-artifacts.mts'
 
-import type { ScriptMeta } from '../_shared/run-main.mts'
+import type { ScriptMeta } from '../process/run-main.mts'
 import type { GeneratedArtifact } from './_shared/generated-artifacts.mts'
 
 /**
@@ -44,7 +44,7 @@ type Snapshot = ReadonlyMap<string, string | undefined>
 
 /**
  * Whether this tree is the wheelhouse, which decides if wheelhouse-tier
- * entries are checkable. Keyed on the sync-scaffolding manifest directory,
+ * entries are checkable. Keyed on the commit-cascade manifest directory,
  * the thing those generators actually read.
  */
 export function isWheelhouseCheckout(repoRoot: string): boolean {
@@ -113,6 +113,138 @@ export function staleReport(
   ].join('\n')
 }
 
+/**
+ * The two tiers this gate runs in. `compare` is side-effect free: it puts every
+ * snapshotted output back. `regenerate` (`--fix`) keeps the freshly rendered
+ * bytes on disk instead.
+ */
+export type ArtifactRunMode = 'compare' | 'regenerate'
+
+/**
+ * The verdict for one artifact. `failure` carries the ready-to-print block for
+ * a missing generator, a generator that exited non-zero, or (in `compare` mode)
+ * a stale output. `isStale` is set whenever the bytes moved, in either mode, so
+ * `--fix` can still name what it regenerated.
+ */
+export interface ArtifactInspection {
+  readonly failure?: string | undefined
+  readonly isStale: boolean
+}
+
+/**
+ * Regenerate one artifact and compare. In `compare` mode every snapshotted
+ * output goes back before this returns, including on the generator-failed path.
+ */
+export async function inspectArtifact(
+  artifact: GeneratedArtifact,
+  mode: ArtifactRunMode,
+): Promise<ArtifactInspection> {
+  const scriptAbs = path.join(REPO_ROOT, artifact.script)
+  if (!existsSync(scriptAbs)) {
+    return {
+      failure: [
+        `What: the generator for "${artifact.id}" is missing.`,
+        `Where: ${artifact.script}`,
+        'Saw: no file at that path; wanted the generator the registry names.',
+        'Fix: correct the `script` field in scripts/fleet/check/_shared/generated-artifacts.mts.',
+      ].join('\n'),
+      isStale: false,
+    }
+  }
+  const before = snapshotOutputs(REPO_ROOT, artifact)
+  // `spawn` rejects on a non-zero exit, so the catch and the code check are
+  // the same failure arriving by two routes.
+  let exitCode: number | undefined
+  try {
+    const result = await spawn('node', [scriptAbs], {
+      cwd: REPO_ROOT,
+      stdioString: true,
+    })
+    exitCode = result.code ?? 0
+  } catch {
+    exitCode = 1
+  }
+  if (exitCode !== 0) {
+    restoreOutputs(REPO_ROOT, before)
+    return {
+      failure: [
+        `What: the generator for "${artifact.id}" exited ${exitCode}.`,
+        `Where: ${artifact.script}`,
+        'Saw: a non-zero exit, so its output could not be compared.',
+        'Fix: run it directly and read the error.',
+      ].join('\n'),
+      isStale: false,
+    }
+  }
+  const stale = staleOutputs(REPO_ROOT, before)
+  if (!stale.length) {
+    return { isStale: false }
+  }
+  if (mode === 'regenerate') {
+    return { isStale: true }
+  }
+  restoreOutputs(REPO_ROOT, before)
+  return { failure: staleReport(artifact, stale), isStale: true }
+}
+
+/**
+ * Inspect every artifact in one pass. A gate that stops at the first failure
+ * turns one run into N runs, so every artifact is visited and its verdict
+ * collected.
+ */
+export async function inspectArtifacts(
+  artifacts: readonly GeneratedArtifact[],
+  mode: ArtifactRunMode,
+): Promise<{ failures: string[]; staleIds: string[] }> {
+  const logger = getDefaultLogger()
+  const failures: string[] = []
+  const staleIds: string[] = []
+  for (const artifact of artifacts) {
+    const inspection = await inspectArtifact(artifact, mode)
+    if (inspection.isStale) {
+      staleIds.push(artifact.id)
+      if (mode === 'regenerate') {
+        logger.log(
+          `[generated-artifacts-are-current] regenerated ${artifact.id}`,
+        )
+      }
+    }
+    if (inspection.failure) {
+      failures.push(inspection.failure)
+    }
+  }
+  return { failures, staleIds }
+}
+
+/**
+ * The `--self-test` arm: perturb one committed output and prove the comparison
+ * still notices. Returns the failure message, or `''` when the gate proved
+ * itself. Without an arm like this a gate that silently stopped comparing would
+ * report green forever.
+ */
+export function selfTestFailure(
+  artifacts: readonly GeneratedArtifact[],
+): string {
+  const probe = artifacts[0]!
+  const snap = snapshotOutputs(REPO_ROOT, probe)
+  const { 0: firstRel } = [...snap.keys()]
+  const original = snap.get(firstRel!)
+  if (original === undefined) {
+    return '[generated-artifacts-are-current] SELF-TEST FAILED: the probe artifact has no committed output to perturb.'
+  }
+  writeFileSync(
+    path.join(REPO_ROOT, firstRel!),
+    `${original}\n// self-test perturbation\n`,
+    'utf8',
+  )
+  const detected = staleOutputs(REPO_ROOT, snap).length > 0
+  restoreOutputs(REPO_ROOT, snap)
+  if (!detected) {
+    return '[generated-artifacts-are-current] SELF-TEST FAILED: a perturbed artifact went undetected, so this gate cannot catch the drift it exists for.'
+  }
+  return ''
+}
+
 export async function main(
   argv: readonly string[] = process.argv.slice(2),
 ): Promise<number> {
@@ -129,86 +261,13 @@ export async function main(
     return 0
   }
 
-  const failures: string[] = []
-  const staleIds: string[] = []
+  const mode: ArtifactRunMode = fix ? 'regenerate' : 'compare'
+  const { failures, staleIds } = await inspectArtifacts(artifacts, mode)
 
-  for (const artifact of artifacts) {
-    const scriptAbs = path.join(REPO_ROOT, artifact.script)
-    if (!existsSync(scriptAbs)) {
-      failures.push(
-        [
-          `What: the generator for "${artifact.id}" is missing.`,
-          `Where: ${artifact.script}`,
-          'Saw: no file at that path; wanted the generator the registry names.',
-          'Fix: correct the `script` field in scripts/fleet/check/_shared/generated-artifacts.mts.',
-        ].join('\n'),
-      )
-      continue
-    }
-
-    const before = snapshotOutputs(REPO_ROOT, artifact)
-    // `spawn` rejects on a non-zero exit, so the catch and the code check are
-    // the same failure arriving by two routes.
-    let exitCode: number | undefined
-    try {
-      const result = await spawn('node', [scriptAbs], {
-        cwd: REPO_ROOT,
-        stdioString: true,
-      })
-      exitCode = result.code ?? 0
-    } catch {
-      exitCode = 1
-    }
-    if (exitCode !== 0) {
-      restoreOutputs(REPO_ROOT, before)
-      failures.push(
-        [
-          `What: the generator for "${artifact.id}" exited ${exitCode}.`,
-          `Where: ${artifact.script}`,
-          'Saw: a non-zero exit, so its output could not be compared.',
-          'Fix: run it directly and read the error.',
-        ].join('\n'),
-      )
-      continue
-    }
-
-    const stale = staleOutputs(REPO_ROOT, before)
-    if (!stale.length) {
-      continue
-    }
-    staleIds.push(artifact.id)
-    if (fix) {
-      logger.log(`[generated-artifacts-are-current] regenerated ${artifact.id}`)
-      continue
-    }
-    restoreOutputs(REPO_ROOT, before)
-    failures.push(staleReport(artifact, stale))
-  }
-
-  // `--self-test` proves the gate can still fail. Without an arm like this a
-  // gate that silently stopped comparing would report green forever.
   if (selfTest) {
-    const probe = artifacts[0]!
-    const snap = snapshotOutputs(REPO_ROOT, probe)
-    const [firstRel] = [...snap.keys()]
-    const original = snap.get(firstRel!)
-    if (original === undefined) {
-      logger.error(
-        '[generated-artifacts-are-current] SELF-TEST FAILED: the probe artifact has no committed output to perturb.',
-      )
-      return 1
-    }
-    writeFileSync(
-      path.join(REPO_ROOT, firstRel!),
-      `${original}\n// self-test perturbation\n`,
-      'utf8',
-    )
-    const detected = staleOutputs(REPO_ROOT, snap).length > 0
-    restoreOutputs(REPO_ROOT, snap)
-    if (!detected) {
-      logger.error(
-        '[generated-artifacts-are-current] SELF-TEST FAILED: a perturbed artifact went undetected, so this gate cannot catch the drift it exists for.',
-      )
+    const selfTestMessage = selfTestFailure(artifacts)
+    if (selfTestMessage) {
+      logger.error(selfTestMessage)
       return 1
     }
   }
@@ -233,9 +292,14 @@ export async function main(
     return 1
   }
 
-  logger.success(
-    `[generated-artifacts-are-current] ${artifacts.length} generated artifact(s) match their generators${selfTest ? '. Self-test passed.' : '.'}`,
-  )
+  // `--quiet` silences the PASS line only. A failure and the `--fix` receipt
+  // both still print: a check that can be told to hide its own red is a check
+  // a caller can neutralize by accident.
+  if (!quiet) {
+    logger.success(
+      `[generated-artifacts-are-current] ${artifacts.length} generated artifact(s) match their generators${selfTest ? '. Self-test passed.' : '.'}`,
+    )
+  }
   return 0
 }
 

@@ -29,18 +29,19 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { hasSourceExtension } from '../constants/source-extensions.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
-import { isMainModule } from '../_shared/is-main-module.mts'
-import { runMain } from '../_shared/run-main.mts'
+import { isMainModule } from '../process/is-main-module.mts'
+import { runMain } from '../process/run-main.mts'
 import { REPO_ROOT } from '../paths.mts'
 import {
   diffAgainstBurnDown,
   findDuplicateTails,
 } from './_shared/literal-path-tails.mts'
 
-import type { ScriptMeta } from '../_shared/run-main.mts'
+import type { ScriptMeta } from '../process/run-main.mts'
 
 const BURN_DOWN_REL = path.join(
   'scripts',
@@ -49,7 +50,10 @@ const BURN_DOWN_REL = path.join(
   'path-construction-burn-down.json',
 )
 
-const SCANNED_EXTENSIONS = ['.mts', '.ts', '.mjs', '.js']
+/**
+ * How far into a file the dep-0 declaration must appear to count.
+ */
+const DEP_ZERO_HEADER_CHARS = 2000
 
 /**
  * Whether a tracked file is one this gate reads.
@@ -74,7 +78,7 @@ export function isScannablePath(rel: string): boolean {
   if (unix.startsWith('test/') || unix.includes('.test.')) {
     return false
   }
-  return SCANNED_EXTENSIONS.some(ext => unix.endsWith(ext))
+  return hasSourceExtension(unix)
 }
 
 /**
@@ -103,6 +107,19 @@ export function ownerFor(tail: string): string {
  * Read the recorded backlog, treating an absent file as an empty one so a
  * fresh member starts at zero rather than failing on a missing path.
  */
+/**
+ * Whether a source declares itself dep-0, so it may not import a path module.
+ *
+ * A dep-0 script runs with no guaranteed `node_modules` — Claude Code spawns
+ * `api-key-helper.mjs` from its own directory at the moment OAuth has already
+ * expired. Importing `paths.mts` there breaks the rescue the script exists
+ * for, so its literal path is forced rather than careless, and the burn-down
+ * is the wrong home for a duplicate that can never be removed.
+ */
+export function declaresDepZero(source: string): boolean {
+  return source.slice(0, DEP_ZERO_HEADER_CHARS).includes('DEP-0')
+}
+
 export function readBurnDown(repoRoot: string): string[] {
   const abs = path.join(repoRoot, BURN_DOWN_REL)
   if (!existsSync(abs)) {
@@ -131,7 +148,11 @@ async function trackedSources(repoRoot: string): Promise<Map<string, string>> {
     if (!existsSync(abs)) {
       continue
     }
-    sources.set(rel, readFileSync(abs, 'utf8'))
+    const source = readFileSync(abs, 'utf8')
+    if (declaresDepZero(source)) {
+      continue
+    }
+    sources.set(rel, source)
   }
   return sources
 }

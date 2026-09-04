@@ -36,10 +36,10 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { REPO_ROOT } from '../paths.mts'
-import { isMainModule } from '../_shared/is-main-module.mts'
-import { runMain } from '../_shared/run-main.mts'
+import { isMainModule } from '../process/is-main-module.mts'
+import { runMain } from '../process/run-main.mts'
 
-import type { ScriptMeta } from '../_shared/run-main.mts'
+import type { ScriptMeta } from '../process/run-main.mts'
 
 const logger = getDefaultLogger()
 

@@ -15,7 +15,7 @@
  *   generator in the fleet could go stale unobserved. One registry closes the
  *   class: adding a generator here is one entry, not a fourth bespoke check.
  *
- *   Tiers. `wheelhouse` entries render from sync-scaffolding sources that only
+ *   Tiers. `wheelhouse` entries render from commit-cascade sources that only
  *   the wheelhouse carries, so the gate skips them in a member checkout.
  *   `fleet` entries ship everywhere and are checked in every tree.
  */
@@ -49,18 +49,26 @@ export interface GeneratedArtifact {
 export const GENERATED_ARTIFACTS: readonly GeneratedArtifact[] = [
   {
     consequence:
+      'the dogfood lint scope reads a stale exclude list, so a file refactored back under the cap stays excluded and its rules go unenforced',
+    id: 'dogfood-oxlint-config',
+    outputs: ['.config/repo/oxlintrc.dogfood.json'],
+    script: 'scripts/repo/gen/dogfood-oxlint-config.mts',
+    tier: 'wheelhouse',
+  },
+  {
+    consequence:
       'the ownership registry, the dep-0 installer, and both tracked-surface guards read a stale set, so a member commits the wrong files',
     id: 'fleet-files',
-    outputs: ['scripts/repo/sync-scaffolding/manifest/fleet-files.json'],
-    script: 'scripts/repo/sync-scaffolding/manifest/emit-fleet-files.mts',
+    outputs: ['scripts/repo/commit-cascade/manifest/fleet-files.json'],
+    script: 'scripts/repo/commit-cascade/manifest/emit-fleet-files.mts',
     tier: 'wheelhouse',
   },
   {
     consequence:
       'the dep-0 installer and the two tracked-surface guards derive their expectation from this surface, so a missing entry is invisible to them',
     id: 'github-tracked-surface',
-    outputs: ['template/base/scripts/fleet/_shared/github-tracked-surface.mts'],
-    script: 'scripts/repo/sync-scaffolding/manifest/emit-tracked-surface.mts',
+    outputs: ['template/base/scripts/fleet/github/tracked-surface.mts'],
+    script: 'scripts/repo/commit-cascade/manifest/emit-tracked-surface.mts',
     tier: 'wheelhouse',
   },
 ]
@@ -68,7 +76,7 @@ export const GENERATED_ARTIFACTS: readonly GeneratedArtifact[] = [
 /**
  * The entries the gate can run in this tree.
  *
- * A member checkout carries no `scripts/repo/sync-scaffolding`, so a
+ * A member checkout carries no `scripts/repo/commit-cascade`, so a
  * wheelhouse entry there would fail on a missing generator rather than on
  * real staleness. Skipping is correct, not lenient: the wheelhouse gates
  * those artifacts before they ever reach a member.

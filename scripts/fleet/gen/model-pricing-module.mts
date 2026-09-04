@@ -26,9 +26,9 @@ import { existsSync, readFileSync } from 'node:fs'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { isMainModule } from '../_shared/is-main-module.mts'
-import { writeThroughMirrorLock } from '../_shared/mirror-lock.mts'
-import { runMain } from '../_shared/run-main.mts'
+import { isMainModule } from '../process/is-main-module.mts'
+import { writeThroughMirrorLock } from '../fs/mirror-lock.mts'
+import { runMain } from '../process/run-main.mts'
 import {
   MODEL_PRICING_JSON,
   MODEL_PRICING_MODULE,
@@ -36,7 +36,7 @@ import {
   TEMPLATE_MODEL_PRICING_MODULE,
 } from '../paths.mts'
 
-import type { ScriptMeta } from '../_shared/run-main.mts'
+import type { ScriptMeta } from '../process/run-main.mts'
 
 const BANNER = [
   '/*',
