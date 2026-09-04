@@ -81,6 +81,79 @@ export const readAllowedSignerKeys = (): Set<string> => {
   return out
 }
 
+interface SignatureVerdict {
+  unsigned: string[]
+  unauthorized: string[]
+}
+
+// Sorts one `%H %G? %GK` line per commit into the two blocking buckets.
+function classifyCommitSignatures(
+  lines: string[],
+  allowedSigners: Set<string>,
+): SignatureVerdict {
+  const unsigned: string[] = []
+  const unauthorized: string[] = []
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    const parts = line.split(' ')
+    const sha = parts[0]
+    const marker = parts[1]
+    const signerKey = parts.slice(2).join(' ').trim()
+    if (!sha || !marker) {
+      continue
+    }
+    // `N` = no signature. `B` = bad signature. Both block.
+    if (marker === 'B' || marker === 'N') {
+      unsigned.push(sha)
+      continue
+    }
+    // Allowed-signers cross-check, SSH-signed commits only. `G`
+    // means git verified the signature against SOME key it trusts —
+    // but "any trusted key" includes attacker-controlled keys on a
+    // compromised dev machine. The authorized-signer file pins down
+    // which keys we accept for the protected branch.
+    if (
+      allowedSigners.size > 0 &&
+      signerKey &&
+      !allowedSigners.has(signerKey)
+    ) {
+      unauthorized.push(`${sha} (signed by ${signerKey.slice(0, 16)}…)`)
+    }
+  }
+  return { unauthorized, unsigned }
+}
+
+// Prints the operator-facing failure report for both buckets.
+function reportSignatureFailures(
+  verdict: SignatureVerdict,
+  refBase: string,
+): void {
+  const { unauthorized, unsigned } = verdict
+  if (unauthorized.length > 0) {
+    logger.error(
+      `${unauthorized.length} commit(s) signed by a key NOT in gpg.ssh.allowedSignersFile:`,
+    )
+    for (let i = 0, { length } = unauthorized; i < length; i += 1) {
+      const u = unauthorized[i]!
+      logger.error(`  ${u}`)
+    }
+  }
+  const errors = unsigned.length + unauthorized.length
+  logger.fail(`${errors} unsigned commit(s) being pushed to ${refBase}.`)
+  const shaList = unsigned.slice(0, 5)
+  for (let j = 0, { length: jlen } = shaList; j < jlen; j += 1) {
+    const sha = shaList[j]!
+    const oneline = git('log', '-1', '--oneline', sha)
+    logger.info(`  - ${oneline}`)
+  }
+  if (unsigned.length > 5) {
+    logger.info(`  ... and ${unsigned.length - 5} more`)
+  }
+  logger.info('')
+  logger.info('Fix: rebase + re-sign the commits.')
+  logger.info(`  git rebase --exec 'git commit --amend --no-edit -S' <base>`)
+}
+
 export const scanSignedCommits = (range: string, remoteRef: string): number => {
   // Only enforce on default-branch refs (main / master). Feature
   // branches and topic branches can stay unsigned during development;
@@ -100,61 +173,11 @@ export const scanSignedCommits = (range: string, remoteRef: string): number => {
   // ~/.gnupg, at which point the local box is fully owned).
   const lines = gitLines('log', '--format=%H %G? %GK', range)
   const allowedSigners = readAllowedSignerKeys()
-  let errors = 0
-  const unsigned: string[] = []
-  const unauthorized: string[] = []
-  for (const line of lines) {
-    const parts = line.split(' ')
-    const sha = parts[0]
-    const marker = parts[1]
-    const signerKey = parts.slice(2).join(' ').trim()
-    if (!sha || !marker) {
-      continue
-    }
-    // `N` = no signature. `B` = bad signature. Both block.
-    if (marker === 'B' || marker === 'N') {
-      unsigned.push(sha)
-      errors++
-      continue
-    }
-    // Allowed-signers cross-check, SSH-signed commits only. `G`
-    // means git verified the signature against SOME key it trusts —
-    // but "any trusted key" includes attacker-controlled keys on a
-    // compromised dev machine. The authorized-signer file pins down
-    // which keys we accept for the protected branch.
-    if (
-      allowedSigners.size > 0 &&
-      signerKey &&
-      !allowedSigners.has(signerKey)
-    ) {
-      unauthorized.push(`${sha} (signed by ${signerKey.slice(0, 16)}…)`)
-      errors++
-    }
-  }
-  if (unauthorized.length > 0) {
-    logger.error(
-      `${unauthorized.length} commit(s) signed by a key NOT in gpg.ssh.allowedSignersFile:`,
-    )
-    for (let i = 0, { length } = unauthorized; i < length; i += 1) {
-      const u = unauthorized[i]!
-      logger.error(`  ${u}`)
-    }
-  }
+  const verdict = classifyCommitSignatures(lines, allowedSigners)
+  const errors = verdict.unsigned.length + verdict.unauthorized.length
   if (errors === 0) {
     return 0
   }
-  logger.fail(`${errors} unsigned commit(s) being pushed to ${refBase}.`)
-  const shaList = unsigned.slice(0, 5)
-  for (let j = 0, { length: jlen } = shaList; j < jlen; j += 1) {
-    const sha = shaList[j]!
-    const oneline = git('log', '-1', '--oneline', sha)
-    logger.info(`  - ${oneline}`)
-  }
-  if (unsigned.length > 5) {
-    logger.info(`  ... and ${unsigned.length - 5} more`)
-  }
-  logger.info('')
-  logger.info('Fix: rebase + re-sign the commits.')
-  logger.info(`  git rebase --exec 'git commit --amend --no-edit -S' <base>`)
+  reportSignatureFailures(verdict, refBase)
   return errors
 }

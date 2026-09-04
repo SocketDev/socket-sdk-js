@@ -68,7 +68,7 @@
     "lockstep": "node scripts/fleet/lockstep.mts",
     "lockstep:emit-mirror-globs": "node scripts/fleet/lockstep-emit-mirror-globs.mts",
     "lockstep:emit-schema": "node scripts/fleet/lockstep-emit-schema.mts",
-    "mcp:reset": "node scripts/fleet/mcp-reset.mts",
+    "mcp:reset": "node scripts/fleet/mcp/reset.mts",
     "npm:publish": "node scripts/fleet/publish-pipeline.mts",
     "precommit": "pnpm run check --lint --staged",
     "preinstall": "node scripts/fleet/setup/bootstrap-zero-dep-packages.mjs",

@@ -78,7 +78,7 @@ test-output.*
 
 # <fleet>
 # Managed by socket-wheelhouse. Don't edit locally — edit upstream
-# in scripts/sync-scaffolding/checks/gitignore-fleet-block.mts and
+# in scripts/repo/commit-cascade/checks/gitignore-fleet-block.mts and
 # re-cascade via `pnpm run sync`. Project-specific ignores stay
 # OUTSIDE this block; the fixer preserves them.
 # Per-machine Claude Code permission config + log dirs stay ignored;
@@ -110,16 +110,17 @@ test-output.*
 # so each is ignored in BOTH the repo-root live copy AND the template/base/
 # mirror — the fleet keeps ignores in this root block, not nested per-dir
 # files. Keep in lock-step with RELEASE_ONLY_DIR_MIRROR_FILES (scripts/repo/
-# sync-scaffolding/dir-mirror-skip.mts). See docs/fleet/agents.md/release-vs-cascade.md.
+# commit-cascade/dir-mirror-skip.mts). See docs/fleet/agents.md/release-vs-cascade.md.
 **/.claude/hooks/fleet/_dist/fleet-pack.cjs
 # The model-pricing module gen/model-pricing-module.mts bakes from the pricing
 # JSON so rolldown inlines the prices into fleet-pack.cjs. A build output in
 # BOTH trees, shipped in the pack, never cascaded.
 **/scripts/fleet/constants/model-pricing.generated.mts
+**/scripts/fleet/constants/fleet-pack-version.generated.mts
 # Prebuilt dispatch-launcher variants (one per platform-arch), CI
 # cross-compiled and hydrated from the release bundle; the host build
 # copies its match into _shared/ instead of invoking cc. Contract:
-# scripts/fleet/_shared/launcher-variants.mts.
+# scripts/fleet/pack/launcher-variants.mts.
 **/.claude/hooks/fleet/_dist/launchers/
 # Legacy pre-v1.0.16 dispatch layout: socket-sdk-js still tracks the
 # _dispatch/index.cjs loader, which requires ./fleet-pack.cjs — that generated
@@ -151,7 +152,7 @@ test-output.*
 # pointer file on Windows, so each host gets a real symlink generated on its
 # own OS. Tracking them only produces churn + merge conflicts. Keep in sync
 # with ADAPTERS in scripts/fleet/gen/harness-adapters.mts + the .agents/ mirror
-# (and the .mcp.json projections in scripts/fleet/mcp-config.mts: /.codex/,
+# (and the .mcp.json projections in scripts/fleet/mcp/config.mts: /.codex/,
 # and /opencode.json — all generated from the single committed .mcp.json
 # authority at setup and rebuilt into the release bundle at
 # make-publish-bundle, never committed).
@@ -189,6 +190,7 @@ Thumbs.db
 # generated-globs.mts) by generated-globs-are-consistent.mts.
 **/build/
 **/dist/
+**/tmp/
 /template/generated/
 **/out/
 **/.cache/
@@ -2819,6 +2821,8 @@ scripts/fleet/changelog/render.mts
 scripts/fleet/changelog/scopes.mts
 scripts/fleet/changelog/sections.mts
 scripts/fleet/check.mts
+scripts/fleet/check/_shared/generated-artifacts.mts
+scripts/fleet/check/_shared/literal-path-tails.mts
 scripts/fleet/check/account-identity-is-not-committed.mts
 scripts/fleet/check/action-pins-are-current.mts
 scripts/fleet/check/action-ports-are-lock-stepped.mts
@@ -2928,6 +2932,7 @@ scripts/fleet/check/format-write-is-convergent.mts
 scripts/fleet/check/fresh-members-are-squashed-until-release.mts
 scripts/fleet/check/fuzz-targets-are-sound.mts
 scripts/fleet/check/fuzz-tiers-are-covered.mts
+scripts/fleet/check/generated-artifacts-are-current.mts
 scripts/fleet/check/generated-globs-are-consistent.mts
 scripts/fleet/check/generated-outputs-are-untracked.mts
 scripts/fleet/check/gh-aw-emissions-are-declared.mts
@@ -2995,6 +3000,7 @@ scripts/fleet/check/package-manager-pins-are-synced.mts
 scripts/fleet/check/packed-readme-pins-release-refs.mts
 scripts/fleet/check/path-tools-are-at-pinned-version.mts
 scripts/fleet/check/paths-are-canonical.mts
+scripts/fleet/check/paths-are-constructed-once.mts
 scripts/fleet/check/paths-are-normalized-before-match-at-commit.mts
 scripts/fleet/check/paths/allowlist.mts
 scripts/fleet/check/paths/exempt.mts
@@ -3039,6 +3045,7 @@ scripts/fleet/check/release-publish-scripts-are-conventionally-named.mts
 scripts/fleet/check/release-receipts-match-observable-state.mts
 scripts/fleet/check/release-tags-are-immutable.mts
 scripts/fleet/check/release-tags-match-provenance.mts
+scripts/fleet/check/repo-owned-claude-paths-are-tracked.mts
 scripts/fleet/check/report-paths-are-helper-built.mts
 scripts/fleet/check/researching-recency-contract-is-current.mts
 scripts/fleet/check/review-stages-are-ordered.mts
@@ -3137,6 +3144,7 @@ scripts/fleet/constants/fixture-name-burn-down.mts
 scripts/fleet/constants/generated-globs.mts
 scripts/fleet/constants/model-pricing.json
 scripts/fleet/constants/npm-registry.mts
+scripts/fleet/constants/path-construction-burn-down.json
 scripts/fleet/constants/prose-em-dash-burn-down.json
 scripts/fleet/constants/prose-em-dash-burn-down.mts
 scripts/fleet/constants/real-identity-burn-down.json

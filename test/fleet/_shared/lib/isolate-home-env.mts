@@ -32,7 +32,7 @@ import process from 'node:process'
 import {
   ISOLATED_ENV_VARS,
   TOOLCHAIN_ROOT_VARS,
-} from '../../../../scripts/fleet/_shared/test-isolation-law.mts'
+} from '../../../../scripts/fleet/prose/test-isolation-law.mts'
 
 // Where each isolated var lands inside the sandbox. The KEYS are not listed
 // here -- they come from ISOLATED_ENV_VARS, which is the law's own statement of
@@ -70,7 +70,7 @@ export function isolateHomeEnv(): string {
   // Clause 3, and it runs BEFORE HOME moves so `os.homedir()` still answers
   // with the real home. rustup reads its default toolchain from ~/.rustup, so a
   // redirected HOME with no RUSTUP_HOME leaves cargo unable to choose one and
-  // every cargo-spawning test dies with "is this a cargo workspace?". The same
+  // every cargo-spawning test dies with "is this a `cargo workspace`?". The same
   // shape hits every shim in TOOLCHAIN_ROOT_VARS.
   //
   // Two conditions, both from the law's own wording ("when it is not already
@@ -90,25 +90,23 @@ export function isolateHomeEnv(): string {
   // Pin the pnpm STORE to the real global one, before PNPM_HOME is sandboxed
   // below. This is the destruction bug, and it cost three checkouts.
   //
-  // pnpm 11 keeps one content-addressed store at `$PNPM_HOME/store/v11`, and a
-  // project's `node_modules` are LINKS into it — `.modules.yaml` records the
-  // `storeDir` and `virtualStoreDir` it linked against. Sandbox PNPM_HOME and
-  // any install that runs under it relocates the store into `os.tmpdir()` and
-  // relinks the whole tree there. The tree then survives only until temp is
-  // reaped, and every link dangles at once.
+  // pnpm keeps one content-addressed store at `$PNPM_HOME/store/v<n>` and a
+  // project's `node_modules` are LINKS into it. Sandbox PNPM_HOME and any
+  // install running under it relocates the store into `os.tmpdir()` and relinks
+  // the whole tree there, so the tree survives only until temp is reaped and
+  // every link dangles at once. `pnpm install` does NOT repair it, reporting
+  // "Already up to date" while the tree is gone. Pinning the store keeps it real
+  // however PNPM_HOME moves; the sandbox still owns everything a run WRITES.
   //
-  // That is the signature of all three socket-wheelhouse losses: "cannot
-  // resolve @socketsecurity/lib-stable", then "node_modules missing".
-  // Confirmed on socket-lib 2026-08-24; `pnpm install` does NOT repair it,
-  // reporting "Already up to date" while every link dangles.
-  //
-  // Pinning `store-dir` keeps the store real however PNPM_HOME moves. The
-  // sandbox still owns everything a run WRITES.
-  if (!process.env['npm_config_store_dir']) {
+  // The var NAME is load-bearing. pnpm reads config only under a
+  // `PNPM_CONFIG_<KEY>` prefix (pacquet `config/src/env_overlay.rs`);
+  // `npm_config_<key>` is npm's prefix and pnpm ignores it, so a pin under that
+  // name is inert and the store relocates into the sandbox anyway.
+  if (!process.env['PNPM_CONFIG_STORE_DIR']) {
     const pnpmHome = process.env['PNPM_HOME']
     const store = pnpmHome ? path.join(pnpmHome, 'store') : undefined
     if (store && existsSync(store)) {
-      process.env['npm_config_store_dir'] = store
+      process.env['PNPM_CONFIG_STORE_DIR'] = store
     }
   }
 

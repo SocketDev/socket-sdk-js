@@ -1,7 +1,17 @@
 {
   "// <fleet>": "Managed by socket-wheelhouse; edit the template, then cascade.",
   "// apiKeyHelper": "Rescues a session whose OAuth token expired: Claude Code cannot re-auth itself but it CAN run a command, and this one answers from the key the machine already holds. Resolved by walking UP from the session cwd, not from $CLAUDE_PROJECT_DIR: measured against the 2.1.247 client, that variable is injected per-child for hooks, MCP servers and the statusline only, and the apiKeyHelper runner passes neither env nor cwd, so it would expand EMPTY here and yield `node /scripts/...`. The walk also resolves when a session starts in a subdirectory. Payload-relative, so every member runs its own copy and no path names a home directory. DECLINES SILENTLY (exit 0, no output) when the payload is absent, which is every member before its first bootstrap and every fresh clone: this is the RESCUE path for an expired token, so it must never be the reason a session cannot start. Exiting non-zero here surfaced 'apiKeyHelper failed … re-authenticate with your provider' and took down auth in a repo that simply had nothing to rescue with. The walk cannot reach a sibling checkout either, only ancestors, so a member without its own copy has no copy to find.",
-  "apiKeyHelper": "h=scripts/fleet/ai-balancer/api-key-helper.mjs; d=$PWD; until [ -f \"$d/$h\" ]; do [ \"$d\" = / ] && { echo \"fleet payload absent: $h not found above $PWD\" >&2; exit 1; }; d=$(dirname \"$d\"); done; exec node \"$d/$h\"",
+  "apiKeyHelper": "h=scripts/fleet/ai/balancer/api-key-helper.mjs; d=$PWD; until [ -f \"$d/$h\" ]; do [ \"$d\" = / ] && exit 0; d=$(dirname \"$d\"); done; n=$(command -v node 2>/dev/null); [ -z \"$n\" ] && n=$(\"$SHELL\" -lic \"command -v node\" 2>/dev/null | tail -1); { [ -n \"$n\" ] && [ -x \"$n\" ]; } || exit 0; exec \"$n\" \"$d/$h\"",
+  "// env": "The fleet no-phone-home knobs, one copy per delivery surface. FLEET_ENV (.github/actions/fleet/setup/fleet-env.json) is the source; the shell-rc bridge and the CI workflow env already derive from it, and this block is the third surface — a Claude Code session and every tool it spawns. Kept in lockstep by claude-settings-env-matches-fleet-env.mts, so a knob added there fails this file until it is added here too.",
+  "env": {
+    "AI_BALANCER_ENABLED": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "COREPACK_ENABLE_PROJECT_SPEC": "0",
+    "DISABLE_TELEMETRY": "1",
+    "DO_NOT_TRACK": "1",
+    "NO_UPDATE_NOTIFIER": "1",
+    "OTEL_SDK_DISABLED": "true"
+  },
   "hooks": {
     "PostToolUse": [
       {

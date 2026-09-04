@@ -2,7 +2,7 @@
 
 # <fleet>
 # Cascaded from socket-wheelhouse/template/base/. Don't edit locally —
-# edit upstream and re-cascade via sync-scaffolding. Marked
+# edit upstream and re-cascade via commit-cascade. Marked
 # linguist-generated so GitHub PR diffs collapse them by default.
 .claude/agents/fleet linguist-generated=true
 .claude/commands/fleet linguist-generated=true
@@ -18,6 +18,7 @@
 .config/fleet/git-authors.json linguist-generated=true
 .config/fleet/lockstep.schema.json linguist-generated=true
 .config/fleet/markdownlint-rules linguist-generated=true
+.config/fleet/mcp linguist-generated=true
 .config/fleet/oxfmtrc.json linguist-generated=true
 .config/fleet/oxlint-plugin/_shared linguist-generated=true
 .config/fleet/oxlint-plugin/fleet linguist-generated=true
@@ -40,12 +41,14 @@
 .config/fleet/tsconfig.check.base.json linguist-generated=true
 .config/fleet/tsconfig.check.json linguist-generated=true
 .config/fleet/vitest.coverage.fleet.config.mts linguist-generated=true
+.config/fleet/vitest.fuzz.fleet.config.mts linguist-generated=true
 .editorconfig linguist-generated=true
 .git-hooks/_shared linguist-generated=true
 .git-hooks/commit-msg linguist-generated=true
 .git-hooks/fleet linguist-generated=true
 .git-hooks/post-commit linguist-generated=true
 .git-hooks/pre-commit linguist-generated=true
+.git-hooks/pre-merge-commit linguist-generated=true
 .git-hooks/pre-push linguist-generated=true
 .github/actions/fleet/_shared linguist-generated=true
 .github/actions/fleet/cache-pnpm-store linguist-generated=true
@@ -74,14 +77,12 @@
 .github/dependabot.yml linguist-generated=true
 .github/local-ci.Dockerfile linguist-generated=true
 .github/workflows/*.lock.yml linguist-generated=true merge=ours
-.github/workflows/fuzz.yml linguist-generated=true
 .github/workflows/get-green.yml linguist-generated=true
 .github/workflows/github-release.yml linguist-generated=true
-.github/workflows/npm-publish-dryrun.yml linguist-generated=true
 .github/workflows/npm-publish.yml linguist-generated=true
-.github/workflows/on-device-model-cache.yml linguist-generated=true
 .github/workflows/prune-workflow-runs.yml linguist-generated=true
-.github/workflows/release-reconcile.yml linguist-generated=true
+.github/workflows/weekly-fuzz.yml linguist-generated=true
+.github/workflows/weekly-odai-cache.yml linguist-generated=true
 .github/workflows/weekly-update.yml linguist-generated=true
 .github/zizmor.yml linguist-generated=true
 .mcp.json linguist-generated=true

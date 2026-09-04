@@ -82,7 +82,12 @@ const main = async (): Promise<number> => {
 
   for (let i = 0, { length } = refLines; i < length; i += 1) {
     const refLine = refLines[i]!
-    const [localRef, localSha, remoteRef, remoteSha] = refLine.split(/\s+/)
+    const {
+      0: localRef,
+      1: localSha,
+      2: remoteRef,
+      3: remoteSha,
+    } = refLine.split(/\s+/)
     if (!localRef || !localSha || !remoteRef || !remoteSha) {
       continue
     }

@@ -5,10 +5,10 @@
  *   automatically (github.com → objects.githubusercontent.com),
  *   `node:crypto.createHash` computes the digest in-process, and tar/unzip
  *   shell out, already preinstalled on every supported runner image. Usage:
- *   node install-tool.mjs <url> <integrity> <dest-dir> [<bin-name>] <integrity>
- *   is a Subresource Integrity string: `<algo>-<base64>` OR `<algo>-<hex>`
- *   (publisher checksum form, e.g. `sha256-<64 hex>` from go.dev / rustup /
- *   Google's Packages index). Examples: `sha256-67PM...=`,
+ *   `node install`-tool.mjs <url> <integrity> <dest-dir> [<bin-name>]
+ *   <integrity> is a Subresource Integrity string: `<algo>-<base64>` OR
+ *   `<algo>-<hex>` (publisher checksum form, e.g. `sha256-<64 hex>` from go.dev
+ *   / rustup / Google's Packages index). Examples: `sha256-67PM...=`,
  *   `sha256-544932...c0749c`. The algorithm is parsed from the prefix; multiple
  *   algos are supported (sha256, sha384, sha512). Same encoding as npm
  *   package-lock.json's `integrity` field and as `external-tools.json`'s
@@ -146,7 +146,7 @@ async function run() {
       positionals.push(a)
     }
   }
-  const [url, integrityArg, destDir, binName] = positionals
+  const { 0: url, 1: integrityArg, 2: destDir, 3: binName } = positionals
 
   if (!url || !integrityArg || !destDir) {
     logger.fail(

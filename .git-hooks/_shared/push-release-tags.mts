@@ -87,7 +87,7 @@ export function listLocalReleaseTagCommits(
   )
   const found = new Map<string, string>()
   for (const line of lines) {
-    const [name, objectName, peeled] = line.trim().split(/\s+/)
+    const { 0: name, 1: objectName, 2: peeled } = line.trim().split(/\s+/)
     if (!name || !isReleaseTagName(name)) {
       continue
     }
@@ -114,7 +114,7 @@ export function listPublishedReleaseTagCommits(
   }
   const rawLines = raw.split(/\r?\n/)
   for (let i = 0, { length } = rawLines; i < length; i += 1) {
-    const [sha, ref] = rawLines[i]!.trim().split(/\s+/)
+    const { 0: sha, 1: ref } = rawLines[i]!.trim().split(/\s+/)
     if (!sha || !ref) {
       continue
     }
