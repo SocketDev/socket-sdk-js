@@ -5,56 +5,8 @@ importers:
 
   .:
     configDependencies: {}
-    packageManagerDependencies:
-      '@pnpm/exe':
-        specifier: 11.9.0
-        version: 11.9.0
-      pnpm:
-        specifier: 11.9.0
-        version: 11.9.0
 
 packages:
-
-  '@pnpm/exe@11.9.0':
-    resolution: {integrity: sha512-pPPOpR79qW3nsNhlyDIdfstli4Bi78mk8r22ySxpFRwMbO8KXSjGrVzGmJBsVX39NnJTh7/WADj527nZhG9H9g==}
-    hasBin: true
-
-  '@pnpm/linux-arm64@11.9.0':
-    resolution: {integrity: sha512-XYmY2qadHauBA3QaHi2R7fI6kt5Flje0WHz9MVrbH0kVH/XLpfOLnwPeE1+EX6K/nDa2CBvzp35VjYCNGFJa9A==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@pnpm/linux-x64@11.9.0':
-    resolution: {integrity: sha512-fl7W5imnSmmgXIqMQFZ/rPaVvk9OkKF8/anqHZE3XEDfWcn3BlWGndyOEas/JN7u2BXWYjs63DJZ3rnG6WOhLA==}
-    cpu: [x64]
-    os: [linux]
-
-  '@pnpm/linuxstatic-arm64@11.9.0':
-    resolution: {integrity: sha512-fif8xbnzVEAIlvaU4yIgWKXeXYb4Kj6WMEl/KvM2x1Rp3AKAjBW/53SGzxO4cZP9doAqUzOIpMRGFVbHGeMDRw==}
-    cpu: [arm64]
-    os: [linux]
-    libc: [musl]
-
-  '@pnpm/linuxstatic-x64@11.9.0':
-    resolution: {integrity: sha512-9dKu3QdShqOpnWrjW9owARpIJeP0ul8UgIIbBUv8VDGEYibt+g49zQsNaD7SdMD3WeRSjExPQ1zIhplzr5cwvQ==}
-    cpu: [x64]
-    os: [linux]
-    libc: [musl]
-
-  '@pnpm/macos-arm64@11.9.0':
-    resolution: {integrity: sha512-MWzBTgeI5p3odjdVltYvFXaSWAjF2Xk5YaxiP/u2RmW8N6PHsLyIyj37Ds992CrXgFM8fO1RpvsEirozhsD6KA==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@pnpm/win-arm64@11.9.0':
-    resolution: {integrity: sha512-u/QxEcbKJZxC1t3zUYCZiHzu7TaZ/iXc6EGZoQjkeVT0LXmEVR6ypcK3ByjhIqbxQ3HGX75gnpIpR+VjRjubfw==}
-    cpu: [arm64]
-    os: [win32]
-
-  '@pnpm/win-x64@11.9.0':
-    resolution: {integrity: sha512-HqJVHmZG5UKfLi38AjMl2azVmq87TlWRhwSW+f4q9LLaZeAkFyIZ7LY/pN6mh4VlH9yWj90C+tsb1yKiy7OKnw==}
-    cpu: [x64]
-    os: [win32]
 
   '@reflink/reflink-darwin-arm64@0.1.19':
     resolution: {integrity: sha512-ruy44Lpepdk1FqDz38vExBY/PVUsjxZA+chd9wozjUH9JjuDT/HEaQYA6wYN9mf041l0yLVar6BCZuWABJvHSA==}
@@ -116,46 +68,7 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  pnpm@11.9.0:
-    resolution: {integrity: sha512-vWgtXQP+Ul73yf1ngMaITR51asTJyf4AxTh4KCQxDc+Q493E9Tg18G3669UIXkGFXgvLs7YN4qxburieUDbwOw==}
-    engines: {node: '>=22.13'}
-    hasBin: true
-
 snapshots:
-
-  '@pnpm/exe@11.9.0':
-    dependencies:
-      '@reflink/reflink': 0.1.19
-      detect-libc: 2.1.2
-    optionalDependencies:
-      '@pnpm/linux-arm64': 11.9.0
-      '@pnpm/linux-x64': 11.9.0
-      '@pnpm/linuxstatic-arm64': 11.9.0
-      '@pnpm/linuxstatic-x64': 11.9.0
-      '@pnpm/macos-arm64': 11.9.0
-      '@pnpm/win-arm64': 11.9.0
-      '@pnpm/win-x64': 11.9.0
-
-  '@pnpm/linux-arm64@11.9.0':
-    optional: true
-
-  '@pnpm/linux-x64@11.9.0':
-    optional: true
-
-  '@pnpm/linuxstatic-arm64@11.9.0':
-    optional: true
-
-  '@pnpm/linuxstatic-x64@11.9.0':
-    optional: true
-
-  '@pnpm/macos-arm64@11.9.0':
-    optional: true
-
-  '@pnpm/win-arm64@11.9.0':
-    optional: true
-
-  '@pnpm/win-x64@11.9.0':
-    optional: true
 
   '@reflink/reflink-darwin-arm64@0.1.19':
     optional: true
@@ -194,8 +107,6 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  pnpm@11.9.0: {}
-
 ---
 lockfileVersion: '9.0'
 
@@ -209,8 +120,8 @@ catalogs:
       specifier: 2.1.220
       version: 2.1.220
     '@mdn/browser-compat-data':
-      specifier: 8.0.12
-      version: 8.0.12
+      specifier: 8.0.11
+      version: 8.0.11
     '@playwright/mcp':
       specifier: 0.0.79
       version: 0.0.79
@@ -439,7 +350,7 @@ importers:
         version: 7.29.7
       '@mdn/browser-compat-data':
         specifier: 'catalog:'
-        version: 8.0.12
+        version: 8.0.11
       '@oxlint/migrate':
         specifier: 1.52.0
         version: 1.52.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
@@ -3994,8 +3905,8 @@ packages:
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
 
-  '@mdn/browser-compat-data@8.0.12':
-    resolution: {integrity: sha512-OuNNIGofh8ayCuSC8yqUSMUKqWMfo2Qpn5JU2YVGm5gkUXx05p7zOZ1bfcplEuH/q7E+zILfIqoQsFN/yFie0g==}
+  '@mdn/browser-compat-data@8.0.11':
+    resolution: {integrity: sha512-KZMEJ9A2Q9lLCSplxRtTe4hDiydwzfv7Uk8SRguozAKqH8BYctKpJnUDzM6sTELSPo/6lcwFpCMcvVqEh59LUA==}
 
   '@mswjs/interceptors@0.41.9':
     resolution: {integrity: sha512-VVPPgHyQ6ShqnrmDWuxjmUIsO9gWyOZFmuOfLd9LfBGQJwZfy0gvv9pbHSJuoFNIYC7ZDX9aoFwowjcdSC4E8w==}
@@ -6938,7 +6849,7 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@mdn/browser-compat-data@8.0.12': {}
+  '@mdn/browser-compat-data@8.0.11': {}
 
   '@mswjs/interceptors@0.41.9':
     dependencies:
