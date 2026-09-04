@@ -22,7 +22,7 @@ import { buildConfig } from '../../.config/repo/rolldown.config.mts'
 import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.mts'
 import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
-import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { isMainModule } from '../fleet/process/is-main-module.mts'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -79,9 +79,8 @@ export async function buildSource(
       await bundle.close()
     }
 
-    // Browser bundle (dist/index.browser.js): fetch-based, node-free build for
-    // Chrome MV3 service workers, selected via the package.json `browser`
-    // export condition. See .config/repo/rolldown.browser.config.mts.
+    // Node-free so it runs in a Chrome MV3 service worker; the package.json
+    // `browser` export condition selects it.
     const { output: browserOutput, ...browserInputOptions } = browserBuildConfig
     const browserBundle = await rolldown(browserInputOptions)
     try {
@@ -90,9 +89,8 @@ export async function buildSource(
       await browserBundle.close()
     }
 
-    // Vendored externals (dist/external/*): self-contained CJS bundles the
-    // main bundle reaches through verbatim relative requires, mimicking
-    // socket-lib's build-externals step. See rolldown.externals.config.mts.
+    // Self-contained CJS, because the main bundle reaches these through
+    // verbatim relative requires.
     const { output: externalsOutput, ...externalsInputOptions } =
       externalsBuildConfig
     const externalsBundle = await rolldown(externalsInputOptions)
