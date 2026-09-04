@@ -1,17 +1,7 @@
 #!/usr/bin/env node
 /*
- * @file Generates docs/api.md from src/socket-sdk-class.mts and
- *   data/api-method-quota-and-permissions.json. The doc is a
- *   one-line-per-method reference grouped by domain. Quota costs come from the
- *   SDK's own quota API. Resolution rules for the OpenAPI operation ID (used to
- *   look up quota):
- *
- *   1. JSDoc `@operationId <id>` tag — explicit override. `none` means skip.
- *   2. First `<'opId'>` type generic in the method body (e.g.,
- *      `#handleApiError<'createOrgRepo'>`).
- *   3. The method name itself, if it appears as a key in the data file. Usage:
- *      node scripts/repo/gen-api-docs.mts # write the file node
- *      scripts/repo/gen-api-docs.mts --check # diff only, exit 1 on drift
+ * @file Writes docs/api.md from the SDK class and the quota data file.
+ *   `--check` diffs instead of writing and exits 1 on drift.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -22,7 +12,7 @@ import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { extractMethods, renderApiDocs } from './gen-api-docs-lib.mts'
-import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { isMainModule } from '../fleet/process/is-main-module.mts'
 
 const logger = getDefaultLogger()
 const rootPackageJsonPath = findUpSync('package.json', {

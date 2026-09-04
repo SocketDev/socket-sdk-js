@@ -1,15 +1,7 @@
 #!/usr/bin/env node
 /*
- * @file Validates that there are no CDN references in the codebase. This is a
- *   preventative check to ensure no hardcoded CDN URLs are introduced. The
- *   project deliberately avoids CDN dependencies for security and reliability.
- *   Blocked CDN domains:
- *
- *   - unpkg.com
- *   - cdn.jsdelivr.net
- *   - esm.sh
- *   - cdn.skypack.dev
- *   - ga.jspm.io
+ * @file Fails on a hardcoded CDN URL, because the project takes its
+ *   dependencies from the registry for security and reliability.
  */
 
 import { promises as fs } from 'node:fs'
@@ -19,7 +11,7 @@ import process from 'node:process'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { findUpPackageJson } from '@socketsecurity/lib-stable/packages/find'
-import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { isMainModule } from '../fleet/process/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
