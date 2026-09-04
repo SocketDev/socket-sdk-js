@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url'
 
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { isMainModule } from '../fleet/process/is-main-module.mts'
 
 /**
  * An SDK method name, as `getOrgFullScanList`. Named so the table's key says
