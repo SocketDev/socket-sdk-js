@@ -22,10 +22,7 @@ import {
   getFormData,
 } from '../../../src/file-upload.mts'
 import { SocketSdk } from '../../../src/index.mts'
-import {
-  isCoverageMode,
-  setupNockEnvironment,
-} from '../../utils/environment.mts'
+import { setupNockEnvironment } from '../../utils/environment.mts'
 import { FAST_TEST_CONFIG } from '../../utils/fast-test-config.mts'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
@@ -139,6 +136,7 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
 })
 
 describe('File Upload - createUploadRequest', () => {
+  setupNockEnvironment()
   let tempDir: string
 
   beforeEach(() => {
@@ -173,7 +171,7 @@ describe('File Upload - createUploadRequest', () => {
     expect(response.status).toBe(200)
   })
 
-  it.skipIf(isCoverageMode)('should call hooks when provided', async () => {
+  it('should call hooks when provided', async () => {
     let requestCalled = false
     let responseCalled = false
 
@@ -206,7 +204,7 @@ describe('File Upload - createUploadRequest', () => {
     expect(responseCalled).toBe(true)
   })
 
-  it.skipIf(isCoverageMode)('should handle upload errors', async () => {
+  it('should handle upload errors', async () => {
     const testFile = path.join(tempDir, 'test.txt')
     writeFileSync(testFile, 'test content')
 
@@ -226,7 +224,7 @@ describe('File Upload - createUploadRequest', () => {
     expect(response.status).toBe(400)
   })
 
-  it.skipIf(isCoverageMode)('should handle JSON body in request', async () => {
+  it('should handle JSON body in request', async () => {
     const FormDataCtor = getFormData()
     const jsonPart = new FormDataCtor()
     jsonPart.append(
@@ -252,36 +250,33 @@ describe('File Upload - createUploadRequest', () => {
     expect(response.status).toBe(200)
   })
 
-  it.skipIf(isCoverageMode)(
-    'should handle mixed file and JSON uploads',
-    async () => {
-      const testFile = path.join(tempDir, 'manifest.json')
-      writeFileSync(testFile, '{"dependencies":{}}')
+  it('should handle mixed file and JSON uploads', async () => {
+    const testFile = path.join(tempDir, 'manifest.json')
+    writeFileSync(testFile, '{"dependencies":{}}')
 
-      // Create a single FormData with both file and JSON
-      const form = createRequestBodyForFilepaths([testFile], tempDir)
-      const jsonStream = Readable.from(JSON.stringify({ metadata: 'test' }), {
-        highWaterMark: 1024 * 1024,
-      })
-      form.append('meta', jsonStream, {
-        contentType: 'application/json',
-        filename: 'meta.json',
-      })
+    // Create a single FormData with both file and JSON
+    const form = createRequestBodyForFilepaths([testFile], tempDir)
+    const jsonStream = Readable.from(JSON.stringify({ metadata: 'test' }), {
+      highWaterMark: 1024 * 1024,
+    })
+    form.append('meta', jsonStream, {
+      contentType: 'application/json',
+      filename: 'meta.json',
+    })
 
-      nock('https://api.socket.dev')
-        .post('/v0/test-mixed-upload')
-        .reply(200, { success: true })
+    nock('https://api.socket.dev')
+      .post('/v0/test-mixed-upload')
+      .reply(200, { success: true })
 
-      const response = await createUploadRequest(
-        'https://api.socket.dev',
-        '/v0/test-mixed-upload',
-        form,
-        { timeout: 5000 },
-      )
+    const response = await createUploadRequest(
+      'https://api.socket.dev',
+      '/v0/test-mixed-upload',
+      form,
+      { timeout: 5000 },
+    )
 
-      expect(response.status).toBe(200)
-    },
-  )
+    expect(response.status).toBe(200)
+  })
 
   it(
     'should handle network connection failures gracefully',

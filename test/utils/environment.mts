@@ -11,10 +11,6 @@ import { SocketSdk } from '../../src/index.mts'
 
 import type { IncomingHttpHeaders } from 'node:http'
 
-// Check if running in coverage mode
-// This is set in vitest.config.mts when coverage is enabled
-export const isCoverageMode = process.env['COVERAGE'] === 'true'
-
 /**
  * Normalize a nock `scope.on('request')` payload's headers across nock majors:
  * nock 14 emits a legacy ClientRequest-shaped req whose `headers` is a plain
@@ -67,26 +63,18 @@ export function setupNockEnvironment() {
     nock.cleanAll()
     nock.activate()
     nock.disableNetConnect()
-
-    // In coverage mode, be extra aggressive about cleanup
-    if (isCoverageMode) {
-      nock.abortPendingRequests()
-      nock.cleanAll()
-    }
   })
 
   afterEach(() => {
-    // In coverage mode, be aggressive about cleanup
-    if (isCoverageMode) {
+    try {
+      if (!nock.isDone()) {
+        throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
+      }
+    } finally {
       nock.abortPendingRequests()
+      nock.cleanAll()
+      nock.restore()
     }
-
-    // Skip strict pending mock checks in coverage mode
-    if (!isCoverageMode && !nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
-    nock.cleanAll()
-    nock.restore()
   })
 }
 
@@ -127,35 +115,7 @@ export function setupTestClient(
 }
 
 export function setupTestEnvironment() {
-  beforeEach(() => {
-    nock.restore()
-    nock.cleanAll()
-    nock.activate()
-    nock.disableNetConnect()
-
-    // In coverage mode (singleThread: true), be extra aggressive about cleanup
-    // to prevent nock mock state bleeding between tests
-    if (isCoverageMode) {
-      nock.abortPendingRequests()
-      // Clear any lingering interceptors
-      nock.cleanAll()
-    }
-  })
-
-  afterEach(() => {
-    // In coverage mode, be aggressive about cleanup to prevent state bleeding
-    if (isCoverageMode) {
-      nock.abortPendingRequests()
-    }
-
-    // Skip strict pending mock checks in coverage mode
-    // The singleThread execution can cause timing issues with nock.isDone()
-    if (!isCoverageMode && !nock.isDone()) {
-      throw new Error(`pending nock mocks: ${nock.pendingMocks()}`)
-    }
-    nock.cleanAll()
-    nock.restore()
-  })
+  setupNockEnvironment()
 }
 
 // Handle unhandled rejections in tests.

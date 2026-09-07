@@ -6,24 +6,13 @@
  * @vitest-environment node
  */
 
-// Run these tests in isolated mode to prevent nock state bleeding.
-// Nock callback replies are incompatible with forks pool (used in coverage mode),
-// so tests using static replies are skipped when COVERAGE=true.
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
-import {
-  isCoverageMode,
-  setupTestEnvironment,
-} from '../../utils/environment.mts'
+import { setupTestEnvironment } from '../../utils/environment.mts'
 
-// Nock HTTP mocking is incompatible with vitest forks pool (used by isolated config).
-// The retry logic is still tested in the main thread pool config.
-const describeRetry = isCoverageMode ? describe.skip : describe
-
-// oxlint-disable-next-line socket/require-vitest-globals-import -- describeRetry is a local const aliasing the imported describe (describe.skip in coverage mode), not a vitest global.
-describeRetry('SocketSdk - Retry Logic', () => {
+describe('SocketSdk - Retry Logic', () => {
   setupTestEnvironment()
 
   describe('Authentication Error Handling', () => {
