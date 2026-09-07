@@ -137,7 +137,7 @@ export type StreamFullScanOptions = {
 export type OrganizationsResult = {
   cause?: undefined | undefined
   data: {
-    organizations: Record<string, OrganizationItem>
+    organizations: Record<OrganizationSlug, OrganizationItem>
   }
   error?: undefined | undefined
   status: number

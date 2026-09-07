@@ -4,8 +4,7 @@
  *   parse and transform them into strict versions with required fields properly
  *   marked.
  */
-// A single one-shot oxfmt invocation; the sync API keeps this codegen
-// pipeline strictly serial.
+// The sync API keeps the generation and validation stages serial.
 // oxlint-disable-next-line socket/prefer-async-spawn -- serial codegen
 import { spawnSync } from 'node:child_process'
 import { promises as fs } from 'node:fs'
@@ -216,8 +215,10 @@ const STRICT_TYPE_CONFIG: Record<ApiMethodName, StrictTypeConfig> = {
 /**
  * Update index.mts to export all generated types.
  */
-export async function updateIndexExports(): Promise<void> {
-  const indexPath = indexExportsPath
+export async function updateIndexExports(
+  options: { indexPath?: string | undefined } = {},
+): Promise<void> {
+  const indexPath = options.indexPath ?? indexExportsPath
   const indexContent = await fs.readFile(indexPath, 'utf8')
 
   // Extract type names from generated types
@@ -234,17 +235,16 @@ export async function updateIndexExports(): Promise<void> {
   // Sort alphabetically
   typeNames.sort()
 
-  // Find the types-strict import section
-  const importRegex = /export type \{[^}]*\} from '\.\/types-strict'/s
+  // Match the generated strict-type export block.
+  const importRegex = /export type \{[^}]*\} from '\.\/types\/strict\.mts'/s
   const match = indexContent.match(importRegex)
 
   if (!match) {
-    logger.log('  Warning: Could not find types-strict export in index.ts')
-    return
+    throw new Error('Missing strict-type export block in src/index.mts')
   }
 
   // Build new export statement
-  const newExport = `export type {\n  ${typeNames.join(',\n  ')},\n} from './types-strict'`
+  const newExport = `export type {\n  ${typeNames.join(',\n  ')},\n} from './types/strict.mts'`
 
   // Replace the old export
   const newIndexContent = indexContent.replace(importRegex, () => newExport)
@@ -366,6 +366,8 @@ async function main(): Promise<void> {
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
+import type { OrganizationSlug } from './keys.mts'
+
 ${generatedTypes.join('\n\n')}
 ${generateWrapperTypes()}
 /* c8 ignore stop */
@@ -375,7 +377,7 @@ ${generateWrapperTypes()}
     await fs.writeFile(strictTypesPath, output, 'utf8')
     logger.log(`  Written to ${strictTypesPath}`)
 
-    // Step 7: Update index.ts exports
+    // Update index.mts exports.
     await updateIndexExports()
 
     // Apply autofixable lint rules first: the OpenAPI source emits nested
@@ -383,22 +385,24 @@ ${generateWrapperTypes()}
     // requires `type?: 'x' | undefined`. The fix is deterministic, so run it
     // before formatting so regeneration stays lint-clean.
     logger.log('  Applying lint autofixes…')
-    // Both generated/rewritten files must leave here ALREADY passing the
-    // fleet gates — the CI branch commit runs the same staged lint, and an
-    // unformatted artifact fails there instead of here. The `pnpm run fix`
-    // wrapper owns lint + format (config, ignore set, convergence looping);
-    // never a bare oxlint/oxfmt binary. Fail loud on any non-zero exit — a
-    // swallowed status shipped unformatted output to CI.
     logger.substep('Fixing + formatting generated files…')
-    const fixResult = spawnSync(
-      'pnpm',
-      ['run', 'fix', strictTypesPath, indexExportsPath],
-      { cwd: rootPath, encoding: 'utf8' },
-    )
-    if (fixResult.error || fixResult.status !== 0) {
-      throw new Error(
-        `pnpm run fix on generated files failed (${fixResult.error?.message ?? `exit ${fixResult.status}`}) — repair the generator output, do not hand-format.`,
-      )
+    const generatedPaths = [strictTypesPath, indexExportsPath]
+    const validationCommands = [
+      ['run', 'lint', '--fix', ...generatedPaths],
+      ['run', 'format', ...generatedPaths],
+      ['run', 'lint', ...generatedPaths],
+    ]
+    for (let i = 0, { length } = validationCommands; i < length; i += 1) {
+      const args = validationCommands[i]!
+      const fixResult = spawnSync('pnpm', args, {
+        cwd: rootPath,
+        stdio: 'inherit',
+      })
+      if (fixResult.error || fixResult.status !== 0) {
+        throw new Error(
+          `pnpm ${args.join(' ')} failed (${fixResult.error?.message ?? `exit ${fixResult.status}`}) — repair the generator output, do not hand-format.`,
+        )
+      }
     }
 
     logger.log('Strict type generation complete')
