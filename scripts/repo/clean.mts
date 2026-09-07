@@ -6,12 +6,11 @@
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { parseArgs } from 'node:util'
 
 import { deleteAsync } from 'del'
 import fastGlob from 'fast-glob'
 
-import { isQuiet } from '@socketsecurity/lib-stable/exe/argv/flag-predicates'
-import { parseArgs } from '@socketsecurity/lib-stable/exe/argv/parse'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { createSectionHeader } from '@socketsecurity/lib-stable/stdio/header'
@@ -160,7 +159,7 @@ async function main(): Promise<void> {
       return
     }
 
-    const quiet = isQuiet(values)
+    const quiet = Boolean(values.quiet || values.silent)
 
     // Determine what to clean
     const cleanAll =

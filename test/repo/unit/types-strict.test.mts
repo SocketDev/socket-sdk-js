@@ -20,7 +20,7 @@ import type {
 } from '../../../src/types/strict.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
-describe.sequential('Strict Types - v3.0', () => {
+describe('Strict Types - v3.0', { concurrent: false }, () => {
   const getClient = setupTestClient('test-token', { retries: 0 })
 
   describe('FullScanListResult', () => {

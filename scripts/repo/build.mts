@@ -6,11 +6,10 @@ import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { parseArgs } from 'node:util'
 
 import { rolldown, watch } from 'rolldown'
 
-import { isQuiet } from '@socketsecurity/lib-stable/exe/argv/flag-predicates'
-import { parseArgs } from '@socketsecurity/lib-stable/exe/argv/parse'
 import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
@@ -219,18 +218,7 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
 async function main(): Promise<void> {
   try {
     // Parse arguments
-    interface BuildArgs extends Record<string, unknown> {
-      help: boolean
-      src: boolean
-      types: boolean
-      watch: boolean
-      needed: boolean
-      analyze: boolean
-      silent: boolean
-      quiet: boolean
-      verbose: boolean
-    }
-    const { values } = parseArgs<BuildArgs>({
+    const { values } = parseArgs({
       options: {
         help: {
           type: 'boolean',
@@ -305,8 +293,8 @@ async function main(): Promise<void> {
       return
     }
 
-    const quiet = isQuiet(values)
-    const verbose = values.verbose
+    const quiet = Boolean(values.quiet || values.silent)
+    const verbose = Boolean(values.verbose)
 
     // Check if build is needed
     if (values.needed && !isBuildNeeded()) {
@@ -344,7 +332,7 @@ async function main(): Promise<void> {
       const { buildTime, exitCode: srcExitCode } = await buildSource({
         quiet,
         verbose,
-        analyze: values.analyze,
+        analyze: Boolean(values.analyze),
       })
       exitCode = srcExitCode
       if (exitCode === 0 && !quiet) {
@@ -382,7 +370,7 @@ async function main(): Promise<void> {
           quiet,
           verbose,
           skipClean: true,
-          analyze: values.analyze,
+          analyze: Boolean(values.analyze),
         }),
         buildTypes({ quiet, verbose, skipClean: true }),
       ])

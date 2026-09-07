@@ -65,13 +65,13 @@ describe('Path Resolution', () => {
   describe('resolveBasePath', () => {
     it('should resolve relative path to absolute', () => {
       const result = resolveBasePath('.')
-      expect(result).toContain('socket-sdk-js')
+      expect(result).toBe(normalizePath(path.resolve('.')))
       expect(path.isAbsolute(result)).toBe(true)
     })
 
     it('should resolve nested relative path', () => {
       const result = resolveBasePath('./test')
-      expect(result).toContain('socket-sdk-js')
+      expect(result).toBe(normalizePath(path.resolve('test')))
       expect(result.endsWith('/test')).toBe(true)
     })
 
@@ -84,7 +84,7 @@ describe('Path Resolution', () => {
 
     it('should default to cwd when no argument provided', () => {
       const result = resolveBasePath()
-      expect(result).toContain('socket-sdk-js')
+      expect(result).toBe(normalizePath(path.resolve('.')))
     })
   })
 

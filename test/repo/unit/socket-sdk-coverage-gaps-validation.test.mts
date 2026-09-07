@@ -265,11 +265,11 @@ describe('SocketSdk - File validation callbacks', () => {
 
       // Pass 5 invalid files to trigger the truncation (>3 triggers "... and N more")
       const result = await client.uploadManifestFiles('test-org', [
-        '/nonexistent/a.json',
-        '/nonexistent/b.json',
-        '/nonexistent/c.json',
-        '/nonexistent/d.json',
-        '/nonexistent/e.json',
+        '/nonexistent/package.json',
+        '/nonexistent/composer.json',
+        '/nonexistent/pipfile.json',
+        '/nonexistent/cargo.json',
+        '/nonexistent/go.json',
       ])
 
       expect(warnSpy).toHaveBeenCalled()

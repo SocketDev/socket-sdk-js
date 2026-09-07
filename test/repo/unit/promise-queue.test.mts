@@ -74,7 +74,7 @@ describe('PromiseQueue', () => {
     })
   })
 
-  describe.sequential('Max Queue Length', () => {
+  describe('Max Queue Length', { concurrent: false }, () => {
     it('should reject newest submission when queue is full', async () => {
       // Since @socketsecurity/lib 5.21.0, a bounded PromiseQueue rejects
       // the NEWEST submission when `maxQueueLength` is exceeded, so
@@ -145,7 +145,7 @@ describe('PromiseQueue', () => {
     })
   })
 
-  describe.sequential('Complex Scenarios', () => {
+  describe('Complex Scenarios', { concurrent: false }, () => {
     it('should handle multiple concurrent queues', async () => {
       const queue1 = new PromiseQueue(2)
       const queue2 = new PromiseQueue(2)

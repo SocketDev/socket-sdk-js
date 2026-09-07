@@ -288,7 +288,7 @@ describe('SocketSdk - Retry Logic', () => {
   })
 
   describe('Retry Configuration', () => {
-    it.sequential('should respect custom retry count', async () => {
+    it('should respect custom retry count', { concurrent: false }, async () => {
       let attemptCount = 0
 
       nock('https://api.socket.dev')

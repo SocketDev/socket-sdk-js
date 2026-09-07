@@ -8,12 +8,12 @@
  *   NOT pass `--config`: vitiate's supervisor re-spawns a child `vitest run`
  *   for the coverage-guided pass without forwarding `--config`, so parent and
  *   child have to agree via auto-discovery on the same root config (see the
- *   header of vitest.config.mts). The `fuzz()` targets (`test/**\/*.fuzz.ts`)
+ *   header of vitest.config.mts). The `fuzz()` targets (`test/**\/*.fuzz.mts`)
  *   are then coverage-fuzzed with mutated inputs; without `VITIATE_FUZZ` they
  *   replay the committed seed corpus as fast regression checks. Budget via
  *   `FUZZ_TIME_MS` (default 15s; CI raises it). Exits with vitest's status —
  *   vitest reports a crash/hang as a failed test, which sidesteps the vitiate
- *   CLI exit-code nuances. Extra argv is forwarded (e.g. a single `*.fuzz.ts`
+ *   CLI exit-code nuances. Extra argv is forwarded (e.g. a single `*.fuzz.mts`
  *   path).
  */
 

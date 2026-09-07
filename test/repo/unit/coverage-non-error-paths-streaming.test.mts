@@ -286,13 +286,13 @@ describe('SocketSdk - uploadManifestFiles edge cases', () => {
 
     // Pass 7 invalid files to trigger the >5 truncation in "all files invalid" error
     const result = await client.uploadManifestFiles('test-org', [
-      '/nonexistent/a.json',
-      '/nonexistent/b.json',
-      '/nonexistent/c.json',
-      '/nonexistent/d.json',
-      '/nonexistent/e.json',
-      '/nonexistent/f.json',
-      '/nonexistent/g.json',
+      '/nonexistent/package.json',
+      '/nonexistent/composer.json',
+      '/nonexistent/pipfile.json',
+      '/nonexistent/cargo.json',
+      '/nonexistent/go.json',
+      '/nonexistent/gemfile.json',
+      '/nonexistent/lockfile.json',
     ])
 
     expect(result.success).toBe(false)
