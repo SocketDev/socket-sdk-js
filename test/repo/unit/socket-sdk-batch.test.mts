@@ -176,7 +176,7 @@ describe('SocketSdk - Batch Operations', () => {
 
     it(
       'should handle network timeouts for reachability checks',
-      { concurrent: false },
+      { concurrent: false, timeout: 10_000 },
       async () => {
         // Use fake timers to avoid actual delay
         vi.useFakeTimers()
@@ -202,7 +202,6 @@ describe('SocketSdk - Batch Operations', () => {
 
         vi.useRealTimers()
       },
-      10_000,
     )
 
     it('should handle partial response data', async () => {

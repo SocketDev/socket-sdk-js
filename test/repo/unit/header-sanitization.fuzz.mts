@@ -29,10 +29,7 @@ const SENSITIVE = [
 // Parse arbitrary bytes into a header record: each `name:value` line becomes an
 // entry (arbitrary names, values, casing, unicode, control chars).
 function headersFromBytes(data: Buffer): Record<string, string> {
-  const out: Record<string, string> = { __proto__: null } as Record<
-    string,
-    string
-  >
+  const out = Object.create(null) as Record<string, string>
   const lines = data.toString('utf8').split('\n')
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i]!
