@@ -20,6 +20,7 @@ import process from 'node:process'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { findUpPackageJson } from '@socketsecurity/lib-stable/packages/find'
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
@@ -118,8 +119,9 @@ if (isMainModule(import.meta.url)) {
  */
 export async function findMarkdownFiles(
   dir: string,
-  files: string[] = [],
+  options: { files?: string[] | undefined } = {},
 ): Promise<string[]> {
+  const { files = [] } = options
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
@@ -129,7 +131,7 @@ export async function findMarkdownFiles(
 
       if (entry.isDirectory()) {
         if (!SKIP_DIRS.has(entry.name) && !entry.name.startsWith('.')) {
-          await findMarkdownFiles(fullPath, files)
+          await findMarkdownFiles(fullPath, { files })
         }
       } else if (entry.isFile()) {
         // Check for .md files or LICENSE (no extension)
@@ -150,8 +152,10 @@ export async function findMarkdownFiles(
  * .md files must be within docs/ or .claude/ directories.
  */
 export function isInAllowedLocationForRegularMd(filePath: string): boolean {
-  const relativePath = path.relative(rootPath, filePath)
-  const dir = path.dirname(relativePath)
+  const relativePath = normalizePath(
+    path.relative(rootPath, normalizePath(filePath)),
+  )
+  const dir = path.posix.dirname(relativePath)
 
   // Must be within docs/ (any depth)
   if (dir === 'docs' || dir.startsWith('docs/')) {
@@ -179,8 +183,10 @@ interface FilenameViolation {
  * only).
  */
 export function isInAllowedLocationForScreamingCase(filePath: string): boolean {
-  const relativePath = path.relative(rootPath, filePath)
-  const dir = path.dirname(relativePath)
+  const relativePath = normalizePath(
+    path.relative(rootPath, normalizePath(filePath)),
+  )
+  const dir = path.posix.dirname(relativePath)
 
   // Allow at root level
   if (dir === '.') {

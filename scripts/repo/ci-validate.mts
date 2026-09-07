@@ -20,8 +20,9 @@ const rootPath = path.resolve(__dirname, '..')
 
 export async function runCommand(
   command: string,
-  args: string[] = [],
+  options: { args?: string[] | undefined } = {},
 ): Promise<number> {
+  const { args = [] } = options
   return new Promise<number>((resolve, reject) => {
     const spawnPromise = spawn(command, args, {
       cwd: rootPath,
@@ -46,7 +47,7 @@ async function main(): Promise<void> {
 
     // Run tests
     logger.step('Running tests')
-    let exitCode = await runCommand('pnpm', ['test', '--all'])
+    let exitCode = await runCommand('pnpm', { args: ['test', '--all'] })
     if (exitCode !== 0) {
       logger.error('Tests failed')
       process.exitCode = exitCode
@@ -56,7 +57,7 @@ async function main(): Promise<void> {
 
     // Run checks
     logger.step('Running checks')
-    exitCode = await runCommand('pnpm', ['check', '--all'])
+    exitCode = await runCommand('pnpm', { args: ['check', '--all'] })
     if (exitCode !== 0) {
       logger.error('Checks failed')
       process.exitCode = exitCode
@@ -66,7 +67,7 @@ async function main(): Promise<void> {
 
     // Run build
     logger.step('Building project')
-    exitCode = await runCommand('pnpm', ['build'])
+    exitCode = await runCommand('pnpm', { args: ['build'] })
     if (exitCode !== 0) {
       logger.error('Build failed')
       process.exitCode = exitCode

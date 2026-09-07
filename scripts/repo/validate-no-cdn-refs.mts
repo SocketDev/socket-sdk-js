@@ -10,6 +10,7 @@ import process from 'node:process'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { findUpPackageJson } from '@socketsecurity/lib-stable/packages/find'
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
@@ -122,13 +123,14 @@ if (isMainModule(import.meta.url)) {
 export async function checkFileForCdnRefs(
   filePath: string,
 ): Promise<CdnViolation[]> {
+  const normalizedPath = normalizePath(filePath)
   // Skip this validator script itself (it mentions CDN domains by necessity)
-  if (filePath.endsWith('validate-no-cdn-refs.mts')) {
+  if (normalizedPath.endsWith('validate-no-cdn-refs.mts')) {
     return []
   }
 
   try {
-    const content = await fs.readFile(filePath, 'utf8')
+    const content = await fs.readFile(normalizedPath, 'utf8')
     const lines = content.split(/\r?\n/)
     const violations = []
 
@@ -145,7 +147,7 @@ export async function checkFileForCdnRefs(
           const match = line.match(pattern)
           if (match) {
             violations.push({
-              file: path.relative(rootPath, filePath),
+              file: normalizePath(path.relative(rootPath, normalizedPath)),
               line: lineNumber,
               content: line.trim(),
               cdnDomain: match[0],
@@ -173,8 +175,9 @@ export async function checkFileForCdnRefs(
  */
 export async function findTextFiles(
   dir: string,
-  files: string[] = [],
+  options: { files?: string[] | undefined } = {},
 ): Promise<string[]> {
+  const { files = [] } = options
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true })
 
@@ -188,7 +191,7 @@ export async function findTextFiles(
           !SKIP_DIRS.has(entry.name) &&
           (!entry.name.startsWith('.') || entry.name === '.github')
         ) {
-          await findTextFiles(fullPath, files)
+          await findTextFiles(fullPath, { files })
         }
       } else if (entry.isFile() && shouldScanFile(entry.name)) {
         files.push(fullPath)
