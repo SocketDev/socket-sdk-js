@@ -5,7 +5,7 @@
 // no external side effects.
 
 // Collapse a template archetype-layer path back to its flat repo-relative form:
-// `template/base/.git-hooks/x` → `template/.git-hooks/x`, same for `solo/` /
+// `template/base/universal/.git-hooks/x` → `template/.git-hooks/x`, same for `solo/` /
 // `mono/` / `overrides/<repo>/`. The archetype move (template/* →
 // template/{base,solo,mono,overrides/<repo>}/*) inserts a layer segment that
 // every `startsWith('template/.claude/hooks/')`-style exemption would otherwise

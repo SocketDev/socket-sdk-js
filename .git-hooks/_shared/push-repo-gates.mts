@@ -1,3 +1,7 @@
+import {
+  sharedFleetTsconfigCheckJsonPath,
+  sharedTypescriptBinTscPath,
+} from '../../scripts/fleet/paths/util.mts'
 // Pre-push repo-level gates that run against the working-tree state (not a
 // commit range): submodule pristine-ness, soak-bypass date annotations, the
 // fast lint/format gate, and the wheelhouse-only hook-dispatch-table drift check.
@@ -15,6 +19,11 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { gitLines } from './git.mts'
+import {
+  debugCheck,
+  showCheckOutput,
+  showCheckResult,
+} from './check-output.mts'
 import {
   dirtyEntry,
   readTypecheckVerdict,
@@ -46,7 +55,7 @@ export const checkSubmodules = (): number => {
   if (!existsSync('.gitmodules')) {
     return 0
   }
-  logger.info('Checking submodules are pristine…')
+  debugCheck('Checking submodules are pristine…')
   let errors = 0
   const status = gitLines('submodule', 'status')
   for (const line of status) {
@@ -72,7 +81,7 @@ export const checkSubmodules = (): number => {
     logger.error('Fix submodules before pushing.')
     return errors
   }
-  logger.success('All submodules pristine')
+  debugCheck('All submodules pristine')
   return 0
 }
 
@@ -151,7 +160,7 @@ export const scanFastChecks = (ranges: readonly string[] = []): number => {
   }
   // Matches `.claude` as a complete path segment anywhere in `toplevel`, start, middle, or end.
   if (/(?:^|\/)\.claude(?:\/|$)/.test(toplevel)) {
-    logger.info(
+    logger.warn(
       'Fast lint/format check skipped — checkout is under an ignored path (.claude/); CI re-lints from a clean tree.',
     )
     return 0
@@ -176,7 +185,7 @@ export const scanFastChecks = (ranges: readonly string[] = []): number => {
   }
   const scopeArgs =
     ranges.length > 0 ? ranges.map(range => `--range=${range}`) : ['--all']
-  logger.info(
+  debugCheck(
     ranges.length > 0
       ? `Running fast lint/format check on the pushed range (${ranges.join(', ')})…`
       : 'Running fast lint/format check on the whole tree (no pushed range to scope by)…',
@@ -190,8 +199,10 @@ export const scanFastChecks = (ranges: readonly string[] = []): number => {
   // blocking a worktree push.
   const r = spawnSync(process.execPath, [m[1]!, ...scopeArgs], {
     env: { ...process.env, CI: 'true' },
-    stdio: 'inherit',
+    maxBuffer: Infinity,
+    stdioString: true,
   })
+  showCheckResult(r)
   if (r.status !== 0) {
     logger.fail(
       'Fast lint/format check failed — fix lint/format before pushing.',
@@ -207,8 +218,8 @@ export const scanFastChecks = (ranges: readonly string[] = []): number => {
 
 // The canonical fleet type gate — the same whole-project check the `type` npm
 // script and CI run.
-const TYPE_CHECK_TSCONFIG = path.join('.config', 'fleet', 'tsconfig.check.json')
-const TSC_BIN = path.join('node_modules', 'typescript', 'bin', 'tsc')
+const TYPE_CHECK_TSCONFIG = sharedFleetTsconfigCheckJsonPath('.config')
+const TSC_BIN = sharedTypescriptBinTscPath('node_modules')
 
 // Regenerate the hook dispatch table so the whole-project type gate can resolve
 // the generated `_shared` modules (`dispatch-table.mts` + variants), which are
@@ -388,7 +399,7 @@ function runTypeCheckOnce(cacheKey: string): TypecheckVerdict {
     }
   }
   try {
-    logger.info('Running type check…')
+    debugCheck('Running type check…')
     // Captured rather than inherited so the diagnostics can be ATTRIBUTED. tsc
     // reads the working tree, which in a shared checkout holds a co-session's
     // half-finished edits — errors this push neither caused nor can fix.
@@ -432,9 +443,10 @@ export const scanTypeCheck = (ranges: readonly string[] = []): number => {
   const cached = readTypecheckVerdict(TYPECHECK_CACHE_DIR, cacheKey)
   const verdict = cached ?? runTypeCheckOnce(cacheKey)
   if (cached) {
-    logger.info('Type check: reusing the verdict for this exact tree.')
+    debugCheck('Type check: reusing the verdict for this exact tree.')
   }
   if (verdict.status === 0) {
+    showCheckOutput(verdict.status, verdict.output)
     return 0
   }
   const { output } = verdict
@@ -501,7 +513,7 @@ export function pushedRangeFiles(ranges: readonly string[]): string[] {
   return [...out]
 }
 
-// Dispatch-table drift — WHEELHOUSE-ONLY (gated on the canonical `template/base`
+// Dispatch-table drift — WHEELHOUSE-ONLY (gated on the canonical `template/base/universal`
 // seed, which only the wheelhouse has). The rolldown bundle's static dispatch
 // table must match a fresh regen of the hooks present; a mismatch means a hook
 // was added/removed without rebuilding, or a byte-cascaded table references an
@@ -511,14 +523,15 @@ export function pushedRangeFiles(ranges: readonly string[]): string[] {
 // until the cascade regenerates per-tree, so blocking their push would
 // false-fire — they rely on CI's `check --all` for the same check.
 export const scanDispatchDrift = (): number => {
-  if (!existsSync('template/base')) {
+  if (!existsSync('template/base/universal')) {
     return 0
   }
   const r = spawnSync(
-    'node',
+    process.execPath,
     ['scripts/fleet/check/dispatch-table-is-current.mts', '--quiet'],
-    { stdio: 'inherit' },
+    { maxBuffer: Infinity, stdioString: true },
   )
+  showCheckResult(r)
   if (r.status !== 0) {
     logger.fail('Hook dispatch table is stale — rebuild before pushing.')
     logger.info(

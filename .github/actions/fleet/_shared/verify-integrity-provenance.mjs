@@ -350,7 +350,7 @@ export function checkStaleness(dateString, options = {}) {
       ? opts.maxAgeDays
       : 90
   const ageDays = Math.floor((now.getTime() - pinned) / 86_400_000)
-  return { stale: ageDays > maxAgeDays, ageDays }
+  return { __proto__: null, stale: ageDays > maxAgeDays, ageDays }
 }
 
 // ── provenance stages (each returns a ProvenanceResult, or undefined to
@@ -369,6 +369,7 @@ async function fetchPublisherChecksumBody(src, fetchImpl) {
     res = await fetchImpl(src, { redirect: 'follow' })
   } catch (e) {
     return {
+      __proto__: null,
       failure: {
         ok: false,
         status: 'fail',
@@ -378,6 +379,7 @@ async function fetchPublisherChecksumBody(src, fetchImpl) {
   }
   if (!res || !res.ok) {
     return {
+      __proto__: null,
       failure: {
         ok: false,
         status: 'fail',
@@ -385,7 +387,7 @@ async function fetchPublisherChecksumBody(src, fetchImpl) {
       },
     }
   }
-  return { text: await res.text() }
+  return { __proto__: null, text: await res.text() }
 }
 
 /**
@@ -403,6 +405,7 @@ async function verifyPublisherChecksum(src, value, o) {
   const fetched = parseChecksumFile(body.text, { assetFilename })
   if (!fetched) {
     return {
+      __proto__: null,
       ok: false,
       status: 'fail',
       reason: `could not parse a checksum from ${src} for ${assetFilename || '(asset)'}`,
@@ -410,6 +413,7 @@ async function verifyPublisherChecksum(src, value, o) {
   }
   if (!checksumsMatch(value, fetched)) {
     return {
+      __proto__: null,
       ok: false,
       status: 'fail',
       reason: `provenance mismatch: pin ${value} != publisher ${fetched} from ${src}`,
@@ -432,6 +436,7 @@ function evaluatePinStaleness(date, src, o, warn) {
   }
   if (!r.stale) {
     return {
+      __proto__: null,
       ok: true,
       status: 'pass',
       reason: `pin is ${r.ageDays} days old (within ${maxAgeDays})`,
@@ -443,6 +448,7 @@ function evaluatePinStaleness(date, src, o, warn) {
     `(threshold ${maxAgeDays}) — re-verify against ${src || 'the publisher'}`
   if (o.strict || false) {
     return {
+      __proto__: null,
       ok: false,
       status: 'fail',
       reason: msg,
@@ -452,6 +458,7 @@ function evaluatePinStaleness(date, src, o, warn) {
   }
   warn(msg)
   return {
+    __proto__: null,
     ok: true,
     status: 'warn',
     reason: msg,
@@ -466,11 +473,12 @@ function evaluatePinStaleness(date, src, o, warn) {
  * Verify an `integrity` pin's live provenance + staleness. For the STRING form
  * (no src/date), this is a no-op — the static SRI check is the only gate, and
  * existing behavior is unchanged. For the OBJECT form:
- * - `src` present → fetch the publisher's current checksum, parse it, and
- * compare to `value`. A mismatch FAILS (the pin is stale / re-released /
- * possibly compromised — the hash no longer matches the source of truth).
+ *
+ * - `src` present → fetch the publisher's current checksum, parse it, and compare
+ *   to `value`. A mismatch FAILS (the pin is stale / re-released / possibly
+ *   compromised — the hash no longer matches the source of truth).
  * - `date` present → staleness check; a pin older than `maxAgeDays` WARNS by
- * default and FAILS only under `strict`.
+ *   default and FAILS only under `strict`.
  *
  * @param {string | { value: string; src?: string; date?: string }} integrity
  * @param {ProvenanceOptions} [options]
@@ -492,6 +500,7 @@ export async function verifyIntegrityProvenance(integrity, options = {}) {
   // gate). Only the object form { value, src?, date? } carries provenance.
   if (typeof integrity !== 'object' || integrity === null) {
     return {
+      __proto__: null,
       ok: true,
       reason: 'string integrity — no provenance check',
       status: 'pass',
@@ -518,6 +527,7 @@ export async function verifyIntegrityProvenance(integrity, options = {}) {
   }
 
   return {
+    __proto__: null,
     ok: true,
     status: 'pass',
     reason: src ? 'provenance verified' : 'no src/date',

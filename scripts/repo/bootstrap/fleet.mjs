@@ -3,6 +3,7 @@ import {
   chmodSync,
   copyFileSync,
   existsSync,
+  lstatSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -13,112 +14,14 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs'
-import os from 'node:os'
 import path, { dirname, resolve, sep } from 'node:path'
-import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import crypto from 'node:crypto'
 import { execFileSync } from 'node:child_process'
+import os from 'node:os'
+import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import https from 'node:https'
 
-//#region scripts/repo/gen/bootstrap/src/dep0-io.mts
-/**
- * @file Dep-0 I/O shim for the fleet bundle fetcher. `fleet.mjs` — the built
- *   bootstrap fetcher — runs on a BARE clone with NO node_modules, before the
- *   published `@socketsecurity/lib-stable` exists, so it cannot import the lib
- *   logger or lib safeDelete. This module supplies node:-builtin-only stand-ins
- *   that rolldown inlines into the single-file bundle: a logger whose `log`
- *   writes to STDOUT (preserving the `--json` machine-readable contract) and
- *   whose `error` writes to STDERR, plus a fail-open recursive delete. The two
- *   lint carve-outs the dep-0 constraint forces (`socket/prefer-safe-delete`,
- *   `socket/no-console-prefer-logger`) live ONLY here, so every other src/
- *   module stays carve-out-free.
- */
-/**
- * Return the shared dep-0 logger. Mirrors the lib `getDefaultLogger()` factory
- * shape so call sites read identically (`const logger = getDep0Logger()`).
- */
-function getDep0Logger() {
-  return dep0Logger
-}
-/**
- * Whether `candidate` sits strictly INSIDE `root` - a descendant, never `root`
- * itself and never above it.
- *
- * The prune walk builds its target with `path.join(dest, rel)` where `rel`
- * comes from a state file on disk. `path.join(dest, '.')` is `dest`, and
- * `path.join(dest, '..')` is its parent, so a single stray line in that record
- * turns a per-file prune into a recursive delete of the checkout or of the
- * directory holding it. Comparing resolved paths is the only check a caller
- * cannot get wrong.
- */
-function isInsidePath(root, candidate) {
-  const resolvedRoot = resolve(root)
-  const resolvedCandidate = resolve(candidate)
-  if (resolvedCandidate === resolvedRoot) return false
-  return resolvedCandidate.startsWith(`${resolvedRoot}${sep}`)
-}
-/**
- * Fail-open recursive delete, CONTAINED to `root`. The dep-0 fetcher cannot
- * import the lib `safeDeleteSync`, so it wraps node's `rmSync` with the same
- * force + recursive fail-open semantics: a missing path is a no-op, never a
- * throw.
- *
- * `root` is required and not optional on purpose. This deletes recursively with
- * force, so the one thing every caller must state is the boundary it may not
- * cross. A target outside `root` throws instead of deleting: the alternative is
- * a warning nobody reads about a tree that is already gone.
- *
- * A read-only target gets ONE retry after a chmod +w. The installer locks the
- * files it places (0444/0555), and Windows refuses to unlink a read-only file -
- * POSIX does not, it checks the parent directory, which the lock never touches.
- */
-function rm(targetPath, root) {
-  if (!isInsidePath(root, targetPath))
-    throw new Error(
-      `refusing to delete outside the install root.\n  Where: ${resolve(targetPath)}\n  Saw:   a target that is not a descendant of ${resolve(root)}\n  Fix:   this is a bug in the caller - a prune entry resolved to the root or above it. Report the manifest or applied-files line that produced it.`,
-    )
-  rmForce(targetPath)
-}
-/**
- * The unguarded force delete, for a path this module minted itself.
- */
-function rmForce(targetPath) {
-  try {
-    rmSync(targetPath, {
-      force: true,
-      recursive: true,
-    })
-  } catch (e) {
-    const code = errorCode$1(e)
-    if (code !== 'EACCES' && code !== 'EPERM') throw e
-    chmodSync(targetPath, (statSync(targetPath).mode & 511) | 128)
-    rmSync(targetPath, {
-      force: true,
-      recursive: true,
-    })
-  }
-}
-/**
- * The `errno` string of a thrown filesystem error (`EACCES`, `EPERM`, …), or
- * undefined for anything that is not one. Dep-0: no lib `isErrnoException`.
- */
-function errorCode$1(e) {
-  if (e instanceof Error) {
-    const { code } = e
-    return code
-  }
-}
-const dep0Logger = {
-  error(...args) {
-    console.error(...args)
-  },
-  log(...args) {
-    console.log(...args)
-  },
-}
-
-//#endregion
 //#region scripts/repo/gen/bootstrap/src/helpers.mts
 const HYBRID_BUNDLE_PATHS = /* @__PURE__ */ new Set(['.gitignore', 'CLAUDE.md'])
 /**
@@ -254,9 +157,10 @@ function findFleetBlockSpans(lines, commentStyle) {
  * byte-for-byte, except that removing a block sandwiched between blank lines
  * drops one of them rather than leaving a doubled blank.
  * If markers are absent:
+ *
  * - `html` style (CLAUDE.md, README): insert before the first level-2 heading
- * (`## `) with i > 0, or append at end.
- * - other styles: append with a leading blank line separator.
+ *   (`## `) with i > 0, or append at end.
+ * - Other styles: append with a leading blank line separator.
  */
 function spliceFleetBlock(config) {
   const { commentStyle, fleetBlock, target } = {
@@ -490,6 +394,239 @@ function writeAppliedRef(dest, ref) {
 }
 
 //#endregion
+//#region template/base/universal/scripts/fleet/lib/conditional-config.mts
+function isPlainObject(value) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value))
+    return false
+  const prototype = Object.getPrototypeOf(value)
+  return prototype === null || prototype === Object.prototype
+}
+function markerCompilesRust(value) {
+  const build = value['build']
+  if (
+    typeof build === 'object' &&
+    build !== null &&
+    !Array.isArray(build) &&
+    build['type'] === 'rust'
+  )
+    return true
+  const capabilities = value['capabilities']
+  if (
+    typeof capabilities !== 'object' ||
+    capabilities === null ||
+    Array.isArray(capabilities)
+  )
+    return false
+  const cargoPaths = capabilities['cargo']
+  return Array.isArray(cargoPaths) && cargoPaths.length > 0
+}
+function hasNonEmptyPrebakes(raw) {
+  const docker = raw['docker']
+  if (!isPlainObject(docker)) return false
+  const prebakes = docker['prebakes']
+  if (!isPlainObject(prebakes)) return false
+  const list = prebakes['prebakes']
+  return Array.isArray(list) && list.length > 0
+}
+function hasNapiPlatforms(raw) {
+  const napi = raw['napi']
+  if (!isPlainObject(napi)) return false
+  const platforms = napi['platforms']
+  return Array.isArray(platforms) && platforms.length > 0
+}
+function buildsAsGithubAction(raw) {
+  const build = raw['build']
+  if (!isPlainObject(build)) return false
+  return build['from'] === 'github-action'
+}
+function publishesToGhcr(raw) {
+  const ghcr = raw['ghcr']
+  return isPlainObject(ghcr)
+}
+/**
+ * True when the repo bundles VENDORED dependencies, so it needs the fleet
+ * rolldown plugin family (guarded define, engine-gate folding, factory
+ * collision). Config data rather than a marker file: the family DELIVERS the
+ * plugin the old marker pointed at, so a prune of that one copy made the whole
+ * family undeliverable forever, and every build importing it broke.
+ */
+function bundlesVendoredDeps(raw) {
+  const build = raw['build']
+  return isPlainObject(build) && build['bundlesVendoredDeps'] === true
+}
+/**
+ * True when the config-data trigger `flag` holds for the raw socket-wheelhouse
+ * marker. THE authority for the CONDITIONAL_FILES `configFlag` triggers — the
+ * check and its tests both route through this, so a new flag is one predicate
+ * plus one arm, never a second derivation that can drift.
+ */
+function configFlagHolds(flag, raw) {
+  switch (flag) {
+    case 'bundlesVendoredDeps':
+      return bundlesVendoredDeps(raw)
+    case 'hasGhcr':
+      return publishesToGhcr(raw)
+    case 'hasNapi':
+      return hasNapiPlatforms(raw)
+    case 'hasPrebakes':
+      return hasNonEmptyPrebakes(raw)
+    case 'hasRust':
+      return markerCompilesRust(raw)
+    case 'isGithubAction':
+      return buildsAsGithubAction(raw)
+    default:
+      return false
+  }
+}
+
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/conditional-files.mts
+function readConditionalSettings(dest) {
+  const settings = resolveSettingsPath(dest)
+  if (settings === void 0) return {}
+  try {
+    const value = JSON.parse(readFileSync(settings, 'utf8'))
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+      ? value
+      : {}
+  } catch {
+    return {}
+  }
+}
+function conditionalManifestGroupHolds(group, raw, dest) {
+  if (group.marker !== void 0) return existsSync(path.join(dest, group.marker))
+  if (group.configFlag !== void 0) return configFlagHolds(group.configFlag, raw)
+  if (group.capability !== void 0) {
+    const capabilities = raw['capabilities']
+    return (
+      capabilities !== null &&
+      typeof capabilities === 'object' &&
+      Object.hasOwn(capabilities, group.capability)
+    )
+  }
+  const build = raw['build']
+  return (
+    group.buildType !== void 0 &&
+    build !== null &&
+    typeof build === 'object' &&
+    build['type'] === group.buildType
+  )
+}
+function filterManifestForConditions(manifest, dest) {
+  if (!manifest.conditionalScopedFiles?.length) return manifest
+  const raw = readConditionalSettings(dest)
+  const excluded = /* @__PURE__ */ new Set()
+  for (const group of manifest.conditionalScopedFiles)
+    if (!conditionalManifestGroupHolds(group, raw, dest))
+      for (const file of group.files) excluded.add(normalizeBundlePath(file))
+  const files = {}
+  for (const [file, hash] of Object.entries(manifest.files))
+    if (!excluded.has(normalizeBundlePath(file))) files[file] = hash
+  return {
+    ...manifest,
+    files,
+  }
+}
+
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/dep0-io.mts
+/**
+ * @file Dep-0 I/O shim for the fleet bundle fetcher. `fleet.mjs` — the built
+ *   bootstrap fetcher — runs on a BARE clone with NO node_modules, before the
+ *   published `@socketsecurity/lib-stable` exists, so it cannot import the lib
+ *   logger or lib safeDelete. This module supplies node:-builtin-only stand-ins
+ *   that rolldown inlines into the single-file bundle: a logger whose `log`
+ *   writes to STDOUT (preserving the `--json` machine-readable contract) and
+ *   whose `error` writes to STDERR, plus a fail-open recursive delete. The two
+ *   lint carve-outs the dep-0 constraint forces (`socket/prefer-safe-delete`,
+ *   `socket/no-console-prefer-logger`) live ONLY here, so every other src/
+ *   module stays carve-out-free.
+ */
+/**
+ * Return the shared dep-0 logger. Mirrors the lib `getDefaultLogger()` factory
+ * shape so call sites read identically (`const logger = getDep0Logger()`).
+ */
+function getDep0Logger() {
+  return dep0Logger
+}
+/**
+ * Whether `candidate` sits strictly INSIDE `root` - a descendant, never `root`
+ * itself and never above it.
+ *
+ * The prune walk builds its target with `path.join(dest, rel)` where `rel`
+ * comes from a state file on disk. `path.join(dest, '.')` is `dest`, and
+ * `path.join(dest, '..')` is its parent, so a single stray line in that record
+ * turns a per-file prune into a recursive delete of the checkout or of the
+ * directory holding it. Comparing resolved paths is the only check a caller
+ * cannot get wrong.
+ */
+function isInsidePath(root, candidate) {
+  const resolvedRoot = resolve(root)
+  const resolvedCandidate = resolve(candidate)
+  if (resolvedCandidate === resolvedRoot) return false
+  return resolvedCandidate.startsWith(`${resolvedRoot}${sep}`)
+}
+/**
+ * Fail-open recursive delete, CONTAINED to `root`. The dep-0 fetcher cannot
+ * import the lib `safeDeleteSync`, so it wraps node's `rmSync` with the same
+ * force + recursive fail-open semantics: a missing path is a no-op, never a
+ * throw.
+ *
+ * `root` is required and not optional on purpose. This deletes recursively with
+ * force, so the one thing every caller must state is the boundary it may not
+ * cross. A target outside `root` throws instead of deleting: the alternative is
+ * a warning nobody reads about a tree that is already gone.
+ *
+ * A read-only target gets ONE retry after a chmod +w. The installer locks the
+ * files it places (0444/0555), and Windows refuses to unlink a read-only file -
+ * POSIX does not, it checks the parent directory, which the lock never touches.
+ */
+function rm(targetPath, root) {
+  if (!isInsidePath(root, targetPath))
+    throw new Error(
+      `refusing to delete outside the install root.\n  Where: ${resolve(targetPath)}\n  Saw:   a target that is not a descendant of ${resolve(root)}\n  Fix:   this is a bug in the caller - a prune entry resolved to the root or above it. Report the manifest or applied-files line that produced it.`,
+    )
+  rmForce(targetPath)
+}
+/**
+ * The unguarded force delete, for a path this module minted itself.
+ */
+function rmForce(targetPath) {
+  try {
+    rmSync(targetPath, {
+      force: true,
+      recursive: true,
+    })
+  } catch (e) {
+    const code = errorCode$1(e)
+    if (code !== 'EACCES' && code !== 'EPERM') throw e
+    chmodSync(targetPath, (statSync(targetPath).mode & 511) | 128)
+    rmSync(targetPath, {
+      force: true,
+      recursive: true,
+    })
+  }
+}
+/**
+ * The `errno` string of a thrown filesystem error (`EACCES`, `EPERM`, …), or
+ * undefined for anything that is not one. Dep-0: no lib `isErrnoException`.
+ */
+function errorCode$1(e) {
+  if (e instanceof Error) {
+    const { code } = e
+    return code
+  }
+}
+const dep0Logger = {
+  error(...args) {
+    console.error(...args)
+  },
+  log(...args) {
+    console.log(...args)
+  },
+}
+
+//#endregion
 //#region scripts/repo/gen/bootstrap/src/install-fleet-pack-prune.mts
 /**
  * The hybrid (segment + settingsSegment) path set fleetPackOwnedPaths excludes
@@ -505,7 +642,7 @@ function computeHybridPaths(manifest) {
 }
 
 //#endregion
-//#region template/base/scripts/fleet/fs/fleet-canonical-splice.mts
+//#region template/base/universal/scripts/fleet/fs/fleet-canonical-splice.mts
 const FLEET_CANONICAL_END_SENTINEL = ['#fleet', 'canonical', 'end'].join('-')
 const FLEET_CANONICAL_SPLICE_FILES = [
   '.config/fleet/oxlintrc.json',
@@ -599,7 +736,7 @@ function spliceFleetCanonicalContent(source, target) {
 }
 
 //#endregion
-//#region template/base/scripts/fleet/github/tracked-surface.mts
+//#region template/base/universal/scripts/fleet/github/tracked-surface.mts
 const ALWAYS_TRACKED_GITHUB_PREFIXES = [
   '.github/actions/fleet/_shared/',
   '.github/actions/fleet/cache-pnpm-store/',
@@ -632,13 +769,18 @@ const ALWAYS_TRACKED_PREFIXES = [
   '.config/fleet/.prettierignore',
   '.config/fleet/oxlintrc.json',
   '.config/fleet/tsconfig.check.json',
+  '.config/repo/external-tools.json',
+  '.config/repo/socket-wheelhouse-schema.json',
   '.editorconfig',
   '.git-hooks/',
   '.npmrc',
   'assets/fleet/badge-follow-bluesky.svg',
   'assets/fleet/badge-follow-x.svg',
+  'assets/fleet/important.LICENSE',
+  'assets/fleet/important.svg',
   'assets/fleet/socket-combomark-dark.svg',
   'assets/fleet/socket-combomark-light.svg',
+  'patches/run-local-ci@0.18.1.patch',
   'scripts/repo/bootstrap/',
 ]
 /**
@@ -974,7 +1116,19 @@ function untrackFleetPackPaths(config) {
 }
 
 //#endregion
-//#region template/base/scripts/fleet/fs/mirror-lock.mts
+//#region scripts/repo/gen/bootstrap/src/member-manifest.mts
+function effectiveMemberManifest(manifest, dest) {
+  return filterManifestForCapabilities(
+    filterManifestForShape(
+      filterManifestForConditions(manifest, dest),
+      readBuildShape(dest),
+    ),
+    readDeclaredCapabilities(dest),
+  )
+}
+
+//#endregion
+//#region template/base/universal/scripts/fleet/fs/mirror-lock.mts
 /**
  * @file Mirror-lock lift primitives. The cascade chmods live fleet mirrors
  *   read-only (0444/0555) so stray edits fail at the filesystem level; every
@@ -1009,6 +1163,56 @@ function lockFileReadonlySync(filePath) {
 
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/local-template-manifest.mts
+function localTemplateManifests(filesDir, manifest, dest) {
+  const groups = [...(manifest.conditionalScopedFiles ?? [])]
+  for (const [file, value] of Object.entries(manifest.files)) {
+    const entry = value
+    if (
+      entry &&
+      typeof entry === 'object' &&
+      entry.conditional &&
+      entry.triggerKind
+    )
+      groups.push({
+        [entry.triggerKind]: entry.conditional,
+        files: [file],
+      })
+  }
+  const conditionalRoot = path.join(path.dirname(filesDir), 'conditional')
+  const roots = [filesDir]
+  if (existsSync(conditionalRoot))
+    for (const name of readdirSync(conditionalRoot).toSorted().reverse()) {
+      const root = path.join(conditionalRoot, name)
+      if (statSync(root).isDirectory()) roots.push(root)
+    }
+  const sources = /* @__PURE__ */ new Map()
+  for (const root of roots) {
+    const expanded = expandManifestForLocalTemplate(root, manifest)
+    const filtered = filterManifestForConditions(
+      {
+        ...expanded,
+        conditionalScopedFiles: groups,
+      },
+      dest,
+    )
+    for (const [file, value] of Object.entries(filtered.files))
+      sources.set(file, {
+        root,
+        value,
+      })
+  }
+  return roots.map(root => ({
+    filesDir: root,
+    manifest: {
+      ...manifest,
+      files: Object.fromEntries(
+        [...sources]
+          .filter(([, source]) => source.root === root)
+          .map(([file, source]) => [file, source.value]),
+      ),
+    },
+  }))
+}
 const PACKAGE_MANAGER_DIRS = /* @__PURE__ */ new Set(['.venv', 'node_modules'])
 /**
  * Every regular file beneath `dir`, as paths relative to `dir`, skipping any
@@ -1100,6 +1304,53 @@ function expandManifestForLocalTemplate(filesDir, manifest) {
     ...manifest,
     files,
   }
+}
+
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/layered-content.mts
+const TEXT_SOURCE_EXTENSIONS = /* @__PURE__ */ new Set([
+  '.cjs',
+  '.cts',
+  '.js',
+  '.json',
+  '.md',
+  '.mjs',
+  '.mts',
+  '.ts',
+  '.yaml',
+  '.yml',
+])
+function isConditionalTemplateSource(source, templateDir) {
+  const prefix = `${normalizeBundlePath(path.join(templateDir, 'base', 'conditional'))}/`
+  return normalizeBundlePath(source).startsWith(prefix)
+}
+function rewriteTemplateLayerContent(
+  srcAbs,
+  relFile,
+  dirEntry,
+  content,
+  templateDir,
+) {
+  if (!isConditionalTemplateSource(srcAbs, templateDir)) return content
+  const depth = [
+    ...dirEntry.split('/'),
+    ...path.posix.dirname(relFile).split('/'),
+  ].filter(segment => segment !== '' && segment !== '.').length
+  const toRoot = '../'.repeat(depth)
+  return content.replace(/(['"`])(?:\.\.\/)+universal\//g, `$1${toRoot}`)
+}
+function localTemplateFileContent(source, memberPath, templateDir) {
+  if (!isConditionalTemplateSource(source, templateDir)) return void 0
+  if (!TEXT_SOURCE_EXTENSIONS.has(path.extname(source))) return void 0
+  const content = readFileSync(source, 'utf8')
+  const rewritten = rewriteTemplateLayerContent(
+    source,
+    memberPath,
+    '.',
+    content,
+    templateDir,
+  )
+  return rewritten === content ? void 0 : rewritten
 }
 
 //#endregion
@@ -1415,7 +1666,7 @@ function mergeWorkspaceYaml(config) {
 }
 
 //#endregion
-//#region template/base/scripts/fleet/hooks/wiring.mts
+//#region template/base/universal/scripts/fleet/hooks/wiring.mts
 const DISPATCH_EVENTS = ['PreToolUse', 'PostToolUse', 'SessionStart', 'Stop']
 const INDEX_REL = '.claude/hooks/fleet/index.cjs'
 const LAUNCHER_REL = '.claude/hooks/fleet/_shared/dispatch-launcher'
@@ -1691,29 +1942,31 @@ function removeTombstonedPaths(dest, manifest) {
   }
   return removed
 }
-/**
- * Prune stale fleet files so a fetch is a true SYNC (place + prune) — scoped
- * to what the bundle PREVIOUSLY owned. Only a file the last-applied manifest
- * shipped (the applied-files record, see readAppliedFiles) that the current
- * manifest no longer ships is deleted. The prune list comes from MANIFESTS,
- * never a directory walk, so repo-owned files that merely live beside the
- * fleet payload — per-repo EXPECTED variants like
- * `.config/fleet/tsconfig.check.json`, `.gitkeep` seeds, cascade-only
- * release-excluded scripts under `scripts/fleet/` — can never be collateral.
- * With no record (fresh clone, or the first refresh that introduces the
- * record) nothing is pruned; the record starts with this apply and the next
- * refresh prunes precisely.
- */
-function pruneStaleFleetFiles(dest, manifest, previousFiles) {
-  if (!previousFiles || previousFiles.length === 0) return 0
+function pruneStaleFleetFiles(dest, manifest, previousFiles, options) {
+  const { archiveManifest } = {
+    __proto__: null,
+    ...options,
+  }
+  const candidates = new Set(previousFiles)
+  for (const group of archiveManifest?.conditionalScopedFiles ?? [])
+    for (const file of group.files) {
+      const absolute = path.join(dest, normalizeBundlePath(file))
+      if (
+        !Object.hasOwn(manifest.files, file) &&
+        existsSync(absolute) &&
+        lstatSync(absolute).isFile() &&
+        computeSha256(readFileSync(absolute)) === archiveManifest?.files[file]
+      )
+        candidates.add(file)
+    }
   const kept = new Set(Object.keys(manifest.files).map(normalizeBundlePath))
   for (const segment of manifest.segments ?? [])
     kept.add(normalizeBundlePath(segment.path))
   if (manifest.settingsSegment !== void 0)
     kept.add(normalizeBundlePath(manifest.settingsSegment.path))
   let pruned = 0
-  for (let i = 0, { length } = previousFiles; i < length; i += 1) {
-    const rel = normalizeBundlePath(previousFiles[i])
+  for (const file of candidates) {
+    const rel = normalizeBundlePath(file)
     if (kept.has(rel)) continue
     const abs = path.join(dest, rel)
     if (existsSync(abs)) {
@@ -1748,11 +2001,11 @@ function hasIdenticalBytes(source, target) {
   }
 }
 function installFiles(filesDir, dest, manifest, options) {
-  const refreshTracked =
-    {
-      __proto__: null,
-      ...options,
-    }.refreshTracked === true
+  const opts = {
+    __proto__: null,
+    ...options,
+  }
+  const refreshTracked = opts.refreshTracked === true
   const locking = readonlyBundleMirrorsEnabled()
   const generatedPaths = new Set(
     (manifest.generatedPaths ?? []).map(normalizeBundlePath),
@@ -1767,10 +2020,14 @@ function installFiles(filesDir, dest, manifest, options) {
     const rel = rels[i]
     const source = path.join(filesDir, rel)
     const target = path.join(dest, rel)
+    const rewritten =
+      opts.templateDir === void 0
+        ? void 0
+        : localTemplateFileContent(source, rel, opts.templateDir)
     mkdirSync(path.dirname(target), { recursive: true })
     let spliced
     if (isFleetCanonicalSpliceFile(rel) && existsSync(target)) {
-      const sourceContent = readFileSync(source, 'utf8')
+      const sourceContent = rewritten ?? readFileSync(source, 'utf8')
       if (hasFleetCanonicalEndSentinel(sourceContent))
         spliced = spliceFleetCanonicalContent(
           sourceContent,
@@ -1782,6 +2039,15 @@ function installFiles(filesDir, dest, manifest, options) {
       existsSync(target)
     ) {
       if (!refreshTracked && spliced === void 0) {
+        if (
+          locking &&
+          isLockablePlacement({
+            generatedPaths,
+            hybridPaths,
+            relPath: rel,
+          })
+        )
+          lockFileReadonlySync(target)
         skippedAlwaysTracked += 1
         continue
       }
@@ -1797,7 +2063,11 @@ function installFiles(filesDir, dest, manifest, options) {
       placed += 1
       continue
     }
-    if (hasIdenticalBytes(source, target)) {
+    if (
+      rewritten === void 0
+        ? hasIdenticalBytes(source, target)
+        : existsSync(target) && readFileSync(target, 'utf8') === rewritten
+    ) {
       unchanged += 1
       if (
         locking &&
@@ -1810,7 +2080,10 @@ function installFiles(filesDir, dest, manifest, options) {
         lockFileReadonlySync(target)
       continue
     }
-    placeWithLockRetry(target, () => copyFileSync(source, target))
+    placeWithLockRetry(target, () => {
+      if (rewritten === void 0) copyFileSync(source, target)
+      else writeFileSync(target, rewritten)
+    })
     placed += 1
     if (
       locking &&
@@ -1831,7 +2104,7 @@ function installFiles(filesDir, dest, manifest, options) {
 }
 /**
  * Materialize the fleet mirrors in a PRODUCER checkout from its own
- * `template/base`, rather than from a fetched bundle.
+ * `template/base/universal`, rather than from a fetched bundle.
  *
  * The wheelhouse holds the canon locally, so it has no bundle to fetch and is
  * not a fleet-pack consumer. That is the only reason its mirrors stayed in
@@ -1840,27 +2113,36 @@ function installFiles(filesDir, dest, manifest, options) {
  *
  * Why it must live in this dep-0 entry and not in the cascade: the cascade
  * cannot load without the payload it would be materializing.
- * `template/base/scripts/fleet/land-work.mts` and its siblings import the LIVE
- * `.claude/hooks/fleet/_shared/**`, so a checkout whose mirrors are absent dies
- * at module resolution before any fixer runs. Same reason the fetcher cannot
- * ship inside the bundle it fetches.
+ * `template/base/universal/scripts/fleet/land-work.mts` and its siblings import
+ * the LIVE `.claude/hooks/fleet/_shared/**`, so a checkout whose mirrors are
+ * absent dies at module resolution before any fixer runs. Same reason the
+ * fetcher cannot ship inside the bundle it fetches.
  *
- * Returns undefined when `template/base` is absent, which is every consumer:
- * the caller then knows this checkout is not a producer and fetches instead.
+ * Returns undefined when `template/base/universal` is absent, which is every
+ * consumer: the caller then knows this checkout is not a producer and fetches
+ * instead.
  */
 function materializeFromLocalTemplate(dest, manifest, options) {
-  const filesDir = path.join(dest, 'template', 'base')
+  const filesDir = path.join(dest, 'template', 'base', 'universal')
   if (!existsSync(filesDir)) return
-  const shaped = filterManifestForCapabilities(
-    filterManifestForShape(manifest, readBuildShape(dest)),
-    readDeclaredCapabilities(dest),
-  )
-  return installFiles(
-    filesDir,
-    dest,
-    expandManifestForLocalTemplate(filesDir, shaped),
-    options,
-  )
+  const shaped = effectiveMemberManifest(manifest, dest)
+  const total = {
+    placed: 0,
+    unchanged: 0,
+    skippedAlwaysTracked: 0,
+    refreshedTracked: [],
+  }
+  for (const source of localTemplateManifests(filesDir, shaped, dest)) {
+    const result = installFiles(source.filesDir, dest, source.manifest, {
+      ...options,
+      templateDir: path.join(dest, 'template'),
+    })
+    total.placed += result.placed
+    total.unchanged += result.unchanged
+    total.skippedAlwaysTracked += result.skippedAlwaysTracked
+    total.refreshedTracked.push(...result.refreshedTracked)
+  }
+  return total
 }
 /**
  * Untrack the bundle's GENERATED build outputs (`manifest.generatedPaths`)
@@ -1996,9 +2278,10 @@ const SYNC_FLEET_SCRIPT = 'node scripts/repo/bootstrap/fleet.mjs'
 const PREPARE_FETCH = 'node scripts/repo/bootstrap/prepare.mts'
 /**
  * The PRODUCER belt: materialize the mirrors from this checkout's own
- * `template/base` instead of fetching a bundle. The wheelhouse's counterpart to
- * PREPARE_FETCH, and it runs in the same slot for the same reason — the
- * git-hooks installer it precedes is itself one of the untracked mirrors.
+ * `template/base/universal` instead of fetching a bundle. The wheelhouse's
+ * counterpart to PREPARE_FETCH, and it runs in the same slot for the same
+ * reason — the git-hooks installer it precedes is itself one of the untracked
+ * mirrors.
  */
 const PREPARE_FROM_TEMPLATE =
   'node scripts/repo/bootstrap/fleet.mjs --from-template'
@@ -2376,14 +2659,17 @@ function networkFailureMessage(config) {
 }
 
 //#endregion
-//#region scripts/repo/gen/bootstrap/src/ghcr-fetch.mts
-const GHCR_HOST = 'ghcr.io'
-const MANIFEST_ACCEPT = [
+//#region template/base/universal/scripts/fleet/constants/oci-media-types.mts
+const OCI_MANIFEST_ACCEPT = [
   'application/vnd.oci.image.manifest.v1+json',
   'application/vnd.oci.image.index.v1+json',
   'application/vnd.docker.distribution.manifest.v2+json',
   'application/vnd.docker.distribution.manifest.list.v2+json',
 ].join(', ')
+
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/ghcr-fetch.mts
+const GHCR_HOST = 'ghcr.io'
 const MAX_REDIRECTS = 5
 const REQUEST_TIMEOUT_MS = 3e4
 /**
@@ -2566,7 +2852,7 @@ async function getGhcrToken(repo, registry, httpFn = httpGet) {
 async function fetchOciManifest(repo, ref, token, registry, httpFn = httpGet) {
   const res = await httpFn(`https://${registry}/v2/${repo}/manifests/${ref}`, {
     headers: {
-      accept: MANIFEST_ACCEPT,
+      accept: OCI_MANIFEST_ACCEPT,
       authorization: `Bearer ${token}`,
     },
   })
@@ -3207,10 +3493,7 @@ async function installFleet(config) {
         return 1
       }
     }
-    const memberManifest = filterManifestForCapabilities(
-      filterManifestForShape(manifest, readBuildShape(dest)),
-      readDeclaredCapabilities(dest),
-    )
+    const memberManifest = effectiveMemberManifest(manifest, dest)
     const fileCount = Object.keys(memberManifest.files).length
     const segmentCount =
       (memberManifest.segments?.length ?? 0) +
@@ -3229,6 +3512,7 @@ async function installFleet(config) {
       dest,
       memberManifest,
       readAppliedFiles(dest),
+      { archiveManifest: manifest },
     )
     const movedCount = applyMovedPaths(dest, manifest)
     const tombstonedCount = removeTombstonedPaths(dest, manifest)
@@ -3297,10 +3581,10 @@ function isMainModule() {
 }
 /**
  * The `--from-template` verb: materialize this checkout's fleet mirrors from
- * its own `template/base`, then report what was placed.
+ * its own `template/base/universal`, then report what was placed.
  *
- * Exit 1 when the checkout carries no `template/base` — a consumer ran the
- * producer verb, a wiring mistake worth failing on rather than silently
+ * Exit 1 when the checkout carries no `template/base/universal` — a consumer
+ * ran the producer verb, a wiring mistake worth failing on rather than silently
  * no-opping into an unusable tree.
  */
 function runFromTemplate(config) {
@@ -3326,13 +3610,13 @@ function runFromTemplate(config) {
   )
   if (result === void 0) {
     logger.error(
-      'install-fleet: --from-template: no template/base here — that verb is for the payload PRODUCER; a consumer fetches its bundle.',
+      'install-fleet: --from-template: no template/base/universal here — that verb is for the payload PRODUCER; a consumer fetches its bundle.',
     )
     return 1
   }
   if (!config.quiet)
     logger.log(
-      `install-fleet: materialized ${result.placed} file(s) from template/base (${result.unchanged} already current, ${result.skippedAlwaysTracked} always-tracked left alone).`,
+      `install-fleet: materialized ${result.placed} file(s) from template/base/universal (${result.unchanged} already current, ${result.skippedAlwaysTracked} always-tracked left alone).`,
     )
   return 0
 }
@@ -3353,7 +3637,7 @@ export {
   GHCR_HOST,
   HARNESS_ALIAS_PATHS,
   HYBRID_BUNDLE_PATHS,
-  MANIFEST_ACCEPT,
+  OCI_MANIFEST_ACCEPT as MANIFEST_ACCEPT,
   PREPARE_FETCH,
   PREPARE_FROM_TEMPLATE,
   SETTINGS_CANDIDATES,

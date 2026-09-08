@@ -11,6 +11,7 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { debugCheck } from './check-output.mts'
 
 import { readFileForScan, shouldSkipFile } from './file-scan.mts'
 import { gitLines } from './git.mts'
@@ -163,7 +164,7 @@ function reportPrivateKeys(file: string, text: string): number {
 // any dependency exists, so they call console.* directly. template/ holds the
 // canonical sources that cascade to those same trees in downstream fleet
 // repos, so the destination exemption has to apply at the source too;
-// `layerless` collapses the archetype layer segment so template/base/... stays
+// `layerless` collapses the archetype layer segment so template/base/universal/... stays
 // exempt. src/logger/ IS the logger.
 function isLoggerScanTarget(file: string, layerless: string): boolean {
   return (
@@ -274,7 +275,7 @@ function reportClaudeLockdown(file: string, text: string): number {
   logger.info(
     'A headless `query()` / `new ClaudeSDKClient()` MUST set tools, ' +
       'allowedTools, disallowedTools, permissionMode (dontAsk), and never ' +
-      'bypassPermissions / default. See .claude/skills/fleet/locking-down-claude/.',
+      'bypassPermissions / default. See .claude/skills/fleet/locking-down-agent-calls/.',
   )
   return 1
 }
@@ -315,7 +316,7 @@ function warnAiConfigPoison(file: string, text: string): void {
 function scanFileContent(file: string, text: string): number {
   // Layer-agnostic form of the path for the `template/...` exemptions: the
   // archetype move buries the canonical sources under template/<layer>/, so
-  // the prefix exemptions test this collapsed form (template/base/.git-hooks/x
+  // the prefix exemptions test this collapsed form (template/base/universal/.git-hooks/x
   // → template/.git-hooks/x) instead of the raw moved path.
   const layerless = stripTemplateLayer(file)
   let errors = 0
@@ -350,7 +351,7 @@ function scanFileContent(file: string, text: string): number {
 
 // Scans changed files in the range for secrets, keys, and leaks.
 export const scanFilesInRange = (range: string): number => {
-  logger.info('Checking files for security issues…')
+  debugCheck('Checking files for security issues…')
   // Normalize to POSIX forward slashes — same reason as pre-commit.mts.
   const changed = gitLines('diff', '--name-only', range).map(normalizePath)
   if (changed.length === 0) {

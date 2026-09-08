@@ -20,11 +20,9 @@
 
 import { joinAnd } from '@socketsecurity/lib-stable/arrays/join'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { debugCheck } from './check-output.mts'
 
 import { git, gitLines } from './git.mts'
-
-const logger = getDefaultLogger()
 
 // How many exempt commits the notice names before it summarizes the rest.
 const EXEMPT_SAMPLE_LIMIT = 5
@@ -250,6 +248,6 @@ export function reportReleaseTagExemption(
 ): void {
   const lines = formatReleaseTagExemption(exemption, scanLabel)
   for (let i = 0, { length } = lines; i < length; i += 1) {
-    logger.info(lines[i]!)
+    debugCheck(lines[i]!)
   }
 }

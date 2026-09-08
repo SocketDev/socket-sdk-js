@@ -1,273 +1,21 @@
-//#region scripts/repo/gen/bootstrap/src/helpers.d.mts
-export type FleetCommentStyle = 'hash' | 'html' | 'json' | 'slash';
-export declare const HYBRID_BUNDLE_PATHS: ReadonlySet<string>;
-export interface BundleManifest {
-  readonly files: Record<string, string>;
-  readonly generatedPaths?: readonly string[] | undefined;
-  readonly movedPaths?: ReadonlyArray<{
-    from: string;
-    to: string;
-  }> | undefined;
-  readonly removedPaths?: readonly string[] | undefined;
-  readonly segments?: readonly SegmentEntry[] | undefined;
-  readonly settingsSegment?: SettingsSegmentEntry | undefined;
-  readonly templateSha: string;
-  readonly version: string;
-  readonly workspaceSegment?: WorkspaceSegmentEntry | undefined;
-}
-export interface InstallConfig {
-  readonly bundle?: string | undefined;
-  readonly dest?: string | undefined;
-  /**
-   * Materialize mirrors from this checkout's own template/base (producer).
-   */
-  readonly fromTemplate?: boolean | undefined;
-  readonly dryRun?: boolean | undefined;
-  readonly exitCode?: boolean | undefined;
-  readonly ifCurrent?: boolean | undefined;
-  readonly json?: boolean | undefined;
-  readonly manifest?: string | undefined;
-  readonly noHeader?: boolean | undefined;
-  readonly quiet?: boolean | undefined;
-  readonly refreshTracked?: boolean | undefined;
-  readonly ref: string;
-  readonly repo?: string | undefined;
-  readonly status?: boolean | undefined;
-  readonly thin?: boolean | undefined;
-  readonly wire?: boolean | undefined;
-}
-export interface UntrackFleetPackConfig {
-  readonly dest: string;
-  readonly manifest: BundleManifest;
-}
-export interface WorkspaceSegmentEntry {
-  readonly fleetKeys: readonly string[];
-  readonly path: string;
-  readonly sha256: string;
-}
-export interface SegmentEntry {
-  readonly commentStyle: FleetCommentStyle;
-  readonly path: string;
-  readonly sha256: string;
-}
-export interface SettingsSegmentEntry {
-  readonly path: string;
-  readonly sha256: string;
-}
-export interface SpliceConfig {
-  readonly commentStyle: FleetCommentStyle;
-  readonly fleetBlock: string;
-  readonly target: string;
-}
-export interface TarExtractConfig {
-  readonly archive: string;
-  readonly destination: string;
-  readonly platform: NodeJS.Platform;
-}
-/**
- * Normalize bundle-manifest paths to their portable `/` wire format.
- */
-export declare function normalizeBundlePath(filePath: string): string;
-export declare function tarExecutable(platform: NodeJS.Platform, systemRoot: string | undefined): string;
-/**
- * Build extraction arguments for the platform-selected tar executable.
- */
-export declare function tarExtractArgs(config: TarExtractConfig): string[];
-export declare function errorMessage(e: unknown): string;
-/**
- * Compute the SHA-256 hex digest of a Buffer — used for both files (byte-
- * identical verification) and fleet-block segments.
- */
-export declare function computeSha256(buf: Buffer): string;
-/**
- * The open marker line for a given comment style — canonical short-tag
- * bare-tag form, matching the grammar used by fleet-markers.mts on the
- * producer side. Inlined here so this file stays dep-0 — it cannot import
- * the wheelhouse's fleet-markers module.
- */
-export declare function beginMarker(style: FleetCommentStyle): string;
-/**
- * The close marker line for a given comment style — canonical short-tag
- * bare-tag form.
- */
-export declare function endMarker(style: FleetCommentStyle): string;
-/**
- * The open marker for the fetcher-owned `<fleet-pack>` gitignore region — the
- * manifest-derived untrack entries live here, OUTSIDE the cascade's `<fleet>`
- * region, so the cascade's block rewrite can never discard them (the defect
- * that re-tracked every hydrated payload file on the next cascade). Hash form
- * only: the region exists solely in `.gitignore`.
- */
-export declare function packBeginMarker(): string;
-/**
- * The close marker for the fetcher-owned `<fleet-pack>` gitignore region.
- */
-export declare function packEndMarker(): string;
-/**
- * Splice the fetcher-owned `<fleet-pack>` block into `target`. When the
- * markers exist the whole region (markers inclusive) is REPLACED — that is
- * what prunes a stale entry; the region is wholly fetcher-owned, so hand
- * ignores belong outside it. When absent, the block is appended at end of
- * file, after the cascade's `<fleet>` region and the member's `<repo>`
- * wrapper, so the fleet splice's repo-region adjacency is never broken.
- */
-export declare function splicePackBlock(config: {
-  readonly packBlock: string;
-  readonly target: string;
-}): string;
-export interface FleetBlockSpan {
-  readonly start: number;
-  readonly end: number;
-}
-/**
- * Every balanced fleet block in `lines`, in document order. Each open marker
- * pairs with the NEXT close marker after it, and the scan resumes past that
- * close — so a file carrying several stacked blocks reports one span per block
- * rather than one span swallowing them all. An unclosed trailing open marker
- * yields no span: an unbalanced file is left for a human, never half-rewritten.
- */
-export declare function findFleetBlockSpans(lines: readonly string[], commentStyle: FleetCommentStyle): FleetBlockSpan[];
-/**
- * Splice the canonical fleet block into `target`. If `target` already contains
- * the open/close markers, the content between them (markers inclusive) is
- * replaced. A file carrying SEVERAL stacked blocks collapses to one: the first
- * is replaced with `fleetBlock` and every later one is deleted, so a member
- * whose file grew a second managed region ends up with one region instead of a
- * growing stack. Content outside the matched blocks is preserved
- * byte-for-byte, except that removing a block sandwiched between blank lines
- * drops one of them rather than leaving a doubled blank.
- * If markers are absent:
- * - `html` style (CLAUDE.md, README): insert before the first level-2 heading
- * (`## `) with i > 0, or append at end.
- * - other styles: append with a leading blank line separator.
- */
-export declare function spliceFleetBlock(config: SpliceConfig): string;
-export declare function run(cmd: string, args: readonly string[]): void;
-export declare function segmentFileName(relativePath: string): string;
-export declare function readManifest(manifestPath: string): BundleManifest;
-/**
- * Verify every file in `manifest.files` against its expected SHA-256 digest.
- * Returns a list of problem descriptions — empty means all verified. A single
- * mismatch must abort the whole install (fail closed).
- */
-export declare function verifyBundleFiles(filesDir: string, manifest: BundleManifest): string[];
-/**
- * Verify every generic block segment and the specialized Claude settings
- * segment against its expected SHA-256. A mismatch is just as fatal as a file
- * mismatch — the merge result would silently differ from producer intent.
- */
-export declare function verifySegments(segmentsDir: string, manifest: BundleManifest): string[];
+//#region template/base/universal/scripts/fleet/lib/conditional-config.d.mts
+type ConfigFlag = 'bundlesVendoredDeps' | 'hasGhcr' | 'hasNapi' | 'hasPrebakes' | 'hasRust' | 'isGithubAction';
 //#endregion
-//#region scripts/repo/gen/bootstrap/src/applied-state.d.mts
-export declare const SETTINGS_CANDIDATES: string[];
-export declare function resolveSettingsPath(dest: string): string | undefined;
-/**
- * Default bundle ref for a member — `bundle.ref` in its wheelhouse settings
- * file. Lets install-fleet (and the prepare/CI wires) omit an explicit --ref so
- * the pin lives in exactly one place. Returns undefined when absent/malformed.
- */
-export declare function readBundleRef(dest: string): string | undefined;
-export interface BundleConfig {
-  readonly ref: string | undefined;
-  readonly cascadeSha: string | undefined;
+//#region scripts/repo/gen/bootstrap/src/conditional-files.d.mts
+interface ConditionalManifestGroup {
+  readonly marker?: string | undefined;
+  readonly capability?: string | undefined;
+  readonly buildType?: string | undefined;
+  readonly configFlag?: ConfigFlag | undefined;
+  readonly files: readonly string[];
 }
-export interface MemberBuildShape {
-  readonly from: string | undefined;
-  readonly type: string | undefined;
-}
-/**
- * The member's build shape — `build.from` / `build.type` in its wheelhouse
- * settings file. Drives the manifest's shape-scoped file groups: a group is
- * placed only for shapes that ship it. Undefined fields on an absent or
- * malformed config read as "shape unknown", which the filter treats as
- * ship-everything so a config problem can never withhold payload.
- */
-export declare function readBuildShape(dest: string): MemberBuildShape;
-/**
- * The member's declared capabilities — the `capabilities` map in its
- * wheelhouse settings file (an empty or ABSENT map declares NONE, matching
- * the cascade-side gate). Drives the manifest's capability-scoped hook
- * groups: a `@capability`-tagged hook is placed only when the member
- * declares the capability.
- */
-export declare function readDeclaredCapabilities(dest: string): string[];
-/**
- * Read the member's full pinned `bundle` block (ref + cascadeSha) from the
- * wheelhouse settings file. The lock-step verify + the `fleet:status` verb need
- * BOTH halves — `readBundleRef` returns only the ref for the fetch default.
- * Returns both as undefined when the file is absent / malformed.
- */
-export declare function readBundleConfig(dest: string): BundleConfig;
-export declare function readAppliedRef(dest: string): string | undefined;
-/**
- * The file list the LAST applied bundle owned, or undefined when no record
- * exists. Feeds pruneStaleFleetFiles — see APPLIED_FILES_MARKER.
- */
-export declare function readAppliedFiles(dest: string): string[] | undefined;
-/**
- * Record the manifest file list the apply just placed, replacing the previous
- * record. Written after a successful apply only, beside the applied-ref
- * marker.
- */
-export declare function writeAppliedFiles(dest: string, files: readonly string[]): void;
-export declare function writeAppliedRef(dest: string, ref: string): void;
-//#endregion
-//#region scripts/repo/gen/bootstrap/src/bundle-source.d.mts
-export type BundleFetchFn = (config: {
-  readonly ref: string;
-  readonly repo: string;
-  readonly tmp: string;
-}) => Promise<FetchedFiles>;
-export interface FetchedFiles {
-  readonly manifest: string;
-  readonly tarball: string;
-}
-export interface FetchedBundle extends FetchedFiles {
-  readonly source: 'ghcr';
-}
-/**
- * Derive the GHCR fleet-pack package repo from the gh `owner/repo`. GHCR
- * package paths are lowercase: `SocketDev/socket-wheelhouse` →
- * `socketdev/socket-wheelhouse/fleet-pack`.
- */
-export declare function ghcrBundleRepo(repo: string): string;
-/**
- * Extract just the release-bundle manifest from the bundle tarball root (the
- * tarball ships it beside files/ + segments/), so the GHCR path yields the same
- * on-disk `sourceManifest` file the gh-release path downloads separately.
- */
-export declare function extractManifestFromTarball(tarball: string, destDir: string): string;
-/**
- * Default GHCR fetch: anonymous OCI pull of the fleet-pack tarball, then pull
- * the manifest out of it. Throws on any failure so the selector can fall back.
- */
-export declare function ghcrFetchBundle(config: {
-  readonly ref: string;
-  readonly repo: string;
-  readonly tmp: string;
-}): Promise<FetchedFiles>;
-/**
- * Fetch the fleet bundle from GHCR.
- *
- * GHCR is the only source. A GitHub-Release fallback used to sit behind this,
- * described in its own comment as transitional until the public GHCR package
- * existed. That package exists, and the pack no longer publishes a Release at
- * all, so the fallback could only ever fail now: it turned a clear GHCR error
- * into a confusing `gh` one and hid the real cause. The injected `ghcrFetch`
- * lets tests drive it without network.
- */
-export declare function fetchBundleSource(config: {
-  readonly ghcrFetch?: BundleFetchFn | undefined;
-  readonly ref: string;
-  readonly repo: string;
-  readonly tmp: string;
-}): Promise<FetchedBundle>;
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/fleet-pack-manifest.d.mts
 export declare function normalizeManifestEntryPath(entry: {
   path: string;
 }): string;
 export interface FleetFileManifest {
+  conditionalScopedFiles?: readonly ConditionalManifestGroup[] | undefined;
   /**
    * Hook payloads gated on a member capability (stamped from each hook's
    * `// @capability <name>` header at pack build time): placed only when the
@@ -408,7 +156,10 @@ export declare function stripLegacyUntrackEntriesFromFleetBlock(target: string):
  * effect on tracked paths). The index-mutating half lives in
  * untrackFleetPackPaths and stays behind an explicit `--thin`.
  */
-export declare function refreshFleetPackIgnores(config: UntrackFleetPackConfig): void;
+export declare function refreshFleetPackIgnores(config: {
+  dest: string;
+  manifest: FleetFileManifest;
+}): void;
 /**
  * Apply thin mode: refresh the gitignore block (refreshFleetPackIgnores), then
  * untrack those paths from git so the fetch action repopulates them going
@@ -421,9 +172,278 @@ export declare function refreshFleetPackIgnores(config: UntrackFleetPackConfig):
  */
 export declare function untrackFleetPackPaths(config: UntrackFleetPackConfig): void;
 //#endregion
+//#region scripts/repo/gen/bootstrap/src/helpers.d.mts
+export type FleetCommentStyle = 'hash' | 'html' | 'json' | 'slash';
+export declare const HYBRID_BUNDLE_PATHS: ReadonlySet<string>;
+export interface BundleManifest extends Pick<FleetFileManifest, 'capabilityScopedFiles' | 'conditionalScopedFiles' | 'shapeScopedFiles'> {
+  readonly files: Record<string, string>;
+  readonly generatedPaths?: readonly string[] | undefined;
+  readonly movedPaths?: ReadonlyArray<{
+    from: string;
+    to: string;
+  }> | undefined;
+  readonly removedPaths?: readonly string[] | undefined;
+  readonly segments?: readonly SegmentEntry[] | undefined;
+  readonly settingsSegment?: SettingsSegmentEntry | undefined;
+  readonly templateSha: string;
+  readonly version: string;
+  readonly workspaceSegment?: WorkspaceSegmentEntry | undefined;
+}
+export interface InstallConfig {
+  readonly bundle?: string | undefined;
+  readonly dest?: string | undefined;
+  /**
+   * Materialize mirrors from this checkout's own template/base/universal
+   * (producer).
+   */
+  readonly fromTemplate?: boolean | undefined;
+  readonly dryRun?: boolean | undefined;
+  readonly exitCode?: boolean | undefined;
+  readonly ifCurrent?: boolean | undefined;
+  readonly json?: boolean | undefined;
+  readonly manifest?: string | undefined;
+  readonly noHeader?: boolean | undefined;
+  readonly quiet?: boolean | undefined;
+  readonly refreshTracked?: boolean | undefined;
+  readonly ref: string;
+  readonly repo?: string | undefined;
+  readonly status?: boolean | undefined;
+  readonly thin?: boolean | undefined;
+  readonly wire?: boolean | undefined;
+}
+export interface UntrackFleetPackConfig {
+  readonly dest: string;
+  readonly manifest: BundleManifest;
+}
+export interface WorkspaceSegmentEntry {
+  readonly fleetKeys: readonly string[];
+  readonly path: string;
+  readonly sha256: string;
+}
+export interface SegmentEntry {
+  readonly commentStyle: FleetCommentStyle;
+  readonly path: string;
+  readonly sha256: string;
+}
+export interface SettingsSegmentEntry {
+  readonly path: string;
+  readonly sha256: string;
+}
+export interface SpliceConfig {
+  readonly commentStyle: FleetCommentStyle;
+  readonly fleetBlock: string;
+  readonly target: string;
+}
+export interface TarExtractConfig {
+  readonly archive: string;
+  readonly destination: string;
+  readonly platform: NodeJS.Platform;
+}
+/**
+ * Normalize bundle-manifest paths to their portable `/` wire format.
+ */
+export declare function normalizeBundlePath(filePath: string): string;
+export declare function tarExecutable(platform: NodeJS.Platform, systemRoot: string | undefined): string;
+/**
+ * Build extraction arguments for the platform-selected tar executable.
+ */
+export declare function tarExtractArgs(config: TarExtractConfig): string[];
+export declare function errorMessage(e: unknown): string;
+/**
+ * Compute the SHA-256 hex digest of a Buffer — used for both files (byte-
+ * identical verification) and fleet-block segments.
+ */
+export declare function computeSha256(buf: Buffer): string;
+/**
+ * The open marker line for a given comment style — canonical short-tag
+ * bare-tag form, matching the grammar used by fleet-markers.mts on the
+ * producer side. Inlined here so this file stays dep-0 — it cannot import
+ * the wheelhouse's fleet-markers module.
+ */
+export declare function beginMarker(style: FleetCommentStyle): string;
+/**
+ * The close marker line for a given comment style — canonical short-tag
+ * bare-tag form.
+ */
+export declare function endMarker(style: FleetCommentStyle): string;
+/**
+ * The open marker for the fetcher-owned `<fleet-pack>` gitignore region — the
+ * manifest-derived untrack entries live here, OUTSIDE the cascade's `<fleet>`
+ * region, so the cascade's block rewrite can never discard them (the defect
+ * that re-tracked every hydrated payload file on the next cascade). Hash form
+ * only: the region exists solely in `.gitignore`.
+ */
+export declare function packBeginMarker(): string;
+/**
+ * The close marker for the fetcher-owned `<fleet-pack>` gitignore region.
+ */
+export declare function packEndMarker(): string;
+/**
+ * Splice the fetcher-owned `<fleet-pack>` block into `target`. When the
+ * markers exist the whole region (markers inclusive) is REPLACED — that is
+ * what prunes a stale entry; the region is wholly fetcher-owned, so hand
+ * ignores belong outside it. When absent, the block is appended at end of
+ * file, after the cascade's `<fleet>` region and the member's `<repo>`
+ * wrapper, so the fleet splice's repo-region adjacency is never broken.
+ */
+export declare function splicePackBlock(config: {
+  readonly packBlock: string;
+  readonly target: string;
+}): string;
+export interface FleetBlockSpan {
+  readonly start: number;
+  readonly end: number;
+}
+/**
+ * Every balanced fleet block in `lines`, in document order. Each open marker
+ * pairs with the NEXT close marker after it, and the scan resumes past that
+ * close — so a file carrying several stacked blocks reports one span per block
+ * rather than one span swallowing them all. An unclosed trailing open marker
+ * yields no span: an unbalanced file is left for a human, never half-rewritten.
+ */
+export declare function findFleetBlockSpans(lines: readonly string[], commentStyle: FleetCommentStyle): FleetBlockSpan[];
+/**
+ * Splice the canonical fleet block into `target`. If `target` already contains
+ * the open/close markers, the content between them (markers inclusive) is
+ * replaced. A file carrying SEVERAL stacked blocks collapses to one: the first
+ * is replaced with `fleetBlock` and every later one is deleted, so a member
+ * whose file grew a second managed region ends up with one region instead of a
+ * growing stack. Content outside the matched blocks is preserved
+ * byte-for-byte, except that removing a block sandwiched between blank lines
+ * drops one of them rather than leaving a doubled blank.
+ * If markers are absent:
+ *
+ * - `html` style (CLAUDE.md, README): insert before the first level-2 heading
+ *   (`## `) with i > 0, or append at end.
+ * - Other styles: append with a leading blank line separator.
+ */
+export declare function spliceFleetBlock(config: SpliceConfig): string;
+export declare function run(cmd: string, args: readonly string[]): void;
+export declare function segmentFileName(relativePath: string): string;
+export declare function readManifest(manifestPath: string): BundleManifest;
+/**
+ * Verify every file in `manifest.files` against its expected SHA-256 digest.
+ * Returns a list of problem descriptions — empty means all verified. A single
+ * mismatch must abort the whole install (fail closed).
+ */
+export declare function verifyBundleFiles(filesDir: string, manifest: BundleManifest): string[];
+/**
+ * Verify every generic block segment and the specialized Claude settings
+ * segment against its expected SHA-256. A mismatch is just as fatal as a file
+ * mismatch — the merge result would silently differ from producer intent.
+ */
+export declare function verifySegments(segmentsDir: string, manifest: BundleManifest): string[];
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/applied-state.d.mts
+export declare const SETTINGS_CANDIDATES: string[];
+export declare function resolveSettingsPath(dest: string): string | undefined;
+/**
+ * Default bundle ref for a member — `bundle.ref` in its wheelhouse settings
+ * file. Lets install-fleet (and the prepare/CI wires) omit an explicit --ref so
+ * the pin lives in exactly one place. Returns undefined when absent/malformed.
+ */
+export declare function readBundleRef(dest: string): string | undefined;
+export interface BundleConfig {
+  readonly ref: string | undefined;
+  readonly cascadeSha: string | undefined;
+}
+export interface MemberBuildShape {
+  readonly from: string | undefined;
+  readonly type: string | undefined;
+}
+/**
+ * The member's build shape — `build.from` / `build.type` in its wheelhouse
+ * settings file. Drives the manifest's shape-scoped file groups: a group is
+ * placed only for shapes that ship it. Undefined fields on an absent or
+ * malformed config read as "shape unknown", which the filter treats as
+ * ship-everything so a config problem can never withhold payload.
+ */
+export declare function readBuildShape(dest: string): MemberBuildShape;
+/**
+ * The member's declared capabilities — the `capabilities` map in its
+ * wheelhouse settings file (an empty or ABSENT map declares NONE, matching
+ * the cascade-side gate). Drives the manifest's capability-scoped hook
+ * groups: a `@capability`-tagged hook is placed only when the member
+ * declares the capability.
+ */
+export declare function readDeclaredCapabilities(dest: string): string[];
+/**
+ * Read the member's full pinned `bundle` block (ref + cascadeSha) from the
+ * wheelhouse settings file. The lock-step verify + the `fleet:status` verb need
+ * BOTH halves — `readBundleRef` returns only the ref for the fetch default.
+ * Returns both as undefined when the file is absent / malformed.
+ */
+export declare function readBundleConfig(dest: string): BundleConfig;
+export declare function readAppliedRef(dest: string): string | undefined;
+/**
+ * The file list the LAST applied bundle owned, or undefined when no record
+ * exists. Feeds pruneStaleFleetFiles — see APPLIED_FILES_MARKER.
+ */
+export declare function readAppliedFiles(dest: string): string[] | undefined;
+/**
+ * Record the manifest file list the apply just placed, replacing the previous
+ * record. Written after a successful apply only, beside the applied-ref
+ * marker.
+ */
+export declare function writeAppliedFiles(dest: string, files: readonly string[]): void;
+export declare function writeAppliedRef(dest: string, ref: string): void;
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/bundle-source.d.mts
+export type BundleFetchFn = (config: {
+  readonly ref: string;
+  readonly repo: string;
+  readonly tmp: string;
+}) => Promise<FetchedFiles>;
+export interface FetchedFiles {
+  readonly manifest: string;
+  readonly tarball: string;
+}
+export interface FetchedBundle extends FetchedFiles {
+  readonly source: 'ghcr';
+}
+/**
+ * Derive the GHCR fleet-pack package repo from the gh `owner/repo`. GHCR
+ * package paths are lowercase: `SocketDev/socket-wheelhouse` →
+ * `socketdev/socket-wheelhouse/fleet-pack`.
+ */
+export declare function ghcrBundleRepo(repo: string): string;
+/**
+ * Extract just the release-bundle manifest from the bundle tarball root (the
+ * tarball ships it beside files/ + segments/), so the GHCR path yields the same
+ * on-disk `sourceManifest` file the gh-release path downloads separately.
+ */
+export declare function extractManifestFromTarball(tarball: string, destDir: string): string;
+/**
+ * Default GHCR fetch: anonymous OCI pull of the fleet-pack tarball, then pull
+ * the manifest out of it. Throws on any failure so the selector can fall back.
+ */
+export declare function ghcrFetchBundle(config: {
+  readonly ref: string;
+  readonly repo: string;
+  readonly tmp: string;
+}): Promise<FetchedFiles>;
+/**
+ * Fetch the fleet bundle from GHCR.
+ *
+ * GHCR is the only source. A GitHub-Release fallback used to sit behind this,
+ * described in its own comment as transitional until the public GHCR package
+ * existed. That package exists, and the pack no longer publishes a Release at
+ * all, so the fallback could only ever fail now: it turned a clear GHCR error
+ * into a confusing `gh` one and hid the real cause. The injected `ghcrFetch`
+ * lets tests drive it without network.
+ */
+export declare function fetchBundleSource(config: {
+  readonly ghcrFetch?: BundleFetchFn | undefined;
+  readonly ref: string;
+  readonly repo: string;
+  readonly tmp: string;
+}): Promise<FetchedBundle>;
+//#endregion
+//#region template/base/universal/scripts/fleet/constants/oci-media-types.d.mts
+declare const OCI_MANIFEST_ACCEPT: string;
+//#endregion
 //#region scripts/repo/gen/bootstrap/src/ghcr-fetch.d.mts
 export declare const GHCR_HOST = "ghcr.io";
-export declare const MANIFEST_ACCEPT: string;
 export interface GhcrHttpResponse {
   readonly body: Buffer;
   readonly headers: NodeJS.Dict<string | string[]>;
@@ -576,39 +596,21 @@ export declare function removeTombstonedPaths(dest: string, manifest: FleetFileM
  * fleet payload — per-repo EXPECTED variants like
  * `.config/fleet/tsconfig.check.json`, `.gitkeep` seeds, cascade-only
  * release-excluded scripts under `scripts/fleet/` — can never be collateral.
- * With no record (fresh clone, or the first refresh that introduces the
- * record) nothing is pruned; the record starts with this apply and the next
- * refresh prunes precisely.
+ * Excluded conditional files without a record are pruned only when their
+ * bytes match the archive. Locally customized files remain untouched.
  */
-export declare function pruneStaleFleetFiles(dest: string, manifest: FleetFileManifest, previousFiles: readonly string[] | undefined): number;
+interface PruneStaleFleetFilesOptions {
+  archiveManifest?: FleetFileManifest | undefined;
+}
+export declare function pruneStaleFleetFiles(dest: string, manifest: FleetFileManifest, previousFiles: readonly string[] | undefined, options?: PruneStaleFleetFilesOptions | undefined): number;
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/install.d.mts
-/**
- * Place every verified bundle file from `filesDir` into `dest`, creating
- * parent directories as needed. Sentinel-scoped ONLY for the DESIGNATED
- * segment files (FLEET_CANONICAL_SPLICE_FILES): the bundle bytes replace
- * everything through the fleet-canonical end sentinel and the member tail
- * after it survives byte-for-byte — the repo-local oxlintrc ignorePatterns,
- * the derived .prettierignore lockstep-mirrors block. A whole-file copy here
- * wiped exactly those tails on every bootstrap-path refresh. Every other file
- * is a plain byte copy — the PATH gate is load-bearing: content-only gating
- * spliced ANY placed file merely mentioning the sentinel token, stitching
- * stale member tails onto fresh bundle heads (the v1.0.14 fetcher-chimera
- * incident). A designated file landing for the first time also byte-copies.
- *
- * Returns the placement tally: `placed` files written, plus
- * `skippedAlwaysTracked` — the existing always-tracked surfaces left for the
- * cascade COMMIT to refresh — and `refreshedTracked` — the always-tracked
- * surfaces force-refreshed from the bundle under `--refresh-tracked`. The
- * caller's summary line must carry the skip count: "placed N" alone reads as
- * a full refresh, and a repin operator who trusts it ships stale
- * `.github/**` mirrors without knowing a cascade is still owed.
- */
 export interface InstallFilesOptions {
   /**
    * Place always-tracked surfaces even when the target exists (opt-in).
    */
   refreshTracked?: boolean | undefined;
+  templateDir?: string | undefined;
 }
 export interface InstallFilesResult {
   placed: number;
@@ -640,7 +642,7 @@ export declare function hasIdenticalBytes(source: string, target: string): boole
 export declare function installFiles(filesDir: string, dest: string, manifest: BundleManifest, options?: InstallFilesOptions | undefined): InstallFilesResult;
 /**
  * Materialize the fleet mirrors in a PRODUCER checkout from its own
- * `template/base`, rather than from a fetched bundle.
+ * `template/base/universal`, rather than from a fetched bundle.
  *
  * The wheelhouse holds the canon locally, so it has no bundle to fetch and is
  * not a fleet-pack consumer. That is the only reason its mirrors stayed in
@@ -649,13 +651,14 @@ export declare function installFiles(filesDir: string, dest: string, manifest: B
  *
  * Why it must live in this dep-0 entry and not in the cascade: the cascade
  * cannot load without the payload it would be materializing.
- * `template/base/scripts/fleet/land-work.mts` and its siblings import the LIVE
- * `.claude/hooks/fleet/_shared/**`, so a checkout whose mirrors are absent dies
- * at module resolution before any fixer runs. Same reason the fetcher cannot
- * ship inside the bundle it fetches.
+ * `template/base/universal/scripts/fleet/land-work.mts` and its siblings import
+ * the LIVE `.claude/hooks/fleet/_shared/**`, so a checkout whose mirrors are
+ * absent dies at module resolution before any fixer runs. Same reason the
+ * fetcher cannot ship inside the bundle it fetches.
  *
- * Returns undefined when `template/base` is absent, which is every consumer:
- * the caller then knows this checkout is not a producer and fetches instead.
+ * Returns undefined when `template/base/universal` is absent, which is every
+ * consumer: the caller then knows this checkout is not a producer and fetches
+ * instead.
  */
 export declare function materializeFromLocalTemplate(dest: string, manifest: BundleManifest, options?: InstallFilesOptions | undefined): InstallFilesResult | undefined;
 /**
@@ -691,9 +694,10 @@ export declare const SYNC_FLEET_SCRIPT = "node scripts/repo/bootstrap/fleet.mjs"
 export declare const PREPARE_FETCH = "node scripts/repo/bootstrap/prepare.mts";
 /**
  * The PRODUCER belt: materialize the mirrors from this checkout's own
- * `template/base` instead of fetching a bundle. The wheelhouse's counterpart to
- * PREPARE_FETCH, and it runs in the same slot for the same reason — the
- * git-hooks installer it precedes is itself one of the untracked mirrors.
+ * `template/base/universal` instead of fetching a bundle. The wheelhouse's
+ * counterpart to PREPARE_FETCH, and it runs in the same slot for the same
+ * reason — the git-hooks installer it precedes is itself one of the untracked
+ * mirrors.
  */
 export declare const PREPARE_FROM_TEMPLATE = "node scripts/repo/bootstrap/fleet.mjs --from-template";
 export declare const FLEET_STATUS_SCRIPT = "node scripts/repo/bootstrap/fleet.mjs --status";
@@ -1020,3 +1024,4 @@ export declare function runStatus(config: InstallConfig): Promise<number>;
 export declare function installFleet(config: InstallConfig): Promise<number>;
 export declare function isMainModule(): boolean;
 //#endregion
+export { OCI_MANIFEST_ACCEPT as MANIFEST_ACCEPT };

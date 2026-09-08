@@ -123,17 +123,17 @@ export function canonicalPlatformKey() {
 export function resolvePlatformEntry(platforms, canonicalKey) {
   const entry = platforms[canonicalKey]
   if (entry) {
-    return { entry, fallbackKey: undefined }
+    return { __proto__: null, entry, fallbackKey: undefined }
   }
   // musl → glibc sibling fallback (linux-x64-musl → linux-x64).
   if (canonicalKey.endsWith('-musl')) {
     const glibcKey = canonicalKey.slice(0, -5)
     const fallback = platforms[glibcKey]
     if (fallback) {
-      return { entry: fallback, fallbackKey: glibcKey }
+      return { __proto__: null, entry: fallback, fallbackKey: glibcKey }
     }
   }
-  return { entry: undefined, fallbackKey: undefined }
+  return { __proto__: null, entry: undefined, fallbackKey: undefined }
 }
 
 // Normalize an integrity field (string SRI form OR the object provenance form
@@ -158,11 +158,12 @@ export function integrityValue(integrity) {
 export function integrityProvenance(integrity) {
   if (typeof integrity === 'object' && integrity !== null) {
     return {
+      __proto__: null,
       src: typeof integrity.src === 'string' ? integrity.src : '',
       date: typeof integrity.date === 'string' ? integrity.date : '',
     }
   }
-  return { src: '', date: '' }
+  return { __proto__: null, src: '', date: '' }
 }
 
 // Read a `go <version>` line from a go.mod file (the only --version-file
@@ -214,6 +215,7 @@ export function resolveGoAssetFromManifest(manifest, version, canonicalKey) {
     )
   }
   return {
+    __proto__: null,
     asset: `https://go.dev/dl/${file.filename}`,
     integrity: `sha256-${file.sha256}`,
     version: String(version),
@@ -264,7 +266,7 @@ function loadToolsCatalog(toolsFileArg) {
     fail(`× could not parse ${toolsFile}: ${e?.message ?? e}`)
     process.exit(1)
   }
-  return { tools: toolsData?.tools || {}, toolsFile }
+  return { __proto__: null, tools: toolsData?.tools || {}, toolsFile }
 }
 
 // The named tool's catalog entry. A missing tool or a tool with no platforms

@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { debugCheck } from './check-output.mts'
 
 import { git, gitLines } from './git.mts'
 
@@ -162,7 +163,7 @@ export const scanSignedCommits = (range: string, remoteRef: string): number => {
   if (refBase !== 'main' && refBase !== 'master') {
     return 0
   }
-  logger.info('Checking commit signatures…')
+  debugCheck('Checking commit signatures…')
   // %G? — signature verification marker (G/U/E/X/Y/R/N/B).
   // %GK — signing key fingerprint, empty if unsigned.
   // %GS — signer name, from key user-id.

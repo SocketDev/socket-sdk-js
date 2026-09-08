@@ -125,14 +125,14 @@ export function fetchBundle(): void {
     log('no scripts/repo/bootstrap/fleet.mjs beside me — skipping bundle fetch')
     return
   }
-  // The PRODUCER branch. A checkout carrying `template/base` holds the canon
+  // The PRODUCER branch. A checkout carrying `template/base/universal` holds the canon
   // locally: there is no bundle to fetch and no pin to compare, so it
   // materializes from its own template instead. Everything after this step —
   // the pnpm-workspace repair and the reconcile install — is identical, and is
   // exactly what a producer needs too: the mirrors it just placed include ~380
   // workspace package.json files that the first install could not see.
   // Branching here rather than writing a second doctor keeps one code path.
-  if (existsSync(path.join(REPO_ROOT, 'template', 'base'))) {
+  if (existsSync(path.join(REPO_ROOT, 'template', 'base', 'universal'))) {
     if (!tryRun('node', [fleet, '--from-template'])) {
       log(
         'materialize (fleet.mjs --from-template) reported a problem — continuing',
@@ -347,11 +347,11 @@ export async function maybeNotifyUpdate(): Promise<void> {
     const newestRef = await resolveNewestRef(repo)
     // STAMP EVERY ANSWER, including the two that change nothing.
     //
-    // The store used to be written only by `maybeShowUpdateNotice` below,
-    // which is reached only when an update was actually found. So for a member
-    // that is already current - the steady state, and the overwhelmingly
-    // common one - `lastCheckMs` never advanced, the TTL gate above never
-    // fired, and the registry lookup ran on EVERY `pnpm install`. The throttle
+    // Writing it only from `maybeShowUpdateNotice` below would reach the store
+    // only when an update was actually found. For a member that is already
+    // current - the steady state, and the overwhelmingly common one -
+    // `lastCheckMs` would never advance, the TTL gate above would never fire,
+    // and the registry lookup would run on EVERY `pnpm install`. The throttle
     // only ever engaged for members that were behind, which are the ones least
     // in need of throttling.
     //

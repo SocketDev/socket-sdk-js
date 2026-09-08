@@ -32,7 +32,7 @@ import process from 'node:process'
 import {
   ISOLATED_ENV_VARS,
   TOOLCHAIN_ROOT_VARS,
-} from '../../../../scripts/fleet/prose/test-isolation-law.mts'
+} from '../../../../scripts/fleet/constants/test-isolation.mts'
 
 // Where each isolated var lands inside the sandbox. The KEYS are not listed
 // here -- they come from ISOLATED_ENV_VARS, which is the law's own statement of
@@ -44,12 +44,12 @@ import {
 const SANDBOX_SUBPATHS: Record<string, readonly string[]> = {
   __proto__: null,
   HOME: [],
+  npm_config_cache: ['.npm'],
   USERPROFILE: [],
   XDG_CACHE_HOME: ['.cache'],
   XDG_CONFIG_HOME: ['.config'],
   XDG_DATA_HOME: ['.local', 'share'],
   XDG_STATE_HOME: ['.local', 'state'],
-  npm_config_cache: ['.npm'],
 } as unknown as Record<string, readonly string[]>
 
 // XDG_CONFIG_HOME is pinned here but is NOT in the law's list, which stops at
@@ -104,7 +104,9 @@ export function isolateHomeEnv(): string {
   // name is inert and the store relocates into the sandbox anyway.
   if (!process.env['PNPM_CONFIG_STORE_DIR']) {
     const pnpmHome = process.env['PNPM_HOME']
-    const store = pnpmHome ? path.join(pnpmHome, 'store') : undefined
+    const store =
+      process.env['PNPM_STORE_PATH'] ||
+      (pnpmHome ? path.join(pnpmHome, 'store') : undefined)
     if (store && existsSync(store)) {
       process.env['PNPM_CONFIG_STORE_DIR'] = store
     }
