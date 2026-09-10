@@ -170,7 +170,6 @@ describe('v1 full-scan polling', () => {
       'example-org',
       'example-scan',
       {
-        maxPollMs: 100,
         pollIntervalMs: 10,
         runtime: {
           now: () => now,
