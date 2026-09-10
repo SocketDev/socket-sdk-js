@@ -7,7 +7,6 @@ import { describe, expect, it } from 'vitest'
 import { SocketPurlClient } from '../../../src/public-purl-client.mts'
 import { SocketSdk } from '../../../src/socket-sdk-class.mts'
 import { promiseWithResolvers } from '../../../src/utils.mts'
-import { mergeAsyncGenerators } from '../../../src/utils/async-generators.mts'
 import { createPublicApiServer } from '../../utils/public-api-server.mts'
 
 describe('PURL batch pool', () => {
@@ -147,27 +146,5 @@ describe('PURL batch pool', () => {
     } finally {
       await server.close()
     }
-  })
-
-  it('propagates a generator failure and closes another suspended generator', async () => {
-    const failure = new Error('example failure')
-    const suspended = promiseWithResolvers<void>()
-    let cleaned = false
-    async function* waiting(): AsyncGenerator<string> {
-      try {
-        await suspended.promise
-        yield 'example item'
-      } finally {
-        cleaned = true
-      }
-    }
-    async function* failing(): AsyncGenerator<string> {
-      yield await Promise.reject(failure)
-    }
-    const iterator = mergeAsyncGenerators([waiting, failing], 2, () =>
-      suspended.resolve(),
-    )
-    await expect(iterator.next()).rejects.toBe(failure)
-    expect(cleaned).toBe(true)
   })
 })

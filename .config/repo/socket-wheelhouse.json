@@ -36,6 +36,7 @@
       "mid": [
         "test/fleet/integration/comment-voice.test.mts",
         "test/fleet/nock-loopback-passthrough.test.mts",
+        "test/repo/integration/sync-openapi.test.mts",
         "test/repo/unit/alert-resolutions.test.mts",
         "test/repo/unit/blob.test.mts",
         "test/repo/unit/coverage-non-error-paths-retry-cache.test.mts",
@@ -78,7 +79,6 @@
         "test/repo/unit/socket-sdk-retry.test.mts",
         "test/repo/unit/socket-sdk-success-paths.test.mts",
         "test/repo/unit/socket-sdk-upload.test.mts",
-        "test/repo/unit/sync-openapi.test.mts",
         "test/repo/unit/threat-campaigns-v1.test.mts",
         "test/repo/unit/types-strict.test.mts",
         "test/socket-sdk-logging-hooks.test.mts"
@@ -90,7 +90,7 @@
         "test/repo/unit/build.test.mts",
         "test/repo/unit/bundle-validation.test.mts",
         "test/repo/unit/clean.test.mts",
-        "test/repo/unit/openapi-contracts.test.mts"
+        "test/repo/unit/generate-sdk.test.mts"
       ]
     }
   }

@@ -96,6 +96,7 @@ it('bases generated changes on the current workflow and source', async () => {
     const currentHead = runGitOrThrow(['rev-parse', 'HEAD'], { cwd: root })
     const generatedPath = path.join(root, 'generated.mts')
     await fs.writeFile(generatedPath, 'export type Generated = string\n')
+    const generatedBytes = await fs.readFile(generatedPath)
     runGitOrThrow(['switch', '--create', branch], { cwd: root })
     expect(runGitOrThrow(['rev-parse', 'HEAD'], { cwd: root })).toBe(
       currentHead,
@@ -103,9 +104,7 @@ it('bases generated changes on the current workflow and source', async () => {
     expect(await fs.readFile(workflowPath, 'utf8')).toBe(
       'name: current workflow\n',
     )
-    expect(await fs.readFile(generatedPath, 'utf8')).toBe(
-      'export type Generated = string\n',
-    )
+    expect(await fs.readFile(generatedPath)).toEqual(generatedBytes)
   } finally {
     await safeDelete(root)
   }

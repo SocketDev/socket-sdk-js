@@ -16,7 +16,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
   repoUsesRolldown,
   scan,
-} from '../../../scripts/fleet/check/dependencies-are-deduped.mts'
+} from '../../../../scripts/fleet/check/dependencies-are-deduped.mts'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('repoUsesRolldown', () => {
