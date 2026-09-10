@@ -2453,9 +2453,6 @@ opencode.json
 .config/fleet/pnpm-workspace.fleet.yaml
 .config/fleet/rolldown/bundle-regions.mts
 .config/fleet/rolldown/bundle-stub.mts
-.config/fleet/rolldown/define-guarded.mts
-.config/fleet/rolldown/engine-gate-fold.mts
-.config/fleet/rolldown/factory-collision.mts
 .config/fleet/rolldown/hook-bundle-excluded.config.mts
 .config/fleet/rolldown/hook-bundle-snapshot.config.mts
 .config/fleet/rolldown/hook-bundle.config.mts
