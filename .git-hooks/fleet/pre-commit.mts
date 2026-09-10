@@ -12,6 +12,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { debugCheck } from '../_shared/check-output.mts'
 
 import {
   catastrophicDeletionReason,
@@ -159,7 +160,7 @@ function checkSigningConfig(): number {
 function checkDsStoreFiles(stagedFiles: string[]): number {
   let errors = 0
   // .DS_Store files.
-  logger.info('Checking for .DS_Store files…')
+  debugCheck('Checking for .DS_Store files…')
   const dsStores = stagedFiles.filter(f => f.includes('.DS_Store'))
   if (dsStores.length > 0) {
     logger.fail('.DS_Store file detected!')
@@ -174,7 +175,7 @@ function checkDsStoreFiles(stagedFiles: string[]): number {
 function checkLogFiles(stagedFiles: string[]): number {
   let errors = 0
   // Log files, ignore test logs.
-  logger.info('Checking for log files…')
+  debugCheck('Checking for log files…')
   const logs = stagedFiles.filter(
     f => f.endsWith('.log') && !/test.*\.log$/.test(f),
   )
@@ -194,7 +195,7 @@ function checkEnvFiles(stagedFiles: string[]): number {
   // .env.precommit (templates / tracked placeholders). Match the
   // commit-msg.mts behavior: a nested .env.local is just as much a
   // leak as a root-level one. basename() catches both.
-  logger.info('Checking for .env files…')
+  debugCheck('Checking for .env files…')
   const envFiles = stagedFiles.filter(f => {
     const base = path.basename(f)
     return (
@@ -223,7 +224,7 @@ function checkPersonalPaths(stagedFiles: string[]): number {
   // table whose regexes spell `/Users/` is data, not a leak. Scanning it here
   // while the gate ignored it stranded operators between a red hook and a
   // green check, with a suggested fix that would corrupt the payload.
-  logger.info('Checking for hardcoded personal paths…')
+  debugCheck('Checking for hardcoded personal paths…')
   for (let k = 0, { length: klen } = stagedFiles; k < klen; k += 1) {
     const file = stagedFiles[k]!
     if (shouldSkipSourceScan(file)) {
@@ -259,7 +260,7 @@ function checkPersonalPaths(stagedFiles: string[]): number {
 
 function warnApiKeys(stagedFiles: string[]): void {
   // Socket API keys, warning, not blocking.
-  logger.info('Checking for API keys…')
+  debugCheck('Checking for API keys…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
     if (shouldSkipFile(file)) {
@@ -285,7 +286,7 @@ function warnApiKeys(stagedFiles: string[]): void {
 function checkOtherSecrets(stagedFiles: string[]): number {
   let errors = 0
   // Other secret patterns (AWS, GitHub, private keys).
-  logger.info('Checking for potential secrets…')
+  debugCheck('Checking for potential secrets…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
     if (shouldSkipFile(file)) {
@@ -331,7 +332,7 @@ function checkPackageJsonOverrides(stagedFiles: string[]): number {
   let errors = 0
   // package.json pnpm.overrides — overrides belong in
   // pnpm-workspace.yaml overrides:, not package.json.
-  logger.info('Checking for package.json pnpm.overrides…')
+  debugCheck('Checking for package.json pnpm.overrides…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
     if (path.basename(file) !== 'package.json' || shouldSkipFile(file)) {
@@ -363,7 +364,7 @@ function checkSoakExcludeDates(stagedFiles: string[]): number {
   // Claude edits; pre-push catches non-Claude pushes; this is the commit-time
   // twin so a staged bypass entry can't slip past `git commit`. Scans the staged
   // working-tree content via readFileForScan, parity with the other scanners.
-  logger.info('Checking soak-bypass date annotations…')
+  debugCheck('Checking soak-bypass date annotations…')
   if (stagedFiles.includes('pnpm-workspace.yaml')) {
     const text = readFileForScan('pnpm-workspace.yaml')
     if (text) {
@@ -392,7 +393,7 @@ function checkSoakExcludeDates(stagedFiles: string[]): number {
 function checkNpxDlxUsage(stagedFiles: string[]): number {
   let errors = 0
   // npx/dlx usage.
-  logger.info('Checking for npx/dlx usage…')
+  debugCheck('Checking for npx/dlx usage…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
     // shouldSkipFile covers tests, fixtures, .git-hooks, etc. — test
@@ -463,7 +464,7 @@ function warnDocsPnpmFirst(stagedFiles: string[]): void {
   // pnpm form. npm/yarn fallbacks come after. Block-only — inline
   // backtick spans are not scanned. Suppress per-block with
   // `oxlint-disable-next-line socket/docs-lead-with-pnpm`.
-  logger.info('Checking docs lead with pnpm install commands…')
+  debugCheck('Checking docs lead with pnpm install commands…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
     if (shouldSkipFile(file)) {
@@ -513,7 +514,7 @@ function isLoggerExemptPath(file: string): boolean {
   // template/ is the canonical source for code that cascades to
   // .claude/hooks/, .git-hooks/, and scripts/. Apply the same
   // exemption at the source. stripTemplateLayer collapses the
-  // archetype layer segment (template/base/... → template/...) so
+  // archetype layer segment (template/base/universal/... → template/...) so
   // the move stays exempt.
   const layerless = stripTemplateLayer(file)
   return (
@@ -543,7 +544,7 @@ function checkLoggerLeaks(stagedFiles: string[]): number {
   // from @socketsecurity/lib-stable/logger/default; the logger-guard PreToolUse hook
   // catches these at edit time, this gate catches them at commit time
   // for edits made outside Claude.
-  logger.info('Checking for direct stream writes…')
+  debugCheck('Checking for direct stream writes…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
     if (shouldSkipFile(file)) {
@@ -588,7 +589,7 @@ function checkCrossRepoPaths(stagedFiles: string[]): number {
   // out of the current repo) or `…/projects/<fleet-repo>/…` (absolute
   // sibling-clone escape). Both forms hardcode someone's local layout
   // and break in CI / fresh clones / non-standard checkouts.
-  logger.info('Checking for cross-repo path references…')
+  debugCheck('Checking for cross-repo path references…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
     if (shouldSkipFile(file)) {
@@ -655,7 +656,7 @@ function checkPrProcessComments(stagedFiles: string[]): number {
   // markdown, docs, JSON, and YAML reference these patterns legitimately.
   // shouldSkipFile still exempts tests/fixtures. Per-line opt-out:
   // `// oxlint-disable-next-line socket/no-pr-process-comment`.
-  logger.info('Checking comments for PR-process / step-N references…')
+  debugCheck('Checking comments for PR-process / step-N references…')
   for (let j = 0, { length: jlen } = stagedFiles; j < jlen; j += 1) {
     const file = stagedFiles[j]!
     if (shouldSkipSourceScan(file)) {
@@ -699,7 +700,7 @@ function checkOxlintRuleWiring(
   // commit time, not just in a PR, many commits land without one. No-ops
   // unless a wiring-relevant file is staged + the generator is present
   // so it only runs in the wheelhouse, where the rule files live.
-  logger.info('Checking oxlint plugin rule wiring…')
+  debugCheck('Checking oxlint plugin rule wiring…')
   const wiringRoot = repoTopline || process.cwd()
   const wiringDrift = checkOxlintRuleWiringStaged(stagedFiles, wiringRoot)
   if (wiringDrift) {
@@ -733,7 +734,7 @@ function checkCanonicalForks(
   // the guard cannot attribute or fire for it), or a hand-run git command.
   // Bypass: SOCKET_PRE_COMMIT_ALLOW_CANONICAL_FORK=1, one-shot, for a
   // genuine emergency hotfix that can't wait for a template edit + cascade.
-  logger.info('Checking for canonical files forked outside the cascade…')
+  debugCheck('Checking for canonical files forked outside the cascade…')
   if (!process.env['SOCKET_PRE_COMMIT_ALLOW_CANONICAL_FORK']) {
     const forkRoot = repoTopline || process.cwd()
     const forkFindings = scanCanonicalForkPaths(stagedFiles, forkRoot)
@@ -766,7 +767,7 @@ function checkCanonicalForks(
 }
 
 const main = (): number => {
-  logger.info('Running Socket Security checks…')
+  debugCheck('Running Socket Security checks…')
   const wipeVerdict = refuseCatastrophicDeletion()
   if (wipeVerdict) {
     return wipeVerdict
@@ -789,7 +790,7 @@ const main = (): number => {
   // proved the commit is non-empty, a pure-deletion or merge commit. Nothing
   // for the content scanners to read, so the security sweep is a no-op.
   if (stagedFiles.length === 0) {
-    logger.success('No files to scan')
+    debugCheck('No files to scan')
     return 0
   }
 
@@ -831,7 +832,7 @@ const main = (): number => {
   // them in this security pass too meant the staged delta was tested twice, and
   // this pass used the old 60s ceiling, which is what blew the ≤10s pre-commit
   // budget. The single bounded shell step keeps the commit fast.
-  logger.success('All security checks passed!')
+  debugCheck('All security checks passed!')
   return 0
 }
 

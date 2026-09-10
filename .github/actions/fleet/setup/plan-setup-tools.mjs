@@ -121,6 +121,7 @@ export function resolveSfwSelection({ probe, socketApiToken, toolsFile }) {
   const shape = sfwShape(probe(toolsFile, [...nsKeys, 'sfw-free', 'version']))
   const { flavor, repo } = selectSfwFlavor(socketApiToken)
   return {
+    __proto__: null,
     entryPath: sfwEntryPath(shape, flavor),
     flavor,
     ns,
@@ -138,6 +139,7 @@ export function resolveSfwSelection({ probe, socketApiToken, toolsFile }) {
  */
 export function fallbackSfwSelection(shape) {
   return {
+    __proto__: null,
     entryPath: sfwEntryPath(shape, 'free'),
     flavor: 'free',
     repo: 'SocketDev/sfw-free',

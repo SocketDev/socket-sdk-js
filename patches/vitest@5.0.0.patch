@@ -1,0 +1,16 @@
+diff --git a/dist/chunks/index.B89dZ0-N.js b/dist/chunks/index.B89dZ0-N.js
+index 50abf4fbed1dc8670b7941ee466a7c8443840c5f..7f97e0bf884a338e1fff90d5cf3c1298d710c824 100644
+--- a/dist/chunks/index.B89dZ0-N.js
++++ b/dist/chunks/index.B89dZ0-N.js
+@@ -14942,10 +14942,7 @@ Update your dependencies and make sure the versions match.`));
+ 			const include = this.options.include;
+ 			this.globMatchers = {
+ 				matchExclude: exclude.length ? pm(exclude, { dot: true }) : () => false,
+-				matchInclude: include ? pm(include, {
+-					dot: true,
+-					ignore: exclude
+-				}) : () => true
++				matchInclude: include ? pm(include, { dot: true }) : () => true
+ 			};
+ 		}
+ 		return this.globMatchers;
