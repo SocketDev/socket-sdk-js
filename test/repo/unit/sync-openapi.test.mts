@@ -8,11 +8,12 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
-import { expect, it } from 'vitest'
+import { expect, it, vi } from 'vitest'
 import { parse as parseYaml } from 'yaml'
 
+import { runGitOrThrow } from '../../../.claude/hooks/fleet/_shared/git-runner.mts'
 import { SYNC_OPENAPI_WORKFLOW_PATH } from '../../../scripts/repo/paths.mts'
+import { makeGitRepo } from '../../fleet/_shared/lib/git-fixture.mts'
 
 interface WorkflowStep {
   env?: Record<string, string> | undefined
@@ -29,20 +30,6 @@ interface SyncWorkflow {
       steps: WorkflowStep[]
     }
   }
-}
-
-async function runGit(cwd: string, args: string[]): Promise<string> {
-  const { code, stdout } = await spawn('git', args, {
-    cwd,
-    stdio: 'pipe',
-    stdioString: true,
-  })
-  if (code !== 0) {
-    throw new Error(
-      `Git fixture failed in ${cwd}: exit ${code}; expected 0. Inspect the fixture command.`,
-    )
-  }
-  return stdout
 }
 
 it('limits write jobs to the default branch and uses the PR App for changes', async () => {
@@ -87,10 +74,10 @@ it('bases generated changes on the current workflow and source', async () => {
   }
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'sdk-openapi-base-'))
   try {
-    await runGit(root, ['init', '--initial-branch=fixture-main'])
+    runGitOrThrow(['init', '--initial-branch=fixture-main'], { cwd: root })
     const workflowPath = path.join(root, 'workflow.yml')
     await fs.writeFile(workflowPath, 'name: original workflow\n')
-    await runGit(root, ['add', 'workflow.yml'])
+    runGitOrThrow(['add', 'workflow.yml'], { cwd: root })
     const commitArgs = [
       '-c',
       'commit.gpgsign=false',
@@ -102,15 +89,17 @@ it('bases generated changes on the current workflow and source', async () => {
       '-m',
       'test: record workflow',
     ]
-    await runGit(root, commitArgs)
+    runGitOrThrow(commitArgs, { cwd: root })
     await fs.writeFile(workflowPath, 'name: current workflow\n')
-    await runGit(root, ['add', 'workflow.yml'])
-    await runGit(root, commitArgs)
-    const currentHead = await runGit(root, ['rev-parse', 'HEAD'])
+    runGitOrThrow(['add', 'workflow.yml'], { cwd: root })
+    runGitOrThrow(commitArgs, { cwd: root })
+    const currentHead = runGitOrThrow(['rev-parse', 'HEAD'], { cwd: root })
     const generatedPath = path.join(root, 'generated.mts')
     await fs.writeFile(generatedPath, 'export type Generated = string\n')
-    await runGit(root, ['switch', '--create', branch])
-    expect(await runGit(root, ['rev-parse', 'HEAD'])).toBe(currentHead)
+    runGitOrThrow(['switch', '--create', branch], { cwd: root })
+    expect(runGitOrThrow(['rev-parse', 'HEAD'], { cwd: root })).toBe(
+      currentHead,
+    )
     expect(await fs.readFile(workflowPath, 'utf8')).toBe(
       'name: current workflow\n',
     )
@@ -119,5 +108,24 @@ it('bases generated changes on the current workflow and source', async () => {
     )
   } finally {
     await safeDelete(root)
+  }
+})
+
+it('isolates fixture Git commands from inherited repository paths', () => {
+  const fixture = makeGitRepo()
+  const inherited = makeGitRepo()
+  try {
+    const expectedGitDir = fixture.git('rev-parse', '--absolute-git-dir')
+    const inheritedGitDir = inherited.git('rev-parse', '--absolute-git-dir')
+    vi.stubEnv('GIT_DIR', inheritedGitDir)
+    vi.stubEnv('GIT_WORK_TREE', inherited.dir)
+    vi.stubEnv('GIT_INDEX_FILE', path.join(inheritedGitDir, 'index'))
+    expect(
+      runGitOrThrow(['rev-parse', '--absolute-git-dir'], { cwd: fixture.dir }),
+    ).toBe(expectedGitDir)
+  } finally {
+    vi.unstubAllEnvs()
+    fixture.cleanup()
+    inherited.cleanup()
   }
 })
