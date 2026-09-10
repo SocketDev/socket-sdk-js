@@ -26,6 +26,7 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
 
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -130,7 +131,7 @@ export function sweepOrphanedShmSegments(): void {
   }
 }
 
-if (isMainModule(import.meta.url)) {
+function main(): void {
   sweepOrphanedShmSegments()
 
   // Sync is required here: this top-level CLI runner exits with the
@@ -151,4 +152,13 @@ if (isMainModule(import.meta.url)) {
   ) as { status?: number | null | undefined }
 
   process.exit(result.status ?? 1)
+}
+
+const SCRIPT_META = {
+  describe: 'run SDK fuzz targets',
+  help: `Usage: node scripts/repo/fuzz.mts [vitest options]\n\narguments are forwarded to Vitest\n--help, -h  show usage\n--describe  show purpose`,
+}
+
+if (isMainModule(import.meta.url)) {
+  runMain(main, SCRIPT_META)
 }

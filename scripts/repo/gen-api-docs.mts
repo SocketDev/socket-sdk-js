@@ -13,6 +13,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { extractMethods, renderApiDocs } from './gen-api-docs-lib.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 const rootPackageJsonPath = findUpSync('package.json', {
@@ -24,7 +25,7 @@ if (!rootPackageJsonPath) {
 const rootPath = path.dirname(rootPackageJsonPath)
 const outPath = path.join(rootPath, 'docs/api.md')
 
-function main(): void {
+export function generateApiDocs(): void {
   const check = process.argv.includes('--check')
   const methods = extractMethods()
   const next = renderApiDocs(methods)
@@ -46,6 +47,11 @@ function main(): void {
   )
 }
 
+const SCRIPT_META = {
+  describe: 'generate SDK API documentation',
+  help: `Usage: node scripts/repo/gen-api-docs.mts [--check]\n\n--check  verify documentation without writing\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(generateApiDocs, SCRIPT_META)
 }

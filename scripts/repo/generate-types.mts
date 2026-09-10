@@ -13,6 +13,7 @@ import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -26,7 +27,7 @@ const rootPath = path.dirname(rootPackageJsonPath)
 const openApiJsonPath = path.join(rootPath, 'openapi.json')
 const typesPath = path.join(rootPath, 'types/api.d.ts')
 
-async function main(): Promise<void> {
+export async function generateApiTypes(): Promise<void> {
   try {
     const output = await openapiTS(openApiJsonPath, {
       transform(schemaObject) {
@@ -44,9 +45,11 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'generate API TypeScript declarations',
+  help: `Usage: node scripts/repo/generate-types.mts\n\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
-  })
+  runMain(generateApiTypes, SCRIPT_META)
 }

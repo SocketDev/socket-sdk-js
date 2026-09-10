@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 /**
  * An SDK method name, as `getOrgFullScanList`. Named so the table's key says
@@ -185,8 +186,13 @@ function main(): void {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'validate SDK operation quota metadata',
+  help: `Usage: node scripts/repo/validate-quota-sync.mts [--warn]\n\n--warn  report errors without failing\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }
 
 // ---------------------------------------------------------------------------

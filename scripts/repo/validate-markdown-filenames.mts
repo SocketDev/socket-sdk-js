@@ -23,6 +23,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { findUpPackageJson } from '@socketsecurity/lib-stable/packages/find'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -107,11 +108,13 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'validate Markdown filenames and locations',
+  help: `Usage: node scripts/repo/validate-markdown-filenames.mts\n\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.fail(`Validation failed: ${e}`)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }
 
 /**

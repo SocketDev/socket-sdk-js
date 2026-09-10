@@ -34,6 +34,7 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { runCommand } from './run-command.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 // CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
 const traverse =
@@ -278,9 +279,11 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'generate SDK definitions from the Socket OpenAPI schema',
+  help: `Usage: pnpm run generate-sdk\n\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

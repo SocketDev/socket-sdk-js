@@ -15,6 +15,7 @@ import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { createSectionHeader } from '@socketsecurity/lib-stable/stdio/header'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -176,35 +177,6 @@ async function main(): Promise<void> {
       strict: false,
     })
 
-    // Show help if requested
-    if (values['help']) {
-      logger.log('Clean Runner')
-      logger.log('')
-      logger.log('Usage: pnpm clean [options]')
-      logger.log('')
-      logger.log('Options:')
-      logger.log('  --help              Show this help message')
-      logger.log('  --all               Clean everything (default if no flags)')
-      logger.log('  --cache             Clean cache directories')
-      logger.log('  --coverage          Clean coverage reports')
-      logger.log('  --dist              Clean build output')
-      logger.log('  --types             Clean TypeScript declarations only')
-      logger.log('  --modules           Clean node_modules')
-      logger.log('  --quiet, --silent   Suppress progress messages')
-      logger.log('')
-      logger.log('Examples:')
-      logger.log(
-        '  pnpm clean                  # Clean everything except node_modules',
-      )
-      logger.log('  pnpm clean --dist           # Clean build output only')
-      logger.log('  pnpm clean --cache --coverage  # Clean cache and coverage')
-      logger.log(
-        '  pnpm clean --all --modules  # Clean everything including node_modules',
-      )
-      process.exitCode = 0
-      return
-    }
-
     const quiet = Boolean(values.quiet || values.silent)
 
     const tasks = selectCleanTasks({
@@ -251,9 +223,17 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'remove selected SDK build outputs',
+  help: `Usage: pnpm clean [options]\n\n--all  clean cache, coverage, and dist
+--cache  clean caches
+--coverage  clean coverage
+--dist  clean bundles and declarations
+--types  clean declarations
+--modules  clean dependencies
+--quiet, --silent  suppress progress\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

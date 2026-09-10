@@ -22,6 +22,7 @@ import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.m
 import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -384,38 +385,6 @@ async function main(): Promise<void> {
       strict: false,
     })
 
-    // Show help if requested
-    if (values.help) {
-      logger.log('Build Runner')
-      logger.log('')
-      logger.log('Usage: pnpm build [options]')
-      logger.log('')
-      logger.log('Options:')
-      logger.log('  --help       Show this help message')
-      logger.log('  --src        Build source code only')
-      logger.log('  --types      Build TypeScript declarations only')
-      logger.log(
-        '  --watch      Watch mode with incremental builds (68% faster rebuilds)',
-      )
-      logger.log('  --needed     Only build if dist files are missing')
-      logger.log('  --analyze    Show bundle size analysis')
-      logger.log('  --quiet, --silent  Suppress progress messages')
-      logger.log('  --verbose    Show detailed build output')
-      logger.log('')
-      logger.log('Examples:')
-      logger.log('  pnpm build              # Full build (source + types)')
-      logger.log('  pnpm build --src        # Build source only')
-      logger.log('  pnpm build --types      # Build types only')
-      logger.log(
-        '  pnpm build --watch      # Watch mode with incremental builds',
-      )
-      logger.log('  pnpm build --analyze    # Build with size analysis')
-      logger.log('')
-      logger.log('Note: Watch mode uses rolldown for incremental rebuilds')
-      process.exitCode = 0
-      return
-    }
-
     const quiet = Boolean(values.quiet || values.silent)
     const verbose = Boolean(values.verbose)
 
@@ -462,9 +431,17 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'build SDK bundles and declarations',
+  help: `Usage: pnpm build [options]\n\n--src  build source only
+--types  build declarations only
+--watch  watch source changes
+--needed  skip existing outputs
+--analyze  report bundle size
+--quiet, --silent  suppress progress
+--verbose  show detailed output\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

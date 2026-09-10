@@ -32,6 +32,7 @@ import {
 import type { StrictTypeConfig } from './generate-strict-types-emit.mts'
 import type { AstNode } from './generate-strict-types-lib.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 /**
  * An SDK method name, as `getOrgFullScanList`. Named so the table's key says
@@ -414,9 +415,11 @@ ${generateWrapperTypes()}
   }
 }
 
+const SCRIPT_META = {
+  describe: 'generate strict SDK operation types',
+  help: `Usage: node scripts/repo/generate-strict-types.mts\n\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }
