@@ -89,9 +89,19 @@ jobs:
           payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
+      - name: Mint OpenAPI PR token
+        id: openapi-app
+        env:
+          APP_PRIVATE_KEY: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          CLIENT_ID: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          OWNER: ${{ github.repository_owner }}
+          PERMISSIONS: '{"contents":"write","issues":"write","pull_requests":"write"}'
+          REPOSITORIES: ${{ github.event.repository.name }}
+        run: node .github/actions/fleet/github-payload-app-token/mint-app-installation-token.mjs
+
       - name: Configure push credentials
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.openapi-app.outputs.token }}
         run: git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
 
       - uses: ./.github/actions/fleet/setup-git-signing
@@ -141,7 +151,7 @@ jobs:
       - name: Create Pull Request
         if: steps.check.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.openapi-app.outputs.token }}
         run: |
           # Check if PR already exists
           existing_pr=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
