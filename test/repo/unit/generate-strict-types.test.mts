@@ -6,16 +6,16 @@ import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
-import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { updateIndexExports } from '../../../scripts/repo/generate-strict-types.mts'
 
 const fixtureDirs: string[] = []
 
-afterEach(() => {
+afterEach(async () => {
   for (const directory of fixtureDirs.splice(0)) {
-    safeDeleteSync(directory)
+    await safeDelete(directory)
   }
 })
 

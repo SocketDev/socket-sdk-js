@@ -10,7 +10,6 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import * as path from 'node:path'
 import { Readable } from 'node:stream'
-import { setTimeout as sleep } from 'node:timers/promises'
 
 import FormData from 'form-data'
 import nock from 'nock'
@@ -22,6 +21,7 @@ import {
   getFormData,
 } from '../../../src/file-upload.mts'
 import { SocketSdk } from '../../../src/index.mts'
+import { tolerantSleep } from '../../fleet/_shared/lib/timing.mts'
 import { setupNockEnvironment } from '../../utils/environment.mts'
 import { FAST_TEST_CONFIG } from '../../utils/fast-test-config.mts'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
@@ -41,7 +41,7 @@ describe('File Upload - createRequestBodyForFilepaths', () => {
 
   afterEach(async () => {
     // Allow time for any async operations to complete
-    await new Promise(resolve => setTimeout(resolve, 10))
+    await tolerantSleep(10)
     if (tempDir) {
       await safeDelete(tempDir)
     }
@@ -145,7 +145,7 @@ describe('File Upload - createUploadRequest', () => {
 
   afterEach(async () => {
     // Allow time for any async operations to complete
-    await sleep(10)
+    await tolerantSleep(10)
     if (tempDir) {
       await safeDelete(tempDir)
     }
@@ -349,7 +349,7 @@ describe('SocketSdk - Upload Manifest', () => {
 
   afterEach(async () => {
     // Allow time for any async operations to complete
-    await sleep(10)
+    await tolerantSleep(10)
     if (tempDir) {
       await safeDelete(tempDir)
     }

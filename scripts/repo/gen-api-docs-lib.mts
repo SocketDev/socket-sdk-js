@@ -49,8 +49,13 @@ export function extractMethods(
   data = loadQuotaData(),
 ): MethodInfo[] {
   const methods: MethodInfo[] = []
+  const names = new Set<string>()
   for (const method of extractSdkClassMethods(source)) {
     const { name, isGenerator, signature, summary, hadOperationIdNone } = method
+    if (names.has(name)) {
+      continue
+    }
+    names.add(name)
     const operationId =
       method.operationId ??
       (!hadOperationIdNone && data.api[name] ? name : undefined)

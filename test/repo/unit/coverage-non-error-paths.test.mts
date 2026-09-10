@@ -22,7 +22,7 @@ import {
 } from '../../../src/file-upload.mts'
 import { createGetRequest, getResponseJson } from '../../../src/http-client.mts'
 import { promiseWithResolvers } from '../../../src/utils.mts'
-import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
+import { setupLocalHttpServer } from '../../utils/local-server.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
@@ -125,7 +125,7 @@ describe('getResponseJson enhanced error branches', () => {
     await new Promise<void>(resolve => {
       server.listen(0, () => {
         const address = server.address()
-        if (address && typeof address === 'object') {
+        if (address !== null && typeof address === 'object') {
           baseUrl = `http://127.0.0.1:${address.port}`
           resolve()
         }

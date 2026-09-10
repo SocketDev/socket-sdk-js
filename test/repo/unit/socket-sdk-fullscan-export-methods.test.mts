@@ -1,10 +1,8 @@
 /**
- * @file Tests for the full-scan export and repo-HEAD diff Socket SDK methods
- *   added for SURF-195 API parity (getOrgFullScanCsv, getOrgFullScanPdf,
- *   createOrgRepoDiff).
+ * @file Tests for full-scan export and repository diff methods.
  */
 
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -12,8 +10,9 @@ import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { setupTestClient } from '../../utils/environment.mts'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
-describe('Socket SDK - Full-scan export & repo diff methods (SURF-195)', () => {
+describe('Socket SDK - Full-scan export & repo diff methods', () => {
   const getClient = setupTestClient('test-api-token', { retries: 0 })
 
   describe('getOrgFullScanCsv', () => {
@@ -74,7 +73,7 @@ describe('Socket SDK - Full-scan export & repo diff methods (SURF-195)', () => {
 
   describe('getOrgFullScanPdf', () => {
     it('should return raw PDF bytes as a Buffer', async () => {
-      const pdfBytes = Buffer.from('%PDF-1.7\n...binary...', 'utf8')
+      const pdfBytes = Buffer.from('%PDF-1.7\n...binary…', 'utf8')
 
       nock('https://api.socket.dev')
         .post('/v0/orgs/test-org/full-scans/scan-1/format/pdf')
@@ -144,7 +143,7 @@ describe('Socket SDK - Full-scan export & repo diff methods (SURF-195)', () => {
           expect(data.diff_scan.id).toBe('diff-1')
         }
       } finally {
-        rmSync(tempDir, { recursive: true, force: true })
+        safeDeleteSync(tempDir)
       }
     })
 
@@ -184,7 +183,7 @@ describe('Socket SDK - Full-scan export & repo diff methods (SURF-195)', () => {
           expect(result.error).toBeDefined()
         }
       } finally {
-        rmSync(tempDir, { recursive: true, force: true })
+        safeDeleteSync(tempDir)
       }
     })
   })

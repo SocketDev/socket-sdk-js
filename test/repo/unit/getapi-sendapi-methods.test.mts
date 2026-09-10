@@ -2,10 +2,13 @@
  * @file Tests for the generic getApi method functionality.
  */
 
+import os from 'node:os'
+import process from 'node:process'
+
 import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
-import { DEFAULT_USER_AGENT } from '../../../src/constants.mts'
+import rootPkgJson from '../../../package.json' with { type: 'json' }
 import { SocketSdk } from '../../../src/index.mts'
 import {
   captureRequestHeaders,
@@ -311,7 +314,7 @@ describe('getApi and sendApi Methods', () => {
 
       // The caller token is appended to the enriched SDK base, not swapped in.
       expect(capturedHeaders['user-agent']).toBe(
-        `${DEFAULT_USER_AGENT} CustomApp/1.0.0`,
+        `socketsecurity-sdk/${rootPkgJson.version} node/${process.version} ${os.platform()}/${os.arch()} CustomApp/1.0.0`,
       )
       expect(capturedHeaders['user-agent']).toContain('node/')
     })

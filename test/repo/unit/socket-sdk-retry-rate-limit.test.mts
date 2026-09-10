@@ -92,7 +92,7 @@ describe('SocketSdk - Retry Logic', () => {
           expect(result.data.quota).toBe(2000)
         }
         expect(attemptCount).toBe(2)
-        // Verify timing (test environment may have timing variance)
+        // Verify elapsed time.
         const elapsed = Date.now() - startTime
         // Just verify it completed
         expect(elapsed).toBeGreaterThanOrEqual(0)
@@ -111,7 +111,7 @@ describe('SocketSdk - Retry Logic', () => {
           .reply(() => {
             attemptCount++
             if (attemptCount < 2) {
-              // Return Retry-After as array (some servers might do this)
+              // Return multiple Retry-After values.
               return [
                 429,
                 { error: { message: 'Too Many Requests' } },

@@ -81,7 +81,7 @@ describe('SDK streaming reads are lazy', () => {
     await new Promise<void>(resolve => {
       server.listen(0, '127.0.0.1', () => {
         const address = server.address()
-        if (address && typeof address === 'object') {
+        if (address !== null && typeof address === 'object') {
           baseUrl = `http://127.0.0.1:${address.port}/v0/`
         }
         resolve()

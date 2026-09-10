@@ -17,9 +17,9 @@ import { isError } from '@socketsecurity/lib/errors/predicates'
 import type { Server } from 'node:http'
 
 const responseBodies = {
-  normal: 'Hello, World!',
   empty: '',
   large: 'x'.repeat(10_000),
+  normal: 'Hello, World!',
 }
 
 describe('HTTP Client - Error Handling', () => {
@@ -59,7 +59,7 @@ describe('HTTP Client - Error Handling', () => {
     await new Promise<void>(resolve => {
       server.listen(0, '127.0.0.1', () => {
         const address = server.address()
-        if (address && typeof address === 'object') {
+        if (address !== null && typeof address === 'object') {
           const { port } = address
           baseUrl = `http://127.0.0.1:${port}`
           resolve()

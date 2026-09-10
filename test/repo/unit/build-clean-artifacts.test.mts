@@ -33,10 +33,10 @@ async function createArtifactFixture(): Promise<string> {
 
 describe('build artifact selection', () => {
   it.each([
-    [{}, 'all'],
-    [{ src: true }, 'src'],
+    [{}, 'full'],
+    [{ src: true }, 'source'],
     [{ types: true }, 'types'],
-    [{ src: true, types: true }, 'all'],
+    [{ src: true, types: true }, 'full'],
     [{ watch: true, types: true }, 'watch'],
   ])('selects the requested build for %j', (flags, mode) => {
     expect(selectBuildMode(flags)).toBe(mode)

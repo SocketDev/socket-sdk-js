@@ -1,33 +1,22 @@
-/*
- * @file Commit-time backstop for the fleet-fork rule. A fleet-canonical path
- *   (per .gitattributes `linguist-generated=true`) lives only in `template/`
- *   and is cascaded out via sync-scaffolding, which commits with
- *   `--no-verify` — a legitimate cascade commit never reaches this hook.
- *   Anything staged on a canonical path here was written outside the
- *   cascade: an Edit/Write/Bash tool call, a background Workflow `agent()`
- *   subagent (whose Bash reaches PreToolUse with the PARENT transcript, so
- *   the `no-fleet-fork-guard` PreToolUse hook cannot attribute or block it —
- *   see docs/fleet/agents.md/agent-delegation.md), or a hand-run git command.
- *   A git hook fires for every commit regardless of which process or agent
- *   ran `git commit`, so this closes the gap the tool-call guard cannot
- *   reach.
- *
- *   Reuses the exact decision inputs `no-fleet-fork-guard` already uses
- *   (fleetCanonicalEntries / isPerRepoMarkerPath / isOperatorLocalPath /
- *   textHasFleetBlockMarkers) from
- *   .claude/hooks/fleet/_shared/{fleet-fork,fleet-markers}.mts, so the two
- *   enforcement points can never disagree about what counts as canonical.
- */
-
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
+import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import {
+  readCanonicalIndexEntry,
+  readCanonicalTreeEntry,
+} from './canonical-git.mts'
+import { canonicalMemberCopyMatches } from './canonical-proof.mts'
+import type { CanonicalIndexEntry } from './canonical-git.mts'
 
 import {
   fleetCanonicalEntries,
   isOperatorLocalPath,
   isPerRepoMarkerPath,
 } from '../../.claude/hooks/fleet/_shared/fleet-fork.mts'
-import { textHasFleetBlockMarkers } from '../../.claude/hooks/fleet/_shared/fleet-markers.mts'
+import {
+  findFleetRegions,
+  textHasFleetBlockMarkers,
+} from '../../.claude/hooks/fleet/_shared/fleet-markers.mts'
 
 // Each child names one capability or member, never an arbitrary generated
 // bucket. Generated universal files map directly to the destination tree.
@@ -82,19 +71,96 @@ export function templateTwinPaths(repoRoot: string, file: string): string[] {
 export function matchesTemplateTwin(
   repoRoot: string,
   file: string,
-  content: string,
+  content: string | Uint8Array,
+  mode = '100644',
 ): boolean {
   const candidates = templateTwinPaths(repoRoot, file)
   for (let i = 0, { length } = candidates; i < length; i += 1) {
-    let twin: string
     try {
-      twin = readFileSync(candidates[i]!, 'utf8')
+      const stat = lstatSync(candidates[i]!)
+      const candidateMode = stat.mode & 0o111 ? '100755' : '100644'
+      if (!stat.isFile() || candidateMode !== mode) {
+        continue
+      }
+      if (
+        readFileSync(candidates[i]!).equals(
+          typeof content === 'string' ? Buffer.from(content) : content,
+        )
+      ) {
+        return true
+      }
     } catch {
       continue
     }
-    if (twin === content) {
-      return true
+  }
+  return false
+}
+
+function readForkGit(repoRoot: string, args: string[]): string {
+  const result = spawnSync('git', ['--literal-pathspecs', ...args], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: 5000,
+  })
+  return result.status === 0 ? (result.stdout ?? '') : ''
+}
+
+function mergeParentIds(repoRoot: string): string[] {
+  const mergeHeadPath = readForkGit(repoRoot, [
+    'rev-parse',
+    '--git-path',
+    'MERGE_HEAD',
+  ]).trim()
+  const parents = readFileSync(path.resolve(repoRoot, mergeHeadPath), 'utf8')
+    .trim()
+    .split(/\r?\n/)
+  // Each parent is a full SHA-1 (40 hex digits) or SHA-256 (64 hex digits).
+  if (
+    !parents.every(parent => /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(parent))
+  ) {
+    return []
+  }
+  return parents
+}
+
+export function matchesMergeParentIndex(
+  repoRoot: string,
+  file: string,
+): boolean {
+  try {
+    const parents = mergeParentIds(repoRoot)
+    if (parents.length === 0) {
+      return false
     }
+    const staged = readForkGit(repoRoot, [
+      'ls-files',
+      '--stage',
+      '-z',
+      '--',
+      file,
+    ])
+    // Match one stage-zero entry: mode, object ID, stage, then a tab.
+    const entry = /^(\d+) ([a-f0-9]+) 0\t/.exec(staged)
+    if (!entry || staged !== `${entry[0]}${file}\0`) {
+      return false
+    }
+    const expected = `${entry[1]} blob ${entry[2]}\t${file}\0`
+    for (const parent of parents) {
+      if (
+        readForkGit(repoRoot, ['cat-file', '-t', parent]).trim() !== 'commit'
+      ) {
+        return false
+      }
+      if (
+        readForkGit(repoRoot, ['ls-tree', '-z', parent, '--', file]) ===
+        expected
+      ) {
+        return true
+      }
+    }
+  } catch {
+    return false
   }
   return false
 }
@@ -110,8 +176,7 @@ function isInsideTemplateRelative(file: string): boolean {
 /**
  * Every staged path (repo-relative, POSIX-normalized, add/change/modify
  * only — a caller filters deletions out via `--diff-filter=ACM`) that is
- * fleet-canonical and was staged OUTSIDE the cascade. Pure aside from the
- * file reads the fleet-block-marker allowance needs.
+ * fleet-canonical and differs from its canonical source or merge parent.
  */
 export function scanCanonicalForkPaths(
   stagedFiles: readonly string[],
@@ -151,24 +216,48 @@ export function scanCanonicalForkPaths(
     if (!isCanonical) {
       continue
     }
-    // Fleet-block allowance: a canonical file carrying `<fleet-canonical>`
-    // markers is only PART fleet-managed — content outside the markers is
-    // repo-owned, so staging it is normal repo work, not a fork.
-    let content = ''
-    try {
-      content = readFileSync(path.join(repoRoot, file), 'utf8')
-    } catch {
-      // Unreadable (permissions, binary) — fall through as non-exempt; a
-      // canonical path staged unreadable is still worth surfacing.
-    }
-    if (textHasFleetBlockMarkers(content)) {
-      continue
-    }
-    // Byte-identical to canonical is propagation, not divergence.
-    if (matchesTemplateTwin(repoRoot, file, content)) {
+    const entry = readCanonicalIndexEntry(repoRoot, file)
+    if (entry && stagedCanonicalFileIsAllowed(repoRoot, file, entry)) {
       continue
     }
     findings.push({ file })
   }
   return findings
+}
+
+function fleetRegionBodies(content: Uint8Array): string[] {
+  const text = Buffer.from(content).toString('utf8')
+  if (!textHasFleetBlockMarkers(text)) {
+    return []
+  }
+  const lines = text.split(/(?<=\n)/u)
+  return findFleetRegions(lines).map(region =>
+    lines.slice(region.start, region.end + 1).join(''),
+  )
+}
+
+function stagedCanonicalFileIsAllowed(
+  repoRoot: string,
+  file: string,
+  entry: CanonicalIndexEntry,
+): boolean {
+  if (matchesMergeParentIndex(repoRoot, file)) {
+    return true
+  }
+  const baseline = readCanonicalTreeEntry(repoRoot, 'HEAD', file)
+  if (baseline && baseline.mode === entry.mode) {
+    const before = fleetRegionBodies(baseline.content)
+    const after = fleetRegionBodies(entry.content)
+    if (
+      before.length > 0 &&
+      before.length === after.length &&
+      before.every((body, index) => body === after[index])
+    ) {
+      return true
+    }
+  }
+  return (
+    matchesTemplateTwin(repoRoot, file, entry.content, entry.mode) ||
+    canonicalMemberCopyMatches(repoRoot, file, entry)
+  )
 }

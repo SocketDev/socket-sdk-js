@@ -55,7 +55,7 @@ export async function checkBundledDependencies(content: string): Promise<{
     CallExpression(callPath) {
       // Handle require() calls
       const { callee } = callPath.node
-      const [firstArg] = callPath.node.arguments
+      const { 0: firstArg } = callPath.node.arguments
       if (
         callee.type === 'Identifier' &&
         callee.name === 'require' &&
@@ -134,7 +134,7 @@ export async function checkBundledDependencies(content: string): Promise<{
           // Look for actual code that imports/requires this dependency
           CallExpression(callPath) {
             const { callee } = callPath.node
-            const [firstArg] = callPath.node.arguments
+            const { 0: firstArg } = callPath.node.arguments
             if (
               callee.type === 'Identifier' &&
               callee.name === 'require' &&
@@ -251,7 +251,7 @@ export function findNodeBuiltinImports(content: string): string[] {
       // Dynamic import(): the specifier is the parent CallExpression's first arg.
       const parent = importPath.parent
       if (parent.type === 'CallExpression') {
-        const [firstArg] = parent.arguments
+        const { 0: firstArg } = parent.arguments
         if (firstArg?.type === 'StringLiteral') {
           flag(firstArg.value)
         }
@@ -259,7 +259,7 @@ export function findNodeBuiltinImports(content: string): string[] {
     },
     CallExpression(callPath) {
       const { callee } = callPath.node
-      const [firstArg] = callPath.node.arguments
+      const { 0: firstArg } = callPath.node.arguments
       if (
         callee.type === 'Identifier' &&
         callee.name === 'require' &&

@@ -64,15 +64,20 @@ export function resolveStorePath({
   runnerOs,
 }) {
   if (queriedPath !== '') {
-    return { fallback: false, storePath: queriedPath }
+    return { __proto__: null, fallback: false, storePath: queriedPath }
   }
   if (runnerOs === 'Windows') {
     return {
+      __proto__: null,
       fallback: true,
       storePath: `${localAppData}/pnpm/store/v3`.replaceAll('\\', '/'),
     }
   }
-  return { fallback: true, storePath: `${home}/.local/share/pnpm/store/v3` }
+  return {
+    __proto__: null,
+    fallback: true,
+    storePath: `${home}/.local/share/pnpm/store/v3`,
+  }
 }
 
 /**
@@ -129,6 +134,7 @@ function defaultAppend(name) {
  */
 export function readStoreCacheEnv(env) {
   return {
+    __proto__: null,
     cacheVersion: env.CACHE_VERSION ?? '',
     home: env.HOME ?? '',
     keyPrefix: env.KEY_PREFIX ?? '',

@@ -1,21 +1,17 @@
-# <fleet-canonical>
-# Managed by socket-wheelhouse. Don't edit this block locally — edit
-# template/base/.github/workflows/ci.yml upstream and re-cascade via
-# `pnpm run sync`. Fleet CI runs check + test using the LOCAL composite actions
-# under .github/actions/ (inlined — no cross-repo reusable, no `uses:@sha` for
-# first-party). Repo-owned jobs go BELOW the END marker (still under the
-# top-level `jobs:` key). See scripts/repo/sync-scaffolding/checks/workflow-fleet-block.mts.
-name: ⚡ CI
+# Baseline CI — seeded once by socket-wheelhouse (template/presets/), then
+# repo-owned: edit freely. Runs check + test via the LOCAL composite actions
+# under .github/actions/fleet/ (cascade-updated), referenced by ./ path — no
+# cross-repo reusable workflow, no first-party `uses:@sha`. Add repo-specific
+# jobs anywhere under `jobs:`.
+name: 🧪 CI
+run-name: CI
 
-# PUSH, never pull_request. The fleet takes no outside contributions and
-# lands on main directly, so a pull_request trigger adds no coverage a push
-# trigger does not already give — and it is the fragile half: GitHub has
-# narrowed pull_request defaults for security, and a silently non-firing
-# trigger reads as a green repo with no CI at all.
 on:
   push:
     branches: [main]
     tags: ['*']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -23,88 +19,159 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# Fleet no-phone-home posture: CI runners don't source the shell-rc that dev
-# machines get from setup-security-tools, so set every FLEET_ENV knob
-# workflow-level or the telemetry-env-is-disabled +
-# package-manager-auto-update-is-disabled gates (under `check --all`) fail.
-# Lockstep source: .claude/hooks/fleet/_shared/fleet-env.mts (FLEET_ENV) —
-# the telemetry-env-is-disabled check asserts each knob at CI runtime.
-env:
-  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1'
-  COREPACK_ENABLE_PROJECT_SPEC: '0'
-  DISABLE_TELEMETRY: '1'
-  DO_NOT_TRACK: '1'
-  NO_UPDATE_NOTIFIER: '1'
-  OTEL_SDK_DISABLED: 'true'
-
+# Fleet no-phone-home posture: NOT set here. The shared setup action's first
+# step emits every FLEET_ENV knob into $GITHUB_ENV, derived from
+# .github/actions/fleet/setup/fleet-env.json, so each job inherits the full set
+# by running setup. Hand-copying them workflow-level is what let
+# OTEL_SDK_DISABLED reach one workflow and miss another; the gates
+# telemetry-env-is-disabled + package-manager-auto-update-is-disabled-at-commit read the
+# runtime env, which the action has already populated.
 jobs:
-  # First step of every job is the third-party actions/checkout (GitHub fetches
-  # it independently) to populate the workspace so the LOCAL `./.github/actions/*`
-  # composites resolve. setup-and-install then re-checks-out — full history
-  # (fetch-depth 0) in the check job, since the commit-history checks it runs
-  # (AI-attribution, release-boundary) read the default branch's history and
-  # refuse a shallow clone rather than false-green; the test matrix stays at
-  # the default depth (25 — covers CI's other git operations) and runs the
-  # zizmor Actions audit (its own `strategy.job-total < 2` skip runs it in the
-  # non-matrix check job, skips it in the test matrix).
+  # First step of every job is an inline git-fetch bootstrap (no third-party
+  # actions/checkout) — a job's FIRST step can't call the local
+  # `./.github/actions/fleet/checkout` composite, since nothing is checked out
+  # yet for GitHub to resolve `./.github/actions/*` from. It shallow-fetches the
+  # workspace so those composites resolve; setup-and-install then re-runs the
+  # checkout composite — full history (fetch-depth 0) in the check job, since
+  # the commit-history checks it runs (AI-attribution, release-boundary) read
+  # the default branch's history and refuse a shallow clone rather than
+  # false-green; the test matrix stays at the default depth (25 — covers CI's
+  # other git operations) and runs the zizmor Actions audit (its own
+  # `strategy.job-total < 2` skip runs it in the non-matrix check job, skips it
+  # in the test matrix).
   check:
-    name: 🔎 Check
+    name: Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
-        with:
-          fetch-depth: 1
-          persist-credentials: false
-      - uses: ./.github/actions/fleet/setup-and-install
+      - name: Bootstrap checkout
+        shell: bash
+        env:
+          # Route context through env (no ${{ }} in the shell body —
+          # zizmor expression-injection). Token authorizes the fetch inline and
+          # is never persisted to .git/config.
+          GITHUB_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git init -q
+          git config --local advice.detachedHead false
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "${SERVER_URL}/${REPOSITORY}"
+          FETCH_ARGS=(--no-tags --prune --depth 1 origin "${TRIGGER_REF}")
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+            git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" fetch "${FETCH_ARGS[@]}"
+          else
+            git fetch "${FETCH_ARGS[@]}"
+          fi
+          git checkout -q --detach FETCH_HEAD
+      - name: 'Set up and install'
+        uses: ./.github/actions/fleet/setup-and-install
         with:
           # Full history: the commit-history checks (AI-attribution,
           # release-boundary) read the default branch's history and refuse a
           # shallow clone rather than false-green.
           checkout-fetch-depth: '0'
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
-          # Thin-distribution CI auth: mint a contents:read-only token so the
-          # bootstrap fetch (fired by `prepare` during install) can download the
-          # fleet release bundle from the private wheelhouse. Both refs are
-          # empty on a non-thin member (var/secret unset) - the mint is skipped
-          # and the fetch no-ops. A thin member sets a dedicated read-only App's
-          # client-id var + private-key secret.
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
-      - uses: ./.github/actions/fleet/run-script
+          # Reuse the PR App for a contents:read token scoped to wheelhouse.
+          # Both credentials enable the private release fallback. Without the
+          # key, hydration still pulls public GHCR anonymously.
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+      - name: Prepare hook snapshot validation
+        uses: ./.github/actions/fleet/run-script
         with:
+          main-script: node scripts/fleet/setup/hook-snapshot.mts --no-wire
+      - name: 'Check'
+        uses: ./.github/actions/fleet/run-script
+        with:
+          setup-script: |
+            pnpm run build
+            pnpm run check:package-artifact
           main-script: pnpm run check --all
+      # The type pass runs HERE, not only in the pre-push hook. A type error is
+      # the one class of breakage that surfaces against the whole project rather
+      # than per-edit, so nothing before this catches it — and the local hook is
+      # routinely bypassed, because the wheelhouse tree is dirty at a push by
+      # construction (the live /fleet/ mirrors wait for a cascade commit) and the
+      # push guidance says to force through. Without this, a --no-verify push
+      # lands an unverified type on the default branch.
+      - name: 'Check types'
+        uses: ./.github/actions/fleet/run-script
+        with:
+          main-script: pnpm run type
 
   test:
-    name: 🧪 Test
+    name: 'Test (${{ matrix.os }})'
     strategy:
       fail-fast: false
       max-parallel: 4
       matrix:
-        # JS/TS tests only need a fast Linux run; cross-platform behavior is
-        # covered by unit tests, not the CI matrix.
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
-        with:
-          fetch-depth: 1
-          persist-credentials: false
-      - uses: ./.github/actions/fleet/setup-and-install
+      - name: Bootstrap checkout
+        shell: bash
+        env:
+          # Route context through env (no ${{ }} in the shell body —
+          # zizmor expression-injection). Token authorizes the fetch inline and
+          # is never persisted to .git/config.
+          GITHUB_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git init -q
+          git config --local advice.detachedHead false
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "${SERVER_URL}/${REPOSITORY}"
+          FETCH_ARGS=(--no-tags --prune --depth 1 origin "${TRIGGER_REF}")
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+            git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" fetch "${FETCH_ARGS[@]}"
+          else
+            git fetch "${FETCH_ARGS[@]}"
+          fi
+          git checkout -q --detach FETCH_HEAD
+      - name: 'Set up and install'
+        uses: ./.github/actions/fleet/setup-and-install
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
-          # Thin-distribution CI auth: mint a contents:read-only token so the
-          # bootstrap fetch (fired by `prepare` during install) can download the
-          # fleet release bundle from the private wheelhouse. Both refs are
-          # empty on a non-thin member (var/secret unset) - the mint is skipped
-          # and the fetch no-ops. A thin member sets a dedicated read-only App's
-          # client-id var + private-key secret.
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
-      - uses: ./.github/actions/fleet/run-script
+          # Reuse the PR App for a contents:read token scoped to wheelhouse.
+          # Both credentials enable the private release fallback. Without the
+          # key, hydration still pulls public GHCR anonymously.
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+      # The SFW proxy interposes crates.io at the system level. Other tools
+      # receive its CA via NODE_EXTRA_CA_CERTS; cargo needs CARGO_HTTP_CAINFO
+      # explicitly, and on Windows schannel additionally demands revocation
+      # status the proxy-minted certs cannot publish. A no-op for repos (and
+      # steps) that never invoke cargo.
+      - name: 'Trust the firewall CA in Cargo'
+        # CARGO_HTTP_CAINFO REPLACES cargo's trust store. The fleet bypass
+        # list routes the registry hosts (index.crates.io, static.crates.io,
+        # crates.io) DIRECT past the proxy, so the CA file must merge the
+        # public roots (Node's baked-in Mozilla store) with the proxy CA —
+        # the proxy CA alone fails every direct fetch with "untrusted root".
+        shell: bash
+        run: |
+          if [ -n "${NODE_EXTRA_CA_CERTS:-}" ] && [ -f "${NODE_EXTRA_CA_CERTS}" ]; then
+            BUNDLE="${RUNNER_TEMP}/cargo-ca-bundle.pem"
+            node -e 'const fs=require("node:fs");const tls=require("node:tls");fs.writeFileSync(process.argv[1], tls.rootCertificates.join("\n")+"\n"+fs.readFileSync(process.env.NODE_EXTRA_CA_CERTS,"utf8")+"\n")' "$BUNDLE"
+            echo "CARGO_HTTP_CAINFO=${BUNDLE}" >> "$GITHUB_ENV"
+          fi
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            echo "CARGO_HTTP_CHECK_REVOKE=false" >> "$GITHUB_ENV"
+          fi
+      - name: 'Run tests'
+        uses: ./.github/actions/fleet/run-script
         env:
           # Authenticate build-time GitHub API reads (release listings,
           # prebuilt-artifact downloads). Unauthenticated calls share the
@@ -113,4 +180,3 @@ jobs:
         with:
           setup-script: pnpm run build
           main-script: pnpm run test --all
-  # </fleet-canonical>

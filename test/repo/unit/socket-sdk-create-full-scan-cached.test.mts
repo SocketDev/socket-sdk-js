@@ -96,8 +96,7 @@ describe('SocketSdk#createFullScan cache-aware v1 path', () => {
     }
     // Exact key set from openapi.json's `CreateOrgFullScan` 201 schema
     // (additionalProperties: false), sorted.
-    // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); Object.keys returns a fresh array so in-place sort is safe.
-    expect(Object.keys(result.data).sort()).toEqual([
+    expect(Object.keys(result.data).toSorted()).toEqual([
       'api_url',
       'branch',
       'commit_hash',

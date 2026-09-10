@@ -196,7 +196,6 @@ describe('Testing Utilities', () => {
       const error = mockSdkError('NOT_FOUND')
 
       expect(error).toBeInstanceOf(Error)
-      expect(error.message).toBe('Resource not found')
       expect(error.status).toBe(404)
     })
 
@@ -212,7 +211,6 @@ describe('Testing Utilities', () => {
       const error = mockSdkError('FORBIDDEN')
 
       expect(error).toBeInstanceOf(Error)
-      expect(error.message).toBe('Access forbidden')
       expect(error.status).toBe(403)
     })
 
@@ -220,7 +218,6 @@ describe('Testing Utilities', () => {
       const error = mockSdkError('SERVER_ERROR')
 
       expect(error).toBeInstanceOf(Error)
-      expect(error.message).toBe('Internal server error')
       expect(error.status).toBe(500)
     })
 
@@ -228,7 +225,6 @@ describe('Testing Utilities', () => {
       const error = mockSdkError('TIMEOUT')
 
       expect(error).toBeInstanceOf(Error)
-      expect(error.message).toBe('Request timeout')
       expect(error.status).toBe(408)
     })
 

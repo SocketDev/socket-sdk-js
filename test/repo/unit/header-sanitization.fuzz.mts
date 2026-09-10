@@ -1,7 +1,7 @@
 /**
  * @file Vitiate coverage-guided fuzz target (Tier 2) for
  *   src/utils/header-sanitization — the untrusted-HTTP-header boundary
- *   (response headers get sanitized before they reach logs). Complements the
+ *   where response headers are sanitized before logging. Complements the
  *   fast-check property test in header-sanitization.fuzz.test.mts: fast-check
  *   checks the redaction contract on constructed header records; vitiate feeds
  *   SWC-coverage-guided mutated BYTES (parsed into an arbitrary header record)
@@ -30,7 +30,7 @@ const SENSITIVE = [
 // entry (arbitrary names, values, casing, unicode, control chars).
 function headersFromBytes(data: Buffer): Record<string, string> {
   const out = Object.create(null) as Record<string, string>
-  const lines = data.toString('utf8').split('\n')
+  const lines = data.toString('utf8').split(/\r?\n/)
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i]!
     const idx = line.indexOf(':')
@@ -51,7 +51,9 @@ fuzz(
     if (!result) {
       return
     }
-    for (const key of Object.keys(result)) {
+    const keys = Object.keys(result)
+    for (let index = 0, { length } = keys; index < length; index += 1) {
+      const key = keys[index]!
       if (
         SENSITIVE.includes(key.toLowerCase()) &&
         result[key] !== '[REDACTED]'

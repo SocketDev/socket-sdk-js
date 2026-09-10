@@ -225,16 +225,23 @@
     "strict": true
   },
   "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": ">=12.0.0 <13.0.0",
-      "onFail": "error"
-    }
+    "packageManager": [
+      {
+        "name": "npm",
+        "version": "^11.19.0 || >=12.0.2",
+        "onFail": "error"
+      },
+      {
+        "name": "pnpm",
+        "version": "^11.25.0 || >=12.3.4",
+        "onFail": "error"
+      }
+    ]
   },
   "engines": {
     "node": ">=24",
-    "npm": ">=12.0.2",
-    "pnpm": ">=12.0.0"
+    "npm": "^11.19.0 || >=12.0.2",
+    "pnpm": "^11.25.0 || >=12.3.4"
   },
   "allowScripts": {
     "cpu-features": false,

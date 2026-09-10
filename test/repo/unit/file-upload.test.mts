@@ -1,30 +1,49 @@
+/**
+ * @file Multipart imports remain statically traceable to the bundled shim.
+ */
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { parseTypeScript } from '../../../scripts/repo/generate-strict-types-lib.mts'
 import { getFormData } from '../../../src/file-upload.mts'
 
-// CE-356: the SDK reached form-data through a bundler-invisible
-// `createRequire(...)('form-data')`, so socket-cli's rollup shipped the bare
-// specifier with form-data neither bundled nor declared, and every fresh
-// `npx socket` install threw "Cannot find module 'form-data'" on its first
-// multipart upload — taking a customer's CI down. form-data is now vendored
-// through `src/external/` (socket-lib's convention): a static relative
-// require a bundler can follow, backed by a self-contained
-// `dist/external/form-data.js` for any loader that leaves the require
-// verbatim. These tests pin that mechanism.
-describe('form-data vendoring (CE-356)', () => {
+describe('form-data vendoring', () => {
   const rootPath = path.join(import.meta.dirname, '../../..')
   const read = (rel: string) => readFileSync(path.join(rootPath, rel), 'utf8')
 
   it('reaches form-data only through the vendored shim', () => {
-    // A dynamically-required or bare 'form-data' specifier here is the
-    // regression: bundlers cannot follow it, so it ships unresolvable.
-    const source = read('src/file-upload.mts')
-    expect(source).not.toMatch(/from 'node:module'/)
-    expect(source).not.toMatch(/require\(\s*['"]form-data['"]\s*\)/)
-    expect(source).toMatch(/require\(\s*'\.\/external\/form-data\.js',?\s*\)/)
+    const ast = parseTypeScript(read('src/file-upload.mts'))
+    const nodes = Array.isArray(ast.body) ? ast.body : []
+    const declaration = nodes.find(
+      node => node.declaration?.id?.name === 'getFormData',
+    )?.declaration
+    expect(declaration).toMatchObject({
+      body: {
+        body: [
+          {
+            consequent: {
+              body: [
+                {
+                  expression: {
+                    right: {
+                      expression: {
+                        arguments: [{ value: './external/form-data.js' }],
+                        callee: { name: 'require', type: 'Identifier' },
+                        type: 'CallExpression',
+                      },
+                      type: 'TSAsExpression',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          { type: 'ReturnStatement' },
+        ],
+      },
+    })
   })
 
   it('keeps the shim a static single-specifier re-export', () => {

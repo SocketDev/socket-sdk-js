@@ -10,6 +10,8 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 import { SocketSdk } from '../../../src/index.mts'
 
+const logger = getDefaultLogger()
+
 describe('SocketSdk - File validation callbacks', () => {
   describe('createDependenciesSnapshot', () => {
     it('should invoke onFileValidation callback when files are invalid', async () => {
@@ -86,7 +88,7 @@ describe('SocketSdk - File validation callbacks', () => {
 
     it('should warn and continue when no callback and files are invalid', async () => {
       const warnSpy = vi
-        .spyOn(getDefaultLogger(), 'warn')
+        .spyOn(logger, 'warn')
         .mockImplementation(
           function (this: ReturnType<typeof getDefaultLogger>) {
             return this
@@ -163,7 +165,7 @@ describe('SocketSdk - File validation callbacks', () => {
 
     it('should warn without callback when files are invalid', async () => {
       const warnSpy = vi
-        .spyOn(getDefaultLogger(), 'warn')
+        .spyOn(logger, 'warn')
         .mockImplementation(
           function (this: ReturnType<typeof getDefaultLogger>) {
             return this
@@ -254,7 +256,7 @@ describe('SocketSdk - File validation callbacks', () => {
 
     it('should warn without callback when files are invalid and truncate display for many files', async () => {
       const warnSpy = vi
-        .spyOn(getDefaultLogger(), 'warn')
+        .spyOn(logger, 'warn')
         .mockImplementation(
           function (this: ReturnType<typeof getDefaultLogger>) {
             return this

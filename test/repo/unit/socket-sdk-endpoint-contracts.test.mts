@@ -1,6 +1,6 @@
 /**
  * @file Contract tests pinning each SDK method to its exact Socket API path.
- *   These assert the precise request path (nock throws on any mismatch),
+ *   These assert the precise request path through nock interception,
  *   guarding against path regressions that loose `url.includes()` interceptors
  *   would miss. Paths are verified against the depscan api-v0 route
  *   definitions.

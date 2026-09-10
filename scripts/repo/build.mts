@@ -21,6 +21,7 @@ import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.m
 import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 // Initialize logger
 const logger = getDefaultLogger()
@@ -205,34 +206,7 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
   return 0
 }
 
-export function printBuildHelp(): void {
-  logger.log('Build Runner')
-  logger.log('')
-  logger.log('Usage: pnpm build [options]')
-  logger.log('')
-  logger.log('Options:')
-  logger.log('  --help       Show this help message')
-  logger.log('  --src        Build source code only')
-  logger.log('  --types      Build TypeScript declarations only')
-  logger.log(
-    '  --watch      Watch mode with incremental builds (68% faster rebuilds)',
-  )
-  logger.log('  --needed     Only build if dist files are missing')
-  logger.log('  --analyze    Show bundle size analysis')
-  logger.log('  --quiet, --silent  Suppress progress messages')
-  logger.log('  --verbose    Show detailed build output')
-  logger.log('')
-  logger.log('Examples:')
-  logger.log('  pnpm build              # Full build (source + types)')
-  logger.log('  pnpm build --src        # Build source only')
-  logger.log('  pnpm build --types      # Build types only')
-  logger.log('  pnpm build --watch      # Watch mode with incremental builds')
-  logger.log('  pnpm build --analyze    # Build with size analysis')
-  logger.log('')
-  logger.log('Note: Watch mode uses rolldown for incremental rebuilds')
-}
-
-export type BuildMode = 'watch' | 'types' | 'src' | 'all'
+export type BuildMode = 'watch' | 'types' | 'source' | 'full'
 
 export function selectBuildMode(values: Record<string, unknown>): BuildMode {
   if (values['watch']) {
@@ -241,7 +215,7 @@ export function selectBuildMode(values: Record<string, unknown>): BuildMode {
   if (values['types'] && !values['src']) {
     return 'types'
   }
-  return values['src'] && !values['types'] ? 'src' : 'all'
+  return values['src'] && !values['types'] ? 'source' : 'full'
 }
 
 export async function runFullBuild(options: BuildOptions): Promise<number> {
@@ -292,7 +266,7 @@ export async function runSelectedBuild(
   if (mode === 'watch') {
     return watchBuild(options)
   }
-  if (mode === 'all') {
+  if (mode === 'full') {
     return runFullBuild(options)
   }
   const exitCode =
@@ -351,13 +325,6 @@ async function main(): Promise<void> {
       strict: false,
     })
 
-    // Show help if requested
-    if (values.help) {
-      printBuildHelp()
-      process.exitCode = 0
-      return
-    }
-
     const quiet = Boolean(values.quiet || values.silent)
     const verbose = Boolean(values.verbose)
 
@@ -395,9 +362,17 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'build SDK bundles and declarations',
+  help: `Usage: pnpm build [options]\n\n--src  build source only
+--types  build declarations only
+--watch  watch source changes
+--needed  skip existing outputs
+--analyze  report bundle size
+--quiet, --silent  suppress progress
+--verbose  show detailed output\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

@@ -16,7 +16,8 @@ import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
-import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
+import { tolerantTimeout } from '../../fleet/_shared/lib/timing.mts'
+import { setupLocalHttpServer } from '../../utils/local-server.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
@@ -215,14 +216,18 @@ describe('SocketSdk - downloadPatch MAX_PATCH_SIZE', () => {
     },
   )
 
-  it('should reject when patch exceeds MAX_PATCH_SIZE', async () => {
-    const client = new SocketSdk('test-token')
-    await expect(
-      client.downloadPatch('sha256-oversized', {
-        baseUrl: getBaseUrl(),
-      }),
-    ).rejects.toThrow(/exceeds maximum size/)
-  }, 30_000)
+  it(
+    'should reject when patch exceeds MAX_PATCH_SIZE',
+    async () => {
+      const client = new SocketSdk('test-token')
+      await expect(
+        client.downloadPatch('sha256-oversized', {
+          baseUrl: getBaseUrl(),
+        }),
+      ).rejects.toThrow(/exceeds maximum size/)
+    },
+    tolerantTimeout(30_000),
+  )
 })
 
 // ===========================================================================

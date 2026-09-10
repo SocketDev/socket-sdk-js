@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
-import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
+import { setupLocalHttpServer } from '../../utils/local-server.mts'
 
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { SocketSdkGenericResult } from '../../../src/index.mts'

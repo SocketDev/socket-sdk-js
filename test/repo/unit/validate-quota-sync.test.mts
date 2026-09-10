@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  extractMethods,
   resolveDataEntry,
   validateMethodQuota,
 } from '../../../scripts/repo/validate-quota-sync.mts'
@@ -40,6 +41,30 @@ function quotaErrors(overrides: Partial<MethodInfo>): string[] {
 }
 
 describe('quota metadata validation', () => {
+  it('respects explicit operation absence and extracts generic fallback with quota', () => {
+    expect(
+      extractMethods(`class SocketSdk {
+      /** @operationId none */
+      async localScan(): Promise<void> { return request<'ignored'>() }
+      /** @quota 7 units */
+      async readScan(): Promise<void> { return request<'getScan'>() }
+    }`),
+    ).toEqual([
+      {
+        hadOperationIdNone: true,
+        jsdocQuota: undefined,
+        name: 'localScan',
+        operationId: undefined,
+      },
+      {
+        hadOperationIdNone: false,
+        jsdocQuota: 7,
+        name: 'readScan',
+        operationId: 'getScan',
+      },
+    ])
+  })
+
   it('accepts zero-cost operations and verified SDK aliases', () => {
     expect(quotaErrors({})).toEqual([])
     expect(

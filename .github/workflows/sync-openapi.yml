@@ -27,18 +27,29 @@ defaults:
 jobs:
   fetch_and_update:
     name: Sync v0 and v1 contracts
-    if: github.event_name != 'push' || github.ref_name == github.event.repository.default_branch
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
     permissions:
       actions: write
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
-      - name: Checkout default branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
-        with:
-          persist-credentials: false
-          ref: ${{ github.event.repository.default_branch }}
+      - name: Bootstrap checkout
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git init -q
+          git config --local advice.detachedHead false
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "${SERVER_URL}/${REPOSITORY}"
+          AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+          git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" \
+            fetch --no-tags --prune --depth 1 origin "${TRIGGER_REF}"
+          git checkout -q --detach FETCH_HEAD
+          test "$(git rev-parse HEAD)" = "${TRIGGER_REF}"
       - name: Set up and install
         uses: ./.github/actions/fleet/setup-and-install
         with:
@@ -75,10 +86,21 @@ jobs:
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Mint PR token
+        if: steps.check.outputs.has_changes == 'true'
+        id: openapi-app
+        env:
+          APP_PRIVATE_KEY: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          CLIENT_ID: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          OWNER: ${{ github.repository_owner }}
+          PERMISSIONS: '{"contents":"write","issues":"write","pull_requests":"write"}'
+          REPOSITORIES: ${{ github.event.repository.name }}
+        run: node .github/actions/fleet/github-payload-app-token/mint-app-installation-token.mjs
+
       - name: Commit and push generated artifacts
         if: steps.check.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.openapi-app.outputs.token }}
         run: |
           mapfile -t artifact_paths < "$RUNNER_TEMP/openapi-artifacts.txt"
           git switch --create automated/open-api
@@ -92,7 +114,7 @@ jobs:
       - name: Create or update pull request
         if: steps.check.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.openapi-app.outputs.token }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           cat > "$RUNNER_TEMP/openapi-pr-body.md" <<'BODY'

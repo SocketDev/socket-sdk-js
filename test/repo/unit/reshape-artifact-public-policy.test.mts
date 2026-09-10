@@ -374,7 +374,7 @@ describe('reshapeArtifactForPublicPolicy - Complete Coverage', () => {
 
       it('should omit deep-link qualifier fields when absent', () => {
         // Only copy qualifier fields that are actually present so the reshaped
-        // shape stays minimal (npm artifacts carry none of them).
+        // shape stays minimal because npm artifacts carry none of them.
         const data = {
           artifacts: [
             {

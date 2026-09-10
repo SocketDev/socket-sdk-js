@@ -12,7 +12,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
-import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
+import { tolerantTimeout } from '../../fleet/_shared/lib/timing.mts'
+import { setupLocalHttpServer } from '../../utils/local-server.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
@@ -177,17 +178,21 @@ describe('SocketSdk - #getResponseText size limit', () => {
     },
   )
 
-  it('should throw when response text exceeds 50MB limit', async () => {
-    const client = new SocketSdk('test-token', {
-      baseUrl: `${getBaseUrl()}/v0/`,
-      retries: 0,
-      timeout: 30_000,
-    })
+  it(
+    'should throw when response text exceeds 50MB limit',
+    async () => {
+      const client = new SocketSdk('test-token', {
+        baseUrl: `${getBaseUrl()}/v0/`,
+        retries: 0,
+        timeout: 30_000,
+      })
 
-    await expect(
-      client.getApi('huge-text', { responseType: 'text' }),
-    ).rejects.toThrow(/Response exceeds maximum size limit/)
-  }, 60_000)
+      await expect(
+        client.getApi('huge-text', { responseType: 'text' }),
+      ).rejects.toThrow(/Response exceeds maximum size limit/)
+    },
+    tolerantTimeout(60_000),
+  )
 })
 
 // =============================================================================

@@ -7,7 +7,7 @@
 // reachable from a production importer root through the snapshot graph, so
 // dev-only duplicate majors stay informational.
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -17,20 +17,25 @@ import {
   repoUsesRolldown,
   scan,
 } from '../../../scripts/fleet/check/dependencies-are-deduped.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('repoUsesRolldown', () => {
   const tempDirs: string[] = []
 
-  afterEach(() => {
+  afterEach(async () => {
     for (const dir of tempDirs.splice(0)) {
-      rmSync(dir, { force: true, recursive: true })
+      await safeDelete(dir)
     }
   })
 
-  function makeRepo(options?: {
-    config?: string | undefined
-    rolldownDep?: boolean | undefined
-  }): string {
+  function makeRepo(
+    options?:
+      | {
+          config?: string | undefined
+          rolldownDep?: boolean | undefined
+        }
+      | undefined,
+  ): string {
     const dir = mkdtempSync(path.join(os.tmpdir(), 'socket-sdk-dedup-'))
     tempDirs.push(dir)
     writeFileSync(

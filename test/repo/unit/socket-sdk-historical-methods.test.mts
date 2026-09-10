@@ -139,10 +139,8 @@ describe('Socket SDK - Historical & analytics methods (SURF-195)', () => {
 
   describe('historicalSnapshotsList', () => {
     it('should list historical snapshots', async () => {
-      const mockResponse = {
-        endCursor: null,
-        results: [{ requestId: 'req-1', status: 'completed' }],
-      }
+      const mockResponse =
+        '{"endCursor":null,"results":[{"requestId":"req-1","status":"completed"}]}'
 
       nock('https://api.socket.dev')
         .get(

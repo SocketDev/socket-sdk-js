@@ -10,7 +10,6 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
 
-import { MAX_RESPONSE_SIZE } from '../../../src/constants.mts'
 import { bufferStreamedErrorResponse } from '../../../src/utils/response-stream.mts'
 
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
@@ -58,12 +57,13 @@ describe('bufferStreamedErrorResponse', () => {
     expect(drained.headers['content-type']).toBe('application/json')
   })
 
-  it('stops reading once the body passes the size cap', async () => {
+  it('stops reading once the body passes the 10 MiB cap', async () => {
+    const responseLimit = 10 * 1024 * 1024
     const chunkSize = 1024 * 1024
     let chunksPulled = 0
     function* oversized(): Generator<Buffer> {
       // Enough chunks to exceed the cap twice over if the drain never stopped.
-      for (let i = 0; i < (MAX_RESPONSE_SIZE / chunkSize) * 2; i += 1) {
+      for (let i = 0; i < (responseLimit / chunkSize) * 2; i += 1) {
         chunksPulled += 1
         yield Buffer.alloc(chunkSize, 0x61)
       }
@@ -73,7 +73,7 @@ describe('bufferStreamedErrorResponse', () => {
       streamingResponse(oversized()),
     )
 
-    expect(chunksPulled).toBeLessThanOrEqual(MAX_RESPONSE_SIZE / chunkSize + 1)
-    expect(drained.body.byteLength).toBeLessThanOrEqual(MAX_RESPONSE_SIZE)
+    expect(chunksPulled).toBeLessThanOrEqual(responseLimit / chunkSize + 1)
+    expect(drained.body.byteLength).toBeLessThanOrEqual(responseLimit)
   })
 })
