@@ -129,7 +129,7 @@
     },
     "sfw-free": {
       "notes": [
-        "SFW (Socket Firewall) free flavor (public, SocketDev/sfw-free). Ships a 7-platform set: linux-{x64,arm64}{,-musl}, darwin-{x64,arm64}, win-x64. win-arm64 is intentionally absent \u2014 upstream does not yet build it. SFW is a required dependency of the install flow, so consumers on win-arm64 skip SFW-dependent steps until upstream support lands.",
+        "SFW (Socket Firewall) free flavor (public, SocketDev/sfw-free). Ships a 7-platform set: linux-{x64,arm64}{,-musl}, darwin-{x64,arm64}, win-x64. Windows 11 ARM64 setup uses the verified win32-x64 asset through x64 emulation when a native asset is unavailable. SFW remains mandatory and must execute successfully before installation continues.",
         "Installed when neither SOCKET_API_KEY nor SOCKET_API_TOKEN is set; the enterprise flavor (sfw-enterprise) is selected when one of those is present. The two flavors share a version and install to the same `sfw` binary name."
       ],
       "description": "Socket Firewall (free tier) \u2014 package manager command wrapper",

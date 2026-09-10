@@ -39,6 +39,7 @@ const SCRIPT_META: ScriptMeta = {
   describe:
     'checks generated API artifacts against both local OpenAPI snapshots',
   help: 'Usage: pnpm run check:api-contracts\n\nChecks v0 and v1 contract freshness without writing files or using the network.',
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

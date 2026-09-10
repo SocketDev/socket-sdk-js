@@ -3,43 +3,31 @@
  *   build steps in sequence.
  */
 
-import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
+import { REPO_ROOT } from '../fleet/paths.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
+
 import { runMain } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.resolve(__dirname, '..')
 
 export async function runCommand(
   command: string,
   options: { args?: string[] | undefined } = {},
 ): Promise<number> {
   const { args = [] } = options
-  return new Promise<number>((resolve, reject) => {
-    const spawnPromise = spawn(command, args, {
-      cwd: rootPath,
-      stdio: 'inherit',
-    })
-
-    const child = spawnPromise.process
-
-    child.on('exit', (code: number | null) => {
-      resolve(code || 0)
-    })
-
-    child.on('error', (e: Error) => {
-      reject(e)
-    })
+  const result = await spawn(command, args, {
+    cwd: REPO_ROOT,
+    stdio: 'inherit',
+    throws: false,
   })
+  return result.signal ? 1 : (result.code ?? 1)
 }
 
 async function main(): Promise<void> {
@@ -83,9 +71,10 @@ async function main(): Promise<void> {
   }
 }
 
-const SCRIPT_META = {
+const SCRIPT_META: ScriptMeta = {
   describe: 'validate SDK build and generated artifacts',
   help: `Usage: pnpm run ci:validate\n\n--help, -h  show usage\n--describe  show purpose`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

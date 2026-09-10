@@ -13,6 +13,8 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { extractMethods, renderApiDocs } from './gen-api-docs-lib.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
+
 import { runMain } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
@@ -47,9 +49,10 @@ export function generateApiDocs(): void {
   )
 }
 
-const SCRIPT_META = {
+const SCRIPT_META: ScriptMeta = {
   describe: 'generate SDK API documentation',
   help: `Usage: node scripts/repo/gen-api-docs.mts [--check]\n\n--check  verify documentation without writing\n--help, -h  show usage\n--describe  show purpose`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

@@ -158,6 +158,7 @@ const SCRIPT_META: ScriptMeta = {
   describe:
     'checks packed SDK entry points and declaration imports after build',
   help: 'Usage: pnpm run check:package-artifact\n\nBuild the SDK first. Packs locally without lifecycle scripts or registry access, then type-checks every public declaration entry.',
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

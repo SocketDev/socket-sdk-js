@@ -106,6 +106,7 @@ async function main(): Promise<number> {
   const { values } = parseArgs({
     options: {
       check: { type: 'boolean' },
+      json: { type: 'boolean' },
       offline: { type: 'boolean' },
       'skip-index': { type: 'boolean' },
       'list-artifacts': { type: 'boolean' },
@@ -146,6 +147,7 @@ const SCRIPT_META: ScriptMeta = {
   --v1-source PATH  Read a local v1 OpenAPI document.
   --skip-index      Leave the index export block untouched.
   --list-artifacts  Print the exact generated artifact paths.`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

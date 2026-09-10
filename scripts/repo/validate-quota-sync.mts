@@ -92,6 +92,7 @@ const SCRIPT_META: ScriptMeta = {
   describe:
     'validates SDK quota tags against method metadata and OpenAPI aliases',
   help: 'Usage: pnpm run check:quota-sync [--warn]\n\nChecks quota metadata without network access. --warn reports errors without failing.',
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

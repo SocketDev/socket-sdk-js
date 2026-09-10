@@ -21,6 +21,8 @@ import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.m
 import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
+
 import { runMain } from '../fleet/process/run-main.mts'
 
 // Initialize logger
@@ -365,7 +367,7 @@ async function main(): Promise<void> {
   }
 }
 
-const SCRIPT_META = {
+const SCRIPT_META: ScriptMeta = {
   describe: 'build SDK bundles and declarations',
   help: `Usage: pnpm build [options]\n\n--src  build source only
 --types  build declarations only
@@ -374,6 +376,7 @@ const SCRIPT_META = {
 --analyze  report bundle size
 --quiet, --silent  suppress progress
 --verbose  show detailed output\n--help, -h  show usage\n--describe  show purpose`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

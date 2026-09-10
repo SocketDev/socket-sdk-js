@@ -26,6 +26,8 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
 
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
+
 import { runMain } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
@@ -131,18 +133,16 @@ export function sweepOrphanedShmSegments(): void {
   }
 }
 
-function main(): void {
+function main(): number {
   sweepOrphanedShmSegments()
 
-  // Sync is required here: this top-level CLI runner exits with the
-  // child's code.
   // oxlint-disable-next-line socket/prefer-async-spawn -- sync CLI runner
   const result = spawnSync(
     VITEST_BIN,
     // No `--config`: vitest auto-discovers the repo-root vitest.config.mts, which
     // is the only config both this parent run and vitiate's re-spawned child agree
     // on (the child never receives --config). See vitest.config.mts header.
-    ['run', ...process.argv.slice(2)],
+    ['run', ...process.argv.slice(2).filter(arg => arg !== '--json')],
     {
       __proto__: null,
       cwd: repoRoot,
@@ -151,12 +151,13 @@ function main(): void {
     } as unknown as SpawnSyncOptions,
   ) as { status?: number | null | undefined }
 
-  process.exit(result.status ?? 1)
+  return result.status ?? 1
 }
 
-const SCRIPT_META = {
+const SCRIPT_META: ScriptMeta = {
   describe: 'run SDK fuzz targets',
   help: `Usage: node scripts/repo/fuzz.mts [vitest options]\n\narguments are forwarded to Vitest\n--help, -h  show usage\n--describe  show purpose`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

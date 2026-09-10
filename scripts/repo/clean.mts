@@ -14,6 +14,8 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { createSectionHeader } from '@socketsecurity/lib-stable/stdio/header'
 import { REPO_ROOT } from '../fleet/paths.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
+
 import { runMain } from '../fleet/process/run-main.mts'
 
 // Initialize logger
@@ -206,7 +208,7 @@ async function main(): Promise<void> {
   }
 }
 
-const SCRIPT_META = {
+const SCRIPT_META: ScriptMeta = {
   describe: 'remove selected SDK build outputs',
   help: `Usage: pnpm clean [options]\n\n--all  clean cache, coverage, and dist
 --cache  clean caches
@@ -215,6 +217,7 @@ const SCRIPT_META = {
 --types  clean declarations
 --modules  clean dependencies
 --quiet, --silent  suppress progress\n--help, -h  show usage\n--describe  show purpose`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {
