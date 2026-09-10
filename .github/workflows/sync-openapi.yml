@@ -71,7 +71,7 @@ jobs:
         run: |
           pnpm run check:api-contracts
           pnpm run type
-          pnpm test test/repo/unit/openapi-contracts.test.mts test/repo/unit/openapi-response-types.test.mts test/repo/unit/openapi-multipart.test.mts
+          pnpm test test/repo/unit/generate-sdk.test.mts test/repo/unit/openapi-response-types.test.mts test/repo/integration/openapi-multipart.test.mts
           pnpm run check:quota-sync
           pnpm run build
           pnpm run check:package-artifact

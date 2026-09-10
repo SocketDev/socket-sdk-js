@@ -12,6 +12,7 @@ import { expect, it, vi } from 'vitest'
 import { parse as parseYaml } from 'yaml'
 
 import { runGitOrThrow } from '../../../.claude/hooks/fleet/_shared/git-runner.mts'
+import { REPO_ROOT } from '../../../scripts/fleet/paths.mts'
 import { SYNC_OPENAPI_WORKFLOW_PATH } from '../../../scripts/repo/paths.mts'
 import { makeGitRepo } from '../../fleet/_shared/lib/git-fixture.mts'
 
@@ -60,6 +61,23 @@ it('limits write jobs to the default branch and uses the PR App for changes', as
   )
   const dispatch = job.steps.find(step => step.name === 'Trigger CI checks')
   expect(dispatch?.env?.['GH_TOKEN']).toBe('${{ github.token }}')
+})
+
+it('verifies generated contracts with existing test files', async () => {
+  const workflow = parseYaml(
+    await fs.readFile(SYNC_OPENAPI_WORKFLOW_PATH, 'utf8'),
+  ) as SyncWorkflow
+  const verification = workflow.jobs.fetch_and_update.steps.find(
+    step => step.name === 'Verify generated contracts',
+  )
+  const command = verification?.run
+    ?.split('\n')
+    .find(line => line.startsWith('pnpm test '))
+  const testPaths = command?.trim().split(/\s+/u).slice(2) ?? []
+  expect(testPaths.length).toBeGreaterThan(0)
+  for (const testPath of testPaths) {
+    expect((await fs.stat(path.join(REPO_ROOT, testPath))).isFile()).toBe(true)
+  }
 })
 
 it('bases generated changes on the current workflow and source', async () => {
