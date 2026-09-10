@@ -6,7 +6,7 @@ import path from 'node:path'
 import { rolldown } from 'rolldown'
 import { afterAll } from 'vitest'
 
-import type { RolldownOptions } from 'rolldown'
+import type { OutputOptions, RolldownOptions } from 'rolldown'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const tempDirs: string[] = []
@@ -43,7 +43,7 @@ function hashOutputDir(dir: string): Record<string, string> {
 }
 
 export async function buildInto(
-  config: RolldownOptions & { output: { dir?: string | undefined } },
+  config: Omit<RolldownOptions, 'output'> & { output: OutputOptions },
 ): Promise<Record<string, string>> {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'sdk-repro-'))
   tempDirs.push(dir)
