@@ -69,7 +69,7 @@ describe('SocketSdk class method extraction', () => {
   })
 
   it('retains quota annotations and explicit operation-id exclusions', () => {
-    const methods = extractQuotaMethods(source)
+    const methods = extractQuotaMethods({ source })
     expect(methods.map(method => method.name)).toEqual(names)
     expect(methods[1]).toMatchObject({
       operationId: 'asyncOperation',
@@ -82,11 +82,14 @@ describe('SocketSdk class method extraction', () => {
   })
 
   it('renders metadata for the same class methods using supplied quota data', () => {
-    const methods = extractDocsMethods(source, {
-      api: {
-        ordinaryOperation: { quota: 3, permissions: ['packages:list'] },
-        asyncOperation: { quota: 2, permissions: [] },
-        delegated: { quota: 9, permissions: [] },
+    const methods = extractDocsMethods({
+      source,
+      data: {
+        api: {
+          ordinaryOperation: { quota: 3, permissions: ['packages:list'] },
+          asyncOperation: { quota: 2, permissions: [] },
+          delegated: { quota: 9, permissions: [] },
+        },
       },
     })
     expect(methods.map(method => method.name)).toEqual(names)
@@ -102,19 +105,24 @@ describe('SocketSdk class method extraction', () => {
 
   it('handles unexported classes and ignores overload signatures', () => {
     expect(
-      extractQuotaMethods(
-        'class SocketSdk { method(value: string): string; method(value: string) { return value } }',
-      ).map(method => method.name),
+      extractQuotaMethods({
+        source:
+          'class SocketSdk { method(value: string): string; method(value: string) { return value } }',
+      }).map(method => method.name),
     ).toEqual(['method'])
-    expect(extractQuotaMethods('function SocketSdk() {}')).toEqual([])
+    expect(extractQuotaMethods({ source: 'function SocketSdk() {}' })).toEqual(
+      [],
+    )
   })
   it('does not inherit metadata through an ordinary block comment', () => {
-    const methods = extractQuotaMethods(`class SocketSdk {
+    const methods = extractQuotaMethods({
+      source: `class SocketSdk {
       /** @operationId firstOperation */
       first() { return 1 }
       /* An ordinary comment. */
       second() { return 2 }
-    }`)
+    }`,
+    })
     expect(methods[0]?.operationId).toBe('firstOperation')
     expect(methods[1]?.operationId).toBeUndefined()
   })

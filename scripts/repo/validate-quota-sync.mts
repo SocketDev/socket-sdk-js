@@ -106,8 +106,9 @@ if (isMainModule(import.meta.url)) {
  * Extract method information from the SDK class source.
  */
 export function extractMethods(
-  source = readFileSync(classPath, 'utf8'),
+  options: { source?: string | undefined } = {},
 ): MethodInfo[] {
+  const { source = readFileSync(classPath, 'utf8') } = options
   return extractSdkClassMethods(source).map(
     ({ hadOperationIdNone, jsdocQuota, name, operationId }) => ({
       __proto__: null,
@@ -122,8 +123,9 @@ export function extractMethods(
 export function resolveDataEntry(
   data: QuotaData,
   operationId: string,
-  methodName?: string | undefined,
+  options: { methodName?: string | undefined } = {},
 ): { key: string; entry: DataEntry } | undefined {
+  const { methodName } = options
   const key =
     methodName &&
     data.api[methodName] &&
@@ -146,7 +148,9 @@ export function validateMethodQuota(
     return
   }
   const operationId = method.operationId ?? method.name
-  const resolved = resolveDataEntry(data, operationId, method.name)
+  const resolved = resolveDataEntry(data, operationId, {
+    methodName: method.name,
+  })
   if (method.hadOperationIdNone && !resolved) {
     return
   }

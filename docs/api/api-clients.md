@@ -31,6 +31,9 @@ differ from input identifiers. `retryable` is optional on PURL errors.
 Malformed records and interrupted streams fail instead of returning partial
 analysis as a complete result. Closing a stream cancels its active requests.
 
+<details>
+<summary>Policies, package versions, and fixes</summary>
+
 Policy methods cover policy and rule CRUD, alert resolution creation, migration
 status, and triage translation. Write options accept `dry_run`. Results retain
 the HTTP status, including `200` for previews and `201` for creation.
@@ -50,6 +53,8 @@ integer.
 It also accepts `autofix_run_id` and `include_all_detected_ghsas`. Its typed
 results distinguish available fixes, partial fixes, unavailable fixes,
 inapplicable fixes, and computation failures.
+
+</details>
 
 ## Public clients
 

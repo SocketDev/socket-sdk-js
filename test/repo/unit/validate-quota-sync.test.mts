@@ -43,12 +43,14 @@ function quotaErrors(overrides: Partial<MethodInfo>): string[] {
 describe('quota metadata validation', () => {
   it('respects explicit operation absence and extracts generic fallback with quota', () => {
     expect(
-      extractMethods(`class SocketSdk {
+      extractMethods({
+        source: `class SocketSdk {
       /** @operationId none */
       async localScan(): Promise<void> { return request<'ignored'>() }
       /** @quota 7 units */
       async readScan(): Promise<void> { return request<'getScan'>() }
-    }`),
+    }`,
+      }),
     ).toEqual([
       {
         hadOperationIdNone: true,
@@ -84,7 +86,9 @@ describe('quota metadata validation', () => {
   })
 
   it('resolves canonical operation metadata when the SDK method is an alias', () => {
-    expect(resolveDataEntry(data, 'getOrgRepo', 'getRepository')).toEqual({
+    expect(
+      resolveDataEntry(data, 'getOrgRepo', { methodName: 'getRepository' }),
+    ).toEqual({
       key: 'getOrgRepo',
       entry: { quota: 1, permissions: ['repo:list'] },
     })
