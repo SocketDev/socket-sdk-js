@@ -1,28 +1,5 @@
 #!/usr/bin/env node
-/*
- * @file `check --all` gate: a literal path is constructed in ONE place.
- *   `paths.mts` owns every constructed path; a second file spelling the same
- *   `path.join(root, 'a', 'b')` is a second definition, so a move fixes one
- *   and strands the other.
- *
- *   Runs in the wheelhouse and in every member, because both carry a
- *   `paths.mts` and both drift the same way.
- *
- *   The existing duplicates are a BACKLOG, recorded in
- *   `scripts/fleet/constants/path-construction-burn-down.json`. The list is
- *   SHRINK-ONLY: a duplicate absent from it fails the gate, and a recorded
- *   tail that now scans clean is reported so the operator drops it. Adding an
- *   entry to quiet a new finding is the one move this design forbids.
- *
- *   Detection lives in `_shared/literal-path-tails.mts`, pure and unit-tested
- *   against source strings rather than a repo on disk.
- *
- *   Exit: 0 — no unrecorded duplicate; 1 — a new duplicate, or the burn-down
- *   holds a tail that is now clean.
- *
- *   Usage: node scripts/fleet/check/paths-are-constructed-once.mts [--quiet]
- *          node scripts/fleet/check/paths-are-constructed-once.mts --self-test
- */
+import { sharedTemplateBasePath } from '../paths/util.mts'
 
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -36,19 +13,12 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { isMainModule } from '../process/is-main-module.mts'
 import { runMain } from '../process/run-main.mts'
 import { REPO_ROOT } from '../paths.mts'
-import {
-  diffAgainstBurnDown,
-  findDuplicateTails,
-} from './_shared/literal-path-tails.mts'
+import { isCascadeMirrorPath } from '../fs/cascade-mirror-scope.mts'
+import { findDuplicateTails } from './_shared/literal-path-tails.mts'
 
 import type { ScriptMeta } from '../process/run-main.mts'
 
-const BURN_DOWN_REL = path.join(
-  'scripts',
-  'fleet',
-  'constants',
-  'path-construction-burn-down.json',
-)
+const logger = getDefaultLogger()
 
 /**
  * How far into a file the dep-0 declaration must appear to count.
@@ -75,7 +45,11 @@ export function isScannablePath(rel: string): boolean {
   // layout it verifies, and a probe string may quote a `path.join` call as
   // DATA. Routing either through paths.mts would couple the test to the module
   // under test and give the scanner its own source to trip over.
-  if (unix.startsWith('test/') || unix.includes('.test.')) {
+  if (
+    unix.startsWith('test/') ||
+    unix.includes('/test/') ||
+    unix.includes('.test.')
+  ) {
     return false
   }
   return hasSourceExtension(unix)
@@ -104,32 +78,15 @@ export function ownerFor(tail: string): string {
 }
 
 /**
- * Read the recorded backlog, treating an absent file as an empty one so a
- * fresh member starts at zero rather than failing on a missing path.
- */
-/**
  * Whether a source declares itself dep-0, so it may not import a path module.
  *
- * A dep-0 script runs with no guaranteed `node_modules` — Claude Code spawns
- * `api-key-helper.mjs` from its own directory at the moment OAuth has already
- * expired. Importing `paths.mts` there breaks the rescue the script exists
- * for, so its literal path is forced rather than careless, and the burn-down
- * is the wrong home for a duplicate that can never be removed.
+ * A dep-0 script runs with no guaranteed `node_modules` — the bootstrap and
+ * setup entry points run before an install has ever happened. Importing
+ * `paths.mts` there breaks the very step that would create it, so a literal
+ * path cannot depend on the shared module.
  */
 export function declaresDepZero(source: string): boolean {
-  return source.slice(0, DEP_ZERO_HEADER_CHARS).includes('DEP-0')
-}
-
-export function readBurnDown(repoRoot: string): string[] {
-  const abs = path.join(repoRoot, BURN_DOWN_REL)
-  if (!existsSync(abs)) {
-    return []
-  }
-  const parsed: unknown = JSON.parse(readFileSync(abs, 'utf8'))
-  if (!Array.isArray(parsed)) {
-    return []
-  }
-  return parsed.filter((v): v is string => typeof v === 'string')
+  return /\bdep-0\b/i.test(source.slice(0, DEP_ZERO_HEADER_CHARS))
 }
 
 async function trackedSources(repoRoot: string): Promise<Map<string, string>> {
@@ -138,10 +95,15 @@ async function trackedSources(repoRoot: string): Promise<Map<string, string>> {
     stdioString: true,
   })
   const sources = new Map<string, string>()
+  const isProducer = existsSync(sharedTemplateBasePath(repoRoot))
   const rels = String(result.stdout ?? '').split('\0')
   for (let i = 0, { length } = rels; i < length; i += 1) {
     const rel = rels[i]!
-    if (!rel || !isScannablePath(rel)) {
+    if (
+      !rel ||
+      !isScannablePath(rel) ||
+      (isProducer && isCascadeMirrorPath(rel))
+    ) {
       continue
     }
     const abs = path.join(repoRoot, rel)
@@ -158,16 +120,17 @@ async function trackedSources(repoRoot: string): Promise<Map<string, string>> {
 }
 
 export async function main(
-  argv: readonly string[] = process.argv.slice(2),
+  options?: { readonly argv?: readonly string[] | undefined } | undefined,
 ): Promise<number> {
-  const logger = getDefaultLogger()
+  const { argv = process.argv.slice(2) } = {
+    __proto__: null,
+    ...options,
+  } as { argv?: readonly string[] | undefined }
   const quiet = argv.includes('--quiet')
   const selfTest = argv.includes('--self-test')
 
   const sources = await trackedSources(REPO_ROOT)
   const duplicates = findDuplicateTails(sources)
-  const burnDown = readBurnDown(REPO_ROOT)
-  const { added, cleared } = diffAgainstBurnDown(duplicates, burnDown)
 
   // `--self-test` proves the detector still fires. A gate whose matcher went
   // inert would otherwise report green forever.
@@ -184,11 +147,11 @@ export async function main(
     }
   }
 
-  if (added.length) {
+  if (duplicates.length) {
     logger.error('[paths-are-constructed-once] FAILED:')
     logger.group()
-    for (let i = 0, { length } = added; i < length; i += 1) {
-      const dup = added[i]!
+    for (let i = 0, { length } = duplicates; i < length; i += 1) {
+      const dup = duplicates[i]!
       logger.fail(
         [
           `What: the path "${dup.tail}" is constructed in ${dup.files.length} files.`,
@@ -202,29 +165,16 @@ export async function main(
     return 1
   }
 
-  if (cleared.length) {
-    logger.error(
-      `[paths-are-constructed-once] ${cleared.length} burn-down entr(ies) now scan clean. Drop them from ${BURN_DOWN_REL}:`,
-    )
-    logger.group()
-    for (let i = 0, { length } = cleared; i < length; i += 1) {
-      logger.fail(cleared[i]!)
-    }
-    logger.groupEnd()
-    return 1
-  }
-
   if (!quiet) {
     logger.success(
-      `[paths-are-constructed-once] no unrecorded duplicate path (${burnDown.length} in the burn-down)${selfTest ? '. Self-test passed.' : '.'}`,
+      `[paths-are-constructed-once] no duplicate path${selfTest ? '. Self-test passed.' : '.'}`,
     )
   }
   return 0
 }
 
 const SCRIPT_META: ScriptMeta = {
-  describe:
-    'checks a literal path is constructed once, with a shrink-only burn-down for the backlog',
+  describe: 'checks a literal path is constructed once',
   help: 'Usage: node scripts/fleet/check/paths-are-constructed-once.mts [--quiet] [--self-test]',
 }
 

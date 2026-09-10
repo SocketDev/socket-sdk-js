@@ -21,49 +21,96 @@
  */
 export interface TailUsage {
   /**
-   * The literal segments, slash-joined, as the burn-down records them.
+   * The literal segments joined with slashes.
    */
   readonly tail: string
   readonly files: readonly string[]
 }
 
-/**
- * `path.join(...)` calls with no nested call in their arguments. A nested call
- * means at least one argument is computed, so the tail is not a literal one.
- */
-const JOIN_CALL_RE = /path\.join\(([^()]*)\)/gs
+import { parseSync } from 'rolldown/utils'
 
-const SINGLE_QUOTED_RE = /^'[^']*'$/
+interface PathNode {
+  [key: string]: unknown
+  type: string
+  name?: string | undefined
+  value?: unknown | undefined
+  callee?: PathNode | undefined
+  object?: PathNode | undefined
+  property?: PathNode | undefined
+  arguments?: PathNode[] | undefined
+}
+
+function pathTailInCall(node: PathNode): string | undefined {
+  const callee = node.callee
+  if (
+    node.type !== 'CallExpression' ||
+    callee?.type !== 'MemberExpression' ||
+    callee.object?.type !== 'Identifier' ||
+    callee.object.name !== 'path' ||
+    callee.property?.type !== 'Identifier' ||
+    callee.property.name !== 'join' ||
+    callee['computed']
+  ) {
+    return undefined
+  }
+  const args = node.arguments ?? []
+  const tail = args.slice(1)
+  if (
+    args.length < 3 ||
+    !tail.every(arg => arg.type === 'Literal' && typeof arg.value === 'string')
+  ) {
+    return undefined
+  }
+  const segments = tail.map(arg => arg.value as string)
+  return segments.every(segment => segment === '..')
+    ? undefined
+    : segments.join('/')
+}
 
 /**
  * The literal tails one file builds, each with at least two segments.
  */
-export function literalTailsInSource(source: string): string[] {
+export function literalTailsInSource(
+  source: string,
+  options?: { filePath?: string | undefined } | undefined,
+): string[] {
+  const { filePath = 'source.mts' } = {
+    __proto__: null,
+    ...options,
+  } as NonNullable<typeof options>
   const tails: string[] = []
-  for (const match of source.matchAll(JOIN_CALL_RE)) {
-    const args = (match[1] ?? '')
-      .split(',')
-      .map(a => a.trim())
-      .filter(a => a.length > 0)
-    // One root plus at least two literal segments. A shorter tail is a bare
-    // filename joined onto a caller's directory, which is not a shared path.
-    if (args.length < 3) {
-      continue
-    }
-    const tail = args.slice(1)
-    if (!tail.every(a => SINGLE_QUOTED_RE.test(a))) {
-      continue
-    }
-    const segments = tail.map(a => a.slice(1, -1))
-    // A tail of nothing but `..` walks up from wherever the caller sits. It
-    // names no shared location, so two files climbing three levels are not
-    // two definitions of one path.
-    if (segments.every(s => s === '..')) {
-      continue
-    }
-    tails.push(segments.join('/'))
+  let parsed = parseSync(filePath, source)
+  if (parsed.errors.length) {
+    parsed = parseSync(filePath, `async function workflow() {\n${source}\n}`)
   }
-  return tails
+  if (parsed.errors.length) {
+    throw new SyntaxError(
+      `Cannot inspect path calls in ${filePath}. Saw invalid source syntax; wanted a parseable source file. Fix its syntax before checking path ownership.`,
+      { cause: { filePath } },
+    )
+  }
+  const pending: unknown[] = [parsed.program]
+  while (pending.length) {
+    const value = pending.pop()
+    if (value === null || typeof value !== 'object') {
+      continue
+    }
+    const node = value as PathNode
+    const tail = pathTailInCall(node)
+    if (tail !== undefined) {
+      tails.push(tail)
+    }
+    const children = Object.values(node)
+    for (let i = 0, { length } = children; i < length; i += 1) {
+      const child = children[i]
+      if (Array.isArray(child)) {
+        pending.push(...child)
+      } else if (typeof child === 'object' && child !== null) {
+        pending.push(child)
+      }
+    }
+  }
+  return tails.toReversed()
 }
 
 /**
@@ -78,7 +125,7 @@ export function findDuplicateTails(
 ): TailUsage[] {
   const byTail = new Map<string, Set<string>>()
   for (const [file, source] of sources) {
-    for (const tail of literalTailsInSource(source)) {
+    for (const tail of literalTailsInSource(source, { filePath: file })) {
       let set = byTail.get(tail)
       if (set === undefined) {
         set = new Set<string>()
@@ -96,23 +143,4 @@ export function findDuplicateTails(
   return dups.toSorted((a, b) =>
     a.tail < b.tail ? -1 : a.tail > b.tail ? 1 : 0,
   )
-}
-
-/**
- * Split the duplicates against a burn-down list.
- *
- * `added` is a duplicate the burn-down does not record, which fails the gate.
- * `cleared` is a recorded tail that no longer duplicates, which the operator
- * drops so the list can only shrink.
- */
-export function diffAgainstBurnDown(
-  duplicates: readonly TailUsage[],
-  burnDown: readonly string[],
-): { added: TailUsage[]; cleared: string[] } {
-  const recorded = new Set(burnDown)
-  const live = new Set(duplicates.map(d => d.tail))
-  return {
-    added: duplicates.filter(d => !recorded.has(d.tail)),
-    cleared: burnDown.filter(t => !live.has(t)).toSorted(),
-  }
 }

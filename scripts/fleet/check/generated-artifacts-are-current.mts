@@ -37,6 +37,8 @@ import { artifactsForTier } from './_shared/generated-artifacts.mts'
 import type { ScriptMeta } from '../process/run-main.mts'
 import type { GeneratedArtifact } from './_shared/generated-artifacts.mts'
 
+const logger = getDefaultLogger()
+
 /**
  * An output's bytes, or undefined when the generator creates it fresh.
  */
@@ -156,7 +158,7 @@ export async function inspectArtifact(
   // the same failure arriving by two routes.
   let exitCode: number | undefined
   try {
-    const result = await spawn('node', [scriptAbs], {
+    const result = await spawn(process.execPath, [scriptAbs], {
       cwd: REPO_ROOT,
       stdioString: true,
     })
@@ -196,7 +198,6 @@ export async function inspectArtifacts(
   artifacts: readonly GeneratedArtifact[],
   mode: ArtifactRunMode,
 ): Promise<{ failures: string[]; staleIds: string[] }> {
-  const logger = getDefaultLogger()
   const failures: string[] = []
   const staleIds: string[] = []
   for (const artifact of artifacts) {
@@ -246,9 +247,12 @@ export function selfTestFailure(
 }
 
 export async function main(
-  argv: readonly string[] = process.argv.slice(2),
+  options?: { readonly argv?: readonly string[] | undefined } | undefined,
 ): Promise<number> {
-  const logger = getDefaultLogger()
+  const { argv = process.argv.slice(2) } = {
+    __proto__: null,
+    ...options,
+  } as { argv?: readonly string[] | undefined }
   const fix = argv.includes('--fix')
   const quiet = argv.includes('--quiet')
   const selfTest = argv.includes('--self-test')
@@ -272,15 +276,6 @@ export async function main(
     }
   }
 
-  if (fix) {
-    logger.success(
-      staleIds.length
-        ? `[generated-artifacts-are-current] regenerated ${staleIds.length} stale artifact(s): ${staleIds.join(', ')}. Commit the result.`
-        : '[generated-artifacts-are-current] every artifact was already current.',
-    )
-    return 0
-  }
-
   if (failures.length) {
     logger.error('[generated-artifacts-are-current] FAILED:')
     logger.group()
@@ -290,6 +285,15 @@ export async function main(
     }
     logger.groupEnd()
     return 1
+  }
+
+  if (fix) {
+    logger.success(
+      staleIds.length
+        ? `[generated-artifacts-are-current] regenerated ${staleIds.length} stale artifact(s): ${staleIds.join(', ')}. Commit the result.`
+        : '[generated-artifacts-are-current] every artifact was already current.',
+    )
+    return 0
   }
 
   // `--quiet` silences the PASS line only. A failure and the `--fix` receipt

@@ -67,7 +67,9 @@ export const GENERATED_ARTIFACTS: readonly GeneratedArtifact[] = [
     consequence:
       'the dep-0 installer and the two tracked-surface guards derive their expectation from this surface, so a missing entry is invisible to them',
     id: 'github-tracked-surface',
-    outputs: ['template/base/scripts/fleet/github/tracked-surface.mts'],
+    outputs: [
+      'template/base/universal/scripts/fleet/github/tracked-surface.mts',
+    ],
     script: 'scripts/repo/commit-cascade/manifest/emit-tracked-surface.mts',
     tier: 'wheelhouse',
   },

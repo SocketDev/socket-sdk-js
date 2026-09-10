@@ -49,6 +49,8 @@ import { REPO_ROOT, resolveSyncScaffoldingManifestDir } from '../paths.mts'
 
 import type { ScriptMeta } from '../process/run-main.mts'
 
+const logger = getDefaultLogger()
+
 /**
  * The sanctioned readers. A tracked entry names exactly one.
  *
@@ -156,8 +158,13 @@ export function violationReport(violation: CascadeViolation): string {
       ].join('\n')
 }
 
-export function main(argv: readonly string[] = process.argv.slice(2)): number {
-  const logger = getDefaultLogger()
+export function main(
+  options?: { readonly argv?: readonly string[] | undefined } | undefined,
+): number {
+  const { argv = process.argv.slice(2) } = {
+    __proto__: null,
+    ...options,
+  } as { argv?: readonly string[] | undefined }
   const quiet = argv.includes('--quiet')
   const selfTest = argv.includes('--self-test')
 

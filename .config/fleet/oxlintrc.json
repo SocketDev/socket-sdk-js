@@ -1,13 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/5306f24d9e82ae36ad9c3c964f33075bc589c799/npm/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "import"],
-  "jsPlugins": ["./oxlint-plugin.mjs"],
+  "jsPlugins": ["./oxlint-plugin.generated.mjs"],
   "categories": {
     "correctness": "error",
     "suspicious": "error"
   },
   "rules": {
-    "eslint/complexity": ["error", 200],
+    "eslint/complexity": ["error", 15],
     "eslint/curly": "error",
     "eslint/no-await-in-loop": "off",
     "eslint/no-console": "off",
@@ -38,6 +38,12 @@
     "eslint/no-useless-catch": "off",
     "eslint/no-var": "error",
     "eslint/prefer-const": "error",
+    "eslint/prefer-regex-literals": [
+      "error",
+      {
+        "disallowRedundantWrapping": true
+      }
+    ],
     "eslint/preserve-caught-error": "off",
     "eslint/sort-imports": "off",
     "import/no-cycle": "off",
@@ -47,11 +53,14 @@
     "import/no-unassigned-import": "off",
     "socket/backtick-commands-in-comments": "error",
     "socket/bag-param-optionality-naming": "error",
+    "socket/const-enum-shape": "error",
     "socket/export-top-level-functions": "error",
     "socket/exported-name-has-domain-word": "error",
     "socket/guard-contract": "error",
+    "socket/import-block-is-hoisted": "error",
     "socket/inclusive-language": "error",
     "socket/lint-disable-precedes-code": "error",
+    "socket/match-assertions-normalize-paths": "error",
     "socket/max-comment-block-lines": "error",
     "socket/max-file-lines": "error",
     "socket/mcp-tool-names-are-conventional": "error",
@@ -97,10 +106,10 @@
     "socket/no-process-cwd-in-scripts-hooks": "error",
     "socket/no-promise-race": "error",
     "socket/no-promise-race-in-loop": "error",
+    "socket/no-prose-jargon": "error",
     "socket/no-redundant-spread-fallback": "error",
     "socket/no-required-in-options-bag": ["warn"],
     "socket/no-runtime-features-below-engine-floor": "error",
-    "socket/no-shop-metaphor-jargon": "error",
     "socket/no-snapshot-hostile-builtin": "error",
     "socket/no-source-content-tests": "error",
     "socket/no-source-sniffing": "error",
@@ -138,6 +147,7 @@
     "socket/prefer-ellipsis-char": "error",
     "socket/prefer-env-as-boolean": "error",
     "socket/prefer-error-message-helper": "error",
+    "socket/prefer-exec-path-over-node": "error",
     "socket/prefer-exists-sync": "error",
     "socket/prefer-find-repo-root": "error",
     "socket/prefer-find-up-package-json": "error",
@@ -158,6 +168,7 @@
     "socket/prefer-shell-win32": "error",
     "socket/prefer-socket-lib-compare-str": "error",
     "socket/prefer-socket-lib-error-message": "error",
+    "socket/prefer-socket-lib-json-format": "error",
     "socket/prefer-socket-lib-normalize-path": "error",
     "socket/prefer-socket-lib-predicates": "error",
     "socket/prefer-spawn-over-execsync": "error",
@@ -170,6 +181,7 @@
     "socket/require-regex-comment": "error",
     "socket/require-vitest-globals-import": "error",
     "socket/require-void-run-hook": "error",
+    "socket/returned-object-null-proto": "error",
     "socket/socket-api-token-env": "error",
     "socket/sort-array-literals": "error",
     "socket/sort-boolean-chains": "error",
@@ -256,11 +268,11 @@
     },
     {
       "files": [
-        "**/template/base/.claude/**",
-        "**/template/base/.config/fleet/**",
-        "**/template/base/.git-hooks/**",
-        "**/template/base/scripts/fleet/**",
-        "**/template/base/test/fleet/**"
+        "**/template/base/universal/.claude/**",
+        "**/template/base/universal/.config/fleet/**",
+        "**/template/base/universal/.git-hooks/**",
+        "**/template/base/universal/scripts/fleet/**",
+        "**/template/base/universal/test/fleet/**"
       ],
       "rules": {
         "socket/max-file-lines": "off"
@@ -307,7 +319,7 @@
     "**/test/repo",
     "**/tests/fixtures",
     "**/wasm_exec.js",
-    "**/.config/fleet/oxlint-plugin.mjs",
+    "**/.config/fleet/oxlint-plugin.generated.mjs",
     "**/*.d.ts",
     "**/*.d.ts.map",
     "**/*.tsbuildinfo",

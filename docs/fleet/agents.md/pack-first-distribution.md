@@ -49,7 +49,7 @@ run time cannot be bundled, because rolldown sees a path rather than a value.
 Every consumer then needs the file on disk in the right place.
 
 Render the data into a module constant instead. rolldown inlines a constant,
-so the values ride inside `fleet-pack.cjs` and no member needs the file at
+so the values ride inside `fleet-pack.generated.cjs` and no member needs the file at
 all. `gen/model-pricing-module.mts` is the worked example: it bakes
 `model-pricing.json` into a frozen `MODEL_PRICING`, per tree, and both copies
 are gitignored build outputs rather than cascade payload.

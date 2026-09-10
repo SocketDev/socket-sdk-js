@@ -22,6 +22,8 @@ packages:
 # scripts. Declining is the safe default; running native build scripts from a
 # transitive dep is unnecessary attack surface here.
 allowBuilds:
+  # The CLI's postinstall is its own installer bootstrap; unneeded as a dep.
+  '@anthropic-ai/claude-code': false
   # Optional native addon for ssh2 crypto acceleration; JS fallback is fine.
   cpu-features: false
   # Ships prebuilt dist; its postinstall codegen isn't needed as a dependency.
@@ -33,7 +35,6 @@ allowBuilds:
   puppeteer: false
   # Native bindings are optional (cpu-features above); pure-JS paths suffice.
   ssh2: false
-  '@anthropic-ai/claude-code': true
   # sdk's preinstall is repo-dev bootstrap; the published tarball doesn't
   # ship it, so the self-referential dep never needs build scripts.
   '@socketsecurity/sdk': false
@@ -183,6 +184,12 @@ overrides:
   'vite': 'catalog:'
   'which@>=4': '7.0.0'
 
+# pnpm 11's packageManager-version-check failure policy. `warn` lets the
+# install proceed with a mismatched pnpm (emitting a warning) rather than
+# hard-failing. `error` is the default when the field is absent — socket-lib
+# had `error` while the wheelhouse lacked the field, which blocked commits
+# under a dev pnpm that differed from the `packageManager` pin. `warn` keeps
+# the pin informational without blocking CI or local dev.
 pmOnFail: warn
 
 catalog:
@@ -260,8 +267,8 @@ catalog:
   # candidates before simulating what a port actually cuts. Published
   # 2026-06-08, past the 7-day soak.
   'npm-high-impact': 1.13.0
-  'oxfmt': 0.65.0
-  'oxlint': 1.80.0
+  'oxfmt': 0.66.0
+  'oxlint': 1.81.0
   'oxlint-tsgolint': 7.0.2001
   # parse5 — the HTML parser half of the markdown story. mdast hands raw HTML
   # back as an opaque `html` node (README `<picture>`/`<img>` blocks), so
@@ -284,7 +291,7 @@ catalog:
   # @rolldown/binding-* + @oxc-project/types stay as soak-excluded
   # transitives (consumers depend on `rolldown` only).
   'regjsparser': 0.13.2
-  'rolldown': 1.2.6
+  'rolldown': 1.2.7
   'semver': 7.8.5
   'shell-quote': 1.10.0
   'taze': 21.1.0
@@ -293,15 +300,17 @@ catalog:
   # high, GHSA-v6wh-96g9-6wx3 medium). Tracked here so the pnpm
   # override below pins every transitive `vite` (vitest, @vitest/*,
   # plugin authors) to it.
-  'typescript': 7.0.2
-  'vitest': 4.1.11
-  '@vitest/coverage-v8': 4.1.11
-  c8: 12.0.0
+  'typescript': 7.1.0-dev.20260901.1
+  'vitest': 5.0.0
+  '@vitest/coverage-v8': 5.0.0
+  '@bcoe/v8-coverage': 1.0.2
+  ast-v8-to-istanbul: 1.0.5
   'chrome-devtools-mcp': 1.8.0
   # Playwright MCP server — agent-driven browsing with the fleet agent-banner
   # init script (see .config/fleet/playwright/).
   '@playwright/mcp': 0.0.79
-  '@vitest/ui': 4.1.11
+  '@vitest/ui': 5.0.0
+  c8: 12.0.0
   '@anthropic-ai/claude-code': 2.1.220
   '@typescript/native-preview': 7.0.0-dev.20260510.1
   '@vitiate/core': 0.3.1

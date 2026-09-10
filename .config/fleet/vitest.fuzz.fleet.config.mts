@@ -15,7 +15,8 @@
  *   and the weekly schedule filed it as a fuzz crash for weeks.
  */
 
-import type { TestProjectConfiguration } from 'vitest/config'
+import { isAgent } from '@socketsecurity/lib-stable/env/agents'
+import type { TestUserConfig } from 'vitest/config'
 
 /**
  * Where fuzz targets live. The fleet writes TypeScript as `.mts`, so a
@@ -64,18 +65,22 @@ export function resolveFuzzTimeMs(
  */
 export const FLEET_FUZZ_TIMEOUT_HEADROOM_MS = 30_000
 
-export function fleetFuzzTestConfig(): TestProjectConfiguration['test'] {
+export function fleetFuzzTestConfig(): TestUserConfig {
   return {
     include: [...FLEET_FUZZ_INCLUDE],
     passWithNoTests: true,
+    reporters: [
+      isAgent() && process.env['FUZZ_VERBOSE'] !== '1' ? 'minimal' : 'default',
+      ...(process.env['GITHUB_ACTIONS'] ? ['github-actions' as const] : []),
+    ],
     testTimeout: resolveFuzzTimeMs() + FLEET_FUZZ_TIMEOUT_HEADROOM_MS,
   }
 }
 
 export interface FleetVitiateOptions {
   /**
-   * Corpus + run-results root. Defaults to the fleet cache segment rather than
-   * a top-level `.vitiate/`, because `.cache` is already gitignored fleet-wide.
+   * Corpus + run-results root. The `.vitiate` default matches Vitiate workers,
+   * which do not inherit the plugin process's custom data directory.
    */
   readonly dataDir?: string | undefined
 }
@@ -97,11 +102,12 @@ export function fleetVitiatePluginOptions(
   fuzz: {
     detectors: { prototypePollution: boolean }
     fuzzTimeMs: number
+    quiet: boolean
     stopOnCrash: boolean
   }
   instrument: { include: string[] }
 } {
-  const { dataDir = '.cache/fleet/vitiate' } = {
+  const { dataDir = '.vitiate' } = {
     __proto__: null,
     ...options,
   } as FleetVitiateOptions
@@ -110,6 +116,7 @@ export function fleetVitiatePluginOptions(
     fuzz: {
       detectors: { prototypePollution: true },
       fuzzTimeMs: resolveFuzzTimeMs(),
+      quiet: isAgent() && process.env['FUZZ_VERBOSE'] !== '1',
       stopOnCrash: true,
     },
     instrument: { include: [...instrumentInclude] },

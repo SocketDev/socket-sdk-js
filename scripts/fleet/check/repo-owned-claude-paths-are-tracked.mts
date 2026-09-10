@@ -15,7 +15,7 @@
  *
  *   Segregated directories: `.claude/{agents,commands,hooks,rules,skills}/` are
  *   split `fleet/` vs `repo/`, so only the `repo/` half is asserted.
- *   `.claude/output-styles/` carries no such split - it is repo-owned whole, so
+ *   `.claude/output-styles/` carries no such split - its non-payload paths are repo-owned, so
  *   every path under it is asserted.
  *
  *   The check asks git, never a re-listed copy of the ignore patterns: it runs
@@ -35,6 +35,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
+import { readAppliedPaths } from './payload-importers-are-preserved.mts'
 import { REPO_ROOT } from '../paths.mts'
 import { isMainModule } from '../process/is-main-module.mts'
 import { runMain } from '../process/run-main.mts'
@@ -62,7 +63,7 @@ export const SEGREGATED_CLAUDE_DIRS: readonly string[] = [
 
 /**
  * `.claude/` directories with no fleet/repo split. Repo-owned in whole, so
- * every path beneath them is asserted.
+ * paths absent from the applied bundle are asserted.
  */
 export const REPO_OWNED_CLAUDE_DIRS: readonly string[] = [
   '.claude/output-styles',
@@ -72,11 +73,12 @@ export const REPO_OWNED_CLAUDE_DIRS: readonly string[] = [
  * Whether `filePath` is repo-owned and therefore must never be ignored.
  *
  * A segregated directory contributes only its `repo/` subtree. An unsplit
- * directory contributes everything under it.
+ * directory contributes paths not declared in the applied bundle.
  */
 export function isRepoOwnedClaudePath(
   filePath: string,
   config: {
+    readonly appliedPaths?: ReadonlySet<string> | undefined
     readonly repoOwnedDirs: readonly string[]
     readonly segregatedDirs: readonly string[]
   },
@@ -90,7 +92,7 @@ export function isRepoOwnedClaudePath(
   }
   for (let i = 0, { length } = repoOwnedDirs; i < length; i += 1) {
     if (p.startsWith(`${repoOwnedDirs[i]!}/`)) {
-      return true
+      return !config.appliedPaths?.has(p)
     }
   }
   return false
@@ -161,8 +163,10 @@ async function main(): Promise<void> {
     process.exitCode = 0
     return
   }
+  const appliedPaths = readAppliedPaths()
   const repoOwned = paths.filter(p =>
     isRepoOwnedClaudePath(p, {
+      appliedPaths,
       repoOwnedDirs: REPO_OWNED_CLAUDE_DIRS,
       segregatedDirs: SEGREGATED_CLAUDE_DIRS,
     }),
@@ -192,7 +196,7 @@ async function main(): Promise<void> {
     'Where: the rule matching it - `git check-ignore -v <path>` names the file and line.',
   )
   logger.fail(
-    'Fix:   remove that pattern. The fleet-pack untrack set covers `fleet/` payload only; a `repo/` path, or anything under .claude/output-styles/, belongs in git.',
+    'Fix:   remove that pattern. The fleet-pack untrack set covers `fleet/` payload only; a `repo/` path, or a non-payload path under .claude/output-styles/, belongs in git.',
   )
   process.exitCode = 1
 }
