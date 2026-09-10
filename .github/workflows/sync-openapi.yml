@@ -57,9 +57,30 @@ jobs:
           echo "Sleeping for $delay seconds..."
           sleep $delay
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
-        with:
-          persist-credentials: false
+      - name: Bootstrap checkout
+        shell: bash
+        env:
+          # Route context through env (no ${{ }} in the shell body —
+          # zizmor expression-injection). Token authorizes the fetch inline and
+          # is never persisted to .git/config.
+          GITHUB_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git init -q
+          git config --local advice.detachedHead false
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "${SERVER_URL}/${REPOSITORY}"
+          FETCH_ARGS=(--no-tags --prune --depth 1 origin "${TRIGGER_REF}")
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+            git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" fetch "${FETCH_ARGS[@]}"
+          else
+            git fetch "${FETCH_ARGS[@]}"
+          fi
+          git checkout -q --detach FETCH_HEAD
       - uses: ./.github/actions/fleet/setup-and-install
         with:
           # Thin-distribution CI auth: mint a contents:read-only token so the
@@ -101,6 +122,7 @@ jobs:
           # forbidden here (shared store, parallel-Claude rule).
           tmp_worktree="$(mktemp -d)"
           git worktree add -B automated/open-api "$tmp_worktree" HEAD~1
+          pnpm --dir "$tmp_worktree" install --frozen-lockfile
           # The generated-file set is DERIVED from git state, never a
           # hand-kept list — a generator emitting a new or renamed artifact
           # ships it automatically (a stale hard-coded list broke this
