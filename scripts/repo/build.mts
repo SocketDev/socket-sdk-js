@@ -153,8 +153,11 @@ export async function buildTypes(options: BuildOptions = {}): Promise<number> {
 /**
  * Check if build is needed.
  */
-export function isBuildNeeded(rootPath: string = REPO_ROOT): boolean {
-  const distPath = path.join(rootPath, 'dist', 'index.mjs')
+export function isBuildNeeded(
+  options: { rootPath?: string | undefined } = {},
+): boolean {
+  const { rootPath = REPO_ROOT } = options
+  const distPath = path.join(rootPath, 'dist', 'index.js')
   const distTypesPath = path.join(rootPath, 'dist', 'index.d.mts')
 
   return !existsSync(distPath) || !existsSync(distTypesPath)

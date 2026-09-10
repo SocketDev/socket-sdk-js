@@ -1,13 +1,5 @@
 /**
- * @file Rolldown configuration for the vendored externals build, mimicking
- *   socket-lib's `scripts/repo/build-externals`: each `src/external/*.js` shim
- *   becomes one self-contained CJS bundle under `dist/external/`, while the
- *   main build leaves consumers' relative `require('./external/*.js')` calls
- *   verbatim. The require therefore points at real shipped bytes, so both
- *   plain installs and consumer bundlers (socket-cli's rollup resolves the
- *   relative path and inlines the file) can load it — the failure mode this
- *   exists to prevent is CE-356, where a bundler-invisible bare
- *   `require('form-data')` shipped with nothing behind it.
+ * @file Bundle vendored external entry points for SDK consumers.
  */
 
 import path from 'node:path'
@@ -17,6 +9,7 @@ import {
   createNodeProtocolPlugin,
   MIME_DB_PATTERN,
   MIME_DB_STUB,
+  SDK_BUNDLE_COMMENTS,
 } from './rolldown.config.mts'
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
@@ -35,6 +28,7 @@ export const externalsBuildConfig: RolldownOptions & {
     'external/form-data': path.join(srcPath, 'external/form-data.js'),
   },
   output: {
+    comments: SDK_BUNDLE_COMMENTS,
     dir: distPath,
     format: 'cjs',
     entryFileNames: '[name].js',

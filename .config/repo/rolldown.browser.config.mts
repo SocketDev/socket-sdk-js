@@ -43,6 +43,7 @@ import {
   MIME_DB_STUB,
   OPERATIONS_PATTERN,
   OPERATIONS_STUB,
+  SDK_BUNDLE_COMMENTS,
 } from './rolldown.config.mts'
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
@@ -71,6 +72,7 @@ export const browserBuildConfig: RolldownOptions & { output: OutputOptions } = {
     defaultHandler(level, log)
   },
   output: {
+    comments: SDK_BUNDLE_COMMENTS,
     dir: distPath,
     entryFileNames: '[name].js',
     format: 'esm',

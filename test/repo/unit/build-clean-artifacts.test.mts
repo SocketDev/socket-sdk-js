@@ -10,6 +10,7 @@ import path from 'node:path'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 import { afterEach, describe, expect, it } from 'vitest'
 
+import rootPkgJson from '../../../package.json' with { type: 'json' }
 import { isBuildNeeded, selectBuildMode } from '../../../scripts/repo/build.mts'
 import {
   cleanDirectories,
@@ -44,11 +45,11 @@ describe('build artifact selection', () => {
 
   it('requires both the root bundle and its emitted declaration', async () => {
     const directory = await createArtifactFixture()
-    expect(isBuildNeeded(directory)).toBe(true)
-    await writeFile(path.join(directory, 'dist/index.mjs'), '')
-    expect(isBuildNeeded(directory)).toBe(true)
-    await writeFile(path.join(directory, 'dist/index.d.mts'), '')
-    expect(isBuildNeeded(directory)).toBe(false)
+    expect(isBuildNeeded({ rootPath: directory })).toBe(true)
+    await writeFile(path.join(directory, rootPkgJson.exports['.'].default), '')
+    expect(isBuildNeeded({ rootPath: directory })).toBe(true)
+    await writeFile(path.join(directory, rootPkgJson.exports['.'].types), '')
+    expect(isBuildNeeded({ rootPath: directory })).toBe(false)
   })
 })
 
@@ -69,8 +70,8 @@ describe('clean artifact selection', () => {
 
   it('cleans declarations without deleting source bundles', async () => {
     const directory = await createArtifactFixture()
-    const bundle = path.join(directory, 'dist/index.mjs')
-    const declaration = path.join(directory, 'dist/index.d.mts')
+    const bundle = path.join(directory, rootPkgJson.exports['.'].default)
+    const declaration = path.join(directory, rootPkgJson.exports['.'].types)
     await writeFile(bundle, '')
     await writeFile(declaration, '')
     expect(

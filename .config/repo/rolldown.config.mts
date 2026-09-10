@@ -1,10 +1,5 @@
 /**
- * @file Rolldown configuration for the socket-sdk-js bundle. Two CJS entries
- *   (index, testing), runtime deps externalized so consumers install them.
- *   Replaces the esbuild build (fleet "Tooling" rule: bundler = rolldown). The
- *   heavy-lib stubbing uses the fleet-canonical createLibStubPlugin; mime-db is
- *   stubbed separately (different replacement body); node: builtins are
- *   prefixed + externalized via a resolveId hook.
+ * @file Node bundle configuration for the SDK and testing entry points.
  */
 
 import { readFileSync } from 'node:fs'
@@ -18,6 +13,12 @@ import { createLibStubPlugin } from './rolldown/lib-stub.mts'
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 import type { OutputOptions, Plugin, RolldownOptions } from 'rolldown'
+
+export const SDK_BUNDLE_COMMENTS = {
+  annotation: true,
+  jsdoc: false,
+  legal: true,
+}
 
 const rootPath = REPO_ROOT
 const srcPath = path.join(rootPath, 'src')
@@ -154,6 +155,7 @@ export const buildConfig: RolldownOptions & { output: OutputOptions } = {
     testing: path.join(srcPath, 'testing.mts'),
   },
   output: {
+    comments: SDK_BUNDLE_COMMENTS,
     dir: distPath,
     format: 'cjs',
     entryFileNames: '[name].js',
