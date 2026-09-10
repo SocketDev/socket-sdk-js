@@ -114,14 +114,8 @@ jobs:
       - name: Commit and push changes
         if: steps.check.outputs.has_changes == 'true'
         run: |
-          # Build the PR branch in an ISOLATED worktree at main~1 (so the PR
-          # sits behind main and the "Update branch" button can trigger
-          # enterprise checks). The main checkout never switches branches —
-          # the old checkout-in-place dance aborted whenever a generated
-          # file differed between HEAD and HEAD~1, and `git stash` is
-          # forbidden here (shared store, parallel-Claude rule).
           tmp_worktree="$(mktemp -d)"
-          git worktree add -B automated/open-api "$tmp_worktree" HEAD~1
+          git worktree add -B automated/open-api "$tmp_worktree" HEAD
           node scripts/repo/bootstrap/fleet.mjs --dest "$tmp_worktree"
           pnpm --dir "$tmp_worktree" install --frozen-lockfile
           # The generated-file set is DERIVED from git state, never a
