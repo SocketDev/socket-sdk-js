@@ -407,6 +407,7 @@ minimumReleaseAgeExclude:
   - '@mdn/browser-compat-data@8.1.0'
 
 patchedDependencies:
+  '@polka/url@1.0.0-next.29': patches/@polka__url@1.0.0-next.29.patch
   # default-export interop (managed by socket-wheelhouse sync; do not edit):
   # 5.0.7 dropped the default export from BOTH builds. The CJS half breaks
   # minimatch@9's compiled `__importDefault`, which reads `.default` and
