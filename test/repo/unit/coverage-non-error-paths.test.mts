@@ -22,7 +22,7 @@ import {
 } from '../../../src/file-upload.mts'
 import { createGetRequest, getResponseJson } from '../../../src/http-client.mts'
 import { promiseWithResolvers } from '../../../src/utils.mts'
-import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
+import { setupLocalHttpServer } from '../../utils/local-server.mts'
 
 import type { IncomingMessage, Server, ServerResponse } from 'node:http'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'

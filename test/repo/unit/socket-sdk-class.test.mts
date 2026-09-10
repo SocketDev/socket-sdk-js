@@ -8,7 +8,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/socket-sdk-class.mts'
-import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
+import { setupLocalHttpServer } from '../../utils/local-server.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'

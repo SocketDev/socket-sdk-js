@@ -84,7 +84,8 @@
       ],
       "slow": [
         "test/fleet/e2e/comment-voice.test.mts",
-        "test/repo/unit/build-reproducible.test.mts",
+        "test/repo/unit/rolldown.config.test.mts",
+        "test/repo/unit/rolldown.browser.config.test.mts",
         "test/repo/unit/build.test.mts",
         "test/repo/unit/bundle-validation.test.mts",
         "test/repo/unit/clean.test.mts"

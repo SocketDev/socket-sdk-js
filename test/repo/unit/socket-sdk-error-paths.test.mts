@@ -3,7 +3,7 @@
  *   download/stream, export, post, rescan/search, update, upload, and throwing
  *   methods). Each test triggers a 400 error response from a local HTTP server
  *   and asserts the method returns { success: false }. Uses
- *   setupLocalHttpServer from test/utils/local-server-helpers.mts with a
+ *   setupLocalHttpServer from test/utils/local-server.mts with a
  *   handler that returns 400 for all requests, so every SDK method hits its
  *   catch block and exercises #handleApiError with a client error. Get and List
  *   read-method error paths live in socket-sdk-error-paths-read.test.mts.
@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
-import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
+import { setupLocalHttpServer } from '../../utils/local-server.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
