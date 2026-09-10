@@ -122,6 +122,7 @@ jobs:
           # forbidden here (shared store, parallel-Claude rule).
           tmp_worktree="$(mktemp -d)"
           git worktree add -B automated/open-api "$tmp_worktree" HEAD~1
+          node scripts/repo/bootstrap/fleet.mjs --dest "$tmp_worktree"
           pnpm --dir "$tmp_worktree" install --frozen-lockfile
           # The generated-file set is DERIVED from git state, never a
           # hand-kept list — a generator emitting a new or renamed artifact
