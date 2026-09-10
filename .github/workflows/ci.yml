@@ -1,10 +1,8 @@
-# <fleet-canonical>
-# Managed by socket-wheelhouse. Don't edit this block locally — edit
-# template/base/.github/workflows/ci.yml upstream and re-cascade via
-# `pnpm run sync`. Fleet CI runs check + test using the LOCAL composite actions
-# under .github/actions/ (inlined — no cross-repo reusable, no `uses:@sha` for
-# first-party). Repo-owned jobs go BELOW the END marker (still under the
-# top-level `jobs:` key). See scripts/repo/sync-scaffolding/checks/workflow-fleet-block.mts.
+# Baseline CI — seeded once by socket-wheelhouse (template/presets/), then
+# repo-owned: edit freely. Runs check + test via the LOCAL composite actions
+# under .github/actions/fleet/ (cascade-updated), referenced by ./ path — no
+# cross-repo reusable workflow, no first-party `uses:@sha`. Add repo-specific
+# jobs anywhere under `jobs:`.
 name: ⚡ CI
 
 # PUSH, never pull_request. The fleet takes no outside contributions and
@@ -25,39 +23,36 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Fleet no-phone-home posture: CI runners don't source the shell-rc that dev
-# machines get from setup-security-tools, so set every FLEET_ENV knob
-# workflow-level or the telemetry-env-is-disabled +
-# package-manager-auto-update-is-disabled gates (under `check --all`) fail.
-# Lockstep source: .claude/hooks/fleet/_shared/fleet-env.mts (FLEET_ENV) —
-# the telemetry-env-is-disabled check asserts each knob at CI runtime.
-env:
-  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1'
-  COREPACK_ENABLE_PROJECT_SPEC: '0'
-  DISABLE_TELEMETRY: '1'
-  DO_NOT_TRACK: '1'
-  NO_UPDATE_NOTIFIER: '1'
-  OTEL_SDK_DISABLED: 'true'
-
 jobs:
-  # First step of every job is the third-party actions/checkout (GitHub fetches
-  # it independently) to populate the workspace so the LOCAL `./.github/actions/*`
-  # composites resolve. setup-and-install then re-checks-out — full history
-  # (fetch-depth 0) in the check job, since the commit-history checks it runs
-  # (AI-attribution, release-boundary) read the default branch's history and
-  # refuse a shallow clone rather than false-green; the test matrix stays at
-  # the default depth (25 — covers CI's other git operations) and runs the
-  # zizmor Actions audit (its own `strategy.job-total < 2` skip runs it in the
-  # non-matrix check job, skips it in the test matrix).
   check:
     name: 🔎 Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
-        with:
-          fetch-depth: 1
-          persist-credentials: false
+      - name: Bootstrap checkout
+        shell: bash
+        env:
+          # Route context through env (no ${{ }} in the shell body —
+          # zizmor expression-injection). Token authorizes the fetch inline and
+          # is never persisted to .git/config.
+          GITHUB_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git init -q
+          git config --local advice.detachedHead false
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "${SERVER_URL}/${REPOSITORY}"
+          FETCH_ARGS=(--no-tags --prune --depth 1 origin "${TRIGGER_REF}")
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+            git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" fetch "${FETCH_ARGS[@]}"
+          else
+            git fetch "${FETCH_ARGS[@]}"
+          fi
+          git checkout -q --detach FETCH_HEAD
       - uses: ./.github/actions/fleet/setup-and-install
         with:
           # Full history: the commit-history checks (AI-attribution,
@@ -89,10 +84,30 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
-        with:
-          fetch-depth: 1
-          persist-credentials: false
+      - name: Bootstrap checkout
+        shell: bash
+        env:
+          # Route context through env (no ${{ }} in the shell body —
+          # zizmor expression-injection). Token authorizes the fetch inline and
+          # is never persisted to .git/config.
+          GITHUB_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git init -q
+          git config --local advice.detachedHead false
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "${SERVER_URL}/${REPOSITORY}"
+          FETCH_ARGS=(--no-tags --prune --depth 1 origin "${TRIGGER_REF}")
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+            git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" fetch "${FETCH_ARGS[@]}"
+          else
+            git fetch "${FETCH_ARGS[@]}"
+          fi
+          git checkout -q --detach FETCH_HEAD
       - uses: ./.github/actions/fleet/setup-and-install
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
@@ -113,4 +128,3 @@ jobs:
         with:
           setup-script: pnpm run build
           main-script: pnpm run test --all
-  # </fleet-canonical>
