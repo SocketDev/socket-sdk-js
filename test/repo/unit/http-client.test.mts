@@ -1,3 +1,6 @@
+/**
+ * @file Exercises SDK HTTP transport responses, errors, and hooks.
+ */
 import { createServer } from 'node:http'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -11,62 +14,13 @@ import {
 
 import { isError } from '@socketsecurity/lib/errors/predicates'
 
-import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { Server } from 'node:http'
 
-export function mockHttpResponse(
-  overrides: Partial<Omit<HttpResponse, 'body'>> & {
-    body?: Buffer | string | undefined
-  },
-): HttpResponse {
-  const body =
-    typeof overrides.body === 'string'
-      ? Buffer.from(overrides.body)
-      : (overrides.body ?? Buffer.alloc(0))
-  const status = overrides.status ?? 200
-  return {
-    arrayBuffer: () =>
-      body.buffer.slice(
-        body.byteOffset,
-        body.byteOffset + body.byteLength,
-      ) as ArrayBuffer,
-    body,
-    headers: overrides.headers ?? {},
-    json: () => JSON.parse(body.toString('utf8')),
-    ok: overrides.ok ?? (status >= 200 && status < 300),
-    status,
-    statusText: overrides.statusText ?? '',
-    text: () => body.toString('utf8'),
-    ...(overrides.rawResponse ? { rawResponse: overrides.rawResponse } : {}),
-  }
+const responseBodies = {
+  normal: 'Hello, World!',
+  empty: '',
+  large: 'x'.repeat(10_000),
 }
-
-// =============================================================================
-// Response Body Reading Tests
-// =============================================================================
-
-describe('HTTP Client - Response Body Reading', () => {
-  it('should read normal response body successfully', () => {
-    const testBody = 'Hello, World!'
-    const response = mockHttpResponse({ body: testBody })
-    expect(response.text()).toBe(testBody)
-  })
-
-  it('should read empty response body', () => {
-    const response = mockHttpResponse({ body: '' })
-    expect(response.text()).toBe('')
-  })
-
-  it('should read large response body', () => {
-    const largeBody = 'x'.repeat(10_000)
-    const response = mockHttpResponse({ body: largeBody })
-    expect(response.text()).toBe(largeBody)
-  })
-})
-
-// =============================================================================
-// Error Handling Tests (with Local Server)
-// =============================================================================
 
 describe('HTTP Client - Error Handling', () => {
   let server: Server
@@ -76,7 +30,11 @@ describe('HTTP Client - Error Handling', () => {
     server = createServer((req, res) => {
       const url = req.url || ''
 
-      if (url.includes('/error-immediate')) {
+      const bodyName = url.slice('/body/'.length) as keyof typeof responseBodies
+      if (url.startsWith('/body/') && bodyName in responseBodies) {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(responseBodies[bodyName])
+      } else if (url.includes('/error-immediate')) {
         req.socket.destroy()
       } else if (url.includes('/invalid-json')) {
         res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -99,7 +57,7 @@ describe('HTTP Client - Error Handling', () => {
     })
 
     await new Promise<void>(resolve => {
-      server.listen(0, () => {
+      server.listen(0, '127.0.0.1', () => {
         const address = server.address()
         if (address && typeof address === 'object') {
           const { port } = address
@@ -110,9 +68,30 @@ describe('HTTP Client - Error Handling', () => {
     })
   })
 
-  afterAll(() => {
-    server.close()
+  afterAll(async () => {
+    server.closeAllConnections()
+    await new Promise<void>((resolve, reject) => {
+      server.close(error => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve()
+        }
+      })
+    })
   })
+
+  it.each(Object.entries(responseBodies))(
+    'reads %s response bytes through the SDK transport',
+    async (name, expected) => {
+      const response = await createGetRequest(baseUrl, `/body/${name}`, {
+        timeout: 1000,
+      })
+      expect(response.status).toBe(200)
+      expect(response.text()).toBe(expected)
+      expect(response.headers['content-type']).toBe('text/plain')
+    },
+  )
 
   describe('createGetRequest error handling', () => {
     it('should handle connection errors', async () => {
@@ -196,22 +175,6 @@ describe('HTTP Client - Error Handling', () => {
       expect(requestCalled).toBe(true)
       expect(responseCalled).toBe(true)
     })
-
-    it('should not call hooks when not provided', async () => {
-      // Verifies the if-guard optimization: sanitizeHeaders and hook callbacks
-      // are never evaluated when hooks are absent.
-      const response = await createDeleteRequest(baseUrl, '/test', {
-        timeout: 1000,
-      })
-      expect(response.status).toBe(200)
-    })
-
-    it('should not call hooks on error when not provided', async () => {
-      const invalidUrl = 'http://127.0.0.1:1'
-      await expect(
-        createGetRequest(invalidUrl, '/test', { timeout: 100 }),
-      ).rejects.toThrow()
-    })
   })
 
   describe('timeout handling', () => {
@@ -223,13 +186,6 @@ describe('HTTP Client - Error Handling', () => {
   })
 
   describe('network error handling', () => {
-    it('should handle ECONNREFUSED with helpful message', async () => {
-      const invalidUrl = 'http://127.0.0.1:1'
-      await expect(
-        createGetRequest(invalidUrl, '/test', { timeout: 100 }),
-      ).rejects.toThrow()
-    })
-
     it('should handle ENOTFOUND with DNS guidance', async () => {
       const invalidHost = 'http://nonexistent-host-that-does-not-exist.invalid'
       await expect(

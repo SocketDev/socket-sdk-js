@@ -400,6 +400,7 @@ export function reshapeArtifactForPublicPolicy<
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
+      __proto__: null,
       // Deep-link qualifier fields (artifactId, classifier, ext, params, path,
       // platform, section) are non-sensitive routing hints public consumers use
       // to build correct socket.dev links for non-npm ecosystems. Copy only the

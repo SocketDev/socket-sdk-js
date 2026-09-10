@@ -39,6 +39,100 @@ export interface MethodInfo {
   permissions: string[]
 }
 
+function findSignatureEnd(lines: string[], start: number): number {
+  // Walk through the signature: track ()/{} depth so nested object-literal
+  // option params don't trip the "body starts" detector.
+  let sigEnd = start
+  let parenDepth = 0
+  let braceDepth = 0
+  let sawCloseParen = false
+  while (sigEnd < lines.length) {
+    const line = lines[sigEnd]!
+    for (let ci = 0, { length } = line; ci < length; ci += 1) {
+      const ch = line[ci]!
+      if (ch === '(') {
+        parenDepth++
+      } else if (ch === ')') {
+        parenDepth--
+        if (parenDepth === 0) {
+          sawCloseParen = true
+        }
+      } else if (ch === '{') {
+        braceDepth++
+      } else if (ch === '}') {
+        braceDepth--
+      }
+    }
+    if (
+      sawCloseParen &&
+      parenDepth === 0 &&
+      braceDepth === 1 &&
+      line.endsWith('{')
+    ) {
+      break
+    }
+    sigEnd++
+    if (sigEnd - start > 80) {
+      break
+    }
+  }
+  return sigEnd
+}
+
+function extractMethodDocumentation(lines: string[], start: number) {
+  let jsdocEnd = start - 1
+  while (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '') {
+    jsdocEnd--
+  }
+  let summary = ''
+  let operationId: string | undefined
+  if (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '*/') {
+    let jsdocStart = jsdocEnd
+    while (jsdocStart >= 0 && lines[jsdocStart]!.trim() !== '/**') {
+      jsdocStart--
+    }
+    const jsdoc = lines.slice(jsdocStart, jsdocEnd + 1).join('\n')
+    for (let k = jsdocStart + 1; k < jsdocEnd; k++) {
+      const text = lines[k]!.replace(/^\s*\*\s?/, '').trim()
+      if (text && !text.startsWith('@')) {
+        summary = text
+        break
+      }
+    }
+    const opTag = jsdoc.match(/@operationId\s+(\S+)/)
+    if (opTag) {
+      operationId = opTag[1] === 'none' ? undefined : opTag[1]
+    }
+  }
+
+  return { __proto__: null, summary, operationId }
+}
+
+function resolveMethodQuota(data: QuotaData, operationId: string | undefined) {
+  let quota: number | undefined
+  let permissions: string[] = []
+  if (operationId) {
+    let entry = data.api[operationId]!
+    if (!entry) {
+      const lower = operationId.toLowerCase()
+      const apiEntries = Object.entries(data.api)
+      for (let j = 0, { length: jlen } = apiEntries; j < jlen; j += 1) {
+        const pair = apiEntries[j]!
+        if (pair[0].toLowerCase() === lower) {
+          entry = pair[1]
+          break
+        }
+      }
+    }
+    if (entry) {
+      quota = entry.quota
+      permissions = entry.permissions
+    }
+  }
+
+  return { __proto__: null, quota, permissions }
+}
+
 /**
  * Extract public method records from the SDK class source. Looks for top-level
  * `async name(...)` / `async *name(...)` / `async name<T>(...)` with a JSDoc
@@ -70,42 +164,7 @@ export function extractMethods(): MethodInfo[] {
     }
     seen.add(name)
 
-    // Walk through the signature: track ()/{} depth so nested object-literal
-    // option params don't trip the "body starts" detector.
-    let sigEnd = i
-    let parenDepth = 0
-    let braceDepth = 0
-    let sawCloseParen = false
-    while (sigEnd < lines.length) {
-      const line = lines[sigEnd]!
-      for (let ci = 0, { length } = line; ci < length; ci += 1) {
-        const ch = line[ci]!
-        if (ch === '(') {
-          parenDepth++
-        } else if (ch === ')') {
-          parenDepth--
-          if (parenDepth === 0) {
-            sawCloseParen = true
-          }
-        } else if (ch === '{') {
-          braceDepth++
-        } else if (ch === '}') {
-          braceDepth--
-        }
-      }
-      if (
-        sawCloseParen &&
-        parenDepth === 0 &&
-        braceDepth === 1 &&
-        line.endsWith('{')
-      ) {
-        break
-      }
-      sigEnd++
-      if (sigEnd - i > 80) {
-        break
-      }
-    }
+    const sigEnd = findSignatureEnd(lines, i)
     const sigLines = lines.slice(i, sigEnd + 1).slice()
     const last = sigLines[sigLines.length - 1]!
     sigLines[sigLines.length - 1] = last.replace(/\s*\{$/, '')
@@ -117,30 +176,9 @@ export function extractMethods(): MethodInfo[] {
     }
     const body = lines.slice(i, bodyEnd + 1).join('\n')
 
-    let jsdocEnd = i - 1
-    while (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '') {
-      jsdocEnd--
-    }
-    let summary = ''
-    let operationId: string | undefined
-    if (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '*/') {
-      let jsdocStart = jsdocEnd
-      while (jsdocStart >= 0 && lines[jsdocStart]!.trim() !== '/**') {
-        jsdocStart--
-      }
-      const jsdoc = lines.slice(jsdocStart, jsdocEnd + 1).join('\n')
-      for (let k = jsdocStart + 1; k < jsdocEnd; k++) {
-        const text = lines[k]!.replace(/^\s*\*\s?/, '').trim()
-        if (text && !text.startsWith('@')) {
-          summary = text
-          break
-        }
-      }
-      const opTag = jsdoc.match(/@operationId\s+(\S+)/)
-      if (opTag) {
-        operationId = opTag[1] === 'none' ? undefined : opTag[1]
-      }
-    }
+    const documentation = extractMethodDocumentation(lines, i)
+    const { summary } = documentation
+    let { operationId } = documentation
 
     if (!operationId) {
       const generic = body.match(/<'([a-zA-Z][a-zA-Z0-9]*)'[,>]/)
@@ -152,26 +190,7 @@ export function extractMethods(): MethodInfo[] {
       operationId = name
     }
 
-    let quota: number | undefined
-    let permissions: string[] = []
-    if (operationId) {
-      let entry = data.api[operationId]!
-      if (!entry) {
-        const lower = operationId.toLowerCase()
-        const apiEntries = Object.entries(data.api)
-        for (let j = 0, { length: jlen } = apiEntries; j < jlen; j += 1) {
-          const pair = apiEntries[j]!
-          if (pair[0].toLowerCase() === lower) {
-            entry = pair[1]
-            break
-          }
-        }
-      }
-      if (entry) {
-        quota = entry.quota
-        permissions = entry.permissions
-      }
-    }
+    const { quota, permissions } = resolveMethodQuota(data, operationId)
 
     methods.push({
       isGenerator,

@@ -33,7 +33,8 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { runCommand } from './run-command.mts'
-import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 // CJS/ESM interop: @babel/traverse wraps the function under .default in ESM
 const traverse =
@@ -228,14 +229,14 @@ export async function generateStrictTypes(): Promise<void> {
   // The child script owns lint + format of everything it writes, through the
   // `pnpm run fix` wrapper — a second format pass here under different
   // settings is what shipped gate-failing output to CI.
-  await spawn('node', ['scripts/repo/generate-strict-types.mts'], {
+  await spawn(process.execPath, ['scripts/repo/generate-strict-types.mts'], {
     cwd: rootPath,
     stdio: 'inherit',
   })
 }
 
 export async function generateTypes(): Promise<void> {
-  await spawn('node', ['scripts/repo/generate-types.mts'], {
+  await spawn(process.execPath, ['scripts/repo/generate-types.mts'], {
     cwd: rootPath,
     stdio: 'inherit',
   })
@@ -278,9 +279,11 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'generate SDK definitions from the Socket OpenAPI schema',
+  help: `Usage: pnpm run generate-sdk\n\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

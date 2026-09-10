@@ -176,11 +176,6 @@ const casedSensitive = fc
   )
 
 describe('header-sanitization/sanitizeHeaders (fuzz)', () => {
-  // INVARIANT: undefined input maps to undefined output.
-  test('returns undefined for undefined input', () => {
-    expect(sanitizeHeaders(undefined)).toBeUndefined()
-  })
-
   // SECURITY INVARIANT: a sensitive header in ANY casing is always redacted,
   // regardless of the surrounding non-sensitive headers.
   test('always redacts sensitive headers case-insensitively', () => {

@@ -19,7 +19,8 @@ import { fileURLToPath } from 'node:url'
 
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
 /**
  * An SDK method name, as `getOrgFullScanList`. Named so the table's key says
@@ -88,13 +89,12 @@ interface MethodInfo {
 // Private entry point.
 // ---------------------------------------------------------------------------
 
-function main(): void {
-  const warnOnly = process.argv.includes('--warn')
-  const data = JSON.parse(readFileSync(dataPath, 'utf8')) as QuotaData
-  const methods = extractMethods()
-  const errors: string[] = []
-  const warnings: string[] = []
-
+function collectQuotaDiagnostics(
+  methods: MethodInfo[],
+  data: QuotaData,
+  errors: string[],
+  warnings: string[],
+): void {
   for (let i = 0, { length } = methods; i < length; i += 1) {
     const m = methods[i]!
     if (!m.operationId && !m.hadOperationIdNone) {
@@ -144,6 +144,16 @@ function main(): void {
       )
     }
   }
+}
+
+function main(): void {
+  const warnOnly = process.argv.includes('--warn')
+  const data = JSON.parse(readFileSync(dataPath, 'utf8')) as QuotaData
+  const methods = extractMethods()
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  collectQuotaDiagnostics(methods, data, errors, warnings)
 
   if (warnings.length > 0) {
     logger.log('')
@@ -176,13 +186,48 @@ function main(): void {
   }
 }
 
+const SCRIPT_META = {
+  describe: 'validate SDK operation quota metadata',
+  help: `Usage: node scripts/repo/validate-quota-sync.mts [--warn]\n\n--warn  report errors without failing\n--help, -h  show usage\n--describe  show purpose`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }
 
 // ---------------------------------------------------------------------------
 // Exported helpers (alphabetical).
 // ---------------------------------------------------------------------------
+
+function extractQuotaDocumentation(lines: string[], start: number) {
+  let jsdocEnd = start - 1
+  while (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '') {
+    jsdocEnd--
+  }
+  let jsdocQuota: number | undefined
+  let operationId: string | undefined
+  let hadOperationIdNone = false
+  if (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '*/') {
+    let jsdocStart = jsdocEnd
+    while (jsdocStart >= 0 && lines[jsdocStart]!.trim() !== '/**') {
+      jsdocStart--
+    }
+    const jsdoc = lines.slice(jsdocStart, jsdocEnd + 1).join('\n')
+    const qMatch = jsdoc.match(/@quota\s+(\d+)\s*units?/)
+    if (qMatch) {
+      jsdocQuota = Number(qMatch[1])
+    }
+    const opMatch = jsdoc.match(/@operationId\s+(\S+)/)
+    if (opMatch) {
+      if (opMatch[1] === 'none') {
+        hadOperationIdNone = true
+      } else {
+        operationId = opMatch[1]
+      }
+    }
+  }
+  return { __proto__: null, hadOperationIdNone, jsdocQuota, operationId }
+}
 
 /**
  * Extract method information from the SDK class source.
@@ -225,32 +270,9 @@ export function extractMethods(): MethodInfo[] {
     }
     const body = lines.slice(i, bodyEnd + 1).join('\n')
 
-    let jsdocEnd = i - 1
-    while (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '') {
-      jsdocEnd--
-    }
-    let jsdocQuota: number | undefined
-    let operationId: string | undefined
-    let hadOperationIdNone = false
-    if (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '*/') {
-      let jsdocStart = jsdocEnd
-      while (jsdocStart >= 0 && lines[jsdocStart]!.trim() !== '/**') {
-        jsdocStart--
-      }
-      const jsdoc = lines.slice(jsdocStart, jsdocEnd + 1).join('\n')
-      const qMatch = jsdoc.match(/@quota\s+(\d+)\s*units?/)
-      if (qMatch) {
-        jsdocQuota = Number(qMatch[1])
-      }
-      const opMatch = jsdoc.match(/@operationId\s+(\S+)/)
-      if (opMatch) {
-        if (opMatch[1] === 'none') {
-          hadOperationIdNone = true
-        } else {
-          operationId = opMatch[1]
-        }
-      }
-    }
+    const documentation = extractQuotaDocumentation(lines, i)
+    const { hadOperationIdNone, jsdocQuota } = documentation
+    let { operationId } = documentation
     if (!operationId && !hadOperationIdNone) {
       const generic = body.match(/<'([a-zA-Z][a-zA-Z0-9]*)'[,>]/)
       if (generic) {

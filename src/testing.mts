@@ -111,15 +111,6 @@ export const organizationFixtures = {
  */
 export const repositoryFixtures = {
   /**
-   * Basic repository with minimal data.
-   */
-  basic: {
-    id: 'repo_123',
-    name: 'test-repo',
-    archived: false,
-    default_branch: 'main',
-  },
-  /**
    * Archived repository.
    */
   archived: {
@@ -127,6 +118,15 @@ export const repositoryFixtures = {
     name: 'old-repo',
     archived: true,
     default_branch: 'master', // inclusive-language: external-api -- GitHub repo.default_branch field; legacy archived repo fixture.
+  },
+  /**
+   * Basic repository with minimal data.
+   */
+  basic: {
+    id: 'repo_123',
+    name: 'test-repo',
+    archived: false,
+    default_branch: 'main',
   },
   /**
    * Repository with full details.
@@ -148,14 +148,6 @@ export const repositoryFixtures = {
  */
 export const scanFixtures = {
   /**
-   * Pending scan.
-   */
-  pending: {
-    id: 'scan_pending',
-    status: 'pending',
-    created_at: '2024-01-01T00:00:00Z',
-  },
-  /**
    * Completed scan with no issues.
    */
   completed: {
@@ -164,6 +156,23 @@ export const scanFixtures = {
     created_at: '2024-01-01T00:00:00Z',
     completed_at: '2024-01-01T00:01:00Z',
     issues_found: 0,
+  },
+  /**
+   * Failed scan.
+   */
+  failed: {
+    id: 'scan_failed',
+    status: 'failed',
+    created_at: '2024-01-01T00:00:00Z',
+    error: 'Scan timeout',
+  },
+  /**
+   * Pending scan.
+   */
+  pending: {
+    id: 'scan_pending',
+    status: 'pending',
+    created_at: '2024-01-01T00:00:00Z',
   },
   /**
    * Completed scan with issues.
@@ -175,21 +184,22 @@ export const scanFixtures = {
     completed_at: '2024-01-01T00:01:00Z',
     issues_found: 3,
   },
-  /**
-   * Failed scan.
-   */
-  failed: {
-    id: 'scan_failed',
-    status: 'failed',
-    created_at: '2024-01-01T00:00:00Z',
-    error: 'Scan timeout',
-  },
 } as const
 
 /**
  * Common fixture data for package/artifact responses.
  */
 export const packageFixtures = {
+  /**
+   * Package with malware alert.
+   */
+  malware: {
+    id: 'pkg_malware',
+    name: 'malware-package',
+    version: '3.0.0',
+    score: 0,
+    issues: ['malware'],
+  },
   /**
    * Safe package with high score.
    */
@@ -209,16 +219,6 @@ export const packageFixtures = {
     score: 45,
     issues: ['vulnerability'],
   },
-  /**
-   * Package with malware alert.
-   */
-  malware: {
-    id: 'pkg_malware',
-    name: 'malware-package',
-    version: '3.0.0',
-    score: 0,
-    issues: ['malware'],
-  },
 } as const
 
 /**
@@ -226,13 +226,13 @@ export const packageFixtures = {
  */
 export const issueFixtures = {
   /**
-   * Vulnerability issue.
+   * License issue.
    */
-  vulnerability: {
-    type: 'vulnerability',
-    severity: 'high',
-    key: 'CVE-2024-1234',
-    description: 'SQL Injection vulnerability',
+  license: {
+    type: 'license',
+    severity: 'medium',
+    key: 'license-incompatible',
+    description: 'License incompatible with project',
   },
   /**
    * Malware issue.
@@ -244,13 +244,13 @@ export const issueFixtures = {
     description: 'Malicious code detected',
   },
   /**
-   * License issue.
+   * Vulnerability issue.
    */
-  license: {
-    type: 'license',
-    severity: 'medium',
-    key: 'license-incompatible',
-    description: 'License incompatible with project',
+  vulnerability: {
+    type: 'vulnerability',
+    severity: 'high',
+    key: 'CVE-2024-1234',
+    description: 'SQL Injection vulnerability',
   },
 } as const
 

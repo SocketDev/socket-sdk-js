@@ -25,16 +25,6 @@ import { pRetry } from '@socketsecurity/lib/promises/retry'
 import { setMaxEventTargetListeners } from '@socketsecurity/lib/events/warning/handler'
 import { urlSearchParamsAsBoolean } from '@socketsecurity/lib/url/search-params'
 
-const logger = getDefaultLogger()
-
-let cachedAbortSignal: AbortSignal | undefined
-export function getSdkAbortSignal(): AbortSignal {
-  if (cachedAbortSignal === undefined) {
-    cachedAbortSignal = getAbortSignal()
-  }
-  return cachedAbortSignal
-}
-
 import { httpRequest } from '@socketsecurity/lib/http-request'
 
 import {
@@ -189,6 +179,16 @@ import type { TtlCache } from '@socketsecurity/lib/cache/ttl/types'
 import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
 import type { JsonValue } from '@socketsecurity/lib/json/types'
 
+const logger = getDefaultLogger()
+
+let cachedAbortSignal: AbortSignal | undefined
+export function getSdkAbortSignal(): AbortSignal {
+  if (cachedAbortSignal === undefined) {
+    cachedAbortSignal = getAbortSignal()
+  }
+  return cachedAbortSignal
+}
+
 /**
  * Socket SDK for programmatic access to Socket.dev security analysis APIs.
  * Provides methods for package scanning, organization management, and security
@@ -215,20 +215,7 @@ export class SocketSdk {
    * caching.
    */
   constructor(apiToken: string, options?: SocketSdkOptions | undefined) {
-    // Input validation for API token.
-    const MAX_API_TOKEN_LENGTH = 1024
-    if (typeof apiToken !== 'string') {
-      throw new TypeErrorCtor('"apiToken" is required and must be a string')
-    }
-    const trimmedToken = StringPrototypeTrim(apiToken)
-    if (!trimmedToken) {
-      throw new ErrorCtor('"apiToken" cannot be empty or whitespace-only')
-    }
-    if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
-      throw new ErrorCtor(
-        `"apiToken" exceeds maximum length of ${MAX_API_TOKEN_LENGTH} characters`,
-      )
-    }
+    const trimmedToken = this.#validateApiToken(apiToken)
 
     const {
       baseUrl = 'https://api.socket.dev/v0/',
@@ -243,19 +230,7 @@ export class SocketSdk {
       userAgent,
     } = { __proto__: null, ...options } as SocketSdkOptions
 
-    // Validate timeout parameter.
-    if (timeout !== undefined) {
-      if (
-        typeof timeout !== 'number' ||
-        Number.isNaN(timeout) ||
-        timeout < MIN_HTTP_TIMEOUT ||
-        timeout > MAX_HTTP_TIMEOUT
-      ) {
-        throw new TypeErrorCtor(
-          `"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`,
-        )
-      }
-    }
+    this.#validateTimeout(timeout)
 
     this.#apiToken = trimmedToken
     this.#baseUrl = normalizeBaseUrl(baseUrl)
@@ -294,6 +269,39 @@ export class SocketSdk {
     this.#reqOptionsWithHooks = {
       ...this.#reqOptions,
       hooks: this.#hooks,
+    }
+  }
+
+  #validateApiToken(apiToken: string): string {
+    const MAX_API_TOKEN_LENGTH = 1024
+    if (typeof apiToken !== 'string') {
+      throw new TypeErrorCtor('"apiToken" is required and must be a string')
+    }
+    const trimmedToken = StringPrototypeTrim(apiToken)
+    if (!trimmedToken) {
+      throw new ErrorCtor('"apiToken" cannot be empty or whitespace-only')
+    }
+    if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
+      throw new ErrorCtor(
+        `"apiToken" exceeds maximum length of ${MAX_API_TOKEN_LENGTH} characters`,
+      )
+    }
+
+    return trimmedToken
+  }
+
+  #validateTimeout(timeout: number | undefined): void {
+    if (timeout !== undefined) {
+      if (
+        typeof timeout !== 'number' ||
+        Number.isNaN(timeout) ||
+        timeout < MIN_HTTP_TIMEOUT ||
+        timeout > MAX_HTTP_TIMEOUT
+      ) {
+        throw new TypeErrorCtor(
+          `"timeout" must be a number between ${MIN_HTTP_TIMEOUT} and ${MAX_HTTP_TIMEOUT} milliseconds`,
+        )
+      }
     }
   }
 
@@ -583,6 +591,49 @@ export class SocketSdk {
         cause: error,
       })
     }
+    const body = this.#parseApiErrorBody(error)
+    // Build error message that includes the body content if available.
+    /* c8 ignore next - Fallback error message when error.message is undefined */
+    let errorMessage =
+      error.message ??
+      /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
+    const trimmedBody =
+      body !== undefined ? StringPrototypeTrim(body) : undefined
+    if (trimmedBody && !errorMessage.includes(trimmedBody)) {
+      // Replace generic status message with actual error body if present,
+      // otherwise append the body to the error message.
+      const statusMessage = error.response?.statusText
+      if (statusMessage && errorMessage.includes(statusMessage)) {
+        errorMessage = errorMessage.replace(statusMessage, () => trimmedBody)
+        /* c8 ignore next 2 - c8 ignored: because Node.js http always sets statusText; this else branch handles custom servers or proxies that omit it */
+      } else {
+        errorMessage = `${errorMessage}: ${trimmedBody}`
+      }
+    }
+
+    const actionableGuidance = this.#getApiErrorGuidance(error)
+
+    // Append actionable guidance to cause if available.
+    const causeWithGuidance = actionableGuidance
+      ? [trimmedBody, '', actionableGuidance].filter(Boolean).join('\n')
+      : body
+
+    // Omit cause if it's too similar to the error message (redundant).
+    // This prevents repeating essentially the same information twice.
+    const finalCause = filterRedundantCause(errorMessage, causeWithGuidance)
+
+    return {
+      cause: finalCause,
+      data: undefined,
+      error: errorMessage,
+      /* c8 ignore next - fallback for missing status code in edge cases. */
+      status: statusCode ?? 0,
+      success: false,
+      url: error.url,
+    }
+  }
+
+  #parseApiErrorBody(error: ResponseError): string | undefined {
     // The error payload may give a meaningful hint as to what went wrong.
     const bodyStr = error.response.text()
     // Try to parse the body as JSON, fallback to treating as plain text.
@@ -610,25 +661,11 @@ export class SocketSdk {
     } catch {
       body = bodyStr
     }
-    // Build error message that includes the body content if available.
-    /* c8 ignore next - Fallback error message when error.message is undefined */
-    let errorMessage =
-      error.message ??
-      /* c8 ignore next - fallback for missing error message */ UNKNOWN_ERROR
-    const trimmedBody =
-      body !== undefined ? StringPrototypeTrim(body) : undefined
-    if (trimmedBody && !errorMessage.includes(trimmedBody)) {
-      // Replace generic status message with actual error body if present,
-      // otherwise append the body to the error message.
-      const statusMessage = error.response?.statusText
-      if (statusMessage && errorMessage.includes(statusMessage)) {
-        errorMessage = errorMessage.replace(statusMessage, () => trimmedBody)
-        /* c8 ignore next 2 - c8 ignored: because Node.js http always sets statusText; this else branch handles custom servers or proxies that omit it */
-      } else {
-        errorMessage = `${errorMessage}: ${trimmedBody}`
-      }
-    }
+    return body
+  }
 
+  #getApiErrorGuidance(error: ResponseError): string | undefined {
+    const { status: statusCode } = error.response
     // Add actionable guidance based on status code.
     let actionableGuidance: string | undefined
     if (statusCode === 401) {
@@ -675,24 +712,7 @@ export class SocketSdk {
       ].join('\n')
     }
 
-    // Append actionable guidance to cause if available.
-    const causeWithGuidance = actionableGuidance
-      ? [trimmedBody, '', actionableGuidance].filter(Boolean).join('\n')
-      : body
-
-    // Omit cause if it's too similar to the error message (redundant).
-    // This prevents repeating essentially the same information twice.
-    const finalCause = filterRedundantCause(errorMessage, causeWithGuidance)
-
-    return {
-      cause: finalCause,
-      data: undefined,
-      error: errorMessage,
-      /* c8 ignore next - fallback for missing status code in edge cases. */
-      status: statusCode ?? 0,
-      success: false,
-      url: error.url,
-    }
+    return actionableGuidance
   }
 
   /**
@@ -1653,6 +1673,117 @@ export class SocketSdk {
     }
   }
 
+  #hasRepeatedMissingBlobs(
+    missing: Set<string>,
+    previous: Set<string> | undefined,
+  ): boolean {
+    return (
+      previous !== undefined &&
+      missing.size === previous.size &&
+      Array.from(missing).every(hash => previous.has(hash))
+    )
+  }
+
+  #canCreateManifest(queryParams: QueryParams): boolean {
+    if (this.#v1FullScansUnavailable) {
+      return false
+    }
+    const v1BaseUrl = deriveApiV1BaseUrl(this.#baseUrl)
+    if (v1BaseUrl === undefined) {
+      return false
+    }
+    // The v1 body schema is `additionalProperties: false` — integration-linked
+    // scans have no v1 equivalent yet, so they stay on v0.
+    if (
+      queryParams['integration_type'] !== undefined ||
+      queryParams['integration_org_slug'] !== undefined
+    ) {
+      return false
+    }
+
+    return true
+  }
+
+  #normalizeManifestCommitters(
+    committersRaw: string | string[] | undefined,
+  ): string[] | undefined {
+    // `committers` is documented as a single string, but callers casting
+    // options `as any` (e.g. socket-cli) may pass an array through — accept
+    // either shape and drop non-string/empty entries.
+    return committersRaw === undefined
+      ? undefined
+      : (Array.isArray(committersRaw) ? committersRaw : [committersRaw]).filter(
+          (entry): entry is string =>
+            typeof entry === 'string' && entry.length > 0,
+        )
+  }
+
+  #normalizeManifestPullRequest(
+    pullRequestRaw: number | string | undefined,
+  ): number | undefined {
+    // `pull_request` may arrive as a number, a numeric string (socket-cli
+    // sends `String(pullRequest)`), or `0` (the no-PR sentinel). The v1
+    // schema requires a minimum of 1, so only forward a safe integer ≥ 1 —
+    // anything else (including 0) is omitted rather than shipping a request
+    // that's guaranteed to 400 and pay the v0 fallback tax.
+    const pullRequestNum =
+      typeof pullRequestRaw === 'string'
+        ? Number(pullRequestRaw)
+        : pullRequestRaw
+    return pullRequestNum !== undefined &&
+      Number.isSafeInteger(pullRequestNum) &&
+      pullRequestNum >= 1
+      ? pullRequestNum
+      : undefined
+  }
+
+  #createManifestParams(
+    queryParams: QueryParams,
+  ): CreateFullScanFromManifestParams {
+    const branch = queryParams['branch'] as string | undefined
+    const commitHash = queryParams['commit_hash'] as string | undefined
+    const commitMessage = queryParams['commit_message'] as string | undefined
+    const committersRaw = queryParams['committers'] as
+      | string
+      | string[]
+      | undefined
+    const makeDefaultBranch = queryParams['make_default_branch'] as
+      | boolean
+      | undefined
+    const pullRequestRaw = queryParams['pull_request'] as
+      | number
+      | string
+      | undefined
+    const repo = queryParams['repo'] as string
+    const scanType = queryParams['scan_type'] as string | undefined
+    const setAsPendingHead = queryParams['set_as_pending_head'] as
+      | boolean
+      | undefined
+    const tmp = queryParams['tmp'] as boolean | undefined
+    const workspace = queryParams['workspace'] as string | undefined
+
+    const committers = this.#normalizeManifestCommitters(committersRaw)
+    const pullRequest = this.#normalizeManifestPullRequest(pullRequestRaw)
+
+    return {
+      ...(branch !== undefined ? { branch } : {}),
+      ...(commitHash !== undefined ? { commit_hash: commitHash } : {}),
+      ...(commitMessage !== undefined ? { commit_message: commitMessage } : {}),
+      ...(committers !== undefined ? { committers } : {}),
+      ...(tmp !== undefined ? { ephemeral: tmp } : {}),
+      ...(makeDefaultBranch !== undefined
+        ? { make_default_branch: makeDefaultBranch }
+        : {}),
+      ...(pullRequest !== undefined ? { pull_request: pullRequest } : {}),
+      repo,
+      ...(scanType !== undefined ? { scan_type: scanType } : {}),
+      ...(setAsPendingHead !== undefined
+        ? { set_as_pending_head: setAsPendingHead }
+        : {}),
+      ...(workspace !== undefined ? { workspace } : {}),
+    }
+  }
+
   /**
    * Attempt `createFullScan` via the v1 content-addressed manifest flow.
    * Returns the v0-shaped success envelope on a 201, or undefined when the
@@ -1667,19 +1798,7 @@ export class SocketSdk {
     basePath: string,
     queryParams: QueryParams,
   ): Promise<FullScanResult | undefined> {
-    if (this.#v1FullScansUnavailable) {
-      return undefined
-    }
-    const v1BaseUrl = deriveApiV1BaseUrl(this.#baseUrl)
-    if (v1BaseUrl === undefined) {
-      return undefined
-    }
-    // The v1 body schema is `additionalProperties: false` — integration-linked
-    // scans have no v1 equivalent yet, so they stay on v0.
-    if (
-      queryParams['integration_type'] !== undefined ||
-      queryParams['integration_org_slug'] !== undefined
-    ) {
+    if (!this.#canCreateManifest(queryParams)) {
       return undefined
     }
 
@@ -1693,77 +1812,8 @@ export class SocketSdk {
         return undefined
       }
 
-      const branch = queryParams['branch'] as string | undefined
-      const commitHash = queryParams['commit_hash'] as string | undefined
-      const commitMessage = queryParams['commit_message'] as string | undefined
-      const committersRaw = queryParams['committers'] as
-        | string
-        | string[]
-        | undefined
-      const makeDefaultBranch = queryParams['make_default_branch'] as
-        | boolean
-        | undefined
-      const pullRequestRaw = queryParams['pull_request'] as
-        | number
-        | string
-        | undefined
-      const repo = queryParams['repo'] as string
-      const scanType = queryParams['scan_type'] as string | undefined
-      const setAsPendingHead = queryParams['set_as_pending_head'] as
-        | boolean
-        | undefined
-      const tmp = queryParams['tmp'] as boolean | undefined
-      const workspace = queryParams['workspace'] as string | undefined
-
-      // `committers` is documented as a single string, but callers casting
-      // options `as any` (e.g. socket-cli) may pass an array through — accept
-      // either shape and drop non-string/empty entries.
-      const committers =
-        committersRaw === undefined
-          ? undefined
-          : (Array.isArray(committersRaw)
-              ? committersRaw
-              : [committersRaw]
-            ).filter(
-              (entry): entry is string =>
-                typeof entry === 'string' && entry.length > 0,
-            )
-
-      // `pull_request` may arrive as a number, a numeric string (socket-cli
-      // sends `String(pullRequest)`), or `0` (the no-PR sentinel). The v1
-      // schema requires a minimum of 1, so only forward a safe integer ≥ 1 —
-      // anything else (including 0) is omitted rather than shipping a request
-      // that's guaranteed to 400 and pay the v0 fallback tax.
-      const pullRequestNum =
-        typeof pullRequestRaw === 'string'
-          ? Number(pullRequestRaw)
-          : pullRequestRaw
-      const pullRequest =
-        pullRequestNum !== undefined &&
-        Number.isSafeInteger(pullRequestNum) &&
-        pullRequestNum >= 1
-          ? pullRequestNum
-          : undefined
-
-      const params: CreateFullScanFromManifestParams = {
-        ...(branch !== undefined ? { branch } : {}),
-        ...(commitHash !== undefined ? { commit_hash: commitHash } : {}),
-        ...(commitMessage !== undefined
-          ? { commit_message: commitMessage }
-          : {}),
-        ...(committers !== undefined ? { committers } : {}),
-        ...(tmp !== undefined ? { ephemeral: tmp } : {}),
-        ...(makeDefaultBranch !== undefined
-          ? { make_default_branch: makeDefaultBranch }
-          : {}),
-        ...(pullRequest !== undefined ? { pull_request: pullRequest } : {}),
-        repo,
-        ...(scanType !== undefined ? { scan_type: scanType } : {}),
-        ...(setAsPendingHead !== undefined
-          ? { set_as_pending_head: setAsPendingHead }
-          : {}),
-        ...(workspace !== undefined ? { workspace } : {}),
-      }
+      const params = this.#createManifestParams(queryParams)
+      const { repo, workspace } = params
 
       const entriesByRelPath = new Map(
         assembled.entries.map(entry => [entry.relPath, entry]),
@@ -1842,11 +1892,7 @@ export class SocketSdk {
         const { missing } = result.data
         const missingHashes = new Set(missing.map(m => m.hash))
         const previous = previousMissingHashes
-        if (
-          previous !== undefined &&
-          missingHashes.size === previous.size &&
-          Array.from(missingHashes).every(hash => previous.has(hash))
-        ) {
+        if (this.#hasRepeatedMissingBlobs(missingHashes, previous)) {
           debugLog(
             'createFullScan:v1',
             'no progress across manifest retries (same blobs still missing) — falling back to v0',
@@ -1872,6 +1918,7 @@ export class SocketSdk {
         const uploadResult = await this.uploadBlobs(
           orgSlug,
           missingEntries.map(entry => ({
+            __proto__: null,
             hash: entry.hash,
             localPath: entry.absPath,
             name: entry.relPath,

@@ -86,21 +86,10 @@ export function extractQueryParams(
   source: string,
   config: StrictTypeConfig,
 ): TypeProperty[] | undefined {
-  const opProp = findProperty(operationsNode, operationId)
-  if (!opProp) {
-    return undefined
-  }
-
-  const opType = opProp.typeAnnotation?.typeAnnotation
-  if (!opType) {
-    return undefined
-  }
-  const paramsProp = findProperty(opType, 'parameters')
-  if (!paramsProp) {
-    return undefined
-  }
-
-  const paramsType = paramsProp.typeAnnotation?.typeAnnotation
+  const paramsType = findPropertyTypePath(operationsNode, [
+    operationId,
+    'parameters',
+  ])
   if (!paramsType) {
     return undefined
   }
@@ -135,18 +124,7 @@ export function extractQueryParams(
     }
   }
 
-  // Add additional fields from config
-  if (config.additionalFields) {
-    const additional = config.additionalFields
-    for (let i = 0, { length } = additional; i < length; i += 1) {
-      const field = additional[i]!
-      properties.push({
-        name: field.name,
-        optional: field.optional !== false,
-        type: field.type,
-      })
-    }
-  }
+  appendAdditionalProperties(properties, config)
 
   // Sort properties alphabetically
   properties.sort((a, b) => a.name.localeCompare(b.name))
@@ -164,48 +142,16 @@ export function extractResponseType(
   source: string,
   config: StrictTypeConfig,
 ): TypeProperty[] | undefined {
-  const opProp = findProperty(operationsNode, operationId)
-  if (!opProp) {
+  if (responseCode === undefined) {
     return undefined
   }
-
-  const opType = opProp.typeAnnotation?.typeAnnotation
-  if (!opType) {
-    return undefined
-  }
-  const responsesProp = findProperty(opType, 'responses')
-  if (!responsesProp) {
-    return undefined
-  }
-
-  const responsesType = responsesProp.typeAnnotation?.typeAnnotation
-  if (!responsesType || responseCode === undefined) {
-    return undefined
-  }
-  const codeProp = findProperty(responsesType, responseCode)
-  if (!codeProp) {
-    return undefined
-  }
-
-  const codeType = codeProp.typeAnnotation?.typeAnnotation
-  if (!codeType) {
-    return undefined
-  }
-  const contentProp = findProperty(codeType, 'content')
-  if (!contentProp) {
-    return undefined
-  }
-
-  const contentType = contentProp.typeAnnotation?.typeAnnotation
-  if (!contentType) {
-    return undefined
-  }
-  const jsonProp = findProperty(contentType, 'application/json')
-  if (!jsonProp) {
-    return undefined
-  }
-
-  let targetType = jsonProp.typeAnnotation?.typeAnnotation
+  let targetType = findPropertyTypePath(operationsNode, [
+    operationId,
+    'responses',
+    responseCode,
+    'content',
+    'application/json',
+  ])
 
   // Navigate to nested path if specified
   if (targetType && sourcePath && sourcePath.length > 0) {
@@ -288,41 +234,88 @@ export function navigateToPath(
       return undefined
     }
 
-    if (segment === 'Array' && current.type === 'TSArrayType') {
-      current = unwrapType(current.elementType)
-      continue
-    }
-    if (segment === 'items' && current.type === 'TSTypeLiteral') {
-      // Already at the array element type
-      continue
-    }
-    if (segment === 'Record' && current.type === 'TSTypeReference') {
-      // For Record<string, T>, get T
-      if (current.typeParameters?.params?.[1]) {
-        current = unwrapType(current.typeParameters.params[1])
-        continue
-      }
-    }
-    if (segment === 'Record' && current.type === 'TSTypeLiteral') {
-      // For { [key: string]: T }, get T via index signature
-      const indexSig = current.members?.find(m => m.type === 'TSIndexSignature')
-      if (indexSig?.typeAnnotation?.typeAnnotation) {
-        current = unwrapType(indexSig.typeAnnotation.typeAnnotation)
-        continue
-      }
-    }
-    if (segment === 'value') {
-      // Already navigated via Record
-      continue
-    }
+    current = navigateTypeSegment(current, segment)
+  }
+  return current
+}
 
-    // Navigate to property
-    const prop = findProperty(current, segment)
-    if (prop?.typeAnnotation?.typeAnnotation) {
-      current = unwrapType(prop.typeAnnotation.typeAnnotation)
-    } else {
+function appendAdditionalProperties(
+  properties: TypeProperty[],
+  config: StrictTypeConfig,
+): void {
+  // Add additional fields from config
+  if (config.additionalFields) {
+    const additional = config.additionalFields
+    for (let i = 0, { length } = additional; i < length; i += 1) {
+      const field = additional[i]!
+      properties.push({
+        name: field.name,
+        optional: field.optional !== false,
+        type: field.type,
+      })
+    }
+  }
+}
+
+function findRecordValueType(current: AstNode): AstNode | undefined {
+  if (current.type === 'TSTypeReference') {
+    // For Record<string, T>, get T
+    if (current.typeParameters?.params?.[1]) {
+      return current.typeParameters.params[1]
+    }
+  }
+  if (current.type === 'TSTypeLiteral') {
+    // For { [key: string]: T }, get T via index signature
+    const indexSig = current.members?.find(m => m.type === 'TSIndexSignature')
+    if (indexSig?.typeAnnotation?.typeAnnotation) {
+      return indexSig.typeAnnotation.typeAnnotation
+    }
+  }
+  return undefined
+}
+
+function navigateTypeSegment(
+  current: AstNode,
+  segment: string,
+): AstNode | undefined {
+  if (segment === 'Array' && current.type === 'TSArrayType') {
+    return unwrapType(current.elementType)
+  }
+  if (segment === 'items' && current.type === 'TSTypeLiteral') {
+    // Already at the array element type
+    return current
+  }
+  if (segment === 'Record') {
+    const valueType = findRecordValueType(current)
+    if (valueType) {
+      return unwrapType(valueType)
+    }
+  }
+  if (segment === 'value') {
+    // Already navigated via Record
+    return current
+  }
+
+  // Navigate to property
+  const prop = findProperty(current, segment)
+  if (prop?.typeAnnotation?.typeAnnotation) {
+    return unwrapType(prop.typeAnnotation.typeAnnotation)
+  } else {
+    return undefined
+  }
+}
+
+function findPropertyTypePath(
+  node: AstNode,
+  segments: Array<string | number>,
+): AstNode | undefined {
+  let current: AstNode | undefined = node
+  for (let i = 0, { length } = segments; i < length; i += 1) {
+    const segment = segments[i]!
+    if (!current) {
       return undefined
     }
+    current = findProperty(current, segment)?.typeAnnotation?.typeAnnotation
   }
   return current
 }
