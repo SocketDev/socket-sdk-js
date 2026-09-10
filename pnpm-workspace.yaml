@@ -495,11 +495,6 @@ minimumReleaseAgeExclude:
   # trust-downgrade flag on 14.15.0. The catalog bump cascaded from the
   # wheelhouse without its matching soak-exclude, leaving frozen installs
   # broken; scoped to the exact tag so a future 14.15.2 still soaks.
-  # rolldown 1.0.2 is vite 8.0.14's bundled native rolldown release; the
-  # per-platform bindings share its pin. `@rolldown/pluginutils` versions
-  # independently — rolldown 1.0.2 depends on `^1.0.0` → resolves to 1.0.1.
-  # Listed explicitly per the fleet "no scope globs in soak excludes" rule.
-  - '@rolldown/pluginutils'
 
 patchedDependencies:
   # default-export interop (managed by socket-wheelhouse sync; do not edit):
