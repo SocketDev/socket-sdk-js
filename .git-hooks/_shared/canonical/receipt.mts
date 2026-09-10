@@ -3,13 +3,13 @@
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { canonicalHunksAreValid } from './canonical-patch.mts'
+import { canonicalHunksAreValid } from './patch.mts'
 import {
   canonicalGitText,
   canonicalPathIsSafe,
   readCanonicalGit,
-} from './canonical-git.mts'
-import type { CanonicalGitRead } from './canonical-git.mts'
+} from './git.mts'
+import type { CanonicalGitRead } from './git.mts'
 
 export interface CanonicalPatchStep {
   commit: string

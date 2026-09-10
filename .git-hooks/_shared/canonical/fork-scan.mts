@@ -1,22 +1,19 @@
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import {
-  readCanonicalIndexEntry,
-  readCanonicalTreeEntry,
-} from './canonical-git.mts'
-import { canonicalMemberCopyMatches } from './canonical-proof.mts'
-import type { CanonicalIndexEntry } from './canonical-git.mts'
+import { readCanonicalIndexEntry, readCanonicalTreeEntry } from './git.mts'
+import { canonicalMemberCopyMatches } from './proof.mts'
+import type { CanonicalIndexEntry } from './git.mts'
 
 import {
   fleetCanonicalEntries,
   isOperatorLocalPath,
   isPerRepoMarkerPath,
-} from '../../.claude/hooks/fleet/_shared/fleet-fork.mts'
+} from '../../../.claude/hooks/fleet/_shared/fleet-fork.mts'
 import {
   findFleetRegions,
   textHasFleetBlockMarkers,
-} from '../../.claude/hooks/fleet/_shared/fleet-markers.mts'
+} from '../../../.claude/hooks/fleet/_shared/fleet-markers.mts'
 
 // Each child names one capability or member, never an arbitrary generated
 // bucket. Generated universal files map directly to the destination tree.

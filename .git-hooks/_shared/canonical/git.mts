@@ -4,7 +4,7 @@
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import process from 'node:process'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
-import { GIT_CONTEXT_VARS } from './git-context-vars.mts'
+import { GIT_CONTEXT_VARS } from '../git-context-vars.mts'
 
 export interface CanonicalGitOptions {
   input?: Uint8Array | undefined

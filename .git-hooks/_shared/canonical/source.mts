@@ -2,17 +2,17 @@
  * @file Authorize producer origins and member-specific committed template
  *   sources.
  */
-import { findWheelhouseRoot } from '../../.claude/hooks/fleet/_shared/wheelhouse-root.mts'
-import fleetRosterJson from '../../.claude/skills/fleet/cascading-fleet/lib/fleet-repos.json' with { type: 'json' }
-import { SOCKET_GITHUB_ORGS } from '../../scripts/fleet/constants/socket-scopes.mts'
-import { isFleetPackProducerSlug } from '../../scripts/fleet/member/fleet-membership.mts'
+import { findWheelhouseRoot } from '../../../.claude/hooks/fleet/_shared/wheelhouse-root.mts'
+import fleetRosterJson from '../../../.claude/skills/fleet/cascading-fleet/lib/fleet-repos.json' with { type: 'json' }
+import { SOCKET_GITHUB_ORGS } from '../../../scripts/fleet/constants/socket-scopes.mts'
+import { isFleetPackProducerSlug } from '../../../scripts/fleet/member/fleet-membership.mts'
 import {
   canonicalGitText,
   canonicalPathIsSafe,
   readCanonicalGit,
   readCanonicalTreeEntry,
-} from './canonical-git.mts'
-import type { CanonicalGitRead } from './canonical-git.mts'
+} from './git.mts'
+import type { CanonicalGitRead } from './git.mts'
 
 function canonicalMemberSlug(root: string): string | undefined {
   const remote = canonicalGitText(root, ['remote', 'get-url', 'origin'])?.trim()

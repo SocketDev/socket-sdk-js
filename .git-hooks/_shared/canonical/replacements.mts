@@ -1,7 +1,7 @@
 /**
  * @file Apply uniquely located replacement runs from verified signed hunks.
  */
-import { selectCanonicalPatch } from './canonical-patch.mts'
+import { selectCanonicalPatch } from './patch.mts'
 
 interface ReplacementRun {
   before: string

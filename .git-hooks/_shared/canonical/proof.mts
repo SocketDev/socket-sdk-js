@@ -11,43 +11,34 @@ import {
 } from 'node:fs'
 import os from 'node:os'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
-import { selectCanonicalPatch } from './canonical-patch.mts'
-import { applyCanonicalReplacements } from './canonical-replacements.mts'
+import { selectCanonicalPatch } from './patch.mts'
+import { applyCanonicalReplacements } from './replacements.mts'
 import path from 'node:path'
 import {
   canonicalEntriesEqual,
   canonicalGitText,
   readCanonicalGit,
   readCanonicalTreeEntry,
-} from './canonical-git.mts'
+} from './git.mts'
 import {
   canonicalEligibleSources,
   canonicalProducerAllowed,
   canonicalSourceAllowed,
   findCanonicalProducer,
-} from './canonical-source.mts'
-import {
-  readCanonicalReceipt,
-  validateCanonicalRecipe,
-} from './canonical-receipt.mts'
-import type { CanonicalGitRead, CanonicalIndexEntry } from './canonical-git.mts'
-import type {
-  CanonicalPatchRecipe,
-  CanonicalPatchStep,
-} from './canonical-receipt.mts'
+} from './source.mts'
+import { readCanonicalReceipt, validateCanonicalRecipe } from './receipt.mts'
+import type { CanonicalGitRead, CanonicalIndexEntry } from './git.mts'
+import type { CanonicalPatchRecipe, CanonicalPatchStep } from './receipt.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
-export { readCanonicalIndexEntry } from './canonical-git.mts'
-export { validateCanonicalRecipe } from './canonical-receipt.mts'
+export { readCanonicalIndexEntry } from './git.mts'
+export { validateCanonicalRecipe } from './receipt.mts'
 export type {
   CanonicalGitRead,
   CanonicalIndexEntry,
   CanonicalGitOptions,
   CanonicalGitResult,
-} from './canonical-git.mts'
-export type {
-  CanonicalPatchRecipe,
-  CanonicalPatchStep,
-} from './canonical-receipt.mts'
+} from './git.mts'
+export type { CanonicalPatchRecipe, CanonicalPatchStep } from './receipt.mts'
 
 export interface CanonicalProofOptions {
   readGit?: CanonicalGitRead | undefined
@@ -235,7 +226,7 @@ function applyProofSteps(
         return undefined
       }
       const strip =
-        step.sourcePath.split('/').length -
+        normalizePath(step.sourcePath).split('/').length -
         normalizePath(file).split('/').length +
         1
       if (
