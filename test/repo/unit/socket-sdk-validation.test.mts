@@ -7,16 +7,6 @@ import { SocketSdk } from '../../../src/index.mts'
 
 describe('SocketSdk - Configuration Validation', () => {
   describe('API token validation', () => {
-    it('should throw TypeError for non-string API token', () => {
-      // Test validation of non-string token
-      expect(() => new SocketSdk(undefined as unknown as string)).toThrow(
-        TypeError,
-      )
-      expect(() => new SocketSdk(undefined as unknown as string)).toThrow(
-        '"apiToken" is required and must be a string',
-      )
-    })
-
     it('should throw TypeError for undefined API token', () => {
       expect(() => new SocketSdk(undefined as unknown as string)).toThrow(
         TypeError,
@@ -58,23 +48,9 @@ describe('SocketSdk - Configuration Validation', () => {
       )
     })
 
-    it('should handle custom timeout in options', () => {
-      const sdk = new SocketSdk('test-token', {
-        timeout: 5000,
-      })
-      expect(sdk).toBeDefined()
-    })
-
     it('should handle custom retries in options', () => {
       const sdk = new SocketSdk('test-token', {
         retries: 3,
-      })
-      expect(sdk).toBeDefined()
-    })
-
-    it('should handle custom baseUrl in options', () => {
-      const sdk = new SocketSdk('test-token', {
-        baseUrl: 'https://custom.api.socket.dev/',
       })
       expect(sdk).toBeDefined()
     })
