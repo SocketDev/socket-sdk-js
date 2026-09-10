@@ -4016,4 +4016,7 @@ test-output.*
 # Per-machine precommit env — fleet peers keep it on disk but untracked; this
 # repo's canonical block lacks a broad .env.* glob, so ignore it here.
 /.env.precommit
+!/docs/repo/agents.md/
+!/docs/repo/agents.md/architecture.md
+!/docs/repo/agents.md/batch-generator-pool.md
 # </repo>

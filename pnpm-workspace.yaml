@@ -73,7 +73,7 @@ overrides:
   '@socketsecurity/lib': 'catalog:'
   '@socketsecurity/registry': 'catalog:'
   '@socketsecurity/sdk': 'catalog:'
-  '@swc/core': '1.16.1'
+  '@swc/core': '1.15.41'
   'brace-expansion@>=4': '5.0.9'
   'chalk@>=5': '5.6.2'
   'es-define-property': 'npm:@socketregistry/es-define-property@1.0.7'
@@ -475,26 +475,6 @@ minimumReleaseAgeExclude:
   - 'socket'
   - 'sdxgen'
   - 'sockeye'
-  # vite 8.1.0 — dev dep (vitest's bundler). 8.1 adds experimental.bundledDev
-  # (NOT adopted — experimental, and the fleet runs stable-only). Published
-  # within the 7-day soak; exact-pinned so a future 8.1.1 still soaks.
-  # taze 19.16.0 — the dep updater itself; forced ahead of the soak by owner
-  # directive so the regenerated single-registry patch (patchedDependencies)
-  # tracks the current release. Exact-pinned so a future version re-soaks.
-  # shadscan 0.2.0 — deterministic UI audits for shadcn apps, used by the
-  # design skills; forced ahead of the soak by owner directive. Exact-pinned
-  # so a future version re-soaks.
-  # verkit — new dev-only transitive of taze 19.16.0 (same owner directive);
-  # exact-pinned so future versions re-soak.
-  # js-yaml 5.2.2 — HIGH security fix, GHSA-pm4m-ph32-ghv5: exponential parse
-  # time in flow collections. The canonical overrides entry forces it past
-  # markdownlint-cli2 0.23.1's vulnerable 5.2.1 exact-pin. Soak bypassed per
-  # the high-severity security exception; exact-pinned so a future version
-  # re-soaks.
-  # compromise@14.15.1 is the attested re-publish that clears the
-  # trust-downgrade flag on 14.15.0. The catalog bump cascaded from the
-  # wheelhouse without its matching soak-exclude, leaving frozen installs
-  # broken; scoped to the exact tag so a future 14.15.2 still soaks.
 
 patchedDependencies:
   # default-export interop (managed by socket-wheelhouse sync; do not edit):
