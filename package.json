@@ -140,7 +140,11 @@
     "soak:check": "node scripts/fleet/check/soak-time-is-consistent.mts",
     "check:api-contracts": "node scripts/repo/check/api-contracts-are-current.mts",
     "check:package-artifact": "node scripts/repo/package-artifact-is-complete.mts",
-    "docs:api": "node scripts/repo/gen-api-docs.mts"
+    "docs:api": "node scripts/repo/gen-api-docs.mts",
+    "mcp:connect": "node scripts/fleet/mcp/connect.mts",
+    "mcp:status": "node scripts/fleet/mcp/connect.mts --status",
+    "check:test-budget-headroom": "node scripts/fleet/check/test-budget-headroom.mts",
+    "test:profile": "node scripts/fleet/test/profile.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",

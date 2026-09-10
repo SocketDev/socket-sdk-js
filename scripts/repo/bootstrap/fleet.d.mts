@@ -1,8 +1,34 @@
 //#region scripts/repo/gen/bootstrap/src/workspace-migration.d.mts
 export declare function migrateWorkspaceSettings(dest: string, yaml: string): string;
 //#endregion
+//#region template/base/universal/scripts/fleet/process/script-meta.d.mts
+/**
+ * A script's self-description, answered without running its side effect.
+ * `--describe` prints `describe` verbatim — one line, what the script does —
+ * so script inventories and agents can read purpose without opening the file.
+ * `-h`/`--help` prints `describe`, a blank line, then `help`, which opens
+ * with a `Usage:` line naming the sanctioned invocation and lists the flags
+ * `main()` actually parses.
+ */
+interface ScriptMeta {
+  readonly json?: 'native' | 'result' | undefined;
+  readonly describe: string;
+  readonly help: string;
+}
+//#endregion
+//#region template/base/universal/scripts/fleet/process/script-result.d.mts
+interface ScriptResult {
+  readonly exitCode: number;
+  readonly data?: unknown | undefined;
+  readonly error?: string | undefined;
+}
+//#endregion
+//#region template/base/universal/scripts/fleet/process/run-main-minimal.d.mts
+type MainFn = () => number | void | ScriptResult | Promise<number | void | ScriptResult>;
+export declare function runMainMinimal(main: MainFn, meta: ScriptMeta): void;
+//#endregion
 //#region template/base/universal/scripts/fleet/lib/conditional-config.d.mts
-type ConfigFlag = 'bundlesVendoredDeps' | 'hasGhcr' | 'hasGithubRelease' | 'hasNapi' | 'hasPrebakes' | 'hasRust' | 'isGithubAction';
+type ConfigFlag = 'bundlesVendoredDeps' | 'hasCodeql' | 'hasCratesRegistry' | 'hasGhcr' | 'hasGithubRelease' | 'hasNapi' | 'hasPrebakes' | 'hasRust' | 'isGithubAction';
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/conditional-files.d.mts
 interface ConditionalManifestGroup {
@@ -1007,5 +1033,6 @@ export declare function runStatus(config: InstallConfig): Promise<number>;
  */
 export declare function installFleet(config: InstallConfig): Promise<number>;
 export declare function isMainModule(): boolean;
+export declare function main(): Promise<number>;
 //#endregion
-export { OCI_MANIFEST_ACCEPT as MANIFEST_ACCEPT };
+export { OCI_MANIFEST_ACCEPT as MANIFEST_ACCEPT, type ScriptMeta };

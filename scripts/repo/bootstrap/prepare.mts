@@ -35,6 +35,283 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import { readFileSync as bootstrapReadFileSync } from 'node:fs'
+import bootstrapProcess from 'node:process'
+const bootstrapRunner = (function (
+  readFileSync: typeof bootstrapReadFileSync,
+  process: typeof bootstrapProcess,
+) {
+  interface ScriptResult {
+    readonly exitCode: number
+    readonly data?: unknown | undefined
+    readonly error?: string | undefined
+  }
+
+  function renderScriptResult(result: ScriptResult): string {
+    if (
+      !Number.isInteger(result.exitCode) ||
+      result.exitCode < 0 ||
+      result.exitCode > 255
+    ) {
+      throw new Error(
+        'Script result requires an integer exit code between 0 and 255.',
+      )
+    }
+    return JSON.stringify({
+      ok: result.exitCode === 0,
+      exitCode: result.exitCode,
+      ...(result.data === undefined ? {} : { data: result.data }),
+      ...(result.error === undefined ? {} : { error: result.error }),
+    })
+  }
+
+  class ScriptExit extends Error {
+    readonly exitCode: number
+
+    constructor(exitCode: number) {
+      if (!Number.isInteger(exitCode) || exitCode < 1 || exitCode > 255) {
+        throw new Error(
+          'Script abort requires an integer exit code between 1 and 255.',
+        )
+      }
+      super(
+        `Script stopped with exit code ${exitCode}. Review the preceding diagnostic and retry.`,
+      )
+      this.name = 'ScriptExit'
+      this.exitCode = exitCode
+    }
+  }
+
+  function abortScript(exitCode: number): never {
+    throw new ScriptExit(exitCode)
+  }
+
+  /**
+   * True when argv carries a bare `--`.
+   *
+   * `pnpm run <script> -- --flag` forwards the `--` to the script, and the argv
+   * parser truncates there — every flag after it is DISCARDED, not collected as
+   * a positional. The script then runs with default behaviour while the caller
+   * believes they passed flags. That is merely confusing for a read-only script
+   * and dangerous for a destructive one: `prune:branch-backups -- --dry-run`
+   * drops the `--dry-run` and performs a live run against every repo.
+   *
+   * Checked against `process.argv` because by the time parsing finishes the
+   * dropped flags are unrecoverable — the parsed result cannot tell you what
+   * was lost.
+   */
+  function hasBareDoubleDash(argv: readonly string[]): boolean {
+    return argv.includes('--')
+  }
+
+  /**
+   * The message shown when argv carries a bare `--`. Names the script so the
+   * corrected command can be pasted directly.
+   */
+  function bareDoubleDashMessage(scriptName: string): string {
+    return (
+      'a bare `--` in the command line\n' +
+      `  Where: the argv for ${scriptName}.\n` +
+      '  Saw:   flags after `--`. The argv parser truncates there, so those ' +
+      'flags were NOT applied and the script ran with its defaults.\n' +
+      `  Fix:   drop the \`--\`, e.g. \`pnpm run ${scriptName} --dry-run\`.`
+    )
+  }
+
+  /**
+   * A script's self-description, answered without running its side effect.
+   * `--describe` prints `describe` verbatim — one line, what the script does —
+   * so script inventories and agents can read purpose without opening the file.
+   * `-h`/`--help` prints `describe`, a blank line, then `help`, which opens
+   * with a `Usage:` line naming the sanctioned invocation and lists the flags
+   * `main()` actually parses.
+   */
+  interface ScriptMeta {
+    readonly json?: 'native' | 'result' | undefined
+    readonly describe: string
+    readonly help: string
+  }
+
+  /**
+   * The help request found on argv, if any: `--describe` wins over
+   * `-h`/`--help` when both are present (the narrower ask costs one line;
+   * printing both forms for a mixed argv helps no caller). Pure — exported for
+   * tests.
+   */
+  function helpRequest(
+    argv: readonly string[],
+  ): 'describe' | 'help' | undefined {
+    if (argv.includes('--describe')) {
+      return 'describe'
+    }
+    if (argv.includes('-h') || argv.includes('--help')) {
+      return 'help'
+    }
+    return undefined
+  }
+
+  /**
+   * True when argv carries `--json` on its own — orthogonal to `helpRequest`,
+   * which only reads `--describe`/`-h`/`--help`. A script's own `main()` calls
+   * this to switch its RESULT output to structured JSON without re-parsing
+   * argv itself; `--describe --json` (either order) is answered entirely by
+   * the runner before `main()` runs and never reaches this predicate. Pure —
+   * exported for tests and entry scripts.
+   */
+  function isJsonRequested(argv: readonly string[]): boolean {
+    return argv.includes('--json')
+  }
+
+  /**
+   * The text a help request prints: the one-liner alone for `--describe`, or
+   * the one-liner + blank line + usage body for `--help`. Pure — exported for
+   * tests.
+   */
+  function helpText(kind: 'describe' | 'help', meta: ScriptMeta): string {
+    return kind === 'describe'
+      ? meta.describe
+      : `${meta.describe}\n\n${meta.help}`
+  }
+
+  /**
+   * The `--describe --json` payload: the fleet CLI self-description manifest
+   * (canonical schema: socket-wheelhouse `schemas/cli-describe.schema.json`),
+   * minimal for a script — identity plus the one-line purpose; a script's flags
+   * live in its `help` prose, not structured meta. Pure — exported for tests.
+   */
+  interface DescribeIdentity {
+    readonly name: string
+    readonly version: string
+  }
+
+  function describeManifestText(
+    meta: ScriptMeta,
+    config: DescribeIdentity,
+  ): string {
+    const { name, version } = { __proto__: null, ...config } as DescribeIdentity
+    return JSON.stringify(
+      {
+        $schema:
+          'https://raw.githubusercontent.com/SocketDev/socket-wheelhouse/main/schemas/cli-describe.schema.json',
+        name,
+        version,
+        description: meta.describe,
+      },
+      undefined,
+      2,
+    )
+  }
+
+  function errorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message
+    }
+    return String(error)
+  }
+
+  type MainFn = () =>
+    | number
+    | void
+    | ScriptResult
+    | Promise<number | void | ScriptResult>
+
+  function scriptVersion(): string {
+    try {
+      const value: unknown = JSON.parse(readFileSync('package.json', 'utf8'))
+      if (
+        value !== null &&
+        typeof value === 'object' &&
+        'version' in value &&
+        typeof value.version === 'string'
+      ) {
+        return value.version
+      }
+    } catch {}
+    return '0.0.0'
+  }
+
+  function writeLine(text: string): void {
+    process.stdout.write(`${text}\n`)
+  }
+
+  function runMainMinimal(main: MainFn, meta: ScriptMeta): void {
+    void runMainMinimalAsync(main, meta)
+  }
+
+  async function runMainMinimalAsync(
+    main: MainFn,
+    meta: ScriptMeta,
+  ): Promise<void> {
+    const argv = process.argv.slice(2)
+    const json = isJsonRequested(argv)
+    const request = helpRequest(argv)
+    const name = process.argv[1]?.split('/').pop() ?? 'script'
+    if (request) {
+      writeLine(
+        request === 'describe' && json
+          ? describeManifestText(meta, { name, version: scriptVersion() })
+          : helpText(request, meta),
+      )
+      process.exitCode = 0
+      return
+    }
+    try {
+      if (hasBareDoubleDash(argv)) {
+        throw new Error(bareDoubleDashMessage(name))
+      }
+      if (json && !meta.json) {
+        throw new Error('This script has not declared JSON execution support.')
+      }
+      await invokeMinimalMain(main, meta)
+    } catch (error) {
+      const message = errorMessage(error)
+      const exitCode = error instanceof ScriptExit ? error.exitCode : 1
+      process.exitCode = exitCode
+      if (json) {
+        writeLine(renderScriptResult({ exitCode, error: message }))
+      } else {
+        process.stderr.write(`${message}\n`)
+      }
+    }
+  }
+
+  async function invokeMinimalMain(
+    main: MainFn,
+    meta: ScriptMeta,
+  ): Promise<void> {
+    const json = isJsonRequested(process.argv.slice(2))
+    const result = await main()
+    const code =
+      typeof result === 'object' && result !== null ? result.exitCode : result
+    if (typeof code === 'number') {
+      process.exitCode = code
+    } else if (!process.exitCode) {
+      process.exitCode = 0
+    }
+    if (json && meta.json === 'result') {
+      writeLine(
+        renderScriptResult({
+          ...(typeof result === 'object' && result !== null ? result : {}),
+          exitCode: Number(process.exitCode ?? 0),
+        }),
+      )
+    } else if (!json && typeof result === 'object' && result?.error) {
+      process.stderr.write(`${result.error}\n`)
+    }
+  }
+
+  return { runMainMinimal, abortScript }
+})(bootstrapReadFileSync, bootstrapProcess)
+const { runMainMinimal } = bootstrapRunner
+type ScriptMeta = Parameters<typeof runMainMinimal>[1]
+
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'Prepare a thin fleet checkout and repair its workspace dependencies.',
+  help: 'Usage: node scripts/repo/bootstrap/prepare.mts [--json]',
+  json: 'result',
+}
+
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 // Function declarations hoist, so the sorted-position definition below is
 // usable here.
@@ -107,17 +384,7 @@ export function ensureWorkspacePackages(
 }
 
 /**
- * Step 1: fetch + apply the pinned bundle when not current (best-effort).
- *
- * Guards against downgrading a newer applied pack: `maybeNotifyUpdate` (which
- * runs AFTER this in `runPrepare`) opportunistically applies the newest ref it
- * resolves, but does NOT update the config pin. Without this guard, the next
- * install's `fleet.mjs --if-current` sees `appliedRef !== pinnedRef` and
- * re-applies the OLD pin, reverting the auto-update — wasted work every cycle.
- * The guard skips the fetch when the applied ref is at or ahead of the pin, so
- * a newer applied pack is never downgraded to the pin outside CI. CI behavior
- * is unchanged: `maybeNotifyUpdate` is suppressed there, so the applied ref
- * always matches the pin and the guard is never consulted.
+ * Fetch the pinned bundle unless an equal or newer pack is already applied.
  */
 export function fetchBundle(): void {
   const fleet = path.join(HERE, 'fleet.mjs')
@@ -179,12 +446,8 @@ const APPLIED_MARKER_PATH = '.cache/fleet/socket-wheelhouse/bundle-applied'
  * `git merge-base --is-ancestor` path the stale-template guard in `fleet.mjs`
  * uses, but checking whether the PIN is an ancestor of the APPLIED ref). When
  * no sibling checkout is available (a thin member), ancestry cannot be proven
- * without a network call, so this falls back to trusting the applied ref:
- * outside CI the only writer that diverges the applied ref from the pin is
- * `maybeNotifyUpdate`, which exclusively applies newer refs, so a divergent
- * applied ref is newer by construction. In CI `maybeNotifyUpdate` is
- * suppressed, so the applied ref always matches the pin and this function is
- * never consulted.
+ * without a network call, so local installs preserve the applied pack.
+ * CI requires a verified ancestry relationship or an exact pin match.
  */
 export function isAppliedRefCurrentOrNewer(
   pinnedRef: string | undefined,
@@ -233,8 +496,10 @@ export function isMainModule(): boolean {
 }
 
 export function log(message: string): void {
-  // Dep-0 bootstrap prepare doctor runs on a bare clone with no node_modules:
-  // cannot import the lib logger; console.log writes to STDOUT.
+  if (process.argv.includes('--json')) {
+    process.stderr.write(`fleet-prepare: ${message}\n`)
+    return
+  }
   // oxlint-disable-next-line socket/no-console-prefer-logger -- dep-0 bootstrap
   console.log(`fleet-prepare: ${message}`)
 }
@@ -259,22 +524,7 @@ const NOTICE_CHECK_TTL_MS = 864e5
 const OFFLINE_RETRY_TTL_MS = 36e5
 
 /**
- * Opportunistic update: when this cheaply learns a newer release exists, it
- * APPLIES that ref and then fires the throttled boxed notice on STDERR via the
- * fetcher's own notice machinery.
- *
- * Checking and then telling the operator to go re-cascade left every member
- * stale until somebody acted on a message, so the check does the update it
- * discovered. `fetchBundle` still applies the PINNED ref on every install; this
- * is what moves the pin forward.
- *
- * Best-effort throughout: offline, no gh, or a failed apply is swallowed so a
- * `pnpm install` never breaks on it, and the run continues.
- *
- * The CI-suppress, opt-out, and 24h throttle are checked BEFORE the GitHub
- * lookup, so they gate the apply as well as the display: no CI runner updates
- * itself, an opted-out operator is never touched, and no member updates more
- * than once a day.
+ * Report newer releases without changing the cascaded bundle pin or payload.
  */
 export async function maybeNotifyUpdate(): Promise<void> {
   const fleet = path.join(HERE, 'fleet.mjs')
@@ -317,22 +567,6 @@ export async function maybeNotifyUpdate(): Promise<void> {
     if (!cfg.ref) {
       return
     }
-    // Gate the NETWORK CALL, not just the display. `resolveNewestRef` reaches
-    // the GHCR registry (two anonymous requests: a pull token, then the
-    // `latest` manifest), and the CI-suppress / opt-out / 24h throttle inside
-    // `shouldShowNotice` ran AFTER it — so every `pnpm install`, in every CI
-    // job, paid for a lookup whose result was then discarded. At fleet scale
-    // that is the shape that earns an anonymous-pull rate limit.
-    //
-    // In CI and under the opt-out nothing may be applied or printed, so the
-    // call is pure waste and is skipped outright. Otherwise honor the same 24h
-    // window the display uses.
-    //
-    // The tradeoff is deliberate: a release cut inside the window is not picked
-    // up until the window closes. That costs freshness, never correctness — the
-    // PINNED bundle is still applied on every install by `fetchBundle`
-    // (`fleet.mjs --if-current`), in CI and locally alike, so a member is never
-    // running unverified or half-applied scaffolding while it waits.
     if (process.env['CI'] || process.env[UPDATE_NOTIFIER_OPT_OUT_ENV]) {
       return
     }
@@ -345,51 +579,19 @@ export async function maybeNotifyUpdate(): Promise<void> {
     }
     const repo = 'SocketDev/socket-wheelhouse'
     const newestRef = await resolveNewestRef(repo)
-    // STAMP EVERY ANSWER, including the two that change nothing.
-    //
-    // Writing it only from `maybeShowUpdateNotice` below would reach the store
-    // only when an update was actually found. For a member that is already
-    // current - the steady state, and the overwhelmingly common one -
-    // `lastCheckMs` would never advance, the TTL gate above would never fire,
-    // and the registry lookup would run on EVERY `pnpm install`. The throttle
-    // only ever engaged for members that were behind, which are the ones least
-    // in need of throttling.
-    //
-    // A lookup that answered nothing is stamped short (see
-    // OFFLINE_RETRY_TTL_MS) so an outage costs an hour of freshness, not a day.
+    if (newestRef !== undefined && newestRef !== cfg.ref) {
+      maybeShowUpdateNotice({
+        dest: REPO_ROOT,
+        newestRef,
+        updateAvailable: true,
+      })
+    }
     writeNoticeStore(REPO_ROOT, {
       lastCheckMs:
         newestRef === undefined
           ? Date.now() - NOTICE_CHECK_TTL_MS + OFFLINE_RETRY_TTL_MS
           : Date.now(),
       lastSeenRef: newestRef,
-    })
-    if (newestRef === undefined || newestRef === cfg.ref) {
-      return
-    }
-    // A newer tag exists than the pinned ref, so APPLY it rather than only
-    // saying so. A notice naming a re-cascade the operator has to run by hand is
-    // a to-do item: it costs a read on every install and the member stays stale
-    // until somebody acts on it.
-    //
-    // Safe because the apply is the SAME verified path `fetchBundle` uses —
-    // every file's SHA-256 checked against the manifest, nothing written unless
-    // the whole set matches — so applying a newer ref is no riskier than
-    // applying the pinned one.
-    //
-    // Everything that gates the LOOKUP gates the apply: CI, the opt-out env, and
-    // the 24h window are all checked above. So this cannot fire on a CI runner,
-    // cannot fire for an operator who opted out, and cannot fire more than once
-    // a day. The notice still prints, now reporting what happened rather than
-    // what to go do.
-    const applied = tryRun('node', [fleet, '--ref', newestRef])
-    if (!applied) {
-      log(`bundle update to ${newestRef} reported a problem — continuing`)
-    }
-    maybeShowUpdateNotice({
-      dest: REPO_ROOT,
-      newestRef,
-      updateAvailable: true,
     })
   } catch {
     // Best-effort: offline / no gh / a status hard-fail never breaks install.
@@ -496,6 +698,20 @@ export function resolveRepoRoot(startDir: string): string {
  */
 export async function runPrepare(): Promise<number> {
   fetchBundle()
+  const wsPath = path.join(REPO_ROOT, 'pnpm-workspace.yaml')
+  if (existsSync(wsPath)) {
+    const before = readFileSync(wsPath, 'utf8')
+    if (
+      /^(catalogDriftIgnore|confirmModulesPurge|managePackageManagerVersions):/m.test(
+        before,
+      )
+    ) {
+      const { migrateWorkspaceSettings } = await import(
+        pathToFileURL(path.join(HERE, 'fleet.mjs')).href
+      )
+      writeFileSync(wsPath, migrateWorkspaceSettings(REPO_ROOT, before))
+    }
+  }
   repairWorkspacePackages()
   if (!reconcileInstall()) {
     log('reconcile `pnpm install --ignore-scripts` failed')
@@ -519,7 +735,9 @@ export function tryRun(
     execFileSync(cmd, args as string[], {
       cwd: REPO_ROOT,
       env: env ?? process.env,
-      stdio: 'inherit',
+      stdio: process.argv.includes('--json')
+        ? ['inherit', 2, 'inherit']
+        : 'inherit',
     })
     return true
   } catch {
@@ -531,7 +749,5 @@ export function tryRun(
 // while `process.argv[1]` keeps the path as invoked, so a bare URL equality
 // silently skips the CLI body under a symlinked invocation.
 if (isMainModule()) {
-  // Dep-0 ESM CLI run via node, never CJS-bundled.
-  // oxlint-disable-next-line socket/no-top-level-await -- dep-0 ESM CLI run
-  process.exitCode = await runPrepare()
+  runMainMinimal(runPrepare, SCRIPT_META)
 }

@@ -17,8 +17,9 @@ import {
 import path, { dirname, resolve, sep } from 'node:path'
 import crypto from 'node:crypto'
 import { execFileSync } from 'node:child_process'
+import process$1 from 'node:process'
+import { format } from 'node:util'
 import os from 'node:os'
-import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import https from 'node:https'
 
@@ -131,6 +132,25 @@ function composeGitignore(config) {
 }
 
 //#endregion
+//#region template/base/universal/scripts/fleet/paths/util.mts
+function sharedScriptsRepoCommitCascadeManifestFleetFilesJsonPath(root) {
+  return path.join(
+    root,
+    'scripts',
+    'repo',
+    'commit-cascade',
+    'manifest',
+    'fleet-files.json',
+  )
+}
+function sharedSystem32TarExePath(root) {
+  return path.join(root, 'System32', 'tar.exe')
+}
+function sharedTemplateBasePath(root) {
+  return path.join(root, 'template', 'base', 'universal')
+}
+
+//#endregion
 //#region scripts/repo/gen/bootstrap/src/helpers.mts
 const HYBRID_BUNDLE_PATHS = /* @__PURE__ */ new Set(['.gitignore', 'CLAUDE.md'])
 /**
@@ -141,7 +161,7 @@ function normalizeBundlePath(filePath) {
 }
 function tarExecutable(platform, systemRoot) {
   return platform === 'win32'
-    ? path.join(systemRoot ?? 'C:\\Windows', 'System32', 'tar.exe')
+    ? sharedSystem32TarExePath(systemRoot ?? 'C:\\Windows')
     : 'tar'
 }
 /**
@@ -288,7 +308,11 @@ function spliceFleetBlock(config) {
   return `${target.replace(/\n+$/, '')}\n\n${fleetBlock}\n`
 }
 function run(cmd, args) {
-  execFileSync(cmd, args, { stdio: 'inherit' })
+  execFileSync(cmd, args, {
+    stdio: process$1.argv.includes('--json')
+      ? ['inherit', 2, 'inherit']
+      : 'inherit',
+  })
 }
 function segmentFileName(relativePath) {
   return `${relativePath.replace(/^\./, 'dot-')}.fleetblock`
@@ -577,13 +601,18 @@ function isPlainObject(value) {
   const prototype = Object.getPrototypeOf(value)
   return prototype === null || prototype === Object.prototype
 }
+function hasCodeql(raw) {
+  const github = raw['github']
+  return isPlainObject(github) && github['codeql'] === true
+}
 function markerCompilesRust(value) {
   const build = value['build']
   if (
     typeof build === 'object' &&
     build !== null &&
     !Array.isArray(build) &&
-    build['type'] === 'rust'
+    'type' in build &&
+    build.type === 'rust'
   )
     return true
   const capabilities = value['capabilities']
@@ -593,7 +622,7 @@ function markerCompilesRust(value) {
     Array.isArray(capabilities)
   )
     return false
-  const cargoPaths = capabilities['cargo']
+  const cargoPaths = 'cargo' in capabilities ? capabilities.cargo : void 0
   return Array.isArray(cargoPaths) && cargoPaths.length > 0
 }
 function hasNonEmptyPrebakes(raw) {
@@ -630,6 +659,14 @@ function bundlesVendoredDeps(raw) {
   const build = raw['build']
   return isPlainObject(build) && build['bundlesVendoredDeps'] === true
 }
+function publishesCrates(raw) {
+  const channels = [raw['build']]
+  const secondaries = raw['secondaries']
+  if (Array.isArray(secondaries)) channels.push(...secondaries)
+  return channels.some(
+    channel => isPlainObject(channel) && channel['from'] === 'crates-registry',
+  )
+}
 /**
  * True when the config-data trigger `flag` holds for the raw socket-wheelhouse
  * marker. THE authority for the CONDITIONAL_FILES `configFlag` triggers — the
@@ -640,8 +677,12 @@ function configFlagHolds(flag, raw) {
   switch (flag) {
     case 'bundlesVendoredDeps':
       return bundlesVendoredDeps(raw)
+    case 'hasCodeql':
+      return hasCodeql(raw)
     case 'hasGithubRelease':
       return githubReleaseEnabled(raw)
+    case 'hasCratesRegistry':
+      return publishesCrates(raw)
     case 'hasGhcr':
       return publishesToGhcr(raw)
     case 'hasNapi':
@@ -800,6 +841,10 @@ const dep0Logger = {
     console.error(...args)
   },
   log(...args) {
+    if (process$1.argv.includes('--json')) {
+      process$1.stderr.write(`${format(...args)}\n`)
+      return
+    }
     console.log(...args)
   },
 }
@@ -958,6 +1003,7 @@ const ALWAYS_TRACKED_PREFIXES = [
   'assets/fleet/important.svg',
   'assets/fleet/socket-combomark-dark.svg',
   'assets/fleet/socket-combomark-light.svg',
+  'patches/@socketsecurity__lib@7.0.1.patch',
   'patches/run-local-ci@0.18.1.patch',
   'patches/vitest@5.0.0.patch',
   'scripts/repo/bootstrap/',
@@ -1316,6 +1362,194 @@ function effectiveMemberManifest(manifest, dest) {
     ),
     readDeclaredCapabilities(dest),
   )
+}
+
+//#endregion
+//#region template/base/universal/scripts/fleet/process/script-meta.mts
+/**
+ * True when argv carries a bare `--`.
+ *
+ * `pnpm run <script> -- --flag` forwards the `--` to the script, and the argv
+ * parser truncates there — every flag after it is DISCARDED, not collected as a
+ * positional. The script then runs with default behaviour while the caller
+ * believes they passed flags. That is merely confusing for a read-only script
+ * and dangerous for a destructive one: `prune:branch-backups -- --dry-run`
+ * drops the `--dry-run` and performs a live run against every repo.
+ *
+ * Checked against `process.argv` because by the time parsing finishes the
+ * dropped flags are unrecoverable — the parsed result cannot tell you what was
+ * lost.
+ */
+function hasBareDoubleDash(argv) {
+  return argv.includes('--')
+}
+/**
+ * The message shown when argv carries a bare `--`. Names the script so the
+ * corrected command can be pasted directly.
+ */
+function bareDoubleDashMessage(scriptName) {
+  return `a bare \`--\` in the command line
+  Where: the argv for ${scriptName}.\n  Saw:   flags after \`--\`. The argv parser truncates there, so those flags were NOT applied and the script ran with its defaults.
+  Fix:   drop the \`--\`, e.g. \`pnpm run ${scriptName} --dry-run\`.`
+}
+/**
+ * The help request found on argv, if any: `--describe` wins over `-h`/`--help`
+ * when both are present (the narrower ask costs one line; printing both forms
+ * for a mixed argv helps no caller). Pure — exported for tests.
+ */
+function helpRequest(argv) {
+  if (argv.includes('--describe')) return 'describe'
+  if (argv.includes('-h') || argv.includes('--help')) return 'help'
+}
+/**
+ * True when argv carries `--json` on its own — orthogonal to `helpRequest`,
+ * which only reads `--describe`/`-h`/`--help`. A script's own `main()` calls
+ * this to switch its RESULT output to structured JSON without re-parsing
+ * argv itself; `--describe --json` (either order) is answered entirely by
+ * the runner before `main()` runs and never reaches this predicate. Pure —
+ * exported for tests and entry scripts.
+ */
+function isJsonRequested(argv) {
+  return argv.includes('--json')
+}
+/**
+ * The text a help request prints: the one-liner alone for `--describe`, or
+ * the one-liner + blank line + usage body for `--help`. Pure — exported for
+ * tests.
+ */
+function helpText(kind, meta) {
+  return kind === 'describe'
+    ? meta.describe
+    : `${meta.describe}\n\n${meta.help}`
+}
+function describeManifestText(meta, config) {
+  const { name, version } = {
+    __proto__: null,
+    ...config,
+  }
+  return JSON.stringify(
+    {
+      $schema:
+        'https://raw.githubusercontent.com/SocketDev/socket-wheelhouse/main/schemas/cli-describe.schema.json',
+      name,
+      version,
+      description: meta.describe,
+    },
+    void 0,
+    2,
+  )
+}
+
+//#endregion
+//#region template/base/universal/scripts/fleet/process/script-result.mts
+function renderScriptResult(result) {
+  if (
+    !Number.isInteger(result.exitCode) ||
+    result.exitCode < 0 ||
+    result.exitCode > 255
+  )
+    throw new Error(
+      'Script result requires an integer exit code between 0 and 255.',
+    )
+  return JSON.stringify({
+    ok: result.exitCode === 0,
+    exitCode: result.exitCode,
+    ...(result.data === void 0 ? {} : { data: result.data }),
+    ...(result.error === void 0 ? {} : { error: result.error }),
+  })
+}
+var ScriptExit = class extends Error {
+  exitCode
+  constructor(exitCode) {
+    if (!Number.isInteger(exitCode) || exitCode < 1 || exitCode > 255)
+      throw new Error(
+        'Script abort requires an integer exit code between 1 and 255.',
+      )
+    super(
+      `Script stopped with exit code ${exitCode}. Review the preceding diagnostic and retry.`,
+    )
+    this.name = 'ScriptExit'
+    this.exitCode = exitCode
+  }
+}
+
+//#endregion
+//#region template/base/universal/scripts/fleet/process/run-main-minimal.mts
+function errorMessage$1(error) {
+  if (error instanceof Error) return error.message
+  return String(error)
+}
+function scriptVersion() {
+  try {
+    const value = JSON.parse(readFileSync('package.json', 'utf8'))
+    if (
+      value !== null &&
+      typeof value === 'object' &&
+      'version' in value &&
+      typeof value.version === 'string'
+    )
+      return value.version
+  } catch {}
+  return '0.0.0'
+}
+function writeLine(text) {
+  process.stdout.write(`${text}\n`)
+}
+function runMainMinimal(main, meta) {
+  runMainMinimalAsync(main, meta)
+}
+async function runMainMinimalAsync(main, meta) {
+  const argv = process.argv.slice(2)
+  const json = isJsonRequested(argv)
+  const request = helpRequest(argv)
+  const name = process.argv[1]?.split('/').pop() ?? 'script'
+  if (request) {
+    writeLine(
+      request === 'describe' && json
+        ? describeManifestText(meta, {
+            name,
+            version: scriptVersion(),
+          })
+        : helpText(request, meta),
+    )
+    process.exitCode = 0
+    return
+  }
+  try {
+    if (hasBareDoubleDash(argv)) throw new Error(bareDoubleDashMessage(name))
+    if (json && !meta.json)
+      throw new Error('This script has not declared JSON execution support.')
+    await invokeMinimalMain(main, meta)
+  } catch (error) {
+    const message = errorMessage$1(error)
+    const exitCode = error instanceof ScriptExit ? error.exitCode : 1
+    process.exitCode = exitCode
+    if (json)
+      writeLine(
+        renderScriptResult({
+          exitCode,
+          error: message,
+        }),
+      )
+    else process.stderr.write(`${message}\n`)
+  }
+}
+async function invokeMinimalMain(main, meta) {
+  const json = isJsonRequested(process.argv.slice(2))
+  const result = await main()
+  const code =
+    typeof result === 'object' && result !== null ? result.exitCode : result
+  if (typeof code === 'number') process.exitCode = code
+  else if (!process.exitCode) process.exitCode = 0
+  if (json && meta.json === 'result')
+    writeLine(
+      renderScriptResult({
+        ...(typeof result === 'object' && result !== null ? result : {}),
+        exitCode: Number(process.exitCode ?? 0),
+      }),
+    )
+  else if (!json && typeof result === 'object' && result?.error)
+    process.stderr.write(`${result.error}\n`)
 }
 
 //#endregion
@@ -2355,7 +2589,7 @@ function installFiles(filesDir, dest, manifest, options) {
  * instead.
  */
 function materializeFromLocalTemplate(dest, manifest, options) {
-  const filesDir = path.join(dest, 'template', 'base', 'universal')
+  const filesDir = sharedTemplateBasePath(dest)
   if (!existsSync(filesDir)) return
   const shaped = effectiveMemberManifest(manifest, dest)
   const total = {
@@ -3064,7 +3298,7 @@ async function getGhcrToken(repo, registry, httpFn = httpGet) {
   })
   let token = tokenFromBody(res.body)
   if (!token) {
-    const authorization = ghcrBasicAuthHeader(process.env)
+    const authorization = ghcrBasicAuthHeader(process$1.env)
     if (authorization)
       token = tokenFromBody(
         (
@@ -3208,7 +3442,7 @@ function ghcrBundleRepo(repo) {
  * on-disk `sourceManifest` file the gh-release path downloads separately.
  */
 function extractManifestFromTarball(tarball, destDir) {
-  run(tarExecutable(process.platform, process.env['SystemRoot']), [
+  run(tarExecutable(process$1.platform, process$1.env['SystemRoot']), [
     '-xzf',
     tarball,
     '-C',
@@ -3434,18 +3668,18 @@ function maybeShowUpdateNotice(config) {
   const store = readNoticeStore(dest)
   if (
     !shouldShowNotice({
-      ci: process.env['CI'] !== void 0 && process.env['CI'] !== '',
+      ci: process$1.env['CI'] !== void 0 && process$1.env['CI'] !== '',
       newestRef,
       nowMs: Date.now(),
-      optedOut: process.env['WHEELHOUSE_NO_UPDATE_NOTIFIER'] === '1',
+      optedOut: process$1.env['WHEELHOUSE_NO_UPDATE_NOTIFIER'] === '1',
       store,
       updateAvailable,
     }) ||
     newestRef === void 0
   )
     return false
-  const color = process.env['NO_COLOR'] === void 0
-  process.stderr.write(
+  const color = process$1.env['NO_COLOR'] === void 0
+  process$1.stderr.write(
     `${formatUpdateNotice({
       color,
       newestRef,
@@ -3507,6 +3741,11 @@ function statusJson(state) {
 
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/fleet.mts
+const SCRIPT_META = {
+  describe: 'Fetch, verify, and materialize the pinned fleet tooling bundle.',
+  help: 'Usage: pnpm run sync-fleet [--status | --from-template] [--if-current] [--json]',
+  json: 'native',
+}
 const logger = getDep0Logger()
 const DEFAULT_REPO = 'SocketDev/socket-wheelhouse'
 const MANIFEST_NAME = 'release-bundle-manifest.json'
@@ -3580,7 +3819,9 @@ async function runStatus(config) {
   const bundleConfig = readBundleConfig(dest)
   const ref = cfg.ref || bundleConfig.ref || ''
   if (!ref) {
-    if (!cfg.quiet)
+    if (cfg.json)
+      process$1.stdout.write(`${JSON.stringify({ status: 'unconfigured' })}\n`)
+    else if (!cfg.quiet)
       logger.log(
         'fleet:status: no bundle.ref pinned in .config/repo/socket-wheelhouse.json — not a thin consumer.',
       )
@@ -3604,9 +3845,8 @@ async function runStatus(config) {
     newestTemplateSha,
     pinnedTemplateSha,
   })
-  if (cfg.json) {
-    if (!cfg.quiet) logger.log(JSON.stringify(statusJson(state)))
-  } else if (!cfg.quiet)
+  if (cfg.json) process$1.stdout.write(`${JSON.stringify(statusJson(state))}\n`)
+  else if (!cfg.quiet)
     printStatusReport(state, { noHeader: cfg.noHeader ?? false })
   return lockStepExitCode(state, { exitCode: cfg.exitCode ?? false })
 }
@@ -3680,11 +3920,11 @@ async function installFleet(config) {
     const extractDir = path.join(tmp, 'extracted')
     mkdirSync(extractDir, { recursive: true })
     run(
-      tarExecutable(process.platform, process.env['SystemRoot']),
+      tarExecutable(process$1.platform, process$1.env['SystemRoot']),
       tarExtractArgs({
         archive: sourceTarball,
         destination: extractDir,
-        platform: process.platform,
+        platform: process$1.platform,
       }),
     )
     const filesDir = path.join(extractDir, 'files')
@@ -3809,7 +4049,7 @@ async function installFleet(config) {
   }
 }
 function isMainModule() {
-  const entry = process.argv[1]
+  const entry = process$1.argv[1]
   if (!entry) return false
   try {
     return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(entry)
@@ -3827,14 +4067,8 @@ function isMainModule() {
  */
 function runFromTemplate(config) {
   const dest = path.resolve(config.dest ?? repoRoot)
-  const manifestPath = path.join(
-    dest,
-    'scripts',
-    'repo',
-    'commit-cascade',
-    'manifest',
-    'fleet-files.json',
-  )
+  const manifestPath =
+    sharedScriptsRepoCommitCascadeManifestFleetFilesJsonPath(dest)
   if (!existsSync(manifestPath)) {
     logger.error(
       `install-fleet: --from-template: no mirror manifest at ${manifestPath}.`,
@@ -3858,14 +4092,17 @@ function runFromTemplate(config) {
     )
   return 0
 }
-if (isMainModule()) {
-  const parsed = parseArgs(process.argv.slice(2))
-  process.exitCode = parsed.status
-    ? await runStatus(parsed)
-    : parsed.fromTemplate
-      ? runFromTemplate(parsed)
-      : await installFleet(parsed)
+async function main() {
+  const parsed = parseArgs(process$1.argv.slice(2))
+  if (parsed.status) return runStatus(parsed)
+  const exitCode = parsed.fromTemplate
+    ? runFromTemplate(parsed)
+    : await installFleet(parsed)
+  if (parsed.json)
+    process$1.stdout.write(`${renderScriptResult({ exitCode })}\n`)
+  return exitCode
 }
+if (isMainModule()) runMainMinimal(main, SCRIPT_META)
 
 //#endregion
 export {
@@ -3915,6 +4152,7 @@ export {
   isBundleBehindLocalTemplate,
   isMainModule,
   lockStepExitCode,
+  main,
   materializeFromLocalTemplate,
   maybeShowUpdateNotice,
   mergeWorkspaceYaml,
@@ -3948,6 +4186,7 @@ export {
   resolveRepoRoot,
   resolveSettingsPath,
   run,
+  runMainMinimal,
   runStatus,
   segmentFileName,
   sha256Hex,

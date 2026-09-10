@@ -2,6 +2,8 @@
  * @file Authorize producer origins and member-specific committed template
  *   sources.
  */
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+import { CANONICAL_BUNDLE_MANIFEST_PATH } from './paths.mts'
 import { findWheelhouseRoot } from '../../../.claude/hooks/fleet/_shared/wheelhouse-root.mts'
 import fleetRosterJson from '../../../.claude/skills/fleet/cascading-fleet/lib/fleet-repos.json' with { type: 'json' }
 import { SOCKET_GITHUB_ORGS } from '../../../scripts/fleet/constants/socket-scopes.mts'
@@ -120,13 +122,81 @@ export function canonicalSourceAllowed(
   if (!canonicalPathIsSafe(source) || !canonicalPathIsSafe(target)) {
     return false
   }
-  for (const layer of memberLayers(member, readGit)) {
+  const layers = memberLayers(member, readGit)
+  for (const layer of layers) {
     const candidate = `${layer}/${target}`
     if (readCanonicalTreeEntry(producer, commit, candidate, readGit)) {
       return source === candidate
     }
   }
-  return false
+  return (
+    source === target &&
+    layers.length > 0 &&
+    generatedArtifactAllowed(member, producer, commit, target, layers, readGit)
+  )
+}
+
+function generatedEntryMatches(
+  value: unknown,
+  target: string,
+  roots: ReadonlySet<string>,
+): boolean {
+  const entry = objectValue(value)
+  const sourceRoot = entry['sourceRoot']
+  const entryPath = entry['path']
+  if (
+    entry['tracked'] !== true ||
+    typeof sourceRoot !== 'string' ||
+    !roots.has(sourceRoot) ||
+    typeof entryPath !== 'string' ||
+    !canonicalPathIsSafe(entryPath)
+  ) {
+    return false
+  }
+  const normalized = normalizePath(entryPath)
+  return entry['type'] === 'file'
+    ? target === normalized
+    : entry['type'] === 'dir' &&
+        normalizePath(target).startsWith(`${normalized}/`)
+}
+
+function generatedArtifactAllowed(
+  member: string,
+  producer: string,
+  commit: string,
+  target: string,
+  layers: readonly string[],
+  readGit: CanonicalGitRead,
+): boolean {
+  const roots = new Set(
+    layers
+      .filter(layer => normalizePath(layer).startsWith('template/base/'))
+      .map(layer => layer.replace('template/base/', 'template/generated/')),
+  )
+  if (readCanonicalTreeEntry(member, 'HEAD', 'package.json', readGit)) {
+    roots.add('template/generated/conditional/npm')
+  }
+  const manifest = readCanonicalTreeEntry(
+    producer,
+    commit,
+    CANONICAL_BUNDLE_MANIFEST_PATH,
+    readGit,
+  )
+  if (!manifest) {
+    return false
+  }
+  try {
+    const value: unknown = JSON.parse(
+      Buffer.from(manifest.content).toString('utf8'),
+    )
+    const entries = objectValue(value)['mirror']
+    return (
+      Array.isArray(entries) &&
+      entries.some(entry => generatedEntryMatches(entry, target, roots))
+    )
+  } catch {
+    return false
+  }
 }
 
 export function canonicalEligibleSources(

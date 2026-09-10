@@ -93,7 +93,7 @@ overrides:
   'mime-types@>=3': '3.0.2'
   'minimatch@>=3': '10.2.6'
   'minipass@>=4': '7.1.3'
-  'postcss@>=8': '8.5.26'
+  'postcss@>=8': '8.5.27'
   'safe-buffer': 'npm:@socketregistry/safe-buffer@1.0.9'
   'safer-buffer': 'npm:@socketregistry/safer-buffer@1.0.10'
   'semver@>=5.0.0 <7.6.0': '7.8.5'
@@ -213,7 +213,7 @@ catalog:
   # pinned while the fleet migrates; the 0.x entry is deleted once no member
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
   # dated minimumReleaseAgeExclude entry above.
-  'typebox': 1.3.23
+  'typebox': 1.3.25
   '@socketregistry/packageurl-js': 1.5.2
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used INSIDE that same package — Node ESM treats it as a
@@ -233,7 +233,7 @@ catalog:
   '@socketsecurity/sdk': 4.1.4
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.1.4'
   '@types/mdast': 4.0.4
-  '@types/node': 26.4.0
+  '@types/node': 26.4.1
   '@types/semver': 7.8.0
   '@types/shell-quote': 1.7.5
   'compromise': 14.16.0
@@ -341,6 +341,22 @@ minimumReleaseAgeExclude:
   - sockeye
   # published: 2026-09-03 | removable: 2026-09-10
   - '@mdn/browser-compat-data@8.1.0'
+  # published: 2026-09-08 | removable: 2026-09-15
+  - pnpm@12.4.0
+  # published: 2026-09-03 | removable: 2026-09-10
+  - '@vitest/coverage-v8@5.0.0'
+  # published: 2026-09-03 | removable: 2026-09-10
+  - '@vitest/mocker@5.0.0'
+  # published: 2026-09-03 | removable: 2026-09-10
+  - '@vitest/pretty-format@5.0.0'
+  # published: 2026-09-03 | removable: 2026-09-10
+  - '@vitest/spy@5.0.0'
+  # published: 2026-09-03 | removable: 2026-09-10
+  - '@vitest/ui@5.0.0'
+  # published: 2026-09-03 | removable: 2026-09-10
+  - '@vitest/utils@5.0.0'
+  # published: 2026-09-03 | removable: 2026-09-10
+  - vitest@5.0.0
   # published: 2026-09-04 | removable: 2026-09-11
   - pnpm@12.3.4
   # published: 2026-09-02 | removable: 2026-09-09
@@ -373,22 +389,8 @@ minimumReleaseAgeExclude:
   - '@rolldown/binding-win32-arm64-msvc@1.2.7'
   # published: 2026-09-02 | removable: 2026-09-09
   - '@rolldown/binding-win32-x64-msvc@1.2.7'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/coverage-v8@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/mocker@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/pretty-format@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/spy@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/ui@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/utils@5.0.0'
   # published: 2026-09-02 | removable: 2026-09-09
   - rolldown@1.2.7
-  # published: 2026-09-03 | removable: 2026-09-10
-  - vitest@5.0.0
   # published: 2026-09-01 | removable: 2026-09-08
   - '@oxc-project/types@0.148.0'
   # published: 2026-09-01 | removable: 2026-09-08
@@ -502,6 +504,26 @@ patchedDependencies:
   # patched v10 answers that same shape.
   # On a bump, regenerate via `pnpm patch minimatch` + `pnpm patch-commit`.
   minimatch@10.2.6: patches/minimatch@10.2.6.patch
+  # dedup: public runtime helpers (managed by socket-wheelhouse sync):
+  # The bundled debug loader must read DEBUG at runtime so fleet debugNs
+  # honors namespace selection, wildcards, and exclusions.
+  # Generated terminal authorization and process accessors support setup
+  # through the shared public library API without a version change.
+  '@socketsecurity/lib@7.0.1': patches/@socketsecurity__lib@7.0.1.patch
+  # dedup: workflow variable presence (managed by socket-wheelhouse sync):
+  # Local CI must accept explicitly supplied empty workflow variables.
+  # Check own-property presence in run preflight and job validation;
+  # absent variables remain errors.
+  # Intercepted fetch records local HEAD in FETCH_HEAD so inline detached
+  # checkout preserves the pre-populated Local CI workspace.
+  run-local-ci@0.18.1: patches/run-local-ci@0.18.1.patch
+  # dedup: coverage matcher allocation (managed by socket-wheelhouse sync):
+  # Coverage checks exclusions before matching includes.
+  # Compile exclusions once instead of once per include pattern.
+  # This preserves membership and bounds matcher memory for fleet coverage.
+  # CPU-profiled forks use the configured teardown deadline to flush profiles.
+  # Ordinary forks retain the upstream 500 ms termination grace.
+  vitest@5.0.0: patches/vitest@5.0.0.patch
 
 # Refuse transitive (sub-) deps declared via git/tarball/local-tarball
 # specs. Direct git deps in this repo are still allowed; this only
