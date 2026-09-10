@@ -1,16 +1,7 @@
 #!/usr/bin/env node
-/*
- * @file Validates that quota information is consistent across the three sources
- *   of truth:
- *
- *   1. The `@quota N units` JSDoc tag on each public method in
- *      `src/socket-sdk-class.mts`.
- *   2. The `data/api-method-quota-and-permissions.json` data file.
- *   3. The OpenAPI operation ID referenced from the method (via `@operationId`
- *      JSDoc tag, the first `<'opId'>` type generic in the body, or the method
- *      name itself). Usage: node scripts/repo/validate-quota-sync.mts # report +
- *      exit non-zero node scripts/repo/validate-quota-sync.mts --warn # report only,
- *      exit 0
+/**
+ * @file Validates SDK quota tags against method metadata and explicit OpenAPI
+ *   aliases.
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -20,6 +11,11 @@ import { fileURLToPath } from 'node:url'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
+
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
+import { OPENAPI_METHOD_ALIASES } from './openapi-contracts.mts'
+import { extractSdkClassMethods } from './sdk-method-extraction.mts'
 
 /**
  * An SDK method name, as `getOrgFullScanList`. Named so the table's key says
@@ -42,42 +38,16 @@ const dataPath = path.join(
   'data/api-method-quota-and-permissions.json',
 )
 
-// Type generics in the SDK class that reference op-ids whose casing or naming
-// doesn't match `api-method-quota-and-permissions.json`. Clearing these is a
-// follow-up: either rename the type generic or rename the data-file entry.
-const KNOWN_NAME_DRIFT: ReadonlySet<string> = new Set([
-  'batchOrgPackageFetch:batchPackageFetchByOrg',
-  'createFullScan:CreateOrgFullScan',
-  'createOrgFullScanFromArchive:CreateOrgFullScanArchive',
-  'createOrgWebhook:createOrgWebhook',
-  'deleteOrgWebhook:deleteOrgWebhook',
-  'downloadOrgFullScanFilesAsTar:downloadOrgFullScanFilesAsTar',
-  'getDiffScanGfm:GetDiffScanGfm',
-  'getFullScan:getOrgFullScan',
-  'getIssuesByNpmPackage:getIssuesByNPMPackage',
-  'getOrgAlertFullScans:alertFullScans',
-  'getOrgAlertsList:alertsList',
-  'getOrgTelemetryConfig:getOrgTelemetryConfig',
-  'getOrgWebhook:getOrgWebhook',
-  'getOrgWebhooksList:getOrgWebhooksList',
-  'getScoreByNpmPackage:getScoreByNPMPackage',
-  'getSupportedFiles:getSupportedFiles',
-  'rescanFullScan:rescanOrgFullScan',
-  'streamFullScan:getOrgFullScan',
-  'updateOrgTelemetryConfig:updateOrgTelemetryConfig',
-  'updateOrgWebhook:updateOrgWebhook',
-])
-
-interface DataEntry {
+export interface DataEntry {
   quota: number
   permissions: string[]
 }
 
-interface QuotaData {
+export interface QuotaData {
   api: Record<ApiMethodName, DataEntry>
 }
 
-interface MethodInfo {
+export interface MethodInfo {
   name: string
   jsdocQuota: number | undefined
   operationId: string | undefined
@@ -88,70 +58,14 @@ interface MethodInfo {
 // Private entry point.
 // ---------------------------------------------------------------------------
 
-function main(): void {
+function main(): number {
   const warnOnly = process.argv.includes('--warn')
   const data = JSON.parse(readFileSync(dataPath, 'utf8')) as QuotaData
   const methods = extractMethods()
   const errors: string[] = []
-  const warnings: string[] = []
 
-  for (let i = 0, { length } = methods; i < length; i += 1) {
-    const m = methods[i]!
-    if (!m.operationId && !m.hadOperationIdNone) {
-      errors.push(
-        `${m.name}: no operation ID. Add a JSDoc \`@operationId <id>\` tag (or \`@operationId none\` if intentional).`,
-      )
-      continue
-    }
-    if (m.hadOperationIdNone) {
-      continue
-    }
-
-    const resolved = resolveDataEntry(data, m.operationId!)
-    const driftKey = `${m.name}:${m.operationId}`
-    if (!resolved) {
-      if (KNOWN_NAME_DRIFT.has(driftKey)) {
-        warnings.push(
-          `${m.name}: op-id \`${m.operationId}\` not found in data file (known drift).`,
-        )
-      } else {
-        errors.push(
-          `${m.name}: op-id \`${m.operationId}\` is not present in data/api-method-quota-and-permissions.json.`,
-        )
-      }
-      continue
-    }
-
-    if (resolved.key !== m.operationId) {
-      if (!KNOWN_NAME_DRIFT.has(driftKey)) {
-        errors.push(
-          `${m.name}: op-id \`${m.operationId}\` only resolves case-insensitively to \`${resolved.key}\`. Reconcile the casing.`,
-        )
-        continue
-      }
-      warnings.push(
-        `${m.name}: op-id \`${m.operationId}\` differs in casing from data key \`${resolved.key}\` (known drift).`,
-      )
-    }
-
-    if (m.jsdocQuota === undefined) {
-      warnings.push(
-        `${m.name}: no \`@quota N units\` JSDoc tag (data file says ${resolved.entry.quota}).`,
-      )
-    } else if (m.jsdocQuota !== resolved.entry.quota) {
-      errors.push(
-        `${m.name}: JSDoc \`@quota ${m.jsdocQuota}\` disagrees with data file (${resolved.entry.quota}).`,
-      )
-    }
-  }
-
-  if (warnings.length > 0) {
-    logger.log('')
-    logger.warn(`Quota-sync warnings (${warnings.length}):`)
-    for (let i = 0, { length } = warnings; i < length; i += 1) {
-      const w = warnings[i]!
-      logger.warn(`  ${w}`)
-    }
+  for (const method of methods) {
+    validateMethodQuota(method, data, errors)
   }
 
   if (errors.length > 0) {
@@ -162,22 +76,26 @@ function main(): void {
       logger.error(`  ${e}`)
     }
     if (!warnOnly) {
-      process.exitCode = 1
-      return
+      return 1
     }
   }
 
-  if (errors.length === 0 && warnings.length === 0) {
+  if (errors.length === 0) {
     logger.success(
       `Quota sync OK (${methods.length} methods checked against ${Object.keys(data.api).length} data entries).`,
     )
-  } else if (errors.length === 0) {
-    logger.success(`Quota sync passed with ${warnings.length} warning(s).`)
   }
+  return 0
+}
+
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'validates SDK quota tags against method metadata and OpenAPI aliases',
+  help: 'Usage: pnpm run check:quota-sync [--warn]\n\nChecks quota metadata without network access. --warn reports errors without failing.',
 }
 
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }
 
 // ---------------------------------------------------------------------------
@@ -187,102 +105,64 @@ if (isMainModule(import.meta.url)) {
 /**
  * Extract method information from the SDK class source.
  */
-export function extractMethods(): MethodInfo[] {
-  const src = readFileSync(classPath, 'utf8')
-  const lines = src.split(/\r?\n/)
-  const out: MethodInfo[] = []
-  const seen = new Set<string>()
-
-  let i = 0
-  while (i < lines.length) {
-    const match = lines[i]!.match(/^  async \*?([a-zA-Z][a-zA-Z0-9_]*)[<(]/)
-    if (!match) {
-      i++
-      continue
-    }
-    const name = match[1]!
-    if (seen.has(name)) {
-      i++
-      continue
-    }
-    seen.add(name)
-
-    let sigEnd = i
-    while (sigEnd < lines.length) {
-      const line = lines[sigEnd]!
-      if (
-        line.match(/\)\s*:\s*[^=]+\{$/) ||
-        line === '  ) {' ||
-        line.endsWith(' {')
-      ) {
-        break
-      }
-      sigEnd++
-    }
-    let bodyEnd = sigEnd + 1
-    while (bodyEnd < lines.length && lines[bodyEnd] !== '  }') {
-      bodyEnd++
-    }
-    const body = lines.slice(i, bodyEnd + 1).join('\n')
-
-    let jsdocEnd = i - 1
-    while (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '') {
-      jsdocEnd--
-    }
-    let jsdocQuota: number | undefined
-    let operationId: string | undefined
-    let hadOperationIdNone = false
-    if (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '*/') {
-      let jsdocStart = jsdocEnd
-      while (jsdocStart >= 0 && lines[jsdocStart]!.trim() !== '/**') {
-        jsdocStart--
-      }
-      const jsdoc = lines.slice(jsdocStart, jsdocEnd + 1).join('\n')
-      const qMatch = jsdoc.match(/@quota\s+(\d+)\s*units?/)
-      if (qMatch) {
-        jsdocQuota = Number(qMatch[1])
-      }
-      const opMatch = jsdoc.match(/@operationId\s+(\S+)/)
-      if (opMatch) {
-        if (opMatch[1] === 'none') {
-          hadOperationIdNone = true
-        } else {
-          operationId = opMatch[1]
-        }
-      }
-    }
-    if (!operationId && !hadOperationIdNone) {
-      const generic = body.match(/<'([a-zA-Z][a-zA-Z0-9]*)'[,>]/)
-      if (generic) {
-        operationId = generic[1]
-      }
-    }
-    out.push({ hadOperationIdNone, jsdocQuota, name, operationId })
-    i = bodyEnd + 1
-  }
-  return out
+export function extractMethods(
+  source = readFileSync(classPath, 'utf8'),
+): MethodInfo[] {
+  return extractSdkClassMethods(source).map(
+    ({ hadOperationIdNone, jsdocQuota, name, operationId }) => ({
+      __proto__: null,
+      hadOperationIdNone,
+      jsdocQuota,
+      name,
+      operationId,
+    }),
+  )
 }
 
-/**
- * Resolve an op-id against the data file (exact match first, case-insensitive
- * fallback).
- */
 export function resolveDataEntry(
   data: QuotaData,
-  opId: string,
+  operationId: string,
+  methodName?: string | undefined,
 ): { key: string; entry: DataEntry } | undefined {
-  if (data.api[opId]) {
-    return { entry: data.api[opId]!, key: opId }
+  const key =
+    methodName &&
+    data.api[methodName] &&
+    OPENAPI_METHOD_ALIASES[methodName] === operationId
+      ? methodName
+      : operationId
+  const entry = data.api[key]
+  return entry ? { key, entry } : undefined
+}
+
+export function validateMethodQuota(
+  method: MethodInfo,
+  data: QuotaData,
+  errors: string[],
+): void {
+  if (!method.operationId && !method.hadOperationIdNone) {
+    errors.push(
+      `${method.name}: no operation ID. Add a JSDoc \`@operationId <id>\` tag (or \`@operationId none\` if intentional).`,
+    )
+    return
   }
-  const lower = opId.toLowerCase()
-  const entries = Object.entries(data.api)
-  for (let i = 0, { length } = entries; i < length; i += 1) {
-    const entry = entries[i]!
-    const key = entry[0]
-    const value = entry[1]
-    if (key.toLowerCase() === lower) {
-      return { entry: value, key }
-    }
+  const operationId = method.operationId ?? method.name
+  const resolved = resolveDataEntry(data, operationId, method.name)
+  if (method.hadOperationIdNone && !resolved) {
+    return
   }
-  return undefined
+  if (!resolved) {
+    errors.push(
+      `${method.name}: op-id \`${operationId}\` has no quota metadata. Add its method entry to data/api-method-quota-and-permissions.json.`,
+    )
+    return
+  }
+  if (method.jsdocQuota === undefined) {
+    errors.push(
+      `${method.name}: no \`@quota N units\` JSDoc tag (data file says ${resolved.entry.quota}). Add the verified quota tag.`,
+    )
+  } else if (method.jsdocQuota !== resolved.entry.quota) {
+    errors.push(
+      `${method.name}: JSDoc \`@quota ${method.jsdocQuota}\` disagrees with data file (${resolved.entry.quota}). Update the quota from the backend contract.`,
+    )
+  }
 }

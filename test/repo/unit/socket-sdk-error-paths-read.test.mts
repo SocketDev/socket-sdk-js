@@ -130,6 +130,7 @@ describe('SocketSdk error paths - Get methods', () => {
     const client = createClient()
     const result = await client.getOrgFixes('test-org', {
       allow_major_updates: false,
+      repo_slug: 'example-repo',
       vulnerability_ids: 'CVE-2021-23337',
     })
     expect(result.success).toBe(false)

@@ -1,3 +1,6 @@
+/**
+ * @file HTTP request helpers for the Socket SDK.
+ */
 import { debugLog } from '@socketsecurity/lib/debug/output'
 import { isError } from '@socketsecurity/lib/errors/predicates'
 import { httpRequest } from '@socketsecurity/lib/http-request'
@@ -20,8 +23,8 @@ import type {
   SocketArtifactAlert,
   SocketArtifactWithExtras,
 } from './types/core.mts'
-import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
-import type { JsonValue } from '@socketsecurity/lib/json/types'
+import type { SocketSdkHttpResponse as HttpResponse } from './types/http.mts'
+import type { SocketSdkJsonValue as JsonValue } from './types/util.mts'
 
 export class ResponseError extends Error {
   response: HttpResponse
@@ -71,6 +74,7 @@ export async function createDeleteRequest(
       headers: opts.headers as Record<string, string>,
       timeout: opts.timeout,
       maxResponseSize: MAX_RESPONSE_SIZE,
+      signal: opts.signal,
     })
 
     if (hooks?.onResponse) {
@@ -108,6 +112,7 @@ export async function createDeleteRequest(
  */
 export type GetRequestOptions = RequestOptionsWithHooks & {
   stream?: boolean | undefined
+  maxResponseSize?: number | undefined
 }
 
 export async function createGetRequest(
@@ -119,7 +124,12 @@ export async function createGetRequest(
   const url = `${baseUrl}${urlPath}`
   const method = 'GET'
   const stopTimer = perfTimer('http:get', { urlPath })
-  const { hooks, stream, ...rawOpts } = {
+  const {
+    hooks,
+    stream,
+    maxResponseSize = MAX_RESPONSE_SIZE,
+    ...rawOpts
+  } = {
     __proto__: null,
     ...options,
   } as unknown as GetRequestOptions
@@ -139,7 +149,8 @@ export async function createGetRequest(
       method,
       headers: opts.headers as Record<string, string>,
       timeout: opts.timeout,
-      ...(stream ? { stream: true } : { maxResponseSize: MAX_RESPONSE_SIZE }),
+      signal: opts.signal,
+      ...(stream ? { stream: true } : { maxResponseSize }),
     })
     stopTimer({ statusCode: response.status })
 
@@ -176,17 +187,17 @@ export async function createRequestWithJson(
   baseUrl: string,
   urlPath: string,
   json: unknown,
-  options?: RequestOptionsWithHooks | undefined,
+  options?: GetRequestOptions | undefined,
 ): Promise<HttpResponse> {
   const startTime = DateNow()
   const url = `${baseUrl}${urlPath}`
   const stopTimer = perfTimer(`http:${method.toLowerCase()}`, {
     urlPath,
   })
-  const { hooks, ...rawOpts } = {
+  const { hooks, stream, ...rawOpts } = {
     __proto__: null,
     ...options,
-  } as unknown as RequestOptionsWithHooks
+  } as unknown as GetRequestOptions
   const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
   const body = JSON.stringify(json)
   const headers = {
@@ -213,7 +224,8 @@ export async function createRequestWithJson(
       body,
       headers,
       timeout: opts.timeout,
-      maxResponseSize: MAX_RESPONSE_SIZE,
+      signal: opts.signal,
+      ...(stream ? { stream: true } : { maxResponseSize: MAX_RESPONSE_SIZE }),
     })
     stopTimer({ statusCode: response.status })
 
@@ -400,6 +412,7 @@ export function reshapeArtifactForPublicPolicy<
     const resolvedPolicy = policy ?? defaultPublicPolicy
 
     const reshapeArtifact = (artifact: SocketArtifactWithExtras) => ({
+      __proto__: null,
       // Deep-link qualifier fields (artifactId, classifier, ext, params, path,
       // platform, section) are non-sensitive routing hints public consumers use
       // to build correct socket.dev links for non-npm ecosystems. Copy only the

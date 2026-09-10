@@ -45,15 +45,15 @@
       "permissions": ["report:write"]
     },
     "createFullScan": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["full-scans:create"]
     },
     "createOrgFullScan": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["full-scans:create"]
     },
     "createOrgRepo": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo:create"]
     },
     "createOrgRepoDiff": {
@@ -73,11 +73,11 @@
       "permissions": ["report:write"]
     },
     "deleteOrgFullScan": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["full-scans:delete"]
     },
     "deleteOrgRepo": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo:delete"]
     },
     "associateOrgRepoLabel": {
@@ -105,7 +105,7 @@
       "permissions": ["triage:alerts-update"]
     },
     "getAuditLogEvents": {
-      "quota": 10,
+      "quota": 1,
       "permissions": ["audit-log:list"]
     },
     "getEnabledEntitlements": {
@@ -117,52 +117,52 @@
       "permissions": []
     },
     "getIssuesByNpmPackage": {
-      "quota": 10,
+      "quota": 1,
       "permissions": []
     },
     "getOrgAnalytics": {
-      "quota": 10,
+      "quota": 1,
       "permissions": ["report:write"]
     },
     "getOrganizations": {
-      "quota": 0,
+      "quota": 1,
       "permissions": []
     },
     "streamOrgFullScan": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["full-scans:list"]
     },
     "streamPatchesFromScan": {
-      "quota": 0,
-      "permissions": ["patches:list"]
+      "quota": 100,
+      "permissions": []
     },
     "getOrgFullScanBuffered": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["full-scans:list"]
     },
     "getOrgFullScanList": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["full-scans:list"]
     },
     "getOrgFullScanMetadata": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["full-scans:list"]
     },
     "getOrgLicensePolicy": {
-      "quota": 0,
-      "permissions": ["settings:read"]
+      "quota": 1,
+      "permissions": ["license-policy:read"]
     },
     "getOrgRepo": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo:list"]
     },
     "getOrgRepoList": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo:list"]
     },
     "getOrgSecurityPolicy": {
-      "quota": 0,
-      "permissions": ["settings:read"]
+      "quota": 1,
+      "permissions": ["security-policy:read"]
     },
     "getOrgThreatFeedItems": {
       "quota": 1,
@@ -173,23 +173,23 @@
       "permissions": []
     },
     "getRepoAnalytics": {
-      "quota": 10,
+      "quota": 1,
       "permissions": ["report:write"]
     },
     "getScan": {
-      "quota": 0,
+      "quota": 10,
       "permissions": ["report:read"]
     },
     "getScanList": {
-      "quota": 0,
-      "permissions": ["report:read"]
+      "quota": 10,
+      "permissions": ["report:list"]
     },
     "getSupportedScanFiles": {
-      "quota": 0,
-      "permissions": ["report:read"]
+      "quota": 1,
+      "permissions": []
     },
     "getScoreByNpmPackage": {
-      "quota": 10,
+      "quota": 1,
       "permissions": []
     },
     "getThreatFeedItems": {
@@ -217,15 +217,15 @@
       "permissions": ["historical:snapshots-start"]
     },
     "postSettings": {
-      "quota": 0,
+      "quota": 1,
       "permissions": []
     },
     "searchDependencies": {
-      "quota": 100,
+      "quota": 1,
       "permissions": []
     },
     "updateOrgRepo": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo:update"]
     },
     "uploadManifestFiles": {
@@ -233,91 +233,91 @@
       "permissions": ["packages:upload"]
     },
     "viewPatch": {
-      "quota": 0,
-      "permissions": ["patches:view"]
+      "quota": 10,
+      "permissions": []
     },
     "deleteReport": {
-      "quota": 0,
-      "permissions": ["report:delete"]
+      "quota": 10,
+      "permissions": ["report:write"]
     },
     "exportCDX": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["report:read"]
     },
     "exportSPDX": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["report:read"]
     },
     "getAPITokens": {
       "quota": 10,
-      "permissions": ["api-token:list"]
+      "permissions": ["api-tokens:list"]
     },
     "postAPIToken": {
       "quota": 10,
-      "permissions": ["api-token:create"]
+      "permissions": ["api-tokens:create"]
     },
     "postAPITokenUpdate": {
       "quota": 10,
-      "permissions": ["api-token:update"]
+      "permissions": ["api-tokens:create"]
     },
     "postAPITokensRotate": {
       "quota": 10,
-      "permissions": ["api-token:rotate"]
+      "permissions": ["api-tokens:rotate"]
     },
     "postAPITokensRevoke": {
       "quota": 10,
-      "permissions": ["api-token:revoke"]
+      "permissions": ["api-tokens:revoke"]
     },
     "updateOrgSecurityPolicy": {
-      "quota": 0,
-      "permissions": ["settings:write"]
+      "quota": 1,
+      "permissions": ["security-policy:update"]
     },
     "updateOrgLicensePolicy": {
-      "quota": 0,
-      "permissions": ["settings:write"]
+      "quota": 1,
+      "permissions": ["license-policy:update"]
     },
     "getOrgTriage": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["triage:alerts-list"]
     },
     "updateOrgAlertTriage": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["triage:alerts-update"]
     },
     "getOrgRepoLabelList": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo-label:list"]
     },
     "createOrgRepoLabel": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo-label:create"]
     },
     "getOrgRepoLabel": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo-label:list"]
     },
     "updateOrgRepoLabel": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo-label:update"]
     },
     "deleteOrgRepoLabel": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["repo-label:delete"]
     },
     "getDiffScanById": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["diff-scans:list"]
     },
     "createOrgDiffScanFromIds": {
-      "quota": 0,
-      "permissions": ["diff-scans:create"]
+      "quota": 1,
+      "permissions": ["diff-scans:create", "full-scans:list"]
     },
     "listOrgDiffScans": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["diff-scans:list"]
     },
     "deleteOrgDiffScan": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["diff-scans:delete"]
     },
     "getApi": {
@@ -333,7 +333,7 @@
       "permissions": ["packages:list"]
     },
     "exportOpenVEX": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["report:read"]
     },
     "getOrgAlertFullScans": {
@@ -353,8 +353,184 @@
       "permissions": ["alert-resolution:delete"]
     },
     "rescanFullScan": {
-      "quota": 0,
+      "quota": 1,
       "permissions": ["full-scans:create"]
+    },
+    "getOrgAlertPolicies": {
+      "quota": 1,
+      "permissions": ["alert-policy:list"]
+    },
+    "startOrgFixComputation": {
+      "quota": 10,
+      "permissions": ["fixes:list"]
+    },
+    "getOrgFixComputation": {
+      "quota": 0,
+      "permissions": ["fixes:list"]
+    },
+    "getOrgPurlVersions": {
+      "quota": 100,
+      "permissions": ["packages:list"]
+    },
+    "downloadOrgPatchVerificationBundle": {
+      "quota": 10,
+      "permissions": []
+    },
+    "getOrgFixes": {
+      "quota": 10,
+      "permissions": ["fixes:list"]
+    },
+    "batchOrgPackageStream": {
+      "quota": 100,
+      "permissions": ["packages:list"]
+    },
+    "getOrgAlertPolicy": {
+      "quota": 1,
+      "permissions": ["alert-policy:read"]
+    },
+    "createOrgAlertPolicy": {
+      "quota": 1,
+      "permissions": ["alert-policy:create"]
+    },
+    "updateOrgAlertPolicy": {
+      "quota": 1,
+      "permissions": ["alert-policy:update"]
+    },
+    "deleteOrgAlertPolicy": {
+      "quota": 1,
+      "permissions": ["alert-policy:delete"]
+    },
+    "getOrgAlertPolicyRules": {
+      "quota": 1,
+      "permissions": ["alert-policy:list"]
+    },
+    "getOrgAlertPolicyRule": {
+      "quota": 1,
+      "permissions": ["alert-policy:read"]
+    },
+    "createOrgAlertPolicyRule": {
+      "quota": 1,
+      "permissions": ["alert-policy:create"]
+    },
+    "updateOrgAlertPolicyRule": {
+      "quota": 1,
+      "permissions": ["alert-policy:update"]
+    },
+    "deleteOrgAlertPolicyRule": {
+      "quota": 1,
+      "permissions": ["alert-policy:delete"]
+    },
+    "createOrgAlertResolution": {
+      "quota": 1,
+      "permissions": ["alert-resolution:create"]
+    },
+    "getOrgAlertPolicyMigrationStatus": {
+      "quota": 1,
+      "permissions": ["alert-policy:list"]
+    },
+    "translateOrgAlertPolicyMigrationTriage": {
+      "quota": 1,
+      "permissions": []
+    },
+    "fetchPatchesByCVE": {
+      "quota": 10,
+      "permissions": []
+    },
+    "fetchPatchesByGHSA": {
+      "quota": 10,
+      "permissions": []
+    },
+    "fetchPatchesByPackage": {
+      "quota": 10,
+      "permissions": []
+    },
+    "fetchPatchesBatch": {
+      "quota": 20,
+      "permissions": []
+    },
+    "fetchPatchRecords": {
+      "quota": 10,
+      "permissions": []
+    },
+    "getPatchPackages": {
+      "quota": 20,
+      "permissions": []
+    },
+    "patchPackageStats": {
+      "quota": 10,
+      "permissions": []
+    },
+    "lookupPatchPackage": {
+      "quota": 10,
+      "permissions": []
+    },
+    "getPatchDiff": {
+      "quota": 10,
+      "permissions": []
+    },
+    "getPatchBlob": {
+      "quota": 1,
+      "permissions": []
+    },
+    "createOrgFullScanFromArchive": {
+      "quota": 1,
+      "permissions": ["full-scans:create"]
+    },
+    "getFullScan": {
+      "quota": 1,
+      "permissions": ["full-scans:list"]
+    },
+    "streamFullScan": {
+      "quota": 1,
+      "permissions": ["full-scans:list"]
+    },
+    "getDiffScanGfm": {
+      "quota": 1,
+      "permissions": ["diff-scans:list"]
+    },
+    "getOrgAlertsList": {
+      "quota": 10,
+      "permissions": ["alerts:list"]
+    },
+    "postOrgTelemetry": {
+      "quota": 0,
+      "permissions": []
+    },
+    "getSupportedFiles": {
+      "quota": 1,
+      "permissions": []
+    },
+    "createOrgWebhook": {
+      "quota": 1,
+      "permissions": ["webhooks:create"]
+    },
+    "deleteOrgWebhook": {
+      "quota": 1,
+      "permissions": ["webhooks:delete"]
+    },
+    "getOrgWebhook": {
+      "quota": 1,
+      "permissions": ["webhooks:list"]
+    },
+    "getOrgWebhooksList": {
+      "quota": 1,
+      "permissions": ["webhooks:list"]
+    },
+    "updateOrgWebhook": {
+      "quota": 1,
+      "permissions": ["webhooks:update"]
+    },
+    "getOrgTelemetryConfig": {
+      "quota": 1,
+      "permissions": []
+    },
+    "updateOrgTelemetryConfig": {
+      "quota": 1,
+      "permissions": ["telemetry-policy:update"]
+    },
+    "downloadOrgFullScanFilesAsTar": {
+      "quota": 1,
+      "permissions": ["full-scans:list"]
     }
   }
 }

@@ -15,8 +15,8 @@ import { sleep as defaultSleep } from '@socketsecurity/lib/promises/timers'
 import { DEFAULT_POLL_INTERVAL, DEFAULT_POLL_TIMEOUT } from '../constants.mts'
 import { getResponseJson } from '../http-client.mts'
 
-import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
-import type { JsonValue } from '@socketsecurity/lib/json/types'
+import type { SocketSdkHttpResponse as HttpResponse } from '../types/http.mts'
+import type { SocketSdkJsonValue as JsonValue } from '../types/util.mts'
 
 // HTTP 202 Accepted: the cached scan is still being computed; poll again.
 export const HTTP_STATUS_ACCEPTED = 202

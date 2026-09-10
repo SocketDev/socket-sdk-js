@@ -4,14 +4,12 @@
  *
  *   - getApi response type handling (#handleQueryResponseData)
  *   - sendApi additional paths
- *   - checkMalware batch path (multiple components, empty list, error forwarding)
  *   - additional method success paths (exportOpenVEX, rescanFullScan,
  *     getEnabledEntitlements, getOrgAlertFullScans)
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { MAX_FIREWALL_COMPONENTS } from '../../../src/constants.mts'
 import { SocketSdk } from '../../../src/index.mts'
 import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
 
@@ -245,139 +243,6 @@ describe('SocketSdk - sendApi additional paths', () => {
     })) as SocketSdkGenericResult<unknown>
 
     expect(result.success).toBe(false)
-  })
-})
-
-// ---------------------------------------------------------------------------
-// checkMalware batch path (multiple components) - additional coverage
-// ---------------------------------------------------------------------------
-describe('SocketSdk - checkMalware batch path additional', () => {
-  const getBaseUrl = setupLocalHttpServer(
-    (req: IncomingMessage, res: ServerResponse) => {
-      const url = req.url || ''
-
-      // Consume POST body
-      let body = ''
-      req.on('data', (chunk: Buffer) => {
-        body += chunk.toString()
-      })
-      req.on('end', () => {
-        if (url.includes('/purl') && req.method === 'POST') {
-          // Parse request body to determine response
-          const parsed = JSON.parse(body)
-          const purls = (parsed.components || []).map(
-            (c: { purl: string }) => c.purl,
-          )
-
-          if (purls.includes('pkg:npm/nonexistent@0.0.0')) {
-            // Empty response
-            res.writeHead(200, { 'Content-Type': 'application/x-ndjson' })
-            res.end('\n')
-          } else {
-            // Multi-artifact response
-            const artifact1 = {
-              alerts: [
-                {
-                  key: 'cve-1',
-                  severity: 'high',
-                  type: 'criticalCVE',
-                },
-              ],
-              name: 'pkg-a',
-              type: 'npm',
-              version: '1.0.0',
-            }
-            const artifact2 = {
-              alerts: [],
-              name: 'pkg-b',
-              type: 'npm',
-              version: '2.0.0',
-            }
-            res.writeHead(200, { 'Content-Type': 'application/x-ndjson' })
-            res.end(
-              `${JSON.stringify(artifact1)}\n${JSON.stringify(artifact2)}\n`,
-            )
-          }
-        } else {
-          res.writeHead(404)
-          res.end()
-        }
-      })
-    },
-  )
-
-  it('should handle empty artifact list from batch API', async () => {
-    const count = MAX_FIREWALL_COMPONENTS + 1
-    const client = new SocketSdk('test-api-token', {
-      baseUrl: `${getBaseUrl()}/v0/`,
-      retries: 0,
-    })
-
-    const components = Array.from({ length: count }, (_, i) => ({
-      purl: `pkg:npm/nonexistent@0.0.${i}`,
-    }))
-    const result = await client.checkMalware(components)
-
-    expect(result.success).toBe(true)
-    if (!result.success) {
-      return
-    }
-    expect(result.data).toEqual([])
-  })
-
-  it('should normalize multiple artifacts from batch response', async () => {
-    const count = MAX_FIREWALL_COMPONENTS + 1
-    const client = new SocketSdk('test-api-token', {
-      baseUrl: `${getBaseUrl()}/v0/`,
-      retries: 0,
-    })
-
-    const components = Array.from({ length: count }, (_, i) => ({
-      purl: `pkg:npm/pkg-${String.fromCharCode(97 + i)}@${i + 1}.0.0`,
-    }))
-    const result = await client.checkMalware(components)
-
-    expect(result.success).toBe(true)
-    if (!result.success) {
-      return
-    }
-    // Server returns 2 artifacts for non-nonexistent purls
-    expect(result.data).toHaveLength(2)
-    // criticalCVE is 'warn' in publicPolicy, so it should be included
-    expect(result.data[0]!.alerts).toHaveLength(1)
-    expect(result.data[0]!.alerts[0]!.type).toBe('criticalCVE')
-    expect(result.data[1]!.alerts).toEqual([])
-  })
-})
-
-// ---------------------------------------------------------------------------
-// checkMalwareBatch error forwarding
-// ---------------------------------------------------------------------------
-describe('SocketSdk - checkMalware batch error forwarding', () => {
-  const getBaseUrl = setupLocalHttpServer(
-    (_req: IncomingMessage, res: ServerResponse) => {
-      // Return 401 for all requests to trigger batchPackageFetch error
-      res.writeHead(401, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ error: { message: 'Unauthorized' } }))
-    },
-  )
-
-  it('should forward batchPackageFetch error from checkMalwareBatch', async () => {
-    const count = MAX_FIREWALL_COMPONENTS + 1
-    const client = new SocketSdk('test-token', {
-      baseUrl: `${getBaseUrl()}/v0/`,
-      retries: 0,
-    })
-
-    const components = Array.from({ length: count }, (_, i) => ({
-      purl: `pkg:npm/lodash@4.17.${i}`,
-    }))
-    const result = await client.checkMalware(components)
-
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      expect(result.status).toBe(401)
-    }
   })
 })
 

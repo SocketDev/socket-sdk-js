@@ -39,7 +39,7 @@ describe('SocketSdk - batchOrgPackageFetch', () => {
               version: '4.17.21',
             }
             res.end(`${JSON.stringify(artifact)}\n`)
-          } else if (url.includes('invalid-lines')) {
+          } else if (url.includes('summary=true')) {
             // Response with empty and invalid lines
             const artifact = {
               name: 'lodash',
@@ -102,13 +102,13 @@ describe('SocketSdk - batchOrgPackageFetch', () => {
     const result = await client.batchOrgPackageFetch(
       'test-org',
       { components: [{ purl: 'pkg:npm/lodash@4.17.21' }] },
-      { compact: 'true' },
+      { compact: true },
     )
 
     expect(result.success).toBe(true)
   })
 
-  it('should skip empty and invalid JSON lines in NDJSON', async () => {
+  it('returns failure for malformed NDJSON after a valid record', async () => {
     const client = new SocketSdk('test-token', {
       baseUrl: `${getBaseUrl()}/v0/`,
       retries: 0,
@@ -117,15 +117,10 @@ describe('SocketSdk - batchOrgPackageFetch', () => {
     const result = await client.batchOrgPackageFetch(
       'test-org',
       { components: [{ purl: 'pkg:npm/lodash@4.17.21' }] },
-      { 'invalid-lines': 'true' },
+      { summary: true },
     )
 
-    expect(result.success).toBe(true)
-    if (!result.success) {
-      return
-    }
-    // Only the valid artifact line should be parsed
-    expect(result.data).toHaveLength(1)
+    expect(result.success).toBe(false)
   })
 })
 

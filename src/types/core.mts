@@ -4,9 +4,12 @@
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
-import type { components, operations } from '../../types/api'
-import type { OpReturnType } from '../../types/api-helpers'
-import type { Remap } from '@socketsecurity/lib/objects/types'
+import type { PurlFetchResult, PurlStreamOptions } from './purl.mts'
+import type { MalwareCheckEntry } from './malware.mts'
+
+import type { components, operations } from '../../types/api.d.ts'
+import type { OpReturnType } from '../../types/api-helpers.d.ts'
+import type { RemapSdkType as Remap } from './util.mts'
 import type { RequestOptions as HttpRequestOptions } from 'node:http'
 import type { ClientSessionRequestOptions } from 'node:http2'
 import type { RequestOptions as HttpsRequestOptions } from 'node:https'
@@ -62,7 +65,6 @@ export type CompactSocketArtifact = Remap<
     | 'dependencies'
     | 'dev'
     | 'direct'
-    | 'inputPurl'
     | 'manifestFiles'
     | 'score'
     | 'size'
@@ -98,6 +100,7 @@ export type RequestOptions = (
   | (HttpRequestOptions & { headers?: HeadersRecord | undefined })
   | (ClientSessionRequestOptions & { headers?: HeadersRecord | undefined })
 ) & {
+  signal?: AbortSignal | undefined
   timeout?: number | undefined
 }
 
@@ -215,7 +218,7 @@ export type MalwareCheckPackage = {
   version?: string | undefined
 }
 
-export type MalwareCheckResult = MalwareCheckPackage[]
+export type MalwareCheckResult = MalwareCheckEntry[]
 
 export type MalwareCheckScore = {
   license: number
@@ -280,6 +283,18 @@ export type FileValidationCallback = (
  * Configuration options for SocketSdk.
  */
 export interface SocketSdkOptions {
+  /**
+   * Authentication scheme for API tokens or OAuth access tokens.
+   */
+  authScheme?: 'basic' | 'bearer' | undefined
+  /**
+   * Explicit v1 base URL for custom API deployments.
+   */
+  apiV1BaseUrl?: string | undefined
+  /**
+   * Cancel requests and retry waits.
+   */
+  signal?: AbortSignal | undefined
   /**
    * Base URL for Socket API (default: 'https://api.socket.dev/v0/')
    */
@@ -391,17 +406,9 @@ export type UploadManifestFilesError = {
 }
 
 // Derived types that depend on SocketSdkOperations
-export type BatchPackageFetchResultType = SocketSdkResult<'batchPackageFetch'>
+export type BatchPackageFetchResultType = PurlFetchResult
 
-export type BatchPackageStreamOptions = {
-  /**
-   * Components per request. Defaults to 1024 (the API's per-request max);
-   * quota is charged per request, so the default is also the cheapest.
-   */
-  chunkSize?: number | undefined
-  concurrencyLimit?: number | undefined
-  queryParams?: QueryParams | undefined
-}
+export type BatchPackageStreamOptions = PurlStreamOptions
 
 export type CreateDependenciesSnapshotOptions = {
   pathsRelativeTo?: string | undefined

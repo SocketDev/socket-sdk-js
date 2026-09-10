@@ -32,7 +32,14 @@ export interface paths {
      *   `purlError` stream shape instead of emitting synthetic `notFound`
      *   artifacts. Use `poll=false` (default) to fail open and return the
      *   current known state quickly. Use `poll=true` to fail closed and wait up
-     *   to `timeoutSec` for pending analysis before returning.
+     *   to `timeoutSec` for pending analysis before returning. **Conda
+     *   (temporary compatibility):** `pkg:conda` inputs are served from the
+     *   already-scanned PyPI package with the same normalized name and version
+     *   when one exists; the response row keeps the original conda PURL in
+     *   `inputPurl` but reports `type: pypi`. Conda `build`, `subdir`, `type`,
+     *   and `channel` qualifiers are ignored, and conda packages without a
+     *   scanned PyPI counterpart return the normal `notFound` result. This
+     *   mapping will be replaced by native conda support.
      *
      * ## Examples:
      *
@@ -106,7 +113,8 @@ export interface paths {
      * Search for any dependency that is being used in your organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - No Scopes Required, but authentication is required.
+     *
+     * - No Scopes Required, but authentication is required
      */
     post: operations['searchDependencies']
   }
@@ -134,7 +142,9 @@ export interface paths {
      *
      * Returns a paginated list of all full scans in an org, excluding SBOM
      * artifacts. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes: - full-scans:list.
+     * requires the following org token scopes:
+     *
+     * - Full-scans:list
      */
     get: operations['getOrgFullScanList']
     /**
@@ -163,7 +173,9 @@ export interface paths {
      * latest, available alert data for artifacts in the full scan (stale while
      * revalidate). Actively running analysis will be returned when available on
      * subsequent runs. This endpoint consumes 1 unit of your quota. This
-     * endpoint requires the following org token scopes: - full-scans:list.
+     * endpoint requires the following org token scopes:
+     *
+     * - Full-scans:list
      */
     get: operations['getOrgFullScan']
     /**
@@ -172,7 +184,8 @@ export interface paths {
      * Delete an existing full scan.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - full-scans:delete.
+     *
+     * - Full-scans:delete
      */
     delete: operations['deleteOrgFullScan']
   }
@@ -183,7 +196,8 @@ export interface paths {
      * Get metadata for a single full scan
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - full-scans:list.
+     *
+     * - Full-scans:list
      */
     get: operations['getOrgFullScanMetadata']
   }
@@ -191,9 +205,10 @@ export interface paths {
     /**
      * Diff Full Scans.
      *
-     * _This endpoint is deprecated._* Get the difference between two existing
-     * Full Scans. The results are not persisted. This endpoint consumes 1 unit
-     * of your quota. This endpoint requires the following org token scopes:
+     * _This endpoint is deprecated._* Get the immutable difference between two
+     * existing Full Scans. The result uses the policies active when it was
+     * computed and may be cached for reuse. This endpoint consumes 1 unit of
+     * your quota. This endpoint requires the following org token scopes:
      *
      * - Full-scans:list
      *
@@ -223,7 +238,8 @@ export interface paths {
      * Download all files associated with a full scan in tar format.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - full-scans:list.
+     *
+     * - Full-scans:list
      */
     get: operations['downloadOrgFullScanFilesAsTar']
   }
@@ -254,8 +270,9 @@ export interface paths {
      * reapplies the latest policies to the previously cached dependency
      * resolution results. A "deep" rescan reruns dependency resolution and
      * applies the latest policies to the results. This endpoint consumes 1 unit
-     * of your quota. This endpoint requires the following org token scopes: -
-     * full-scans:create.
+     * of your quota. This endpoint requires the following org token scopes:
+     *
+     * - Full-scans:create
      */
     post: operations['rescanOrgFullScan']
   }
@@ -266,13 +283,19 @@ export interface paths {
      * Export a CSV file containing all alerts from a full scan. The CSV
      * includes details about each alert and the affected packages. You can
      * optionally filter using the request body "filters" array. Supported
-     * filter IDs include: - alert.action (error|warn|monitor|ignore) -
-     * alert.type - alert.category - alert.severity
-     * (low|medium|middle|high|critical or 0-3) - artifact.type (purl type, e.g.
-     * npm, pypi) - dependency.type (direct|transitive) - dependency.scope
-     * (dev|normal) - dependency.usage (used|unused) - manifest.file This
-     * endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes: - full-scans:list.
+     * filter IDs include:
+     *
+     * - Alert.action (error|warn|monitor|ignore)
+     * - Alert.type
+     * - Alert.category
+     * - Alert.severity (low|medium|middle|high|critical or 0-3)
+     * - Artifact.type (purl type, e.g. npm, pypi)
+     * - Dependency.type (direct|transitive)
+     * - Dependency.scope (dev|normal)
+     * - Dependency.usage (used|unused)
+     * - Manifest.file This endpoint consumes 1 unit of your quota. This endpoint
+     *   requires the following org token scopes:
+     * - Full-scans:list
      */
     post: operations['getOrgFullScanCsv']
   }
@@ -283,13 +306,19 @@ export interface paths {
      * Generate a PDF report for all alerts in a full scan. This endpoint
      * streams a PDF document containing all alerts found in the full scan, with
      * optional filtering and grouping options. Supported request body filter
-     * IDs include: - alert.action (error|warn|monitor|ignore) - alert.type -
-     * alert.category - alert.severity (low|medium|middle|high|critical or 0-3)
-     * - artifact.type (purl type, e.g. npm, pypi) - dependency.type
-     * (direct|transitive) - dependency.scope (dev|normal) - dependency.usage
-     * (used|unused) - manifest.file This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes: -
-     * full-scans:list.
+     * IDs include:
+     *
+     * - Alert.action (error|warn|monitor|ignore)
+     * - Alert.type
+     * - Alert.category
+     * - Alert.severity (low|medium|middle|high|critical or 0-3)
+     * - Artifact.type (purl type, e.g. npm, pypi)
+     * - Dependency.type (direct|transitive)
+     * - Dependency.scope (dev|normal)
+     * - Dependency.usage (used|unused)
+     * - Manifest.file This endpoint consumes 1 unit of your quota. This endpoint
+     *   requires the following org token scopes:
+     * - Full-scans:list
      */
     post: operations['getOrgFullScanPdf']
   }
@@ -299,19 +328,19 @@ export interface paths {
      *
      * Export a Socket SBOM as a CycloneDX SBOM
      * Supported ecosystems:
-     * - crates
-     * - go
-     * - maven
-     * - npm
-     * - nuget
-     * - pypi
-     * - rubygems
-     * - spdx
-     * - cdx
-     * Unsupported ecosystems are filtered from the export.
-     * This endpoint consumes 1 unit of your quota.
-     * This endpoint requires the following org token scopes:
-     * - report:read.
+     *
+     * - Crates
+     * - Go
+     * - Maven
+     * - Npm
+     * - Nuget
+     * - Pypi
+     * - Rubygems
+     * - Spdx
+     * - Cdx Unsupported ecosystems are filtered from the export. This endpoint
+     *   consumes 1 unit of your quota. This endpoint requires the following org
+     *   token scopes:
+     * - Report:read
      */
     get: operations['exportCDX']
   }
@@ -344,19 +373,19 @@ export interface paths {
      *
      * Export a Socket SBOM as a SPDX SBOM
      * Supported ecosystems:
-     * - crates
-     * - go
-     * - maven
-     * - npm
-     * - nuget
-     * - pypi
-     * - rubygems
-     * - spdx
-     * - cdx
-     * Unsupported ecosystems are filtered from the export.
-     * This endpoint consumes 1 unit of your quota.
-     * This endpoint requires the following org token scopes:
-     * - report:read.
+     *
+     * - Crates
+     * - Go
+     * - Maven
+     * - Npm
+     * - Nuget
+     * - Pypi
+     * - Rubygems
+     * - Spdx
+     * - Cdx Unsupported ecosystems are filtered from the export. This endpoint
+     *   consumes 1 unit of your quota. This endpoint requires the following org
+     *   token scopes:
+     * - Report:read
      */
     get: operations['exportSPDX']
   }
@@ -367,7 +396,8 @@ export interface paths {
      * Returns a paginated list of all diff scans in an organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - diff-scans:list.
+     *
+     * - Diff-scans:list
      */
     get: operations['listOrgDiffScans']
   }
@@ -377,7 +407,9 @@ export interface paths {
      *
      * Get the difference between two full scans from an existing diff scan
      * resource. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes: - diff-scans:list.
+     * requires the following org token scopes:
+     *
+     * - Diff-scans:list
      */
     get: operations['getDiffScanById']
     /**
@@ -386,7 +418,8 @@ export interface paths {
      * Delete an existing diff scan.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - diff-scans:delete.
+     *
+     * - Diff-scans:delete
      */
     delete: operations['deleteOrgDiffScan']
   }
@@ -397,7 +430,9 @@ export interface paths {
      * Get the dependency overview and dependency alert comments in GitHub
      * flavored markdown for an existing diff scan. This endpoint consumes 1
      * unit of your quota. This endpoint requires the following org token
-     * scopes: - diff-scans:list.
+     * scopes:
+     *
+     * - Diff-scans:list
      */
     get: operations['GetDiffScanGfm']
   }
@@ -454,7 +489,9 @@ export interface paths {
      * `uuid` to update it. Use `?force=true` for broad triages that lack a
      * specific `alertKey` or granular package information. This endpoint
      * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes: - triage:alerts-update.
+     * token scopes:
+     *
+     * - Triage:alerts-update
      */
     post: operations['updateOrgAlertTriage']
   }
@@ -465,7 +502,8 @@ export interface paths {
      * Delete a specific triage rule by UUID.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - triage:alerts-update.
+     *
+     * - Triage:alerts-update
      */
     delete: operations['deleteOrgAlertTriage']
   }
@@ -476,32 +514,221 @@ export interface paths {
      * List active alert resolutions for an organization. Results are paginated
      * via an opaque cursor and ordered by created_at. Each row includes the
      * anchor fields (alert_type, repo, repo_label, artifact_*) that describe
-     * the resolution scope. This endpoint consumes 1 unit of your quota. This
-     * endpoint requires the following org token scopes:
+     * the resolution scope. Tokens restricted to specific repositories only see
+     * org-wide resolutions and resolutions anchored to their granted
+     * repositories. This endpoint consumes 1 unit of your quota. This endpoint
+     * requires the following org token scopes:
      *
      * - Alert-resolution:list
      */
     get: operations['getOrgAlertResolutions']
+    /**
+     * Create Org Alert Resolution.
+     *
+     * Create an alert resolution. The `vigil_selector` describes which alerts
+     * the resolution applies to; matching alerts are hidden after the next org
+     * snapshot. Returns the same row shape as the list endpoint. Tokens
+     * restricted to specific repositories may only create resolutions anchored
+     * to a single granted repository via `location.repo`; org-wide or
+     * multi-repository selectors require an org-wide token. This endpoint
+     * consumes 1 unit of your quota. This endpoint requires the following org
+     * token scopes:
+     *
+     * - Alert-resolution:create
+     */
+    post: operations['createOrgAlertResolution']
   }
   '/orgs/{org_slug}/alerts/resolutions/{uuid}': {
     /**
      * Get Org Alert Resolution.
      *
      * Fetch a single active alert resolution by UUID. Returns the same row
-     * shape as the list endpoint. This endpoint consumes 1 unit of your quota.
-     * This endpoint requires the following org token scopes: -
-     * alert-resolution:read.
+     * shape as the list endpoint. Tokens restricted to specific repositories
+     * cannot read resolutions anchored to repositories outside their grants.
+     * This endpoint consumes 1 unit of your quota. This endpoint requires the
+     * following org token scopes:
+     *
+     * - Alert-resolution:read
      */
     get: operations['getOrgAlertResolution']
     /**
      * Delete Org Alert Resolution.
      *
      * Delete an alert resolution by UUID. Once deleted, alerts previously
-     * hidden by this resolution will reappear after the next org snapshot. This
-     * endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes: - alert-resolution:delete.
+     * hidden by this resolution will reappear after the next org snapshot.
+     * Tokens restricted to specific repositories may only delete resolutions
+     * anchored to a granted repository. This endpoint consumes 1 unit of your
+     * quota. This endpoint requires the following org token scopes:
+     *
+     * - Alert-resolution:delete
      */
     delete: operations['deleteOrgAlertResolution']
+  }
+  '/orgs/{org_slug}/alert-policies': {
+    /**
+     * List Org Alert Policies.
+     *
+     * List the alert policies of an organization. The default policy (which
+     * applies to all repositories without a policy label) is always first,
+     * followed by custom policies ordered by creation time. Requires a token
+     * with org-wide repository access; repo-restricted tokens receive 403. This
+     * endpoint consumes 1 unit of your quota. This endpoint requires the
+     * following org token scopes:
+     *
+     * - Alert-policy:list
+     */
+    get: operations['getOrgAlertPolicies']
+    /**
+     * Create Org Alert Policy.
+     *
+     * Create an alert policy. A repo label with the same name is created to
+     * scope the policy; repositories carrying that label are governed by the
+     * policy. Requires a token with org-wide repository access; repo-restricted
+     * tokens receive 403. This endpoint consumes 1 unit of your quota. This
+     * endpoint requires the following org token scopes:
+     *
+     * - Alert-policy:create
+     */
+    post: operations['createOrgAlertPolicy']
+  }
+  '/orgs/{org_slug}/alert-policies/{policy_id}': {
+    /**
+     * Get Org Alert Policy.
+     *
+     * Fetch a single alert policy by ID. Use `default` as the ID for the
+     * default policy, which applies to all repositories without a policy label.
+     * Requires a token with org-wide repository access; repo-restricted tokens
+     * receive 403. This endpoint consumes 1 unit of your quota. This endpoint
+     * requires the following org token scopes:
+     *
+     * - Alert-policy:read
+     */
+    get: operations['getOrgAlertPolicy']
+    /**
+     * Update Org Alert Policy.
+     *
+     * Update an alert policy. Only the provided fields change; `repository_ids`
+     * replaces the full set of repositories the policy scopes to. The default
+     * policy cannot be renamed and its scope is implicit. Requires a token with
+     * org-wide repository access; repo-restricted tokens receive 403. This
+     * endpoint consumes 1 unit of your quota. This endpoint requires the
+     * following org token scopes:
+     *
+     * - Alert-policy:update
+     */
+    put: operations['updateOrgAlertPolicy']
+    /**
+     * Delete Org Alert Policy.
+     *
+     * Delete an alert policy along with its rules and repo label. Repositories
+     * previously scoped to the policy fall back to the default policy after the
+     * next org snapshot. The default policy cannot be deleted. Requires a token
+     * with org-wide repository access; repo-restricted tokens receive 403. This
+     * endpoint consumes 1 unit of your quota. This endpoint requires the
+     * following org token scopes:
+     *
+     * - Alert-policy:delete
+     */
+    delete: operations['deleteOrgAlertPolicy']
+  }
+  '/orgs/{org_slug}/alert-policies/{policy_id}/rules': {
+    /**
+     * List Org Alert Policy Rules.
+     *
+     * List the custom rules of an alert policy in evaluation order (ascending
+     * rank). Rules are evaluated before the policy baseline; the first matching
+     * rule decides the alert action. Requires a token with org-wide repository
+     * access; repo-restricted tokens receive 403. This endpoint consumes 1 unit
+     * of your quota. This endpoint requires the following org token scopes:
+     *
+     * - Alert-policy:list
+     */
+    get: operations['getOrgAlertPolicyRules']
+    /**
+     * Create Org Alert Policy Rule.
+     *
+     * Create a rule on an alert policy. Rules are evaluated in ascending rank
+     * order and the first matching rule decides the alert action. Provide at
+     * most one of `position`, `rank`, `before_rule_id`, or `after_rule_id`; the
+     * rule is placed first when no position is provided. Requires a token with
+     * org-wide repository access; repo-restricted tokens receive 403. This
+     * endpoint consumes 1 unit of your quota. This endpoint requires the
+     * following org token scopes:
+     *
+     * - Alert-policy:create
+     */
+    post: operations['createOrgAlertPolicyRule']
+  }
+  '/orgs/{org_slug}/alert-policies/{policy_id}/rules/{rule_id}': {
+    /**
+     * Get Org Alert Policy Rule.
+     *
+     * Fetch a single alert policy rule by UUID. Returns the same row shape as
+     * the rules list endpoint. Requires a token with org-wide repository
+     * access; repo-restricted tokens receive 403. This endpoint consumes 1 unit
+     * of your quota. This endpoint requires the following org token scopes:
+     *
+     * - Alert-policy:read
+     */
+    get: operations['getOrgAlertPolicyRule']
+    /**
+     * Update Org Alert Policy Rule.
+     *
+     * Update an alert policy rule. Only the provided fields change. To move the
+     * rule, provide at most one of `position`, `rank`, `before_rule_id`, or
+     * `after_rule_id`. Requires a token with org-wide repository access;
+     * repo-restricted tokens receive 403. This endpoint consumes 1 unit of your
+     * quota. This endpoint requires the following org token scopes:
+     *
+     * - Alert-policy:update
+     */
+    put: operations['updateOrgAlertPolicyRule']
+    /**
+     * Delete Org Alert Policy Rule.
+     *
+     * Delete an alert policy rule. Alerts previously matched by this rule are
+     * re-evaluated against the remaining rules and baseline after the next org
+     * snapshot. Requires a token with org-wide repository access;
+     * repo-restricted tokens receive 403. This endpoint consumes 1 unit of your
+     * quota. This endpoint requires the following org token scopes:
+     *
+     * - Alert-policy:delete
+     */
+    delete: operations['deleteOrgAlertPolicyRule']
+  }
+  '/orgs/{org_slug}/alert-policies/migration/status': {
+    /**
+     * Get Org Alert Policy Migration Status.
+     *
+     * Retrieve the alert policy migration status of an organization. This is
+     * read-only and does not enroll organizations or start migration windows.
+     * Requires a token with org-wide repository access; repo-restricted tokens
+     * receive 403. This endpoint consumes 1 unit of your quota. This endpoint
+     * requires the following org token scopes:
+     *
+     * - Alert-policy:list
+     */
+    get: operations['getOrgAlertPolicyMigrationStatus']
+  }
+  '/orgs/{org_slug}/alert-policies/migration/translate': {
+    /**
+     * Translate Org Alert Triage.
+     *
+     * Translate a legacy alert triage payload — the same body as `POST
+     * /v0/orgs/{org_slug}/triage/alerts` — into the resolution or policy-rule
+     * requests that replace it. Nothing is created. Policy-rule translations
+     * target the default (Main) policy, which covers repositories without a
+     * policy label; labeled policies do not inherit those rules, so POST the
+     * same body to `/alert-policies/{id}/rules` if the rule should apply there.
+     * Entries that cannot be translated are returned in `untranslatable`; the
+     * rest are in `translations`. Requires one of: `triage:alerts-update`,
+     * `alert-policy:read`, or `alert-resolution:create`. This endpoint consumes
+     * 1 unit of your quota. This endpoint requires the following org token
+     * scopes:
+     *
+     * - No Scopes Required, but authentication is required
+     */
+    post: operations['translateOrgAlertPolicyMigrationTriage']
   }
   '/orgs/{org_slug}/repos': {
     /**
@@ -510,7 +737,8 @@ export interface paths {
      * Lists repositories for the specified organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - repo:list.
+     *
+     * - Repo:list
      */
     get: operations['getOrgRepoList']
     /**
@@ -518,8 +746,9 @@ export interface paths {
      *
      * Create a repository. Repos collect Full scans and Diff scans and are
      * typically associated with a git repo. This endpoint consumes 1 unit of
-     * your quota. This endpoint requires the following org token scopes: -
-     * repo:create.
+     * your quota. This endpoint requires the following org token scopes:
+     *
+     * - Repo:create
      */
     post: operations['createOrgRepo']
   }
@@ -530,7 +759,8 @@ export interface paths {
      * Retrieve a repository associated with an organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - repo:list.
+     *
+     * - Repo:list
      */
     get: operations['getOrgRepo']
     /**
@@ -539,7 +769,8 @@ export interface paths {
      * Update details of an existing repository.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - repo:update.
+     *
+     * - Repo:update
      */
     post: operations['updateOrgRepo']
     /**
@@ -547,7 +778,9 @@ export interface paths {
      *
      * Delete a single repository and all of its associated Full scans and Diff
      * scans. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes: - repo:delete.
+     * requires the following org token scopes:
+     *
+     * - Repo:delete
      */
     delete: operations['deleteOrgRepo']
   }
@@ -558,7 +791,9 @@ export interface paths {
      * Associate a repository label with a repository. Labels can be used to
      * group and organize repositories and to apply security/license policies.
      * This endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes: - repo-label:update.
+     * following org token scopes:
+     *
+     * - Repo-label:update
      */
     post: operations['associateOrgRepoLabel']
   }
@@ -569,7 +804,8 @@ export interface paths {
      * Lists repository labels for the specified organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - repo-label:list.
+     *
+     * - Repo-label:list
      */
     get: operations['getOrgRepoLabelList']
     /**
@@ -578,7 +814,9 @@ export interface paths {
      * Create a repository label. Labels can be used to group and organize
      * repositories and to apply security/license policies. This endpoint
      * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes: - repo-label:create.
+     * token scopes:
+     *
+     * - Repo-label:create
      */
     post: operations['createOrgRepoLabel']
   }
@@ -589,7 +827,8 @@ export interface paths {
      * Retrieve a repository label associated with an organization and label ID.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - repo-label:list.
+     *
+     * - Repo-label:list
      */
     get: operations['getOrgRepoLabel']
     /**
@@ -598,7 +837,9 @@ export interface paths {
      * Update a repository label name. Labels can be used to group and organize
      * repositories and to apply security/license policies. This endpoint
      * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes: - repo-label:update.
+     * token scopes:
+     *
+     * - Repo-label:update
      */
     put: operations['updateOrgRepoLabel']
     /**
@@ -606,8 +847,9 @@ export interface paths {
      *
      * Delete a repository label and all of its associations (repositories,
      * security policy, license policy, etc.). This endpoint consumes 1 unit of
-     * your quota. This endpoint requires the following org token scopes: -
-     * repo-label:delete.
+     * your quota. This endpoint requires the following org token scopes:
+     *
+     * - Repo-label:delete
      */
     delete: operations['deleteOrgRepoLabel']
   }
@@ -622,7 +864,9 @@ export interface paths {
      * given repository label if the `issueRulesPolicyDefault` is set, and
      * inactive when not set. `issueRules` can be used to further refine the
      * alert triage strategy. This endpoint consumes 1 unit of your quota. This
-     * endpoint requires the following org token scopes: - repo-label:list.
+     * endpoint requires the following org token scopes:
+     *
+     * - Repo-label:list
      */
     get: operations['getOrgRepoLabelSetting']
     /**
@@ -637,7 +881,8 @@ export interface paths {
      * refine the alert triage strategy.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - repo-label:update.
+     *
+     * - Repo-label:update
      */
     put: operations['updateOrgRepoLabelSetting']
     /**
@@ -652,7 +897,8 @@ export interface paths {
      * refine the alert triage strategy.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - repo-label:update.
+     *
+     * - Repo-label:update
      */
     delete: operations['deleteOrgRepoLabelSetting']
   }
@@ -663,7 +909,9 @@ export interface paths {
      * Disassociate a repository label from a repository. Labels can be used to
      * group and organize repositories and to apply security/license policies.
      * This endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes: - repo-label:update.
+     * following org token scopes:
+     *
+     * - Repo-label:update
      */
     post: operations['disassociateOrgRepoLabel']
   }
@@ -673,7 +921,8 @@ export interface paths {
      *
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - integration:list.
+     *
+     * - Integration:list
      */
     get: operations['getIntegrationEvents']
   }
@@ -684,7 +933,8 @@ export interface paths {
      * Retrieve the security policy of an organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - security-policy:read.
+     *
+     * - Security-policy:read
      */
     get: operations['getOrgSecurityPolicy']
     /**
@@ -693,7 +943,8 @@ export interface paths {
      * Update the security policy of an organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - security-policy:update.
+     *
+     * - Security-policy:update
      */
     post: operations['updateOrgSecurityPolicy']
   }
@@ -796,7 +1047,9 @@ export interface paths {
      * and deny categories. The deny category contains all licenses that are not
      * explicitly categorized as allow, warn, or monitor. This endpoint consumes
      * 1 unit of your quota. This endpoint requires the following org token
-     * scopes: - license-policy:read.
+     * scopes:
+     *
+     * - License-policy:read
      */
     get: operations['viewLicensePolicy']
   }
@@ -829,7 +1082,9 @@ export interface paths {
      * returned while more results still remain on later pages, so `endCursor`
      * being `null` is the only reliable end-of-results signal. This endpoint
      * consumes 10 units of your quota. This endpoint requires the following org
-     * token scopes: - historical:alerts-list.
+     * token scopes:
+     *
+     * - Historical:alerts-list
      */
     get: operations['historicalAlertsList']
   }
@@ -840,7 +1095,8 @@ export interface paths {
      * Trend analytics of historical alerts.
      * This endpoint consumes 10 units of your quota.
      * This endpoint requires the following org token scopes:
-     * - historical:alerts-trend.
+     *
+     * - Historical:alerts-trend
      */
     get: operations['historicalAlertsTrend']
   }
@@ -851,7 +1107,8 @@ export interface paths {
      * Trend analytics of historical dependencies.
      * This endpoint consumes 10 units of your quota.
      * This endpoint requires the following org token scopes:
-     * - historical:dependencies-trend.
+     *
+     * - Historical:dependencies-trend
      */
     get: operations['historicalDependenciesTrend']
   }
@@ -911,7 +1168,8 @@ export interface paths {
      * Paginated list of audit log events.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - audit-log:list.
+     *
+     * - Audit-log:list
      */
     get: operations['getAuditLogEvents']
   }
@@ -922,7 +1180,8 @@ export interface paths {
      * List all API Tokens.
      * This endpoint consumes 10 units of your quota.
      * This endpoint requires the following org token scopes:
-     * - api-tokens:list.
+     *
+     * - Api-tokens:list
      */
     get: operations['getAPITokens']
     /**
@@ -930,8 +1189,9 @@ export interface paths {
      *
      * Create an API Token. The API Token created must use a subset of
      * permissions the API token creating them. This endpoint consumes 10 units
-     * of your quota. This endpoint requires the following org token scopes: -
-     * api-tokens:create.
+     * of your quota. This endpoint requires the following org token scopes:
+     *
+     * - Api-tokens:create
      */
     post: operations['postAPIToken']
   }
@@ -941,8 +1201,9 @@ export interface paths {
      *
      * Update an API Token. The API Token created must use a subset of
      * permissions the API token creating them. This endpoint consumes 10 units
-     * of your quota. This endpoint requires the following org token scopes: -
-     * api-tokens:create.
+     * of your quota. This endpoint requires the following org token scopes:
+     *
+     * - Api-tokens:create
      */
     post: operations['postAPITokenUpdate']
   }
@@ -953,7 +1214,8 @@ export interface paths {
      * Rotate an API Token
      * This endpoint consumes 10 units of your quota.
      * This endpoint requires the following org token scopes:
-     * - api-tokens:rotate.
+     *
+     * - Api-tokens:rotate
      */
     post: operations['postAPITokensRotate']
   }
@@ -964,7 +1226,8 @@ export interface paths {
      * Revoke an API Token
      * This endpoint consumes 10 units of your quota.
      * This endpoint requires the following org token scopes:
-     * - api-tokens:revoke.
+     *
+     * - Api-tokens:revoke
      */
     post: operations['postAPITokensRevoke']
   }
@@ -978,7 +1241,9 @@ export interface paths {
      * for report generation. Examples of supported filenames include
      * `package.json`, `package-lock.json`, and `yarn.lock`. This endpoint
      * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes: - No Scopes Required, but authentication is required.
+     * token scopes:
+     *
+     * - No Scopes Required, but authentication is required
      */
     get: operations['getSupportedFiles']
   }
@@ -1043,7 +1308,14 @@ export interface paths {
      *   `purlError` stream shape instead of emitting synthetic `notFound`
      *   artifacts. Use `poll=false` (default) to fail open and return the
      *   current known state quickly. Use `poll=true` to fail closed and wait up
-     *   to `timeoutSec` for pending analysis before returning.
+     *   to `timeoutSec` for pending analysis before returning. **Conda
+     *   (temporary compatibility):** `pkg:conda` inputs are served from the
+     *   already-scanned PyPI package with the same normalized name and version
+     *   when one exists; the response row keeps the original conda PURL in
+     *   `inputPurl` but reports `type: pypi`. Conda `build`, `subdir`, `type`,
+     *   and `channel` qualifiers are ignored, and conda packages without a
+     *   scanned PyPI counterpart return the normal `notFound` result. This
+     *   mapping will be replaced by native conda support.
      *
      * ## Query Parameters
      *
@@ -1181,8 +1453,22 @@ export interface paths {
      *   upgraded. May contain multiple distinct entries when different
      *   dependency chains are blocked for different causes (e.g. one chain has
      *   no compatible upstream version; another would require a major version
-     *   bump skipped by `--no-major-updates`). **noFixAvailable**: No fix
-     *   exists for this vulnerability (no patched version published)
+     *   bump skipped by `--no-major-updates`).
+     * - `dependencyChain`: (optional) Installed PURLs along the dependency chain
+     *   where the fix search was blocked, from the blocking package down to
+     *   this package. Present only when a chain was recorded; the first
+     *   `reasons` entry describes this chain.
+     * - `withheldFix`: (optional) Present when a fix exists but this request's
+     *   policy withheld it: `{ purl, version, reason }` where `purl` is the
+     *   package (without version), `version` the lowest safe version the policy
+     *   removed from the fix search, and `reason` one of `majorUpdate` (a major
+     *   update while `allow_major_updates=false`), `releaseAge` (younger than
+     *   `minimum_release_age`) or `publishDateUnknown` (publish date
+     *   unavailable, so `minimum_release_age` cannot be verified). Lifting the
+     *   policy is not guaranteed to make the fix applicable — other version
+     *   constraints in the dependency tree may still block this version.
+     *   **noFixAvailable**: No fix exists for this vulnerability (no patched
+     *   version published)
      * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
      *   manifest files; each carries a static `reasons` entry stating that no
      *   patched version has been published **fixNotApplicable**: A patched
@@ -1195,8 +1481,14 @@ export interface paths {
      *   when the only patched version is a major bump.
      * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
      *   manifest files, each with per-artifact `reasons` explaining why the fix
-     *   could not be applied (omitted when no explanation is available)
-     *   **errorComputingFix**: An error occurred while computing fixes
+     *   could not be applied (always at least one entry; a static fallback when
+     *   the fix search reported no per-package cause) and an optional
+     *   `dependencyChain` — installed PURLs from the package that blocked the
+     *   upgrade down to the vulnerable package, present when a chain was
+     *   recorded (the first `reasons` entry describes it), and an optional
+     *   `withheldFix` — present when a fix exists but this request's policy
+     *   withheld it (see the partialFixFound field list) **errorComputingFix**:
+     *   An error occurred while computing fixes
      * - `value.message`: Error description
      *
      * ### Fix version alignment
@@ -1263,7 +1555,8 @@ export interface paths {
      * Update the telemetry config of an organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - telemetry-policy:update.
+     *
+     * - Telemetry-policy:update
      */
     put: operations['updateOrgTelemetryConfig']
   }
@@ -1274,7 +1567,8 @@ export interface paths {
      * List all webhooks in the specified organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - webhooks:list.
+     *
+     * - Webhooks:list
      */
     get: operations['getOrgWebhooksList']
     /**
@@ -1283,7 +1577,8 @@ export interface paths {
      * Create a new webhook. Returns the created webhook details.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - webhooks:create.
+     *
+     * - Webhooks:create
      */
     post: operations['createOrgWebhook']
   }
@@ -1294,7 +1589,8 @@ export interface paths {
      * Get a webhook for the specified organization.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - webhooks:list.
+     *
+     * - Webhooks:list
      */
     get: operations['getOrgWebhook']
     /**
@@ -1303,7 +1599,8 @@ export interface paths {
      * Update details of an existing webhook.
      * This endpoint consumes 1 unit of your quota.
      * This endpoint requires the following org token scopes:
-     * - webhooks:update.
+     *
+     * - Webhooks:update
      */
     put: operations['updateOrgWebhook']
     /**
@@ -1311,7 +1608,9 @@ export interface paths {
      *
      * Delete a webhook. This will stop all future webhook deliveries to the
      * webhook URL. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes: - webhooks:delete.
+     * requires the following org token scopes:
+     *
+     * - Webhooks:delete
      */
     delete: operations['deleteOrgWebhook']
   }
@@ -1325,7 +1624,9 @@ export interface paths {
      * returned while more results still remain on later pages, so `endCursor`
      * being `null` is the only reliable end-of-results signal. This endpoint
      * consumes 10 units of your quota. This endpoint requires the following org
-     * token scopes: - alerts:list.
+     * token scopes:
+     *
+     * - Alerts:list
      */
     get: operations['alertsList']
   }
@@ -1336,7 +1637,8 @@ export interface paths {
      * List full scans associated with alert.
      * This endpoint consumes 10 units of your quota.
      * This endpoint requires the following org token scopes:
-     * - alerts:list.
+     *
+     * - Alerts:list
      */
     get: operations['alertFullScans']
   }
@@ -1714,8 +2016,9 @@ export interface paths {
      *
      * Get your current API quota. You can use this endpoint to prevent doing
      * requests that might spend all your quota. This endpoint consumes 0 units
-     * of your quota. This endpoint requires the following org token scopes: -
-     * No Scopes Required, but authentication is required.
+     * of your quota. This endpoint requires the following org token scopes:
+     *
+     * - No Scopes Required, but authentication is required
      */
     get: operations['getQuota']
   }
@@ -1725,8 +2028,9 @@ export interface paths {
      *
      * Get information on the current organizations associated with the API
      * token. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes: - No Scopes Required, but
-     * authentication is required.
+     * requires the following org token scopes:
+     *
+     * - No Scopes Required, but authentication is required
      */
     get: operations['getOrganizations']
   }
@@ -1996,7 +2300,7 @@ export interface components {
           value: components['schemas']['PurlSummarySchema']
         }
     SocketOrgBatchPURLFetch: {
-      components: Array<components['schemas']['SocketBatchPURLRequest']>
+      components: components['schemas']['SocketBatchPURLRequest'][]
     }
     SocketArtifact: components['schemas']['SocketPURL'] &
       components['schemas']['SocketArtifactLink'] & {
@@ -2017,7 +2321,18 @@ export interface components {
          * @default
          */
         repositoryType?: string
-        alerts?: Array<components['schemas']['SocketAlert']>
+        /**
+         * ISO-8601 timestamp of when this package version or artifact was
+         * published, when known. Currently populated for PURL types: actions,
+         * cargo, composer, go, maven, npm, nuget, openvsx, pypi, and rubygems.
+         * Maven and PyPI can use artifact-grain dates when artifact qualifiers
+         * identify a concrete artifact; other listed ecosystems use
+         * package-version dates.
+         *
+         * @default
+         */
+        publishedAt?: string
+        alerts?: components['schemas']['SocketAlert'][]
         score?: components['schemas']['SocketScore']
         patch?: components['schemas']['SocketArtifactPatch']
         /**
@@ -2083,12 +2398,12 @@ export interface components {
       /**
        * Artifact links from the base/before state.
        */
-      base?: Array<components['schemas']['SocketArtifactLink']>
+      base?: components['schemas']['SocketArtifactLink'][]
       capabilities?: components['schemas']['Capabilities']
       /**
        * Artifact links from the head/after state.
        */
-      head?: Array<components['schemas']['SocketArtifactLink']>
+      head?: components['schemas']['SocketArtifactLink'][]
       qualifiers?: components['schemas']['Qualifiers']
       /**
        * Total size of the package artifact in bytes.
@@ -2103,7 +2418,7 @@ export interface components {
       licenseDetails?: components['schemas']['LicenseDetails']
       licenseAttrib?: components['schemas']['SAttrib1_N']
       score?: components['schemas']['SocketScore']
-      alerts?: Array<components['schemas']['SocketAlert']>
+      alerts?: components['schemas']['SocketAlert'][]
     }
     CDXManifestSchema: {
       /**
@@ -2128,38 +2443,36 @@ export interface components {
          */
         timestamp: string
         tools: {
-          components: Array<
-            components['schemas']['CDXComponentSchema'] & {
-              /**
-               * @default Socket
-               */
-              author?: string
-              authors?: string[]
-              /**
-               * @default Socket
-               */
-              publisher?: string
-            }
-          >
+          components: (components['schemas']['CDXComponentSchema'] & {
+            /**
+             * @default Socket
+             */
+            author?: string
+            authors?: string[]
+            /**
+             * @default Socket
+             */
+            publisher?: string
+          })[]
         }
-        authors: Array<{
+        authors: {
           /**
            * @default Socket
            */
           name: string
-        }>
+        }[]
         /**
          * @default
          */
         supplier?: string
-        lifecycles: Array<{
+        lifecycles: {
           /**
            * @default build
            */
           phase: string
-        }>
+        }[]
         component: components['schemas']['CDXComponentSchema']
-        properties?: Array<{
+        properties?: {
           /**
            * @default
            */
@@ -2168,17 +2481,17 @@ export interface components {
            * @default
            */
           value: string
-        }>
+        }[]
       }
-      components: Array<components['schemas']['CDXComponentSchema']>
-      dependencies: Array<{
+      components: components['schemas']['CDXComponentSchema'][]
+      dependencies: {
         /**
          * @default
          */
         ref: string
         dependsOn?: string[]
-      }>
-      vulnerabilities?: Array<{
+      }[]
+      vulnerabilities?: {
         /**
          * @default
          */
@@ -2299,7 +2612,7 @@ export interface components {
            */
           lastUpdated?: string
         }
-      }>
+      }[]
     }
     OpenVEXDocumentSchema: {
       /**
@@ -2322,7 +2635,7 @@ export interface components {
        * @default 1
        */
       version: number
-      statements: Array<components['schemas']['OpenVEXStatementSchema']>
+      statements: components['schemas']['OpenVEXStatementSchema'][]
       /**
        * @default VEX Generator
        */
@@ -2365,7 +2678,7 @@ export interface components {
         creators: string[]
       }
       documentDescribes: string[]
-      packages: Array<{
+      packages: {
         /**
          * @default
          */
@@ -2430,8 +2743,8 @@ export interface components {
            */
           checksumValue: string
         }[]
-      }>
-      relationships: Array<{
+      }[]
+      relationships: {
         /**
          * @default SPDXRef-DOCUMENT
          */
@@ -2444,12 +2757,12 @@ export interface components {
          * @default DESCRIBES
          */
         relationshipType: string
-      }>
+      }[]
     }
     /**
      * @default null
      */
-    LicenseAllowListRequest: Record<string, never>
+    LicenseAllowListRequest: Record<string, unknown>
     SStoredLicensePolicy: {
       allow: string[] | null
       warn: string[] | null
@@ -2539,8 +2852,7 @@ export interface components {
        */
       supplyChain: number
       /**
-       * Score from 0.0 to 1.0 based on known vulnerabilities and their
-       * severity.
+       * Score from 0.0 to 1.0 based on known vulnerabilities and their severity.
        *
        * @default 0
        */
@@ -2581,11 +2893,11 @@ export interface components {
     /**
      * @default null
      */
-    SLicenseMetaRes: Record<string, never>
+    SLicenseMetaRes: Record<string, unknown>
     /**
      * @default null
      */
-    SLicenseMetaReq: Record<string, never>
+    SLicenseMetaReq: Record<string, unknown>
     SocketReport: {
       /**
        * @default
@@ -2623,7 +2935,7 @@ export interface components {
        */
       url: string
     }
-    SocketIssueList: Array<components['schemas']['SocketIssue']>
+    SocketIssueList: components['schemas']['SocketIssue'][]
     SocketPackageScore: {
       supplyChainRisk: components['schemas']['SocketMetricSchema']
       quality: components['schemas']['SocketMetricSchema']
@@ -2645,6 +2957,12 @@ export interface components {
        * @default
        */
       inputPurl: string
+      /**
+       * True when the error is transient (timeout or shed resolution) and a
+       * retry can succeed. Absent or false means the error is an authoritative
+       * verdict for this input.
+       */
+      retryable?: boolean
     }
     PurlSummarySchema: {
       /**
@@ -2754,7 +3072,7 @@ export interface components {
        *
        * @default null
        */
-      props?: Record<string, never>
+      props?: Record<string, unknown>
       /**
        * Action to take for this alert (e.g., error, warn, ignore)
        *
@@ -2768,7 +3086,7 @@ export interface components {
          * @default
          */
         type: string
-        candidates: Array<{
+        candidates: {
           /**
            * Type of action candidate.
            *
@@ -2793,8 +3111,54 @@ export interface components {
            * @default
            */
           repoLabelId: string
-        }>
+          /**
+           * ID of the alert policy whose rule matched. Absent when not
+           * applicable (alert-policy candidates only)
+           *
+           * @default
+           */
+          policyId?: string
+          /**
+           * Display name of the matched alert policy at evaluation time; null
+           * for the default policy. Absent when not applicable (alert-policy
+           * candidates only)
+           *
+           * @default
+           */
+          policyName?: string | null
+          /**
+           * ID of the matched alert policy rule: the rule uuid for custom
+           * rules, the issue name for baseline rules. Absent when not
+           * applicable (alert-policy candidates only)
+           *
+           * @default
+           */
+          ruleId?: string
+          /**
+           * Name of the matched alert policy rule at evaluation time. Absent
+           * when not applicable (alert-policy candidates only)
+           *
+           * @default
+           */
+          ruleName?: string
+          /**
+           * 0-based position of the matched rule in first-match-wins
+           * evaluation order. Absent when not applicable (alert-policy
+           * candidates only)
+           *
+           * @default 0
+           */
+          ruleIndex?: number
+          /**
+           * Whether the matched alert policy rule is a baseline rule. Absent
+           * when not applicable (alert-policy candidates only)
+           *
+           * @default false
+           */
+          isBaseline?: boolean
+        }[]
       }
+      alertPolicyRule?: components['schemas']['SocketAlertPolicyRule']
       /**
        * Index of the policy rule that triggered this action, for traceability
        * to security policies.
@@ -2818,7 +3182,7 @@ export interface components {
         /**
          * Patches available to fix this specific alert.
          */
-        patch?: Array<{
+        patch?: {
           /**
            * Unique identifier for this patch.
            *
@@ -2839,7 +3203,7 @@ export interface components {
            * @default false
            */
           deprecated?: boolean
-        }>
+        }[]
       }
       patch?: components['schemas']['SocketPatch']
       reachability?: {
@@ -2858,9 +3222,9 @@ export interface components {
       /**
        * List of available patches that can be applied to fix vulnerabilities.
        */
-      availablePatches?: Array<components['schemas']['SocketPatch']>
+      availablePatches?: components['schemas']['SocketPatch'][]
     }
-    LicenseDetails: Array<{
+    LicenseDetails: {
       /**
        * SPDX license expression in disjunctive normal form (e.g., '(MIT OR
        * Apache-2.0)')
@@ -2898,8 +3262,8 @@ export interface components {
        * @default 0
        */
       match_strength: number
-    }>
-    SAttrib1_N: Array<{
+    }[]
+    SAttrib1_N: {
       /**
        * Full text of the license attribution or copyright notice found in the
        * package.
@@ -2931,7 +3295,7 @@ export interface components {
          */
         foundAuthors: string[]
       }[]
-    }>
+    }[]
     SocketArtifactLink: {
       /**
        * Indicates if this is a direct dependency (not transitive)
@@ -2953,16 +3317,16 @@ export interface components {
        * @default false
        */
       dead?: boolean
-      manifestFiles?: Array<components['schemas']['SocketManifestReference']>
+      manifestFiles?: components['schemas']['SocketManifestReference'][]
       /**
        * IDs of the root-level packages in the dependency tree that depend on
        * this package.
        */
-      topLevelAncestors?: Array<components['schemas']['SocketId']>
+      topLevelAncestors?: components['schemas']['SocketId'][]
       /**
        * IDs of packages that this package directly depends on.
        */
-      dependencies?: Array<components['schemas']['SocketId']>
+      dependencies?: components['schemas']['SocketId'][]
       /**
        * Computed priority scores for each alert type based on severity,
        * reachability, and fixability factors.
@@ -3052,12 +3416,12 @@ export interface components {
        * analysis for the corresponding vulnerability alert.
        */
       alertKeysToReachabilitySummaries?: {
-        [key: string]: Array<{
+        [key: string]: {
           /**
            * @default
            */
           type: string
-        }>
+        }[]
       }
     }
     /**
@@ -3102,7 +3466,7 @@ export interface components {
        * @default
        */
       scope?: string
-      hashes?: Array<{
+      hashes?: {
         /**
          * @default
          */
@@ -3111,8 +3475,8 @@ export interface components {
          * @default
          */
         content: string
-      }>
-      licenses?: Array<{
+      }[]
+      licenses?: {
         /**
          * @default
          */
@@ -3131,12 +3495,12 @@ export interface components {
            */
           url?: string
         }
-      }>
+      }[]
       /**
        * @default
        */
       purl: string
-      externalReferences?: Array<{
+      externalReferences?: {
         /**
          * @default
          */
@@ -3145,7 +3509,7 @@ export interface components {
          * @default
          */
         url: string
-      }>
+      }[]
       /**
        * @default application
        */
@@ -3164,7 +3528,7 @@ export interface components {
            * @default 0
            */
           confidence: number
-          methods: Array<{
+          methods: {
             /**
              * @default
              */
@@ -3177,17 +3541,17 @@ export interface components {
              * @default
              */
             value: string
-          }>
+          }[]
         }
-        occurrences?: Array<{
+        occurrences?: {
           /**
            * @default
            */
           location: string
-        }>
+        }[]
       }
       tags?: string[]
-      properties?: Array<{
+      properties?: {
         /**
          * @default
          */
@@ -3196,8 +3560,8 @@ export interface components {
          * @default
          */
         value: string
-      }>
-      cryptoProperties?: Array<{
+      }[]
+      cryptoProperties?: {
         /**
          * @default
          */
@@ -3212,12 +3576,12 @@ export interface components {
            */
           implementationPlatform: string
         }
-      }>
-      components?: Array<components['schemas']['CDXComponentSchema']>
+      }[]
+      components?: components['schemas']['CDXComponentSchema'][]
     }
     OpenVEXStatementSchema: {
       vulnerability: components['schemas']['OpenVEXVulnerabilitySchema']
-      products: Array<components['schemas']['OpenVEXProductSchema']>
+      products: components['schemas']['OpenVEXProductSchema'][]
       /**
        * @default affected
        */
@@ -3365,6 +3729,102 @@ export interface components {
                * @default
                */
               detectedAt: string | null
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /**
+           * @enum {string}
+           */
+          type?: 'browserExtensionPermission'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /**
+             * @default
+             */
+            description: string
+            props: {
+              /**
+               * @default
+               */
+              permission: string
+              /**
+               * @default
+               */
+              permissionType: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /**
+           * @enum {string}
+           */
+          type?: 'browserExtensionHostPermission'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /**
+             * @default
+             */
+            description: string
+            props: {
+              /**
+               * @default
+               */
+              host: string
+              /**
+               * @default
+               */
+              permissionType: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /**
+           * @enum {string}
+           */
+          type?: 'browserExtensionWildcardHostPermission'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /**
+             * @default
+             */
+            description: string
+            props: {
+              /**
+               * @default
+               */
+              host: string
+              /**
+               * @default
+               */
+              permissionType: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /**
+           * @enum {string}
+           */
+          type?: 'browserExtensionContentScript'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /**
+             * @default
+             */
+            description: string
+            props: {
+              /**
+               * @default
+               */
+              scriptFile: string
+              /**
+               * @default
+               */
+              matches: string
+              /**
+               * @default
+               */
+              runAt: string
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -3559,7 +4019,7 @@ export interface components {
                * @default
                */
               cveId: string
-              cwes: Array<{
+              cwes: {
                 /**
                  * @default
                  */
@@ -3574,7 +4034,7 @@ export interface components {
                  * @default
                  */
                 name: string
-              }>
+              }[]
               /**
                * Common Vulnerability Scoring System metrics.
                */
@@ -3628,50 +4088,52 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs: Array<{
-                /**
-                 * @default
-                 */
-                vulnerabilityName: string
-                /**
-                 * @default
-                 */
-                shortDescription: string | null
-                /**
-                 * @default
-                 */
-                requiredAction: string | null
-                /**
-                 * Date when added to CISA KEV catalog (ISO 8601 format)
-                 *
-                 * @default
-                 */
-                dateAdded: string
-                /**
-                 * Remediation deadline for federal agencies (ISO 8601 format)
-                 *
-                 * @default
-                 */
-                dueDate: string | null
-                /**
-                 * Known, Unknown, or specific ransomware campaign names.
-                 *
-                 * @default
-                 */
-                knownRansomwareCampaignUse: string | null
-                /**
-                 * @default
-                 */
-                notes: string | null
-                /**
-                 * @default
-                 */
-                vendorProject: string
-                /**
-                 * @default
-                 */
-                product: string
-              }> | null
+              kevs:
+                | {
+                    /**
+                     * @default
+                     */
+                    vulnerabilityName: string
+                    /**
+                     * @default
+                     */
+                    shortDescription: string | null
+                    /**
+                     * @default
+                     */
+                    requiredAction: string | null
+                    /**
+                     * Date when added to CISA KEV catalog (ISO 8601 format)
+                     *
+                     * @default
+                     */
+                    dateAdded: string
+                    /**
+                     * Remediation deadline for federal agencies (ISO 8601 format)
+                     *
+                     * @default
+                     */
+                    dueDate: string | null
+                    /**
+                     * Known, Unknown, or specific ransomware campaign names.
+                     *
+                     * @default
+                     */
+                    knownRansomwareCampaignUse: string | null
+                    /**
+                     * @default
+                     */
+                    notes: string | null
+                    /**
+                     * @default
+                     */
+                    vendorProject: string
+                    /**
+                     * @default
+                     */
+                    product: string
+                  }[]
+                | null
               /**
                * Exploit Prediction Scoring System https://www.first.org/epss/
                */
@@ -3707,7 +4169,7 @@ export interface components {
                * @default
                */
               cveId: string
-              cwes: Array<{
+              cwes: {
                 /**
                  * @default
                  */
@@ -3722,7 +4184,7 @@ export interface components {
                  * @default
                  */
                 name: string
-              }>
+              }[]
               /**
                * Common Vulnerability Scoring System metrics.
                */
@@ -3776,50 +4238,52 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs: Array<{
-                /**
-                 * @default
-                 */
-                vulnerabilityName: string
-                /**
-                 * @default
-                 */
-                shortDescription: string | null
-                /**
-                 * @default
-                 */
-                requiredAction: string | null
-                /**
-                 * Date when added to CISA KEV catalog (ISO 8601 format)
-                 *
-                 * @default
-                 */
-                dateAdded: string
-                /**
-                 * Remediation deadline for federal agencies (ISO 8601 format)
-                 *
-                 * @default
-                 */
-                dueDate: string | null
-                /**
-                 * Known, Unknown, or specific ransomware campaign names.
-                 *
-                 * @default
-                 */
-                knownRansomwareCampaignUse: string | null
-                /**
-                 * @default
-                 */
-                notes: string | null
-                /**
-                 * @default
-                 */
-                vendorProject: string
-                /**
-                 * @default
-                 */
-                product: string
-              }> | null
+              kevs:
+                | {
+                    /**
+                     * @default
+                     */
+                    vulnerabilityName: string
+                    /**
+                     * @default
+                     */
+                    shortDescription: string | null
+                    /**
+                     * @default
+                     */
+                    requiredAction: string | null
+                    /**
+                     * Date when added to CISA KEV catalog (ISO 8601 format)
+                     *
+                     * @default
+                     */
+                    dateAdded: string
+                    /**
+                     * Remediation deadline for federal agencies (ISO 8601 format)
+                     *
+                     * @default
+                     */
+                    dueDate: string | null
+                    /**
+                     * Known, Unknown, or specific ransomware campaign names.
+                     *
+                     * @default
+                     */
+                    knownRansomwareCampaignUse: string | null
+                    /**
+                     * @default
+                     */
+                    notes: string | null
+                    /**
+                     * @default
+                     */
+                    vendorProject: string
+                    /**
+                     * @default
+                     */
+                    product: string
+                  }[]
+                | null
               /**
                * Exploit Prediction Scoring System https://www.first.org/epss/
                */
@@ -3855,7 +4319,7 @@ export interface components {
                * @default
                */
               cveId: string
-              cwes: Array<{
+              cwes: {
                 /**
                  * @default
                  */
@@ -3870,7 +4334,7 @@ export interface components {
                  * @default
                  */
                 name: string
-              }>
+              }[]
               /**
                * Common Vulnerability Scoring System metrics.
                */
@@ -3924,50 +4388,52 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs: Array<{
-                /**
-                 * @default
-                 */
-                vulnerabilityName: string
-                /**
-                 * @default
-                 */
-                shortDescription: string | null
-                /**
-                 * @default
-                 */
-                requiredAction: string | null
-                /**
-                 * Date when added to CISA KEV catalog (ISO 8601 format)
-                 *
-                 * @default
-                 */
-                dateAdded: string
-                /**
-                 * Remediation deadline for federal agencies (ISO 8601 format)
-                 *
-                 * @default
-                 */
-                dueDate: string | null
-                /**
-                 * Known, Unknown, or specific ransomware campaign names.
-                 *
-                 * @default
-                 */
-                knownRansomwareCampaignUse: string | null
-                /**
-                 * @default
-                 */
-                notes: string | null
-                /**
-                 * @default
-                 */
-                vendorProject: string
-                /**
-                 * @default
-                 */
-                product: string
-              }> | null
+              kevs:
+                | {
+                    /**
+                     * @default
+                     */
+                    vulnerabilityName: string
+                    /**
+                     * @default
+                     */
+                    shortDescription: string | null
+                    /**
+                     * @default
+                     */
+                    requiredAction: string | null
+                    /**
+                     * Date when added to CISA KEV catalog (ISO 8601 format)
+                     *
+                     * @default
+                     */
+                    dateAdded: string
+                    /**
+                     * Remediation deadline for federal agencies (ISO 8601 format)
+                     *
+                     * @default
+                     */
+                    dueDate: string | null
+                    /**
+                     * Known, Unknown, or specific ransomware campaign names.
+                     *
+                     * @default
+                     */
+                    knownRansomwareCampaignUse: string | null
+                    /**
+                     * @default
+                     */
+                    notes: string | null
+                    /**
+                     * @default
+                     */
+                    vendorProject: string
+                    /**
+                     * @default
+                     */
+                    product: string
+                  }[]
+                | null
               /**
                * Exploit Prediction Scoring System https://www.first.org/epss/
                */
@@ -4003,7 +4469,7 @@ export interface components {
                * @default
                */
               cveId: string
-              cwes: Array<{
+              cwes: {
                 /**
                  * @default
                  */
@@ -4018,7 +4484,7 @@ export interface components {
                  * @default
                  */
                 name: string
-              }>
+              }[]
               /**
                * Common Vulnerability Scoring System metrics.
                */
@@ -4072,50 +4538,52 @@ export interface components {
                * @default
                */
               vulnerableVersionRange: string
-              kevs: Array<{
-                /**
-                 * @default
-                 */
-                vulnerabilityName: string
-                /**
-                 * @default
-                 */
-                shortDescription: string | null
-                /**
-                 * @default
-                 */
-                requiredAction: string | null
-                /**
-                 * Date when added to CISA KEV catalog (ISO 8601 format)
-                 *
-                 * @default
-                 */
-                dateAdded: string
-                /**
-                 * Remediation deadline for federal agencies (ISO 8601 format)
-                 *
-                 * @default
-                 */
-                dueDate: string | null
-                /**
-                 * Known, Unknown, or specific ransomware campaign names.
-                 *
-                 * @default
-                 */
-                knownRansomwareCampaignUse: string | null
-                /**
-                 * @default
-                 */
-                notes: string | null
-                /**
-                 * @default
-                 */
-                vendorProject: string
-                /**
-                 * @default
-                 */
-                product: string
-              }> | null
+              kevs:
+                | {
+                    /**
+                     * @default
+                     */
+                    vulnerabilityName: string
+                    /**
+                     * @default
+                     */
+                    shortDescription: string | null
+                    /**
+                     * @default
+                     */
+                    requiredAction: string | null
+                    /**
+                     * Date when added to CISA KEV catalog (ISO 8601 format)
+                     *
+                     * @default
+                     */
+                    dateAdded: string
+                    /**
+                     * Remediation deadline for federal agencies (ISO 8601 format)
+                     *
+                     * @default
+                     */
+                    dueDate: string | null
+                    /**
+                     * Known, Unknown, or specific ransomware campaign names.
+                     *
+                     * @default
+                     */
+                    knownRansomwareCampaignUse: string | null
+                    /**
+                     * @default
+                     */
+                    notes: string | null
+                    /**
+                     * @default
+                     */
+                    vendorProject: string
+                    /**
+                     * @default
+                     */
+                    product: string
+                  }[]
+                | null
               /**
                * Exploit Prediction Scoring System https://www.first.org/epss/
                */
@@ -4238,6 +4706,72 @@ export interface components {
           /**
            * @enum {string}
            */
+          type?: 'unresolvedYarnDependency'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /**
+             * @default
+             */
+            description: string
+            props: {
+              /**
+               * @default
+               */
+              manifestFile: string
+              /**
+               * @default
+               */
+              ecosystem: string
+              /**
+               * @default 0
+               */
+              unresolvedCount: number
+              /**
+               * @default
+               */
+              packageNames: string
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /**
+           * @enum {string}
+           */
+          type?: 'unresolvedPomReference'
+          value?: components['schemas']['SocketIssueBasics'] & {
+            /**
+             * @default
+             */
+            description: string
+            props: {
+              /**
+               * @default
+               */
+              manifestFile: string
+              /**
+               * @default
+               */
+              ecosystem: string
+              /**
+               * @default
+               */
+              referenceKind: string
+              /**
+               * @default
+               */
+              coordinates: string
+              /**
+               * @default 0
+               */
+              unresolvedCount: number
+            }
+            usage?: components['schemas']['SocketUsageRef']
+          }
+        }
+      | {
+          /**
+           * @enum {string}
+           */
           type?: 'shrinkwrap'
           value?: components['schemas']['SocketIssueBasics'] & {
             /**
@@ -4308,8 +4842,8 @@ export interface components {
               /**
                * @default null
                */
-              sourceLocation: Record<string, never>
-              sinkLocations: Array<Record<string, never>>
+              sourceLocation: Record<string, unknown>
+              sinkLocations: Record<string, unknown>[]
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4332,8 +4866,8 @@ export interface components {
               /**
                * @default null
                */
-              sourceLocation: Record<string, never>
-              sinkLocations: Array<Record<string, never>>
+              sourceLocation: Record<string, unknown>
+              sinkLocations: Record<string, unknown>[]
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4356,8 +4890,8 @@ export interface components {
               /**
                * @default null
                */
-              sourceLocation: Record<string, never>
-              sinkLocations: Array<Record<string, never>>
+              sourceLocation: Record<string, unknown>
+              sinkLocations: Record<string, unknown>[]
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4380,8 +4914,8 @@ export interface components {
               /**
                * @default null
                */
-              sourceLocation: Record<string, never>
-              sinkLocations: Array<Record<string, never>>
+              sourceLocation: Record<string, unknown>
+              sinkLocations: Record<string, unknown>[]
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4404,8 +4938,8 @@ export interface components {
               /**
                * @default null
                */
-              sourceLocation: Record<string, never>
-              sinkLocations: Array<Record<string, never>>
+              sourceLocation: Record<string, unknown>
+              sinkLocations: Record<string, unknown>[]
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4428,8 +4962,8 @@ export interface components {
               /**
                * @default null
                */
-              sourceLocation: Record<string, never>
-              sinkLocations: Array<Record<string, never>>
+              sourceLocation: Record<string, unknown>
+              sinkLocations: Record<string, unknown>[]
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4452,8 +4986,8 @@ export interface components {
               /**
                * @default null
                */
-              sourceLocation: Record<string, never>
-              sinkLocations: Array<Record<string, never>>
+              sourceLocation: Record<string, unknown>
+              sinkLocations: Record<string, unknown>[]
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4506,9 +5040,9 @@ export interface components {
                * @default
                */
               licenseScanResult: string
-              violationData: Array<Record<string, never>>
-              warnData: Array<Record<string, never>>
-              monitorData: Array<Record<string, never>>
+              violationData: Record<string, unknown>[]
+              warnData: Record<string, unknown>[]
+              monitorData: Record<string, unknown>[]
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -4805,7 +5339,7 @@ export interface components {
               /**
                * @default {}
                */
-              maybeByteSpan: Record<string, never>
+              maybeByteSpan: Record<string, unknown>
               /**
                * @default
                */
@@ -4850,7 +5384,7 @@ export interface components {
               /**
                * @default {}
                */
-              maybeByteSpan: Record<string, never>
+              maybeByteSpan: Record<string, unknown>
               /**
                * @default
                */
@@ -4919,7 +5453,7 @@ export interface components {
               /**
                * @default {}
                */
-              maybeByteSpan: Record<string, never>
+              maybeByteSpan: Record<string, unknown>
             }
             usage?: components['schemas']['SocketUsageRef']
           }
@@ -6757,6 +7291,8 @@ export interface components {
       | 'cran'
       | 'deb'
       | 'docker'
+      | 'firefox-extension'
+      | 'edge-extension'
       | 'gem'
       | 'generic'
       | 'github'
@@ -6777,6 +7313,7 @@ export interface components {
       | 'swid'
       | 'swift'
       | 'vscode'
+      | 'vscode-extension'
       | 'unknown'
     /**
      * @default low
@@ -6796,6 +7333,55 @@ export interface components {
       | 'vulnerability'
       | 'license'
       | 'other'
+    /**
+     * The alert policy rule that decided `action`. Included in both normal and
+     * `compact=true` responses whenever an alert policy rule decided the
+     * action; absent when the action came from any other source. Unrelated to
+     * `actionPolicyIndex`, which indexes the legacy security policy.
+     */
+    SocketAlertPolicyRule: {
+      /**
+       * ID of the alert policy whose rule decided this action: a UUID, or
+       * `default` for the default policy until it is first customized.
+       *
+       * @default
+       */
+      policyId: string
+      /**
+       * Display name of that policy at evaluation time; null for the default
+       * policy.
+       *
+       * @default
+       */
+      policyName: string | null
+      /**
+       * ID of the rule that decided this action: the rule UUID for custom
+       * rules, the alert type name for baseline rules.
+       *
+       * @default
+       */
+      ruleId: string
+      /**
+       * Name of that rule at evaluation time; baseline rules use the alert type
+       * name.
+       *
+       * @default
+       */
+      ruleName: string
+      /**
+       * 0-based position of the rule in first-match-wins evaluation order
+       * (custom rules first, then baseline)
+       *
+       * @default 0
+       */
+      ruleIndex: number
+      /**
+       * Whether the rule is a baseline rule rather than a custom rule.
+       *
+       * @default false
+       */
+      isBaseline: boolean
+    }
     SocketPatch: {
       /**
        * Unique identifier for this patch.
@@ -6830,7 +7416,7 @@ export interface components {
       /**
        * Reachability analysis results for each vulnerability.
        */
-      results: Array<components['schemas']['ReachabilityResultItem']>
+      results: components['schemas']['ReachabilityResultItem'][]
     }
     OpenVEXVulnerabilitySchema: {
       /**
@@ -6854,7 +7440,7 @@ export interface components {
       '@id': string
       identifiers?: components['schemas']['OpenVEXIdentifiersSchema']
       hashes?: components['schemas']['OpenVEXHashesSchema']
-      subcomponents?: Array<components['schemas']['OpenVEXComponentSchema']>
+      subcomponents?: components['schemas']['OpenVEXComponentSchema'][]
     }
     SocketIssueBasics: {
       severity: components['schemas']['SocketIssueSeverity']
@@ -6885,7 +7471,7 @@ export interface components {
       /**
        * @default null
        */
-      value: Record<string, never>
+      value: Record<string, unknown>
     }
     ReachabilityResultItem: {
       type: components['schemas']['ReachabilityType']
@@ -6908,14 +7494,14 @@ export interface components {
              * @enum {string}
              */
             type?: 'function-level'
-            value?: Array<components['schemas']['CallStackItem'][]>
+            value?: components['schemas']['CallStackItem'][][]
           }
         | {
             /**
              * @enum {string}
              */
             type?: 'class-level'
-            value?: Array<components['schemas']['ClassStackItem'][]>
+            value?: components['schemas']['ClassStackItem'][][]
           }
       /**
        * Path to the workspace root for multi-workspace projects.
@@ -6929,6 +7515,14 @@ export interface components {
        * @default
        */
       subprojectPath?: string
+      /**
+       * For direct_dependency results: the direct importer is a
+       * private/unresolvable package in the project rather than the application
+       * manifest.
+       *
+       * @default false
+       */
+      viaPrivateDependency?: boolean
     }
     OpenVEXIdentifiersSchema: {
       /**
@@ -7002,7 +7596,7 @@ export interface components {
       identifiers?: components['schemas']['OpenVEXIdentifiersSchema']
       hashes?: components['schemas']['OpenVEXHashesSchema']
     }
-    SocketRefList: Array<components['schemas']['SocketRef']>
+    SocketRefList: components['schemas']['SocketRef'][]
     SocketRefFile: {
       /**
        * @default
@@ -7267,7 +7861,7 @@ export interface components {
             /**
              * @default null
              */
-            details: Record<string, unknown> | null
+            details: Record<string, unknown>
           }
         }
       }
@@ -7286,7 +7880,7 @@ export interface components {
             /**
              * @default null
              */
-            details: Record<string, unknown> | null
+            details: Record<string, unknown>
           }
         }
       }
@@ -7305,7 +7899,7 @@ export interface components {
             /**
              * @default null
              */
-            details: Record<string, unknown> | null
+            details: Record<string, unknown>
           }
         }
       }
@@ -7324,7 +7918,7 @@ export interface components {
             /**
              * @default null
              */
-            details: Record<string, unknown> | null
+            details: Record<string, unknown>
           }
         }
       }
@@ -7350,7 +7944,7 @@ export interface components {
             /**
              * @default null
              */
-            details: Record<string, unknown> | null
+            details: Record<string, unknown>
           }
         }
       }
@@ -7369,7 +7963,118 @@ export interface components {
             /**
              * @default null
              */
-            details: Record<string, unknown> | null
+            details: Record<string, unknown>
+          }
+        }
+      }
+    }
+    /**
+     * Internal server error.
+     */
+    SocketServerFault: {
+      content: {
+        'application/json': {
+          error: {
+            /**
+             * @default
+             */
+            message: string
+            details: {
+              /**
+               * Per-request id; also the X-Request-Id header.
+               *
+               * @default
+               */
+              requestId: string
+              /**
+               * Coarse failure class.
+               *
+               * @default internal
+               *
+               * @enum {string}
+               */
+              code: 'timeout' | 'temporarily_unavailable' | 'internal'
+              /**
+               * Whether the same request may succeed on retry.
+               *
+               * @default false
+               */
+              retryable: boolean
+            }
+          }
+        }
+      }
+    }
+    /**
+     * Service temporarily unavailable.
+     */
+    SocketServiceUnavailable: {
+      content: {
+        'application/json': {
+          error: {
+            /**
+             * @default
+             */
+            message: string
+            details: {
+              /**
+               * Per-request id; also the X-Request-Id header.
+               *
+               * @default
+               */
+              requestId: string
+              /**
+               * Coarse failure class.
+               *
+               * @default internal
+               *
+               * @enum {string}
+               */
+              code: 'timeout' | 'temporarily_unavailable' | 'internal'
+              /**
+               * Whether the same request may succeed on retry.
+               *
+               * @default false
+               */
+              retryable: boolean
+            }
+          }
+        }
+      }
+    }
+    /**
+     * Gateway timeout.
+     */
+    SocketGatewayTimeout: {
+      content: {
+        'application/json': {
+          error: {
+            /**
+             * @default
+             */
+            message: string
+            details: {
+              /**
+               * Per-request id; also the X-Request-Id header.
+               *
+               * @default
+               */
+              requestId: string
+              /**
+               * Coarse failure class.
+               *
+               * @default internal
+               *
+               * @enum {string}
+               */
+              code: 'timeout' | 'temporarily_unavailable' | 'internal'
+              /**
+               * Whether the same request may succeed on retry.
+               *
+               * @default false
+               */
+              retryable: boolean
+            }
           }
         }
       }
@@ -7388,7 +8093,7 @@ export interface components {
             /**
              * @default null
              */
-            details: Record<string, unknown> | null
+            details: Record<string, unknown>
           }
         }
       }
@@ -7407,7 +8112,7 @@ export interface components {
             /**
              * @default null
              */
-            details: Record<string, unknown> | null
+            details: Record<string, unknown>
           }
         }
       }
@@ -7450,7 +8155,14 @@ export interface operations {
    *   `purlError` stream shape instead of emitting synthetic `notFound`
    *   artifacts. Use `poll=false` (default) to fail open and return the current
    *   known state quickly. Use `poll=true` to fail closed and wait up to
-   *   `timeoutSec` for pending analysis before returning.
+   *   `timeoutSec` for pending analysis before returning. **Conda (temporary
+   *   compatibility):** `pkg:conda` inputs are served from the already-scanned
+   *   PyPI package with the same normalized name and version when one exists;
+   *   the response row keeps the original conda PURL in `inputPurl` but reports
+   *   `type: pypi`. Conda `build`, `subdir`, `type`, and `channel` qualifiers
+   *   are ignored, and conda packages without a scanned PyPI counterpart return
+   *   the normal `notFound` result. This mapping will be replaced by native
+   *   conda support.
    *
    * ## Examples:
    *
@@ -7526,7 +8238,7 @@ export interface operations {
          * Include only alerts with comma separated actions defined by security
          * policy.
          */
-        actions?: Array<'error' | 'monitor' | 'warn' | 'ignore'>
+        actions?: ('error' | 'monitor' | 'warn' | 'ignore')[]
         /**
          * Compact metadata. When enabled, excludes metadata fields like author,
          * scores, size, dependencies, and manifest files. Always includes: id,
@@ -7610,7 +8322,8 @@ export interface operations {
    * Search for any dependency that is being used in your organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - No Scopes Required, but authentication is required.
+   *
+   * - No Scopes Required, but authentication is required
    */
   searchDependencies: {
     requestBody?: {
@@ -7651,7 +8364,7 @@ export interface operations {
               valid: string[]
               invalid: string[]
             }
-            rows: Array<{
+            rows: {
               /**
                * @default
                */
@@ -7692,7 +8405,7 @@ export interface operations {
                * @default
                */
               workspace?: string
-            }>
+            }[]
           }
         }
       }
@@ -7736,7 +8449,7 @@ export interface operations {
            * @default
            */
           branch?: string
-          [key: string]: undefined
+          [key: string]: (Uint8Array | string) | undefined
         }
       }
     }
@@ -7762,7 +8475,9 @@ export interface operations {
    *
    * Returns a paginated list of all full scans in an org, excluding SBOM
    * artifacts. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes: - full-scans:list.
+   * requires the following org token scopes:
+   *
+   * - Full-scans:list
    */
   getOrgFullScanList: {
     parameters: {
@@ -7839,7 +8554,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * @default
                */
@@ -7937,7 +8652,7 @@ export interface operations {
                * @enum {string|null}
                */
               scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null
-            }>
+            }[]
             /**
              * @default
              */
@@ -8059,7 +8774,7 @@ export interface operations {
     requestBody?: {
       content: {
         'multipart/form-data': {
-          [key: string]: never
+          [key: string]: Uint8Array
         }
       }
     }
@@ -8185,7 +8900,9 @@ export interface operations {
    * latest, available alert data for artifacts in the full scan (stale while
    * revalidate). Actively running analysis will be returned when available on
    * subsequent runs. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes: - full-scans:list.
+   * requires the following org token scopes:
+   *
+   * - Full-scans:list
    */
   getOrgFullScan: {
     parameters: {
@@ -8196,9 +8913,7 @@ export interface operations {
          * specify individual fields like "components,formula" to include only
          * those fields.
          */
-        include_alert_priority_details?:
-          | boolean
-          | Array<'component' | 'formula'>
+        include_alert_priority_details?: boolean | ('component' | 'formula')[]
         /**
          * Include scores event in the response. include_scores_details implies
          * this flag.
@@ -8210,7 +8925,7 @@ export interface operations {
          * specify individual fields like "components,formula" to include only
          * those fields.
          */
-        include_scores_details?: boolean | Array<'components' | 'formula'>
+        include_scores_details?: boolean | ('components' | 'formula')[]
         /**
          * Include license details in the response. This can increase the
          * response size significantly.
@@ -8282,7 +8997,8 @@ export interface operations {
    * Delete an existing full scan.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - full-scans:delete.
+   *
+   * - Full-scans:delete
    */
   deleteOrgFullScan: {
     parameters: {
@@ -8324,7 +9040,8 @@ export interface operations {
    * Get metadata for a single full scan
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - full-scans:list.
+   *
+   * - Full-scans:list
    */
   getOrgFullScanMetadata: {
     parameters: {
@@ -8456,9 +9173,10 @@ export interface operations {
   /**
    * Diff Full Scans.
    *
-   * _This endpoint is deprecated._* Get the difference between two existing
-   * Full Scans. The results are not persisted. This endpoint consumes 1 unit of
-   * your quota. This endpoint requires the following org token scopes:
+   * _This endpoint is deprecated._* Get the immutable difference between two
+   * existing Full Scans. The result uses the policies active when it was
+   * computed and may be cached for reuse. This endpoint consumes 1 unit of your
+   * quota. This endpoint requires the following org token scopes:
    *
    * - Full-scans:list
    *
@@ -8618,27 +9336,25 @@ export interface operations {
               /**
                * Artifacts present in the after scan but not the before scan.
                */
-              added: Array<components['schemas']['SocketDiffArtifact']>
+              added: components['schemas']['SocketDiffArtifact'][]
               /**
                * Artifacts present in the before scan but not the after scan.
                */
-              removed: Array<components['schemas']['SocketDiffArtifact']>
+              removed: components['schemas']['SocketDiffArtifact'][]
               /**
                * Artifacts present in both scans with no changes. Null when
                * omitted via the omit_unchanged query parameter.
                */
-              unchanged: Array<
-                components['schemas']['SocketDiffArtifact']
-              > | null
+              unchanged: components['schemas']['SocketDiffArtifact'][] | null
               /**
                * Artifacts replaced between the scans, e.g. the same package
                * supplied by a different source.
                */
-              replaced: Array<components['schemas']['SocketDiffArtifact']>
+              replaced: components['schemas']['SocketDiffArtifact'][]
               /**
                * Artifacts whose version changed between the scans.
                */
-              updated: Array<components['schemas']['SocketDiffArtifact']>
+              updated: components['schemas']['SocketDiffArtifact'][]
             }
             /**
              * @default false
@@ -8648,6 +9364,23 @@ export interface operations {
              * @default
              */
             diff_report_url: string | null
+          }
+        }
+      }
+      /**
+       * Scan is being processed. Repeat the request later to retrieve results.
+       */
+      202: {
+        content: {
+          'application/json': {
+            /**
+             * @default processing
+             */
+            status: string
+            /**
+             * @default
+             */
+            id: string
           }
         }
       }
@@ -8855,7 +9588,8 @@ export interface operations {
    * Download all files associated with a full scan in tar format.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - full-scans:list.
+   *
+   * - Full-scans:list
    */
   downloadOrgFullScanFilesAsTar: {
     parameters: {
@@ -8989,7 +9723,7 @@ export interface operations {
     requestBody?: {
       content: {
         'multipart/form-data': {
-          [key: string]: never
+          [key: string]: Uint8Array
         }
       }
     }
@@ -9115,8 +9849,9 @@ export interface operations {
    * reapplies the latest policies to the previously cached dependency
    * resolution results. A "deep" rescan reruns dependency resolution and
    * applies the latest policies to the results. This endpoint consumes 1 unit
-   * of your quota. This endpoint requires the following org token scopes: -
-   * full-scans:create.
+   * of your quota. This endpoint requires the following org token scopes:
+   *
+   * - Full-scans:create
    */
   rescanOrgFullScan: {
     parameters: {
@@ -9153,6 +9888,15 @@ export interface operations {
              * @default The status of the new scan
              */
             status: string
+            /**
+             * The rescan mode actually performed. A "shallow" request falls
+             * back to "deep" when the source scan has no cached data.
+             *
+             * @default shallow
+             *
+             * @enum {string}
+             */
+            mode: 'shallow' | 'deep'
           }
         }
       }
@@ -9169,12 +9913,19 @@ export interface operations {
    * Export a CSV file containing all alerts from a full scan. The CSV includes
    * details about each alert and the affected packages. You can optionally
    * filter using the request body "filters" array. Supported filter IDs
-   * include: - alert.action (error|warn|monitor|ignore) - alert.type -
-   * alert.category - alert.severity (low|medium|middle|high|critical or 0-3) -
-   * artifact.type (purl type, e.g. npm, pypi) - dependency.type
-   * (direct|transitive) - dependency.scope (dev|normal) - dependency.usage
-   * (used|unused) - manifest.file This endpoint consumes 1 unit of your quota.
-   * This endpoint requires the following org token scopes: - full-scans:list.
+   * include:
+   *
+   * - Alert.action (error|warn|monitor|ignore)
+   * - Alert.type
+   * - Alert.category
+   * - Alert.severity (low|medium|middle|high|critical or 0-3)
+   * - Artifact.type (purl type, e.g. npm, pypi)
+   * - Dependency.type (direct|transitive)
+   * - Dependency.scope (dev|normal)
+   * - Dependency.usage (used|unused)
+   * - Manifest.file This endpoint consumes 1 unit of your quota. This endpoint
+   *   requires the following org token scopes:
+   * - Full-scans:list
    */
   getOrgFullScanCsv: {
     parameters: {
@@ -9185,9 +9936,7 @@ export interface operations {
          * specify individual fields like "components,formula" to include only
          * those fields.
          */
-        include_alert_priority_details?:
-          | boolean
-          | Array<'component' | 'formula'>
+        include_alert_priority_details?: boolean | ('component' | 'formula')[]
         /**
          * Include license details in the response.
          */
@@ -9207,13 +9956,13 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          filters?: Array<{
+          filters?: {
             /**
              * @default
              */
             id: string
             value: string[]
-          }>
+          }[]
         }
       }
     }
@@ -9239,12 +9988,18 @@ export interface operations {
    * Generate a PDF report for all alerts in a full scan. This endpoint streams
    * a PDF document containing all alerts found in the full scan, with optional
    * filtering and grouping options. Supported request body filter IDs include:
-   * - alert.action (error|warn|monitor|ignore) - alert.type - alert.category -
-   * alert.severity (low|medium|middle|high|critical or 0-3) - artifact.type
-   * (purl type, e.g. npm, pypi) - dependency.type (direct|transitive) -
-   * dependency.scope (dev|normal) - dependency.usage (used|unused) -
-   * manifest.file This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes: - full-scans:list.
+   *
+   * - Alert.action (error|warn|monitor|ignore)
+   * - Alert.type
+   * - Alert.category
+   * - Alert.severity (low|medium|middle|high|critical or 0-3)
+   * - Artifact.type (purl type, e.g. npm, pypi)
+   * - Dependency.type (direct|transitive)
+   * - Dependency.scope (dev|normal)
+   * - Dependency.usage (used|unused)
+   * - Manifest.file This endpoint consumes 1 unit of your quota. This endpoint
+   *   requires the following org token scopes:
+   * - Full-scans:list
    */
   getOrgFullScanPdf: {
     parameters: {
@@ -9255,9 +10010,7 @@ export interface operations {
          * specify individual fields like "components,formula" to include only
          * those fields.
          */
-        include_alert_priority_details?:
-          | boolean
-          | Array<'component' | 'formula'>
+        include_alert_priority_details?: boolean | ('component' | 'formula')[]
         /**
          * Include license details in the response.
          */
@@ -9277,13 +10030,13 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          filters?: Array<{
+          filters?: {
             /**
              * @default
              */
             id: string
             value: string[]
-          }>
+          }[]
           /**
            * @default
            */
@@ -9316,19 +10069,19 @@ export interface operations {
    *
    * Export a Socket SBOM as a CycloneDX SBOM
    * Supported ecosystems:
-   * - crates
-   * - go
-   * - maven
-   * - npm
-   * - nuget
-   * - pypi
-   * - rubygems
-   * - spdx
-   * - cdx
-   * Unsupported ecosystems are filtered from the export.
-   * This endpoint consumes 1 unit of your quota.
-   * This endpoint requires the following org token scopes:
-   * - report:read.
+   *
+   * - Crates
+   * - Go
+   * - Maven
+   * - Npm
+   * - Nuget
+   * - Pypi
+   * - Rubygems
+   * - Spdx
+   * - Cdx Unsupported ecosystems are filtered from the export. This endpoint
+   *   consumes 1 unit of your quota. This endpoint requires the following org
+   *   token scopes:
+   * - Report:read
    */
   exportCDX: {
     parameters: {
@@ -9386,6 +10139,9 @@ export interface operations {
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
+      500: components['responses']['SocketServerFault']
+      503: components['responses']['SocketServiceUnavailable']
+      504: components['responses']['SocketGatewayTimeout']
     }
   }
   /**
@@ -9452,6 +10208,9 @@ export interface operations {
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
+      500: components['responses']['SocketServerFault']
+      503: components['responses']['SocketServiceUnavailable']
+      504: components['responses']['SocketGatewayTimeout']
     }
   }
   /**
@@ -9459,19 +10218,19 @@ export interface operations {
    *
    * Export a Socket SBOM as a SPDX SBOM
    * Supported ecosystems:
-   * - crates
-   * - go
-   * - maven
-   * - npm
-   * - nuget
-   * - pypi
-   * - rubygems
-   * - spdx
-   * - cdx
-   * Unsupported ecosystems are filtered from the export.
-   * This endpoint consumes 1 unit of your quota.
-   * This endpoint requires the following org token scopes:
-   * - report:read.
+   *
+   * - Crates
+   * - Go
+   * - Maven
+   * - Npm
+   * - Nuget
+   * - Pypi
+   * - Rubygems
+   * - Spdx
+   * - Cdx Unsupported ecosystems are filtered from the export. This endpoint
+   *   consumes 1 unit of your quota. This endpoint requires the following org
+   *   token scopes:
+   * - Report:read
    */
   exportSPDX: {
     parameters: {
@@ -9529,6 +10288,9 @@ export interface operations {
       403: components['responses']['SocketForbidden']
       404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
+      500: components['responses']['SocketServerFault']
+      503: components['responses']['SocketServiceUnavailable']
+      504: components['responses']['SocketGatewayTimeout']
     }
   }
   /**
@@ -9537,7 +10299,8 @@ export interface operations {
    * Returns a paginated list of all diff scans in an organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - diff-scans:list.
+   *
+   * - Diff-scans:list
    */
   listOrgDiffScans: {
     parameters: {
@@ -9586,7 +10349,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * @default
                */
@@ -9635,7 +10398,7 @@ export interface operations {
                * @default
                */
               api_url: string | null
-            }>
+            }[]
             /**
              * @default
              */
@@ -9659,7 +10422,9 @@ export interface operations {
    *
    * Get the difference between two full scans from an existing diff scan
    * resource. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes: - diff-scans:list.
+   * requires the following org token scopes:
+   *
+   * - Diff-scans:list
    */
   getDiffScanById: {
     parameters: {
@@ -9676,11 +10441,11 @@ export interface operations {
          */
         omit_unchanged?: boolean
         /**
-         * Return cached immutable scan results. When enabled and results are
+         * Enable polling mode for immutable diff scan results. When results are
          * cached, returns the pre-computed scan. When results are not yet
          * cached, returns 202 Accepted and enqueues a background job. Note:
          * When cached=true, the omit_license_details parameter is ignored as
-         * cached results always includes license details.
+         * cached results always include license details.
          */
         cached?: boolean
       }
@@ -9893,27 +10658,25 @@ export interface operations {
                 /**
                  * Artifacts present in the after scan but not the before scan.
                  */
-                added: Array<components['schemas']['SocketDiffArtifact']>
+                added: components['schemas']['SocketDiffArtifact'][]
                 /**
                  * Artifacts present in the before scan but not the after scan.
                  */
-                removed: Array<components['schemas']['SocketDiffArtifact']>
+                removed: components['schemas']['SocketDiffArtifact'][]
                 /**
                  * Artifacts present in both scans with no changes. Null when
                  * omitted via the omit_unchanged query parameter.
                  */
-                unchanged: Array<
-                  components['schemas']['SocketDiffArtifact']
-                > | null
+                unchanged: components['schemas']['SocketDiffArtifact'][] | null
                 /**
                  * Artifacts replaced between the scans, e.g. the same package
                  * supplied by a different source.
                  */
-                replaced: Array<components['schemas']['SocketDiffArtifact']>
+                replaced: components['schemas']['SocketDiffArtifact'][]
                 /**
                  * Artifacts whose version changed between the scans.
                  */
-                updated: Array<components['schemas']['SocketDiffArtifact']>
+                updated: components['schemas']['SocketDiffArtifact'][]
               }
             }
           }
@@ -9949,7 +10712,8 @@ export interface operations {
    * Delete an existing diff scan.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - diff-scans:delete.
+   *
+   * - Diff-scans:delete
    */
   deleteOrgDiffScan: {
     parameters: {
@@ -9990,8 +10754,9 @@ export interface operations {
    *
    * Get the dependency overview and dependency alert comments in GitHub
    * flavored markdown for an existing diff scan. This endpoint consumes 1 unit
-   * of your quota. This endpoint requires the following org token scopes: -
-   * diff-scans:list.
+   * of your quota. This endpoint requires the following org token scopes:
+   *
+   * - Diff-scans:list
    */
   GetDiffScanGfm: {
     parameters: {
@@ -10332,7 +11097,7 @@ export interface operations {
     requestBody?: {
       content: {
         'multipart/form-data': {
-          [key: string]: never
+          [key: string]: Uint8Array
         }
       }
     }
@@ -10572,7 +11337,10 @@ export interface operations {
         merge?: boolean
         /**
          * Set to "redirect" to receive a 302 redirect to the existing diff scan
-         * instead of a 409 error when a duplicate is detected.
+         * instead of a 409 error when a duplicate is detected. Set to "update"
+         * to apply the supplied external_href to the existing diff scan and
+         * receive it in a 200 response; when external_href is omitted, the
+         * existing value is left untouched.
          */
         on_duplicate?: string
       }
@@ -10584,6 +11352,192 @@ export interface operations {
       }
     }
     responses: {
+      /**
+       * The existing diff scan when on_duplicate=update is set and a duplicate
+       * is detected. If external_href was supplied, it has been applied to the
+       * diff scan.
+       */
+      200: {
+        content: {
+          'application/json': {
+            diff_scan: {
+              /**
+               * The ID of the diff scan.
+               *
+               * @default
+               */
+              id: string
+              /**
+               * The ID of the organization that owns the diff scan.
+               *
+               * @default
+               */
+              organization_id: string
+              /**
+               * The ID of the repository the diff scan was run against.
+               *
+               * @default
+               */
+              repository_id: string
+              /**
+               * ISO 8601 timestamp of when the diff scan was created.
+               *
+               * @default
+               */
+              created_at: string
+              /**
+               * ISO 8601 timestamp of when the diff scan was last updated.
+               *
+               * @default
+               */
+              updated_at: string
+              before_full_scan: {
+                /**
+                 * @default
+                 */
+                id: string
+                /**
+                 * @default
+                 */
+                created_at: string
+                /**
+                 * @default
+                 */
+                updated_at: string
+                /**
+                 * @default
+                 */
+                organization_id: string
+                /**
+                 * @default
+                 */
+                organization_slug: string
+                /**
+                 * @default
+                 */
+                repository_id: string
+                /**
+                 * @default
+                 */
+                repository_slug: string
+                /**
+                 * @default
+                 */
+                branch: string | null
+                /**
+                 * @default
+                 */
+                commit_message: string | null
+                /**
+                 * @default
+                 */
+                commit_hash: string | null
+                /**
+                 * @default 0
+                 */
+                pull_request: number | null
+                committers: string[]
+                /**
+                 * @default
+                 */
+                html_url: string | null
+                /**
+                 * @default
+                 */
+                api_url: string | null
+              }
+              after_full_scan: {
+                /**
+                 * @default
+                 */
+                id: string
+                /**
+                 * @default
+                 */
+                created_at: string
+                /**
+                 * @default
+                 */
+                updated_at: string
+                /**
+                 * @default
+                 */
+                organization_id: string
+                /**
+                 * @default
+                 */
+                organization_slug: string
+                /**
+                 * @default
+                 */
+                repository_id: string
+                /**
+                 * @default
+                 */
+                repository_slug: string
+                /**
+                 * @default
+                 */
+                branch: string | null
+                /**
+                 * @default
+                 */
+                commit_message: string | null
+                /**
+                 * @default
+                 */
+                commit_hash: string | null
+                /**
+                 * @default 0
+                 */
+                pull_request: number | null
+                committers: string[]
+                /**
+                 * @default
+                 */
+                html_url: string | null
+                /**
+                 * @default
+                 */
+                api_url: string | null
+              }
+              /**
+               * Human readable description of the diff scan, e.g. the pull
+               * request title.
+               *
+               * @default
+               */
+              description: string | null
+              /**
+               * Link to the external resource the diff scan was created for,
+               * e.g. the pull request URL.
+               *
+               * @default
+               */
+              external_href: string | null
+              /**
+               * True when the diff scan was created for a merge event rather
+               * than an open pull request.
+               *
+               * @default false
+               */
+              merge: boolean
+              /**
+               * Link to the diff scan report in the Socket dashboard.
+               *
+               * @default
+               */
+              html_url: string | null
+              /**
+               * Link to the diff scan resource in the Socket API.
+               *
+               * @default
+               */
+              api_url: string | null
+            }
+          }
+        }
+      }
       /**
        * The details of the created diff scan.
        */
@@ -11004,7 +11958,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * The uuid of the triage action.
                *
@@ -11127,7 +12081,7 @@ export interface operations {
                * @enum {string|null}
                */
               kevs?: 'exist' | 'none' | '*' | null
-            }>
+            }[]
             /**
              * @default 0
              */
@@ -11150,7 +12104,9 @@ export interface operations {
    * `uuid` to update it. Use `?force=true` for broad triages that lack a
    * specific `alertKey` or granular package information. This endpoint consumes
    * 1 unit of your quota. This endpoint requires the following org token
-   * scopes: - triage:alerts-update.
+   * scopes:
+   *
+   * - Triage:alerts-update
    */
   updateOrgAlertTriage: {
     parameters: {
@@ -11172,7 +12128,7 @@ export interface operations {
     requestBody?: {
       content: {
         'application/json': {
-          alertTriage: Array<{
+          alertTriage: {
             /**
              * The UUID of the triage entry. Omit to create a new entry;
              * provide to update an existing one.
@@ -11269,7 +12225,7 @@ export interface operations {
              * @enum {string}
              */
             state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
-          }>
+          }[]
         }
       }
     }
@@ -11301,7 +12257,8 @@ export interface operations {
    * Delete a specific triage rule by UUID.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - triage:alerts-update.
+   *
+   * - Triage:alerts-update
    */
   deleteOrgAlertTriage: {
     parameters: {
@@ -11344,8 +12301,10 @@ export interface operations {
    * List active alert resolutions for an organization. Results are paginated
    * via an opaque cursor and ordered by created_at. Each row includes the
    * anchor fields (alert_type, repo, repo_label, artifact_*) that describe the
-   * resolution scope. This endpoint consumes 1 unit of your quota. This
-   * endpoint requires the following org token scopes:
+   * resolution scope. Tokens restricted to specific repositories only see
+   * org-wide resolutions and resolutions anchored to their granted
+   * repositories. This endpoint consumes 1 unit of your quota. This endpoint
+   * requires the following org token scopes:
    *
    * - Alert-resolution:list
    */
@@ -11380,7 +12339,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            items: Array<{
+            items: {
               /**
                * The UUID of the resolution.
                *
@@ -11412,6 +12371,16 @@ export interface operations {
                * @default
                */
               comment: string | null
+              /**
+               * The full selector describing which alerts the resolution
+               * applies to. The anchor fields below are a derived summary —
+               * compound selectors (e.g. `$or` over several repos) cannot be
+               * summarized and read back as null anchors, so this is the
+               * source of truth.
+               *
+               * @default null
+               */
+              vigil_selector: Record<string, unknown>
               /**
                * Alert type the resolution scopes to (e.g. criticalCVE). Null
                * if the resolution applies to multiple alert types.
@@ -11481,7 +12450,7 @@ export interface operations {
                * @default
                */
               updated_at: string
-            }>
+            }[]
             /**
              * @default
              */
@@ -11497,11 +12466,334 @@ export interface operations {
     }
   }
   /**
+   * Create Org Alert Resolution.
+   *
+   * Create an alert resolution. The `vigil_selector` describes which alerts the
+   * resolution applies to; matching alerts are hidden after the next org
+   * snapshot. Returns the same row shape as the list endpoint. Tokens
+   * restricted to specific repositories may only create resolutions anchored to
+   * a single granted repository via `location.repo`; org-wide or
+   * multi-repository selectors require an org-wide token. This endpoint
+   * consumes 1 unit of your quota. This endpoint requires the following org
+   * token scopes:
+   *
+   * - Alert-resolution:create
+   */
+  createOrgAlertResolution: {
+    parameters: {
+      query?: {
+        /**
+         * Rehearse the write: authorize and validate the request and return the
+         * response body a real write would produce, then discard it. Accepts
+         * `true`, `1`, or `yes`. Other present values return 400 so a typo
+         * cannot persist. Nothing is persisted. A dry-run success is HTTP 200
+         * with `dry_run: true`, not 201.
+         */
+        dry_run?: boolean
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * The reason the alert is resolved. One of: false_positive,
+           * remediated, tolerable_risk, other.
+           *
+           * @enum {string}
+           */
+          reason: 'false_positive' | 'remediated' | 'tolerable_risk' | 'other'
+          /**
+           * Selector describing which alerts the resolution applies to. Fields
+           * must all be under finding._, location._, or artifact.* (e.g.
+           * `{"finding.alertType": "criticalCVE", "artifact.name":
+           * "lodash"}`).
+           *
+           * @default null
+           */
+          vigil_selector: Record<string, unknown>
+          /**
+           * Free-form reason text, mainly for when `reason` is `other` (1-256
+           * characters).
+           *
+           * @default
+           */
+          reason_text?: string | null
+          /**
+           * Operator-provided comment (1-1024 characters).
+           *
+           * @default
+           */
+          comment?: string | null
+        }
+      }
+    }
+    responses: {
+      /**
+       * Dry-run: the write was not persisted.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * The UUID of the resolution.
+             *
+             * @default
+             */
+            uuid: string
+            /**
+             * The reason the alert was resolved. One of: false_positive,
+             * remediated, tolerable_risk, other.
+             *
+             * @default other
+             *
+             * @enum {string}
+             */
+            reason: 'false_positive' | 'remediated' | 'tolerable_risk' | 'other'
+            /**
+             * Free-form reason text when `reason` is `other`.
+             *
+             * @default
+             */
+            reason_text: string | null
+            /**
+             * Operator-provided comment.
+             *
+             * @default
+             */
+            comment: string | null
+            /**
+             * The full selector describing which alerts the resolution applies
+             * to. The anchor fields below are a derived summary — compound
+             * selectors (e.g. `$or` over several repos) cannot be summarized
+             * and read back as null anchors, so this is the source of truth.
+             *
+             * @default null
+             */
+            vigil_selector: Record<string, unknown>
+            /**
+             * Alert type the resolution scopes to (e.g. criticalCVE). Null if
+             * the resolution applies to multiple alert types.
+             *
+             * @default
+             */
+            alert_type: string | null
+            /**
+             * Repository full name the resolution scopes to. Null if not scoped
+             * to a single repo.
+             *
+             * @default
+             */
+            repo: string | null
+            /**
+             * Repository label the resolution scopes to. Null if not scoped to
+             * a label.
+             *
+             * @default
+             */
+            repo_label: string | null
+            /**
+             * Package ecosystem the resolution scopes to (e.g. npm, pypi). Null
+             * if not scoped to a single ecosystem.
+             *
+             * @default
+             */
+            artifact_type: string | null
+            /**
+             * Package namespace/scope the resolution scopes to. Null if not
+             * scoped to a namespace.
+             *
+             * @default
+             */
+            artifact_namespace: string | null
+            /**
+             * Package name the resolution scopes to. Null if not scoped to a
+             * single package.
+             *
+             * @default
+             */
+            artifact_name: string | null
+            /**
+             * Package version the resolution scopes to. Extracted from the
+             * resolution selector at read time; null if the resolution applies
+             * to multiple versions or no single version.
+             *
+             * @default
+             */
+            artifact_version: string | null
+            /**
+             * User ID that created the resolution. Null for system-created
+             * resolutions.
+             *
+             * @default
+             */
+            resolved_by: string | null
+            /**
+             * ISO-8601 creation timestamp.
+             *
+             * @default
+             */
+            created_at: string
+            /**
+             * ISO-8601 last-update timestamp.
+             *
+             * @default
+             */
+            updated_at: string
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      /**
+       * The created alert resolution.
+       */
+      201: {
+        content: {
+          'application/json': {
+            /**
+             * The UUID of the resolution.
+             *
+             * @default
+             */
+            uuid: string
+            /**
+             * The reason the alert was resolved. One of: false_positive,
+             * remediated, tolerable_risk, other.
+             *
+             * @default other
+             *
+             * @enum {string}
+             */
+            reason: 'false_positive' | 'remediated' | 'tolerable_risk' | 'other'
+            /**
+             * Free-form reason text when `reason` is `other`.
+             *
+             * @default
+             */
+            reason_text: string | null
+            /**
+             * Operator-provided comment.
+             *
+             * @default
+             */
+            comment: string | null
+            /**
+             * The full selector describing which alerts the resolution applies
+             * to. The anchor fields below are a derived summary — compound
+             * selectors (e.g. `$or` over several repos) cannot be summarized
+             * and read back as null anchors, so this is the source of truth.
+             *
+             * @default null
+             */
+            vigil_selector: Record<string, unknown>
+            /**
+             * Alert type the resolution scopes to (e.g. criticalCVE). Null if
+             * the resolution applies to multiple alert types.
+             *
+             * @default
+             */
+            alert_type: string | null
+            /**
+             * Repository full name the resolution scopes to. Null if not scoped
+             * to a single repo.
+             *
+             * @default
+             */
+            repo: string | null
+            /**
+             * Repository label the resolution scopes to. Null if not scoped to
+             * a label.
+             *
+             * @default
+             */
+            repo_label: string | null
+            /**
+             * Package ecosystem the resolution scopes to (e.g. npm, pypi). Null
+             * if not scoped to a single ecosystem.
+             *
+             * @default
+             */
+            artifact_type: string | null
+            /**
+             * Package namespace/scope the resolution scopes to. Null if not
+             * scoped to a namespace.
+             *
+             * @default
+             */
+            artifact_namespace: string | null
+            /**
+             * Package name the resolution scopes to. Null if not scoped to a
+             * single package.
+             *
+             * @default
+             */
+            artifact_name: string | null
+            /**
+             * Package version the resolution scopes to. Extracted from the
+             * resolution selector at read time; null if the resolution applies
+             * to multiple versions or no single version.
+             *
+             * @default
+             */
+            artifact_version: string | null
+            /**
+             * User ID that created the resolution. Null for system-created
+             * resolutions.
+             *
+             * @default
+             */
+            resolved_by: string | null
+            /**
+             * ISO-8601 creation timestamp.
+             *
+             * @default
+             */
+            created_at: string
+            /**
+             * ISO-8601 last-update timestamp.
+             *
+             * @default
+             */
+            updated_at: string
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
    * Get Org Alert Resolution.
    *
    * Fetch a single active alert resolution by UUID. Returns the same row shape
-   * as the list endpoint. This endpoint consumes 1 unit of your quota. This
-   * endpoint requires the following org token scopes: - alert-resolution:read.
+   * as the list endpoint. Tokens restricted to specific repositories cannot
+   * read resolutions anchored to repositories outside their grants. This
+   * endpoint consumes 1 unit of your quota. This endpoint requires the
+   * following org token scopes:
+   *
+   * - Alert-resolution:read
    */
   getOrgAlertResolution: {
     parameters: {
@@ -11550,6 +12842,15 @@ export interface operations {
              * @default
              */
             comment: string | null
+            /**
+             * The full selector describing which alerts the resolution applies
+             * to. The anchor fields below are a derived summary — compound
+             * selectors (e.g. `$or` over several repos) cannot be summarized
+             * and read back as null anchors, so this is the source of truth.
+             *
+             * @default null
+             */
+            vigil_selector: Record<string, unknown>
             /**
              * Alert type the resolution scopes to (e.g. criticalCVE). Null if
              * the resolution applies to multiple alert types.
@@ -11633,9 +12934,12 @@ export interface operations {
    * Delete Org Alert Resolution.
    *
    * Delete an alert resolution by UUID. Once deleted, alerts previously hidden
-   * by this resolution will reappear after the next org snapshot. This endpoint
-   * consumes 1 unit of your quota. This endpoint requires the following org
-   * token scopes: - alert-resolution:delete.
+   * by this resolution will reappear after the next org snapshot. Tokens
+   * restricted to specific repositories may only delete resolutions anchored to
+   * a granted repository. This endpoint consumes 1 unit of your quota. This
+   * endpoint requires the following org token scopes:
+   *
+   * - Alert-resolution:delete
    */
   deleteOrgAlertResolution: {
     parameters: {
@@ -11672,12 +12976,1829 @@ export interface operations {
     }
   }
   /**
+   * List Org Alert Policies.
+   *
+   * List the alert policies of an organization. The default policy (which
+   * applies to all repositories without a policy label) is always first,
+   * followed by custom policies ordered by creation time. Requires a token with
+   * org-wide repository access; repo-restricted tokens receive 403. This
+   * endpoint consumes 1 unit of your quota. This endpoint requires the
+   * following org token scopes:
+   *
+   * - Alert-policy:list
+   */
+  getOrgAlertPolicies: {
+    parameters: {
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+      }
+    }
+    responses: {
+      /**
+       * Lists alert policies for the specified organization.
+       */
+      200: {
+        content: {
+          'application/json': {
+            items: {
+              /**
+               * The ID of the policy: a UUID, or `default` for the default
+               * policy until it is first customized.
+               *
+               * @default
+               */
+              id: string
+              /**
+               * The policy name. Null for the default policy, which applies
+               * to all repositories without a policy label.
+               *
+               * @default
+               */
+              name: string | null
+              /**
+               * Operator-provided description.
+               *
+               * @default
+               */
+              description: string | null
+              /**
+               * How the policy scopes to repositories: `labeled_repos`
+               * applies to repositories carrying the policy repo label;
+               * `unlabeled_repos` is the default policy for all unlabeled
+               * repositories.
+               *
+               * @default labeled_repos
+               *
+               * @enum {string}
+               */
+              apply_method: 'labeled_repos' | 'unlabeled_repos'
+              /**
+               * The repo label that scopes this policy. Null for the default
+               * policy.
+               *
+               * @default
+               */
+              repo_label_id: string | null
+              /**
+               * Repositories the policy scopes to. Empty for the default
+               * policy and for policies with no repository assignments.
+               */
+              repository_ids: string[]
+              /**
+               * Baseline rule bundle the policy starts from. One of:
+               * essential, balanced, comprehensive. Null when the policy has
+               * no baseline.
+               *
+               * @default
+               */
+              baseline: string | null
+              /**
+               * User ID that created the policy.
+               *
+               * @default
+               */
+              created_by: string | null
+              /**
+               * User ID that last updated the policy.
+               *
+               * @default
+               */
+              updated_by: string | null
+              /**
+               * ISO-8601 creation timestamp. Null for the default policy
+               * until it is first customized.
+               *
+               * @default
+               */
+              created_at: string | null
+              /**
+               * ISO-8601 last-update timestamp. Null for the default policy
+               * until it is first customized.
+               *
+               * @default
+               */
+              updated_at: string | null
+            }[]
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create Org Alert Policy.
+   *
+   * Create an alert policy. A repo label with the same name is created to scope
+   * the policy; repositories carrying that label are governed by the policy.
+   * Requires a token with org-wide repository access; repo-restricted tokens
+   * receive 403. This endpoint consumes 1 unit of your quota. This endpoint
+   * requires the following org token scopes:
+   *
+   * - Alert-policy:create
+   */
+  createOrgAlertPolicy: {
+    parameters: {
+      query?: {
+        /**
+         * Rehearse the write: authorize and validate the request and return the
+         * response body a real write would produce, then discard it. Accepts
+         * `true`, `1`, or `yes`. Other present values return 400 so a typo
+         * cannot persist. Nothing is persisted. A dry-run success is HTTP 200
+         * with `dry_run: true`, not 201.
+         */
+        dry_run?: boolean
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * The policy name (1-120 characters). Also used as the name of the
+           * repo label that scopes the policy.
+           */
+          name: string
+          /**
+           * Operator-provided description (up to 256 characters).
+           *
+           * @default
+           */
+          description?: string | null
+          /**
+           * Repositories to scope the policy to.
+           */
+          repository_ids?: string[] | null
+          /**
+           * Baseline rule bundle the policy starts from. One of: essential,
+           * balanced, comprehensive. Null for no baseline.
+           *
+           * @default
+           */
+          baseline?: string | null
+        }
+      }
+    }
+    responses: {
+      /**
+       * Dry-run: the write was not persisted.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * The ID of the policy: a UUID, or `default` for the default policy
+             * until it is first customized.
+             *
+             * @default
+             */
+            id: string
+            /**
+             * The policy name. Null for the default policy, which applies to
+             * all repositories without a policy label.
+             *
+             * @default
+             */
+            name: string | null
+            /**
+             * Operator-provided description.
+             *
+             * @default
+             */
+            description: string | null
+            /**
+             * How the policy scopes to repositories: `labeled_repos` applies to
+             * repositories carrying the policy repo label; `unlabeled_repos` is
+             * the default policy for all unlabeled repositories.
+             *
+             * @default labeled_repos
+             *
+             * @enum {string}
+             */
+            apply_method: 'labeled_repos' | 'unlabeled_repos'
+            /**
+             * The repo label that scopes this policy. Null for the default
+             * policy.
+             *
+             * @default
+             */
+            repo_label_id: string | null
+            /**
+             * Repositories the policy scopes to. Empty for the default policy
+             * and for policies with no repository assignments.
+             */
+            repository_ids: string[]
+            /**
+             * Baseline rule bundle the policy starts from. One of: essential,
+             * balanced, comprehensive. Null when the policy has no baseline.
+             *
+             * @default
+             */
+            baseline: string | null
+            /**
+             * User ID that created the policy.
+             *
+             * @default
+             */
+            created_by: string | null
+            /**
+             * User ID that last updated the policy.
+             *
+             * @default
+             */
+            updated_by: string | null
+            /**
+             * ISO-8601 creation timestamp. Null for the default policy until it
+             * is first customized.
+             *
+             * @default
+             */
+            created_at: string | null
+            /**
+             * ISO-8601 last-update timestamp. Null for the default policy until
+             * it is first customized.
+             *
+             * @default
+             */
+            updated_at: string | null
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      /**
+       * The created alert policy.
+       */
+      201: {
+        content: {
+          'application/json': {
+            /**
+             * The ID of the policy: a UUID, or `default` for the default policy
+             * until it is first customized.
+             *
+             * @default
+             */
+            id: string
+            /**
+             * The policy name. Null for the default policy, which applies to
+             * all repositories without a policy label.
+             *
+             * @default
+             */
+            name: string | null
+            /**
+             * Operator-provided description.
+             *
+             * @default
+             */
+            description: string | null
+            /**
+             * How the policy scopes to repositories: `labeled_repos` applies to
+             * repositories carrying the policy repo label; `unlabeled_repos` is
+             * the default policy for all unlabeled repositories.
+             *
+             * @default labeled_repos
+             *
+             * @enum {string}
+             */
+            apply_method: 'labeled_repos' | 'unlabeled_repos'
+            /**
+             * The repo label that scopes this policy. Null for the default
+             * policy.
+             *
+             * @default
+             */
+            repo_label_id: string | null
+            /**
+             * Repositories the policy scopes to. Empty for the default policy
+             * and for policies with no repository assignments.
+             */
+            repository_ids: string[]
+            /**
+             * Baseline rule bundle the policy starts from. One of: essential,
+             * balanced, comprehensive. Null when the policy has no baseline.
+             *
+             * @default
+             */
+            baseline: string | null
+            /**
+             * User ID that created the policy.
+             *
+             * @default
+             */
+            created_by: string | null
+            /**
+             * User ID that last updated the policy.
+             *
+             * @default
+             */
+            updated_by: string | null
+            /**
+             * ISO-8601 creation timestamp. Null for the default policy until it
+             * is first customized.
+             *
+             * @default
+             */
+            created_at: string | null
+            /**
+             * ISO-8601 last-update timestamp. Null for the default policy until
+             * it is first customized.
+             *
+             * @default
+             */
+            updated_at: string | null
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get Org Alert Policy.
+   *
+   * Fetch a single alert policy by ID. Use `default` as the ID for the default
+   * policy, which applies to all repositories without a policy label. Requires
+   * a token with org-wide repository access; repo-restricted tokens receive 403.
+   * This endpoint consumes 1 unit of your quota. This endpoint requires the
+   * following org token scopes:
+   *
+   * - Alert-policy:read
+   */
+  getOrgAlertPolicy: {
+    parameters: {
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The ID of the alert policy: a UUID, or `default` for the default
+         * policy.
+         */
+        policy_id: string
+      }
+    }
+    responses: {
+      /**
+       * The requested alert policy.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * The ID of the policy: a UUID, or `default` for the default policy
+             * until it is first customized.
+             *
+             * @default
+             */
+            id: string
+            /**
+             * The policy name. Null for the default policy, which applies to
+             * all repositories without a policy label.
+             *
+             * @default
+             */
+            name: string | null
+            /**
+             * Operator-provided description.
+             *
+             * @default
+             */
+            description: string | null
+            /**
+             * How the policy scopes to repositories: `labeled_repos` applies to
+             * repositories carrying the policy repo label; `unlabeled_repos` is
+             * the default policy for all unlabeled repositories.
+             *
+             * @default labeled_repos
+             *
+             * @enum {string}
+             */
+            apply_method: 'labeled_repos' | 'unlabeled_repos'
+            /**
+             * The repo label that scopes this policy. Null for the default
+             * policy.
+             *
+             * @default
+             */
+            repo_label_id: string | null
+            /**
+             * Repositories the policy scopes to. Empty for the default policy
+             * and for policies with no repository assignments.
+             */
+            repository_ids: string[]
+            /**
+             * Baseline rule bundle the policy starts from. One of: essential,
+             * balanced, comprehensive. Null when the policy has no baseline.
+             *
+             * @default
+             */
+            baseline: string | null
+            /**
+             * User ID that created the policy.
+             *
+             * @default
+             */
+            created_by: string | null
+            /**
+             * User ID that last updated the policy.
+             *
+             * @default
+             */
+            updated_by: string | null
+            /**
+             * ISO-8601 creation timestamp. Null for the default policy until it
+             * is first customized.
+             *
+             * @default
+             */
+            created_at: string | null
+            /**
+             * ISO-8601 last-update timestamp. Null for the default policy until
+             * it is first customized.
+             *
+             * @default
+             */
+            updated_at: string | null
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update Org Alert Policy.
+   *
+   * Update an alert policy. Only the provided fields change; `repository_ids`
+   * replaces the full set of repositories the policy scopes to. The default
+   * policy cannot be renamed and its scope is implicit. Requires a token with
+   * org-wide repository access; repo-restricted tokens receive 403. This
+   * endpoint consumes 1 unit of your quota. This endpoint requires the
+   * following org token scopes:
+   *
+   * - Alert-policy:update
+   */
+  updateOrgAlertPolicy: {
+    parameters: {
+      query?: {
+        /**
+         * Rehearse the write: authorize and validate the request and return the
+         * response body a real write would produce, then discard it. Accepts
+         * `true`, `1`, or `yes`. Other present values return 400 so a typo
+         * cannot persist. Nothing is persisted. A dry-run success is HTTP 200
+         * with `dry_run: true`, not 201.
+         */
+        dry_run?: boolean
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The ID of the alert policy: a UUID, or `default` for the default
+         * policy.
+         */
+        policy_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * The policy name (1-120 characters). The default policy cannot be
+           * renamed.
+           *
+           * @default
+           */
+          name?: string
+          /**
+           * Operator-provided description (up to 256 characters).
+           *
+           * @default
+           */
+          description?: string | null
+          /**
+           * Full replacement set of repositories the policy scopes to. The
+           * default policy scope is implicit and cannot be set.
+           */
+          repository_ids?: string[] | null
+          /**
+           * Baseline rule bundle the policy starts from. One of: essential,
+           * balanced, comprehensive. Null to remove the baseline.
+           *
+           * @default
+           */
+          baseline?: string | null
+        }
+      }
+    }
+    responses: {
+      /**
+       * The updated alert policy. Dry-run responses include `dry_run: true` and
+       * were not persisted.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * The ID of the policy: a UUID, or `default` for the default policy
+             * until it is first customized.
+             *
+             * @default
+             */
+            id: string
+            /**
+             * The policy name. Null for the default policy, which applies to
+             * all repositories without a policy label.
+             *
+             * @default
+             */
+            name: string | null
+            /**
+             * Operator-provided description.
+             *
+             * @default
+             */
+            description: string | null
+            /**
+             * How the policy scopes to repositories: `labeled_repos` applies to
+             * repositories carrying the policy repo label; `unlabeled_repos` is
+             * the default policy for all unlabeled repositories.
+             *
+             * @default labeled_repos
+             *
+             * @enum {string}
+             */
+            apply_method: 'labeled_repos' | 'unlabeled_repos'
+            /**
+             * The repo label that scopes this policy. Null for the default
+             * policy.
+             *
+             * @default
+             */
+            repo_label_id: string | null
+            /**
+             * Repositories the policy scopes to. Empty for the default policy
+             * and for policies with no repository assignments.
+             */
+            repository_ids: string[]
+            /**
+             * Baseline rule bundle the policy starts from. One of: essential,
+             * balanced, comprehensive. Null when the policy has no baseline.
+             *
+             * @default
+             */
+            baseline: string | null
+            /**
+             * User ID that created the policy.
+             *
+             * @default
+             */
+            created_by: string | null
+            /**
+             * User ID that last updated the policy.
+             *
+             * @default
+             */
+            updated_by: string | null
+            /**
+             * ISO-8601 creation timestamp. Null for the default policy until it
+             * is first customized.
+             *
+             * @default
+             */
+            created_at: string | null
+            /**
+             * ISO-8601 last-update timestamp. Null for the default policy until
+             * it is first customized.
+             *
+             * @default
+             */
+            updated_at: string | null
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Delete Org Alert Policy.
+   *
+   * Delete an alert policy along with its rules and repo label. Repositories
+   * previously scoped to the policy fall back to the default policy after the
+   * next org snapshot. The default policy cannot be deleted. Requires a token
+   * with org-wide repository access; repo-restricted tokens receive 403. This
+   * endpoint consumes 1 unit of your quota. This endpoint requires the
+   * following org token scopes:
+   *
+   * - Alert-policy:delete
+   */
+  deleteOrgAlertPolicy: {
+    parameters: {
+      query?: {
+        /**
+         * Rehearse the write: authorize and validate the request and return the
+         * response body a real write would produce, then discard it. Accepts
+         * `true`, `1`, or `yes`. Other present values return 400 so a typo
+         * cannot persist. Nothing is persisted. A dry-run success is HTTP 200
+         * with `dry_run: true`, not 201.
+         */
+        dry_run?: boolean
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The UUID of the alert policy to delete.
+         */
+        policy_id: string
+      }
+    }
+    responses: {
+      /**
+       * Deleted the alert policy, or rehearsed the delete when `dry_run` is
+       * true.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * Present on a persisted delete.
+             *
+             * @default
+             */
+            result?: string
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List Org Alert Policy Rules.
+   *
+   * List the custom rules of an alert policy in evaluation order (ascending
+   * rank). Rules are evaluated before the policy baseline; the first matching
+   * rule decides the alert action. Requires a token with org-wide repository
+   * access; repo-restricted tokens receive 403. This endpoint consumes 1 unit
+   * of your quota. This endpoint requires the following org token scopes:
+   *
+   * - Alert-policy:list
+   */
+  getOrgAlertPolicyRules: {
+    parameters: {
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The ID of the alert policy: a UUID, or `default` for the default
+         * policy.
+         */
+        policy_id: string
+      }
+    }
+    responses: {
+      /**
+       * Lists the rules of the specified alert policy.
+       */
+      200: {
+        content: {
+          'application/json': {
+            items: {
+              /**
+               * The UUID of the rule.
+               *
+               * @default
+               */
+              id: string
+              /**
+               * The UUID of the policy the rule belongs to.
+               *
+               * @default
+               */
+              alert_policy_id: string
+              /**
+               * Fractional-index rank; rules are evaluated in ascending rank
+               * order.
+               *
+               * @default
+               */
+              rank: string
+              /**
+               * The rule name.
+               *
+               * @default
+               */
+              name: string
+              /**
+               * Selector describing which alerts the rule applies to. Fields
+               * must all be under finding._, location._, or artifact.* (e.g.
+               * `{"finding.alertType": "criticalCVE", "artifact.name":
+               * "lodash"}`).
+               *
+               * @default null
+               */
+              vigil_selector: Record<string, unknown>
+              /**
+               * The action applied to matching alerts. One of: error, warn,
+               * monitor, ignore.
+               *
+               * @default monitor
+               *
+               * @enum {string}
+               */
+              action: 'error' | 'warn' | 'monitor' | 'ignore'
+              /**
+               * Operator-provided note.
+               *
+               * @default
+               */
+              note: string | null
+              /**
+               * User ID that created the rule.
+               *
+               * @default
+               */
+              created_by: string | null
+              /**
+               * User ID that last updated the rule.
+               *
+               * @default
+               */
+              updated_by: string | null
+              /**
+               * ISO-8601 creation timestamp.
+               *
+               * @default
+               */
+              created_at: string
+              /**
+               * ISO-8601 last-update timestamp.
+               *
+               * @default
+               */
+              updated_at: string
+            }[]
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Create Org Alert Policy Rule.
+   *
+   * Create a rule on an alert policy. Rules are evaluated in ascending rank
+   * order and the first matching rule decides the alert action. Provide at most
+   * one of `position`, `rank`, `before_rule_id`, or `after_rule_id`; the rule
+   * is placed first when no position is provided. Requires a token with
+   * org-wide repository access; repo-restricted tokens receive 403. This
+   * endpoint consumes 1 unit of your quota. This endpoint requires the
+   * following org token scopes:
+   *
+   * - Alert-policy:create
+   */
+  createOrgAlertPolicyRule: {
+    parameters: {
+      query?: {
+        /**
+         * Rehearse the write: authorize and validate the request and return the
+         * response body a real write would produce, then discard it. Accepts
+         * `true`, `1`, or `yes`. Other present values return 400 so a typo
+         * cannot persist. Nothing is persisted. A dry-run success is HTTP 200
+         * with `dry_run: true`, not 201.
+         */
+        dry_run?: boolean
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The ID of the alert policy: a UUID, or `default` for the default
+         * policy.
+         */
+        policy_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * The rule name (1-128 characters).
+           */
+          name: string
+          /**
+           * Selector describing which alerts the rule applies to. Fields must
+           * all be under finding._, location._, or artifact.* (e.g.
+           * `{"finding.alertType": "criticalCVE", "artifact.name":
+           * "lodash"}`).
+           *
+           * @default null
+           */
+          vigil_selector: Record<string, unknown>
+          /**
+           * The action applied to matching alerts. One of: error, warn,
+           * monitor, ignore.
+           */
+          action: string
+          /**
+           * Operator-provided note (up to 256 characters).
+           *
+           * @default
+           */
+          note?: string | null
+          /**
+           * Where to place the rule within the policy: `first` or `last`.
+           * Mutually exclusive with `rank`, `before_rule_id`, and
+           * `after_rule_id`; when no position is provided a created rule is
+           * placed first.
+           *
+           * @default
+           */
+          position?: string
+          /**
+           * Explicit rank, as a `fractional-indexing` base62 order key (e.g.
+           * `a0`, `a0V`). Prefer `position`, `before_rule_id`, or
+           * `after_rule_id`; a rank that is not a valid order key is rejected.
+           *
+           * @default
+           */
+          rank?: string
+          /**
+           * Place the rule immediately before this rule UUID.
+           *
+           * @default
+           */
+          before_rule_id?: string | null
+          /**
+           * Place the rule immediately after this rule UUID.
+           *
+           * @default
+           */
+          after_rule_id?: string | null
+        }
+      }
+    }
+    responses: {
+      /**
+       * Dry-run: the write was not persisted.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * The UUID of the rule.
+             *
+             * @default
+             */
+            id: string
+            /**
+             * The UUID of the policy the rule belongs to.
+             *
+             * @default
+             */
+            alert_policy_id: string
+            /**
+             * Fractional-index rank; rules are evaluated in ascending rank
+             * order.
+             *
+             * @default
+             */
+            rank: string
+            /**
+             * The rule name.
+             *
+             * @default
+             */
+            name: string
+            /**
+             * Selector describing which alerts the rule applies to. Fields must
+             * all be under finding._, location._, or artifact.* (e.g.
+             * `{"finding.alertType": "criticalCVE", "artifact.name":
+             * "lodash"}`).
+             *
+             * @default null
+             */
+            vigil_selector: Record<string, unknown>
+            /**
+             * The action applied to matching alerts. One of: error, warn,
+             * monitor, ignore.
+             *
+             * @default monitor
+             *
+             * @enum {string}
+             */
+            action: 'error' | 'warn' | 'monitor' | 'ignore'
+            /**
+             * Operator-provided note.
+             *
+             * @default
+             */
+            note: string | null
+            /**
+             * User ID that created the rule.
+             *
+             * @default
+             */
+            created_by: string | null
+            /**
+             * User ID that last updated the rule.
+             *
+             * @default
+             */
+            updated_by: string | null
+            /**
+             * ISO-8601 creation timestamp.
+             *
+             * @default
+             */
+            created_at: string
+            /**
+             * ISO-8601 last-update timestamp.
+             *
+             * @default
+             */
+            updated_at: string
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      /**
+       * The created alert policy rule.
+       */
+      201: {
+        content: {
+          'application/json': {
+            /**
+             * The UUID of the rule.
+             *
+             * @default
+             */
+            id: string
+            /**
+             * The UUID of the policy the rule belongs to.
+             *
+             * @default
+             */
+            alert_policy_id: string
+            /**
+             * Fractional-index rank; rules are evaluated in ascending rank
+             * order.
+             *
+             * @default
+             */
+            rank: string
+            /**
+             * The rule name.
+             *
+             * @default
+             */
+            name: string
+            /**
+             * Selector describing which alerts the rule applies to. Fields must
+             * all be under finding._, location._, or artifact.* (e.g.
+             * `{"finding.alertType": "criticalCVE", "artifact.name":
+             * "lodash"}`).
+             *
+             * @default null
+             */
+            vigil_selector: Record<string, unknown>
+            /**
+             * The action applied to matching alerts. One of: error, warn,
+             * monitor, ignore.
+             *
+             * @default monitor
+             *
+             * @enum {string}
+             */
+            action: 'error' | 'warn' | 'monitor' | 'ignore'
+            /**
+             * Operator-provided note.
+             *
+             * @default
+             */
+            note: string | null
+            /**
+             * User ID that created the rule.
+             *
+             * @default
+             */
+            created_by: string | null
+            /**
+             * User ID that last updated the rule.
+             *
+             * @default
+             */
+            updated_by: string | null
+            /**
+             * ISO-8601 creation timestamp.
+             *
+             * @default
+             */
+            created_at: string
+            /**
+             * ISO-8601 last-update timestamp.
+             *
+             * @default
+             */
+            updated_at: string
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get Org Alert Policy Rule.
+   *
+   * Fetch a single alert policy rule by UUID. Returns the same row shape as the
+   * rules list endpoint. Requires a token with org-wide repository access;
+   * repo-restricted tokens receive 403. This endpoint consumes 1 unit of your
+   * quota. This endpoint requires the following org token scopes:
+   *
+   * - Alert-policy:read
+   */
+  getOrgAlertPolicyRule: {
+    parameters: {
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The ID of the alert policy: a UUID, or `default` for the default
+         * policy.
+         */
+        policy_id: string
+        /**
+         * The UUID of the rule to fetch.
+         */
+        rule_id: string
+      }
+    }
+    responses: {
+      /**
+       * The requested alert policy rule.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * The UUID of the rule.
+             *
+             * @default
+             */
+            id: string
+            /**
+             * The UUID of the policy the rule belongs to.
+             *
+             * @default
+             */
+            alert_policy_id: string
+            /**
+             * Fractional-index rank; rules are evaluated in ascending rank
+             * order.
+             *
+             * @default
+             */
+            rank: string
+            /**
+             * The rule name.
+             *
+             * @default
+             */
+            name: string
+            /**
+             * Selector describing which alerts the rule applies to. Fields must
+             * all be under finding._, location._, or artifact.* (e.g.
+             * `{"finding.alertType": "criticalCVE", "artifact.name":
+             * "lodash"}`).
+             *
+             * @default null
+             */
+            vigil_selector: Record<string, unknown>
+            /**
+             * The action applied to matching alerts. One of: error, warn,
+             * monitor, ignore.
+             *
+             * @default monitor
+             *
+             * @enum {string}
+             */
+            action: 'error' | 'warn' | 'monitor' | 'ignore'
+            /**
+             * Operator-provided note.
+             *
+             * @default
+             */
+            note: string | null
+            /**
+             * User ID that created the rule.
+             *
+             * @default
+             */
+            created_by: string | null
+            /**
+             * User ID that last updated the rule.
+             *
+             * @default
+             */
+            updated_by: string | null
+            /**
+             * ISO-8601 creation timestamp.
+             *
+             * @default
+             */
+            created_at: string
+            /**
+             * ISO-8601 last-update timestamp.
+             *
+             * @default
+             */
+            updated_at: string
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Update Org Alert Policy Rule.
+   *
+   * Update an alert policy rule. Only the provided fields change. To move the
+   * rule, provide at most one of `position`, `rank`, `before_rule_id`, or
+   * `after_rule_id`. Requires a token with org-wide repository access;
+   * repo-restricted tokens receive 403. This endpoint consumes 1 unit of your
+   * quota. This endpoint requires the following org token scopes:
+   *
+   * - Alert-policy:update
+   */
+  updateOrgAlertPolicyRule: {
+    parameters: {
+      query?: {
+        /**
+         * Rehearse the write: authorize and validate the request and return the
+         * response body a real write would produce, then discard it. Accepts
+         * `true`, `1`, or `yes`. Other present values return 400 so a typo
+         * cannot persist. Nothing is persisted. A dry-run success is HTTP 200
+         * with `dry_run: true`, not 201.
+         */
+        dry_run?: boolean
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The ID of the alert policy: a UUID, or `default` for the default
+         * policy.
+         */
+        policy_id: string
+        /**
+         * The UUID of the rule to update.
+         */
+        rule_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * The rule name (1-128 characters).
+           *
+           * @default
+           */
+          name?: string
+          /**
+           * Selector describing which alerts the rule applies to. Fields must
+           * all be under finding._, location._, or artifact.* (e.g.
+           * `{"finding.alertType": "criticalCVE", "artifact.name":
+           * "lodash"}`).
+           *
+           * @default null
+           */
+          vigil_selector?: Record<string, unknown>
+          /**
+           * The action applied to matching alerts. One of: error, warn,
+           * monitor, ignore.
+           *
+           * @default
+           */
+          action?: string
+          /**
+           * Operator-provided note (up to 256 characters).
+           *
+           * @default
+           */
+          note?: string | null
+          /**
+           * Where to place the rule within the policy: `first` or `last`.
+           * Mutually exclusive with `rank`, `before_rule_id`, and
+           * `after_rule_id`; when no position is provided a created rule is
+           * placed first.
+           *
+           * @default
+           */
+          position?: string
+          /**
+           * Explicit rank, as a `fractional-indexing` base62 order key (e.g.
+           * `a0`, `a0V`). Prefer `position`, `before_rule_id`, or
+           * `after_rule_id`; a rank that is not a valid order key is rejected.
+           *
+           * @default
+           */
+          rank?: string
+          /**
+           * Move the rule immediately before this rule UUID.
+           *
+           * @default
+           */
+          before_rule_id?: string | null
+          /**
+           * Move the rule immediately after this rule UUID.
+           *
+           * @default
+           */
+          after_rule_id?: string | null
+        }
+      }
+    }
+    responses: {
+      /**
+       * The updated alert policy rule. Dry-run responses include `dry_run:
+       * true` and were not persisted.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * The UUID of the rule.
+             *
+             * @default
+             */
+            id: string
+            /**
+             * The UUID of the policy the rule belongs to.
+             *
+             * @default
+             */
+            alert_policy_id: string
+            /**
+             * Fractional-index rank; rules are evaluated in ascending rank
+             * order.
+             *
+             * @default
+             */
+            rank: string
+            /**
+             * The rule name.
+             *
+             * @default
+             */
+            name: string
+            /**
+             * Selector describing which alerts the rule applies to. Fields must
+             * all be under finding._, location._, or artifact.* (e.g.
+             * `{"finding.alertType": "criticalCVE", "artifact.name":
+             * "lodash"}`).
+             *
+             * @default null
+             */
+            vigil_selector: Record<string, unknown>
+            /**
+             * The action applied to matching alerts. One of: error, warn,
+             * monitor, ignore.
+             *
+             * @default monitor
+             *
+             * @enum {string}
+             */
+            action: 'error' | 'warn' | 'monitor' | 'ignore'
+            /**
+             * Operator-provided note.
+             *
+             * @default
+             */
+            note: string | null
+            /**
+             * User ID that created the rule.
+             *
+             * @default
+             */
+            created_by: string | null
+            /**
+             * User ID that last updated the rule.
+             *
+             * @default
+             */
+            updated_by: string | null
+            /**
+             * ISO-8601 creation timestamp.
+             *
+             * @default
+             */
+            created_at: string
+            /**
+             * ISO-8601 last-update timestamp.
+             *
+             * @default
+             */
+            updated_at: string
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Delete Org Alert Policy Rule.
+   *
+   * Delete an alert policy rule. Alerts previously matched by this rule are
+   * re-evaluated against the remaining rules and baseline after the next org
+   * snapshot. Requires a token with org-wide repository access; repo-restricted
+   * tokens receive 403. This endpoint consumes 1 unit of your quota. This
+   * endpoint requires the following org token scopes:
+   *
+   * - Alert-policy:delete
+   */
+  deleteOrgAlertPolicyRule: {
+    parameters: {
+      query?: {
+        /**
+         * Rehearse the write: authorize and validate the request and return the
+         * response body a real write would produce, then discard it. Accepts
+         * `true`, `1`, or `yes`. Other present values return 400 so a typo
+         * cannot persist. Nothing is persisted. A dry-run success is HTTP 200
+         * with `dry_run: true`, not 201.
+         */
+        dry_run?: boolean
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+        /**
+         * The ID of the alert policy: a UUID, or `default` for the default
+         * policy.
+         */
+        policy_id: string
+        /**
+         * The UUID of the rule to delete.
+         */
+        rule_id: string
+      }
+    }
+    responses: {
+      /**
+       * Deleted the alert policy rule, or rehearsed the delete when `dry_run`
+       * is true.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * Present on a persisted delete.
+             *
+             * @default
+             */
+            result?: string
+            /**
+             * True when `?dry_run=true` (or `1` / `yes`) rehearsed the write;
+             * nothing was persisted.
+             *
+             * @default false
+             */
+            dry_run?: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      409: components['responses']['SocketConflict']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Get Org Alert Policy Migration Status.
+   *
+   * Retrieve the alert policy migration status of an organization. This is
+   * read-only and does not enroll organizations or start migration windows.
+   * Requires a token with org-wide repository access; repo-restricted tokens
+   * receive 403. This endpoint consumes 1 unit of your quota. This endpoint
+   * requires the following org token scopes:
+   *
+   * - Alert-policy:list
+   */
+  getOrgAlertPolicyMigrationStatus: {
+    parameters: {
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+      }
+    }
+    responses: {
+      /**
+       * The alert policy migration status of the organization.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * Current migration state. Null when the organization is not
+             * enrolled.
+             *
+             * @default pending
+             *
+             * @enum {string|null}
+             */
+            state:
+              | 'pending'
+              | 'previewing'
+              | 'accepted'
+              | 'auto_finalized'
+              | 'rolled_back'
+              | null
+            /**
+             * ISO-8601 timestamp when migration finalized.
+             *
+             * @default
+             */
+            finalized_at: string | null
+            /**
+             * ISO-8601 auto-finalization deadline.
+             *
+             * @default
+             */
+            deadline_at: string | null
+            /**
+             * ISO-8601 end of the organization migration window.
+             *
+             * @default
+             */
+            window_end_at: string | null
+            /**
+             * ISO-8601 timestamp when an administrator paused the deadline.
+             *
+             * @default
+             */
+            deadline_admin_paused_at: string | null
+            /**
+             * Whether the alert policy layer evaluates for this organization.
+             * True for migrated organizations and for organizations that
+             * started on Rules & Policies.
+             *
+             * @default false
+             */
+            alert_policies_enabled: boolean
+            /**
+             * Whether legacy alert triage and the legacy security policy still
+             * evaluate for this organization.
+             *
+             * @default true
+             */
+            legacy_evaluation_enabled: boolean
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * Translate Org Alert Triage.
+   *
+   * Translate a legacy alert triage payload — the same body as `POST
+   * /v0/orgs/{org_slug}/triage/alerts` — into the resolution or policy-rule
+   * requests that replace it. Nothing is created. Policy-rule translations
+   * target the default (Main) policy, which covers repositories without a
+   * policy label; labeled policies do not inherit those rules, so POST the same
+   * body to `/alert-policies/{id}/rules` if the rule should apply there.
+   * Entries that cannot be translated are returned in `untranslatable`; the
+   * rest are in `translations`. Requires one of: `triage:alerts-update`,
+   * `alert-policy:read`, or `alert-resolution:create`. This endpoint consumes 1
+   * unit of your quota. This endpoint requires the following org token scopes:
+   *
+   * - No Scopes Required, but authentication is required
+   */
+  translateOrgAlertPolicyMigrationTriage: {
+    parameters: {
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          alertTriage: {
+            /**
+             * The UUID of the triage entry. Omit to create a new entry;
+             * provide to update an existing one.
+             *
+             * @default
+             */
+            uuid?: string | null
+            /**
+             * The package ecosystem type (e.g., npm, pypi). Use null or "*"
+             * for wildcard.
+             *
+             * @default
+             */
+            packageType?: string | null
+            /**
+             * The package namespace or scope. Use null or "*" for wildcard.
+             *
+             * @default
+             */
+            packageNamespace?: string | null
+            /**
+             * The package name. Use null or "*" for wildcard.
+             *
+             * @default
+             */
+            packageName?: string | null
+            /**
+             * The package version. Supports a "*" suffix for wildcard prefix
+             * matching. Use null for any version.
+             *
+             * @default
+             */
+            packageVersion?: string | null
+            /**
+             * The specific alert key to target.
+             *
+             * @default
+             */
+            alertKey?: string | null
+            /**
+             * The alert type (e.g., criticalCVE, highCVE).
+             *
+             * @default
+             */
+            alertType?: string | null
+            /**
+             * Whether a fix is available, unavailable, or * for any.
+             *
+             * @enum {string}
+             */
+            fixAvailable?: 'available' | 'unavailable' | '*'
+            /**
+             * Whether a patch is available, unavailable, or * for any.
+             *
+             * @enum {string}
+             */
+            patchAvailable?: 'available' | 'unavailable' | '*'
+            /**
+             * Whether the alert has a CISA KEV, can be exist, none, or * for
+             * any.
+             *
+             * @enum {string}
+             */
+            kevs?: 'exist' | 'none' | '*'
+            /**
+             * CVE or GHSA ID to match against.
+             *
+             * @default
+             */
+            cveOrGhsaId?: string | null
+            /**
+             * The reachability of the alert, can be reachable, unreachable,
+             * other, or * for any.
+             *
+             * @enum {string}
+             */
+            reachability?: 'reachable' | 'unreachable' | 'other' | '*'
+            /**
+             * CVSS score comparison operator and value (e.g., >=7.5, >5.0,
+             * ==8.0).
+             *
+             * @default
+             */
+            cvssScoreCmp?: string | null
+            /**
+             * A note or comment for the triage action.
+             *
+             * @default
+             */
+            note?: string
+            /**
+             * The triage state of the alert.
+             *
+             * @enum {string}
+             */
+            state?: 'block' | 'ignore' | 'inherit' | 'monitor' | 'warn'
+          }[]
+        }
+      }
+    }
+    responses: {
+      /**
+       * Translated requests, plus any entries that have no equivalent.
+       */
+      200: {
+        content: {
+          'application/json': {
+            translations: {
+              /**
+               * Zero-based position of the source entry in the submitted
+               * `alertTriage` array.
+               *
+               * @default 0
+               */
+              index: number
+              /**
+               * Which API replaces this triage entry.
+               *
+               * @default alert_resolution
+               *
+               * @enum {string}
+               */
+              target: 'alert_resolution' | 'alert_policy_rule'
+              /**
+               * HTTP method of the new request.
+               *
+               * @default POST
+               *
+               * @enum {string}
+               */
+              method: 'POST'
+              /**
+               * Path of the new request. Policy rules target the default
+               * (Main) policy, which covers repositories without a policy
+               * label. Labeled policies do not inherit Main — replace
+               * `default` with that policy id if the rule should apply
+               * there.
+               *
+               * @default
+               */
+              path: string
+              /**
+               * Request body to send. Resolutions: `{ reason, comment,
+               * vigil_selector }` (`reason` is `other`). Rules: `{ name,
+               * action, note, vigil_selector }` (`block` becomes `error`).
+               *
+               * @default null
+               */
+              body: Record<string, unknown>
+            }[]
+            untranslatable: {
+              /**
+               * Zero-based position of the source entry in the submitted
+               * `alertTriage` array.
+               *
+               * @default 0
+               */
+              index: number
+              /**
+               * Why the entry was not translated.
+               *
+               * @default alert_key_not_translatable
+               *
+               * @enum {string}
+               */
+              code:
+                | 'inherit_not_translatable'
+                | 'alert_key_not_translatable'
+                | 'matches_all_alerts'
+                | 'filter_not_translatable'
+                | 'note_too_long'
+              /**
+               * What to do instead. Safe to show to API clients.
+               *
+               * @default
+               */
+              reason: string
+            }[]
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
    * List repositories.
    *
    * Lists repositories for the specified organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - repo:list.
+   *
+   * - Repo:list
    */
   getOrgRepoList: {
     parameters: {
@@ -11717,7 +14838,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * The ID of the repository.
                *
@@ -11832,7 +14953,7 @@ export interface operations {
                * @default
                */
               workspace?: string
-            }>
+            }[]
             /**
              * @default 0
              */
@@ -11852,8 +14973,9 @@ export interface operations {
    *
    * Create a repository. Repos collect Full scans and Diff scans and are
    * typically associated with a git repo. This endpoint consumes 1 unit of your
-   * quota. This endpoint requires the following org token scopes: -
-   * repo:create.
+   * quota. This endpoint requires the following org token scopes:
+   *
+   * - Repo:create
    */
   createOrgRepo: {
     parameters: {
@@ -12195,7 +15317,8 @@ export interface operations {
    * Retrieve a repository associated with an organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - repo:list.
+   *
+   * - Repo:list
    */
   getOrgRepo: {
     parameters: {
@@ -12361,7 +15484,8 @@ export interface operations {
    * Update details of an existing repository.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - repo:update.
+   *
+   * - Repo:update
    */
   updateOrgRepo: {
     parameters: {
@@ -12568,7 +15692,9 @@ export interface operations {
    *
    * Delete a single repository and all of its associated Full scans and Diff
    * scans. This endpoint consumes 1 unit of your quota. This endpoint requires
-   * the following org token scopes: - repo:delete.
+   * the following org token scopes:
+   *
+   * - Repo:delete
    */
   deleteOrgRepo: {
     parameters: {
@@ -12616,7 +15742,9 @@ export interface operations {
    * Associate a repository label with a repository. Labels can be used to group
    * and organize repositories and to apply security/license policies. This
    * endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes: - repo-label:update.
+   * following org token scopes:
+   *
+   * - Repo-label:update
    */
   associateOrgRepoLabel: {
     parameters: {
@@ -12673,7 +15801,8 @@ export interface operations {
    * Lists repository labels for the specified organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - repo-label:list.
+   *
+   * - Repo-label:list
    */
   getOrgRepoLabelList: {
     parameters: {
@@ -12696,7 +15825,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * The ID of the label.
                *
@@ -12725,7 +15854,7 @@ export interface operations {
                * @default false
                */
               has_license_policy?: boolean
-            }>
+            }[]
             /**
              * @default 0
              */
@@ -12746,7 +15875,9 @@ export interface operations {
    * Create a repository label. Labels can be used to group and organize
    * repositories and to apply security/license policies. This endpoint consumes
    * 1 unit of your quota. This endpoint requires the following org token
-   * scopes: - repo-label:create.
+   * scopes:
+   *
+   * - Repo-label:create
    */
   createOrgRepoLabel: {
     parameters: {
@@ -12827,7 +15958,7 @@ export interface operations {
               /**
                * @default null
                */
-              details: Record<string, unknown> | null
+              details: Record<string, unknown>
             }
           }
         }
@@ -12841,7 +15972,8 @@ export interface operations {
    * Retrieve a repository label associated with an organization and label ID.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - repo-label:list.
+   *
+   * - Repo-label:list
    */
   getOrgRepoLabel: {
     parameters: {
@@ -12908,7 +16040,9 @@ export interface operations {
    * Update a repository label name. Labels can be used to group and organize
    * repositories and to apply security/license policies. This endpoint consumes
    * 1 unit of your quota. This endpoint requires the following org token
-   * scopes: - repo-label:update.
+   * scopes:
+   *
+   * - Repo-label:update
    */
   updateOrgRepoLabel: {
     parameters: {
@@ -12993,7 +16127,7 @@ export interface operations {
               /**
                * @default null
                */
-              details: Record<string, unknown> | null
+              details: Record<string, unknown>
             }
           }
         }
@@ -13006,8 +16140,9 @@ export interface operations {
    *
    * Delete a repository label and all of its associations (repositories,
    * security policy, license policy, etc.). This endpoint consumes 1 unit of
-   * your quota. This endpoint requires the following org token scopes: -
-   * repo-label:delete.
+   * your quota. This endpoint requires the following org token scopes:
+   *
+   * - Repo-label:delete
    */
   deleteOrgRepoLabel: {
     parameters: {
@@ -13055,7 +16190,8 @@ export interface operations {
    * refine the alert triage strategy.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - repo-label:list.
+   *
+   * - Repo-label:list
    */
   getOrgRepoLabelSetting: {
     parameters: {
@@ -13106,6 +16242,39 @@ export interface operations {
               gptMalware?: {
                 /**
                  * The action to take for gptMalware issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionPermission?: {
+                /**
+                 * The action to take for browserExtensionPermission issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionHostPermission?: {
+                /**
+                 * The action to take for browserExtensionHostPermission issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionWildcardHostPermission?: {
+                /**
+                 * The action to take for browserExtensionWildcardHostPermission
+                 * issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionContentScript?: {
+                /**
+                 * The action to take for browserExtensionContentScript issues.
                  *
                  * @enum {string}
                  */
@@ -13242,6 +16411,22 @@ export interface operations {
               oversizedManifest?: {
                 /**
                  * The action to take for oversizedManifest issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              unresolvedYarnDependency?: {
+                /**
+                 * The action to take for unresolvedYarnDependency issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              unresolvedPomReference?: {
+                /**
+                 * The action to take for unresolvedPomReference issues.
                  *
                  * @enum {string}
                  */
@@ -14208,7 +17393,7 @@ export interface operations {
             /**
              * @default null
              */
-            licensePolicy?: Record<string, unknown> | null
+            licensePolicy?: Record<string, unknown>
             /**
              * The recently published package alert threshold for the repository
              * label, in milliseconds.
@@ -14238,7 +17423,8 @@ export interface operations {
    * refine the alert triage strategy.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - repo-label:update.
+   *
+   * - Repo-label:update
    */
   updateOrgRepoLabelSetting: {
     parameters: {
@@ -14276,6 +17462,39 @@ export interface operations {
             gptMalware?: {
               /**
                * The action to take for gptMalware issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            browserExtensionPermission?: {
+              /**
+               * The action to take for browserExtensionPermission issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            browserExtensionHostPermission?: {
+              /**
+               * The action to take for browserExtensionHostPermission issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            browserExtensionWildcardHostPermission?: {
+              /**
+               * The action to take for browserExtensionWildcardHostPermission
+               * issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            browserExtensionContentScript?: {
+              /**
+               * The action to take for browserExtensionContentScript issues.
                *
                * @enum {string}
                */
@@ -14412,6 +17631,22 @@ export interface operations {
             oversizedManifest?: {
               /**
                * The action to take for oversizedManifest issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            unresolvedYarnDependency?: {
+              /**
+               * The action to take for unresolvedYarnDependency issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            unresolvedPomReference?: {
+              /**
+               * The action to take for unresolvedPomReference issues.
                *
                * @enum {string}
                */
@@ -15415,7 +18650,8 @@ export interface operations {
    * refine the alert triage strategy.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - repo-label:update.
+   *
+   * - Repo-label:update
    */
   deleteOrgRepoLabelSetting: {
     parameters: {
@@ -15466,7 +18702,9 @@ export interface operations {
    * Disassociate a repository label from a repository. Labels can be used to
    * group and organize repositories and to apply security/license policies.
    * This endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes: - repo-label:update.
+   * following org token scopes:
+   *
+   * - Repo-label:update
    */
   disassociateOrgRepoLabel: {
     parameters: {
@@ -15522,7 +18760,8 @@ export interface operations {
    *
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - integration:list.
+   *
+   * - Integration:list
    */
   getIntegrationEvents: {
     parameters: {
@@ -15544,7 +18783,7 @@ export interface operations {
        */
       200: {
         content: {
-          'application/json': Array<{
+          'application/json': {
             /**
              * @default
              */
@@ -15592,7 +18831,7 @@ export interface operations {
              * @default
              */
             updated_at: string
-          }>
+          }[]
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -15608,7 +18847,8 @@ export interface operations {
    * Retrieve the security policy of an organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - security-policy:read.
+   *
+   * - Security-policy:read
    */
   getOrgSecurityPolicy: {
     parameters: {
@@ -15652,6 +18892,39 @@ export interface operations {
               gptMalware?: {
                 /**
                  * The action to take for gptMalware issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionPermission?: {
+                /**
+                 * The action to take for browserExtensionPermission issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionHostPermission?: {
+                /**
+                 * The action to take for browserExtensionHostPermission issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionWildcardHostPermission?: {
+                /**
+                 * The action to take for browserExtensionWildcardHostPermission
+                 * issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionContentScript?: {
+                /**
+                 * The action to take for browserExtensionContentScript issues.
                  *
                  * @enum {string}
                  */
@@ -15788,6 +19061,22 @@ export interface operations {
               oversizedManifest?: {
                 /**
                  * The action to take for oversizedManifest issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              unresolvedYarnDependency?: {
+                /**
+                 * The action to take for unresolvedYarnDependency issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              unresolvedPomReference?: {
+                /**
+                 * The action to take for unresolvedPomReference issues.
                  *
                  * @enum {string}
                  */
@@ -16762,7 +20051,8 @@ export interface operations {
    * Update the security policy of an organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - security-policy:update.
+   *
+   * - Security-policy:update
    */
   updateOrgSecurityPolicy: {
     parameters: {
@@ -16808,6 +20098,39 @@ export interface operations {
             gptMalware?: {
               /**
                * The action to take for gptMalware issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            browserExtensionPermission?: {
+              /**
+               * The action to take for browserExtensionPermission issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            browserExtensionHostPermission?: {
+              /**
+               * The action to take for browserExtensionHostPermission issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            browserExtensionWildcardHostPermission?: {
+              /**
+               * The action to take for browserExtensionWildcardHostPermission
+               * issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            browserExtensionContentScript?: {
+              /**
+               * The action to take for browserExtensionContentScript issues.
                *
                * @enum {string}
                */
@@ -16944,6 +20267,22 @@ export interface operations {
             oversizedManifest?: {
               /**
                * The action to take for oversizedManifest issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            unresolvedYarnDependency?: {
+              /**
+               * The action to take for unresolvedYarnDependency issues.
+               *
+               * @enum {string}
+               */
+              action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+            }
+            unresolvedPomReference?: {
+              /**
+               * The action to take for unresolvedPomReference issues.
                *
                * @enum {string}
                */
@@ -17936,6 +21275,39 @@ export interface operations {
                  */
                 action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
               }
+              browserExtensionPermission?: {
+                /**
+                 * The action to take for browserExtensionPermission issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionHostPermission?: {
+                /**
+                 * The action to take for browserExtensionHostPermission issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionWildcardHostPermission?: {
+                /**
+                 * The action to take for browserExtensionWildcardHostPermission
+                 * issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              browserExtensionContentScript?: {
+                /**
+                 * The action to take for browserExtensionContentScript issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
               filesystemAccess?: {
                 /**
                  * The action to take for filesystemAccess issues.
@@ -18067,6 +21439,22 @@ export interface operations {
               oversizedManifest?: {
                 /**
                  * The action to take for oversizedManifest issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              unresolvedYarnDependency?: {
+                /**
+                 * The action to take for unresolvedYarnDependency issues.
+                 *
+                 * @enum {string}
+                 */
+                action: 'defer' | 'error' | 'warn' | 'monitor' | 'ignore'
+              }
+              unresolvedPomReference?: {
+                /**
+                 * The action to take for unresolvedPomReference issues.
                  *
                  * @enum {string}
                  */
@@ -19063,7 +22451,7 @@ export interface operations {
        */
       200: {
         content: {
-          'application/json': Record<string, never>
+          'application/json': Record<string, unknown>
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -19164,7 +22552,7 @@ export interface operations {
     }
     requestBody?: {
       content: {
-        'application/json': Record<string, never>
+        'application/json': Record<string, unknown>
       }
     }
     responses: {
@@ -19173,7 +22561,7 @@ export interface operations {
        */
       200: {
         content: {
-          'application/json': Record<string, never>
+          'application/json': Record<string, unknown>
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -19190,7 +22578,8 @@ export interface operations {
    * and deny categories. The deny category contains all licenses that are not
    * explicitly categorized as allow, warn, or monitor. This endpoint consumes 1
    * unit of your quota. This endpoint requires the following org token scopes:
-   * - license-policy:read.
+   *
+   * - License-policy:read
    */
   viewLicensePolicy: {
     parameters: {
@@ -19788,8 +23177,9 @@ export interface operations {
    * `null`. Do not stop when `items` is empty — an empty page can be returned
    * while more results still remain on later pages, so `endCursor` being `null`
    * is the only reliable end-of-results signal. This endpoint consumes 10 units
-   * of your quota. This endpoint requires the following org token scopes: -
-   * historical:alerts-list.
+   * of your quota. This endpoint requires the following org token scopes:
+   *
+   * - Historical:alerts-list
    */
   historicalAlertsList: {
     parameters: {
@@ -20068,7 +23458,7 @@ export interface operations {
              * @default
              */
             endCursor: string | null
-            items: Array<{
+            items: {
               /**
                * @default
                */
@@ -20186,7 +23576,7 @@ export interface operations {
                  *
                  * @default null
                  */
-                props?: Record<string, unknown> | null
+                props?: Record<string, unknown>
                 /**
                  * @default 0
                  */
@@ -20223,7 +23613,7 @@ export interface operations {
                 topLevelAncestors?: components['schemas']['SocketId'][]
                 dependencies?: components['schemas']['SocketId'][]
               }
-            }>
+            }[]
             meta: {
               /**
                * @default
@@ -20486,7 +23876,8 @@ export interface operations {
    * Trend analytics of historical alerts.
    * This endpoint consumes 10 units of your quota.
    * This endpoint requires the following org token scopes:
-   * - historical:alerts-trend.
+   *
+   * - Historical:alerts-trend
    */
   historicalAlertsTrend: {
     parameters: {
@@ -20998,7 +24389,7 @@ export interface operations {
                 'repoSlug.notIn'?: string[]
               }
             }
-            items: Array<{
+            items: {
               /**
                * @default
                */
@@ -21018,7 +24409,7 @@ export interface operations {
                  */
                 countDelta: number
               }[]
-            }>
+            }[]
           }
         }
       }
@@ -21035,7 +24426,8 @@ export interface operations {
    * Trend analytics of historical dependencies.
    * This endpoint consumes 10 units of your quota.
    * This endpoint requires the following org token scopes:
-   * - historical:dependencies-trend.
+   *
+   * - Historical:dependencies-trend
    */
   historicalDependenciesTrend: {
     parameters: {
@@ -21146,7 +24538,7 @@ export interface operations {
                 dependencyDead?: boolean[]
               }
             }
-            items: Array<{
+            items: {
               /**
                * @default
                */
@@ -21288,7 +24680,7 @@ export interface operations {
                   }
                 }
               }[]
-            }>
+            }[]
           }
         }
       }
@@ -21395,7 +24787,7 @@ export interface operations {
                 requestId?: string[]
               }
             }
-            items: Array<{
+            items: {
               /**
                * @default
                */
@@ -21468,7 +24860,7 @@ export interface operations {
                * @default 0
                */
               numIgnoredCriticalAlerts: number
-            }>
+            }[]
             /**
              * @default
              */
@@ -21549,7 +24941,8 @@ export interface operations {
    * Paginated list of audit log events.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - audit-log:list.
+   *
+   * - Audit-log:list
    */
   getAuditLogEvents: {
     parameters: {
@@ -21559,16 +24952,28 @@ export interface operations {
          */
         type?:
           | 'AddLicenseOverlayNote'
+          | 'AdminAlertTypeUpdated'
+          | 'AdminBotSkipIpsUpdated'
+          | 'AdminLinkGithubInstall'
+          | 'AdminSyncGithubInstall'
+          | 'AdminTriggerFullScan'
+          | 'AdminUnlinkGithubInstall'
+          | 'AdminUpdateGithubInstallWorkspace'
           | 'AssociateLabel'
+          | 'AuthorizeOauthCimdClient'
           | 'CancelInvitation'
           | 'ChangeMemberRole'
           | 'ChangePlanSubscriptionSeats'
           | 'CreateApiToken'
           | 'CreateArtifact'
+          | 'CreateAccessPolicyAttachment'
+          | 'CreateAccessPolicy'
           | 'CreateAlertPolicy'
+          | 'CreateAlertPolicyRule'
           | 'CreateFirewallCustomRegistry'
           | 'CreateFirewallDeploymentConfig'
           | 'CreateLabel'
+          | 'CreateOauthClientCredentialsToken'
           | 'CreateOauthRefreshToken'
           | 'CreateRepoAccessRule'
           | 'CreateUserWithPassword'
@@ -21579,9 +24984,13 @@ export interface operations {
           | 'CoanaCliLegacyModeDemoteOrg'
           | 'CoanaCliLegacyModePromoteOrg'
           | 'CreateAlertResolution'
+          | 'DeleteAccessPolicy'
           | 'DeleteAlertPolicy'
+          | 'DeleteAlertPolicyRule'
+          | 'DeleteAlertNote'
           | 'DeleteAlertResolution'
           | 'DeleteAlertTriage'
+          | 'DeleteAccessPolicyAttachment'
           | 'DeleteApiToken'
           | 'DeleteFirewallCustomRegistry'
           | 'DeleteFirewallDeploymentConfig'
@@ -21593,9 +25002,12 @@ export interface operations {
           | 'DeleteRepository'
           | 'DeleteTicketingConfiguration'
           | 'DeleteWebhook'
+          | 'DisableAccessPolicyAttachment'
+          | 'DisableAccessPolicy'
           | 'DisablePythonCliRunStreamingOverride'
           | 'DisassociateLabel'
           | 'DisconnectAsanaIntegration'
+          | 'DisconnectClickupIntegration'
           | 'DisconnectJiraIntegration'
           | 'DisconnectLinearIntegration'
           | 'DowngradeOrganizationPlan'
@@ -21603,18 +25015,28 @@ export interface operations {
           | 'EnqueueAutopatchMergeRun'
           | 'EnqueueAutopatchPrepareJob'
           | 'FinalizeAlertPolicyMigration'
+          | 'OptOutRulesAndPolicies'
+          | 'RestoreRulesAndPolicies'
+          | 'SetRulesAndPoliciesNewOrgCutoff'
           | 'JoinOrganization'
           | 'AsanaIntegrationConnected'
+          | 'ClickupIntegrationConnected'
           | 'JiraIntegrationConnected'
+          | 'InvalidateOauthCimdClientGrants'
           | 'LinearIntegrationConnected'
+          | 'NpmStagingTokenSaved'
+          | 'NpmStagingTokenRemoved'
           | 'MemberAdded'
           | 'MemberRemoved'
           | 'MemberRoleChanged'
+          | 'OpenFixPullRequest'
           | 'RemoveLicenseOverlay'
           | 'RemoveMember'
+          | 'ReorderAlertPolicyRules'
           | 'RollbackAlertPolicyMigration'
           | 'ResetInvitationLink'
           | 'ResetOrganizationSettingToDefault'
+          | 'ResolveOauthCimdClientMetadata'
           | 'RevokeOauthToken'
           | 'RotateOauthRefreshToken'
           | 'RevokeApiToken'
@@ -21624,12 +25046,24 @@ export interface operations {
           | 'SetLabelSettingToDefault'
           | 'SetSsoBypassMemberships'
           | 'SetSsoBypassRbacRoles'
+          | 'StartAlertPolicyMigrationPreview'
           | 'SSOEmailVerificationCompleted'
           | 'SSOLoginCompleted'
           | 'SvdBackfillLegacyOverlay'
+          | 'SvdImportLegacyOnlyGhsas'
+          | 'SvdImportLegacyOverlay'
           | 'SvdReprocessClusters'
+          | 'SvdRetransformGhsaMirror'
+          | 'SvdSeedLegacyGithubMatches'
+          | 'SvdTruncateRederive'
+          | 'SvdWorkerPause'
           | 'SyncOrganization'
           | 'TransferOwnership'
+          | 'UpdateAlertPolicy'
+          | 'UpdateAlertPolicyRule'
+          | 'UpdateAlertNote'
+          | 'UpdateAccessPolicyAttachment'
+          | 'UpdateAccessPolicy'
           | 'UpdateAlertTriage'
           | 'UpdateApiTokenCommitter'
           | 'UpdateApiTokenMaxQuota'
@@ -21651,6 +25085,7 @@ export interface operations {
           | 'UserMagicLinkSent'
           | 'UserSignedIn'
           | 'UserSignedOut'
+          | 'PurgeOrganizationData'
         /**
          * Number of events per page.
          */
@@ -21679,7 +25114,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * @default
                */
@@ -21707,7 +25142,7 @@ export interface operations {
               /**
                * @default null
                */
-              payload?: Record<string, unknown> | null
+              payload?: Record<string, unknown>
               /**
                * @default 0
                */
@@ -21736,7 +25171,7 @@ export interface operations {
                * @default
                */
               organization_name?: string
-            }>
+            }[]
             /**
              * @default
              */
@@ -21757,7 +25192,8 @@ export interface operations {
    * List all API Tokens.
    * This endpoint consumes 10 units of your quota.
    * This endpoint requires the following org token scopes:
-   * - api-tokens:list.
+   *
+   * - Api-tokens:list
    */
   getAPITokens: {
     parameters: {
@@ -21799,7 +25235,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            tokens: Array<{
+            tokens: {
               /**
                * List of committers associated with this API Token.
                */
@@ -21896,6 +25332,12 @@ export interface operations {
                 | 'alerts'
                 | 'alerts:list'
                 | 'alerts:trend'
+                | 'alert-policy'
+                | 'alert-policy:list'
+                | 'alert-policy:read'
+                | 'alert-policy:create'
+                | 'alert-policy:update'
+                | 'alert-policy:delete'
                 | 'alert-resolution'
                 | 'alert-resolution:list'
                 | 'alert-resolution:create'
@@ -22007,7 +25449,7 @@ export interface operations {
                * @enum {string}
                */
               visibility: 'admin' | 'organization'
-            }>
+            }[]
             /**
              * @default 0
              */
@@ -22026,7 +25468,9 @@ export interface operations {
    *
    * Create an API Token. The API Token created must use a subset of permissions
    * the API token creating them. This endpoint consumes 10 units of your quota.
-   * This endpoint requires the following org token scopes: - api-tokens:create.
+   * This endpoint requires the following org token scopes:
+   *
+   * - Api-tokens:create
    */
   postAPIToken: {
     parameters: {
@@ -22052,10 +25496,16 @@ export interface operations {
           /**
            * List of scopes granted to the API Token.
            */
-          scopes: Array<
+          scopes: (
             | 'alerts'
             | 'alerts:list'
             | 'alerts:trend'
+            | 'alert-policy'
+            | 'alert-policy:list'
+            | 'alert-policy:read'
+            | 'alert-policy:create'
+            | 'alert-policy:update'
+            | 'alert-policy:delete'
             | 'alert-resolution'
             | 'alert-resolution:list'
             | 'alert-resolution:create'
@@ -22151,7 +25601,7 @@ export interface operations {
             | 'profile'
             | 'email'
             | '*'
-          >
+          )[]
           /**
            * The visibility of the API Token. Warning: this field is deprecated
            * and will be removed in the future.
@@ -22203,7 +25653,7 @@ export interface operations {
            * grants can only access a subset of routes that support this
            * feature.
            */
-          resources?: Array<{
+          resources?: {
             /**
              * Slug of the organization to grant access to.
              *
@@ -22222,7 +25672,7 @@ export interface operations {
              * @default
              */
             workspace?: string
-          }>
+          }[]
         }
       }
     }
@@ -22272,7 +25722,9 @@ export interface operations {
    *
    * Update an API Token. The API Token created must use a subset of permissions
    * the API token creating them. This endpoint consumes 10 units of your quota.
-   * This endpoint requires the following org token scopes: - api-tokens:create.
+   * This endpoint requires the following org token scopes:
+   *
+   * - Api-tokens:create
    */
   postAPITokenUpdate: {
     parameters: {
@@ -22298,10 +25750,16 @@ export interface operations {
           /**
            * List of scopes granted to the API Token.
            */
-          scopes: Array<
+          scopes: (
             | 'alerts'
             | 'alerts:list'
             | 'alerts:trend'
+            | 'alert-policy'
+            | 'alert-policy:list'
+            | 'alert-policy:read'
+            | 'alert-policy:create'
+            | 'alert-policy:update'
+            | 'alert-policy:delete'
             | 'alert-resolution'
             | 'alert-resolution:list'
             | 'alert-resolution:create'
@@ -22397,7 +25855,7 @@ export interface operations {
             | 'profile'
             | 'email'
             | '*'
-          >
+          )[]
           /**
            * The visibility of the API Token. Warning: this field is deprecated
            * and will be removed in the future.
@@ -22502,7 +25960,8 @@ export interface operations {
    * Rotate an API Token
    * This endpoint consumes 10 units of your quota.
    * This endpoint requires the following org token scopes:
-   * - api-tokens:rotate.
+   *
+   * - Api-tokens:rotate
    */
   postAPITokensRotate: {
     parameters: {
@@ -22598,7 +26057,8 @@ export interface operations {
    * Revoke an API Token
    * This endpoint consumes 10 units of your quota.
    * This endpoint requires the following org token scopes:
-   * - api-tokens:revoke.
+   *
+   * - Api-tokens:revoke
    */
   postAPITokensRevoke: {
     parameters: {
@@ -22672,7 +26132,9 @@ export interface operations {
    * for report generation. Examples of supported filenames include
    * `package.json`, `package-lock.json`, and `yarn.lock`. This endpoint
    * consumes 1 unit of your quota. This endpoint requires the following org
-   * token scopes: - No Scopes Required, but authentication is required.
+   * token scopes:
+   *
+   * - No Scopes Required, but authentication is required
    */
   getSupportedFiles: {
     parameters: {
@@ -22787,12 +26249,15 @@ export interface operations {
           | 'clawhub'
           | 'composer'
           | 'chrome'
+          | 'firefox-extension'
+          | 'edge-extension'
           | 'golang'
           | 'huggingface'
           | 'maven'
           | 'npm'
           | 'nuget'
           | 'vscode'
+          | 'vscode-extension'
           | 'pypi'
           | 'gem'
           | 'swift'
@@ -22806,7 +26271,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * Format: date-time.
                *
@@ -22914,7 +26379,7 @@ export interface operations {
                * @default 0
                */
               threatInstanceId?: number
-            }>
+            }[]
             /**
              * @default
              */
@@ -23017,12 +26482,15 @@ export interface operations {
           | 'clawhub'
           | 'composer'
           | 'chrome'
+          | 'firefox-extension'
+          | 'edge-extension'
           | 'golang'
           | 'huggingface'
           | 'maven'
           | 'npm'
           | 'nuget'
           | 'vscode'
+          | 'vscode-extension'
           | 'pypi'
           | 'gem'
           | 'swift'
@@ -23042,7 +26510,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * Format: date-time.
                *
@@ -23150,7 +26618,7 @@ export interface operations {
                * @default 0
                */
               threatInstanceId?: number
-            }>
+            }[]
             /**
              * @default
              */
@@ -23190,7 +26658,14 @@ export interface operations {
    *   `purlError` stream shape instead of emitting synthetic `notFound`
    *   artifacts. Use `poll=false` (default) to fail open and return the current
    *   known state quickly. Use `poll=true` to fail closed and wait up to
-   *   `timeoutSec` for pending analysis before returning.
+   *   `timeoutSec` for pending analysis before returning. **Conda (temporary
+   *   compatibility):** `pkg:conda` inputs are served from the already-scanned
+   *   PyPI package with the same normalized name and version when one exists;
+   *   the response row keeps the original conda PURL in `inputPurl` but reports
+   *   `type: pypi`. Conda `build`, `subdir`, `type`, and `channel` qualifiers
+   *   are ignored, and conda packages without a scanned PyPI counterpart return
+   *   the normal `notFound` result. This mapping will be replaced by native
+   *   conda support.
    *
    * ## Query Parameters
    *
@@ -23290,7 +26765,7 @@ export interface operations {
          * Include only alerts with comma separated actions defined by security
          * policy.
          */
-        actions?: Array<'error' | 'monitor' | 'warn' | 'ignore'>
+        actions?: ('error' | 'monitor' | 'warn' | 'ignore')[]
         /**
          * Compact metadata. When enabled, excludes metadata fields like author,
          * scores, size, dependencies, and manifest files. Always includes: id,
@@ -23375,8 +26850,7 @@ export interface operations {
     }
   }
   /**
-   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded
-   * manifest.
+   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded manifest.
    *
    * Fetches available fixes for vulnerabilities in a repository, scan, or
    * uploaded manifest. Requires exactly one of repo_slug, full_scan_id, or
@@ -23424,8 +26898,21 @@ export interface operations {
    *   upgraded. May contain multiple distinct entries when different dependency
    *   chains are blocked for different causes (e.g. one chain has no compatible
    *   upstream version; another would require a major version bump skipped by
-   *   `--no-major-updates`). **noFixAvailable**: No fix exists for this
-   *   vulnerability (no patched version published)
+   *   `--no-major-updates`).
+   * - `dependencyChain`: (optional) Installed PURLs along the dependency chain
+   *   where the fix search was blocked, from the blocking package down to this
+   *   package. Present only when a chain was recorded; the first `reasons`
+   *   entry describes this chain.
+   * - `withheldFix`: (optional) Present when a fix exists but this request's
+   *   policy withheld it: `{ purl, version, reason }` where `purl` is the
+   *   package (without version), `version` the lowest safe version the policy
+   *   removed from the fix search, and `reason` one of `majorUpdate` (a major
+   *   update while `allow_major_updates=false`), `releaseAge` (younger than
+   *   `minimum_release_age`) or `publishDateUnknown` (publish date unavailable,
+   *   so `minimum_release_age` cannot be verified). Lifting the policy is not
+   *   guaranteed to make the fix applicable — other version constraints in the
+   *   dependency tree may still block this version. **noFixAvailable**: No fix
+   *   exists for this vulnerability (no patched version published)
    * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
    *   manifest files; each carries a static `reasons` entry stating that no
    *   patched version has been published **fixNotApplicable**: A patched
@@ -23438,8 +26925,14 @@ export interface operations {
    *   version is a major bump.
    * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
    *   manifest files, each with per-artifact `reasons` explaining why the fix
-   *   could not be applied (omitted when no explanation is available)
-   *   **errorComputingFix**: An error occurred while computing fixes
+   *   could not be applied (always at least one entry; a static fallback when
+   *   the fix search reported no per-package cause) and an optional
+   *   `dependencyChain` — installed PURLs from the package that blocked the
+   *   upgrade down to the vulnerable package, present when a chain was recorded
+   *   (the first `reasons` entry describes it), and an optional `withheldFix` —
+   *   present when a fix exists but this request's policy withheld it (see the
+   *   partialFixFound field list) **errorComputingFix**: An error occurred
+   *   while computing fixes
    * - `value.message`: Error description
    *
    * ### Fix version alignment
@@ -23573,7 +27066,7 @@ export interface operations {
         content: {
           'application/json': {
             fixDetails: {
-              [key: string]: Record<string, never>
+              [key: string]: Record<string, unknown>
             }
             /**
              * All vulnerability GHSA IDs detected in the project, regardless of
@@ -23652,7 +27145,8 @@ export interface operations {
    * Update the telemetry config of an organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - telemetry-policy:update.
+   *
+   * - Telemetry-policy:update
    */
   updateOrgTelemetryConfig: {
     parameters: {
@@ -23709,7 +27203,8 @@ export interface operations {
    * List all webhooks in the specified organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - webhooks:list.
+   *
+   * - Webhooks:list
    */
   getOrgWebhooksList: {
     parameters: {
@@ -23733,7 +27228,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * The ID of the webhook.
                *
@@ -23785,14 +27280,14 @@ export interface operations {
                *
                * @default null
                */
-              headers: Record<string, unknown> | null
+              headers: Record<string, unknown>
               filters: {
                 /**
                  * Array of repository IDs.
                  */
                 repositoryIds: string[] | null
               } | null
-            }>
+            }[]
             /**
              * @default 0
              */
@@ -23813,7 +27308,8 @@ export interface operations {
    * Create a new webhook. Returns the created webhook details.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - webhooks:create.
+   *
+   * - Webhooks:create
    */
   createOrgWebhook: {
     parameters: {
@@ -23860,7 +27356,7 @@ export interface operations {
            *
            * @default null
            */
-          headers?: Record<string, unknown> | null
+          headers?: Record<string, unknown>
           filters?: {
             /**
              * Array of repository IDs.
@@ -23928,7 +27424,7 @@ export interface operations {
              *
              * @default null
              */
-            headers: Record<string, unknown> | null
+            headers: Record<string, unknown>
             filters: {
               /**
                * Array of repository IDs.
@@ -23951,7 +27447,8 @@ export interface operations {
    * Get a webhook for the specified organization.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - webhooks:list.
+   *
+   * - Webhooks:list
    */
   getOrgWebhook: {
     parameters: {
@@ -24024,7 +27521,7 @@ export interface operations {
              *
              * @default null
              */
-            headers: Record<string, unknown> | null
+            headers: Record<string, unknown>
             filters: {
               /**
                * Array of repository IDs.
@@ -24047,7 +27544,8 @@ export interface operations {
    * Update details of an existing webhook.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - webhooks:update.
+   *
+   * - Webhooks:update
    */
   updateOrgWebhook: {
     parameters: {
@@ -24098,7 +27596,7 @@ export interface operations {
            *
            * @default null
            */
-          headers?: Record<string, unknown> | null
+          headers?: Record<string, unknown>
           filters?: {
             /**
              * Array of repository IDs.
@@ -24166,7 +27664,7 @@ export interface operations {
              *
              * @default null
              */
-            headers: Record<string, unknown> | null
+            headers: Record<string, unknown>
             filters: {
               /**
                * Array of repository IDs.
@@ -24188,7 +27686,9 @@ export interface operations {
    *
    * Delete a webhook. This will stop all future webhook deliveries to the
    * webhook URL. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes: - webhooks:delete.
+   * requires the following org token scopes:
+   *
+   * - Webhooks:delete
    */
   deleteOrgWebhook: {
     parameters: {
@@ -24232,8 +27732,9 @@ export interface operations {
    * Do not stop when `items` is empty — an empty page can be returned while
    * more results still remain on later pages, so `endCursor` being `null` is
    * the only reliable end-of-results signal. This endpoint consumes 10 units of
-   * your quota. This endpoint requires the following org token scopes: -
-   * alerts:list.
+   * your quota. This endpoint requires the following org token scopes:
+   *
+   * - Alerts:list
    */
   alertsList: {
     parameters: {
@@ -24570,7 +28071,7 @@ export interface operations {
              * @default
              */
             endCursor: string | null
-            items: Array<{
+            items: {
               /**
                * @default
                */
@@ -24881,7 +28382,7 @@ export interface operations {
                   } | null
                 }
               }[]
-            }>
+            }[]
             meta: {
               /**
                * @default
@@ -25200,7 +28701,8 @@ export interface operations {
    * List full scans associated with alert.
    * This endpoint consumes 10 units of your quota.
    * This endpoint requires the following org token scopes:
-   * - alerts:list.
+   *
+   * - Alerts:list
    */
   alertFullScans: {
     parameters: {
@@ -25245,7 +28747,7 @@ export interface operations {
              * @default
              */
             endCursor: string | null
-            items: Array<{
+            items: {
               /**
                * ID of full scan.
                *
@@ -25288,7 +28790,7 @@ export interface operations {
                */
               scannedAt: string
               alertKeys: string[]
-            }>
+            }[]
             meta: {
               /**
                * @default
@@ -25453,7 +28955,7 @@ export interface operations {
        */
       200: {
         content: {
-          'application/x-ndjson': Array<{
+          'application/x-ndjson': {
             filepathOrProvenance: string[]
             /**
              * @default
@@ -25471,7 +28973,7 @@ export interface operations {
              * @default
              */
             violationExplanation: string
-          }>
+          }[]
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -25775,7 +29277,7 @@ export interface operations {
        */
       200: {
         content: {
-          'application/json': Array<{
+          'application/json': {
             /**
              * @default
              */
@@ -25803,7 +29305,7 @@ export interface operations {
             props: {
               [key: string]: string
             } | null
-          }>
+          }[]
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -25854,8 +29356,9 @@ export interface operations {
    *
    * Get your current API quota. You can use this endpoint to prevent doing
    * requests that might spend all your quota. This endpoint consumes 0 units of
-   * your quota. This endpoint requires the following org token scopes: - No
-   * Scopes Required, but authentication is required.
+   * your quota. This endpoint requires the following org token scopes:
+   *
+   * - No Scopes Required, but authentication is required
    */
   getQuota: {
     responses: {
@@ -25891,7 +29394,8 @@ export interface operations {
    * Get information on the current organizations associated with the API token.
    * This endpoint consumes 1 unit of your quota.
    * This endpoint requires the following org token scopes:
-   * - No Scopes Required, but authentication is required.
+   *
+   * - No Scopes Required, but authentication is required
    */
   getOrganizations: {
     responses: {
@@ -25953,12 +29457,12 @@ export interface operations {
      */
     requestBody?: {
       content: {
-        'application/json': Array<{
+        'application/json': {
           /**
            * @default
            */
           organization?: string
-        }>
+        }[]
       }
     }
     responses: {
@@ -25980,7 +29484,7 @@ export interface operations {
                 }
               }
             }
-            entries: Array<{
+            entries: {
               /**
                * @default
                */
@@ -25998,7 +29502,7 @@ export interface operations {
                   }
                 }
               }
-            }>
+            }[]
           }
         }
       }
@@ -26120,7 +29624,7 @@ export interface operations {
        */
       200: {
         content: {
-          'application/json': Array<{
+          'application/json': {
             /**
              * @default
              */
@@ -26140,7 +29644,7 @@ export interface operations {
             /**
              * @default null
              */
-            pull_requests: Record<string, never>
+            pull_requests: Record<string, unknown>
             /**
              * @default
              */
@@ -26153,7 +29657,7 @@ export interface operations {
              * @default
              */
             created_at: string
-          }>
+          }[]
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -26195,7 +29699,14 @@ export interface operations {
           issueRules?: {
             [key: string]: boolean
           }
-          [key: string]: undefined
+          [key: string]:
+            | (
+                | Uint8Array
+                | {
+                    [key: string]: boolean
+                  }
+              )
+            | undefined
         }
       }
     }
@@ -26287,7 +29798,7 @@ export interface operations {
       200: {
         content: {
           'application/json': {
-            results: Array<{
+            results: {
               /**
                * @default
                */
@@ -26334,7 +29845,7 @@ export interface operations {
                  */
                 created_at: string
               }
-            }>
+            }[]
           }
         }
       }
@@ -26496,7 +30007,7 @@ export interface operations {
        */
       200: {
         content: {
-          'application/json': Array<{
+          'application/json': {
             /**
              * @default 0
              */
@@ -26569,7 +30080,7 @@ export interface operations {
              * @default {}
              */
             top_five_alert_types: Record<string, never>
-          }>
+          }[]
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -26608,7 +30119,7 @@ export interface operations {
        */
       200: {
         content: {
-          'application/json': Array<{
+          'application/json': {
             /**
              * @default 0
              */
@@ -26681,7 +30192,7 @@ export interface operations {
              * @default {}
              */
             top_five_alert_types: Record<string, never>
-          }>
+          }[]
         }
       }
       400: components['responses']['SocketBadRequest']
@@ -26690,18 +30201,28 @@ export interface operations {
       404: components['responses']['SocketNotFoundResponse']
       429: components['responses']['SocketTooManyRequestsResponse']
     }
-  } // SDK v3 method name aliases for TypeScript compatibility.
-  // These map the new SDK method names to their underlying OpenAPI operation names.
+  }
+}
+
+export interface operations {
+  batchOrgPackageFetch: operations['batchPackageFetchByOrg']
+  createFullScan: operations['CreateOrgFullScan']
+  createOrgFullScanFromArchive: operations['CreateOrgFullScanArchive']
+  createRepository: operations['createOrgRepo']
+  deleteFullScan: operations['deleteOrgFullScan']
+  deleteRepository: operations['deleteOrgRepo']
+  getDiffScanGfm: operations['GetDiffScanGfm']
+  getFullScan: operations['getOrgFullScan']
+  getFullScanMetadata: operations['getOrgFullScanMetadata']
+  getIssuesByNpmPackage: operations['getIssuesByNPMPackage']
+  getOrgAlertFullScans: operations['alertFullScans']
+  getOrgAlertsList: operations['alertsList']
+  getRepository: operations['getOrgRepo']
+  getScoreByNpmPackage: operations['getScoreByNPMPackage']
+  listFullScans: operations['getOrgFullScanList']
   listOrganizations: operations['getOrganizations']
   listRepositories: operations['getOrgRepoList']
-  createRepository: operations['createOrgRepo']
-  deleteRepository: operations['deleteOrgRepo']
-  updateRepository: operations['updateOrgRepo']
-  getRepository: operations['getOrgRepo']
-  listFullScans: operations['getOrgFullScanList']
-  createFullScan: operations['CreateOrgFullScan']
-  getFullScan: operations['getOrgFullScan']
+  rescanFullScan: operations['rescanOrgFullScan']
   streamFullScan: operations['getOrgFullScan']
-  deleteFullScan: operations['deleteOrgFullScan']
-  getFullScanMetadata: operations['getOrgFullScanMetadata']
+  updateRepository: operations['updateOrgRepo']
 }

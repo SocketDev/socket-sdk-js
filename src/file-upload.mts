@@ -11,7 +11,7 @@ import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
 import type formDataExternal from './external/form-data'
 import type { RequestOptions, RequestOptionsWithHooks } from './types/core.mts'
-import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
+import type { SocketSdkHttpResponse as HttpResponse } from './types/http.mts'
 import type { ReadStream } from 'node:fs'
 import type { Readable } from 'node:stream'
 

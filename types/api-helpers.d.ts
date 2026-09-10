@@ -1,73 +1,33 @@
 /**
- * @file Helper types for working with generated OpenAPI types.
+ * @file Helper types for generated OpenAPI responses.
  */
 
-/**
- * Extract the successful response type from an operation. Maps to the data
- * property of the success result.
- */
-export type OpReturnType<T> = T extends {
-  responses: {
-    200?: { content?: { 'application/json': infer U } }
-  }
+export type OpResponseBody<Response> = Response extends {
+  content: infer Content
 }
-  ? U
-  : T extends {
-        responses: {
-          201?: { content?: { 'application/json': infer U } }
-        }
-      }
-    ? U
-    : T extends {
-          responses: {
-            204?: unknown
-          }
-        }
-      ? undefined
-      : unknown
+  ? [Content] extends [never]
+    ? undefined
+    : Content[keyof Content]
+  : undefined
 
-/**
- * Extract the error response type from an operation. Maps to the error
- * structure of the error result.
- */
-export type OpErrorType<T> = T extends {
-  responses: infer R
+export type OpResponsesByStatus<Responses, Prefix extends string> = {
+  [Status in keyof Responses]: Status extends string | number
+    ? `${Status}` extends `${Prefix}${string}`
+      ? OpResponseBody<Responses[Status]>
+      : never
+    : never
+}[keyof Responses]
+
+export type OpReturnType<Operation> = Operation extends {
+  responses: infer Responses
 }
-  ? R extends Record<string | number, unknown>
-    ? {
-        [
-          K in keyof R as K extends
-            | 400
-            | 401
-            | 403
-            | 404
-            | 409
-            | 422
-            | 429
-            | 500
-            | 502
-            | 503
-            ? K
-            : never
-        ]: R[K]
-      }[keyof {
-        [
-          K in keyof R as K extends
-            | 400
-            | 401
-            | 403
-            | 404
-            | 409
-            | 422
-            | 429
-            | 500
-            | 502
-            | 503
-            ? K
-            : never
-        ]: R[K]
-      }] extends { content?: { 'application/json': infer E } }
-      ? E
-      : { error?: string }
-    : { error?: string }
-  : { error?: string }
+  ? OpResponsesByStatus<Responses, '2'>
+  : unknown
+
+export type OpErrorType<Operation> = Operation extends {
+  responses: infer Responses
+}
+  ? [OpResponsesByStatus<Responses, '4' | '5'>] extends [never]
+    ? { error?: string | undefined }
+    : OpResponsesByStatus<Responses, '4' | '5'>
+  : { error?: string | undefined }

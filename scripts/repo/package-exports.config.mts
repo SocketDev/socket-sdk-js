@@ -1,40 +1,42 @@
 /**
- * @file Exports-surface policy for @socketsecurity/sdk, consumed by BOTH the
- *   canonical generator (scripts/fleet/gen/package-exports.mts, which rewrites
- *   the package.json `exports` map from `files` minus `ignore`) and the
- *   public-files-are-exported validator (its `ignore` contract). The public
- *   surface is deliberately narrow: the `.` and `./testing` entries plus the
- *   two hand-authored `types/*.d.ts` declaration bundles. The declaration
- *   build emits one .d.mts per module; every sibling .d.mts is the entries'
- *   module graph (the entries re-export from them, so TypeScript resolution
- *   needs them shipped) — not an independently exported entry point. The
- *   graph leaves are therefore enumerated in `ignore`: excluded from export
- *   generation and from orphan detection, while still shipping via the
- *   package.json `files` allowlist. A NEW dist leaf fails the validator until
- *   it is either exported (add it to `files` here) or declared graph-only
- *   (add it to `ignore`) — that loud stop is the point.
+ * @file Public exports and internal declaration modules for the SDK package.
+ *   The exports generator and public-files validator share this policy.
+ *   Internal declaration modules ship through package.json files so consumers
+ *   can resolve imports from the root and testing declarations.
  */
 
 import type { ExportsConfig } from '../fleet/gen/package-exports.mts'
 
 export const config: ExportsConfig = {
   files: ['dist/*.js', 'dist/*.d.mts', 'types/*.d.ts', 'package.json'],
-  // Shipped-but-not-exported: the entries' declaration module graph. Kept in
-  // the published tarball (package.json `files`), out of the exports map.
   ignore: [
+    'dist/alert-policies.d.mts',
+    'dist/alert-policy-migration.d.mts',
+    'dist/alert-policy-rules.d.mts',
+    'dist/api-client.d.mts',
+    'dist/api-errors.d.mts',
+    'dist/api-retry.d.mts',
     'dist/blob.d.mts',
     'dist/constants.d.mts',
     'dist/events-v1.d.mts',
     'dist/file-upload.d.mts',
-    'dist/form-data-entry.d.mts',
+    'dist/full-scan-compat.d.mts',
+    'dist/full-scan-polling-v1.d.mts',
+    'dist/full-scan-results-v1.d.mts',
     'dist/full-scans-v1.d.mts',
     'dist/http-client.d.mts',
+    'dist/malware.d.mts',
+    'dist/org-api.d.mts',
+    'dist/org-fixes.d.mts',
+    'dist/patch-verification.d.mts',
+    'dist/public-patches-client.d.mts',
+    'dist/public-purl-client.d.mts',
+    'dist/purl-versions-v1.d.mts',
+    'dist/purl.d.mts',
     'dist/quota-utils.d.mts',
     'dist/socket-sdk-class.d.mts',
     'dist/threat-campaigns-v1.d.mts',
-    'dist/types-strict.d.mts',
-    'dist/types-parity.d.mts',
-    'dist/types.d.mts',
+    'dist/types/*',
     'dist/user-agent.d.mts',
     'dist/utils.d.mts',
     'dist/utils/*',

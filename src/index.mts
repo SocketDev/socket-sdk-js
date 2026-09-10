@@ -179,3 +179,20 @@ export type {
 // Re-export functions from modules.
 export { createUserAgentFromPkgJson } from './user-agent.mts'
 /* c8 ignore stop */
+
+export { SocketPurlClient } from './public-purl-client.mts'
+export { SocketPatchClient } from './public-patches-client.mts'
+export type { SocketPatchClientOptions } from './public-patches-client.mts'
+export type * from './types/alert-policies.mts'
+export type * from './types/fixes.mts'
+export type * from './types/full-scan-results-v1.mts'
+export type * from './types/malware.mts'
+export type * from './types/purl.mts'
+export type {
+  PurlVersionEntry,
+  PurlVersionsData,
+  PurlVersionsOptions,
+} from './purl-versions-v1.mts'
+
+export type { SocketSdkHttpResponse } from './types/http.mts'
+export type { SocketSdkJsonValue } from './types/util.mts'

@@ -1,6 +1,7 @@
 {
   "allow": {
     "openapi.json": "Load-bearing OpenAPI source for scripts/repo/generate-sdk.mts, generate-types.mts, and generate-strict-types.mts, which resolve it at the repo root.",
-    "types": "Published type surface: types/api.d.ts and types/api-helpers.d.ts ship via package.json files[] and the ./types/api and ./types/api-helpers exports."
+    "openapi-v1.json": "OpenAPI v1 snapshot read by scripts/repo/openapi-contracts.mts to generate and check types/api-v1.d.ts.",
+    "types": "Published declarations: api.d.ts, api-v1.d.ts, and api-helpers.d.ts ship through package.json files[] and their ./types/* exports."
   }
 }

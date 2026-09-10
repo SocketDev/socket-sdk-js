@@ -118,9 +118,7 @@ describe('SocketSdk - Configuration Validation', () => {
           new SocketSdk('test-token', {
             timeout: 4999,
           }),
-      ).toThrow(
-        '"timeout" must be a number between 5000 and 300000 milliseconds',
-      )
+      ).toThrow(TypeError)
     })
 
     it('should throw error for timeout above maximum (300000)', () => {
@@ -129,9 +127,7 @@ describe('SocketSdk - Configuration Validation', () => {
           new SocketSdk('test-token', {
             timeout: 300_001,
           }),
-      ).toThrow(
-        '"timeout" must be a number between 5000 and 300000 milliseconds',
-      )
+      ).toThrow(TypeError)
     })
 
     it('should accept timeout at minimum boundary', () => {

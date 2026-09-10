@@ -3,7 +3,7 @@
  *   telemetry ingestion). Hand-written since events has no generated OpenAPI
  *   schema in this SDK yet, mirroring the precedent set by full-scans-v1.mts.
  */
-import type { JsonValue } from '@socketsecurity/lib/json/types'
+import type { SocketSdkJsonValue as JsonValue } from './types/util.mts'
 
 // The wire schema is `additionalProperties: true` with a handful of known
 // optional fields — callers may send arbitrary extra keys alongside them.

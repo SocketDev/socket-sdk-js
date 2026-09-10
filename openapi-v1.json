@@ -1,0 +1,1301 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Socket API v1",
+    "description": "TODO: v1 Description",
+    "version": "1.0.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Organization API token"
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/v1/openapi": {
+      "get": {
+        "summary": "Returns the OpenAPI definition",
+        "tags": ["meta"],
+        "description": "Returns the OpenAPI 3.1 specification for the v1 API. No authentication required.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/openapi.json": {
+      "get": {
+        "summary": "Returns the OpenAPI definition",
+        "tags": ["meta"],
+        "description": "Returns the OpenAPI 3.1 specification for the v1 API. No authentication required.",
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/v1/orgs/{org_slug}/events/": {
+      "post": {
+        "summary": "Post organization events",
+        "tags": ["events"],
+        "description": "Send events directly to Socket.\n\nAuthentication: Organization API token only.\nRequired token scopes: *",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "description": "Array of event payloads",
+                "items": {
+                  "type": "object",
+                  "description": "Event payload. May include an optional `event_kind` field (one of: informative, socket-action, user-action).",
+                  "additionalProperties": {},
+                  "properties": {
+                    "action": {
+                      "type": "string"
+                    },
+                    "alert_action": {
+                      "type": "string"
+                    },
+                    "alert_count": {
+                      "type": "number"
+                    },
+                    "api_error": {
+                      "type": "string"
+                    },
+                    "artifact_purl": {
+                      "type": "string"
+                    },
+                    "block_reason": {
+                      "type": "string"
+                    },
+                    "block_source": {
+                      "type": "string"
+                    },
+                    "blocked_alert_count": {
+                      "type": "number"
+                    },
+                    "cached": {
+                      "type": "boolean"
+                    },
+                    "client_action": {
+                      "type": "string"
+                    },
+                    "client_ip": {
+                      "type": "string"
+                    },
+                    "decision": {
+                      "type": "string"
+                    },
+                    "event_category": {
+                      "type": "string"
+                    },
+                    "event_id": {
+                      "type": "string"
+                    },
+                    "event_kind": {
+                      "type": "string"
+                    },
+                    "event_sender_created_at": {
+                      "type": "string"
+                    },
+                    "event_type": {
+                      "type": "string"
+                    },
+                    "ignore_reason": {
+                      "type": "string"
+                    },
+                    "input_purl": {
+                      "type": "string"
+                    },
+                    "machine_id": {
+                      "type": "string"
+                    },
+                    "monitor_reason": {
+                      "type": "string"
+                    },
+                    "parser_name": {
+                      "type": "string"
+                    },
+                    "parser_version": {
+                      "type": "string"
+                    },
+                    "private_registry_request_id": {
+                      "type": "string"
+                    },
+                    "purlCheckLatencyMs": {
+                      "type": "number"
+                    },
+                    "purl_check_latency_ms": {
+                      "type": "number"
+                    },
+                    "registryFqdn": {
+                      "type": "string"
+                    },
+                    "repo": {
+                      "type": "string"
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "response_code": {
+                      "type": "number"
+                    },
+                    "socket_api_response_code": {
+                      "type": "number"
+                    },
+                    "socket_client_version": {
+                      "type": "string"
+                    },
+                    "source_path": {
+                      "type": "string"
+                    },
+                    "stale": {
+                      "type": "boolean"
+                    },
+                    "trace_id": {
+                      "type": "string"
+                    },
+                    "upstream_host": {
+                      "type": "string"
+                    },
+                    "upstream_path": {
+                      "type": "string"
+                    },
+                    "upstream_status": {
+                      "type": "number"
+                    },
+                    "user_agent": {
+                      "type": "string"
+                    },
+                    "versions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "warn_reason": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "minItems": 0,
+                "maxItems": 1000
+              }
+            }
+          },
+          "description": "Array of event payloads"
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "description": "Organization slug"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Events ingestion metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Events ingestion metadata",
+                  "additionalProperties": true,
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Events ingestion metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Events ingestion metadata",
+                  "additionalProperties": true,
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orgs/{org_slug}/purl/versions/{purl}": {
+      "get": {
+        "summary": "List published versions for a package by PURL",
+        "tags": ["packages"],
+        "description": "Given a package URL (PURL) *without* a version, returns every version\nSocket knows about for that package along with its publish date, sorted\nnewest-first by publish date.\n\nThis lets you enforce version policies such as \"N-1\" (allow the previous\nrelease, block the newest) without querying a package registry directly.\nVersions with no known publish date are listed last.\n\n**Ordering includes prereleases.** Sorting is by publish date only, so\nindex 0 is the most recently *published* version, not necessarily the\nnewest stable release. On npm in particular the newest publishes are\noften canaries or release candidates, so a consumer that reads index 1\nas \"N-1\" can land on a prerelease. Each entry carries a `prerelease`\nflag for this: filter out entries where `prerelease` is `true` before\napplying an N-1 rule. `prerelease` is `null` when the ecosystem's\nversion grammar has no canonical prerelease parser, or when the version\nstring itself does not parse — treat null according to your own policy\nrather than as an error.\n\nPass `limit` to cap how many entries come back; it is applied after\nsorting, so `limit=2` is all the N-1 use case needs. A `limit` that\nis not a positive integer is rejected with a 400 rather than clamped.\n\nThe PURL must be percent-encoded as a single path segment\n(`encodeURIComponent`); an unencoded `/` will not match this route.\nAny version on the PURL is ignored — the full history always comes back.\nThe HuggingFace `type` qualifier (model, dataset, or space) is honored.\n\nA well-formed PURL for an ecosystem that does not support version\nlisting returns a 400 rather than a server error.\n\nAuthentication: Organization API token, OAuth2, or NextAuth session.\nRequired token scope: `packages:list`. Costs 100 quota units.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "description": "Maximum number of version entries to return, applied after sorting. Omit for the full history."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "description": "Organization slug"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "purl",
+            "required": true,
+            "description": "Package URL, percent-encoded as a single path segment. Example: pkg%3Anpm%2F%40babel%2Fcore"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["purl", "versions"],
+                  "properties": {
+                    "purl": {
+                      "type": "string",
+                      "description": "The PURL as received, echoed back."
+                    },
+                    "versions": {
+                      "type": "array",
+                      "description": "Known versions, newest-first by publish date. Ordering includes prereleases, so index 0 is the most recent publish rather than the newest stable release.",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["version", "publishedAt", "prerelease"],
+                        "properties": {
+                          "version": {
+                            "type": "string",
+                            "description": "The version string as the ecosystem reports it."
+                          },
+                          "publishedAt": {
+                            "type": ["null", "string"],
+                            "description": "ISO-8601 publish date, or null when the ecosystem reports none. Undated versions are listed last."
+                          },
+                          "prerelease": {
+                            "type": ["null", "boolean"],
+                            "description": "True when this version is a prerelease (canary, release candidate, dev, beta) according to the ecosystem's own version grammar. Null means unknown — either the ecosystem has no canonical prerelease parser, or this version string does not parse. Null is not an error."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orgs/{org_slug}/threat-campaigns/": {
+      "get": {
+        "summary": "List threat campaigns",
+        "tags": ["threat-campaigns"],
+        "description": "Returns a paginated list of supply chain attack campaigns. Supports filtering\nby status, ecosystem, and an incremental sync parameter (`updated_after`).\n\nPackage PURLs are not inlined on the campaign object — they are their own\npaginated resource. Fetch them per campaign from\n`/threat-campaigns/:campaign_id/packages`.\n\nAuthentication: Organization API token, OAuth2, or NextAuth session.\nRequired token scope: `threat-campaigns:list`.\n\nThis endpoint requires an Enterprise Plan with the Threat Feed add-on.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["ongoing", "past"]
+            },
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "description": "Filter by campaign status. Defaults to ongoing."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "ecosystem",
+            "required": false,
+            "description": "Filter by ecosystem (e.g. npm, pypi, maven)."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "updated_after",
+            "required": false,
+            "description": "Unix timestamp in seconds. Only return campaigns updated after this time. Omit to return all matching campaigns."
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "description": "Number of campaigns per page. Default 30, max 100."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "description": "Opaque cursor for pagination. Use the endCursor value from the previous response."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "description": "Organization slug"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": ["items"],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "required": [
+                          "id",
+                          "name",
+                          "description",
+                          "status",
+                          "ecosystem",
+                          "firstDiscovered",
+                          "lastActivity",
+                          "blogUrls",
+                          "linkedThreatCount",
+                          "linkedPackageArtifactsCount",
+                          "htmlUrl",
+                          "createdAt",
+                          "updatedAt"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["ongoing", "past"]
+                          },
+                          "ecosystem": {
+                            "type": ["null", "array"],
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "firstDiscovered": {
+                            "type": ["null", "string"]
+                          },
+                          "lastActivity": {
+                            "type": ["null", "string"]
+                          },
+                          "blogUrls": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "linkedThreatCount": {
+                            "type": "integer",
+                            "description": "Number of threat feed entries linked to this campaign."
+                          },
+                          "linkedPackageArtifactsCount": {
+                            "type": "integer",
+                            "description": "Number of distinct package artifacts linked to this campaign."
+                          },
+                          "htmlUrl": {
+                            "type": ["null", "string"],
+                            "description": "URL of the public campaign page on socket.dev, or null if the campaign has no public page."
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "endCursor": {
+                      "type": ["null", "string"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orgs/{org_slug}/threat-campaigns/{campaign_id}/": {
+      "get": {
+        "summary": "Get a threat campaign",
+        "tags": ["threat-campaigns"],
+        "description": "Returns a single supply chain attack campaign by ID. Same shape as one item\nfrom the campaigns list; package PURLs are not inlined — fetch them from the\npaginated `/threat-campaigns/:campaign_id/packages` resource instead.\n\nUseful for filling in cached campaign metadata client-side when crawling the\ncampaigns list or packages feed.\n\nAuthentication: Organization API token, OAuth2, or NextAuth session.\nRequired token scope: `threat-campaigns:list`.\n\nThis endpoint requires an Enterprise Plan with the Threat Feed add-on.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "description": "Organization slug"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "description": "Campaign ID"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "status",
+                    "ecosystem",
+                    "firstDiscovered",
+                    "lastActivity",
+                    "blogUrls",
+                    "linkedThreatCount",
+                    "linkedPackageArtifactsCount",
+                    "htmlUrl",
+                    "createdAt",
+                    "updatedAt"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": ["ongoing", "past"]
+                    },
+                    "ecosystem": {
+                      "type": ["null", "array"],
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "firstDiscovered": {
+                      "type": ["null", "string"]
+                    },
+                    "lastActivity": {
+                      "type": ["null", "string"]
+                    },
+                    "blogUrls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "linkedThreatCount": {
+                      "type": "integer",
+                      "description": "Number of threat feed entries linked to this campaign."
+                    },
+                    "linkedPackageArtifactsCount": {
+                      "type": "integer",
+                      "description": "Number of distinct package artifacts linked to this campaign."
+                    },
+                    "htmlUrl": {
+                      "type": ["null", "string"],
+                      "description": "URL of the public campaign page on socket.dev, or null if the campaign has no public page."
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orgs/{org_slug}/threat-campaigns/{campaign_id}/packages": {
+      "get": {
+        "summary": "List packages for a threat campaign",
+        "tags": ["threat-campaigns"],
+        "description": "Returns a cursor-paginated list of package PURLs affected by a single supply\nchain attack campaign. This is the primary way to retrieve all packages for a\nknown campaign without an inline, unbounded list on the campaign object.\n\nPagination follows the same `{ items, endCursor }` envelope as the campaigns\nlist. Pass the `endCursor` value back as `cursor` to fetch the next page.\n\nAuthentication: Organization API token, OAuth2, or NextAuth session.\nRequired token scope: `threat-campaigns:list`.\n\nThis endpoint requires an Enterprise Plan with the Threat Feed add-on.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "description": "Number of packages per page. Default 100, max 1000."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "description": "Opaque cursor for pagination. Use the endCursor value from the previous response."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "description": "Organization slug"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "description": "Campaign ID"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": ["items"],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Package PURLs associated with this campaign."
+                    },
+                    "endCursor": {
+                      "type": ["null", "string"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "blobs"
+    },
+    {
+      "name": "events"
+    },
+    {
+      "name": "full-scans"
+    },
+    {
+      "name": "meta"
+    },
+    {
+      "name": "packages"
+    },
+    {
+      "name": "threat-campaigns"
+    }
+  ]
+}

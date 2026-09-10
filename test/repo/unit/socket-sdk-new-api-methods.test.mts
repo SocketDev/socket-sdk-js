@@ -11,6 +11,32 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
   const getClient = setupTestClient('test-api-token', { retries: 0 })
 
   describe('batchOrgPackageFetch', () => {
+    it('streams organization PURLs with typed errors and a single label', async () => {
+      const record = {
+        _type: 'purlError',
+        value: {
+          inputPurl: 'pkg:npm/example-missing',
+          error: 'not found',
+          retryable: false,
+        },
+      }
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/example-org/purl', {
+          components: [{ purl: 'pkg:npm/example-missing' }],
+        })
+        .query({ labels: 'production', purlErrors: true })
+        .reply(200, JSON.stringify(record))
+      const results = []
+      for await (const result of getClient().batchOrgPackageStream(
+        'example-org',
+        { components: [{ purl: 'pkg:npm/example-missing' }] },
+        { queryParams: { labels: 'production', purlErrors: true } },
+      )) {
+        results.push(result)
+      }
+      expect(results).toEqual([{ success: true, status: 200, data: record }])
+    })
+
     it('should fetch packages by PURL for organization', async () => {
       const mockResponse = [
         {
@@ -40,8 +66,8 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
           ],
         },
         {
-          alerts: 'true',
-          labels: ['production'],
+          alerts: true,
+          labels: 'production',
         },
       )
 
@@ -91,7 +117,7 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
           components: [{ purl: 'pkg:npm/express@4.19.2' }],
         },
         {
-          compact: 'true',
+          compact: true,
         },
       )
 

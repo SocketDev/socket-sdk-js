@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 
 import { GROUPS, QUOTA_LABELS } from './gen-api-docs-groups.mts'
+import { extractSdkClassMethods } from './sdk-method-extraction.mts'
 
 const rootPackageJsonPath = findUpSync('package.json', {
   cwd: path.dirname(fileURLToPath(import.meta.url)),
@@ -40,149 +41,33 @@ export interface MethodInfo {
 }
 
 /**
- * Extract public method records from the SDK class source. Looks for top-level
- * `async name(...)` / `async *name(...)` / `async name<T>(...)` with a JSDoc
- * block immediately above.
+ * Extract public ordinary, async, and generator methods from the SocketSdk
+ * class and attach adjacent JSDoc metadata.
  */
-export function extractMethods(): MethodInfo[] {
-  const src = readFileSync(classPath, 'utf8')
-  const lines = src.split(/\r?\n/)
-  const data = loadQuotaData()
+export function extractMethods(
+  source = readFileSync(classPath, 'utf8'),
+  data = loadQuotaData(),
+): MethodInfo[] {
   const methods: MethodInfo[] = []
-  const seen = new Set<string>()
-
-  let i = 0
-  while (i < lines.length) {
-    // Match a 2-space-indented async method declaration: group 1 = optional `*`
-    // (generator), group 2 = method name, terminated by `<` (generic) or `(`.
-    const match = lines[i]!.match(/^  async (\*)?([a-zA-Z][a-zA-Z0-9_]*)[<(]/)
-    if (!match) {
-      i++
-      continue
-    }
-
-    const isGenerator = match[1] === '*'
-    const name = match[2]!
-
-    if (seen.has(name)) {
-      i++
-      continue
-    }
-    seen.add(name)
-
-    // Walk through the signature: track ()/{} depth so nested object-literal
-    // option params don't trip the "body starts" detector.
-    let sigEnd = i
-    let parenDepth = 0
-    let braceDepth = 0
-    let sawCloseParen = false
-    while (sigEnd < lines.length) {
-      const line = lines[sigEnd]!
-      for (let ci = 0, { length } = line; ci < length; ci += 1) {
-        const ch = line[ci]!
-        if (ch === '(') {
-          parenDepth++
-        } else if (ch === ')') {
-          parenDepth--
-          if (parenDepth === 0) {
-            sawCloseParen = true
-          }
-        } else if (ch === '{') {
-          braceDepth++
-        } else if (ch === '}') {
-          braceDepth--
-        }
-      }
-      if (
-        sawCloseParen &&
-        parenDepth === 0 &&
-        braceDepth === 1 &&
-        line.endsWith('{')
-      ) {
-        break
-      }
-      sigEnd++
-      if (sigEnd - i > 80) {
-        break
-      }
-    }
-    const sigLines = lines.slice(i, sigEnd + 1).slice()
-    const last = sigLines[sigLines.length - 1]!
-    sigLines[sigLines.length - 1] = last.replace(/\s*\{$/, '')
-    const signature = sigLines.map(l => l.replace(/^ {2}/, '')).join('\n')
-
-    let bodyEnd = sigEnd + 1
-    while (bodyEnd < lines.length && lines[bodyEnd] !== '  }') {
-      bodyEnd++
-    }
-    const body = lines.slice(i, bodyEnd + 1).join('\n')
-
-    let jsdocEnd = i - 1
-    while (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '') {
-      jsdocEnd--
-    }
-    let summary = ''
-    let operationId: string | undefined
-    if (jsdocEnd >= 0 && lines[jsdocEnd]!.trim() === '*/') {
-      let jsdocStart = jsdocEnd
-      while (jsdocStart >= 0 && lines[jsdocStart]!.trim() !== '/**') {
-        jsdocStart--
-      }
-      const jsdoc = lines.slice(jsdocStart, jsdocEnd + 1).join('\n')
-      for (let k = jsdocStart + 1; k < jsdocEnd; k++) {
-        const text = lines[k]!.replace(/^\s*\*\s?/, '').trim()
-        if (text && !text.startsWith('@')) {
-          summary = text
-          break
-        }
-      }
-      const opTag = jsdoc.match(/@operationId\s+(\S+)/)
-      if (opTag) {
-        operationId = opTag[1] === 'none' ? undefined : opTag[1]
-      }
-    }
-
-    if (!operationId) {
-      const generic = body.match(/<'([a-zA-Z][a-zA-Z0-9]*)'[,>]/)
-      if (generic) {
-        operationId = generic[1]
-      }
-    }
-    if (!operationId && data.api[name]) {
-      operationId = name
-    }
-
-    let quota: number | undefined
-    let permissions: string[] = []
-    if (operationId) {
-      let entry = data.api[operationId]!
-      if (!entry) {
-        const lower = operationId.toLowerCase()
-        const apiEntries = Object.entries(data.api)
-        for (let j = 0, { length: jlen } = apiEntries; j < jlen; j += 1) {
-          const pair = apiEntries[j]!
-          if (pair[0].toLowerCase() === lower) {
-            entry = pair[1]
-            break
-          }
-        }
-      }
-      if (entry) {
-        quota = entry.quota
-        permissions = entry.permissions
-      }
-    }
-
+  for (const method of extractSdkClassMethods(source)) {
+    const { name, isGenerator, signature, summary, hadOperationIdNone } = method
+    const operationId =
+      method.operationId ??
+      (!hadOperationIdNone && data.api[name] ? name : undefined)
+    const entry = operationId
+      ? Object.entries(data.api).find(
+          ([key]) => key.toLowerCase() === operationId.toLowerCase(),
+        )?.[1]
+      : undefined
     methods.push({
-      isGenerator,
       name,
-      operationId,
-      permissions,
-      quota,
+      isGenerator,
       signature,
       summary,
+      operationId,
+      quota: entry?.quota,
+      permissions: entry?.permissions ?? [],
     })
-    i = bodyEnd + 1
   }
   return methods
 }

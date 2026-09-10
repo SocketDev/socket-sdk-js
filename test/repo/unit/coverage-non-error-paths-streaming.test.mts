@@ -1,9 +1,7 @@
 /**
- * @file Tests covering socket-sdk-class.ts batch-normalize and streaming
+ * @file Tests covering socket-sdk-class.mts streaming
  *   non-error paths. Targets:
  *
- *   - #checkMalwareBatch normalize with publicPolicy (alerts with/without fix,
- *     ignore actions filtered)
  *   - downloadOrgFullScanFilesAsTar streaming (bytesWritten tracking)
  *   - streamFullScan data/error/end handlers (file output, stdout output)
  *   - uploadManifestFiles edge cases (>5 invalid files, validation callback)
@@ -15,124 +13,11 @@ import path from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { MAX_FIREWALL_COMPONENTS } from '../../../src/constants.mts'
 import { SocketSdk } from '../../../src/index.mts'
 import { setupLocalHttpServer } from '../../utils/local-server-helpers.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-
-// =============================================================================
-// 4e. socket-sdk-class.ts — #checkMalwareBatch normalize with publicPolicy
-//     Specifically: alerts with/without fix, ignore actions filtered
-// =============================================================================
-
-describe('SocketSdk - checkMalware batch normalize with publicPolicy', () => {
-  const artifact = {
-    alerts: [
-      {
-        category: 'supplyChainRisk',
-        fix: { description: 'Remove package', type: 'remove' },
-        key: 'mal-1',
-        props: { note: 'data exfil' },
-        severity: 'critical',
-        type: 'malware',
-      },
-      {
-        // Alert without fix property — criticalCVE is 'warn' in publicPolicy
-        category: 'quality',
-        key: 'cve-1',
-        props: {},
-        severity: 'high',
-        type: 'criticalCVE',
-      },
-      {
-        // deprecated is 'ignore' in publicPolicy — should be filtered out
-        category: 'misc',
-        key: 'dep-1',
-        props: {},
-        severity: 'low',
-        type: 'deprecated',
-      },
-    ],
-    name: 'evil-pkg',
-    namespace: undefined,
-    score: {
-      license: 0.9,
-      maintenance: 0.8,
-      overall: 0.1,
-      quality: 0.7,
-      supplyChain: 0.0,
-      vulnerability: 0.0,
-    },
-    type: 'npm',
-    version: '1.0.0',
-  }
-
-  const getBaseUrl = setupLocalHttpServer(
-    (req: IncomingMessage, res: ServerResponse) => {
-      const url = req.url || ''
-
-      // Batch purl path — exercises #normalizeArtifact with publicPolicy.
-      let body = ''
-      req.on('data', (chunk: Buffer) => {
-        body += chunk.toString()
-      })
-      req.on('end', () => {
-        if (url.includes('/purl') && req.method === 'POST') {
-          const parsed = JSON.parse(body)
-          const count = parsed.components?.length ?? 0
-          const lines = Array.from({ length: count }, () =>
-            JSON.stringify(artifact),
-          ).join('\n')
-          res.writeHead(200, { 'Content-Type': 'application/x-ndjson' })
-          res.end(`${lines}\n`)
-        } else {
-          res.writeHead(404)
-          res.end()
-        }
-      })
-    },
-  )
-
-  it('should normalize artifact with fix and without fix, filtering ignore actions', async () => {
-    const count = MAX_FIREWALL_COMPONENTS + 1
-    const client = new SocketSdk('test-api-token', {
-      baseUrl: `${getBaseUrl()}/v0/`,
-      retries: 0,
-    })
-
-    const components = Array.from({ length: count }, (_, i) => ({
-      purl: `pkg:npm/evil-pkg@${i + 1}.0.0`,
-    }))
-    const result = await client.checkMalware(components)
-
-    expect(result.success).toBe(true)
-    if (!result.success) {
-      return
-    }
-    expect(result.data).toHaveLength(count)
-    const pkg = result.data[0]!
-
-    // Two alerts should remain (error + warn via publicPolicy), deprecated is filtered
-    expect(pkg.alerts).toHaveLength(2)
-
-    // First alert has fix
-    expect(pkg.alerts[0]!.fix).toEqual({
-      description: 'Remove package',
-      type: 'remove',
-    })
-    expect(pkg.alerts[0]!.category).toBe('supplyChainRisk')
-
-    // Second alert has no fix
-    expect(pkg.alerts[1]!.fix).toBeUndefined()
-    expect(pkg.alerts[1]!.type).toBe('criticalCVE')
-
-    // Package metadata
-    expect(pkg.name).toBe('evil-pkg')
-    expect(pkg.score?.overall).toBe(0.1)
-  })
-})
 
 // =============================================================================
 // 4f. socket-sdk-class.ts — downloadOrgFullScanFilesAsTar streaming (1929-1949)

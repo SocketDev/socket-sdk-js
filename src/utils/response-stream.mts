@@ -8,7 +8,7 @@
 
 import { MAX_RESPONSE_SIZE } from '../constants.mts'
 
-import type { HttpResponse } from '@socketsecurity/lib/http-request/response-types'
+import type { SocketSdkHttpResponse as HttpResponse } from '../types/http.mts'
 
 /**
  * Drain a stream-mode error response so the error path has a body to report.

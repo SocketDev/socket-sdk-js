@@ -11,12 +11,15 @@ import { buildSdkBaseUserAgent } from './user-agent.mts'
 
 import type { ALERT_ACTION, ALERT_TYPE } from './types/core.mts'
 
-// Re-export Socket.dev URL constants from @socketsecurity/lib
-export {
-  SOCKET_API_TOKENS_URL,
-  SOCKET_CONTACT_URL,
-  SOCKET_DASHBOARD_URL,
+import {
+  SOCKET_API_TOKENS_URL as LIB_SOCKET_API_TOKENS_URL,
+  SOCKET_CONTACT_URL as LIB_SOCKET_CONTACT_URL,
+  SOCKET_DASHBOARD_URL as LIB_SOCKET_DASHBOARD_URL,
 } from '@socketsecurity/lib/constants/socket'
+
+export const SOCKET_API_TOKENS_URL: string = LIB_SOCKET_API_TOKENS_URL
+export const SOCKET_CONTACT_URL: string = LIB_SOCKET_CONTACT_URL
+export const SOCKET_DASHBOARD_URL: string = LIB_SOCKET_DASHBOARD_URL
 
 export const DEFAULT_USER_AGENT = buildSdkBaseUserAgent(rootPkgJson)
 

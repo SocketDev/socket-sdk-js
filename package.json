@@ -17,13 +17,14 @@
     "CHANGELOG.md",
     "data/*.json",
     "dist/*.d.mts",
+    "dist/types/*.d.mts",
     "dist/utils/*.d.mts",
     "dist/*.js",
     "dist/external/*",
     "types/*.d.ts"
   ],
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "source": "./src/index.mts",
@@ -42,7 +43,10 @@
     "./types/api-helpers": {
       "types": "./types/api-helpers.d.ts"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./types/api-v1": {
+      "types": "./types/api-v1.d.ts"
+    }
   },
   "publishConfig": {
     "access": "public",
@@ -133,7 +137,10 @@
     "gen:glyph": "node scripts/fleet/gen/glyph.mts",
     "setup:ai-clients": "node scripts/fleet/setup/ai-clients.mts",
     "npm:inventory": "node scripts/fleet/registry-infra/npm/account-inventory-read.mts",
-    "soak:check": "node scripts/fleet/check/soak-time-is-consistent.mts"
+    "soak:check": "node scripts/fleet/check/soak-time-is-consistent.mts",
+    "check:api-contracts": "node scripts/repo/check/api-contracts-are-current.mts",
+    "check:package-artifact": "node scripts/repo/package-artifact-is-complete.mts",
+    "docs:api": "node scripts/repo/gen-api-docs.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",

@@ -7,6 +7,11 @@
 import { tsPlugin } from '@sveltejs/acorn-typescript'
 import { Parser } from 'acorn'
 
+import {
+  renderOptionalTypeMembers,
+  typeIncludesUndefined,
+} from './generate-optional-types.mts'
+
 import type {
   StrictTypeConfig,
   TypeProperty,
@@ -28,6 +33,7 @@ export interface AstNode extends Record<string, unknown> {
   members?: AstNode[] | undefined
   typeAnnotation?: AstNode | undefined
   typeParameters?: { params?: AstNode[] | undefined } | undefined
+  typeArguments?: { params?: AstNode[] | undefined } | undefined
   elementType?: AstNode | undefined
   id?: { name?: string | undefined } | undefined
   declaration?: AstNode | undefined
@@ -55,14 +61,11 @@ export function extractProperties(
     if (member.type === 'TSPropertySignature' && member.key?.name) {
       const name = member.key.name
       const isRequired = requiredFields.has(name)
-      let typeStr =
-        typeOverrides[name] ||
-        typeNodeToString(member.typeAnnotation?.typeAnnotation, source)
-
-      // Add | undefined for optional fields
-      if (!isRequired && !typeStr.includes('| undefined')) {
-        typeStr = `${typeStr} | undefined`
-      }
+      const typeStr = renderStrictPropertyType(
+        member.typeAnnotation?.typeAnnotation,
+        source,
+        { required: isRequired, override: typeOverrides[name] },
+      )
 
       properties.push({
         name,
@@ -77,6 +80,35 @@ export function extractProperties(
   return properties
 }
 
+export function renderStrictPropertyType(
+  node: AstNode | undefined,
+  source: string,
+  options: { required: boolean; override?: string | undefined },
+): string {
+  const { required, override } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
+  const typeString = override || typeNodeToString(node, source)
+  if (required) {
+    return typeString
+  }
+  let annotation = node
+  if (override) {
+    const ast = parseTypeScript(`type Generated = ${override}`)
+    annotation = Array.isArray(ast.body)
+      ? ast.body[0]?.typeAnnotation
+      : undefined
+  }
+  if (annotation && typeIncludesUndefined(annotation)) {
+    return typeString
+  }
+  const needsParens =
+    annotation?.type === 'TSFunctionType' ||
+    annotation?.type === 'TSConstructorType'
+  return `${needsParens ? `(${typeString})` : typeString} | undefined`
+}
+
 /**
  * Extract query parameters from operation.
  */
@@ -86,54 +118,19 @@ export function extractQueryParams(
   source: string,
   config: StrictTypeConfig,
 ): TypeProperty[] | undefined {
-  const opProp = findProperty(operationsNode, operationId)
-  if (!opProp) {
+  const queryType = findPropertyTypePath(operationsNode, [
+    operationId,
+    'parameters',
+    'query',
+  ])
+  if (!queryType) {
     return undefined
   }
-
-  const opType = opProp.typeAnnotation?.typeAnnotation
-  if (!opType) {
-    return undefined
-  }
-  const paramsProp = findProperty(opType, 'parameters')
-  if (!paramsProp) {
-    return undefined
-  }
-
-  const paramsType = paramsProp.typeAnnotation?.typeAnnotation
-  if (!paramsType) {
-    return undefined
-  }
-  const queryProp = findProperty(paramsType, 'query')
-  if (!queryProp) {
-    return undefined
-  }
-
-  const queryType = queryProp.typeAnnotation?.typeAnnotation
-  const properties: TypeProperty[] = []
-  const members: AstNode[] = queryType?.members || []
-  const requiredParams = new Set(config.requiredParams || [])
-
-  for (let i = 0, { length } = members; i < length; i += 1) {
-    const member = members[i]!
-    if (member.type === 'TSPropertySignature' && member.key?.name) {
-      const name = member.key.name
-      const isRequired = requiredParams.has(name)
-      let typeStr = typeNodeToString(
-        member.typeAnnotation?.typeAnnotation,
-        source,
-      )
-      // Add | undefined for optional params only
-      if (!isRequired && !typeStr.includes('| undefined')) {
-        typeStr = `${typeStr} | undefined`
-      }
-      properties.push({
-        name,
-        optional: !isRequired,
-        type: typeStr,
-      })
-    }
-  }
+  const properties = extractProperties(queryType, source, {
+    ...config,
+    requiredFields: config.requiredParams,
+    typeOverrides: undefined,
+  })
 
   // Add additional fields from config
   if (config.additionalFields) {
@@ -164,54 +161,17 @@ export function extractResponseType(
   source: string,
   config: StrictTypeConfig,
 ): TypeProperty[] | undefined {
-  const opProp = findProperty(operationsNode, operationId)
-  if (!opProp) {
+  if (responseCode === undefined) {
     return undefined
   }
-
-  const opType = opProp.typeAnnotation?.typeAnnotation
-  if (!opType) {
-    return undefined
-  }
-  const responsesProp = findProperty(opType, 'responses')
-  if (!responsesProp) {
-    return undefined
-  }
-
-  const responsesType = responsesProp.typeAnnotation?.typeAnnotation
-  if (!responsesType || responseCode === undefined) {
-    return undefined
-  }
-  const codeProp = findProperty(responsesType, responseCode)
-  if (!codeProp) {
-    return undefined
-  }
-
-  const codeType = codeProp.typeAnnotation?.typeAnnotation
-  if (!codeType) {
-    return undefined
-  }
-  const contentProp = findProperty(codeType, 'content')
-  if (!contentProp) {
-    return undefined
-  }
-
-  const contentType = contentProp.typeAnnotation?.typeAnnotation
-  if (!contentType) {
-    return undefined
-  }
-  const jsonProp = findProperty(contentType, 'application/json')
-  if (!jsonProp) {
-    return undefined
-  }
-
-  let targetType = jsonProp.typeAnnotation?.typeAnnotation
-
-  // Navigate to nested path if specified
-  if (targetType && sourcePath && sourcePath.length > 0) {
-    targetType = navigateToPath(targetType, sourcePath)
-  }
-
+  const responseType = findPropertyTypePath(operationsNode, [
+    operationId,
+    'responses',
+    responseCode,
+    'content',
+    'application/json',
+  ])
+  const targetType = responseType && navigateToPath(responseType, sourcePath)
   if (!targetType) {
     return undefined
   }
@@ -277,54 +237,63 @@ export function navigateToPath(
   node: AstNode,
   nodePath: string[],
 ): AstNode | undefined {
-  let current: AstNode | undefined = unwrapType(node)
+  let current = unwrapType(node)
   for (let i = 0, { length } = nodePath; i < length; i += 1) {
     const segment = nodePath[i]!
     if (!current) {
       return undefined
     }
-    current = unwrapType(current)
-    if (!current) {
-      return undefined
-    }
-
-    if (segment === 'Array' && current.type === 'TSArrayType') {
-      current = unwrapType(current.elementType)
-      continue
-    }
-    if (segment === 'items' && current.type === 'TSTypeLiteral') {
-      // Already at the array element type
-      continue
-    }
-    if (segment === 'Record' && current.type === 'TSTypeReference') {
-      // For Record<string, T>, get T
-      if (current.typeParameters?.params?.[1]) {
-        current = unwrapType(current.typeParameters.params[1])
-        continue
-      }
-    }
-    if (segment === 'Record' && current.type === 'TSTypeLiteral') {
-      // For { [key: string]: T }, get T via index signature
-      const indexSig = current.members?.find(m => m.type === 'TSIndexSignature')
-      if (indexSig?.typeAnnotation?.typeAnnotation) {
-        current = unwrapType(indexSig.typeAnnotation.typeAnnotation)
-        continue
-      }
-    }
-    if (segment === 'value') {
-      // Already navigated via Record
-      continue
-    }
-
-    // Navigate to property
-    const prop = findProperty(current, segment)
-    if (prop?.typeAnnotation?.typeAnnotation) {
-      current = unwrapType(prop.typeAnnotation.typeAnnotation)
-    } else {
-      return undefined
-    }
+    current = navigateTypeSegment(current, segment)
   }
   return current
+}
+
+export function findPropertyTypePath(
+  node: AstNode,
+  nodePath: Array<string | number>,
+): AstNode | undefined {
+  let current: AstNode | undefined = node
+  for (let i = 0, { length } = nodePath; i < length; i += 1) {
+    const segment = nodePath[i]!
+    current =
+      current && findProperty(current, segment)?.typeAnnotation?.typeAnnotation
+  }
+  return current
+}
+
+export function recordValueType(node: AstNode): AstNode | undefined {
+  if (node.type === 'TSTypeReference') {
+    return node.typeArguments?.params?.[1]
+  }
+  if (node.type === 'TSTypeLiteral') {
+    const indexSignature = node.members?.find(
+      member => member.type === 'TSIndexSignature',
+    )
+    return indexSignature?.typeAnnotation?.typeAnnotation
+  }
+  return undefined
+}
+
+export function navigateTypeSegment(
+  node: AstNode,
+  segment: string,
+): AstNode | undefined {
+  if (segment === 'Array' && node.type === 'TSArrayType') {
+    return unwrapType(node.elementType)
+  }
+  if (
+    segment === 'value' ||
+    (segment === 'items' && node.type === 'TSTypeLiteral')
+  ) {
+    return node
+  }
+  if (segment === 'Record') {
+    const valueType = recordValueType(node)
+    if (valueType) {
+      return unwrapType(valueType)
+    }
+  }
+  return unwrapType(findProperty(node, segment)?.typeAnnotation?.typeAnnotation)
 }
 
 /**
@@ -348,7 +317,7 @@ export function typeNodeToString(
   if (!node) {
     return 'unknown'
   }
-  return source.slice(node.start!, node.end!)
+  return renderOptionalTypeMembers(node, source)
 }
 
 /**

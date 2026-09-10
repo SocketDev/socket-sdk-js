@@ -214,16 +214,16 @@ describe('SocketSdk - Batch Operations', () => {
         components: [{ purl: 'pkg:npm/test@1.0.0' }],
       })
 
-      expect(res.success).toBe(true)
-      if (res.success) {
-        expect(res.data).toEqual([])
-      }
+      expect(res.success).toBe(false)
     })
 
     it('should handle batch streaming with error responses', async () => {
       const errorResponse = {
-        error: 'Package not found',
-        purl: 'pkg:npm/nonexistent@1.0.0',
+        _type: 'purlError',
+        value: {
+          error: 'Package not found',
+          inputPurl: 'pkg:npm/nonexistent@1.0.0',
+        },
       }
 
       nock('https://api.socket.dev')
@@ -266,8 +266,18 @@ describe('SocketSdk - Batch Operations', () => {
 
     it('should handle newline-separated JSON responses', async () => {
       const responses = [
-        { purl: 'pkg:npm/pkg1@1.0.0', name: 'pkg1', version: '1.0.0' },
-        { purl: 'pkg:npm/pkg2@2.0.0', name: 'pkg2', version: '2.0.0' },
+        {
+          type: 'npm',
+          inputPurl: 'pkg:npm/pkg1@1.0.0',
+          name: 'pkg1',
+          version: '1.0.0',
+        },
+        {
+          type: 'npm',
+          inputPurl: 'pkg:npm/pkg2@2.0.0',
+          name: 'pkg2',
+          version: '2.0.0',
+        },
       ]
 
       nock('https://api.socket.dev')
@@ -311,7 +321,7 @@ describe('SocketSdk - Batch Operations', () => {
         {
           components: [{ purl: 'pkg:npm/express@4.19.2' }],
         },
-        { compact: 'true' },
+        { compact: true },
       )
 
       expect(res.success).toBe(true)
@@ -324,8 +334,18 @@ describe('SocketSdk - Batch Operations', () => {
 
     it('should handle responses with empty lines', async () => {
       const responses = [
-        { purl: 'pkg:npm/pkg1@1.0.0', name: 'pkg1', version: '1.0.0' },
-        { purl: 'pkg:npm/pkg2@2.0.0', name: 'pkg2', version: '2.0.0' },
+        {
+          type: 'npm',
+          inputPurl: 'pkg:npm/pkg1@1.0.0',
+          name: 'pkg1',
+          version: '1.0.0',
+        },
+        {
+          type: 'npm',
+          inputPurl: 'pkg:npm/pkg2@2.0.0',
+          name: 'pkg2',
+          version: '2.0.0',
+        },
       ]
 
       // Response with empty lines between results

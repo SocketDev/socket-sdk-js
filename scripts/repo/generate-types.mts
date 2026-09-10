@@ -1,52 +1,65 @@
 /**
- * @file TypeScript type generation script for Socket API. Generates type
- *   definitions from OpenAPI schema for Socket SDK.
+ * @file Renders operation and path types from Socket OpenAPI documents.
  */
-import { promises as fs } from 'node:fs'
-import path from 'node:path'
-import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import openapiTS from 'openapi-typescript'
 
-import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
-import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { OPENAPI_METHOD_ALIASES } from './openapi-contracts.mts'
 
-const logger = getDefaultLogger()
+import type { OpenAPI3, SchemaObject } from 'openapi-typescript'
+import type { OpenApiVersion } from './openapi-contracts.mts'
 
-const rootPackageJsonPath = findUpSync('package.json', {
-  cwd: path.dirname(fileURLToPath(import.meta.url)),
-})
-if (!rootPackageJsonPath) {
-  throw new Error('Unable to locate repository root (package.json not found).')
-}
-const rootPath = path.dirname(rootPackageJsonPath)
-const openApiJsonPath = path.join(rootPath, 'openapi.json')
-const typesPath = path.join(rootPath, 'types/api.d.ts')
-
-async function main(): Promise<void> {
-  try {
-    const output = await openapiTS(openApiJsonPath, {
-      transform(schemaObject) {
-        if ('format' in schemaObject && schemaObject['format'] === 'binary') {
-          return 'never'
-        }
-        return undefined
-      },
-    })
-    await fs.writeFile(typesPath, output, 'utf8')
-    logger.log(`  Written to ${typesPath}`)
-  } catch (e) {
-    process.exitCode = 1
-    logger.error('Failed with error:', errorMessage(e))
+function includeBinaryMetadataTypes(schema: SchemaObject): void {
+  if (!('properties' in schema) || !schema.properties) {
+    return
+  }
+  const additional = schema.additionalProperties
+  if (
+    typeof additional === 'object' &&
+    'format' in additional &&
+    additional.format === 'binary'
+  ) {
+    schema.additionalProperties = {
+      anyOf: [additional, ...Object.values(schema.properties)],
+    }
   }
 }
 
-if (isMainModule(import.meta.url)) {
-  main().catch((e: unknown) => {
-    logger.error(e)
-    process.exitCode = 1
+export async function renderOpenApiDocumentTypes(
+  document: OpenAPI3,
+): Promise<string> {
+  return openapiTS(document, {
+    transform(schemaObject) {
+      includeBinaryMetadataTypes(schemaObject)
+      if (schemaObject.format === 'binary') {
+        return 'Uint8Array'
+      }
+      if (
+        'type' in schemaObject &&
+        schemaObject.type === 'object' &&
+        schemaObject.properties === undefined &&
+        schemaObject.additionalProperties === undefined &&
+        schemaObject.oneOf === undefined &&
+        schemaObject.allOf === undefined &&
+        schemaObject.anyOf === undefined
+      ) {
+        return 'Record<string, unknown>'
+      }
+      return undefined
+    },
   })
+}
+
+export async function renderOpenApiTypes(
+  document: OpenAPI3,
+  version: OpenApiVersion,
+): Promise<string> {
+  const output = await renderOpenApiDocumentTypes(document)
+  if (version === 'v1') {
+    return output
+  }
+  const aliases = Object.entries(OPENAPI_METHOD_ALIASES)
+    .map(([name, operation]) => `  ${name}: operations['${operation}']`)
+    .join('\n')
+  return `${output}\nexport interface operations {\n${aliases}\n}\n`
 }

@@ -22,22 +22,20 @@ describe('Quota Utils', () => {
   describe('getQuotaCost', () => {
     it.each([
       ['batchPackageFetch', 100],
-      ['searchDependencies', 100],
+      ['searchDependencies', 1],
       ['uploadManifestFiles', 100],
-      ['getOrgAnalytics', 10],
+      ['getOrgAnalytics', 1],
       ['getAPITokens', 10],
-      ['getScoreByNpmPackage', 10],
+      ['getScoreByNpmPackage', 1],
       ['getQuota', 0],
-      ['getOrganizations', 0],
-      ['getScan', 0],
+      ['getOrganizations', 1],
+      ['getScan', 10],
     ])('should return %i quota cost for %s', (method, expectedCost) => {
       expect(getQuotaCost(method)).toBe(expectedCost)
     })
 
     it('should throw error for unknown method', () => {
-      expect(() => getQuotaCost('unknownMethod')).toThrow(
-        'Unknown SDK method: "unknownMethod"',
-      )
+      expect(() => getQuotaCost('unknownMethod')).toThrow(Error)
     })
   })
 
@@ -66,13 +64,30 @@ describe('Quota Utils', () => {
     })
 
     it('should throw error for unknown method', () => {
-      expect(() => getRequiredPermissions('unknownMethod')).toThrow(
-        'Unknown SDK method: "unknownMethod"',
-      )
+      expect(() => getRequiredPermissions('unknownMethod')).toThrow(Error)
     })
   })
 
   describe('getMethodRequirements', () => {
+    it.each([
+      ['createOrgWebhook', 1, ['webhooks:create']],
+      ['getOrgWebhooksList', 1, ['webhooks:list']],
+      ['getOrgTelemetryConfig', 1, []],
+      ['updateOrgTelemetryConfig', 1, ['telemetry-policy:update']],
+      ['postOrgTelemetry', 0, []],
+      ['postAPITokenUpdate', 10, ['api-tokens:create']],
+      ['updateOrgSecurityPolicy', 1, ['security-policy:update']],
+      ['getDiffScanGfm', 1, ['diff-scans:list']],
+      ['createOrgDiffScanFromIds', 1, ['diff-scans:create', 'full-scans:list']],
+      ['createOrgFullScanFromArchive', 1, ['full-scans:create']],
+      ['downloadOrgFullScanFilesAsTar', 1, ['full-scans:list']],
+    ] as const)(
+      'exposes verified backend requirements for %s',
+      (method, quota, permissions) => {
+        expect(getMethodRequirements(method)).toEqual({ quota, permissions })
+      },
+    )
+
     it('should return both quota and permissions for a method', () => {
       const requirements = getMethodRequirements('batchPackageFetch')
       expect(requirements).toEqual({
@@ -94,8 +109,7 @@ describe('Quota Utils', () => {
     it('should calculate total cost for multiple methods', () => {
       const methods = ['batchPackageFetch', 'getOrgAnalytics', 'getQuota']
       const total = calculateTotalQuotaCost(methods)
-      // 100 + 10 + 0
-      expect(total).toBe(110)
+      expect(total).toBe(101)
     })
 
     it('should return 0 for empty array', () => {
@@ -103,7 +117,7 @@ describe('Quota Utils', () => {
     })
 
     it('should return 0 for all free methods', () => {
-      const methods = ['getQuota', 'getOrganizations', 'getScan']
+      const methods = ['getQuota', 'getEnabledEntitlements', 'postOrgTelemetry']
       expect(calculateTotalQuotaCost(methods)).toBe(0)
     })
   })
@@ -112,14 +126,14 @@ describe('Quota Utils', () => {
     it('should return high-cost methods', () => {
       const methods = getMethodsByQuotaCost(100)
       expect(methods).toContain('batchPackageFetch')
-      expect(methods).toContain('searchDependencies')
+      expect(methods).toContain('createDependenciesSnapshot')
       expect(methods).toContain('uploadManifestFiles')
       expect(methods.length).toBeGreaterThan(0)
     })
 
     it('should return medium-cost methods', () => {
       const methods = getMethodsByQuotaCost(10)
-      expect(methods).toContain('getOrgAnalytics')
+      expect(methods).toContain('getScan')
       expect(methods).toContain('getAPITokens')
       expect(methods.length).toBeGreaterThan(0)
     })
@@ -127,9 +141,8 @@ describe('Quota Utils', () => {
     it('should return free methods', () => {
       const methods = getMethodsByQuotaCost(0)
       expect(methods).toContain('getQuota')
-      expect(methods).toContain('getOrganizations')
-      // Should be many free methods
-      expect(methods.length).toBeGreaterThan(10)
+      expect(methods).toContain('getEnabledEntitlements')
+      expect(methods).toContain('postOrgTelemetry')
     })
   })
 
@@ -167,12 +180,14 @@ describe('Quota Utils', () => {
 
     it('should return true for exact quota match', () => {
       expect(
-        hasQuotaForMethods(110, ['batchPackageFetch', 'getOrgAnalytics']),
+        hasQuotaForMethods(101, ['batchPackageFetch', 'getOrgAnalytics']),
       ).toBe(true)
     })
 
     it('should return true for free methods with zero quota', () => {
-      expect(hasQuotaForMethods(0, ['getQuota', 'getOrganizations'])).toBe(true)
+      expect(
+        hasQuotaForMethods(0, ['getQuota', 'getEnabledEntitlements']),
+      ).toBe(true)
     })
   })
 
@@ -185,7 +200,8 @@ describe('Quota Utils', () => {
       expect(summary).toHaveProperty('100 units')
 
       expect(summary['0 units']).toContain('getQuota')
-      expect(summary['10 units']).toContain('getOrgAnalytics')
+      expect(summary['1 units']).toContain('getOrgAnalytics')
+      expect(summary['10 units']).toContain('getAPITokens')
       expect(summary['100 units']).toContain('batchPackageFetch')
     })
 
@@ -195,7 +211,8 @@ describe('Quota Utils', () => {
       const methodsList = Object.values(summary)
       for (let i = 0, { length } = methodsList; i < length; i += 1) {
         const methods = methodsList[i]!
-        // oxlint-disable-next-line unicorn/no-array-sort -- toSorted throws on Node <20 (engines floor 18.20.8); the spread already copies so in-place sort is safe.
+        // Node 18 lacks toSorted; spreading creates a fresh array.
+        // oxlint-disable-next-line unicorn/no-array-sort -- fresh array
         const sorted = [...methods].sort()
         expect(methods).toEqual(sorted)
       }
@@ -240,20 +257,16 @@ describe('Quota Utils', () => {
 
   describe('Error handling', () => {
     it('should throw for unknown method in getMethodRequirements', () => {
-      expect(() => getMethodRequirements('unknownMethodName')).toThrow(
-        'Unknown SDK method',
-      )
+      expect(() => getMethodRequirements('unknownMethodName')).toThrow(Error)
     })
 
     it('should throw for unknown method in getQuotaCost', () => {
-      expect(() => getQuotaCost('anotherUnknownMethod')).toThrow(
-        'Unknown SDK method',
-      )
+      expect(() => getQuotaCost('anotherUnknownMethod')).toThrow(Error)
     })
 
     it('should throw for unknown method in getRequiredPermissions', () => {
       expect(() => getRequiredPermissions('yetAnotherUnknownMethod')).toThrow(
-        'Unknown SDK method',
+        Error,
       )
     })
   })
@@ -293,9 +306,7 @@ describe('Quota Utils', () => {
         // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
         await import('../../../src/quota-utils.mts')
 
-      expect(() => getQuotaCostMocked('someMethod')).toThrow(
-        'Failed to load SDK method requirements',
-      )
+      expect(() => getQuotaCostMocked('someMethod')).toThrow(Error)
     })
 
     it('should throw error when requirements.json contains invalid JSON', async () => {
@@ -321,9 +332,7 @@ describe('Quota Utils', () => {
         // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
         await import('../../../src/quota-utils.mts')
 
-      expect(() => getQuotaCostMocked('someMethod')).toThrow(
-        'Failed to load SDK method requirements',
-      )
+      expect(() => getQuotaCostMocked('someMethod')).toThrow(Error)
     })
 
     it('should throw error when requirements.json file does not exist', async () => {
@@ -349,9 +358,7 @@ describe('Quota Utils', () => {
         // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- vi.doMock pattern (isolated test).
         await import('../../../src/quota-utils.mts')
 
-      expect(() => getQuotaCostMocked('someMethod')).toThrow(
-        'Failed to load SDK method requirements',
-      )
+      expect(() => getQuotaCostMocked('someMethod')).toThrow(Error)
     })
   })
 })

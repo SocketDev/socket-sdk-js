@@ -80,8 +80,16 @@ describe('SocketSdk - Optional Configuration', () => {
   describe('Public token artifact reshaping', () => {
     it('should handle empty lines in NDJSON batch responses', async () => {
       const mockResponses = [
-        { purl: 'pkg:npm/pkg1@1.0.0', name: 'pkg1' },
-        { purl: 'pkg:npm/pkg2@2.0.0', name: 'pkg2' },
+        {
+          type: 'npm',
+          inputPurl: 'pkg:npm/example-first@1.0.0',
+          name: 'example-first',
+        },
+        {
+          type: 'npm',
+          inputPurl: 'pkg:npm/example-second@2.0.0',
+          name: 'example-second',
+        },
       ]
 
       // Response with empty lines. Multiple empty lines to test filtering
@@ -95,14 +103,14 @@ describe('SocketSdk - Optional Configuration', () => {
 
       const result = await getClient().batchPackageFetch({
         components: [
-          { purl: 'pkg:npm/pkg1@1.0.0' },
-          { purl: 'pkg:npm/pkg2@2.0.0' },
+          { purl: 'pkg:npm/example-first@1.0.0' },
+          { purl: 'pkg:npm/example-second@2.0.0' },
         ],
       })
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data).toHaveLength(2)
+        expect(result.data).toEqual(mockResponses)
       }
     })
   })

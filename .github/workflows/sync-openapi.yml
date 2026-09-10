@@ -1,36 +1,18 @@
-name: 🔄 Sync OpenAPI
-
-# Fetches the upstream OpenAPI spec from api.socket.dev and regenerates
-# the SDK types (`api.d.ts`, `types-strict.mts`, `index.mts`) to match.
-# Pushes a PR if anything changed, otherwise no-ops.
-#
-# Trigger model:
-#   - cron Mon-Fri 07:23 UTC — daily drift check.
-#   - push to main on the generator scripts — re-emit when the
-#     generators themselves change (otherwise the existing artifacts
-#     would diverge from what the new generator produces).
-#   - workflow_dispatch — manual trigger for hot-fix flows; `force:
-#     true` skips the unchanged-input shortcut.
+name: 🔄 Sync openapi
+run-name: Sync v0 and v1 contracts
 
 on:
   push:
-    branches:
-      - main
     paths:
       - '.github/workflows/sync-openapi.yml'
-      - 'scripts/repo/generate-sdk.mts'
-      - 'scripts/repo/generate-types.mts'
-      - 'scripts/repo/generate-strict-types.mts'
+      - 'scripts/repo/generate-*.mts'
+      - 'scripts/repo/openapi-contracts.mts'
+      - 'scripts/repo/check/api-contracts-are-current.mts'
+      - 'scripts/repo/package-artifact-is-complete.mts'
+      - 'types/api-helpers.d.ts'
   schedule:
-    # At 07:23 on every day-of-week from Monday through Friday.
     - cron: '23 7 * * 1-5'
   workflow_dispatch:
-    inputs:
-      force:
-        description: 'Force regeneration even if no changes detected'
-        required: false
-        default: false
-        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,154 +20,108 @@ concurrency:
 
 permissions: {}
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   fetch_and_update:
-    name: Sync OpenAPI definition
+    name: Sync v0 and v1 contracts
+    if: github.event_name != 'push' || github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     permissions:
-      actions: write # To trigger CI workflow via workflow_dispatch
-      contents: write # To push generated SDK code
-      pull-requests: write # To create PRs for review
-    outputs:
-      has_changes: ${{ steps.check.outputs.has_changes }}
+      actions: write
+      contents: write
+      pull-requests: write
     steps:
-      - name: Random delay
-        if: github.event_name == 'schedule'
-        run: |
-          # Add random delay between 0-10 minutes for scheduled runs
-          delay=$((RANDOM % 600))
-          echo "Sleeping for $delay seconds..."
-          sleep $delay
-
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
+      - name: Checkout default branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
         with:
           persist-credentials: false
-      - uses: ./.github/actions/fleet/setup-and-install
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Set up and install
+        uses: ./.github/actions/fleet/setup-and-install
         with:
-          # Thin-distribution CI auth: mint a contents:read-only token so the
-          # bootstrap fetch (fired by `prepare` during install) can download the
-          # fleet release bundle from the private wheelhouse.
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+          checkout: 'false'
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
-      - name: Configure push credentials
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
-
-      - uses: ./.github/actions/fleet/setup-git-signing
+      - name: Set up commit signing
+        uses: ./.github/actions/fleet/setup-git-signing
         with:
           gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
 
-      - name: Generate SDK
-        # Fetches OpenAPI, generates types/api.d.ts and src/types-strict.mts
-        run: pnpm run generate-sdk
+      - name: Generate both contracts
+        run: |
+          pnpm --silent run generate-sdk --list-artifacts > "$RUNNER_TEMP/openapi-artifacts.txt"
+          pnpm run generate-sdk
 
-      - name: Check for changes
+      - name: Verify generated contracts
+        run: |
+          pnpm run check:api-contracts
+          pnpm run type
+          pnpm test test/repo/unit/openapi-contracts.test.mts test/repo/unit/openapi-response-types.test.mts test/repo/unit/openapi-multipart.test.mts
+          pnpm run check:quota-sync
+          pnpm run build
+          pnpm run check:package-artifact
+
+      - name: Check generated artifacts for changes
         id: check
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
+          mapfile -t artifact_paths < "$RUNNER_TEMP/openapi-artifacts.txt"
+          if [ -n "$(git status --porcelain -- "${artifact_paths[@]}")" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
           else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit and push changes
-        if: steps.check.outputs.has_changes == 'true'
-        run: |
-          # Build the PR branch in an ISOLATED worktree at main~1 (so the PR
-          # sits behind main and the "Update branch" button can trigger
-          # enterprise checks). The main checkout never switches branches —
-          # the old checkout-in-place dance aborted whenever a generated
-          # file differed between HEAD and HEAD~1, and `git stash` is
-          # forbidden here (shared store, parallel-Claude rule).
-          tmp_worktree="$(mktemp -d)"
-          git worktree add -B automated/open-api "$tmp_worktree" HEAD~1
-          # The generated-file set is DERIVED from git state, never a
-          # hand-kept list — a generator emitting a new or renamed artifact
-          # ships it automatically (a stale hard-coded list broke this
-          # workflow across the .ts→.mts migration).
-          files="$(git ls-files --modified --others --exclude-standard)"
-          if [ -z "$files" ]; then
-            echo "::error title=Sync OpenAPI::has_changes was true but no modified/untracked files found — inspect the generate step."
-            exit 1
-          fi
-          echo "Generated files:"
-          printf '%s\n' "$files"
-          printf '%s\n' "$files" | while IFS= read -r f; do
-            mkdir -p "$tmp_worktree/$(dirname "$f")"
-            cp "$f" "$tmp_worktree/$f"
-          done
-          printf '%s\n' "$files" | git -C "$tmp_worktree" add --pathspec-from-file=-
-          git -C "$tmp_worktree" commit -m "fix(openapi): sync with openapi definition"
-          git -C "$tmp_worktree" push origin automated/open-api -fu
-          git worktree remove --force "$tmp_worktree"
-
-      - name: Create Pull Request
+      - name: Commit and push generated artifacts
         if: steps.check.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Check if PR already exists
-          existing_pr=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
+          mapfile -t artifact_paths < "$RUNNER_TEMP/openapi-artifacts.txt"
+          git switch --create automated/open-api
+          git add -- "${artifact_paths[@]}"
+          git commit -m "fix(openapi): sync v0 and v1 contracts"
+          previous_head="$(git -c credential.helper='!gh auth git-credential' ls-remote origin refs/heads/automated/open-api | cut -f1)"
+          git -c credential.helper='!gh auth git-credential' push \
+            --force-with-lease="refs/heads/automated/open-api:$previous_head" \
+            origin HEAD:refs/heads/automated/open-api
 
+      - name: Create or update pull request
+        if: steps.check.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          cat > "$RUNNER_TEMP/openapi-pr-body.md" <<'BODY'
+          Synchronizes the v0 and v1 OpenAPI snapshots and generated TypeScript contracts.
+          The v0 strict types and strict type exports follow the same generation pass.
+
+          Validation: offline contract freshness, TypeScript, generator tests, quota synchronization, build, and packed declaration imports.
+          BODY
+          existing_pr="$(gh pr list --head automated/open-api --base "$DEFAULT_BRANCH" --json number --jq '.[0].number // empty')"
           if [ -z "$existing_pr" ]; then
-            cat > /tmp/pr-body.md <<'EOF'
-          ## OpenAPI Sync
-
-          The OpenAPI definition in the API has been updated. This PR automatically:
-          - Downloads the latest OpenAPI specification
-          - Regenerates TypeScript types (types/api.d.ts)
-          - Regenerates strict TypeScript types (src/types-strict.mts)
-          - Updates SDK method signatures if needed
-
-          ### What's Changed
-          See the file changes below for specific updates to the API types, strict types, and methods.
-
-          **Please review carefully for any breaking changes in the API.**
-          EOF
             gh pr create \
               --head automated/open-api \
-              --base main \
-              --title "Sync with OpenAPI definition" \
-              --body-file /tmp/pr-body.md \
-              --label "dependencies" \
-              --label "automated"
+              --base "$DEFAULT_BRANCH" \
+              --title "fix(openapi): sync v0 and v1 contracts" \
+              --body-file "$RUNNER_TEMP/openapi-pr-body.md" \
+              --label dependencies \
+              --label automated
           else
-            echo "PR #$existing_pr already exists, skipping creation"
+            gh pr edit "$existing_pr" \
+              --title "fix(openapi): sync v0 and v1 contracts" \
+              --body-file "$RUNNER_TEMP/openapi-pr-body.md"
           fi
 
-      # Pushes made with GITHUB_TOKEN don't trigger other workflows.
-      # Use workflow_dispatch to directly trigger CI on the PR branch.
       - name: Trigger CI checks
         if: steps.check.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run ci.yml --ref automated/open-api
 
-      - name: Add job summary
-        if: steps.check.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          pr_number=$(gh pr list --head automated/open-api --json number --jq '.[0].number' || echo "")
-          pr_url="https://github.com/${{ github.repository }}/pull/${pr_number}"
-
-          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
-          ## OpenAPI Sync Complete
-
-          **PR:** [#${pr_number}](${pr_url})
-
-          > **Note:** Enterprise required workflows (e.g. Audit GHA Workflows) won't trigger
-          > automatically on bot PRs. Click **"Update branch"** on the PR to trigger them,
-          > or push an empty commit to the branch:
-          >
-          > \`\`\`sh
-          > git fetch origin automated/open-api && git checkout automated/open-api
-          > git commit --allow-empty -m "chore: trigger enterprise checks"
-          > git push origin automated/open-api
-          > \`\`\`
-          EOF
-
-      - uses: ./.github/actions/fleet/cleanup-git-signing
+      - name: Clean up commit signing
+        uses: ./.github/actions/fleet/cleanup-git-signing
         if: always()

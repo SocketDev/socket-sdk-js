@@ -5,7 +5,6 @@
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
 import { rolldown, watch } from 'rolldown'
@@ -22,11 +21,6 @@ import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.m
 import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
-
-const rootPath = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '..',
-)
 
 // Initialize logger
 const logger = getDefaultLogger()
@@ -121,11 +115,7 @@ export async function buildSource(
  * Build TypeScript declarations. Returns exitCode for external logging.
  */
 export async function buildTypes(options: BuildOptions = {}): Promise<number> {
-  const {
-    quiet = false,
-    skipClean = false,
-    verbose: _verbose = false,
-  } = options
+  const { quiet = false, skipClean = false } = options
 
   const commands: Array<{
     args: string[]
@@ -162,9 +152,9 @@ export async function buildTypes(options: BuildOptions = {}): Promise<number> {
 /**
  * Check if build is needed.
  */
-export function isBuildNeeded(): boolean {
-  const distPath = path.join(rootPath, 'dist', 'index.js')
-  const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
+export function isBuildNeeded(rootPath: string = REPO_ROOT): boolean {
+  const distPath = path.join(rootPath, 'dist', 'index.mjs')
+  const distTypesPath = path.join(rootPath, 'dist', 'index.d.mts')
 
   return !existsSync(distPath) || !existsSync(distTypesPath)
 }
@@ -215,6 +205,106 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
   return 0
 }
 
+export function printBuildHelp(): void {
+  logger.log('Build Runner')
+  logger.log('')
+  logger.log('Usage: pnpm build [options]')
+  logger.log('')
+  logger.log('Options:')
+  logger.log('  --help       Show this help message')
+  logger.log('  --src        Build source code only')
+  logger.log('  --types      Build TypeScript declarations only')
+  logger.log(
+    '  --watch      Watch mode with incremental builds (68% faster rebuilds)',
+  )
+  logger.log('  --needed     Only build if dist files are missing')
+  logger.log('  --analyze    Show bundle size analysis')
+  logger.log('  --quiet, --silent  Suppress progress messages')
+  logger.log('  --verbose    Show detailed build output')
+  logger.log('')
+  logger.log('Examples:')
+  logger.log('  pnpm build              # Full build (source + types)')
+  logger.log('  pnpm build --src        # Build source only')
+  logger.log('  pnpm build --types      # Build types only')
+  logger.log('  pnpm build --watch      # Watch mode with incremental builds')
+  logger.log('  pnpm build --analyze    # Build with size analysis')
+  logger.log('')
+  logger.log('Note: Watch mode uses rolldown for incremental rebuilds')
+}
+
+export type BuildMode = 'watch' | 'types' | 'src' | 'all'
+
+export function selectBuildMode(values: Record<string, unknown>): BuildMode {
+  if (values['watch']) {
+    return 'watch'
+  }
+  if (values['types'] && !values['src']) {
+    return 'types'
+  }
+  return values['src'] && !values['types'] ? 'src' : 'all'
+}
+
+export async function runFullBuild(options: BuildOptions): Promise<number> {
+  const { quiet } = { __proto__: null, ...options } as typeof options
+  const cleanExitCode = await runSequence([
+    {
+      args: ['scripts/repo/clean.mts', '--dist', '--types', '--quiet'],
+      command: 'node',
+    },
+  ])
+  if (cleanExitCode !== 0) {
+    if (!quiet) {
+      logger.error('Clean failed')
+    }
+    return cleanExitCode
+  }
+  if (!quiet) {
+    logger.success('Build Cleaned')
+  }
+  const results = await Promise.allSettled([
+    buildSource({ ...options, skipClean: true }),
+    buildTypes({ ...options, skipClean: true }),
+  ])
+  const srcResult: BuildSourceResult =
+    results[0].status === 'fulfilled'
+      ? results[0].value
+      : { exitCode: 1, buildTime: 0 }
+  const typesExitCode = results[1].status === 'fulfilled' ? results[1].value : 1
+  if (!quiet) {
+    if (srcResult.exitCode === 0) {
+      logger.success(`Source Bundle (${srcResult.buildTime}ms)`)
+    }
+    if (typesExitCode === 0) {
+      logger.success('Type Declarations')
+    }
+  }
+  return srcResult.exitCode !== 0 ? srcResult.exitCode : typesExitCode
+}
+
+export async function runSelectedBuild(
+  mode: BuildMode,
+  options: BuildOptions,
+): Promise<number> {
+  const opts = { __proto__: null, ...options } as typeof options
+  if (!opts.quiet) {
+    printHeader(`Build Runner (${mode})`)
+  }
+  if (mode === 'watch') {
+    return watchBuild(options)
+  }
+  if (mode === 'all') {
+    return runFullBuild(options)
+  }
+  const exitCode =
+    mode === 'types'
+      ? await buildTypes(options)
+      : (await buildSource(options)).exitCode
+  if (exitCode === 0 && !opts.quiet) {
+    logger.success(mode === 'types' ? 'Type Declarations' : 'Source Bundle')
+  }
+  return exitCode
+}
+
 async function main(): Promise<void> {
   try {
     // Parse arguments
@@ -263,32 +353,7 @@ async function main(): Promise<void> {
 
     // Show help if requested
     if (values.help) {
-      logger.log('Build Runner')
-      logger.log('')
-      logger.log('Usage: pnpm build [options]')
-      logger.log('')
-      logger.log('Options:')
-      logger.log('  --help       Show this help message')
-      logger.log('  --src        Build source code only')
-      logger.log('  --types      Build TypeScript declarations only')
-      logger.log(
-        '  --watch      Watch mode with incremental builds (68% faster rebuilds)',
-      )
-      logger.log('  --needed     Only build if dist files are missing')
-      logger.log('  --analyze    Show bundle size analysis')
-      logger.log('  --quiet, --silent  Suppress progress messages')
-      logger.log('  --verbose    Show detailed build output')
-      logger.log('')
-      logger.log('Examples:')
-      logger.log('  pnpm build              # Full build (source + types)')
-      logger.log('  pnpm build --src        # Build source only')
-      logger.log('  pnpm build --types      # Build types only')
-      logger.log(
-        '  pnpm build --watch      # Watch mode with incremental builds',
-      )
-      logger.log('  pnpm build --analyze    # Build with size analysis')
-      logger.log('')
-      logger.log('Note: Watch mode uses rolldown for incremental rebuilds')
+      printBuildHelp()
       process.exitCode = 0
       return
     }
@@ -305,95 +370,11 @@ async function main(): Promise<void> {
       return
     }
 
-    let exitCode = 0
-
-    // Handle watch mode
-    if (values.watch) {
-      if (!quiet) {
-        printHeader('Build Runner (Watch Mode)')
-      }
-      exitCode = await watchBuild({ quiet, verbose })
-    }
-    // Build types only
-    else if (values.types && !values.src) {
-      if (!quiet) {
-        printHeader('Building TypeScript Declarations')
-      }
-      exitCode = await buildTypes({ quiet, verbose })
-      if (exitCode === 0 && !quiet) {
-        logger.success('Type Declarations')
-      }
-    }
-    // Build source only
-    else if (values.src && !values.types) {
-      if (!quiet) {
-        printHeader('Building Source')
-      }
-      const { buildTime, exitCode: srcExitCode } = await buildSource({
-        quiet,
-        verbose,
-        analyze: Boolean(values.analyze),
-      })
-      exitCode = srcExitCode
-      if (exitCode === 0 && !quiet) {
-        logger.success(`Source Bundle (${buildTime}ms)`)
-      }
-    }
-    // Build everything (default)
-    else {
-      if (!quiet) {
-        printHeader('Building Package')
-      }
-
-      // Clean all directories first (once)
-      exitCode = await runSequence([
-        {
-          args: ['scripts/repo/clean.mts', '--dist', '--types', '--quiet'],
-          command: 'node',
-        },
-      ])
-      if (exitCode !== 0) {
-        if (!quiet) {
-          logger.error('Clean failed')
-        }
-        process.exitCode = exitCode
-        return
-      }
-
-      if (!quiet) {
-        logger.success('Build Cleaned')
-      }
-
-      // Run source and types builds in parallel
-      const results = await Promise.allSettled([
-        buildSource({
-          quiet,
-          verbose,
-          skipClean: true,
-          analyze: Boolean(values.analyze),
-        }),
-        buildTypes({ quiet, verbose, skipClean: true }),
-      ])
-      const srcResult: BuildSourceResult =
-        results[0].status === 'fulfilled'
-          ? results[0].value
-          : { exitCode: 1, buildTime: 0 }
-      const typesExitCode =
-        results[1].status === 'fulfilled' ? results[1].value : 1
-
-      // Log completion messages
-      if (!quiet) {
-        if (srcResult.exitCode === 0) {
-          logger.success(`Source Bundle (${srcResult.buildTime}ms)`)
-        }
-
-        if (typesExitCode === 0) {
-          logger.success('Type Declarations')
-        }
-      }
-
-      exitCode = srcResult.exitCode !== 0 ? srcResult.exitCode : typesExitCode
-    }
+    const exitCode = await runSelectedBuild(selectBuildMode(values), {
+      quiet,
+      verbose,
+      analyze: Boolean(values.analyze),
+    })
 
     // Print final status and footer
     if (!quiet) {

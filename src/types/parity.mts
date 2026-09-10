@@ -9,7 +9,7 @@
  */
 /* c8 ignore start - Type definitions only, no runtime code to test. */
 
-import type { operations } from '../../types/api'
+import type { operations } from '../../types/api.d.ts'
 
 export type HistoricalAlertsListOptions = NonNullable<
   operations['historicalAlertsList']['parameters']['query']
