@@ -93,7 +93,12 @@ export function createCodeStubPlugin(
     load(id) {
       for (const { code, pattern } of stubs) {
         if (pattern.test(id)) {
-          return { code, moduleType: 'js', moduleSideEffects: false }
+          return {
+            __proto__: null,
+            code,
+            moduleType: 'js',
+            moduleSideEffects: false,
+          }
         }
       }
       return undefined
@@ -114,7 +119,7 @@ export function createNodeProtocolPlugin(): Plugin {
     name: 'node-protocol',
     resolveId(source) {
       if (builtins.has(source)) {
-        return { id: `node:${source}`, external: true }
+        return { __proto__: null, id: `node:${source}`, external: true }
       }
       return undefined
     },
