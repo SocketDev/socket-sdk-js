@@ -84,6 +84,52 @@ export async function cleanDirectories(
   return 0
 }
 
+export function selectCleanTasks(options: {
+  all?: boolean | undefined
+  cache?: boolean | undefined
+  coverage?: boolean | undefined
+  dist?: boolean | undefined
+  types?: boolean | undefined
+  modules?: boolean | undefined
+}): CleanTask[] {
+  // Determine what to clean
+  const opts = { __proto__: null, ...options } as typeof options
+  const cleanAll =
+    opts['all'] ||
+    (!opts['cache'] &&
+      !opts['coverage'] &&
+      !opts['dist'] &&
+      !opts['types'] &&
+      !opts['modules'])
+
+  const tasks = []
+
+  // Build task list
+  if (cleanAll || opts['cache']) {
+    // oxlint-disable-next-line socket/prefer-repo-root-dot-cache -- deletion-target glob, not a cache location.
+    tasks.push({ name: 'cache', pattern: '**/.cache' })
+  }
+
+  if (cleanAll || opts['coverage']) {
+    tasks.push({ name: 'coverage', pattern: 'coverage' })
+  }
+
+  if (cleanAll || opts['dist']) {
+    tasks.push({
+      name: 'dist',
+      patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
+    })
+  } else if (opts['types']) {
+    tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
+  }
+
+  if (opts['modules']) {
+    tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
+  }
+
+  return tasks
+}
+
 async function main(): Promise<void> {
   try {
     // Parse arguments
@@ -161,39 +207,14 @@ async function main(): Promise<void> {
 
     const quiet = Boolean(values.quiet || values.silent)
 
-    // Determine what to clean
-    const cleanAll =
-      values['all'] ||
-      (!values['cache'] &&
-        !values['coverage'] &&
-        !values['dist'] &&
-        !values['types'] &&
-        !values['modules'])
-
-    const tasks = []
-
-    // Build task list
-    if (cleanAll || values['cache']) {
-      // oxlint-disable-next-line socket/prefer-repo-root-dot-cache -- deletion-target glob, not a cache location.
-      tasks.push({ name: 'cache', pattern: '**/.cache' })
-    }
-
-    if (cleanAll || values['coverage']) {
-      tasks.push({ name: 'coverage', pattern: 'coverage' })
-    }
-
-    if (cleanAll || values['dist']) {
-      tasks.push({
-        name: 'dist',
-        patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
-      })
-    } else if (values['types']) {
-      tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
-    }
-
-    if (values['modules']) {
-      tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
-    }
+    const tasks = selectCleanTasks({
+      all: Boolean(values.all),
+      cache: Boolean(values.cache),
+      coverage: Boolean(values.coverage),
+      dist: Boolean(values.dist),
+      types: Boolean(values.types),
+      modules: Boolean(values.modules),
+    })
 
     // Check if there's anything to clean
     if (tasks.length === 0) {

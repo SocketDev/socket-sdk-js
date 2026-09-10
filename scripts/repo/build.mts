@@ -215,6 +215,129 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
   return 0
 }
 
+export function selectBuildMode(options: {
+  src: boolean
+  types: boolean
+  watch: boolean
+}): 'watch' | 'types' | 'source' | 'full' {
+  const opts = { __proto__: null, ...options } as typeof options
+  if (opts.watch) {
+    return 'watch'
+  }
+  if (opts.types && !opts.src) {
+    return 'types'
+  }
+  if (opts.src && !opts.types) {
+    return 'source'
+  }
+  return 'full'
+}
+
+async function runFullBuild(options: BuildOptions) {
+  const opts = { __proto__: null, ...options }
+  const { quiet, verbose, analyze } = opts
+  let exitCode = 0
+  if (!quiet) {
+    printHeader('Building Package')
+  }
+
+  // Clean all directories first (once)
+  exitCode = await runSequence([
+    {
+      args: ['scripts/repo/clean.mts', '--dist', '--types', '--quiet'],
+      command: 'node',
+    },
+  ])
+  if (exitCode !== 0) {
+    if (!quiet) {
+      logger.error('Clean failed')
+    }
+    return { __proto__: null, exitCode, finished: false }
+  }
+
+  if (!quiet) {
+    logger.success('Build Cleaned')
+  }
+
+  // Run source and types builds in parallel
+  const results = await Promise.allSettled([
+    buildSource({
+      quiet,
+      verbose,
+      skipClean: true,
+      analyze: analyze,
+    }),
+    buildTypes({ quiet, verbose, skipClean: true }),
+  ])
+  const srcResult: BuildSourceResult =
+    results[0].status === 'fulfilled'
+      ? results[0].value
+      : { exitCode: 1, buildTime: 0 }
+  const typesExitCode = results[1].status === 'fulfilled' ? results[1].value : 1
+
+  // Log completion messages
+  if (!quiet) {
+    if (srcResult.exitCode === 0) {
+      logger.success(`Source Bundle (${srcResult.buildTime}ms)`)
+    }
+
+    if (typesExitCode === 0) {
+      logger.success('Type Declarations')
+    }
+  }
+
+  exitCode = srcResult.exitCode !== 0 ? srcResult.exitCode : typesExitCode
+  return { __proto__: null, exitCode, finished: true }
+}
+
+async function runBuildMode(
+  mode: ReturnType<typeof selectBuildMode>,
+  options: BuildOptions,
+) {
+  const opts = { __proto__: null, ...options }
+  const { quiet, verbose, analyze } = opts
+  let exitCode = 0
+
+  // Handle watch mode
+  if (mode === 'watch') {
+    if (!quiet) {
+      printHeader('Build Runner (Watch Mode)')
+    }
+    exitCode = await watchBuild({ quiet, verbose })
+  }
+  // Build types only
+  else if (mode === 'types') {
+    if (!quiet) {
+      printHeader('Building TypeScript Declarations')
+    }
+    exitCode = await buildTypes({ quiet, verbose })
+    if (exitCode === 0 && !quiet) {
+      logger.success('Type Declarations')
+    }
+  }
+  // Build source only
+  else if (mode === 'source') {
+    if (!quiet) {
+      printHeader('Building Source')
+    }
+    const { buildTime, exitCode: srcExitCode } = await buildSource({
+      quiet,
+      verbose,
+      analyze: analyze,
+    })
+    exitCode = srcExitCode
+    if (exitCode === 0 && !quiet) {
+      logger.success(`Source Bundle (${buildTime}ms)`)
+    }
+  }
+  // Build everything (default)
+  else {
+    return await runFullBuild(options)
+  }
+
+  return { __proto__: null, exitCode, finished: true }
+}
+
 async function main(): Promise<void> {
   try {
     // Parse arguments
@@ -305,94 +428,19 @@ async function main(): Promise<void> {
       return
     }
 
-    let exitCode = 0
-
-    // Handle watch mode
-    if (values.watch) {
-      if (!quiet) {
-        printHeader('Build Runner (Watch Mode)')
-      }
-      exitCode = await watchBuild({ quiet, verbose })
-    }
-    // Build types only
-    else if (values.types && !values.src) {
-      if (!quiet) {
-        printHeader('Building TypeScript Declarations')
-      }
-      exitCode = await buildTypes({ quiet, verbose })
-      if (exitCode === 0 && !quiet) {
-        logger.success('Type Declarations')
-      }
-    }
-    // Build source only
-    else if (values.src && !values.types) {
-      if (!quiet) {
-        printHeader('Building Source')
-      }
-      const { buildTime, exitCode: srcExitCode } = await buildSource({
-        quiet,
-        verbose,
-        analyze: Boolean(values.analyze),
-      })
-      exitCode = srcExitCode
-      if (exitCode === 0 && !quiet) {
-        logger.success(`Source Bundle (${buildTime}ms)`)
-      }
-    }
-    // Build everything (default)
-    else {
-      if (!quiet) {
-        printHeader('Building Package')
-      }
-
-      // Clean all directories first (once)
-      exitCode = await runSequence([
-        {
-          args: ['scripts/repo/clean.mts', '--dist', '--types', '--quiet'],
-          command: 'node',
-        },
-      ])
-      if (exitCode !== 0) {
-        if (!quiet) {
-          logger.error('Clean failed')
-        }
-        process.exitCode = exitCode
-        return
-      }
-
-      if (!quiet) {
-        logger.success('Build Cleaned')
-      }
-
-      // Run source and types builds in parallel
-      const results = await Promise.allSettled([
-        buildSource({
-          quiet,
-          verbose,
-          skipClean: true,
-          analyze: Boolean(values.analyze),
-        }),
-        buildTypes({ quiet, verbose, skipClean: true }),
-      ])
-      const srcResult: BuildSourceResult =
-        results[0].status === 'fulfilled'
-          ? results[0].value
-          : { exitCode: 1, buildTime: 0 }
-      const typesExitCode =
-        results[1].status === 'fulfilled' ? results[1].value : 1
-
-      // Log completion messages
-      if (!quiet) {
-        if (srcResult.exitCode === 0) {
-          logger.success(`Source Bundle (${srcResult.buildTime}ms)`)
-        }
-
-        if (typesExitCode === 0) {
-          logger.success('Type Declarations')
-        }
-      }
-
-      exitCode = srcResult.exitCode !== 0 ? srcResult.exitCode : typesExitCode
+    const mode = selectBuildMode({
+      src: Boolean(values.src),
+      types: Boolean(values.types),
+      watch: Boolean(values.watch),
+    })
+    const { exitCode, finished } = await runBuildMode(mode, {
+      quiet,
+      verbose,
+      analyze: Boolean(values.analyze),
+    })
+    if (!finished) {
+      process.exitCode = exitCode
+      return
     }
 
     // Print final status and footer

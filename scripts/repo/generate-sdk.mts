@@ -228,14 +228,14 @@ export async function generateStrictTypes(): Promise<void> {
   // The child script owns lint + format of everything it writes, through the
   // `pnpm run fix` wrapper — a second format pass here under different
   // settings is what shipped gate-failing output to CI.
-  await spawn('node', ['scripts/repo/generate-strict-types.mts'], {
+  await spawn(process.execPath, ['scripts/repo/generate-strict-types.mts'], {
     cwd: rootPath,
     stdio: 'inherit',
   })
 }
 
 export async function generateTypes(): Promise<void> {
-  await spawn('node', ['scripts/repo/generate-types.mts'], {
+  await spawn(process.execPath, ['scripts/repo/generate-types.mts'], {
     cwd: rootPath,
     stdio: 'inherit',
   })
