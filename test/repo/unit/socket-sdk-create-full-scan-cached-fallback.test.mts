@@ -22,10 +22,7 @@ import {
   createTestClient,
   setupNockEnvironment,
 } from '../../utils/environment.mts'
-import {
-  buildV0Body,
-  FILE_CONTENT,
-} from '../../utils/full-scan-v1-fixtures.mts'
+import { buildV0Body, FILE_CONTENT } from './fixture/full-scan-v1.mts'
 import { safeDelete, safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 // Default passthrough to the real implementation; the one test in this file

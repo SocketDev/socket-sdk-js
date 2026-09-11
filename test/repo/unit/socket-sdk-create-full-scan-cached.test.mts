@@ -24,9 +24,9 @@ import {
   buildV0Body,
   buildV1CreatedBody,
   FILE_CONTENT,
-} from '../../utils/full-scan-v1-fixtures.mts'
+} from './fixture/full-scan-v1.mts'
 
-import type { JsonRecord } from '../../utils/full-scan-v1-fixtures.mts'
+import type { JsonRecord } from './fixture/full-scan-v1.mts'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('SocketSdk#createFullScan cache-aware v1 path', () => {
