@@ -33,7 +33,7 @@ const logger = getDefaultLogger()
 
 const REPO_ROOT = path.resolve(
   fileURLToPath(import.meta.url),
-  '../../../../../../../..',
+  '../../../../../..',
 )
 const MARKETPLACE_PATH = path.join(
   REPO_ROOT,
