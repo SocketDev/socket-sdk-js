@@ -189,13 +189,6 @@ runs:
         working-directory: ${{ inputs.working-directory }}
 
     - name: Mint fleet payload read token
-      # Thin-distribution CI auth: mint a contents:read-only token scoped to the
-      # payload repo so the bootstrap fetch (`gh release download` fired by the
-      # `prepare` lifecycle during the install below) can read the private
-      # wheelhouse release bundle. Gated on both credentials: a non-thin member
-      # (and any caller not passing credentials) skips the mint, and its fetch
-      # no-ops with an empty token. The minted token is masked by the minter and
-      # only ever leaves this composite via the step output consumed below.
       id: payload-token
       if: inputs.payload-token-client-id != '' && inputs.payload-token-private-key != ''
       uses: ./.github/actions/fleet/github-payload-app-token
@@ -229,14 +222,6 @@ runs:
         node scripts/fleet/cache/save.mts \
           --path "$PNPM_STORE_PATH" \
           --key "$PNPM_STORE_CACHE_KEY"
-
-    - name: Build oxlint plugin
-      # oxlint-plugin.generated.mjs is GENERATED (gitignored, never committed); tests that
-      # invoke oxlint need it, so build here after install. Builds the fleet's
-      # custom oxlint rules into a single ESM module.
-      run: node scripts/fleet/build-oxlint-bundle.mts
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
 
     - name: Generate hook dispatch table
       # dispatch-manifest.generated.json + dispatch-table.generated.mts are GENERATED (gitignored,

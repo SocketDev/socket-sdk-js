@@ -31,21 +31,6 @@ function recordValue(value: unknown): Record<string, unknown> | undefined {
     ? (value as Record<string, unknown>)
     : undefined
 }
-function validStepMapping(record: Record<string, unknown>): boolean {
-  const source = record['sourcePath']
-  const target = record['targetPath']
-  if (
-    typeof source !== 'string' ||
-    typeof target !== 'string' ||
-    !canonicalPathIsSafe(source) ||
-    !canonicalPathIsSafe(target)
-  ) {
-    return false
-  }
-  return source === target
-    ? record['hunks'] === undefined && record['application'] === undefined
-    : source.endsWith(`/${target}`)
-}
 function validStep(value: unknown): value is CanonicalPatchStep {
   const record = recordValue(value)
   if (
@@ -64,7 +49,11 @@ function validStep(value: unknown): value is CanonicalPatchStep {
     record &&
     typeof record['commit'] === 'string' &&
     SHA_PATTERN.test(record['commit']) &&
-    validStepMapping(record),
+    typeof record['sourcePath'] === 'string' &&
+    canonicalPathIsSafe(record['sourcePath']) &&
+    typeof record['targetPath'] === 'string' &&
+    canonicalPathIsSafe(record['targetPath']) &&
+    record['sourcePath'].endsWith(`/${record['targetPath']}`),
   )
 }
 export function validateCanonicalRecipe(

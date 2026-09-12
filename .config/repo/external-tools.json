@@ -47,20 +47,20 @@
       }
     },
     "gh-aw": {
-      "description": "GitHub Agentic Workflows \u2014 `gh` extension that authors agentic workflows as `.github/workflows/<name>.md` (markdown + frontmatter) and compiles them to a hardened `<name>.lock.yml`. The fleet uses `engine: claude`.",
+      "description": "GitHub Agentic Workflows — `gh` extension that authors agentic workflows as `.github/workflows/<name>.md` (markdown + frontmatter) and compiles them to a hardened `<name>.lock.yml`. The fleet uses `engine: claude`.",
       "version": "latest",
       "repository": "github:github/gh-aw",
       "notes": [
         "Required: any repo with a `.github/workflows/*.md` agentic workflow",
         "Install: `gh extension install github/gh-aw`; init a repo with `gh aw init`; compile after editing frontmatter with `gh aw compile` (commit BOTH the .md and the generated .lock.yml)",
-        "Engine secrets (set per repo, by engine): `ANTHROPIC_API_KEY` (claude), `COPILOT_GITHUB_TOKEN` (copilot \u2014 distinct from the default GITHUB_TOKEN; or use `permissions: copilot-requests: write` to bill the org via the Actions token, no PAT), `OPENAI_API_KEY` (codex), `GEMINI_API_KEY` (gemini)",
-        "`copilot-requests: write` is Copilot-engine-only \u2014 claude/codex/gemini need no GitHub permission beyond their API key",
-        "Any action a compiled .lock.yml references must be added to the repo's GitHub Actions allowlist (Settings \u2192 Actions \u2192 Allowed actions)"
+        "Engine secrets (set per repo, by engine): `ANTHROPIC_API_KEY` (claude), `COPILOT_GITHUB_TOKEN` (copilot — distinct from the default GITHUB_TOKEN; or use `permissions: copilot-requests: write` to bill the org via the Actions token, no PAT), `OPENAI_API_KEY` (codex), `GEMINI_API_KEY` (gemini)",
+        "`copilot-requests: write` is Copilot-engine-only — claude/codex/gemini need no GitHub permission beyond their API key",
+        "Any action a compiled .lock.yml references must be added to the repo's GitHub Actions allowlist (Settings → Actions → Allowed actions)"
       ],
       "origin": "system"
     },
     "git": {
-      "description": "Git CLI \u2014 checkout, submodule init, tag signing.",
+      "description": "Git CLI — checkout, submodule init, tag signing.",
       "version": "2.30+",
       "notes": [
         "Required: yes (all platforms)",
@@ -70,7 +70,7 @@
       "origin": "system"
     },
     "node": {
-      "description": "Node.js \u2014 runs the build scripts and TypeScript stripping.",
+      "description": "Node.js — runs the build scripts and TypeScript stripping.",
       "version": "24+",
       "notes": [
         "Required: yes",
@@ -86,7 +86,7 @@
         "SFW (Socket Firewall) enterprise flavor (private, SocketDev/firewall-release). Same 7-platform set as sfw-free. Enterprise downloads require GITHUB_TOKEN auth (private repo); install-tool.mjs forwards GITHUB_TOKEN automatically when set.",
         "Installed when SOCKET_API_KEY (or SOCKET_API_TOKEN) is set; otherwise the free flavor (sfw-free) is used. The two flavors share a version and install to the same `sfw` binary name."
       ],
-      "description": "Socket Firewall (enterprise tier) \u2014 package manager command wrapper",
+      "description": "Socket Firewall (enterprise tier) — package manager command wrapper",
       "version": "1.15.1",
       "repository": "github:SocketDev/firewall-release",
       "binaryName": "sfw",
@@ -120,19 +120,14 @@
           "integrity": "sha512-vZdptPsQPYnBvRR3S+6bikfk3WdkE+0d1a0CoPmSY8QPdfOG3jC4JxdTMN0FvHUzwR5iZQhfomJWq73F/PDWgg=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-08-26",
-        "removable": "2026-09-02",
-        "version": "1.15.1"
-      }
+      "origin": "gh-asset"
     },
     "sfw-free": {
       "notes": [
         "SFW (Socket Firewall) free flavor (public, SocketDev/sfw-free). Ships a 7-platform set: linux-{x64,arm64}{,-musl}, darwin-{x64,arm64}, win-x64. Windows 11 ARM64 setup uses the verified win32-x64 asset through x64 emulation when a native asset is unavailable. SFW remains mandatory and must execute successfully before installation continues.",
         "Installed when neither SOCKET_API_KEY nor SOCKET_API_TOKEN is set; the enterprise flavor (sfw-enterprise) is selected when one of those is present. The two flavors share a version and install to the same `sfw` binary name."
       ],
-      "description": "Socket Firewall (free tier) \u2014 package manager command wrapper",
+      "description": "Socket Firewall (free tier) — package manager command wrapper",
       "version": "1.15.1",
       "repository": "github:SocketDev/sfw-free",
       "binaryName": "sfw",
@@ -166,12 +161,7 @@
           "integrity": "sha512-ZRuz2N0CmEXJuyhADFyqXU3bBDPp6UmDuXBSMoxcFyzUO/q3/5QRgVCimyOU09cG1XS9TRGvPSyL5y6sFN6D2A=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-08-26",
-        "removable": "2026-09-02",
-        "version": "1.15.1"
-      }
+      "origin": "gh-asset"
     }
   }
 }

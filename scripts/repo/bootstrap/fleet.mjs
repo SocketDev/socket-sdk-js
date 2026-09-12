@@ -12,6 +12,7 @@ import {
   renameSync,
   rmSync,
   statSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs'
 import path, { dirname, resolve, sep } from 'node:path'
@@ -152,7 +153,11 @@ function sharedTemplateBasePath(root) {
 
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/helpers.mts
-const HYBRID_BUNDLE_PATHS = /* @__PURE__ */ new Set(['.gitignore', 'CLAUDE.md'])
+const HYBRID_BUNDLE_PATHS = /* @__PURE__ */ new Set([
+  '.gitattributes',
+  '.gitignore',
+  'CLAUDE.md',
+])
 /**
  * Normalize bundle-manifest paths to their portable `/` wire format.
  */
@@ -1928,7 +1933,7 @@ function parseYamlKeyBlocks(yaml) {
   if (current !== void 0) blocks.push(current)
   return blocks
 }
-const MAP_ENTRY_RE = /^(\s+)(['"]?)([^'":\n]+)\2:/
+const MAP_ENTRY_RE = /^(\s+)(?:(['"])(.*?)\2|([^'"\n]+?)):(?:\s|$)/
 const LIST_ITEM_RE = /^(\s+)-\s+(.*)$/
 /**
  * Split a top-level key block's BODY lines into entry chunks. A chunk starts
@@ -1961,7 +1966,7 @@ function parseYamlEntryChunks(bodyLines) {
       entryIndent ??= indent
       if (current !== void 0) chunks.push(current)
       current = {
-        id: map ? `k:${map[3].trim()}` : `i:${item[2].trim()}`,
+        id: map ? `k:${(map[3] ?? map[4]).trim()}` : `i:${item[2].trim()}`,
         lines: [...pending, line],
       }
       pending = []
@@ -2461,6 +2466,17 @@ function hasIdenticalBytes(source, target) {
     return false
   }
 }
+function isPreservedInstallPath(relative, options) {
+  const opts = {
+    __proto__: null,
+    ...options,
+  }
+  const segments = normalizeBundlePath(relative).split('/')
+  for (let index = 1; index <= segments.length; index += 1)
+    if (opts.preservedPaths?.has(segments.slice(0, index).join('/')))
+      return true
+  return false
+}
 function installFiles(filesDir, dest, manifest, options) {
   const opts = {
     __proto__: null,
@@ -2479,6 +2495,10 @@ function installFiles(filesDir, dest, manifest, options) {
   const refreshedTracked = []
   for (let i = 0, { length } = rels; i < length; i += 1) {
     const rel = rels[i]
+    if (isPreservedInstallPath(rel, { preservedPaths: opts.preservedPaths })) {
+      skippedAlwaysTracked += 1
+      continue
+    }
     const source = path.join(filesDir, rel)
     const target = path.join(dest, rel)
     const rewritten =
@@ -2591,6 +2611,17 @@ function installFiles(filesDir, dest, manifest, options) {
 function materializeFromLocalTemplate(dest, manifest, options) {
   const filesDir = sharedTemplateBasePath(dest)
   if (!existsSync(filesDir)) return
+  const preservedPaths = options?.preserveTracked
+    ? new Set(
+        execFileSync('git', ['ls-files', '--cached', '-z'], {
+          cwd: dest,
+          encoding: 'utf8',
+        })
+          .split('\0')
+          .filter(Boolean)
+          .map(normalizeBundlePath),
+      )
+    : options?.preservedPaths
   const shaped = effectiveMemberManifest(manifest, dest)
   const total = {
     placed: 0,
@@ -2601,6 +2632,7 @@ function materializeFromLocalTemplate(dest, manifest, options) {
   for (const source of localTemplateManifests(filesDir, shaped, dest)) {
     const result = installFiles(source.filesDir, dest, source.manifest, {
       ...options,
+      preservedPaths,
       templateDir: path.join(dest, 'template'),
     })
     total.placed += result.placed
@@ -3010,6 +3042,177 @@ function formatUpdateNotice(config) {
   const top = `╭${'─'.repeat(width + 2)}╮`
   const bottom = `╰${'─'.repeat(width + 2)}╯`
   return [top, ...lines.map(l => `│ ${l.padEnd(width)} │`), bottom].join('\n')
+}
+
+//#endregion
+//#region template/base/universal/.git-hooks/_shared/repo-containment.mts
+function repositoryPathSeparators(value) {
+  return value.replaceAll('\\', '/')
+}
+function repositoryPathApi(value) {
+  return /^(?:[a-z]:[\\/]|\/\/|\\\\)/iu.test(value) ? path.win32 : path.posix
+}
+function resolveRepositoryPath(base, value) {
+  const valueApi = repositoryPathApi(value)
+  return repositoryPathSeparators(
+    (valueApi === path.win32 ? valueApi : repositoryPathApi(base)).resolve(
+      base,
+      repositoryPathSeparators(value),
+    ),
+  )
+}
+function containsRepositoryPath(root, target) {
+  const api = repositoryPathApi(root)
+  const relative = repositoryPathSeparators(api.relative(root, target))
+  return (
+    relative === '' ||
+    (relative !== '..' &&
+      !relative.startsWith('../') &&
+      !api.isAbsolute(relative))
+  )
+}
+function repositoryRealPath(value) {
+  const api = repositoryPathApi(value)
+  let candidate = api.resolve(value)
+  const missing = []
+  while (true)
+    try {
+      lstatSync(candidate)
+      return repositoryPathSeparators(
+        api.join(realpathSync(candidate), ...missing),
+      )
+    } catch (error) {
+      if (error.code !== 'ENOENT') return
+      try {
+        if (lstatSync(candidate).isSymbolicLink()) return
+      } catch (probeError) {
+        if (probeError.code !== 'ENOENT') return
+      }
+      const parent = api.dirname(candidate)
+      if (parent === candidate) return
+      missing.unshift(api.basename(candidate))
+      candidate = parent
+    }
+}
+function repositoryContainsTarget(root, target) {
+  const resolvedRoot = repositoryRealPath(root)
+  const resolvedTarget = repositoryRealPath(target)
+  if (
+    resolvedRoot === void 0 ||
+    resolvedTarget === void 0 ||
+    !containsRepositoryPath(resolvedRoot, resolvedTarget)
+  )
+    return false
+  const nestedRoot =
+    findRepositoryRoot(
+      resolveRepositoryPath(resolvedTarget, '.boundary-root'),
+    ) ?? findRepositoryRoot(resolvedTarget)
+  if (nestedRoot && nestedRoot !== resolvedRoot)
+    return repositoryNestedCheckoutIsContained(resolvedRoot, nestedRoot)
+  return true
+}
+function findRepositoryRoot(file) {
+  const api = repositoryPathApi(file)
+  let directory = api.dirname(api.resolve(file))
+  while (true) {
+    try {
+      lstatSync(api.join(directory, '.git'))
+      return repositoryPathSeparators(directory)
+    } catch (error) {
+      if (error.code !== 'ENOENT') return
+    }
+    const parent = api.dirname(directory)
+    if (parent === directory) return
+    directory = parent
+  }
+}
+function repositoryNestedCheckoutIsContained(root, nestedRoot) {
+  try {
+    const marker = path.join(nestedRoot, '.git')
+    if (!lstatSync(marker).isFile()) return true
+    const reference = readFileSync(marker, 'utf8').trim()
+    if (!reference.startsWith('gitdir: ')) return false
+    const metadata = repositoryRealPath(
+      resolveRepositoryPath(nestedRoot, reference.slice(8)),
+    )
+    return (
+      metadata !== void 0 &&
+      existsSync(metadata) &&
+      repositoryMetadataIsContained(root, metadata) &&
+      !existsSync(path.join(metadata, 'commondir'))
+    )
+  } catch {
+    return false
+  }
+}
+function repositoryMetadataIsContained(root, metadata) {
+  if (containsRepositoryPath(root, metadata)) return true
+  const marker = path.join(root, '.git')
+  if (!lstatSync(marker).isFile()) return false
+  const reference = readFileSync(marker, 'utf8').trim()
+  if (!reference.startsWith('gitdir: ')) return false
+  const gitDirectory = repositoryRealPath(
+    resolveRepositoryPath(root, reference.slice(8)),
+  )
+  if (!gitDirectory) return false
+  if (containsRepositoryPath(path.join(gitDirectory, 'modules'), metadata))
+    return true
+  const commonFile = path.join(gitDirectory, 'commondir')
+  const commonDirectory = repositoryRealPath(
+    resolveRepositoryPath(
+      gitDirectory,
+      readFileSync(commonFile, 'utf8').trim(),
+    ),
+  )
+  return (
+    commonDirectory !== void 0 &&
+    containsRepositoryPath(path.join(commonDirectory, 'modules'), metadata)
+  )
+}
+
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/cascade-state.mts
+const CASCADE_RECEIPT = '.cache/fleet/socket-wheelhouse/cascade-applied.json'
+function readCascadeReceipt(dest) {
+  const filename = cascadeReceiptPath(dest)
+  if (!existsSync(filename)) return void 0
+  const value = JSON.parse(readFileSync(filename, 'utf8'))
+  if (value === null || typeof value !== 'object')
+    throw new Error(
+      `Invalid cascade receipt at ${filename}. Expected a pinned ref and template SHA. Run the validated Wheelhouse cascade again.`,
+    )
+  const pinnedRef = Reflect.get(value, 'pinnedRef')
+  const templateSha = Reflect.get(value, 'templateSha')
+  if (
+    typeof pinnedRef !== 'string' ||
+    !/^fleet-pack-[0-9a-f]{40}$/.test(pinnedRef) ||
+    typeof templateSha !== 'string' ||
+    !/^[0-9a-f]{40}$/.test(templateSha)
+  )
+    throw new Error(
+      `Invalid cascade receipt at ${filename}. Expected a pinned ref and template SHA. Run the validated Wheelhouse cascade again.`,
+    )
+  return {
+    pinnedRef,
+    templateSha,
+  }
+}
+function clearCascadeReceipt(dest) {
+  const filename = cascadeReceiptPath(dest)
+  if (existsSync(filename)) unlinkSync(filename)
+}
+function cascadeReceiptMatchesPin(dest, ref) {
+  return (
+    readBundleRef(dest) === ref && readCascadeReceipt(dest)?.pinnedRef === ref
+  )
+}
+function cascadeReceiptPath(dest) {
+  const filename = path.join(dest, CASCADE_RECEIPT)
+  if (!repositoryContainsTarget(dest, filename))
+    throw new Error(
+      `Cascade receipt path escapes ${dest}. Expected a repository-contained cache. Remove the external cache symlink.`,
+    )
+  return filename
 }
 
 //#endregion
@@ -3538,60 +3741,14 @@ function assertLockStep(config) {
   return false
 }
 const ERR_BUNDLE_BEHIND_LOCAL = 'ERR_WHEELHOUSE_BUNDLE_BEHIND_LOCAL_TEMPLATE'
-/**
- * True when a sibling wheelhouse checkout exists AND its HEAD is strictly
- * DESCENDED from the bundle's template SHA — the bundle is a frozen snapshot
- * of an older template, so unpacking it would roll the member backwards.
- *
- * `assertLockStep` only proves the bundle matches its own pin, which is a
- * self-consistency check. It cannot see that the pin itself went stale. On a
- * machine that also cascades from a local template, the two writers disagree
- * and whichever runs last wins: the cascade writes current content, then
- * `update`'s bundle pass restores the older snapshot over it. That reverted a
- * Socket catalog pin, dropped fleet rules out of CLAUDE.md, and reintroduced a
- * duplicated overrides block that broke `pnpm install` — each time reported as
- * a successful update.
- *
- * Returns false when there is no local wheelhouse (a thin member, or CI),
- * where the bundle IS the only source of truth and applying it is correct.
- * Any git failure also returns false: this guard refuses a provably stale
- * bundle, and never blocks on a question it could not answer.
- *
- * That includes an UNREACHABLE pin, which is the normal state after the fleet
- * squashes its default branch. The cascade-side twin
- * (`isPinnedBundleBehindLocalTemplate` in
- * scripts/repo/commit-cascade/fleet-pack-channel.mts) reads the same state as
- * BEHIND, and the split is deliberate: there, being wrong means delivering a
- * payload that was already current, and here it means raising
- * ERR_WHEELHOUSE_BUNDLE_BEHIND_LOCAL_TEMPLATE and failing a member's install.
- * Only one of those is safe to guess at.
- */
 function isBundleBehindLocalTemplate(config) {
-  const { dest, manifestTemplateSha } = {
-    __proto__: null,
-    ...config,
-  }
-  if (!manifestTemplateSha) return false
-  const wheelhouse = path.join(dest, '..', 'socket-wheelhouse')
-  if (!existsSync(path.join(wheelhouse, '.git'))) return false
-  try {
-    execFileSync(
-      'git',
-      ['merge-base', '--is-ancestor', manifestTemplateSha, 'HEAD'],
-      {
-        cwd: wheelhouse,
-        stdio: 'ignore',
-      },
-    )
-    return (
-      execFileSync('git', ['rev-parse', 'HEAD'], {
-        cwd: wheelhouse,
-        encoding: 'utf8',
-      }).trim() !== manifestTemplateSha
-    )
-  } catch {
-    return false
-  }
+  const { dest, manifestTemplateSha } = config
+  const receipt = readCascadeReceipt(dest)
+  return (
+    receipt !== void 0 &&
+    receipt.pinnedRef === readBundleRef(dest) &&
+    receipt.templateSha !== manifestTemplateSha
+  )
 }
 /**
  * Resolve the NEWEST pack ref from GHCR's moving `latest` tag.
@@ -3774,6 +3931,7 @@ function parseArgs(argv) {
     noHeader: false,
     quiet: false,
     refreshTracked: false,
+    preserveTracked: false,
     ref: '',
     repo: DEFAULT_REPO,
     status: false,
@@ -3794,6 +3952,7 @@ function parseArgs(argv) {
     else if (arg === '--manifest') opts.manifest = argv[++i]
     else if (arg === '--no-header') opts.noHeader = true
     else if (arg === '--quiet') opts.quiet = true
+    else if (arg === '--preserve-tracked') opts.preserveTracked = true
     else if (arg === '--refresh-tracked') opts.refreshTracked = true
     else if (arg === '--ref') opts.ref = argv[++i] ?? ''
     else if (arg === '--repo') opts.repo = argv[++i] ?? DEFAULT_REPO
@@ -3876,9 +4035,19 @@ async function installFleet(config) {
     )
     return 1
   }
-  if (cfg.ifCurrent && readAppliedRef(dest) === ref) {
-    logger.log(`install-fleet: bundle ${ref} already applied — skipping fetch.`)
-    return 0
+  if (cfg.ifCurrent && bundlePath === void 0) {
+    if (cascadeReceiptMatchesPin(dest, ref)) {
+      logger.log(
+        `install-fleet: preserving local cascade changes against pinned bundle ${ref}. Update the pin to adopt a published bundle.`,
+      )
+      return 0
+    }
+    if (readAppliedRef(dest) === ref) {
+      logger.log(
+        `install-fleet: bundle ${ref} already applied — skipping fetch.`,
+      )
+      return 0
+    }
   }
   const repo = cfg.repo ?? DEFAULT_REPO
   const tmp = mkdtempSync(path.join(os.tmpdir(), 'fleet-install-'))
@@ -3966,7 +4135,7 @@ async function installFleet(config) {
         })
       ) {
         logger.error(
-          `install-fleet: ${ERR_BUNDLE_BEHIND_LOCAL} — ${sourceRef} carries template ${manifest.templateSha}, which the sibling socket-wheelhouse checkout has already moved past. Applying it would revert this repo to an older snapshot. Nothing written.\n  Fix: cascade from the local template instead —\n    node scripts/repo/commit-cascade/run.mts --target ${dest} --fix\n  Or repin bundle.ref/cascadeSha in .config/repo/socket-wheelhouse.json to a release cut from the current template.`,
+          `install-fleet: ${ERR_BUNDLE_BEHIND_LOCAL} — ${sourceRef} carries template ${manifest.templateSha}, but the local cascade receipt records a different template. Applying this bundle would replace the cascade payload. Nothing written. Update bundle.ref and bundle.cascadeSha to the published cascade template.`,
         )
         return 1
       }
@@ -4025,6 +4194,7 @@ async function installFleet(config) {
         dest,
         manifest: ignoreManifest,
       })
+    clearCascadeReceipt(dest)
     writeAppliedRef(dest, sourceRef)
     writeAppliedFiles(dest, Object.keys(memberManifest.files))
     const prunedTotal = prunedCount + tombstonedCount
@@ -4078,7 +4248,10 @@ function runFromTemplate(config) {
   const result = materializeFromLocalTemplate(
     dest,
     JSON.parse(readFileSync(manifestPath, 'utf8')),
-    { refreshTracked: config.refreshTracked },
+    {
+      refreshTracked: config.refreshTracked,
+      preserveTracked: config.preserveTracked,
+    },
   )
   if (result === void 0) {
     logger.error(
@@ -4151,6 +4324,7 @@ export {
   installWorkspaceSegment,
   isBundleBehindLocalTemplate,
   isMainModule,
+  isPreservedInstallPath,
   lockStepExitCode,
   main,
   materializeFromLocalTemplate,

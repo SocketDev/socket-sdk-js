@@ -111,9 +111,6 @@ function sourcePatch(
   step: CanonicalPatchStep,
   config: CanonicalProofOptions,
 ): Uint8Array | undefined {
-  if (step.sourcePath === step.targetPath) {
-    return undefined
-  }
   const readGit = config.readGit ?? readCanonicalGit
   const parent = signedParent(recipe.producerRoot, step.commit, readGit)
   if (!parent || !stepSourceAllowed(member, recipe, step, config)) {

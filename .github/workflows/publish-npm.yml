@@ -176,6 +176,11 @@ jobs:
           # key, hydration still pulls public GHCR anonymously.
           payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+      - name: Run full coverage
+        # Backfill republishes already-released historical content. Its hard
+        # content checks replace current-branch qualification.
+        if: ${{ inputs.backfill-version == '' }}
+        run: pnpm run cover
       - name: Build
         run: pnpm run build
       - name: 'Mint release token'

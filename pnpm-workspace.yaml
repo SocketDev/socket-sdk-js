@@ -2,8 +2,9 @@ loglevel: error
 trustPolicy: no-downgrade
 enableGlobalVirtualStore: true
 trustPolicyExclude:
-  - 'compromise@14.15.0'
-  - 'undici@5.29.0'
+  - '@playwright/mcp@0.0.80'
+  - 'playwright@1.63.0-alpha-2026-08-31'
+  - 'playwright-core@1.63.0-alpha-2026-08-31'
 
 # Register .claude/hooks/* as workspace packages so taze (run via
 # `pnpm run update`) sees and bumps their package.json manifests
@@ -14,6 +15,7 @@ packages:
   - '.claude/hooks/fleet/*'
   - '.claude/hooks/repo/*'
   - '.config/repo/oxlint-plugin/*'
+trustPolicyExcludePrune: true
 
 # Native post-install build scripts. These three arrive transitively via
 # @redwoodjs/agent-ci's `ssh2` (optional crypto acceleration). agent-ci's
@@ -208,6 +210,7 @@ catalog:
   '@shadscan/cli': 0.17.0
   '@sinclair/typebox': 0.34.52
   'ecc-agentshield': 1.4.0
+  'mcp-tada': 0.1.0
   'run-local-ci': 0.18.1
   # typebox 1.x — the unscoped rewrite of @sinclair/typebox. Both names are
   # pinned while the fleet migrates; the 0.x entry is deleted once no member
@@ -300,7 +303,7 @@ catalog:
   # high, GHSA-v6wh-96g9-6wx3 medium). Tracked here so the pnpm
   # override below pins every transitive `vite` (vitest, @vitest/*,
   # plugin authors) to it.
-  'typescript': 7.1.0-dev.20260901.1
+  'typescript': 7.1.0-dev.20260903.1
   'vitest': 5.0.0
   '@vitest/coverage-v8': 5.0.0
   '@bcoe/v8-coverage': 1.0.2
@@ -308,7 +311,7 @@ catalog:
   'chrome-devtools-mcp': 1.8.0
   # Playwright MCP server — agent-driven browsing with the fleet agent-banner
   # init script (see .config/fleet/playwright/).
-  '@playwright/mcp': 0.0.79
+  '@playwright/mcp': 0.0.80
   '@vitest/ui': 5.0.0
   c8: 12.0.0
   '@anthropic-ai/claude-code': 2.1.220
@@ -339,140 +342,10 @@ minimumReleaseAgeExclude:
   - '@decmpfs/*'
   - '@node-smol/*'
   - sockeye
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@mdn/browser-compat-data@8.1.0'
   # published: 2026-09-08 | removable: 2026-09-15
   - pnpm@12.4.0
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/coverage-v8@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/mocker@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/pretty-format@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/spy@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/ui@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - '@vitest/utils@5.0.0'
-  # published: 2026-09-03 | removable: 2026-09-10
-  - vitest@5.0.0
-  # published: 2026-09-04 | removable: 2026-09-11
-  - pnpm@12.3.4
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-android-arm-eabi@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-android-arm64@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-darwin-arm64@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-darwin-x64@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-freebsd-x64@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-linux-arm-gnueabihf@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-linux-arm64-gnu@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-linux-arm64-musl@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-linux-ppc64-gnu@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-linux-s390x-gnu@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-linux-x64-gnu@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-linux-x64-musl@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-openharmony-arm64@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-win32-arm64-msvc@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - '@rolldown/binding-win32-x64-msvc@1.2.7'
-  # published: 2026-09-02 | removable: 2026-09-09
-  - rolldown@1.2.7
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxc-project/types@0.148.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-android-arm-eabi@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-android-arm64@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-darwin-arm64@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-darwin-x64@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-freebsd-x64@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-arm-gnueabihf@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-arm-musleabihf@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-arm64-gnu@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-arm64-musl@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-ppc64-gnu@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-riscv64-gnu@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-riscv64-musl@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-s390x-gnu@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-x64-gnu@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-linux-x64-musl@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-openharmony-arm64@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-win32-arm64-msvc@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-win32-ia32-msvc@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxfmt/binding-win32-x64-msvc@0.66.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-android-arm-eabi@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-android-arm64@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-darwin-arm64@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-darwin-x64@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-freebsd-x64@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-arm-gnueabihf@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-arm-musleabihf@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-arm64-gnu@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-arm64-musl@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-ppc64-gnu@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-riscv64-gnu@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-riscv64-musl@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-s390x-gnu@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-x64-gnu@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-linux-x64-musl@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-openharmony-arm64@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-win32-arm64-msvc@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-win32-ia32-msvc@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - '@oxlint/binding-win32-x64-msvc@1.81.0'
-  # published: 2026-09-01 | removable: 2026-09-08
-  - oxfmt@0.66.0
-  # published: 2026-09-01 | removable: 2026-09-08
-  - oxlint@1.81.0
+  # published: 2026-09-10 | removable: 2026-09-17
+  - 'mcp-tada@0.1.0'
   - 'sfw'
   - 'socket'
   - 'sdxgen'
@@ -537,3 +410,16 @@ blockExoticSubdeps: true
 # Pin exact versions on `pnpm add`. Catalog and overrides should
 # also be exact pins (5.24.0, not ^5.24.0).
 saveExact: true
+includeWorkspaceRoot: true
+pipelines:
+  fleet-prepare:
+    - build:oxlint-bundle
+tasks:
+  build:oxlint-bundle:
+    cache: false
+    dependsOn: []
+peerDependencyRules:
+  allowedVersions:
+    '@socketsecurity/lib>typescript': 7.1.0-dev.20260903.1
+    '@socketsecurity/registry>typescript': 7.1.0-dev.20260903.1
+    mcp-tada>typescript: 7.1.0-dev.20260903.1
