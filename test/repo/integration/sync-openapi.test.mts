@@ -14,7 +14,7 @@ import { parse as parseYaml } from 'yaml'
 import { runGitOrThrow } from '../../../.claude/hooks/fleet/_shared/git-runner.mts'
 import { REPO_ROOT } from '../../../scripts/fleet/paths.mts'
 import { SYNC_OPENAPI_WORKFLOW_PATH } from '../../../scripts/repo/paths.mts'
-import { makeGitRepo } from '../../fleet/_shared/lib/git-fixture.mts'
+import { makeGitRepo } from '../../fleet/common/fixture/git.mts'
 
 interface WorkflowStep {
   env?: Record<string, string> | undefined
@@ -45,7 +45,7 @@ it('limits write jobs to the default branch and uses the PR App for changes', as
   const bootstrap = job.steps.find(step => step.name === 'Bootstrap checkout')
   expect(bootstrap?.env?.['TRIGGER_REF']).toBe('${{ github.sha }}')
   const token = job.steps.find(step => step.id === 'openapi-app')
-  expect(token?.env?.['CLIENT_ID']).toBe('${{ vars.SOCKET_PR_CLIENT_ID }}')
+  expect(token?.env?.['CLIENT_ID']).toBe('${{ secrets.SOCKET_PR_CLIENT_ID }}')
   expect(token?.env?.['APP_PRIVATE_KEY']).toBe(
     '${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}',
   )

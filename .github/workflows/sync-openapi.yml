@@ -54,7 +54,7 @@ jobs:
         uses: ./.github/actions/fleet/setup-and-install
         with:
           checkout: 'false'
-          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-client-id: ${{ secrets.SOCKET_PR_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
       - name: Set up commit signing
@@ -91,7 +91,7 @@ jobs:
         id: openapi-app
         env:
           APP_PRIVATE_KEY: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-          CLIENT_ID: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          CLIENT_ID: ${{ secrets.SOCKET_PR_CLIENT_ID }}
           OWNER: ${{ github.repository_owner }}
           PERMISSIONS: '{"contents":"write","issues":"write","pull_requests":"write"}'
           REPOSITORIES: ${{ github.event.repository.name }}
