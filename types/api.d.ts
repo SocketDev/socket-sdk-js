@@ -1560,6 +1560,22 @@ export interface paths {
      */
     put: operations['updateOrgTelemetryConfig']
   }
+  '/orgs/{org_slug}/events': {
+    /**
+     * List organization events.
+     *
+     * List events for an organization. Events are records of actions taken
+     * across Socket products, such as firewall decisions and CLI/SDK actions.
+     * The maximum date range per request is 365 days. When more results are
+     * available, the response body's "endCursor" property contains the cursor
+     * to pass as the "startAfterCursor" query parameter to retrieve the next
+     * page. This endpoint consumes 10 units of your quota. This endpoint
+     * requires the following org token scopes:
+     *
+     * - Telemetry-events:list
+     */
+    get: operations['listOrgEvents']
+  }
   '/orgs/{org_slug}/webhooks': {
     /**
      * List all webhooks.
@@ -27186,6 +27202,582 @@ export interface operations {
                * @default false
                */
               enabled: boolean
+            }
+          }
+        }
+      }
+      400: components['responses']['SocketBadRequest']
+      401: components['responses']['SocketUnauthorized']
+      403: components['responses']['SocketForbidden']
+      404: components['responses']['SocketNotFoundResponse']
+      429: components['responses']['SocketTooManyRequestsResponse']
+    }
+  }
+  /**
+   * List organization events.
+   *
+   * List events for an organization. Events are records of actions taken across
+   * Socket products, such as firewall decisions and CLI/SDK actions. The
+   * maximum date range per request is 365 days. When more results are
+   * available, the response body's "endCursor" property contains the cursor to
+   * pass as the "startAfterCursor" query parameter to retrieve the next page.
+   * This endpoint consumes 10 units of your quota. This endpoint requires the
+   * following org token scopes:
+   *
+   * - Telemetry-events:list
+   */
+  listOrgEvents: {
+    parameters: {
+      query?: {
+        /**
+         * Specify the maximum number of results to return per page
+         * (intermediate pages may have fewer than this limit and callers should
+         * always check "endCursor" in response body to know if there are more
+         * pages)
+         */
+        per_page?: number
+        /**
+         * The ISO 8601 date in YYYY-MM-DD format (e.g. "2025-01-01"). If not
+         * specified, defaults to the current date.
+         */
+        date?: string
+        /**
+         * The date range in format like "7d" or "-7d" where "d" is days. A
+         * positive value means the range extends forward from the date, and a
+         * negative value means the range extends backward. Defaults to "-7d"
+         * (past week). Maximum range is 365 days. NOTE: "latest" is not
+         * supported for events.
+         */
+        range?: string
+        /**
+         * The pagination cursor that was returned as the "endCursor" property
+         * in previous request.
+         */
+        startAfterCursor?: string
+        /**
+         * Sort type (eventCreatedAt, eventSource, eventCategory, eventType,
+         * eventLevel, clientProductName, clientAction)
+         */
+        sort?: string
+        /**
+         * Search keywords to filter events.
+         */
+        search?: string
+        /**
+         * Comma-separated list of alert actions (one of "error", "warn",
+         * "monitor", "ignore"). Filters on the policy-decided alert_action
+         * column.
+         */
+        'filters.alertAction'?: string
+        /**
+         * Comma-separated list of alert actions (one of "error", "warn",
+         * "monitor", "ignore"). Filters on the policy-decided alert_action
+         * column.
+         */
+        'filters.alertAction.notIn'?: string
+        /**
+         * Name of artifact.
+         */
+        'filters.artifactName'?: string
+        /**
+         * Name of artifact.
+         */
+        'filters.artifactName.notIn'?: string
+        /**
+         * Filter by artifact namespace.
+         */
+        'filters.artifactNamespace'?: string
+        /**
+         * Filter by artifact namespace.
+         */
+        'filters.artifactNamespace.notIn'?: string
+        /**
+         * Filter by artifact purl (matches on purl without version)
+         */
+        'filters.artifactPurl'?: string
+        /**
+         * Filter by artifact purl (matches on purl without version)
+         */
+        'filters.artifactPurl.notIn'?: string
+        /**
+         * Comma-separated list of artifact types (e.g. "npm", "pypi", "gem",
+         * "maven", "golang", etc.) that should be included.
+         */
+        'filters.artifactType'?: string
+        /**
+         * Comma-separated list of artifact types (e.g. "npm", "pypi", "gem",
+         * "maven", "golang", etc.) that should be excluded.
+         */
+        'filters.artifactType.notIn'?: string
+        /**
+         * Filter by artifact version.
+         */
+        'filters.artifactVersion'?: string
+        /**
+         * Filter by artifact version.
+         */
+        'filters.artifactVersion.notIn'?: string
+        /**
+         * Comma-separated list of client actions (e.g., "install", "scan",
+         * "block")
+         */
+        'filters.clientAction'?: string
+        /**
+         * Comma-separated list of client actions (e.g., "install", "scan",
+         * "block")
+         */
+        'filters.clientAction.notIn'?: string
+        /**
+         * Comma-separated list of client machine IDs for exact matching.
+         */
+        'filters.clientMachineId'?: string
+        /**
+         * Comma-separated list of client machine IDs for exact matching.
+         */
+        'filters.clientMachineId.notIn'?: string
+        /**
+         * Comma-separated list of client product names (e.g., "socket-cli",
+         * "socket-firewall")
+         */
+        'filters.clientProductName'?: string
+        /**
+         * Comma-separated list of client product names (e.g., "socket-cli",
+         * "socket-firewall")
+         */
+        'filters.clientProductName.notIn'?: string
+        /**
+         * Comma-separated list of HTTP request user-agent header values for
+         * exact matching.
+         */
+        'filters.clientUserAgent'?: string
+        /**
+         * Comma-separated list of HTTP request user-agent header values for
+         * exact matching.
+         */
+        'filters.clientUserAgent.notIn'?: string
+        /**
+         * Comma-separated list of event categories (e.g., "audit", "analytics",
+         * "debug")
+         */
+        'filters.eventCategory'?: string
+        /**
+         * Comma-separated list of event categories (e.g., "audit", "analytics",
+         * "debug")
+         */
+        'filters.eventCategory.notIn'?: string
+        /**
+         * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+         */
+        'filters.eventCreatedAt.eq'?: string
+        /**
+         * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+         */
+        'filters.eventCreatedAt.lt'?: string
+        /**
+         * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+         */
+        'filters.eventCreatedAt.lte'?: string
+        /**
+         * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+         */
+        'filters.eventCreatedAt.gt'?: string
+        /**
+         * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+         */
+        'filters.eventCreatedAt.gte'?: string
+        /**
+         * Comma-separated list of event levels ("trace", "debug", "info",
+         * "warn", "error", "fatal")
+         */
+        'filters.eventLevel'?: string
+        /**
+         * Comma-separated list of event levels ("trace", "debug", "info",
+         * "warn", "error", "fatal")
+         */
+        'filters.eventLevel.notIn'?: string
+        /**
+         * Comma-separated list of event sources (e.g., "api-v0", "socket-cli",
+         * "socket-firewall")
+         */
+        'filters.eventSource'?: string
+        /**
+         * Comma-separated list of event sources (e.g., "api-v0", "socket-cli",
+         * "socket-firewall")
+         */
+        'filters.eventSource.notIn'?: string
+        /**
+         * Comma-separated list of event types (e.g.,
+         * "show_ide_text_decoration", "firewall_package_download")
+         */
+        'filters.eventType'?: string
+        /**
+         * Comma-separated list of event types (e.g.,
+         * "show_ide_text_decoration", "firewall_package_download")
+         */
+        'filters.eventType.notIn'?: string
+        /**
+         * Comma-separated list of client IP addresses (HTTP request remote IPs)
+         * for exact matching.
+         */
+        'filters.httpRequestRemoteIp'?: string
+        /**
+         * Comma-separated list of client IP addresses (HTTP request remote IPs)
+         * for exact matching.
+         */
+        'filters.httpRequestRemoteIp.notIn'?: string
+        /**
+         * Comma-separated list of repo full names that should be included.
+         */
+        'filters.repoFullName'?: string
+        /**
+         * Comma-separated list of repo full names that should be excluded.
+         */
+        'filters.repoFullName.notIn'?: string
+        /**
+         * Comma-separated list of repo slugs that should be included.
+         */
+        'filters.repoSlug'?: string
+        /**
+         * Comma-separated list of repo slugs that should be excluded.
+         */
+        'filters.repoSlug.notIn'?: string
+      }
+      path: {
+        /**
+         * The slug of the organization.
+         */
+        org_slug: string
+      }
+    }
+    responses: {
+      /**
+       * The paginated array of event items for the organization and related
+       * metadata.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @default
+             */
+            endCursor: string | null
+            items: {
+              /**
+               * @default
+               */
+              eventId: string
+              /**
+               * @default
+               */
+              eventSource: string
+              /**
+               * @default
+               */
+              eventLevel: string
+              /**
+               * @default
+               */
+              eventCategory: string
+              /**
+               * @default
+               */
+              eventType: string
+              /**
+               * @default
+               */
+              eventCreatedAt: string
+              /**
+               * @default
+               */
+              eventReceivedAt: string | null
+              /**
+               * @default null
+               */
+              eventExtraData: Record<string, unknown>
+              /**
+               * @default
+               */
+              organizationId: string
+              /**
+               * @default
+               */
+              organizationSlug: string
+              /**
+               * @default
+               */
+              repoId: string | null
+              /**
+               * @default
+               */
+              repoSlug: string | null
+              /**
+               * @default
+               */
+              repoFullName: string | null
+              /**
+               * @default
+               */
+              branch: string | null
+              /**
+               * @default
+               */
+              clientProductName: string | null
+              /**
+               * @default
+               */
+              clientProductVersion: string | null
+              /**
+               * @default
+               */
+              clientAction: string | null
+              /**
+               * @default
+               */
+              artifactType: string | null
+              /**
+               * @default
+               */
+              artifactNamespace: string | null
+              /**
+               * @default
+               */
+              artifactName: string | null
+              /**
+               * @default
+               */
+              artifactVersion: string | null
+              /**
+               * @default
+               */
+              artifactPurl: string | null
+              /**
+               * @default
+               */
+              userId: string | null
+              /**
+               * @default
+               */
+              userEmail: string | null
+              /**
+               * @default
+               */
+              httpRequestPath: string | null
+              /**
+               * @default
+               */
+              httpRequestMethod: string | null
+              /**
+               * @default 0
+               */
+              httpResponseStatusCode: number | null
+            }[]
+            meta: {
+              /**
+               * @default
+               */
+              organizationId: string
+              /**
+               * @default 0
+               */
+              queryStartTimestamp: number
+              /**
+               * @default
+               */
+              startDateInclusive: string
+              /**
+               * @default
+               */
+              endDateInclusive: string
+              filters: {
+                /**
+                 * Comma-separated list of alert actions (one of "error",
+                 * "warn", "monitor", "ignore"). Filters on the policy-decided
+                 * alert_action column.
+                 */
+                alertAction?: string[]
+                /**
+                 * Comma-separated list of alert actions (one of "error",
+                 * "warn", "monitor", "ignore"). Filters on the policy-decided
+                 * alert_action column.
+                 */
+                'alertAction.notIn'?: string[]
+                /**
+                 * Name of artifact.
+                 */
+                artifactName?: string[]
+                /**
+                 * Name of artifact.
+                 */
+                'artifactName.notIn'?: string[]
+                /**
+                 * Filter by artifact namespace.
+                 */
+                artifactNamespace?: string[]
+                /**
+                 * Filter by artifact namespace.
+                 */
+                'artifactNamespace.notIn'?: string[]
+                /**
+                 * Filter by artifact purl (matches on purl without version)
+                 */
+                artifactPurl?: string[]
+                /**
+                 * Filter by artifact purl (matches on purl without version)
+                 */
+                'artifactPurl.notIn'?: string[]
+                /**
+                 * Comma-separated list of artifact types (e.g. "npm", "pypi",
+                 * "gem", "maven", "golang", etc.) that should be included.
+                 */
+                artifactType?: string[]
+                /**
+                 * Comma-separated list of artifact types (e.g. "npm", "pypi",
+                 * "gem", "maven", "golang", etc.) that should be excluded.
+                 */
+                'artifactType.notIn'?: string[]
+                /**
+                 * Filter by artifact version.
+                 */
+                artifactVersion?: string[]
+                /**
+                 * Filter by artifact version.
+                 */
+                'artifactVersion.notIn'?: string[]
+                /**
+                 * Comma-separated list of client actions (e.g., "install",
+                 * "scan", "block")
+                 */
+                clientAction?: string[]
+                /**
+                 * Comma-separated list of client actions (e.g., "install",
+                 * "scan", "block")
+                 */
+                'clientAction.notIn'?: string[]
+                /**
+                 * Comma-separated list of client machine IDs for exact matching.
+                 */
+                clientMachineId?: string[]
+                /**
+                 * Comma-separated list of client machine IDs for exact matching.
+                 */
+                'clientMachineId.notIn'?: string[]
+                /**
+                 * Comma-separated list of client product names (e.g.,
+                 * "socket-cli", "socket-firewall")
+                 */
+                clientProductName?: string[]
+                /**
+                 * Comma-separated list of client product names (e.g.,
+                 * "socket-cli", "socket-firewall")
+                 */
+                'clientProductName.notIn'?: string[]
+                /**
+                 * Comma-separated list of HTTP request user-agent header values
+                 * for exact matching.
+                 */
+                clientUserAgent?: string[]
+                /**
+                 * Comma-separated list of HTTP request user-agent header values
+                 * for exact matching.
+                 */
+                'clientUserAgent.notIn'?: string[]
+                /**
+                 * Comma-separated list of event categories (e.g., "audit",
+                 * "analytics", "debug")
+                 */
+                eventCategory?: string[]
+                /**
+                 * Comma-separated list of event categories (e.g., "audit",
+                 * "analytics", "debug")
+                 */
+                'eventCategory.notIn'?: string[]
+                /**
+                 * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+                 */
+                'eventCreatedAt.eq'?: string[]
+                /**
+                 * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+                 */
+                'eventCreatedAt.lt'?: string[]
+                /**
+                 * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+                 */
+                'eventCreatedAt.lte'?: string[]
+                /**
+                 * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+                 */
+                'eventCreatedAt.gt'?: string[]
+                /**
+                 * Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)
+                 */
+                'eventCreatedAt.gte'?: string[]
+                /**
+                 * Comma-separated list of event levels ("trace", "debug",
+                 * "info", "warn", "error", "fatal")
+                 */
+                eventLevel?: string[]
+                /**
+                 * Comma-separated list of event levels ("trace", "debug",
+                 * "info", "warn", "error", "fatal")
+                 */
+                'eventLevel.notIn'?: string[]
+                /**
+                 * Comma-separated list of event sources (e.g., "api-v0",
+                 * "socket-cli", "socket-firewall")
+                 */
+                eventSource?: string[]
+                /**
+                 * Comma-separated list of event sources (e.g., "api-v0",
+                 * "socket-cli", "socket-firewall")
+                 */
+                'eventSource.notIn'?: string[]
+                /**
+                 * Comma-separated list of event types (e.g.,
+                 * "show_ide_text_decoration", "firewall_package_download")
+                 */
+                eventType?: string[]
+                /**
+                 * Comma-separated list of event types (e.g.,
+                 * "show_ide_text_decoration", "firewall_package_download")
+                 */
+                'eventType.notIn'?: string[]
+                /**
+                 * Comma-separated list of client IP addresses (HTTP request
+                 * remote IPs) for exact matching.
+                 */
+                httpRequestRemoteIp?: string[]
+                /**
+                 * Comma-separated list of client IP addresses (HTTP request
+                 * remote IPs) for exact matching.
+                 */
+                'httpRequestRemoteIp.notIn'?: string[]
+                /**
+                 * Comma-separated list of repo full names that should be
+                 * included.
+                 */
+                repoFullName?: string[]
+                /**
+                 * Comma-separated list of repo full names that should be
+                 * excluded.
+                 */
+                'repoFullName.notIn'?: string[]
+                /**
+                 * Comma-separated list of repo slugs that should be included.
+                 */
+                repoSlug?: string[]
+                /**
+                 * Comma-separated list of repo slugs that should be excluded.
+                 */
+                'repoSlug.notIn'?: string[]
+              }
+              /**
+               * Search keywords.
+               */
+              searchKeywords: string[]
+              /**
+               * Sort type (eventCreatedAt)
+               */
+              sort: string[]
             }
           }
         }

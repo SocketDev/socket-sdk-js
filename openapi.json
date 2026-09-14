@@ -44292,6 +44292,1091 @@
         "x-readme": {}
       }
     },
+    "/orgs/{org_slug}/events": {
+      "get": {
+        "tags": ["events"],
+        "summary": "List organization events",
+        "operationId": "listOrgEvents",
+        "parameters": [
+          {
+            "name": "org_slug",
+            "in": "path",
+            "required": true,
+            "description": "The slug of the organization",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Specify the maximum number of results to return per page (intermediate pages may have fewer than this limit and callers should always check \"endCursor\" in response body to know if there are more pages)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5000,
+              "default": 1000
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "description": "The ISO 8601 date in YYYY-MM-DD format (e.g. \"2025-01-01\"). If not specified, defaults to the current date.",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "range",
+            "in": "query",
+            "required": false,
+            "description": "The date range in format like \"7d\" or \"-7d\" where \"d\" is days. A positive value means the range extends forward from the date, and a negative value means the range extends backward. Defaults to \"-7d\" (past week). Maximum range is 365 days. NOTE: \"latest\" is not supported for events.",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "startAfterCursor",
+            "in": "query",
+            "required": false,
+            "description": "The pagination cursor that was returned as the \"endCursor\" property in previous request",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Sort type (eventCreatedAt, eventSource, eventCategory, eventType, eventLevel, clientProductName, clientAction)",
+            "schema": {
+              "type": "string",
+              "default": "eventCreatedAt"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Search keywords to filter events",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "filters.alertAction",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert actions (one of \"error\", \"warn\", \"monitor\", \"ignore\"). Filters on the policy-decided alert_action column.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.alertAction.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of alert actions (one of \"error\", \"warn\", \"monitor\", \"ignore\"). Filters on the policy-decided alert_action column.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Name of artifact",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactNamespace",
+            "in": "query",
+            "required": false,
+            "description": "Filter by artifact namespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactNamespace.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Filter by artifact namespace",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactPurl",
+            "in": "query",
+            "required": false,
+            "description": "Filter by artifact purl (matches on purl without version)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactPurl.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Filter by artifact purl (matches on purl without version)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactVersion",
+            "in": "query",
+            "required": false,
+            "description": "Filter by artifact version",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.artifactVersion.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Filter by artifact version",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.clientAction",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of client actions (e.g., \"install\", \"scan\", \"block\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.clientAction.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of client actions (e.g., \"install\", \"scan\", \"block\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.clientMachineId",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of client machine IDs for exact matching",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.clientMachineId.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of client machine IDs for exact matching",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.clientProductName",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of client product names (e.g., \"socket-cli\", \"socket-firewall\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.clientProductName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of client product names (e.g., \"socket-cli\", \"socket-firewall\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.clientUserAgent",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of HTTP request user-agent header values for exact matching",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.clientUserAgent.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of HTTP request user-agent header values for exact matching",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventCategory",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of event categories (e.g., \"audit\", \"analytics\", \"debug\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventCategory.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of event categories (e.g., \"audit\", \"analytics\", \"debug\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventCreatedAt.eq",
+            "in": "query",
+            "required": false,
+            "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventCreatedAt.lt",
+            "in": "query",
+            "required": false,
+            "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventCreatedAt.lte",
+            "in": "query",
+            "required": false,
+            "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventCreatedAt.gt",
+            "in": "query",
+            "required": false,
+            "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventCreatedAt.gte",
+            "in": "query",
+            "required": false,
+            "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventLevel",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of event levels (\"trace\", \"debug\", \"info\", \"warn\", \"error\", \"fatal\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventLevel.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of event levels (\"trace\", \"debug\", \"info\", \"warn\", \"error\", \"fatal\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventSource",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of event sources (e.g., \"api-v0\", \"socket-cli\", \"socket-firewall\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventSource.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of event sources (e.g., \"api-v0\", \"socket-cli\", \"socket-firewall\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventType",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of event types (e.g., \"show_ide_text_decoration\", \"firewall_package_download\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.eventType.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of event types (e.g., \"show_ide_text_decoration\", \"firewall_package_download\")",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.httpRequestRemoteIp",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of client IP addresses (HTTP request remote IPs) for exact matching",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.httpRequestRemoteIp.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of client IP addresses (HTTP request remote IPs) for exact matching",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoFullName",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoFullName.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo full names that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoSlug",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo slugs that should be included",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filters.repoSlug.notIn",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of repo slugs that should be excluded",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": ["telemetry-events:list"]
+          },
+          {
+            "basicAuth": ["telemetry-events:list"]
+          }
+        ],
+        "description": "List events for an organization.\n\nEvents are records of actions taken across Socket products, such as firewall decisions and CLI/SDK actions.\n\nThe maximum date range per request is 365 days. When more results are available, the response body's \"endCursor\" property contains the cursor to pass as the \"startAfterCursor\" query parameter to retrieve the next page.\n\nThis endpoint consumes 10 units of your quota.\n\nThis endpoint requires the following org token scopes:\n- telemetry-events:list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "",
+                  "properties": {
+                    "endCursor": {
+                      "type": "string",
+                      "description": "",
+                      "default": "",
+                      "nullable": true
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "",
+                        "properties": {
+                          "eventId": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "eventSource": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "eventLevel": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "eventCategory": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "eventType": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "eventCreatedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "eventReceivedAt": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "eventExtraData": {
+                            "type": "object",
+                            "description": "",
+                            "default": null,
+                            "nullable": true
+                          },
+                          "organizationId": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "organizationSlug": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "repoId": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "repoSlug": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "repoFullName": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "branch": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "clientProductName": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "clientProductVersion": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "clientAction": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifactType": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifactNamespace": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifactName": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifactVersion": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "artifactPurl": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "userId": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "userEmail": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "httpRequestPath": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "httpRequestMethod": {
+                            "type": "string",
+                            "description": "",
+                            "default": "",
+                            "nullable": true
+                          },
+                          "httpResponseStatusCode": {
+                            "type": "integer",
+                            "description": "",
+                            "default": 0,
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "artifactName",
+                          "artifactNamespace",
+                          "artifactPurl",
+                          "artifactType",
+                          "artifactVersion",
+                          "branch",
+                          "clientAction",
+                          "clientProductName",
+                          "clientProductVersion",
+                          "eventCategory",
+                          "eventCreatedAt",
+                          "eventExtraData",
+                          "eventId",
+                          "eventLevel",
+                          "eventReceivedAt",
+                          "eventSource",
+                          "eventType",
+                          "httpRequestMethod",
+                          "httpRequestPath",
+                          "httpResponseStatusCode",
+                          "organizationId",
+                          "organizationSlug",
+                          "repoFullName",
+                          "repoId",
+                          "repoSlug",
+                          "userEmail",
+                          "userId"
+                        ]
+                      },
+                      "description": ""
+                    },
+                    "meta": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "",
+                      "properties": {
+                        "organizationId": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "queryStartTimestamp": {
+                          "type": "number",
+                          "description": "",
+                          "default": 0
+                        },
+                        "startDateInclusive": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "endDateInclusive": {
+                          "type": "string",
+                          "description": "",
+                          "default": ""
+                        },
+                        "filters": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "alertAction": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert actions (one of \"error\", \"warn\", \"monitor\", \"ignore\"). Filters on the policy-decided alert_action column."
+                            },
+                            "alertAction.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of alert actions (one of \"error\", \"warn\", \"monitor\", \"ignore\"). Filters on the policy-decided alert_action column."
+                            },
+                            "artifactName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
+                            "artifactName.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Name of artifact"
+                            },
+                            "artifactNamespace": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Filter by artifact namespace"
+                            },
+                            "artifactNamespace.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Filter by artifact namespace"
+                            },
+                            "artifactPurl": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Filter by artifact purl (matches on purl without version)"
+                            },
+                            "artifactPurl.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Filter by artifact purl (matches on purl without version)"
+                            },
+                            "artifactType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be included"
+                            },
+                            "artifactType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of artifact types (e.g. \"npm\", \"pypi\", \"gem\", \"maven\", \"golang\", etc.) that should be excluded"
+                            },
+                            "artifactVersion": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Filter by artifact version"
+                            },
+                            "artifactVersion.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Filter by artifact version"
+                            },
+                            "clientAction": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of client actions (e.g., \"install\", \"scan\", \"block\")"
+                            },
+                            "clientAction.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of client actions (e.g., \"install\", \"scan\", \"block\")"
+                            },
+                            "clientMachineId": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of client machine IDs for exact matching"
+                            },
+                            "clientMachineId.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of client machine IDs for exact matching"
+                            },
+                            "clientProductName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of client product names (e.g., \"socket-cli\", \"socket-firewall\")"
+                            },
+                            "clientProductName.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of client product names (e.g., \"socket-cli\", \"socket-firewall\")"
+                            },
+                            "clientUserAgent": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of HTTP request user-agent header values for exact matching"
+                            },
+                            "clientUserAgent.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of HTTP request user-agent header values for exact matching"
+                            },
+                            "eventCategory": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of event categories (e.g., \"audit\", \"analytics\", \"debug\")"
+                            },
+                            "eventCategory.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of event categories (e.g., \"audit\", \"analytics\", \"debug\")"
+                            },
+                            "eventCreatedAt.eq": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "eventCreatedAt.lt": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "eventCreatedAt.lte": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "eventCreatedAt.gt": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "eventCreatedAt.gte": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Event created at (YYYY-MM-DD HH:MM:SS in UTC time zone)"
+                            },
+                            "eventLevel": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of event levels (\"trace\", \"debug\", \"info\", \"warn\", \"error\", \"fatal\")"
+                            },
+                            "eventLevel.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of event levels (\"trace\", \"debug\", \"info\", \"warn\", \"error\", \"fatal\")"
+                            },
+                            "eventSource": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of event sources (e.g., \"api-v0\", \"socket-cli\", \"socket-firewall\")"
+                            },
+                            "eventSource.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of event sources (e.g., \"api-v0\", \"socket-cli\", \"socket-firewall\")"
+                            },
+                            "eventType": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of event types (e.g., \"show_ide_text_decoration\", \"firewall_package_download\")"
+                            },
+                            "eventType.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of event types (e.g., \"show_ide_text_decoration\", \"firewall_package_download\")"
+                            },
+                            "httpRequestRemoteIp": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of client IP addresses (HTTP request remote IPs) for exact matching"
+                            },
+                            "httpRequestRemoteIp.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of client IP addresses (HTTP request remote IPs) for exact matching"
+                            },
+                            "repoFullName": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be included"
+                            },
+                            "repoFullName.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo full names that should be excluded"
+                            },
+                            "repoSlug": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo slugs that should be included"
+                            },
+                            "repoSlug.notIn": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "description": "",
+                                "default": ""
+                              },
+                              "description": "Comma-separated list of repo slugs that should be excluded"
+                            }
+                          },
+                          "description": ""
+                        },
+                        "searchKeywords": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": "Search keywords"
+                        },
+                        "sort": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "description": "",
+                            "default": ""
+                          },
+                          "description": "Sort type (eventCreatedAt)"
+                        }
+                      },
+                      "required": [
+                        "endDateInclusive",
+                        "filters",
+                        "organizationId",
+                        "queryStartTimestamp",
+                        "searchKeywords",
+                        "sort",
+                        "startDateInclusive"
+                      ]
+                    }
+                  },
+                  "required": ["endCursor", "items", "meta"]
+                }
+              }
+            },
+            "description": "The paginated array of event items for the organization and related metadata."
+          },
+          "400": {
+            "$ref": "#/components/responses/SocketBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SocketUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SocketForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SocketNotFoundResponse"
+          },
+          "429": {
+            "$ref": "#/components/responses/SocketTooManyRequestsResponse"
+          }
+        },
+        "x-readme": {}
+      }
+    },
     "/orgs/{org_slug}/webhooks": {
       "get": {
         "tags": ["webhooks"],
