@@ -3,8 +3,8 @@
 # under .github/actions/fleet/ (cascade-updated), referenced by ./ path — no
 # cross-repo reusable workflow, no first-party `uses:@sha`. Add repo-specific
 # jobs anywhere under `jobs:`.
-name: 🧪 CI
-run-name: CI
+name: 'ci: gates'
+run-name: 'ci: gates'
 
 on:
   push:
@@ -81,8 +81,8 @@ jobs:
           # Reuse the PR App for a contents:read token scoped to wheelhouse.
           # Both credentials enable the private release fallback. Without the
           # key, hydration still pulls public GHCR anonymously.
-          payload-token-client-id: ${{ secrets.SOCKET_PR_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
       - name: Prepare hook snapshot validation
         uses: ./.github/actions/fleet/run-script
         with:
@@ -147,8 +147,8 @@ jobs:
           # Reuse the PR App for a contents:read token scoped to wheelhouse.
           # Both credentials enable the private release fallback. Without the
           # key, hydration still pulls public GHCR anonymously.
-          payload-token-client-id: ${{ secrets.SOCKET_PR_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
       # The SFW proxy interposes crates.io at the system level. Other tools
       # receive its CA via NODE_EXTRA_CA_CERTS; cargo needs CARGO_HTTP_CAINFO
       # explicitly, and on Windows schannel additionally demands revocation

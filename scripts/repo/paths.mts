@@ -12,5 +12,5 @@ export const SYNC_OPENAPI_WORKFLOW_PATH = path.join(
   REPO_ROOT,
   '.github',
   'workflows',
-  'sync-openapi.yml',
+  'chore-sync-openapi.yml',
 )

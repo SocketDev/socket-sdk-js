@@ -1,10 +1,10 @@
-name: 🔄 Sync openapi
-run-name: Sync v0 and v1 contracts
+name: 'chore: sync openapi'
+run-name: 'chore: sync v0 and v1 contracts'
 
 on:
   push:
     paths:
-      - '.github/workflows/sync-openapi.yml'
+      - '.github/workflows/chore-sync-openapi.yml'
       - 'scripts/repo/generate-*.mts'
       - 'scripts/repo/openapi-contracts.mts'
       - 'scripts/repo/check/api-contracts-are-current.mts'
@@ -54,8 +54,8 @@ jobs:
         uses: ./.github/actions/fleet/setup-and-install
         with:
           checkout: 'false'
-          payload-token-client-id: ${{ secrets.SOCKET_PR_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
       - name: Set up commit signing
         uses: ./.github/actions/fleet/setup-git-signing
