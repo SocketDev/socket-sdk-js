@@ -15,11 +15,11 @@ describe('session payload planning', () => {
       const fetcher = path.join(directory, 'scripts/repo/bootstrap/fleet.mjs')
       await mkdir(path.dirname(fetcher), { recursive: true })
       await writeFile(fetcher, '')
-      expect(planFetch(directory)).toEqual({ action: 'fetch', fleet: fetcher })
+      expect(planFetch(directory)).toEqual({ action: 'ensure', fleet: fetcher })
       const sentinel = path.join(directory, '.claude/hooks/fleet/index.cjs')
       await mkdir(path.dirname(sentinel), { recursive: true })
       await writeFile(sentinel, '')
-      expect(planFetch(directory)).toEqual({ action: 'present' })
+      expect(planFetch(directory)).toEqual({ action: 'ensure', fleet: fetcher })
     } finally {
       safeDeleteSync(directory)
     }
