@@ -180,4 +180,5 @@ export const buildConfig: RolldownOptions & { output: OutputOptions } = {
       ),
     },
   },
+experimental: { attachDebugInfo: 'none' },
 }

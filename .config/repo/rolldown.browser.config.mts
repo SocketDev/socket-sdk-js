@@ -102,4 +102,5 @@ export const browserBuildConfig: RolldownOptions & { output: OutputOptions } = {
       ),
     },
   },
+experimental: { attachDebugInfo: 'none' },
 }
