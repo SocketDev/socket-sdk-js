@@ -128,6 +128,7 @@ export function createNodeProtocolPlugin(): Plugin {
 }
 
 export const buildConfig: RolldownOptions & { output: OutputOptions } = {
+  experimental: { attachDebugInfo: 'none' },
   // Runtime deps stay external (consumers install them); node: builtins are
   // externalized by the node-protocol plugin. The SDK's OWN vendored
   // `src/external/*` shims are externalized so consumers' relative

@@ -22,6 +22,7 @@ const distPath = path.join(rootPath, 'dist')
 export const externalsBuildConfig: RolldownOptions & {
   output: OutputOptions
 } = {
+  experimental: { attachDebugInfo: 'none' },
   input: {
     // The input key carries the `external/` prefix so the bundle lands at
     // `dist/external/form-data.js`, mirroring `src/external/form-data.js`.
