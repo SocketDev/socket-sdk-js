@@ -54,6 +54,7 @@ const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 
 export const browserBuildConfig: RolldownOptions & { output: OutputOptions } = {
+  experimental: { attachDebugInfo: 'none' },
   // Everything is inlined for a self-contained browser bundle (lib is a
   // devDependency, same model as the node build); node builtins are shimmed.
   external: [],
@@ -101,5 +102,4 @@ export const browserBuildConfig: RolldownOptions & { output: OutputOptions } = {
       ),
     },
   },
-experimental: { attachDebugInfo: 'none' },
 }

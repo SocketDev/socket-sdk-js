@@ -128,17 +128,7 @@ export function createNodeProtocolPlugin(): Plugin {
 }
 
 export const buildConfig: RolldownOptions & { output: OutputOptions } = {
-  // Runtime deps stay external (consumers install them); node: builtins are
-  // externalized by the node-protocol plugin. The SDK's OWN vendored
-  // `src/external/*` shims are externalized so consumers' relative
-  // `require('./external/form-data.js')` calls survive verbatim and resolve
-  // against the separately built self-contained `dist/external/*` bundles.
-  //
-  // The match is by RESOLVED PATH under this repo's `src/external/`, never a
-  // blanket `external/`-segment test: this build INLINES @socketsecurity/lib,
-  // whose internals require lib's own nested `dist/external/*` modules, and a
-  // segment match externalizes those too — emitting relative requires into a
-  // package that consumers of this zero-dependency SDK never install.
+  experimental: { attachDebugInfo: 'none' },
   external: (id: string, importer?: string | undefined) => {
     if (externalDependencies.includes(id)) {
       return true
@@ -179,5 +169,4 @@ export const buildConfig: RolldownOptions & { output: OutputOptions } = {
       ),
     },
   },
-experimental: { attachDebugInfo: 'none' },
 }
