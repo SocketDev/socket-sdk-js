@@ -44,4 +44,5 @@ export const externalsBuildConfig: RolldownOptions & {
     createCodeStubPlugin([{ pattern: MIME_DB_PATTERN, code: MIME_DB_STUB }]),
     createNodeProtocolPlugin(),
   ],
+experimental: { attachDebugInfo: 'none' },
 }
