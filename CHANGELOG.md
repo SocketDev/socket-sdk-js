@@ -4,6 +4,63 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.1.5](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.5) - 2026-09-22
+
+### Added
+
+- **`api`** — add v1 clients and synchronize api contracts
+- add 10 missing patch SDK methods
+
+### Fixed
+
+- **`openapi`** — sync v0 and v1 contracts
+- **`openapi`** — sync v0 and v1 contracts
+- **`paths`** — contain patch regeneration inputs
+- **`tooling`** — normalize helper options and api references
+- **`build`** — align cached artifacts and bundled comments
+- **`tooling`** — keep published hydration reproducible
+- **`tooling`** — remove the standing pluginutils soak exception
+- **`tooling`** — resolve package managers from the fleet registry
+- **`tooling`** — make sdk entrypoints safe to inspect
+- **`sdk`** — return prototype-free artifact records
+- **`tooling`** — exclude generated api declarations from formatting
+- **`tooling`** — reconcile installed fleet runtime contracts
+- match Socket coverage badge styling
+- **`codegen`** — preserve strict type keys and validate formatted output
+- **`test`** — preserve timeout options and type fuzz headers
+- **`scripts`** — repoint the last five is-main-module imports
+- **`scripts`** — repoint is-main-module and trim two header essays
+- **`scripts`** — repoint is-main-module after the fleet \_shared split
+- **`fuzz`** — match .mts targets and stay quiet on an empty run
+- **`scripts`** — repoint trust at registry-infra after the rename
+- **`scripts`** — build the loader short-circuit url with pathToFileURL
+- **`sdk`** — insert the error body verbatim and drop the deprecated marker
+- **`scripts`** — insert the rebuilt export verbatim in strict-types codegen
+
+### Internal
+
+- **`ci`** — align sdk release configuration with fleet checks
+- **`deps`** — reconcile hydrated workspace lockfile
+- **`deps`** — register char comparison lint rule
+- **`ci`** — align SDK validation contracts
+- **`ci`** — use current openapi verification tests
+- **`ci`** — support repository script results
+- **`ci`** — use the scoped app token for openapi pull requests
+- **`ci`** — base generated openapi changes on the current commit
+- **`ci`** — hydrate openapi worktree patches before installation
+- **`ci`** — restore polka url parser compatibility
+- **`ci`** — install hook dependencies in the openapi worktree
+- **`ci`** — bootstrap the exact workflow commit without checkout action
+- **`check`** — remove obsolete changed-test mapper
+- **`check`** — normalize file paths and remove unused command helpers
+- **`ci`** — import entrypoint helper from the pinned fleet pack
+- **`ci`** — repair build parsing and test runner compatibility
+- **`deps`** — drop the orphaned pnpm 11.9.0 package-manager pin
+- **`deps`** — align the pnpm devEngines pin with engines
+- **`lint`** — satisfy the socket rules the refreshed payload added
+- **`deps`** — _update @socketsecurity/lib to 7.0.1_
+- **`deps`** — add missing yaml catalog entry and reconcile lockfile
+
 ## [4.1.4](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.4) - 2026-08-05
 
 ### Fixed
