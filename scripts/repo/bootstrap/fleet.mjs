@@ -15385,7 +15385,12 @@ function recoverRuleAuthority(dest) {
     `Cannot recover engineering rules in ${dest}: the latest 32 first-parent commits contain no authored CLAUDE.md. Restore authored AGENTS.md before continuing.`,
   )
 }
-function migrateRuleFile(dest) {
+function migrateRuleFile(dest, preservedPaths) {
+  if (preservedPaths?.has('CLAUDE.md') || preservedPaths?.has('AGENTS.md'))
+    return false
+  return migrateUnpreservedRuleFile(dest)
+}
+function migrateUnpreservedRuleFile(dest) {
   const legacy = path.join(dest, LEGACY_RULE_FILE)
   const current = path.join(dest, RULE_FILE)
   const currentStat = ruleStat(current)
@@ -19062,7 +19067,6 @@ function installFiles(filesDir, dest, manifest, options) {
 function materializeFromLocalTemplate(dest, manifest, options) {
   const filesDir = sharedTemplateBasePath(dest)
   if (!existsSync(filesDir)) return
-  migrateRuleFile(dest)
   const preservedPaths = options?.preserveTracked
     ? new Set(
         execFileSync('git', ['ls-files', '--cached', '-z'], {
@@ -19074,6 +19078,7 @@ function materializeFromLocalTemplate(dest, manifest, options) {
           .map(normalizeBundlePath),
       )
     : options?.preservedPaths
+  migrateRuleFile(dest, preservedPaths)
   const shaped = effectiveMemberManifest(manifest, dest)
   const total = {
     placed: 0,
@@ -19149,10 +19154,10 @@ function untrackGeneratedOutputs(dest, generatedPaths) {
  * consumer's existing file (or start with an empty string), splice the block
  * in, and write back.
  */
-function installSegments(segmentsDir, dest, manifest) {
+function installSegments(segmentsDir, dest, manifest, preservedPaths) {
   const segments = manifest.segments
   if (!segments || segments.length === 0) return
-  migrateRuleFile(dest)
+  migrateRuleFile(dest, preservedPaths)
   for (const entry of segments) {
     const destName = segmentFileName(entry.path)
     const blockPath = path.join(segmentsDir, destName)
@@ -28769,19 +28774,21 @@ const INSTALLED_ADAPTER_PATHS = [
 function isPlainObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
-function projectMcpClientConfigs(dest) {
+function projectMcpClientConfigs(dest, preservedPaths) {
   const authority = path.join(dest, '.mcp.json')
   if (!existsSync(authority)) return
   const servers = parseCanonicalMcpConfig(readFileSync(authority, 'utf8'))
   const codexPath = path.join(dest, CODEX_MCP_CONFIG_REL)
   if (
-    !existsSync(codexPath) ||
-    readFileSync(codexPath, 'utf8').startsWith(
-      '# Generated from ../.mcp.json by scripts/fleet/mcp/config.mts.',
-    )
+    !isPreservedInstallPath('.codex/config.toml', { preservedPaths }) &&
+    (!existsSync(codexPath) ||
+      readFileSync(codexPath, 'utf8').startsWith(
+        '# Generated from ../.mcp.json by scripts/fleet/mcp/config.mts.',
+      ))
   )
     writeIfChanged(codexPath, renderCodexMcpConfig(servers))
   const openCodePath = path.join(dest, OPENCODE_MCP_ADAPTER_REL)
+  if (isPreservedInstallPath('opencode.json', { preservedPaths })) return
   const existing = existsSync(openCodePath)
     ? JSON.parse(readFileSync(openCodePath, 'utf8'))
     : {}
@@ -28836,8 +28843,8 @@ function writeRuleAlias(dest, relative) {
     writeIfChanged(dest, POINTER_BODY)
   }
 }
-function projectInstalledAdapters(dest) {
-  migrateRuleFile(dest)
+function projectInstalledAdapters(dest, preservedPaths) {
+  migrateRuleFile(dest, preservedPaths)
   for (let i = 0, { length } = ADAPTERS; i < length; i += 1) {
     const adapter = ADAPTERS[i]
     if (
@@ -28860,10 +28867,15 @@ function projectInstalledAdapters(dest) {
       },
     }),
   ])
-  for (const [file, content] of writes) writeIfChanged(file, content)
+  for (const [file, content] of writes) {
+    if (isPreservedInstallPath(path.relative(dest, file), { preservedPaths }))
+      continue
+    writeIfChanged(file, content)
+  }
   for (let i = 0, { length } = ADAPTERS; i < length; i += 1) {
     const adapter = ADAPTERS[i]
     const destination = path.join(dest, adapter.dest)
+    if (isPreservedInstallPath(adapter.dest, { preservedPaths })) continue
     if (adapter.kind === 'symlink') {
       writeRuleAlias(destination, adapter.dest)
       continue
@@ -28875,7 +28887,7 @@ function projectInstalledAdapters(dest) {
       renderAdapterCopy(adapter, readFileSync(source, 'utf8')),
     )
   }
-  projectMcpClientConfigs(dest)
+  projectMcpClientConfigs(dest, preservedPaths)
   return INSTALLED_ADAPTER_PATHS
 }
 
@@ -29071,7 +29083,10 @@ async function ensureCurrentFleet(config, dependencies) {
     ...dependencies,
   }
   const dest = path.resolve(cfg.dest ?? repoRoot)
-  migrateRuleFile(dest)
+  migrateRuleFile(
+    dest,
+    existsSync(path.join(dest, '.git')) ? readFleetTrackedPaths(dest) : void 0,
+  )
   if (existsSync(sharedTemplateBasePath(dest))) return 0
   repairTrackedHydration(dest, { restoreMissing: cfg.repairTracked === true })
   const now = deps.now ?? Date.now
@@ -29248,12 +29263,12 @@ async function installFleet(config) {
       )
       return 0
     }
-    migrateRuleFile(dest)
     const preserveTracked =
       cfg.expectedReceipt !== void 0 || cfg.preserveTracked === true
     const preservedPaths = preserveTracked
       ? readFleetTrackedPaths(dest)
       : void 0
+    migrateRuleFile(dest, preservedPaths)
     const runtimeManifest = preservedPaths
       ? {
           ...memberManifest,
@@ -29310,7 +29325,7 @@ async function installFleet(config) {
           },
         }
       : memberManifest
-    installSegments(segmentsDir, dest, runtimeManifest)
+    installSegments(segmentsDir, dest, runtimeManifest, preservedPaths)
     const settingsResult = installSettingsSegment(
       segmentsDir,
       dest,
@@ -29331,7 +29346,7 @@ async function installFleet(config) {
         manifest: runtimeManifest,
       })
     try {
-      projectInstalledAdapters(dest)
+      projectInstalledAdapters(dest, preservedPaths)
       if (!preserveTracked)
         untrackGeneratedOutputs(dest, INSTALLED_ADAPTER_PATHS)
     } catch (error) {

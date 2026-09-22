@@ -1,4 +1,4 @@
-export declare function migrateRuleFile(dest: string): boolean;
+export declare function migrateRuleFile(dest: string, preservedPaths?: ReadonlySet<string> | undefined): boolean;
 export declare function migrateWorkspaceSettings(dest: string, yaml: string): string;
 /**
  * A script's self-description, answered without running its side effect.
@@ -713,7 +713,7 @@ export declare function untrackGeneratedOutputs(dest: string, generatedPaths: re
  * consumer's existing file (or start with an empty string), splice the block
  * in, and write back.
  */
-export declare function installSegments(segmentsDir: string, dest: string, manifest: BundleManifest): void;
+export declare function installSegments(segmentsDir: string, dest: string, manifest: BundleManifest, preservedPaths?: ReadonlySet<string> | undefined): void;
 /**
  * Merge the release's canonical Claude settings section into the consumer's
  * hybrid file. Fleet keys are replaced; repo-owned top-level settings and
