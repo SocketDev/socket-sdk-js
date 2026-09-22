@@ -177,14 +177,14 @@ catalogs:
       specifier: 2.0.0
       version: 2.0.0
     '@playwright/mcp':
-      specifier: 0.0.80
-      version: 0.0.80
+      specifier: 0.0.81
+      version: 0.0.81
     '@shadscan/cli':
       specifier: 0.17.0
       version: 0.17.0
     '@socketregistry/packageurl-js-stable':
-      specifier: npm:@socketregistry/packageurl-js@1.5.2
-      version: 1.5.2
+      specifier: npm:@socketregistry/packageurl-js@1.5.3
+      version: 1.5.3
     '@socketsecurity/lib-stable':
       specifier: npm:@socketsecurity/lib@7.0.3
       version: 7.0.3
@@ -327,7 +327,7 @@ catalogs:
 overrides:
   '@polka/url': 1.0.0-next.29
   '@sinclair/typebox': 0.34.52
-  '@socketregistry/packageurl-js': 1.5.2
+  '@socketregistry/packageurl-js': 1.5.3
   '@socketsecurity/lib': 7.0.3
   '@socketsecurity/registry': 2.0.5
   '@socketsecurity/sdk': 4.1.4
@@ -429,7 +429,7 @@ importers:
         version: 1.52.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
       '@playwright/mcp':
         specifier: 'catalog:'
-        version: 0.0.80
+        version: 0.0.81
       '@shadscan/cli':
         specifier: 'catalog:'
         version: 0.17.0
@@ -437,11 +437,11 @@ importers:
         specifier: 0.34.52
         version: 0.34.52
       '@socketregistry/packageurl-js':
-        specifier: 1.5.2
-        version: 1.5.2
+        specifier: 1.5.3
+        version: 1.5.3
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.5.2'
+        version: '@socketregistry/packageurl-js@1.5.3'
       '@socketsecurity/lib':
         specifier: 7.0.3
         version: 7.0.3(typescript@7.1.0-dev.20260909.1)
@@ -979,7 +979,7 @@ importers:
     dependencies:
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.5.2'
+        version: '@socketregistry/packageurl-js@1.5.3'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260909.1)'
@@ -3248,7 +3248,7 @@ importers:
     dependencies:
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.5.2'
+        version: '@socketregistry/packageurl-js@1.5.3'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260909.1)'
@@ -4750,8 +4750,8 @@ packages:
     resolution: {integrity: sha512-s7j9AboaesCuCXvju80q16mHGa0kFo/1OYBCA3oZaXEIjcbEDMyroWoDbJ/OLouenHhK12neDoMDWBhfl6PF5g==}
     hasBin: true
 
-  '@playwright/mcp@0.0.80':
-    resolution: {integrity: sha512-FOPXHm2SvFhAQylm10jMZ35B/SR2TaMLVkavAlwoG4N2qCb5RqbvhQYcu3zmXNyxR2DW0Ooxe+9XPVt5UjKRCQ==}
+  '@playwright/mcp@0.0.81':
+    resolution: {integrity: sha512-c4eVex1nS53IzLHlwAm0J9ZISDTvA7RndFX8oVcQOrmvIrKSkByazpq79lZHWJuWTB7Gpk0sLBQoRepyIgmneA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4911,9 +4911,9 @@ packages:
     resolution: {integrity: sha512-MZ5dyXOtiEc7q3801T+2EmKkxrd55BOSQnG8z/8/IkIJzDxqBxGGBKVyixqFm3W657TyUEBfIT9iWgSB6ipFsA==}
     engines: {node: '>=18'}
 
-  '@socketregistry/packageurl-js@1.5.2':
-    resolution: {integrity: sha512-j8plTfIjXEU8u2q4clv9njGqHFXQz0Ad4lscj2em3QcQlaWD/UHaQeYgyKlAiM6PowkEWMXFhVD7cgm1BzX6Sg==}
-    engines: {node: '>=24', npm: '>=12.0.1', pnpm: '>=11.0.5'}
+  '@socketregistry/packageurl-js@1.5.3':
+    resolution: {integrity: sha512-L3EIqOlRbUgZK6lHhaiWE6QO6U94SM13GywFRxsjN062ZcxzP/B2Qv3TyKN002WOXrW1iZoPRfYnIK5glOrQFQ==}
+    engines: {node: '>=24', npm: ^11.19.0 || >=12.0.2, pnpm: ^11.25.0 || >=12.3.4}
 
   '@socketregistry/safe-buffer@1.0.9':
     resolution: {integrity: sha512-eV4uYchI1+vQeKpFG+aBlhVQ/AaaPTTXaan+ReiNn/izy8U9hfT4WC8l4g8o8BC3zaeNnsNVxec14hJH/y2y3g==}
@@ -6553,13 +6553,13 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright-core@1.63.0-alpha-2026-08-31:
-    resolution: {integrity: sha512-1ek0Lyr12h6jcs/WTcNoVtzZkQp7D/90PsMuBW/Rm6h3AsWAbzpqj0geMv8+8Tzzr9CSUYvg9kznrVZINQMXXw==}
+  playwright-core@1.64.0-alpha-2026-09-14:
+    resolution: {integrity: sha512-VCqlQ8lEKS8NAfEU/sWx3KP7gL2oCWd/DAGzPDZncGV7dUNNHpaVxHd2LWe2pc5y53h0Hqu3SWzRiPqKqkrYQA==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.63.0-alpha-2026-08-31:
-    resolution: {integrity: sha512-3XAsuznfu8jBVJ4QxdGvBkt0+b8ZFwuwJYyOfiIw5ZjUOrNLNRhKxzLzLuydou3gJ9c6eMwVqgzdiOwhy54Kzw==}
+  playwright@1.64.0-alpha-2026-09-14:
+    resolution: {integrity: sha512-CdpbZ03/Iq4HMth9RP2NHBv/gv9exDLkR3eJEDvS2fKdAjZSNYvL2PrJum3wHe8qOSFR8KzWuyKUx3AZ5vZc4w==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -7626,10 +7626,10 @@ snapshots:
       - '@emnapi/core'
       - '@emnapi/runtime'
 
-  '@playwright/mcp@0.0.80':
+  '@playwright/mcp@0.0.81':
     dependencies:
-      playwright: 1.63.0-alpha-2026-08-31
-      playwright-core: 1.63.0-alpha-2026-08-31
+      playwright: 1.64.0-alpha-2026-09-14
+      playwright-core: 1.64.0-alpha-2026-09-14
 
   '@polka/url@1.0.0-next.29(patch_hash=60d82e95c5e67e66c41fe2987ddd4fc3f4992f12158e5c56838e7682e6ef72ea)': {}
 
@@ -7724,7 +7724,7 @@ snapshots:
 
   '@socketregistry/hasown@1.0.7': {}
 
-  '@socketregistry/packageurl-js@1.5.2': {}
+  '@socketregistry/packageurl-js@1.5.3': {}
 
   '@socketregistry/safe-buffer@1.0.9': {}
 
@@ -9461,11 +9461,11 @@ snapshots:
 
   playwright-core@1.63.0: {}
 
-  playwright-core@1.63.0-alpha-2026-08-31: {}
+  playwright-core@1.64.0-alpha-2026-09-14: {}
 
-  playwright@1.63.0-alpha-2026-08-31:
+  playwright@1.64.0-alpha-2026-09-14:
     dependencies:
-      playwright-core: 1.63.0-alpha-2026-08-31
+      playwright-core: 1.64.0-alpha-2026-09-14
 
   pnpm-workspace-yaml@1.8.0:
     dependencies:
