@@ -67,7 +67,7 @@ import {
   createFullScanV0Result,
 } from './full-scan-compat.mts'
 import { correlateMalwareResults } from './malware.mts'
-import { SocketPurlClient } from './public-purl-client.mts'
+import { SOCKET_PURL_API_URL, SocketPurlClient } from './public-purl-client.mts'
 import { fetchPurlRecords, streamBatchPurlRecords } from './purl.mts'
 import type { PurlRecordTransform } from './purl.mts'
 import type {
@@ -228,6 +228,17 @@ import type { SocketSdkJsonValue as JsonValue } from './types/util.mts'
 const logger = getDefaultLogger()
 
 let cachedAbortSignal: AbortSignal | undefined
+export function createSdkPurlApiContext(
+  context: SdkApiContext,
+  options: SocketSdkOptions | undefined,
+): SdkApiContext {
+  const opts = { __proto__: null, ...options } as typeof options
+  return {
+    ...context,
+    baseUrl: opts?.baseUrl ?? SOCKET_PURL_API_URL,
+  }
+}
+
 export function getSdkAbortSignal(): AbortSignal {
   if (cachedAbortSignal === undefined) {
     cachedAbortSignal = getAbortSignal()
@@ -242,6 +253,7 @@ export function getSdkAbortSignal(): AbortSignal {
  */
 export class SocketSdk {
   readonly #apiContext: SdkApiContext
+  readonly #purlApiContext: SdkApiContext
   readonly #apiV1BaseUrl: string | undefined
   readonly #apiToken: string
   readonly #baseUrl: string
@@ -310,6 +322,7 @@ export class SocketSdk {
       baseUrl: this.#baseUrl,
       signal: signal ?? getSdkAbortSignal(),
     })
+    this.#purlApiContext = createSdkPurlApiContext(this.#apiContext, options)
     this.#reqOptions = this.#apiContext.requestOptions
     this.#reqOptionsWithHooks = this.#apiContext.requestOptions
   }
@@ -678,8 +691,8 @@ export class SocketSdk {
     componentsObj: PurlComponents,
     queryParams?: OrgPurlQuery | undefined,
   ): Promise<PurlFetchResult> {
-    return await fetchPurlRecords(this.#apiContext, {
-      path: createOrgApiPath(orgSlug, 'purl'),
+    return await fetchPurlRecords(this.#purlApiContext, {
+      path: `orgs/${encodeURIComponent(orgSlug)}/batch`,
       method: 'POST',
       body: componentsObj,
       query: queryParams,
@@ -701,8 +714,8 @@ export class SocketSdk {
     options?: PurlStreamOptions<OrgPurlQuery> | undefined,
   ): AsyncGenerator<PurlStreamResult> {
     return streamBatchPurlRecords(
-      this.#apiContext,
-      createOrgApiPath(orgSlug, 'purl'),
+      this.#purlApiContext,
+      `orgs/${encodeURIComponent(orgSlug)}/batch`,
       componentsObj,
       options,
     )
@@ -725,9 +738,9 @@ export class SocketSdk {
     queryParams?: PurlQuery | undefined,
   ): Promise<PurlFetchResult> {
     return await fetchPurlRecords(
-      this.#apiContext,
+      this.#purlApiContext,
       {
-        path: 'purl',
+        path: 'batch',
         method: 'POST',
         body: componentsObj,
         query: queryParams,
@@ -755,8 +768,8 @@ export class SocketSdk {
   ): AsyncGenerator<PurlStreamResult> {
     const opts = { __proto__: null, ...options } as typeof options
     return streamBatchPurlRecords(
-      this.#apiContext,
-      'purl',
+      this.#purlApiContext,
+      'batch',
       componentsObj,
       options,
       this.#purlTransform(opts?.queryParams),

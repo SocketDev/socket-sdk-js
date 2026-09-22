@@ -69,8 +69,8 @@ describe('SocketSdk - Batch Operations', () => {
         ],
       }
 
-      nock('https://api.socket.dev')
-        .post('/v0/purl')
+      nock('https://purl-api.socket.dev')
+        .post('/batch')
         .reply(200, `${JSON.stringify(mockResponse)}\n`)
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
@@ -108,8 +108,8 @@ describe('SocketSdk - Batch Operations', () => {
         ],
       }
 
-      nock('https://api.socket.dev')
-        .post('/v0/purl')
+      nock('https://purl-api.socket.dev')
+        .post('/batch')
         .reply(200, `${JSON.stringify(mockResponse)}\n`)
 
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
@@ -151,8 +151,8 @@ describe('SocketSdk - Batch Operations', () => {
         },
       ]
 
-      nock('https://api.socket.dev')
-        .post('/v0/purl')
+      nock('https://purl-api.socket.dev')
+        .post('/batch')
         .reply(200, responses.map(r => JSON.stringify(r)).join('\n'))
 
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
@@ -181,8 +181,8 @@ describe('SocketSdk - Batch Operations', () => {
         // Use fake timers to avoid actual delay
         vi.useFakeTimers()
 
-        nock('https://api.socket.dev')
-          .post('/v0/purl')
+        nock('https://purl-api.socket.dev')
+          .post('/batch')
           .delay(6000)
           .reply(200, {})
 
@@ -205,8 +205,8 @@ describe('SocketSdk - Batch Operations', () => {
     )
 
     it('should handle partial response data', async () => {
-      nock('https://api.socket.dev')
-        .post('/v0/purl')
+      nock('https://purl-api.socket.dev')
+        .post('/batch')
         .reply(200, '{"purl":"pkg:npm/test@1.0.0","na')
 
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
@@ -226,8 +226,8 @@ describe('SocketSdk - Batch Operations', () => {
         },
       }
 
-      nock('https://api.socket.dev')
-        .post('/v0/purl')
+      nock('https://purl-api.socket.dev')
+        .post('/batch')
         .reply(200, `${JSON.stringify(errorResponse)}\n`)
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
@@ -251,7 +251,7 @@ describe('SocketSdk - Batch Operations', () => {
     })
 
     it('should handle empty batch response', async () => {
-      nock('https://api.socket.dev').post('/v0/purl').reply(200, '')
+      nock('https://purl-api.socket.dev').post('/batch').reply(200, '')
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
       const res = await client.batchPackageFetch({
@@ -280,8 +280,8 @@ describe('SocketSdk - Batch Operations', () => {
         },
       ]
 
-      nock('https://api.socket.dev')
-        .post('/v0/purl')
+      nock('https://purl-api.socket.dev')
+        .post('/batch')
         .reply(200, `${responses.map(r => JSON.stringify(r)).join('\n')}\n`)
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
@@ -312,8 +312,8 @@ describe('SocketSdk - Batch Operations', () => {
         type: 'npm',
       }
 
-      nock('https://api.socket.dev')
-        .post('/v0/purl?compact=true')
+      nock('https://purl-api.socket.dev')
+        .post('/batch?compact=true')
         .reply(200, `${JSON.stringify(mockResponse)}\n`)
 
       const client = new SocketSdk('test-token', FAST_TEST_CONFIG)
@@ -355,7 +355,9 @@ describe('SocketSdk - Batch Operations', () => {
         JSON.stringify(responses[1]) +
         '\n'
 
-      nock('https://api.socket.dev').post('/v0/purl').reply(200, responseText)
+      nock('https://purl-api.socket.dev')
+        .post('/batch')
+        .reply(200, responseText)
 
       const client = new SocketSdk('test-token', NO_RETRY_CONFIG)
       const res = await client.batchPackageFetch({
