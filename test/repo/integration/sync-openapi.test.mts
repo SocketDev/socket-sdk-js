@@ -21,6 +21,8 @@ interface WorkflowStep {
   id?: string | undefined
   name: string
   run?: string | undefined
+  uses?: string | undefined
+  with?: Record<string, string> | undefined
 }
 
 interface SyncWorkflow {
@@ -45,17 +47,28 @@ it('limits write jobs to the default branch and uses the PR App for changes', as
   const bootstrap = job.steps.find(step => step.name === 'Bootstrap checkout')
   expect(bootstrap?.env?.['TRIGGER_REF']).toBe('${{ github.sha }}')
   const token = job.steps.find(step => step.id === 'openapi-app')
-  expect(token?.env?.['CLIENT_ID']).toBe('${{ secrets.SOCKET_PR_CLIENT_ID }}')
-  expect(token?.env?.['APP_PRIVATE_KEY']).toBe(
-    '${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}',
+  const branchToken = job.steps.find(step => step.id === 'openapi-branch')
+  expect(branchToken?.uses).toBe(
+    './.github/actions/fleet/github-pr-branch-app-token',
   )
+  expect(token?.uses).toBe('./.github/actions/fleet/github-pr-app-token')
+  for (const credentials of [branchToken, token]) {
+    expect(credentials?.with).toEqual({
+      'client-id':
+        '${{ secrets.SOCKET_PR_CLIENT_ID || vars.SOCKET_PR_CLIENT_ID }}',
+      'private-key': '${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}',
+      repositories: '${{ github.event.repository.name }}',
+    })
+  }
   const push = job.steps.find(
     step => step.name === 'Commit and push generated artifacts',
   )
   const pullRequest = job.steps.find(
     step => step.name === 'Create or update pull request',
   )
-  expect(push?.env?.['GH_TOKEN']).toBe('${{ steps.openapi-app.outputs.token }}')
+  expect(push?.env?.['GH_TOKEN']).toBe(
+    '${{ steps.openapi-branch.outputs.token }}',
+  )
   expect(pullRequest?.env?.['GH_TOKEN']).toBe(
     '${{ steps.openapi-app.outputs.token }}',
   )
