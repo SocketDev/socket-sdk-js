@@ -99,7 +99,9 @@ describe('SocketSdk - Optional Configuration', () => {
         JSON.stringify(mockResponses[1]) +
         '\n'
 
-      nock('https://api.socket.dev').post('/v0/purl').reply(200, responseText)
+      nock('https://purl-api.socket.dev')
+        .post('/batch')
+        .reply(200, responseText)
 
       const result = await getClient().batchPackageFetch({
         components: [
