@@ -71,7 +71,7 @@
 
 # Derived cross-harness rule adapters — generated per-repo, per-platform by
 # the multi-agent scaffolding (setup / init / sync) script from .claude/skills/
-# and CLAUDE.md, never committed. A tracked symlink checks out as a plain
+# and AGENTS.md, never committed. A tracked symlink checks out as a plain
 # pointer file on Windows, so each host gets a real symlink generated on its
 # own OS. Tracking them only produces churn + merge conflicts. Keep in sync
 # with ADAPTERS in scripts/fleet/gen/harness-adapters.mts + the .agents/ mirror
@@ -90,7 +90,7 @@
 /.kiro/
 /.opencode/
 /.windsurf/
-/AGENTS.md
+/CLAUDE.md
 /opencode.json
 
 # VS Code: ignore the dir contents so a hidden tasks.json with a `folderOpen`
@@ -2245,6 +2245,7 @@ opencode.json
 .claude/skills/fleet/managing-pnpm-workspaces/SKILL.md
 .claude/skills/fleet/managing-pnpm-workspaces/references/catalog-policy.md
 .claude/skills/fleet/managing-worktrees/SKILL.md
+.claude/skills/fleet/managing-worktrees/lib/gate-dependencies.mts
 .claude/skills/fleet/managing-worktrees/lib/gate-hydration.mts
 .claude/skills/fleet/managing-worktrees/lib/land.mts
 .claude/skills/fleet/managing-worktrees/references/land-mode.md
@@ -4036,6 +4037,10 @@ scripts/fleet/git/staging-branch.mts
 scripts/fleet/git/worktree.mts
 scripts/fleet/github/action-port-map.mts
 scripts/fleet/github/actions-runtime.mts
+scripts/fleet/github/app-credentials-expressions.mts
+scripts/fleet/github/app-credentials-inputs.mts
+scripts/fleet/github/app-credentials-workflows.mts
+scripts/fleet/github/app-credentials-yaml.mts
 scripts/fleet/github/app-credentials.mts
 scripts/fleet/github/apps.mts
 scripts/fleet/github/ci/catalog.mts
@@ -4077,6 +4082,7 @@ scripts/fleet/land-work/ai-summary.mts
 scripts/fleet/land-work/message.mts
 scripts/fleet/lib/api-docs/docs-artifact.mts
 scripts/fleet/lib/api-docs/export-rows.mts
+scripts/fleet/lib/ata-loader.mts
 scripts/fleet/lib/audit-hook-documentation.mts
 scripts/fleet/lib/auth-status.mts
 scripts/fleet/lib/catalog-diff.mts
@@ -4740,6 +4746,7 @@ scripts/fleet/trim-claude-md.mts
 scripts/fleet/trimming-bundle/measure-bundle.mts
 scripts/fleet/type.mts
 scripts/fleet/types/fix.mts
+scripts/fleet/types/prepare.mts
 scripts/fleet/update-model-pricing.mts
 scripts/fleet/update.mts
 scripts/fleet/update/_shared.mts
@@ -4846,7 +4853,6 @@ desktop.ini
 *.lnk
 
 # Environment & config
-/.claude/*
 !/.claude/agents/
 !/.claude/commands/
 !/.claude/ops/

@@ -164,7 +164,7 @@ jobs:
           fi
       - name: 'Set up and install'
         uses: ./.github/actions/fleet/setup-and-install
-        with: &coverage-setup-inputs
+        with:
           socket-api-token: ${{ inputs.checkout-ref == '' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW || '' }}
           payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
@@ -235,7 +235,11 @@ jobs:
           fi
       - name: 'Set up and install'
         uses: ./.github/actions/fleet/setup-and-install
-        with: *coverage-setup-inputs
+        with:
+          socket-api-token: ${{ inputs.checkout-ref == '' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW || '' }}
+          payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
+          checkout-ref: ${{ inputs.checkout-ref || github.sha }}
       - name: Build
         run: pnpm run build
       - name: Restore reserved coverage tooling
@@ -591,6 +595,7 @@ jobs:
           SOCKET_API_KEY: ${{ steps.content-trust.outputs.trusted == 'true' && secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW || '' }}
         with:
           cache: 'false'
+          checkout-fetch-depth: '0'
           socket-api-token: ${{ steps.content-trust.outputs.trusted == 'true' && secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW || '' }}
           # Forward the backfill content ref — setup-and-install re-checks-out
           # internally (fleet checkout falls back to the TRIGGERING ref when
