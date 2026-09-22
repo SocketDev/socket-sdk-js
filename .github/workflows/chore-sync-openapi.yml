@@ -86,21 +86,19 @@ jobs:
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Mint PR token
+      - name: Mint branch token
         if: steps.check.outputs.has_changes == 'true'
-        id: openapi-app
-        env:
-          APP_PRIVATE_KEY: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-          CLIENT_ID: ${{ secrets.SOCKET_PR_CLIENT_ID }}
-          OWNER: ${{ github.repository_owner }}
-          PERMISSIONS: '{"contents":"write","issues":"write","pull_requests":"write"}'
-          REPOSITORIES: ${{ github.event.repository.name }}
-        run: node .github/actions/fleet/github-payload-app-token/mint-app-installation-token.mjs
+        id: openapi-branch
+        uses: ./.github/actions/fleet/github-pr-branch-app-token
+        with:
+          client-id: ${{ secrets.SOCKET_PR_CLIENT_ID || vars.SOCKET_PR_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
 
       - name: Commit and push generated artifacts
         if: steps.check.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ steps.openapi-app.outputs.token }}
+          GH_TOKEN: ${{ steps.openapi-branch.outputs.token }}
         run: |
           mapfile -t artifact_paths < "$RUNNER_TEMP/openapi-artifacts.txt"
           git switch --create automated/open-api
@@ -110,6 +108,15 @@ jobs:
           git -c credential.helper='!gh auth git-credential' push \
             --force-with-lease="refs/heads/automated/open-api:$previous_head" \
             origin HEAD:refs/heads/automated/open-api
+
+      - name: Mint PR token
+        if: steps.check.outputs.has_changes == 'true'
+        id: openapi-app
+        uses: ./.github/actions/fleet/github-pr-app-token
+        with:
+          client-id: ${{ secrets.SOCKET_PR_CLIENT_ID || vars.SOCKET_PR_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
 
       - name: Create or update pull request
         if: steps.check.outputs.has_changes == 'true'
@@ -142,7 +149,7 @@ jobs:
         if: steps.check.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run ci.yml --ref automated/open-api
+        run: gh workflow run ci-gates.yml --ref automated/open-api
 
       - name: Clean up commit signing
         uses: ./.github/actions/fleet/cleanup-git-signing

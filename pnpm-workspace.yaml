@@ -312,6 +312,19 @@ catalog:
   'vite': 8.2.2
   'vitiate': 0.3.1
   'yaml': 2.9.0
+  '@babel/generator': 7.29.8
+  '@babel/parser': 7.29.8
+  '@babel/traverse': 7.29.8
+  '@babel/types': 7.29.8
+  '@oxlint/migrate': 1.52.0
+  '@sveltejs/acorn-typescript': 1.0.13
+  '@types/babel__traverse': 7.28.0
+  acorn: 8.18.0
+  del: 8.0.1
+  dev-null-cli: 2.0.0
+  fast-glob: 3.3.3
+  form-data: 4.0.6
+  openapi-typescript: 6.7.6
 
 # Soak time for external-tools updates: minutes a release must have
 # existed before scripts/fleet/external-tools/update.mts will consider it

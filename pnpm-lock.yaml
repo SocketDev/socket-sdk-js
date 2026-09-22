@@ -167,6 +167,18 @@ catalogs:
     '@anthropic-ai/claude-code':
       specifier: 2.1.268
       version: 2.1.268
+    '@babel/generator':
+      specifier: 7.29.8
+      version: 7.29.8
+    '@babel/parser':
+      specifier: 7.29.8
+      version: 7.29.8
+    '@babel/traverse':
+      specifier: 7.29.8
+      version: 7.29.8
+    '@babel/types':
+      specifier: 7.29.8
+      version: 7.29.8
     '@bcoe/v8-coverage':
       specifier: 1.0.2
       version: 1.0.2
@@ -176,6 +188,9 @@ catalogs:
     '@modelcontextprotocol/client':
       specifier: 2.0.0
       version: 2.0.0
+    '@oxlint/migrate':
+      specifier: 1.52.0
+      version: 1.52.0
     '@playwright/mcp':
       specifier: 0.0.81
       version: 0.0.81
@@ -194,6 +209,12 @@ catalogs:
     '@socketsecurity/sdk-stable':
       specifier: npm:@socketsecurity/sdk@4.1.4
       version: 4.1.4
+    '@sveltejs/acorn-typescript':
+      specifier: 1.0.13
+      version: 1.0.13
+    '@types/babel__traverse':
+      specifier: 7.28.0
+      version: 7.28.0
     '@types/mdast':
       specifier: 4.0.4
       version: 4.0.4
@@ -221,6 +242,9 @@ catalogs:
     '@vitiate/core':
       specifier: 0.3.1
       version: 0.3.1
+    acorn:
+      specifier: 8.18.0
+      version: 8.18.0
     ast-v8-to-istanbul:
       specifier: 1.0.6
       version: 1.0.6
@@ -236,6 +260,12 @@ catalogs:
     compromise:
       specifier: 14.17.0
       version: 14.17.0
+    del:
+      specifier: 8.0.1
+      version: 8.0.1
+    dev-null-cli:
+      specifier: 2.0.0
+      version: 2.0.0
     ecc-agentshield:
       specifier: 1.6.0
       version: 1.6.0
@@ -245,6 +275,12 @@ catalogs:
     fast-check:
       specifier: 4.10.0
       version: 4.10.0
+    fast-glob:
+      specifier: 3.3.3
+      version: 3.3.3
+    form-data:
+      specifier: 4.0.6
+      version: 4.0.6
     markdownlint-cli2:
       specifier: 0.23.2
       version: 0.23.2
@@ -275,6 +311,9 @@ catalogs:
     npm-high-impact:
       specifier: 1.13.0
       version: 1.13.0
+    openapi-typescript:
+      specifier: 6.7.6
+      version: 6.7.6
     oxfmt:
       specifier: 0.68.0
       version: 0.68.0
@@ -404,16 +443,16 @@ importers:
         specifier: 'catalog:'
         version: 2.1.268
       '@babel/generator':
-        specifier: 7.29.8
+        specifier: 'catalog:'
         version: 7.29.8
       '@babel/parser':
-        specifier: 7.29.8
+        specifier: 'catalog:'
         version: 7.29.8
       '@babel/traverse':
-        specifier: 7.29.8
+        specifier: 'catalog:'
         version: 7.29.8(supports-color@9.4.0)
       '@babel/types':
-        specifier: 7.29.8
+        specifier: 'catalog:'
         version: 7.29.8
       '@bcoe/v8-coverage':
         specifier: 'catalog:'
@@ -425,7 +464,7 @@ importers:
         specifier: 'catalog:'
         version: 2.0.0
       '@oxlint/migrate':
-        specifier: 1.52.0
+        specifier: 'catalog:'
         version: 1.52.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)
       '@playwright/mcp':
         specifier: 'catalog:'
@@ -458,10 +497,10 @@ importers:
         specifier: 'catalog:'
         version: '@socketsecurity/sdk@4.1.4'
       '@sveltejs/acorn-typescript':
-        specifier: 1.0.13
+        specifier: 'catalog:'
         version: 1.0.13(acorn@8.18.0)
       '@types/babel__traverse':
-        specifier: 7.28.0
+        specifier: 'catalog:'
         version: 7.28.0
       '@types/mdast':
         specifier: 'catalog:'
@@ -491,7 +530,7 @@ importers:
         specifier: 'catalog:'
         version: 0.3.1(typescript@7.1.0-dev.20260913.1)(vite@8.2.2(@types/node@26.5.1)(jiti@2.7.0)(yaml@2.9.0))(vitest@5.0.0)
       acorn:
-        specifier: 8.18.0
+        specifier: 'catalog:'
         version: 8.18.0
       ast-v8-to-istanbul:
         specifier: 'catalog:'
@@ -506,10 +545,10 @@ importers:
         specifier: 'catalog:'
         version: 1.9.0
       del:
-        specifier: 8.0.1
+        specifier: 'catalog:'
         version: 8.0.1
       dev-null-cli:
-        specifier: 2.0.0
+        specifier: 'catalog:'
         version: 2.0.0
       ecc-agentshield:
         specifier: 'catalog:'
@@ -521,10 +560,10 @@ importers:
         specifier: 'catalog:'
         version: 4.10.0
       fast-glob:
-        specifier: 3.3.3
+        specifier: 'catalog:'
         version: 3.3.3
       form-data:
-        specifier: 4.0.6
+        specifier: 'catalog:'
         version: 4.0.6
       magic-string:
         specifier: 1.2.3
@@ -560,7 +599,7 @@ importers:
         specifier: 'catalog:'
         version: 1.13.0
       openapi-typescript:
-        specifier: 6.7.6
+        specifier: 'catalog:'
         version: 6.7.6
       oxfmt:
         specifier: 'catalog:'
