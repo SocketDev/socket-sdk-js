@@ -87,13 +87,11 @@ describe('SocketSdk - File validation callbacks', () => {
     })
 
     it('should warn and continue when no callback and files are invalid', async () => {
-      const warnSpy = vi
-        .spyOn(logger, 'warn')
-        .mockImplementation(
-          function (this: ReturnType<typeof getDefaultLogger>) {
-            return this
-          },
-        )
+      const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(function (
+        this: ReturnType<typeof getDefaultLogger>,
+      ) {
+        return this
+      })
 
       const client = new SocketSdk('test-token', { retries: 0 })
 
@@ -164,13 +162,11 @@ describe('SocketSdk - File validation callbacks', () => {
     })
 
     it('should warn without callback when files are invalid', async () => {
-      const warnSpy = vi
-        .spyOn(logger, 'warn')
-        .mockImplementation(
-          function (this: ReturnType<typeof getDefaultLogger>) {
-            return this
-          },
-        )
+      const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(function (
+        this: ReturnType<typeof getDefaultLogger>,
+      ) {
+        return this
+      })
 
       const client = new SocketSdk('test-token', { retries: 0 })
 
@@ -255,13 +251,11 @@ describe('SocketSdk - File validation callbacks', () => {
     })
 
     it('should warn without callback when files are invalid and truncate display for many files', async () => {
-      const warnSpy = vi
-        .spyOn(logger, 'warn')
-        .mockImplementation(
-          function (this: ReturnType<typeof getDefaultLogger>) {
-            return this
-          },
-        )
+      const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(function (
+        this: ReturnType<typeof getDefaultLogger>,
+      ) {
+        return this
+      })
 
       const client = new SocketSdk('test-token', { retries: 0 })
 
