@@ -84,6 +84,7 @@
       "description": "Socket Firewall (enterprise tier) — package manager command wrapper",
       "version": "1.15.2",
       "repository": "github:SocketDev/firewall-release",
+      "tag": "v1.15.2",
       "binaryName": "sfw",
       "platforms": {
         "darwin-arm64": {
@@ -115,12 +116,7 @@
           "integrity": "sha512-xXhch+OLtqYjatxThlqOv+HY2ooSoyA0B/hujjjSLyQ7xz8LLcJtc+Db0iBB/2mOKYc4KqQT4ukeTtxz3g0+xQ=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-09-15",
-        "removable": "2026-09-22",
-        "version": "1.15.2"
-      }
+      "origin": "gh-asset"
     },
     "sfw-free": {
       "notes": [
@@ -130,6 +126,7 @@
       "description": "Socket Firewall (free tier) — package manager command wrapper",
       "version": "1.15.2",
       "repository": "github:SocketDev/sfw-free",
+      "tag": "v1.15.2",
       "binaryName": "sfw",
       "platforms": {
         "darwin-arm64": {
@@ -161,12 +158,7 @@
           "integrity": "sha512-vPOL88R3H75j0rHg6lRv53rwtRxFxDo7rzjXU0rWWPDY1U1e3hQzAmvsloS19uo6noWeCXIBJ8ZAbZxQf7EFxA=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-09-15",
-        "removable": "2026-09-22",
-        "version": "1.15.2"
-      }
+      "origin": "gh-asset"
     }
   }
 }
