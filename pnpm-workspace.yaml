@@ -72,7 +72,7 @@ overrides:
   '@socketsecurity/registry': 'catalog:'
   '@socketsecurity/sdk': 'catalog:'
   '@swc/core': '1.16.1'
-  'brace-expansion@>=4': '5.0.9'
+  'brace-expansion@>=4': '5.0.12'
   'chalk@>=5': '5.6.2'
   'es-define-property': 'npm:@socketregistry/es-define-property@1.0.7'
   'es-set-tostringtag': 'npm:@socketregistry/es-set-tostringtag@1.0.10'
@@ -84,9 +84,9 @@ overrides:
   'hasown': 'npm:@socketregistry/hasown@1.0.7'
   'iconv-lite': '0.7.3'
   'isexe@>=3': '4.0.0'
-  'js-yaml@>=5.0.0 <5.2.2': '5.4.1'
+  'js-yaml@>=5.0.0 <5.2.2': '5.4.2'
   'lru-cache@>=10': '11.5.2'
-  'magic-string': '1.2.3'
+  'magic-string': '1.4.1'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
   'minimatch@>=3': '10.2.6'
@@ -105,7 +105,7 @@ overrides:
   'uuid': '11.1.1'
   'which': '7.0.0'
   'wrap-ansi@>=8': '9.0.2'
-  'yaml@2': '2.9.0'
+  'yaml@2': '2.9.1'
 
   # Repo-specific overrides below.
   # Dedup: @grpc/proto-loader 0.7 (dockerode direct) vs 0.8 (via @grpc/grpc-js,
@@ -153,7 +153,7 @@ overrides:
   'js-yaml': '4.3.2'
   'json-stable-stringify': 'npm:@socketregistry/json-stable-stringify@1.0.14'
   # Dependabot transitive-advisory pin (soaked, semver-compatible).
-  'markdown-it': '14.3.1'
+  'markdown-it': '14.3.2'
   # Dedup: picomatch 2 (micromatch, via fast-glob -> globby ->
   # markdownlint-cli2) vs 4 (fdir/tinyglobby, via vite/vitest). micromatch's
   # `picomatch(glob, options, returnState)` call and its
@@ -206,7 +206,7 @@ catalog:
   # pinned while the fleet migrates; the 0.x entry is deleted once no member
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
   # dated minimumReleaseAgeExclude entry above.
-  'typebox': 1.3.30
+  'typebox': 1.3.31
   '@socketregistry/packageurl-js': 1.5.3
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used INSIDE that same package — Node ESM treats it as a
@@ -234,7 +234,7 @@ catalog:
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
   'fast-check': 4.10.0
-  'magic-string': 1.3.1
+  'magic-string': 1.4.1
   'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   # GFM pair for render-faithful markdown parsing (tables, footnotes,
@@ -304,14 +304,14 @@ catalog:
   '@playwright/mcp': 0.0.81
   '@vitest/ui': 5.0.0
   c8: 12.0.0
-  '@anthropic-ai/claude-code': 2.1.268
+  '@anthropic-ai/claude-code': 2.1.272
   '@typescript/native-preview': 7.0.0-dev.20260510.1
   '@vitiate/core': 0.3.1
   'npm-run-all2': 9.0.3
   'svgo': 4.1.0
-  'vite': 8.2.2
+  'vite': 8.3.0
   'vitiate': 0.3.1
-  'yaml': 2.9.0
+  'yaml': 2.9.1
   '@babel/generator': 7.29.8
   '@babel/parser': 7.29.8
   '@babel/traverse': 7.29.8
@@ -435,7 +435,6 @@ patchedDependencies:
   # The patch restores `expand` as the default on each build separately;
   # patching one build leaves the other broken.
   # On a bump, regenerate via `pnpm patch brace-expansion` + `pnpm patch-commit`.
-  brace-expansion@5.0.9: patches/fleet/brace-expansion@5.0.9.patch
   # default-export interop (managed by socket-wheelhouse sync; do not edit):
   # v10's ESM build ships named exports only, so `import minimatch from
   # 'minimatch'` throws "does not provide an export named default". That is
