@@ -113,7 +113,7 @@
     "offload:model": "node scripts/fleet/offload-model.mts",
     "precommit": "pnpm run check --lint --staged",
     "preflight": "node scripts/repo/bootstrap/fleet.mjs --quiet && node scripts/fleet/preflight.mts",
-    "preinstall": "node scripts/fleet/setup/bootstrap-zero-dep-packages.mjs",
+    "preinstall": "node scripts/fleet/setup/bootstrap/zero-dep-packages.mjs",
     "prepare": "node scripts/repo/bootstrap/prepare.mts && node scripts/fleet/install-git-hooks.mts && node scripts/fleet/prepare.mts",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "prune:backups": "node scripts/fleet/backup-branches.mts prune",
