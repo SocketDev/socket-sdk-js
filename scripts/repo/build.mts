@@ -21,9 +21,9 @@ import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.m
 import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
-import type { ScriptMeta } from '../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../fleet/process/main/run.mts'
 
-import { runMain } from '../fleet/process/run-main.mts'
+import { runMain } from '../fleet/process/main/run.mts'
 
 // Initialize logger
 const logger = getDefaultLogger()
