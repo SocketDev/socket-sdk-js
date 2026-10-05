@@ -8,7 +8,7 @@ import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
-import type { runMain } from '../../../../../scripts/fleet/process/run-main.mts'
+import type { runMain } from '../../../../../scripts/fleet/process/main/run.mts'
 
 const boundary = vi.hoisted(() => ({
   runMain: vi.fn<typeof runMain>(),
@@ -20,7 +20,7 @@ vi.mock(
     isMainModule: () => true,
   }),
 )
-vi.mock(import('../../../../../scripts/fleet/process/run-main.mts'), () => ({
+vi.mock(import('../../../../../scripts/fleet/process/main/run.mts'), () => ({
   runMain: boundary.runMain,
 }))
 vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), () => ({

@@ -13,9 +13,9 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { findUpPackageJson } from '@socketsecurity/lib-stable/packages/find'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
-import type { ScriptMeta } from '../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../fleet/process/main/run.mts'
 
-import { runMain } from '../fleet/process/run-main.mts'
+import { runMain } from '../fleet/process/main/run.mts'
 
 const logger = getDefaultLogger()
 

@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 import { createRequire } from 'node:module'
-import { execFile, execFileSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import crypto, { randomUUID } from 'node:crypto'
 import {
   chmodSync,
   copyFileSync,
   existsSync,
-  linkSync,
   lstatSync,
   mkdirSync,
   mkdtempSync,
@@ -16,48 +15,22 @@ import {
   realpathSync,
   renameSync,
   rmSync,
-  rmdirSync,
   statSync,
   symlinkSync,
-  unlinkSync,
   utimesSync,
   writeFileSync,
 } from 'node:fs'
 import path, { dirname, resolve, sep } from 'node:path'
 import process$1 from 'node:process'
-import { format, parseArgs as parseArgs$1, promisify } from 'node:util'
+import { format } from 'node:util'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import https from 'node:https'
-import v8 from 'node:v8'
-import { AsyncLocalStorage } from 'node:async_hooks'
 
-var __defProp = Object.defineProperty
-var __esmMin = (fn, res, err) => () => {
-  if (err) throw err[0]
-  try {
-    return (fn && (res = fn((fn = 0))), res)
-  } catch (e) {
-    throw ((err = [e]), e)
-  }
-}
 var __commonJSMin = (cb, mod) => () => (
   mod || (cb((mod = { exports: {} }).exports, mod), (cb = null)),
   mod.exports
 )
-var __exportAll = (all, no_symbols) => {
-  let target = {}
-  for (var name in all) {
-    __defProp(target, name, {
-      get: all[name],
-      enumerable: true,
-    })
-  }
-  if (!no_symbols) {
-    __defProp(target, Symbol.toStringTag, { value: 'Module' })
-  }
-  return target
-}
 var __require = /* #__PURE__ */ (() => createRequire(import.meta.url))()
 
 const POINTER_TEXT =
@@ -136,7 +109,7 @@ const ADAPTERS = [
   },
 ]
 
-var require_runtime$3 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_runtime = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   /**
    * @file Runtime environment detection constants. All checks use only
@@ -179,7 +152,7 @@ var require_runtime$3 = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_fs$1 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const nodeFs = require_runtime$3().IS_NODE
+  const nodeFs = require_runtime().IS_NODE
     ? /*@__PURE__*/ __require('fs')
     : void 0
   function getNodeFs() {
@@ -202,7 +175,7 @@ var require_fs$1 = /* @__PURE__ */ __commonJSMin(exports => {
   exports.getNodeFs = getNodeFs
 })
 
-var require_predicates$3 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_predicates$2 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   /**
    * @file Array type-guard predicates. Currently just a re-export of native
@@ -249,7 +222,7 @@ var require_predicates$3 = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_os = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const nodeOs = require_runtime$3().IS_NODE
+  const nodeOs = require_runtime().IS_NODE
     ? /*@__PURE__*/ __require('os')
     : void 0
   function getNodeOs() {
@@ -399,7 +372,7 @@ var require_platform = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_module = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_constants_runtime = require_runtime$3()
+  const require_constants_runtime = require_runtime()
   let module$1 = __require('module')
   /**
    * @file Accessors for `node:module` that work across runtimes. Ambient
@@ -871,7 +844,7 @@ var require_string$1 = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_url = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_constants_runtime = require_runtime$3()
+  const require_constants_runtime = require_runtime()
   let cachedUrl
   /**
    * @unused No internal or Socket consumers; exercised only by its unit tests.
@@ -947,7 +920,7 @@ var require_encoding = /* @__PURE__ */ __commonJSMin(exports => {
   exports.UTF8 = UTF8
 })
 
-var require_shared$3 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_shared$2 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_constants_platform = require_platform()
   const require_primordials_string = require_string$1()
@@ -1405,9 +1378,9 @@ var require_object = /* @__PURE__ */ __commonJSMin(exports => {
   exports.ObjectValues = ObjectValues
 })
 
-var require_predicates$2 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_predicates$1 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_arrays_predicates = require_predicates$3()
+  const require_arrays_predicates = require_predicates$2()
   const require_primordials_object = require_object()
   /**
    * @file Object type guards: `hasKeys`, `hasOwn`, `isObject`, `isPlainObject`.
@@ -1856,8 +1829,8 @@ var require_reflect = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_mutate = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_arrays_predicates = require_predicates$3()
-  const require_objects_predicates = require_predicates$2()
+  const require_arrays_predicates = require_predicates$2()
+  const require_objects_predicates = require_predicates$1()
   const require_primordials_error = require_error$1()
   const require_primordials_map_set = require_map_set()
   require_sentinels()
@@ -2190,7 +2163,7 @@ var require_array$2 = /* @__PURE__ */ __commonJSMin(exports => {
   exports.Uint8ClampedArrayCtor = Uint8ClampedArrayCtor
 })
 
-var require_predicates$1 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_predicates = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_primordials_object = require_object()
   const require_primordials_error = require_error$1()
@@ -2427,9 +2400,9 @@ var require_abort = /* @__PURE__ */ __commonJSMin(exports => {
   exports.getAbortSignal = getAbortSignal
 })
 
-var require_shared$2 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_shared$1 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_constants_runtime = require_runtime$3()
+  const require_constants_runtime = require_runtime()
   const require_process_abort = require_abort()
   /**
    * Get the timers/promises module. Uses a lazy `require` rather than a
@@ -2453,7 +2426,7 @@ var require_shared$2 = /* @__PURE__ */ __commonJSMin(exports => {
   exports.getTimers = getTimers
 })
 
-var require_options$1 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_options = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_process_abort = require_abort()
   const require_primordials_math = require_math()
@@ -2602,8 +2575,8 @@ var require_retry = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   require_sentinels()
   const require_primordials_math = require_math()
-  const require_promises_shared = require_shared$2()
-  const require_promises_options = require_options$1()
+  const require_promises_shared = require_shared$1()
+  const require_promises_options = require_options()
   /**
    * @file `pRetry` — exponential-backoff retry with optional jitter,
    *   abort-signal support, and an `onRetry` hook for customizing delays or
@@ -2786,7 +2759,7 @@ var require_retry = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_path$1 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const nodePath = require_runtime$3().IS_NODE
+  const nodePath = require_runtime().IS_NODE
     ? /*@__PURE__*/ __require('path')
     : void 0
   function getNodePath() {
@@ -2916,7 +2889,7 @@ var require_boolean = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_async_hooks = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_constants_runtime = require_runtime$3()
+  const require_constants_runtime = require_runtime()
   let asyncHooks
   function getNodeAsyncHooks() {
     if (!require_constants_runtime.IS_NODE) return
@@ -2928,9 +2901,9 @@ var require_async_hooks = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_rewire$1 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_constants_runtime = require_runtime$3()
+  const require_constants_runtime = require_runtime()
   const require_primordials_object = require_object()
-  const require_objects_predicates = require_predicates$2()
+  const require_objects_predicates = require_predicates$1()
   const require_env_boolean = require_boolean()
   const require_node_async_hooks = require_async_hooks()
   const require_primordials_map_set = require_map_set()
@@ -3985,7 +3958,7 @@ var require_windows = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_env_rewire = require_rewire$1()
   const require_node_path = require_path$1()
-  const require_paths_shared = require_shared$3()
+  const require_paths_shared = require_shared$2()
   /**
    * @file Windows environment variable getters. Provides access to
    *   Windows-specific user directory paths.
@@ -4344,7 +4317,7 @@ var require_socket = /* @__PURE__ */ __commonJSMin(exports => {
   const require_env_home = require_home()
   const require_env_socket = require_socket$1()
   const require_node_path = require_path$1()
-  const require_paths_shared = require_shared$3()
+  const require_paths_shared = require_shared$2()
   const require_env_windows = require_windows()
   const require_env_xdg = require_xdg()
   const require_paths_dirnames = require_dirnames()
@@ -4736,7 +4709,7 @@ var require_socket = /* @__PURE__ */ __commonJSMin(exports => {
   exports.getUserHomeDir = getUserHomeDir
 })
 
-var require_shared$1 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_shared = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_node_fs = require_fs$1()
   const require_node_path = require_path$1()
@@ -4831,7 +4804,7 @@ var require_shared$1 = /* @__PURE__ */ __commonJSMin(exports => {
   exports.getDefaultAllowedDirectories = getDefaultAllowedDirectories
 })
 
-var require_process$1 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_process = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   /**
    * @file Safe call-through accessors for the `process` global's methods and
@@ -5113,17 +5086,17 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
   node_fs = __toESM(node_fs, 1)
   let node_fs_promises = __require('fs/promises')
   node_fs_promises = __toESM(node_fs_promises, 1)
-  let node_path$1 = __require('path')
-  node_path$1 = __toESM(node_path$1, 1)
-  let node_process$1 = __require('process')
-  node_process$1 = __toESM(node_process$1, 1)
+  let node_path = __require('path')
+  node_path = __toESM(node_path, 1)
+  let node_process = __require('process')
+  node_process = __toESM(node_process, 1)
   let node_stream = __require('stream')
   let node_events = __require('events')
   let node_stream_promises = __require('stream/promises')
-  let node_util$1 = __require('util')
+  let node_util = __require('util')
   let node_child_process = __require('child_process')
   let node_url = __require('url')
-  let node_os$1 = __require('os')
+  let node_os = __require('os')
   const {
     ArrayIsArray: _p_ArrayIsArray,
     ArrayPrototypeFlat: _p_ArrayPrototypeFlat,
@@ -5161,7 +5134,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     ObjectKeys: _p_ObjectKeys,
   } = require_object()
   const { processCwd: _p_processCwd, processNextTick: _p_processNextTick } =
-    require_process$1()
+    require_process()
   const {
     PromiseAll: _p_PromiseAll,
     PromiseCtor: _p_PromiseCtor,
@@ -5182,9 +5155,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     StringPrototypeToLowerCase: _p_StringPrototypeToLowerCase,
     StringPrototypeTrim: _p_StringPrototypeTrim,
   } = require_string$1()
-  node_os$1 = __toESM(node_os$1, 1)
+  node_os = __toESM(node_os, 1)
   var require_constants$2 = /* @__PURE__ */ __commonJSMin(
-    (exports$14, module$13) => {
+    (exports$1, module$2) => {
       const WIN_SLASH = '\\\\/'
       const WIN_NO_SLASH = `[^${WIN_SLASH}]`
       const DEFAULT_MAX_EXTGLOB_RECURSION = 0
@@ -5236,7 +5209,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         END_ANCHOR: `(?:[${WIN_SLASH}]|$)`,
         SEP: '\\',
       }
-      module$13.exports = {
+      module$2.exports = {
         DEFAULT_MAX_EXTGLOB_RECURSION,
         MAX_LENGTH: 65536,
         POSIX_REGEX_SOURCE: {
@@ -5352,22 +5325,22 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
     },
   )
-  var require_utils$3 = /* @__PURE__ */ __commonJSMin(exports$15 => {
+  var require_utils$3 = /* @__PURE__ */ __commonJSMin(exports$2 => {
     const {
       REGEX_BACKSLASH,
       REGEX_REMOVE_BACKSLASH,
       REGEX_SPECIAL_CHARS,
       REGEX_SPECIAL_CHARS_GLOBAL,
     } = require_constants$2()
-    exports$15.isObject = val =>
+    exports$2.isObject = val =>
       val !== null && typeof val === 'object' && !_p_ArrayIsArray(val)
-    exports$15.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str)
-    exports$15.isRegexChar = str =>
-      str.length === 1 && exports$15.hasRegexChars(str)
-    exports$15.escapeRegex = str =>
+    exports$2.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str)
+    exports$2.isRegexChar = str =>
+      str.length === 1 && exports$2.hasRegexChars(str)
+    exports$2.escapeRegex = str =>
       str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1')
-    exports$15.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/')
-    exports$15.isWindows = () => {
+    exports$2.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/')
+    exports$2.isWindows = () => {
       if (typeof navigator !== 'undefined' && navigator.platform) {
         const platform = navigator.platform.toLowerCase()
         return platform === 'win32' || platform === 'windows'
@@ -5376,19 +5349,19 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return process.platform === 'win32'
       return false
     }
-    exports$15.removeBackslashes = str => {
+    exports$2.removeBackslashes = str => {
       return str.replace(REGEX_REMOVE_BACKSLASH, match => {
         return match === '\\' ? '' : match
       })
     }
-    exports$15.escapeLast = (input, char, lastIdx) => {
+    exports$2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx)
       if (idx === -1) return input
       if (input[idx - 1] === '\\')
-        return exports$15.escapeLast(input, char, idx - 1)
+        return exports$2.escapeLast(input, char, idx - 1)
       return `${input.slice(0, idx)}\\${input.slice(idx)}`
     }
-    exports$15.removePrefix = (input, state = {}) => {
+    exports$2.removePrefix = (input, state = {}) => {
       let output = input
       if (_p_StringPrototypeStartsWith(output, './')) {
         output = output.slice(2)
@@ -5396,19 +5369,19 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       return output
     }
-    exports$15.wrapOutput = (input, state = {}, options = {}) => {
+    exports$2.wrapOutput = (input, state = {}, options = {}) => {
       let output = `${options.contains ? '' : '^'}(?:${input})${options.contains ? '' : '$'}`
       if (state.negated === true) output = `(?:^(?!${output}).*$)`
       return output
     }
-    exports$15.basename = (path, { windows } = {}) => {
+    exports$2.basename = (path, { windows } = {}) => {
       const segs = path.split(windows ? /[\\/]/ : '/')
       const last = segs[segs.length - 1]
       if (last === '') return segs[segs.length - 2]
       return last
     }
   })
-  var require_scan = /* @__PURE__ */ __commonJSMin((exports$16, module$14) => {
+  var require_scan = /* @__PURE__ */ __commonJSMin((exports$3, module$3) => {
     const utils = require_utils$3()
     const {
       CHAR_ASTERISK,
@@ -5741,1303 +5714,1295 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       return state
     }
-    module$14.exports = scan
+    module$3.exports = scan
   })
-  var require_parse$1 = /* @__PURE__ */ __commonJSMin(
-    (exports$17, module$15) => {
-      const constants = require_constants$2()
-      const utils = require_utils$3()
-      /**
-       * Constants.
-       */
-      const {
-        MAX_LENGTH,
-        POSIX_REGEX_SOURCE,
-        REGEX_NON_SPECIAL_CHARS,
-        REGEX_SPECIAL_CHARS_BACKREF,
-        REPLACEMENTS,
-      } = constants
-      /**
-       * Helpers.
-       */
-      const expandRange = (args, options) => {
-        if (typeof options.expandRange === 'function')
-          return options.expandRange(...args, options)
-        args.sort()
-        const value = `[${args.join('-')}]`
-        try {
-          new _p_RegExpCtor(value)
-        } catch (ex) {
-          return args.map(v => utils.escapeRegex(v)).join('..')
-        }
-        return value
+  var require_parse$1 = /* @__PURE__ */ __commonJSMin((exports$4, module$4) => {
+    const constants = require_constants$2()
+    const utils = require_utils$3()
+    /**
+     * Constants.
+     */
+    const {
+      MAX_LENGTH,
+      POSIX_REGEX_SOURCE,
+      REGEX_NON_SPECIAL_CHARS,
+      REGEX_SPECIAL_CHARS_BACKREF,
+      REPLACEMENTS,
+    } = constants
+    /**
+     * Helpers.
+     */
+    const expandRange = (args, options) => {
+      if (typeof options.expandRange === 'function')
+        return options.expandRange(...args, options)
+      args.sort()
+      const value = `[${args.join('-')}]`
+      try {
+        new _p_RegExpCtor(value)
+      } catch (ex) {
+        return args.map(v => utils.escapeRegex(v)).join('..')
       }
-      /**
-       * Create the message for a syntax error.
-       */
-      const syntaxError = (type, char) => {
-        return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`
-      }
-      const splitTopLevel = input => {
-        const parts = []
-        let bracket = 0
-        let paren = 0
-        let quote = 0
-        let value = ''
-        let escaped = false
-        for (const ch of input) {
-          if (escaped === true) {
-            value += ch
-            escaped = false
-            continue
-          }
-          if (ch === '\\') {
-            value += ch
-            escaped = true
-            continue
-          }
-          if (ch === '"') {
-            quote = quote === 1 ? 0 : 1
-            value += ch
-            continue
-          }
-          if (quote === 0) {
-            if (ch === '[') bracket++
-            else if (ch === ']' && bracket > 0) bracket--
-            else if (bracket === 0) {
-              if (ch === '(') paren++
-              else if (ch === ')' && paren > 0) paren--
-              else if (ch === '|' && paren === 0) {
-                parts.push(value)
-                value = ''
-                continue
-              }
-            }
-          }
+      return value
+    }
+    /**
+     * Create the message for a syntax error.
+     */
+    const syntaxError = (type, char) => {
+      return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`
+    }
+    const splitTopLevel = input => {
+      const parts = []
+      let bracket = 0
+      let paren = 0
+      let quote = 0
+      let value = ''
+      let escaped = false
+      for (const ch of input) {
+        if (escaped === true) {
           value += ch
+          escaped = false
+          continue
         }
-        parts.push(value)
-        return parts
-      }
-      const isPlainBranch = branch => {
-        let escaped = false
-        for (const ch of branch) {
-          if (escaped === true) {
-            escaped = false
-            continue
-          }
-          if (ch === '\\') {
-            escaped = true
-            continue
-          }
-          if (/[?*+@!()[\]{}]/.test(ch)) return false
+        if (ch === '\\') {
+          value += ch
+          escaped = true
+          continue
         }
-        return true
-      }
-      const normalizeSimpleBranch = branch => {
-        let value = _p_StringPrototypeTrim(branch)
-        let changed = true
-        while (changed === true) {
-          changed = false
-          if (/^@\([^\\()[\]{}|]+\)$/.test(value)) {
-            value = value.slice(2, -1)
-            changed = true
-          }
+        if (ch === '"') {
+          quote = quote === 1 ? 0 : 1
+          value += ch
+          continue
         }
-        if (!isPlainBranch(value)) return
-        return value.replace(/\\(.)/g, '$1')
-      }
-      const hasRepeatedCharPrefixOverlap = branches => {
-        const values = branches.map(normalizeSimpleBranch).filter(Boolean)
-        for (let i = 0; i < values.length; i++)
-          for (let j = i + 1; j < values.length; j++) {
-            const a = values[i]
-            const b = values[j]
-            const char = a[0]
-            if (
-              !char ||
-              a !== _p_StringPrototypeRepeat(char, a.length) ||
-              b !== _p_StringPrototypeRepeat(char, b.length)
-            )
+        if (quote === 0) {
+          if (ch === '[') bracket++
+          else if (ch === ']' && bracket > 0) bracket--
+          else if (bracket === 0) {
+            if (ch === '(') paren++
+            else if (ch === ')' && paren > 0) paren--
+            else if (ch === '|' && paren === 0) {
+              parts.push(value)
+              value = ''
               continue
-            if (
-              a === b ||
-              _p_StringPrototypeStartsWith(a, b) ||
-              _p_StringPrototypeStartsWith(b, a)
-            )
-              return true
+            }
           }
-        return false
+        }
+        value += ch
       }
-      const parseRepeatedExtglob = (pattern, requireEnd = true) => {
-        if ((pattern[0] !== '+' && pattern[0] !== '*') || pattern[1] !== '(')
-          return
-        let bracket = 0
-        let paren = 0
-        let quote = 0
-        let escaped = false
-        for (let i = 1; i < pattern.length; i++) {
-          const ch = pattern[i]
-          if (escaped === true) {
-            escaped = false
+      parts.push(value)
+      return parts
+    }
+    const isPlainBranch = branch => {
+      let escaped = false
+      for (const ch of branch) {
+        if (escaped === true) {
+          escaped = false
+          continue
+        }
+        if (ch === '\\') {
+          escaped = true
+          continue
+        }
+        if (/[?*+@!()[\]{}]/.test(ch)) return false
+      }
+      return true
+    }
+    const normalizeSimpleBranch = branch => {
+      let value = _p_StringPrototypeTrim(branch)
+      let changed = true
+      while (changed === true) {
+        changed = false
+        if (/^@\([^\\()[\]{}|]+\)$/.test(value)) {
+          value = value.slice(2, -1)
+          changed = true
+        }
+      }
+      if (!isPlainBranch(value)) return
+      return value.replace(/\\(.)/g, '$1')
+    }
+    const hasRepeatedCharPrefixOverlap = branches => {
+      const values = branches.map(normalizeSimpleBranch).filter(Boolean)
+      for (let i = 0; i < values.length; i++)
+        for (let j = i + 1; j < values.length; j++) {
+          const a = values[i]
+          const b = values[j]
+          const char = a[0]
+          if (
+            !char ||
+            a !== _p_StringPrototypeRepeat(char, a.length) ||
+            b !== _p_StringPrototypeRepeat(char, b.length)
+          )
             continue
-          }
-          if (ch === '\\') {
-            escaped = true
-            continue
-          }
-          if (ch === '"') {
-            quote = quote === 1 ? 0 : 1
-            continue
-          }
-          if (quote === 1) continue
-          if (ch === '[') {
-            bracket++
-            continue
-          }
-          if (ch === ']' && bracket > 0) {
-            bracket--
-            continue
-          }
-          if (bracket > 0) continue
-          if (ch === '(') {
-            paren++
-            continue
-          }
-          if (ch === ')') {
-            paren--
-            if (paren === 0) {
-              if (requireEnd === true && i !== pattern.length - 1) return
-              return {
-                type: pattern[0],
-                body: pattern.slice(2, i),
-                end: i,
-              }
+          if (
+            a === b ||
+            _p_StringPrototypeStartsWith(a, b) ||
+            _p_StringPrototypeStartsWith(b, a)
+          )
+            return true
+        }
+      return false
+    }
+    const parseRepeatedExtglob = (pattern, requireEnd = true) => {
+      if ((pattern[0] !== '+' && pattern[0] !== '*') || pattern[1] !== '(')
+        return
+      let bracket = 0
+      let paren = 0
+      let quote = 0
+      let escaped = false
+      for (let i = 1; i < pattern.length; i++) {
+        const ch = pattern[i]
+        if (escaped === true) {
+          escaped = false
+          continue
+        }
+        if (ch === '\\') {
+          escaped = true
+          continue
+        }
+        if (ch === '"') {
+          quote = quote === 1 ? 0 : 1
+          continue
+        }
+        if (quote === 1) continue
+        if (ch === '[') {
+          bracket++
+          continue
+        }
+        if (ch === ']' && bracket > 0) {
+          bracket--
+          continue
+        }
+        if (bracket > 0) continue
+        if (ch === '(') {
+          paren++
+          continue
+        }
+        if (ch === ')') {
+          paren--
+          if (paren === 0) {
+            if (requireEnd === true && i !== pattern.length - 1) return
+            return {
+              type: pattern[0],
+              body: pattern.slice(2, i),
+              end: i,
             }
           }
         }
       }
-      const buildCharClassStar = chars => {
-        return `${chars.length === 1 ? utils.escapeRegex(chars[0]) : `[${chars.map(ch => utils.escapeRegex(ch)).join('')}]`}*`
-      }
-      const getStarExtglobSequenceChars = pattern => {
-        let index = 0
-        const chars = []
-        while (index < pattern.length) {
-          const match = parseRepeatedExtglob(pattern.slice(index), false)
-          if (!match || match.type !== '*') return
-          const branches = splitTopLevel(match.body).map(branch =>
-            _p_StringPrototypeTrim(branch),
-          )
-          if (branches.length !== 1) return
-          const branch = normalizeSimpleBranch(branches[0])
-          if (!branch || branch.length !== 1) return
-          chars.push(branch)
-          index += match.end + 1
-        }
-        if (chars.length < 1) return
-        return chars
-      }
-      const repeatedExtglobRecursion = pattern => {
-        let depth = 0
-        let value = _p_StringPrototypeTrim(pattern)
-        let match = parseRepeatedExtglob(value)
-        while (match) {
-          depth++
-          value = match.body.trim()
-          match = parseRepeatedExtglob(value)
-        }
-        return depth
-      }
-      const analyzeRepeatedExtglob = (body, options) => {
-        if (options.maxExtglobRecursion === false) return { risky: false }
-        const max =
-          typeof options.maxExtglobRecursion === 'number'
-            ? options.maxExtglobRecursion
-            : constants.DEFAULT_MAX_EXTGLOB_RECURSION
-        const branches = splitTopLevel(body).map(branch =>
+    }
+    const buildCharClassStar = chars => {
+      return `${chars.length === 1 ? utils.escapeRegex(chars[0]) : `[${chars.map(ch => utils.escapeRegex(ch)).join('')}]`}*`
+    }
+    const getStarExtglobSequenceChars = pattern => {
+      let index = 0
+      const chars = []
+      while (index < pattern.length) {
+        const match = parseRepeatedExtglob(pattern.slice(index), false)
+        if (!match || match.type !== '*') return
+        const branches = splitTopLevel(match.body).map(branch =>
           _p_StringPrototypeTrim(branch),
         )
-        if (branches.length > 1) {
-          if (
-            branches.some(branch => branch === '') ||
-            branches.some(branch => /^[*?]+$/.test(branch)) ||
-            hasRepeatedCharPrefixOverlap(branches)
-          )
-            return { risky: true }
+        if (branches.length !== 1) return
+        const branch = normalizeSimpleBranch(branches[0])
+        if (!branch || branch.length !== 1) return
+        chars.push(branch)
+        index += match.end + 1
+      }
+      if (chars.length < 1) return
+      return chars
+    }
+    const repeatedExtglobRecursion = pattern => {
+      let depth = 0
+      let value = _p_StringPrototypeTrim(pattern)
+      let match = parseRepeatedExtglob(value)
+      while (match) {
+        depth++
+        value = match.body.trim()
+        match = parseRepeatedExtglob(value)
+      }
+      return depth
+    }
+    const analyzeRepeatedExtglob = (body, options) => {
+      if (options.maxExtglobRecursion === false) return { risky: false }
+      const max =
+        typeof options.maxExtglobRecursion === 'number'
+          ? options.maxExtglobRecursion
+          : constants.DEFAULT_MAX_EXTGLOB_RECURSION
+      const branches = splitTopLevel(body).map(branch =>
+        _p_StringPrototypeTrim(branch),
+      )
+      if (branches.length > 1) {
+        if (
+          branches.some(branch => branch === '') ||
+          branches.some(branch => /^[*?]+$/.test(branch)) ||
+          hasRepeatedCharPrefixOverlap(branches)
+        )
+          return { risky: true }
+      }
+      const safeChars = []
+      let sawStarSequence = false
+      let combinable = true
+      for (const branch of branches) {
+        const chars = getStarExtglobSequenceChars(branch)
+        if (chars) {
+          sawStarSequence = true
+          safeChars.push(...chars)
+          continue
         }
-        const safeChars = []
-        let sawStarSequence = false
-        let combinable = true
-        for (const branch of branches) {
-          const chars = getStarExtglobSequenceChars(branch)
-          if (chars) {
-            sawStarSequence = true
-            safeChars.push(...chars)
-            continue
-          }
-          const literal = normalizeSimpleBranch(branch)
-          if (literal && literal.length === 1) {
-            safeChars.push(literal)
-            continue
-          }
-          combinable = false
-          if (repeatedExtglobRecursion(branch) > max) return { risky: true }
+        const literal = normalizeSimpleBranch(branch)
+        if (literal && literal.length === 1) {
+          safeChars.push(literal)
+          continue
         }
-        if (sawStarSequence)
-          return combinable
-            ? {
-                risky: true,
-                safeOutput: buildCharClassStar([...new _p_SetCtor(safeChars)]),
-              }
-            : { risky: true }
-        return { risky: false }
+        combinable = false
+        if (repeatedExtglobRecursion(branch) > max) return { risky: true }
+      }
+      if (sawStarSequence)
+        return combinable
+          ? {
+              risky: true,
+              safeOutput: buildCharClassStar([...new _p_SetCtor(safeChars)]),
+            }
+          : { risky: true }
+      return { risky: false }
+    }
+    /**
+     * Parse the given input string.
+     *
+     * @param {String} input
+     * @param {Object} options
+     *
+     * @returns {Object}
+     */
+    const parse = (input, options) => {
+      if (typeof input !== 'string')
+        throw new _p_TypeErrorCtor('Expected a string')
+      input = REPLACEMENTS[input] || input
+      const opts = { ...options }
+      const max =
+        typeof opts.maxLength === 'number'
+          ? _p_MathMin(MAX_LENGTH, opts.maxLength)
+          : MAX_LENGTH
+      let len = input.length
+      if (len > max)
+        throw new _p_SyntaxErrorCtor(
+          `Input length: ${len}, exceeds maximum allowed length: ${max}`,
+        )
+      const bos = {
+        type: 'bos',
+        value: '',
+        output: opts.prepend || '',
+      }
+      const tokens = [bos]
+      const capture = opts.capture ? '' : '?:'
+      const PLATFORM_CHARS = constants.globChars(opts.windows)
+      const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS)
+      const {
+        DOT_LITERAL,
+        PLUS_LITERAL,
+        SLASH_LITERAL,
+        ONE_CHAR,
+        DOTS_SLASH,
+        NO_DOT,
+        NO_DOT_SLASH,
+        NO_DOTS_SLASH,
+        QMARK,
+        QMARK_NO_DOT,
+        STAR,
+        START_ANCHOR,
+      } = PLATFORM_CHARS
+      const globstar = opts => {
+        return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`
+      }
+      const nodot = opts.dot ? '' : NO_DOT
+      const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT
+      let star = opts.bash === true ? globstar(opts) : STAR
+      if (opts.capture) star = `(${star})`
+      if (typeof opts.noext === 'boolean') opts.noextglob = opts.noext
+      const state = {
+        input,
+        index: -1,
+        start: 0,
+        dot: opts.dot === true,
+        consumed: '',
+        output: '',
+        prefix: '',
+        backtrack: false,
+        negated: false,
+        brackets: 0,
+        braces: 0,
+        parens: 0,
+        quotes: 0,
+        globstar: false,
+        tokens,
+      }
+      input = utils.removePrefix(input, state)
+      len = input.length
+      const extglobs = []
+      const braces = []
+      const stack = []
+      let prev = bos
+      let value
+      /**
+       * Tokenizing helpers.
+       */
+      const eos = () => state.index === len - 1
+      const peek = (state.peek = (n = 1) => input[state.index + n])
+      const advance = (state.advance = () => input[++state.index] || '')
+      const remaining = () => input.slice(state.index + 1)
+      const consume = (value = '', num = 0) => {
+        state.consumed += value
+        state.index += num
+      }
+      const append = token => {
+        state.output += token.output != null ? token.output : token.value
+        consume(token.value)
+      }
+      const negate = () => {
+        let count = 1
+        while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
+          advance()
+          state.start++
+          count++
+        }
+        if (count % 2 === 0) return false
+        state.negated = true
+        state.start++
+        return true
+      }
+      const increment = type => {
+        state[type]++
+        stack.push(type)
+      }
+      const decrement = type => {
+        state[type]--
+        stack.pop()
       }
       /**
-       * Parse the given input string.
-       *
-       * @param {String} input
-       * @param {Object} options
-       *
-       * @returns {Object}
+       * Push tokens onto the tokens array. This helper speeds up
+       * tokenizing by 1) helping us avoid backtracking as much as possible,
+       * and 2) helping us avoid creating extra tokens when consecutive
+       * characters are plain text. This improves performance and simplifies
+       * lookbehinds.
        */
-      const parse = (input, options) => {
-        if (typeof input !== 'string')
-          throw new _p_TypeErrorCtor('Expected a string')
-        input = REPLACEMENTS[input] || input
-        const opts = { ...options }
-        const max =
-          typeof opts.maxLength === 'number'
-            ? _p_MathMin(MAX_LENGTH, opts.maxLength)
-            : MAX_LENGTH
-        let len = input.length
-        if (len > max)
-          throw new _p_SyntaxErrorCtor(
-            `Input length: ${len}, exceeds maximum allowed length: ${max}`,
-          )
-        const bos = {
-          type: 'bos',
-          value: '',
-          output: opts.prepend || '',
-        }
-        const tokens = [bos]
-        const capture = opts.capture ? '' : '?:'
-        const PLATFORM_CHARS = constants.globChars(opts.windows)
-        const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS)
-        const {
-          DOT_LITERAL,
-          PLUS_LITERAL,
-          SLASH_LITERAL,
-          ONE_CHAR,
-          DOTS_SLASH,
-          NO_DOT,
-          NO_DOT_SLASH,
-          NO_DOTS_SLASH,
-          QMARK,
-          QMARK_NO_DOT,
-          STAR,
-          START_ANCHOR,
-        } = PLATFORM_CHARS
-        const globstar = opts => {
-          return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`
-        }
-        const nodot = opts.dot ? '' : NO_DOT
-        const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT
-        let star = opts.bash === true ? globstar(opts) : STAR
-        if (opts.capture) star = `(${star})`
-        if (typeof opts.noext === 'boolean') opts.noextglob = opts.noext
-        const state = {
-          input,
-          index: -1,
-          start: 0,
-          dot: opts.dot === true,
-          consumed: '',
-          output: '',
-          prefix: '',
-          backtrack: false,
-          negated: false,
-          brackets: 0,
-          braces: 0,
-          parens: 0,
-          quotes: 0,
-          globstar: false,
-          tokens,
-        }
-        input = utils.removePrefix(input, state)
-        len = input.length
-        const extglobs = []
-        const braces = []
-        const stack = []
-        let prev = bos
-        let value
-        /**
-         * Tokenizing helpers.
-         */
-        const eos = () => state.index === len - 1
-        const peek = (state.peek = (n = 1) => input[state.index + n])
-        const advance = (state.advance = () => input[++state.index] || '')
-        const remaining = () => input.slice(state.index + 1)
-        const consume = (value = '', num = 0) => {
-          state.consumed += value
-          state.index += num
-        }
-        const append = token => {
-          state.output += token.output != null ? token.output : token.value
-          consume(token.value)
-        }
-        const negate = () => {
-          let count = 1
-          while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
-            advance()
-            state.start++
-            count++
-          }
-          if (count % 2 === 0) return false
-          state.negated = true
-          state.start++
-          return true
-        }
-        const increment = type => {
-          state[type]++
-          stack.push(type)
-        }
-        const decrement = type => {
-          state[type]--
-          stack.pop()
-        }
-        /**
-         * Push tokens onto the tokens array. This helper speeds up
-         * tokenizing by 1) helping us avoid backtracking as much as possible,
-         * and 2) helping us avoid creating extra tokens when consecutive
-         * characters are plain text. This improves performance and simplifies
-         * lookbehinds.
-         */
-        const push = tok => {
-          if (prev.type === 'globstar') {
-            const isBrace =
-              state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace')
-            const isExtglob =
-              tok.extglob === true ||
-              (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'))
-            if (
-              tok.type !== 'slash' &&
-              tok.type !== 'paren' &&
-              !isBrace &&
-              !isExtglob
-            ) {
-              state.output = state.output.slice(0, -prev.output.length)
-              prev.type = 'star'
-              prev.value = '*'
-              prev.output = star
-              state.output += prev.output
-            }
-          }
-          if (extglobs.length && tok.type !== 'paren')
-            extglobs[extglobs.length - 1].inner += tok.value
-          if (tok.value || tok.output) append(tok)
-          if (prev && prev.type === 'text' && tok.type === 'text') {
-            prev.output = (prev.output || prev.value) + tok.value
-            prev.value += tok.value
-            return
-          }
-          tok.prev = prev
-          tokens.push(tok)
-          prev = tok
-        }
-        const extglobOpen = (type, value) => {
-          const token = {
-            ...EXTGLOB_CHARS[value],
-            conditions: 1,
-            inner: '',
-          }
-          token.prev = prev
-          token.parens = state.parens
-          token.output = state.output
-          token.startIndex = state.index
-          token.tokensIndex = tokens.length
-          const output = (opts.capture ? '(' : '') + token.open
-          increment('parens')
-          push({
-            type,
-            value,
-            output: state.output ? '' : ONE_CHAR,
-          })
-          push({
-            type: 'paren',
-            extglob: true,
-            value: advance(),
-            output,
-          })
-          extglobs.push(token)
-        }
-        const extglobClose = token => {
-          const literal = input.slice(token.startIndex, state.index + 1)
-          const body = input.slice(token.startIndex + 2, state.index)
-          const analysis = analyzeRepeatedExtglob(body, opts)
+      const push = tok => {
+        if (prev.type === 'globstar') {
+          const isBrace =
+            state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace')
+          const isExtglob =
+            tok.extglob === true ||
+            (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'))
           if (
-            (token.type === 'plus' || token.type === 'star') &&
-            analysis.risky
+            tok.type !== 'slash' &&
+            tok.type !== 'paren' &&
+            !isBrace &&
+            !isExtglob
           ) {
-            const safeOutput = analysis.safeOutput
-              ? (token.output ? '' : ONE_CHAR) +
-                (opts.capture
-                  ? `(${analysis.safeOutput})`
-                  : analysis.safeOutput)
-              : void 0
-            const open = tokens[token.tokensIndex]
-            open.type = 'text'
-            open.value = literal
-            open.output = safeOutput || utils.escapeRegex(literal)
-            for (let i = token.tokensIndex + 1; i < tokens.length; i++) {
-              tokens[i].value = ''
-              tokens[i].output = ''
-              delete tokens[i].suffix
-            }
-            state.output = token.output + open.output
-            state.backtrack = true
-            push({
-              type: 'paren',
-              extglob: true,
-              value,
-              output: '',
-            })
-            decrement('parens')
-            return
+            state.output = state.output.slice(0, -prev.output.length)
+            prev.type = 'star'
+            prev.value = '*'
+            prev.output = star
+            state.output += prev.output
           }
-          let output = token.close + (opts.capture ? ')' : '')
-          let rest
-          if (token.type === 'negate') {
-            let extglobStar = star
-            if (
-              token.inner &&
-              token.inner.length > 1 &&
-              token.inner.includes('/')
-            )
-              extglobStar = globstar(opts)
-            if (extglobStar !== star || eos() || /^\)+$/.test(remaining()))
-              output = token.close = `)$))${extglobStar}`
-            if (
-              token.inner.includes('*') &&
-              (rest = remaining()) &&
-              /^\.[^\\/.]+$/.test(rest)
-            )
-              output = token.close = `)${
-                parse(rest, {
-                  ...options,
-                  fastpaths: false,
-                }).output
-              })${extglobStar})`
-            if (token.prev.type === 'bos') state.negatedExtglob = true
+        }
+        if (extglobs.length && tok.type !== 'paren')
+          extglobs[extglobs.length - 1].inner += tok.value
+        if (tok.value || tok.output) append(tok)
+        if (prev && prev.type === 'text' && tok.type === 'text') {
+          prev.output = (prev.output || prev.value) + tok.value
+          prev.value += tok.value
+          return
+        }
+        tok.prev = prev
+        tokens.push(tok)
+        prev = tok
+      }
+      const extglobOpen = (type, value) => {
+        const token = {
+          ...EXTGLOB_CHARS[value],
+          conditions: 1,
+          inner: '',
+        }
+        token.prev = prev
+        token.parens = state.parens
+        token.output = state.output
+        token.startIndex = state.index
+        token.tokensIndex = tokens.length
+        const output = (opts.capture ? '(' : '') + token.open
+        increment('parens')
+        push({
+          type,
+          value,
+          output: state.output ? '' : ONE_CHAR,
+        })
+        push({
+          type: 'paren',
+          extglob: true,
+          value: advance(),
+          output,
+        })
+        extglobs.push(token)
+      }
+      const extglobClose = token => {
+        const literal = input.slice(token.startIndex, state.index + 1)
+        const body = input.slice(token.startIndex + 2, state.index)
+        const analysis = analyzeRepeatedExtglob(body, opts)
+        if (
+          (token.type === 'plus' || token.type === 'star') &&
+          analysis.risky
+        ) {
+          const safeOutput = analysis.safeOutput
+            ? (token.output ? '' : ONE_CHAR) +
+              (opts.capture ? `(${analysis.safeOutput})` : analysis.safeOutput)
+            : void 0
+          const open = tokens[token.tokensIndex]
+          open.type = 'text'
+          open.value = literal
+          open.output = safeOutput || utils.escapeRegex(literal)
+          for (let i = token.tokensIndex + 1; i < tokens.length; i++) {
+            tokens[i].value = ''
+            tokens[i].output = ''
+            delete tokens[i].suffix
           }
+          state.output = token.output + open.output
+          state.backtrack = true
           push({
             type: 'paren',
             extglob: true,
             value,
-            output,
+            output: '',
           })
           decrement('parens')
+          return
         }
-        /**
-         * Fast paths.
-         */
-        if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
-          let backslashes = false
-          let output = input.replace(
-            REGEX_SPECIAL_CHARS_BACKREF,
-            (m, esc, chars, first, rest, index) => {
-              if (first === '\\') {
-                backslashes = true
-                return m
-              }
-              if (first === '?') {
-                if (esc)
-                  return (
-                    esc +
-                    first +
-                    (rest ? _p_StringPrototypeRepeat(QMARK, rest.length) : '')
-                  )
-                if (index === 0)
-                  return (
-                    qmarkNoDot +
-                    (rest ? _p_StringPrototypeRepeat(QMARK, rest.length) : '')
-                  )
-                return _p_StringPrototypeRepeat(QMARK, chars.length)
-              }
-              if (first === '.')
-                return _p_StringPrototypeRepeat(DOT_LITERAL, chars.length)
-              if (first === '*') {
-                if (esc) return esc + first + (rest ? star : '')
-                return star
-              }
-              return esc ? m : `\\${m}`
-            },
+        let output = token.close + (opts.capture ? ')' : '')
+        let rest
+        if (token.type === 'negate') {
+          let extglobStar = star
+          if (
+            token.inner &&
+            token.inner.length > 1 &&
+            token.inner.includes('/')
           )
-          if (backslashes === true) {
-            if (opts.unescape === true) output = output.replace(/\\/g, '')
-            else
-              output = output.replace(/\\+/g, m => {
-                return m.length % 2 === 0 ? '\\\\' : m ? '\\' : ''
-              })
-          }
-          if (output === input && opts.contains === true) {
-            state.output = input
-            return state
-          }
-          state.output = utils.wrapOutput(output, state, options)
+            extglobStar = globstar(opts)
+          if (extglobStar !== star || eos() || /^\)+$/.test(remaining()))
+            output = token.close = `)$))${extglobStar}`
+          if (
+            token.inner.includes('*') &&
+            (rest = remaining()) &&
+            /^\.[^\\/.]+$/.test(rest)
+          )
+            output = token.close = `)${
+              parse(rest, {
+                ...options,
+                fastpaths: false,
+              }).output
+            })${extglobStar})`
+          if (token.prev.type === 'bos') state.negatedExtglob = true
+        }
+        push({
+          type: 'paren',
+          extglob: true,
+          value,
+          output,
+        })
+        decrement('parens')
+      }
+      /**
+       * Fast paths.
+       */
+      if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
+        let backslashes = false
+        let output = input.replace(
+          REGEX_SPECIAL_CHARS_BACKREF,
+          (m, esc, chars, first, rest, index) => {
+            if (first === '\\') {
+              backslashes = true
+              return m
+            }
+            if (first === '?') {
+              if (esc)
+                return (
+                  esc +
+                  first +
+                  (rest ? _p_StringPrototypeRepeat(QMARK, rest.length) : '')
+                )
+              if (index === 0)
+                return (
+                  qmarkNoDot +
+                  (rest ? _p_StringPrototypeRepeat(QMARK, rest.length) : '')
+                )
+              return _p_StringPrototypeRepeat(QMARK, chars.length)
+            }
+            if (first === '.')
+              return _p_StringPrototypeRepeat(DOT_LITERAL, chars.length)
+            if (first === '*') {
+              if (esc) return esc + first + (rest ? star : '')
+              return star
+            }
+            return esc ? m : `\\${m}`
+          },
+        )
+        if (backslashes === true) {
+          if (opts.unescape === true) output = output.replace(/\\/g, '')
+          else
+            output = output.replace(/\\+/g, m => {
+              return m.length % 2 === 0 ? '\\\\' : m ? '\\' : ''
+            })
+        }
+        if (output === input && opts.contains === true) {
+          state.output = input
           return state
         }
+        state.output = utils.wrapOutput(output, state, options)
+        return state
+      }
+      /**
+       * Tokenize input until we reach end-of-string.
+       */
+      while (!eos()) {
+        value = advance()
+        if (value === '\0') continue
         /**
-         * Tokenize input until we reach end-of-string.
+         * Escaped characters.
          */
-        while (!eos()) {
-          value = advance()
-          if (value === '\0') continue
-          /**
-           * Escaped characters.
-           */
-          if (value === '\\') {
-            const next = peek()
-            if (next === '/' && opts.bash !== true) continue
-            if (next === '.' || next === ';') continue
-            if (!next) {
-              value += '\\'
-              push({
-                type: 'text',
-                value,
-              })
-              continue
-            }
-            const match = /^\\+/.exec(remaining())
-            let slashes = 0
-            if (match && match[0].length > 2) {
-              slashes = match[0].length
-              state.index += slashes
-              if (slashes % 2 !== 0) value += '\\'
-            }
-            if (opts.unescape === true) value = advance()
-            else value += advance()
-            if (state.brackets === 0) {
-              push({
-                type: 'text',
-                value,
-              })
-              continue
-            }
-          }
-          /**
-           * If we're inside a regex character class, continue
-           * until we reach the closing bracket.
-           */
-          if (
-            state.brackets > 0 &&
-            (value !== ']' || prev.value === '[' || prev.value === '[^')
-          ) {
-            if (opts.posix !== false && value === ':') {
-              const inner = prev.value.slice(1)
-              if (inner.includes('[')) {
-                prev.posix = true
-                if (inner.includes(':')) {
-                  const idx = prev.value.lastIndexOf('[')
-                  const pre = prev.value.slice(0, idx)
-                  const rest = prev.value.slice(idx + 2)
-                  const posix = POSIX_REGEX_SOURCE[rest]
-                  if (posix) {
-                    prev.value = pre + posix
-                    state.backtrack = true
-                    advance()
-                    if (!bos.output && tokens.indexOf(prev) === 1)
-                      bos.output = ONE_CHAR
-                    continue
-                  }
-                }
-              }
-            }
-            if (
-              (value === '[' && peek() !== ':') ||
-              (value === '-' && peek() === ']')
-            )
-              value = `\\${value}`
-            if (value === ']' && (prev.value === '[' || prev.value === '[^'))
-              value = `\\${value}`
-            if (opts.posix === true && value === '!' && prev.value === '[')
-              value = '^'
-            prev.value += value
-            append({ value })
-            continue
-          }
-          /**
-           * If we're inside a quoted string, continue
-           * until we reach the closing double quote.
-           */
-          if (state.quotes === 1 && value !== '"') {
-            value = utils.escapeRegex(value)
-            prev.value += value
-            append({ value })
-            continue
-          }
-          /**
-           * Double quotes.
-           */
-          if (value === '"') {
-            state.quotes = state.quotes === 1 ? 0 : 1
-            if (opts.keepQuotes === true)
-              push({
-                type: 'text',
-                value,
-              })
-            continue
-          }
-          /**
-           * Parentheses.
-           */
-          if (value === '(') {
-            increment('parens')
-            push({
-              type: 'paren',
-              value,
-            })
-            continue
-          }
-          if (value === ')') {
-            if (state.parens === 0 && opts.strictBrackets === true)
-              throw new _p_SyntaxErrorCtor(syntaxError('opening', '('))
-            const extglob = extglobs[extglobs.length - 1]
-            if (extglob && state.parens === extglob.parens + 1) {
-              extglobClose(extglobs.pop())
-              continue
-            }
-            push({
-              type: 'paren',
-              value,
-              output: state.parens ? ')' : '\\)',
-            })
-            decrement('parens')
-            continue
-          }
-          /**
-           * Square brackets.
-           */
-          if (value === '[') {
-            if (opts.nobracket === true || !remaining().includes(']')) {
-              if (opts.nobracket !== true && opts.strictBrackets === true)
-                throw new _p_SyntaxErrorCtor(syntaxError('closing', ']'))
-              value = `\\${value}`
-            } else increment('brackets')
-            push({
-              type: 'bracket',
-              value,
-            })
-            continue
-          }
-          if (value === ']') {
-            if (
-              opts.nobracket === true ||
-              (prev && prev.type === 'bracket' && prev.value.length === 1)
-            ) {
-              push({
-                type: 'text',
-                value,
-                output: `\\${value}`,
-              })
-              continue
-            }
-            if (state.brackets === 0) {
-              if (opts.strictBrackets === true)
-                throw new _p_SyntaxErrorCtor(syntaxError('opening', '['))
-              push({
-                type: 'text',
-                value,
-                output: `\\${value}`,
-              })
-              continue
-            }
-            decrement('brackets')
-            const prevValue = prev.value.slice(1)
-            if (
-              prev.posix !== true &&
-              prevValue[0] === '^' &&
-              !prevValue.includes('/')
-            )
-              value = `/${value}`
-            prev.value += value
-            append({ value })
-            if (
-              opts.literalBrackets === false ||
-              utils.hasRegexChars(prevValue)
-            )
-              continue
-            const escaped = utils.escapeRegex(prev.value)
-            state.output = state.output.slice(0, -prev.value.length)
-            if (opts.literalBrackets === true) {
-              state.output += escaped
-              prev.value = escaped
-              continue
-            }
-            prev.value = `(${capture}${escaped}|${prev.value})`
-            state.output += prev.value
-            continue
-          }
-          /**
-           * Braces.
-           */
-          if (value === '{' && opts.nobrace !== true) {
-            increment('braces')
-            const open = {
-              type: 'brace',
-              value,
-              output: '(',
-              outputIndex: state.output.length,
-              tokensIndex: state.tokens.length,
-            }
-            braces.push(open)
-            push(open)
-            continue
-          }
-          if (value === '}') {
-            const brace = braces[braces.length - 1]
-            if (opts.nobrace === true || !brace) {
-              push({
-                type: 'text',
-                value,
-                output: value,
-              })
-              continue
-            }
-            let output = ')'
-            if (brace.dots === true) {
-              const arr = tokens.slice()
-              const range = []
-              for (let i = arr.length - 1; i >= 0; i--) {
-                tokens.pop()
-                if (arr[i].type === 'brace') break
-                if (arr[i].type !== 'dots')
-                  _p_ArrayPrototypeUnshift(range, arr[i].value)
-              }
-              output = expandRange(range, opts)
-              state.backtrack = true
-            }
-            if (brace.comma !== true && brace.dots !== true) {
-              const out = state.output.slice(0, brace.outputIndex)
-              const toks = state.tokens.slice(brace.tokensIndex)
-              brace.value = brace.output = '\\{'
-              value = output = '\\}'
-              state.output = out
-              for (const t of toks) state.output += t.output || t.value
-            }
-            push({
-              type: 'brace',
-              value,
-              output,
-            })
-            decrement('braces')
-            braces.pop()
-            continue
-          }
-          /**
-           * Pipes.
-           */
-          if (value === '|') {
-            if (extglobs.length > 0) extglobs[extglobs.length - 1].conditions++
+        if (value === '\\') {
+          const next = peek()
+          if (next === '/' && opts.bash !== true) continue
+          if (next === '.' || next === ';') continue
+          if (!next) {
+            value += '\\'
             push({
               type: 'text',
               value,
             })
             continue
           }
-          /**
-           * Commas.
-           */
-          if (value === ',') {
-            let output = value
-            const brace = braces[braces.length - 1]
-            if (brace && stack[stack.length - 1] === 'braces') {
-              brace.comma = true
-              output = '|'
-            }
+          const match = /^\\+/.exec(remaining())
+          let slashes = 0
+          if (match && match[0].length > 2) {
+            slashes = match[0].length
+            state.index += slashes
+            if (slashes % 2 !== 0) value += '\\'
+          }
+          if (opts.unescape === true) value = advance()
+          else value += advance()
+          if (state.brackets === 0) {
             push({
-              type: 'comma',
+              type: 'text',
               value,
-              output,
             })
             continue
           }
-          /**
-           * Slashes.
-           */
-          if (value === '/') {
-            if (prev.type === 'dot' && state.index === state.start + 1) {
-              state.start = state.index + 1
-              state.consumed = ''
-              state.output = ''
+        }
+        /**
+         * If we're inside a regex character class, continue
+         * until we reach the closing bracket.
+         */
+        if (
+          state.brackets > 0 &&
+          (value !== ']' || prev.value === '[' || prev.value === '[^')
+        ) {
+          if (opts.posix !== false && value === ':') {
+            const inner = prev.value.slice(1)
+            if (inner.includes('[')) {
+              prev.posix = true
+              if (inner.includes(':')) {
+                const idx = prev.value.lastIndexOf('[')
+                const pre = prev.value.slice(0, idx)
+                const rest = prev.value.slice(idx + 2)
+                const posix = POSIX_REGEX_SOURCE[rest]
+                if (posix) {
+                  prev.value = pre + posix
+                  state.backtrack = true
+                  advance()
+                  if (!bos.output && tokens.indexOf(prev) === 1)
+                    bos.output = ONE_CHAR
+                  continue
+                }
+              }
+            }
+          }
+          if (
+            (value === '[' && peek() !== ':') ||
+            (value === '-' && peek() === ']')
+          )
+            value = `\\${value}`
+          if (value === ']' && (prev.value === '[' || prev.value === '[^'))
+            value = `\\${value}`
+          if (opts.posix === true && value === '!' && prev.value === '[')
+            value = '^'
+          prev.value += value
+          append({ value })
+          continue
+        }
+        /**
+         * If we're inside a quoted string, continue
+         * until we reach the closing double quote.
+         */
+        if (state.quotes === 1 && value !== '"') {
+          value = utils.escapeRegex(value)
+          prev.value += value
+          append({ value })
+          continue
+        }
+        /**
+         * Double quotes.
+         */
+        if (value === '"') {
+          state.quotes = state.quotes === 1 ? 0 : 1
+          if (opts.keepQuotes === true)
+            push({
+              type: 'text',
+              value,
+            })
+          continue
+        }
+        /**
+         * Parentheses.
+         */
+        if (value === '(') {
+          increment('parens')
+          push({
+            type: 'paren',
+            value,
+          })
+          continue
+        }
+        if (value === ')') {
+          if (state.parens === 0 && opts.strictBrackets === true)
+            throw new _p_SyntaxErrorCtor(syntaxError('opening', '('))
+          const extglob = extglobs[extglobs.length - 1]
+          if (extglob && state.parens === extglob.parens + 1) {
+            extglobClose(extglobs.pop())
+            continue
+          }
+          push({
+            type: 'paren',
+            value,
+            output: state.parens ? ')' : '\\)',
+          })
+          decrement('parens')
+          continue
+        }
+        /**
+         * Square brackets.
+         */
+        if (value === '[') {
+          if (opts.nobracket === true || !remaining().includes(']')) {
+            if (opts.nobracket !== true && opts.strictBrackets === true)
+              throw new _p_SyntaxErrorCtor(syntaxError('closing', ']'))
+            value = `\\${value}`
+          } else increment('brackets')
+          push({
+            type: 'bracket',
+            value,
+          })
+          continue
+        }
+        if (value === ']') {
+          if (
+            opts.nobracket === true ||
+            (prev && prev.type === 'bracket' && prev.value.length === 1)
+          ) {
+            push({
+              type: 'text',
+              value,
+              output: `\\${value}`,
+            })
+            continue
+          }
+          if (state.brackets === 0) {
+            if (opts.strictBrackets === true)
+              throw new _p_SyntaxErrorCtor(syntaxError('opening', '['))
+            push({
+              type: 'text',
+              value,
+              output: `\\${value}`,
+            })
+            continue
+          }
+          decrement('brackets')
+          const prevValue = prev.value.slice(1)
+          if (
+            prev.posix !== true &&
+            prevValue[0] === '^' &&
+            !prevValue.includes('/')
+          )
+            value = `/${value}`
+          prev.value += value
+          append({ value })
+          if (opts.literalBrackets === false || utils.hasRegexChars(prevValue))
+            continue
+          const escaped = utils.escapeRegex(prev.value)
+          state.output = state.output.slice(0, -prev.value.length)
+          if (opts.literalBrackets === true) {
+            state.output += escaped
+            prev.value = escaped
+            continue
+          }
+          prev.value = `(${capture}${escaped}|${prev.value})`
+          state.output += prev.value
+          continue
+        }
+        /**
+         * Braces.
+         */
+        if (value === '{' && opts.nobrace !== true) {
+          increment('braces')
+          const open = {
+            type: 'brace',
+            value,
+            output: '(',
+            outputIndex: state.output.length,
+            tokensIndex: state.tokens.length,
+          }
+          braces.push(open)
+          push(open)
+          continue
+        }
+        if (value === '}') {
+          const brace = braces[braces.length - 1]
+          if (opts.nobrace === true || !brace) {
+            push({
+              type: 'text',
+              value,
+              output: value,
+            })
+            continue
+          }
+          let output = ')'
+          if (brace.dots === true) {
+            const arr = tokens.slice()
+            const range = []
+            for (let i = arr.length - 1; i >= 0; i--) {
               tokens.pop()
-              prev = bos
-              continue
+              if (arr[i].type === 'brace') break
+              if (arr[i].type !== 'dots')
+                _p_ArrayPrototypeUnshift(range, arr[i].value)
             }
-            push({
-              type: 'slash',
-              value,
-              output: SLASH_LITERAL,
-            })
+            output = expandRange(range, opts)
+            state.backtrack = true
+          }
+          if (brace.comma !== true && brace.dots !== true) {
+            const out = state.output.slice(0, brace.outputIndex)
+            const toks = state.tokens.slice(brace.tokensIndex)
+            brace.value = brace.output = '\\{'
+            value = output = '\\}'
+            state.output = out
+            for (const t of toks) state.output += t.output || t.value
+          }
+          push({
+            type: 'brace',
+            value,
+            output,
+          })
+          decrement('braces')
+          braces.pop()
+          continue
+        }
+        /**
+         * Pipes.
+         */
+        if (value === '|') {
+          if (extglobs.length > 0) extglobs[extglobs.length - 1].conditions++
+          push({
+            type: 'text',
+            value,
+          })
+          continue
+        }
+        /**
+         * Commas.
+         */
+        if (value === ',') {
+          let output = value
+          const brace = braces[braces.length - 1]
+          if (brace && stack[stack.length - 1] === 'braces') {
+            brace.comma = true
+            output = '|'
+          }
+          push({
+            type: 'comma',
+            value,
+            output,
+          })
+          continue
+        }
+        /**
+         * Slashes.
+         */
+        if (value === '/') {
+          if (prev.type === 'dot' && state.index === state.start + 1) {
+            state.start = state.index + 1
+            state.consumed = ''
+            state.output = ''
+            tokens.pop()
+            prev = bos
             continue
           }
-          /**
-           * Dots.
-           */
-          if (value === '.') {
-            if (state.braces > 0 && prev.type === 'dot') {
-              if (prev.value === '.') prev.output = DOT_LITERAL
-              const brace = braces[braces.length - 1]
-              prev.type = 'dots'
-              prev.output += value
-              prev.value += value
-              brace.dots = true
-              continue
-            }
-            if (
-              state.braces + state.parens === 0 &&
-              prev.type !== 'bos' &&
-              prev.type !== 'slash'
-            ) {
-              push({
-                type: 'text',
-                value,
-                output: DOT_LITERAL,
-              })
-              continue
-            }
+          push({
+            type: 'slash',
+            value,
+            output: SLASH_LITERAL,
+          })
+          continue
+        }
+        /**
+         * Dots.
+         */
+        if (value === '.') {
+          if (state.braces > 0 && prev.type === 'dot') {
+            if (prev.value === '.') prev.output = DOT_LITERAL
+            const brace = braces[braces.length - 1]
+            prev.type = 'dots'
+            prev.output += value
+            prev.value += value
+            brace.dots = true
+            continue
+          }
+          if (
+            state.braces + state.parens === 0 &&
+            prev.type !== 'bos' &&
+            prev.type !== 'slash'
+          ) {
             push({
-              type: 'dot',
+              type: 'text',
               value,
               output: DOT_LITERAL,
             })
             continue
           }
-          /**
-           * Question marks.
-           */
-          if (value === '?') {
+          push({
+            type: 'dot',
+            value,
+            output: DOT_LITERAL,
+          })
+          continue
+        }
+        /**
+         * Question marks.
+         */
+        if (value === '?') {
+          if (
+            !(prev && prev.value === '(') &&
+            opts.noextglob !== true &&
+            peek() === '(' &&
+            peek(2) !== '?'
+          ) {
+            extglobOpen('qmark', value)
+            continue
+          }
+          if (prev && prev.type === 'paren') {
+            const next = peek()
+            let output = value
             if (
-              !(prev && prev.value === '(') &&
-              opts.noextglob !== true &&
-              peek() === '(' &&
-              peek(2) !== '?'
-            ) {
-              extglobOpen('qmark', value)
-              continue
-            }
-            if (prev && prev.type === 'paren') {
-              const next = peek()
-              let output = value
-              if (
-                (prev.value === '(' && !/[!=<:]/.test(next)) ||
-                (next === '<' && !/<([!=]|\w+>)/.test(remaining()))
-              )
-                output = `\\${value}`
-              push({
-                type: 'text',
-                value,
-                output,
-              })
-              continue
-            }
-            if (
-              opts.dot !== true &&
-              (prev.type === 'slash' || prev.type === 'bos')
-            ) {
-              push({
-                type: 'qmark',
-                value,
-                output: QMARK_NO_DOT,
-              })
-              continue
-            }
+              (prev.value === '(' && !/[!=<:]/.test(next)) ||
+              (next === '<' && !/<([!=]|\w+>)/.test(remaining()))
+            )
+              output = `\\${value}`
+            push({
+              type: 'text',
+              value,
+              output,
+            })
+            continue
+          }
+          if (
+            opts.dot !== true &&
+            (prev.type === 'slash' || prev.type === 'bos')
+          ) {
             push({
               type: 'qmark',
               value,
-              output: QMARK,
+              output: QMARK_NO_DOT,
             })
             continue
           }
-          /**
-           * Exclamation.
-           */
-          if (value === '!') {
-            if (opts.noextglob !== true && peek() === '(') {
-              if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
-                extglobOpen('negate', value)
-                continue
-              }
-            }
-            if (opts.nonegate !== true && state.index === 0) {
-              negate()
+          push({
+            type: 'qmark',
+            value,
+            output: QMARK,
+          })
+          continue
+        }
+        /**
+         * Exclamation.
+         */
+        if (value === '!') {
+          if (opts.noextglob !== true && peek() === '(') {
+            if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
+              extglobOpen('negate', value)
               continue
             }
           }
-          /**
-           * Plus.
-           */
-          if (value === '+') {
-            if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-              extglobOpen('plus', value)
-              continue
-            }
-            if ((prev && prev.value === '(') || opts.regex === false) {
-              push({
-                type: 'plus',
-                value,
-                output: PLUS_LITERAL,
-              })
-              continue
-            }
-            if (
-              (prev &&
-                (prev.type === 'bracket' ||
-                  prev.type === 'paren' ||
-                  prev.type === 'brace')) ||
-              state.parens > 0
-            ) {
-              push({
-                type: 'plus',
-                value,
-              })
-              continue
-            }
+          if (opts.nonegate !== true && state.index === 0) {
+            negate()
+            continue
+          }
+        }
+        /**
+         * Plus.
+         */
+        if (value === '+') {
+          if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+            extglobOpen('plus', value)
+            continue
+          }
+          if ((prev && prev.value === '(') || opts.regex === false) {
             push({
               type: 'plus',
-              value: PLUS_LITERAL,
+              value,
+              output: PLUS_LITERAL,
             })
             continue
           }
-          /**
-           * Plain text.
-           */
-          if (value === '@') {
-            if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-              push({
-                type: 'at',
-                extglob: true,
-                value,
-                output: '',
-              })
-              continue
-            }
+          if (
+            (prev &&
+              (prev.type === 'bracket' ||
+                prev.type === 'paren' ||
+                prev.type === 'brace')) ||
+            state.parens > 0
+          ) {
             push({
-              type: 'text',
+              type: 'plus',
               value,
             })
             continue
           }
-          /**
-           * Plain text.
-           */
-          if (value !== '*') {
-            if (value === '$' || value === '^') value = `\\${value}`
-            const match = REGEX_NON_SPECIAL_CHARS.exec(remaining())
-            if (match) {
-              value += match[0]
-              state.index += match[0].length
-            }
+          push({
+            type: 'plus',
+            value: PLUS_LITERAL,
+          })
+          continue
+        }
+        /**
+         * Plain text.
+         */
+        if (value === '@') {
+          if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
             push({
-              type: 'text',
+              type: 'at',
+              extglob: true,
               value,
+              output: '',
             })
             continue
           }
-          /**
-           * Stars.
-           */
-          if (prev && (prev.type === 'globstar' || prev.star === true)) {
-            prev.type = 'star'
-            prev.star = true
-            prev.value += value
-            prev.output = star
-            state.backtrack = true
-            state.globstar = true
-            consume(value)
-            continue
-          }
-          let rest = remaining()
-          if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
-            extglobOpen('star', value)
-            continue
-          }
-          if (prev.type === 'star') {
-            if (opts.noglobstar === true) {
-              consume(value)
-              continue
-            }
-            const prior = prev.prev
-            const before = prior.prev
-            const isStart = prior.type === 'slash' || prior.type === 'bos'
-            const afterStar =
-              before && (before.type === 'star' || before.type === 'globstar')
-            if (
-              opts.bash === true &&
-              (!isStart || (rest[0] && rest[0] !== '/'))
-            ) {
-              push({
-                type: 'star',
-                value,
-                output: '',
-              })
-              continue
-            }
-            const isBrace =
-              state.braces > 0 &&
-              (prior.type === 'comma' || prior.type === 'brace')
-            const isExtglob =
-              extglobs.length &&
-              (prior.type === 'pipe' || prior.type === 'paren')
-            if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
-              push({
-                type: 'star',
-                value,
-                output: '',
-              })
-              continue
-            }
-            while (rest.slice(0, 3) === '/**') {
-              const after = input[state.index + 4]
-              if (after && after !== '/') break
-              rest = rest.slice(3)
-              consume('/**', 3)
-            }
-            const isEnd =
-              eos() ||
-              (state.parens > 0 &&
-                rest === ')'.repeat(state.parens) &&
-                !extglobs.some(extglob => extglob.type === 'negate'))
-            if (prior.type === 'bos' && eos()) {
-              prev.type = 'globstar'
-              prev.value += value
-              prev.output = globstar(opts)
-              state.output = prev.output
-              state.globstar = true
-              consume(value)
-              continue
-            }
-            if (
-              prior.type === 'slash' &&
-              prior.prev.type !== 'bos' &&
-              !afterStar &&
-              isEnd
-            ) {
-              state.output = state.output.slice(
-                0,
-                -(prior.output + prev.output).length,
-              )
-              prior.output = `(?:${prior.output}`
-              prev.type = 'globstar'
-              prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)')
-              prev.value += value
-              state.globstar = true
-              state.output += prior.output + prev.output
-              consume(value)
-              continue
-            }
-            if (
-              prior.type === 'slash' &&
-              prior.prev.type !== 'bos' &&
-              rest[0] === '/'
-            ) {
-              const end = rest[1] !== void 0 ? '|$' : ''
-              state.output = state.output.slice(
-                0,
-                -(prior.output + prev.output).length,
-              )
-              prior.output = `(?:${prior.output}`
-              prev.type = 'globstar'
-              prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`
-              prev.value += value
-              state.output += prior.output + prev.output
-              state.globstar = true
-              consume(value + advance())
-              push({
-                type: 'slash',
-                value: '/',
-                output: '',
-              })
-              continue
-            }
-            if (prior.type === 'bos' && rest[0] === '/') {
-              prev.type = 'globstar'
-              prev.value += value
-              prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`
-              state.output = prev.output
-              state.globstar = true
-              consume(value + advance())
-              push({
-                type: 'slash',
-                value: '/',
-                output: '',
-              })
-              continue
-            }
-            state.output = state.output.slice(0, -prev.output.length)
-            prev.type = 'globstar'
-            prev.output = globstar(opts)
-            prev.value += value
-            state.output += prev.output
-            state.globstar = true
-            consume(value)
-            continue
-          }
-          const token = {
-            type: 'star',
+          push({
+            type: 'text',
             value,
-            output: star,
+          })
+          continue
+        }
+        /**
+         * Plain text.
+         */
+        if (value !== '*') {
+          if (value === '$' || value === '^') value = `\\${value}`
+          const match = REGEX_NON_SPECIAL_CHARS.exec(remaining())
+          if (match) {
+            value += match[0]
+            state.index += match[0].length
           }
-          if (opts.bash === true) {
-            token.output = '.*?'
-            if (prev.type === 'bos' || prev.type === 'slash')
-              token.output = nodot + token.output
-            push(token)
+          push({
+            type: 'text',
+            value,
+          })
+          continue
+        }
+        /**
+         * Stars.
+         */
+        if (prev && (prev.type === 'globstar' || prev.star === true)) {
+          prev.type = 'star'
+          prev.star = true
+          prev.value += value
+          prev.output = star
+          state.backtrack = true
+          state.globstar = true
+          consume(value)
+          continue
+        }
+        let rest = remaining()
+        if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
+          extglobOpen('star', value)
+          continue
+        }
+        if (prev.type === 'star') {
+          if (opts.noglobstar === true) {
+            consume(value)
+            continue
+          }
+          const prior = prev.prev
+          const before = prior.prev
+          const isStart = prior.type === 'slash' || prior.type === 'bos'
+          const afterStar =
+            before && (before.type === 'star' || before.type === 'globstar')
+          if (
+            opts.bash === true &&
+            (!isStart || (rest[0] && rest[0] !== '/'))
+          ) {
+            push({
+              type: 'star',
+              value,
+              output: '',
+            })
+            continue
+          }
+          const isBrace =
+            state.braces > 0 &&
+            (prior.type === 'comma' || prior.type === 'brace')
+          const isExtglob =
+            extglobs.length && (prior.type === 'pipe' || prior.type === 'paren')
+          if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
+            push({
+              type: 'star',
+              value,
+              output: '',
+            })
+            continue
+          }
+          while (rest.slice(0, 3) === '/**') {
+            const after = input[state.index + 4]
+            if (after && after !== '/') break
+            rest = rest.slice(3)
+            consume('/**', 3)
+          }
+          const isEnd =
+            eos() ||
+            (state.parens > 0 &&
+              rest === ')'.repeat(state.parens) &&
+              !extglobs.some(extglob => extglob.type === 'negate'))
+          if (prior.type === 'bos' && eos()) {
+            prev.type = 'globstar'
+            prev.value += value
+            prev.output = globstar(opts)
+            state.output = prev.output
+            state.globstar = true
+            consume(value)
             continue
           }
           if (
-            prev &&
-            (prev.type === 'bracket' || prev.type === 'paren') &&
-            opts.regex === true
+            prior.type === 'slash' &&
+            prior.prev.type !== 'bos' &&
+            !afterStar &&
+            isEnd
           ) {
-            token.output = value
-            push(token)
+            state.output = state.output.slice(
+              0,
+              -(prior.output + prev.output).length,
+            )
+            prior.output = `(?:${prior.output}`
+            prev.type = 'globstar'
+            prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)')
+            prev.value += value
+            state.globstar = true
+            state.output += prior.output + prev.output
+            consume(value)
             continue
           }
           if (
-            state.index === state.start ||
-            prev.type === 'slash' ||
-            prev.type === 'dot'
+            prior.type === 'slash' &&
+            prior.prev.type !== 'bos' &&
+            rest[0] === '/'
           ) {
-            if (prev.type === 'dot') {
-              state.output += NO_DOT_SLASH
-              prev.output += NO_DOT_SLASH
-            } else if (opts.dot === true) {
-              state.output += NO_DOTS_SLASH
-              prev.output += NO_DOTS_SLASH
-            } else {
-              state.output += nodot
-              prev.output += nodot
-            }
-            if (peek() !== '*') {
-              state.output += ONE_CHAR
-              prev.output += ONE_CHAR
-            }
+            const end = rest[1] !== void 0 ? '|$' : ''
+            state.output = state.output.slice(
+              0,
+              -(prior.output + prev.output).length,
+            )
+            prior.output = `(?:${prior.output}`
+            prev.type = 'globstar'
+            prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`
+            prev.value += value
+            state.output += prior.output + prev.output
+            state.globstar = true
+            consume(value + advance())
+            push({
+              type: 'slash',
+              value: '/',
+              output: '',
+            })
+            continue
           }
+          if (prior.type === 'bos' && rest[0] === '/') {
+            prev.type = 'globstar'
+            prev.value += value
+            prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`
+            state.output = prev.output
+            state.globstar = true
+            consume(value + advance())
+            push({
+              type: 'slash',
+              value: '/',
+              output: '',
+            })
+            continue
+          }
+          state.output = state.output.slice(0, -prev.output.length)
+          prev.type = 'globstar'
+          prev.output = globstar(opts)
+          prev.value += value
+          state.output += prev.output
+          state.globstar = true
+          consume(value)
+          continue
+        }
+        const token = {
+          type: 'star',
+          value,
+          output: star,
+        }
+        if (opts.bash === true) {
+          token.output = '.*?'
+          if (prev.type === 'bos' || prev.type === 'slash')
+            token.output = nodot + token.output
           push(token)
-        }
-        while (state.brackets > 0) {
-          if (opts.strictBrackets === true)
-            throw new _p_SyntaxErrorCtor(syntaxError('closing', ']'))
-          state.output = utils.escapeLast(state.output, '[')
-          decrement('brackets')
-        }
-        while (state.parens > 0) {
-          if (opts.strictBrackets === true)
-            throw new _p_SyntaxErrorCtor(syntaxError('closing', ')'))
-          state.output = utils.escapeLast(state.output, '(')
-          decrement('parens')
-        }
-        while (state.braces > 0) {
-          if (opts.strictBrackets === true)
-            throw new _p_SyntaxErrorCtor(syntaxError('closing', '}'))
-          state.output = utils.escapeLast(state.output, '{')
-          decrement('braces')
+          continue
         }
         if (
-          opts.strictSlashes !== true &&
-          (prev.type === 'star' || prev.type === 'bracket')
+          prev &&
+          (prev.type === 'bracket' || prev.type === 'paren') &&
+          opts.regex === true
+        ) {
+          token.output = value
+          push(token)
+          continue
+        }
+        if (
+          state.index === state.start ||
+          prev.type === 'slash' ||
+          prev.type === 'dot'
+        ) {
+          if (prev.type === 'dot') {
+            state.output += NO_DOT_SLASH
+            prev.output += NO_DOT_SLASH
+          } else if (opts.dot === true) {
+            state.output += NO_DOTS_SLASH
+            prev.output += NO_DOTS_SLASH
+          } else {
+            state.output += nodot
+            prev.output += nodot
+          }
+          if (peek() !== '*') {
+            state.output += ONE_CHAR
+            prev.output += ONE_CHAR
+          }
+        }
+        push(token)
+      }
+      while (state.brackets > 0) {
+        if (opts.strictBrackets === true)
+          throw new _p_SyntaxErrorCtor(syntaxError('closing', ']'))
+        state.output = utils.escapeLast(state.output, '[')
+        decrement('brackets')
+      }
+      while (state.parens > 0) {
+        if (opts.strictBrackets === true)
+          throw new _p_SyntaxErrorCtor(syntaxError('closing', ')'))
+        state.output = utils.escapeLast(state.output, '(')
+        decrement('parens')
+      }
+      while (state.braces > 0) {
+        if (opts.strictBrackets === true)
+          throw new _p_SyntaxErrorCtor(syntaxError('closing', '}'))
+        state.output = utils.escapeLast(state.output, '{')
+        decrement('braces')
+      }
+      if (
+        opts.strictSlashes !== true &&
+        (prev.type === 'star' || prev.type === 'bracket')
+      )
+        push({
+          type: 'maybe_slash',
+          value: '',
+          output: `${SLASH_LITERAL}?`,
+        })
+      if (state.backtrack === true) {
+        state.output = ''
+        for (const token of state.tokens) {
+          state.output += token.output != null ? token.output : token.value
+          if (token.suffix) state.output += token.suffix
+        }
+      }
+      return state
+    }
+    /**
+     * Fast paths for creating regular expressions for common glob patterns.
+     * This can significantly speed up processing and has very little downside
+     * impact when none of the fast paths match.
+     */
+    parse.fastpaths = (input, options) => {
+      const opts = { ...options }
+      const max =
+        typeof opts.maxLength === 'number'
+          ? _p_MathMin(MAX_LENGTH, opts.maxLength)
+          : MAX_LENGTH
+      const len = input.length
+      if (len > max)
+        throw new _p_SyntaxErrorCtor(
+          `Input length: ${len}, exceeds maximum allowed length: ${max}`,
         )
-          push({
-            type: 'maybe_slash',
-            value: '',
-            output: `${SLASH_LITERAL}?`,
-          })
-        if (state.backtrack === true) {
-          state.output = ''
-          for (const token of state.tokens) {
-            state.output += token.output != null ? token.output : token.value
-            if (token.suffix) state.output += token.suffix
+      input = REPLACEMENTS[input] || input
+      const {
+        DOT_LITERAL,
+        SLASH_LITERAL,
+        ONE_CHAR,
+        DOTS_SLASH,
+        NO_DOT,
+        NO_DOTS,
+        NO_DOTS_SLASH,
+        STAR,
+        START_ANCHOR,
+      } = constants.globChars(opts.windows)
+      const nodot = opts.dot ? NO_DOTS : NO_DOT
+      const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT
+      const capture = opts.capture ? '' : '?:'
+      const state = {
+        negated: false,
+        prefix: '',
+      }
+      let star = opts.bash === true ? '.*?' : STAR
+      if (opts.capture) star = `(${star})`
+      const globstar = opts => {
+        if (opts.noglobstar === true) return star
+        return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`
+      }
+      const create = str => {
+        switch (str) {
+          case '*':
+            return `${nodot}${ONE_CHAR}${star}`
+          case '.*':
+            return `${DOT_LITERAL}${ONE_CHAR}${star}`
+          case '*.*':
+            return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`
+          case '*/*':
+            return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`
+          case '**':
+            return nodot + globstar(opts)
+          case '**/*':
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`
+          case '**/*.*':
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`
+          case '**/.*':
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`
+          default: {
+            const match = /^(.*?)\.(\w+)$/.exec(str)
+            if (!match) return
+            const source = create(match[1])
+            if (!source) return
+            return source + DOT_LITERAL + match[2]
           }
         }
-        return state
       }
-      /**
-       * Fast paths for creating regular expressions for common glob patterns.
-       * This can significantly speed up processing and has very little downside
-       * impact when none of the fast paths match.
-       */
-      parse.fastpaths = (input, options) => {
-        const opts = { ...options }
-        const max =
-          typeof opts.maxLength === 'number'
-            ? _p_MathMin(MAX_LENGTH, opts.maxLength)
-            : MAX_LENGTH
-        const len = input.length
-        if (len > max)
-          throw new _p_SyntaxErrorCtor(
-            `Input length: ${len}, exceeds maximum allowed length: ${max}`,
-          )
-        input = REPLACEMENTS[input] || input
-        const {
-          DOT_LITERAL,
-          SLASH_LITERAL,
-          ONE_CHAR,
-          DOTS_SLASH,
-          NO_DOT,
-          NO_DOTS,
-          NO_DOTS_SLASH,
-          STAR,
-          START_ANCHOR,
-        } = constants.globChars(opts.windows)
-        const nodot = opts.dot ? NO_DOTS : NO_DOT
-        const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT
-        const capture = opts.capture ? '' : '?:'
-        const state = {
-          negated: false,
-          prefix: '',
-        }
-        let star = opts.bash === true ? '.*?' : STAR
-        if (opts.capture) star = `(${star})`
-        const globstar = opts => {
-          if (opts.noglobstar === true) return star
-          return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`
-        }
-        const create = str => {
-          switch (str) {
-            case '*':
-              return `${nodot}${ONE_CHAR}${star}`
-            case '.*':
-              return `${DOT_LITERAL}${ONE_CHAR}${star}`
-            case '*.*':
-              return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`
-            case '*/*':
-              return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`
-            case '**':
-              return nodot + globstar(opts)
-            case '**/*':
-              return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`
-            case '**/*.*':
-              return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`
-            case '**/.*':
-              return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`
-            default: {
-              const match = /^(.*?)\.(\w+)$/.exec(str)
-              if (!match) return
-              const source = create(match[1])
-              if (!source) return
-              return source + DOT_LITERAL + match[2]
-            }
-          }
-        }
-        let source = create(utils.removePrefix(input, state))
-        if (source && opts.strictSlashes !== true) source += `${SLASH_LITERAL}?`
-        return source
-      }
-      module$15.exports = parse
-    },
-  )
+      let source = create(utils.removePrefix(input, state))
+      if (source && opts.strictSlashes !== true) source += `${SLASH_LITERAL}?`
+      return source
+    }
+    module$4.exports = parse
+  })
   var require_picomatch$1 = /* @__PURE__ */ __commonJSMin(
-    (exports$18, module$16) => {
+    (exports$5, module$5) => {
       const scan = require_scan()
       const parse = require_parse$1()
       const utils = require_utils$3()
@@ -7428,11 +7393,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       /**
        * Expose "picomatch"
        */
-      module$16.exports = picomatch
+      module$5.exports = picomatch
     },
   )
   var require_picomatch = /* @__PURE__ */ __commonJSMin(
-    (exports$19, module$17) => {
+    (exports$6, module$6) => {
       const pico = require_picomatch$1()
       const utils = require_utils$3()
       function picomatch(glob, options, returnState = false) {
@@ -7444,7 +7409,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return pico(glob, options, returnState)
       }
       _p_ObjectAssign(picomatch, pico)
-      module$17.exports = picomatch
+      module$6.exports = picomatch
     },
   )
   function mergeStreams(streams) {
@@ -7695,13 +7660,13 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     PASSTHROUGH_LISTENERS_COUNT = 2
     PASSTHROUGH_LISTENERS_PER_STREAM = 1
   })
-  var require_array$1 = /* @__PURE__ */ __commonJSMin(exports$20 => {
-    _p_ObjectDefineProperty(exports$20, '__esModule', { value: true })
-    exports$20.splitWhen = exports$20.flatten = void 0
+  var require_array$1 = /* @__PURE__ */ __commonJSMin(exports$7 => {
+    _p_ObjectDefineProperty(exports$7, '__esModule', { value: true })
+    exports$7.splitWhen = exports$7.flatten = void 0
     function flatten(items) {
       return items.reduce((collection, item) => [].concat(collection, item), [])
     }
-    exports$20.flatten = flatten
+    exports$7.flatten = flatten
     function splitWhen(items, predicate) {
       const result = [[]]
       let groupIndex = 0
@@ -7712,19 +7677,19 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         } else result[groupIndex].push(item)
       return result
     }
-    exports$20.splitWhen = splitWhen
+    exports$7.splitWhen = splitWhen
   })
-  var require_errno = /* @__PURE__ */ __commonJSMin(exports$21 => {
-    _p_ObjectDefineProperty(exports$21, '__esModule', { value: true })
-    exports$21.isEnoentCodeError = void 0
+  var require_errno = /* @__PURE__ */ __commonJSMin(exports$8 => {
+    _p_ObjectDefineProperty(exports$8, '__esModule', { value: true })
+    exports$8.isEnoentCodeError = void 0
     function isEnoentCodeError(error) {
       return error.code === 'ENOENT'
     }
-    exports$21.isEnoentCodeError = isEnoentCodeError
+    exports$8.isEnoentCodeError = isEnoentCodeError
   })
-  var require_fs$3 = /* @__PURE__ */ __commonJSMin(exports$22 => {
-    _p_ObjectDefineProperty(exports$22, '__esModule', { value: true })
-    exports$22.createDirentFromStats = void 0
+  var require_fs$3 = /* @__PURE__ */ __commonJSMin(exports$9 => {
+    _p_ObjectDefineProperty(exports$9, '__esModule', { value: true })
+    exports$9.createDirentFromStats = void 0
     var DirentFromStats = class {
       constructor(name, stats) {
         this.name = name
@@ -7740,19 +7705,19 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     function createDirentFromStats(name, stats) {
       return new DirentFromStats(name, stats)
     }
-    exports$22.createDirentFromStats = createDirentFromStats
+    exports$9.createDirentFromStats = createDirentFromStats
   })
-  var require_path = /* @__PURE__ */ __commonJSMin(exports$23 => {
-    _p_ObjectDefineProperty(exports$23, '__esModule', { value: true })
-    exports$23.convertPosixPathToPattern =
-      exports$23.convertWindowsPathToPattern =
-      exports$23.convertPathToPattern =
-      exports$23.escapePosixPath =
-      exports$23.escapeWindowsPath =
-      exports$23.escape =
-      exports$23.removeLeadingDotSegment =
-      exports$23.makeAbsolute =
-      exports$23.unixify =
+  var require_path = /* @__PURE__ */ __commonJSMin(exports$10 => {
+    _p_ObjectDefineProperty(exports$10, '__esModule', { value: true })
+    exports$10.convertPosixPathToPattern =
+      exports$10.convertWindowsPathToPattern =
+      exports$10.convertPathToPattern =
+      exports$10.escapePosixPath =
+      exports$10.escapeWindowsPath =
+      exports$10.escape =
+      exports$10.removeLeadingDotSegment =
+      exports$10.makeAbsolute =
+      exports$10.unixify =
         void 0
     const os$2 = __require('os')
     const path$11 = __require('path')
@@ -7783,11 +7748,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     function unixify(filepath) {
       return filepath.replace(/\\/g, '/')
     }
-    exports$23.unixify = unixify
+    exports$10.unixify = unixify
     function makeAbsolute(cwd, filepath) {
       return path$11.resolve(cwd, filepath)
     }
-    exports$23.makeAbsolute = makeAbsolute
+    exports$10.makeAbsolute = makeAbsolute
     function removeLeadingDotSegment(entry) {
       if (_p_StringPrototypeCharAt(entry, 0) === '.') {
         const secondCharactery = _p_StringPrototypeCharAt(entry, 1)
@@ -7796,19 +7761,19 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       return entry
     }
-    exports$23.removeLeadingDotSegment = removeLeadingDotSegment
-    exports$23.escape = IS_WINDOWS_PLATFORM
+    exports$10.removeLeadingDotSegment = removeLeadingDotSegment
+    exports$10.escape = IS_WINDOWS_PLATFORM
       ? escapeWindowsPath
       : escapePosixPath
     function escapeWindowsPath(pattern) {
       return pattern.replace(WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE, '\\$2')
     }
-    exports$23.escapeWindowsPath = escapeWindowsPath
+    exports$10.escapeWindowsPath = escapeWindowsPath
     function escapePosixPath(pattern) {
       return pattern.replace(POSIX_UNESCAPED_GLOB_SYMBOLS_RE, '\\$2')
     }
-    exports$23.escapePosixPath = escapePosixPath
-    exports$23.convertPathToPattern = IS_WINDOWS_PLATFORM
+    exports$10.escapePosixPath = escapePosixPath
+    exports$10.convertPathToPattern = IS_WINDOWS_PLATFORM
       ? convertWindowsPathToPattern
       : convertPosixPathToPattern
     function convertWindowsPathToPattern(filepath) {
@@ -7816,21 +7781,21 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         .replace(DOS_DEVICE_PATH_RE, '//$1')
         .replace(WINDOWS_BACKSLASHES_RE, '/')
     }
-    exports$23.convertWindowsPathToPattern = convertWindowsPathToPattern
+    exports$10.convertWindowsPathToPattern = convertWindowsPathToPattern
     function convertPosixPathToPattern(filepath) {
       return escapePosixPath(filepath)
     }
-    exports$23.convertPosixPathToPattern = convertPosixPathToPattern
+    exports$10.convertPosixPathToPattern = convertPosixPathToPattern
   })
   var require_is_extglob = /* @__PURE__ */ __commonJSMin(
-    (exports$24, module$18) => {
+    (exports$11, module$7) => {
       /*!
        * is-extglob <https://github.com/jonschlinkert/is-extglob>
        *
        * Copyright (c) 2014-2016, Jon Schlinkert.
        * Licensed under the MIT License.
        */
-      module$18.exports = function isExtglob(str) {
+      module$7.exports = function isExtglob(str) {
         if (typeof str !== 'string' || str === '') return false
         var match
         while ((match = /(\\).|([@?!+*]\(.*\))/g.exec(str))) {
@@ -7842,7 +7807,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     },
   )
   var require_is_glob = /* @__PURE__ */ __commonJSMin(
-    (exports$25, module$19) => {
+    (exports$12, module$8) => {
       /*!
        * is-glob <https://github.com/jonschlinkert/is-glob>
        *
@@ -7953,7 +7918,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         }
         return false
       }
-      module$19.exports = function isGlob(str, options) {
+      module$8.exports = function isGlob(str, options) {
         if (typeof str !== 'string' || str === '') return false
         if (isExtglob(str)) return true
         var check = strictCheck
@@ -7963,7 +7928,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     },
   )
   var require_glob_parent = /* @__PURE__ */ __commonJSMin(
-    (exports$26, module$20) => {
+    (exports$13, module$9) => {
       var isGlob = require_is_glob()
       var pathPosixDirname = __require('path').posix.dirname
       var isWin32 = __require('os').platform() === 'win32'
@@ -7979,7 +7944,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
        *
        * @returns {string}
        */
-      module$20.exports = function globParent(str, opts) {
+      module$9.exports = function globParent(str, opts) {
         if (
           _p_ObjectAssign({ flipBackslashes: true }, opts).flipBackslashes &&
           isWin32 &&
@@ -7994,8 +7959,8 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
     },
   )
-  var require_utils$2 = /* @__PURE__ */ __commonJSMin(exports$27 => {
-    exports$27.isInteger = num => {
+  var require_utils$2 = /* @__PURE__ */ __commonJSMin(exports$14 => {
+    exports$14.isInteger = num => {
       if (typeof num === 'number') return _p_NumberIsInteger(num)
       if (typeof num === 'string' && _p_StringPrototypeTrim(num) !== '')
         return _p_NumberIsInteger(Number(num))
@@ -8004,20 +7969,20 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     /**
      * Find a node of the given type.
      */
-    exports$27.find = (node, type) =>
+    exports$14.find = (node, type) =>
       node.nodes.find(node => node.type === type)
     /**
      * Find a node of the given type.
      */
-    exports$27.exceedsLimit = (min, max, step = 1, limit) => {
+    exports$14.exceedsLimit = (min, max, step = 1, limit) => {
       if (limit === false) return false
-      if (!exports$27.isInteger(min) || !exports$27.isInteger(max)) return false
+      if (!exports$14.isInteger(min) || !exports$14.isInteger(max)) return false
       return (Number(max) - Number(min)) / Number(step) >= limit
     }
     /**
      * Escape the given node with '' before node.value.
      */
-    exports$27.escapeNode = (block, n = 0, type) => {
+    exports$14.escapeNode = (block, n = 0, type) => {
       const node = block.nodes[n]
       if (!node) return
       if (
@@ -8035,7 +8000,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
      * Returns true if the given brace node should be enclosed in literal
      * braces.
      */
-    exports$27.encloseBrace = node => {
+    exports$14.encloseBrace = node => {
       if (node.type !== 'brace') return false
       if ((node.commas >> (0 + node.ranges)) >> 0 === 0) {
         node.invalid = true
@@ -8046,7 +8011,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     /**
      * Returns true if a brace node is invalid.
      */
-    exports$27.isInvalidBrace = block => {
+    exports$14.isInvalidBrace = block => {
       if (block.type !== 'brace') return false
       if (block.invalid === true || block.dollar) return true
       if ((block.commas >> (0 + block.ranges)) >> 0 === 0) {
@@ -8062,14 +8027,14 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     /**
      * Returns true if a node is an open or close node.
      */
-    exports$27.isOpenOrClose = node => {
+    exports$14.isOpenOrClose = node => {
       if (node.type === 'open' || node.type === 'close') return true
       return node.open === true || node.close === true
     }
     /**
      * Reduce an array of text nodes.
      */
-    exports$27.reduce = nodes =>
+    exports$14.reduce = nodes =>
       nodes.reduce((acc, node) => {
         if (node.type === 'text') acc.push(node.value)
         if (node.type === 'range') node.type = 'text'
@@ -8078,7 +8043,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     /**
      * Flatten an array.
      */
-    exports$27.flatten = (...args) => {
+    exports$14.flatten = (...args) => {
       const result = []
       const flat = arr => {
         for (let i = 0; i < arr.length; i++) {
@@ -8096,9 +8061,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
   })
   var require_stringify = /* @__PURE__ */ __commonJSMin(
-    (exports$28, module$21) => {
+    (exports$15, module$10) => {
       const utils = require_utils$2()
-      module$21.exports = (ast, options = {}) => {
+      module$10.exports = (ast, options = {}) => {
         const stringify = (node, parent = {}) => {
           const invalidBlock =
             options.escapeInvalid && utils.isInvalidBrace(parent)
@@ -8126,8 +8091,8 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
    * Released under the MIT License.
    */
   var require_is_number = /* @__PURE__ */ __commonJSMin(
-    (exports$29, module$22) => {
-      module$22.exports = function (num) {
+    (exports$16, module$11) => {
+      module$11.exports = function (num) {
         if (typeof num === 'number') return num - num === 0
         if (typeof num === 'string' && _p_StringPrototypeTrim(num) !== '')
           return Number.isFinite ? _p_NumberIsFinite(+num) : isFinite(+num)
@@ -8142,7 +8107,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
    * Released under the MIT License.
    */
   var require_to_regex_range = /* @__PURE__ */ __commonJSMin(
-    (exports$30, module$23) => {
+    (exports$17, module$12) => {
       const isNumber = require_is_number()
       const toRegexRange = (min, max, options) => {
         if (isNumber(min) === false)
@@ -8356,7 +8321,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       /**
        * Expose `toRegexRange`
        */
-      module$23.exports = toRegexRange
+      module$12.exports = toRegexRange
     },
   )
   /*!
@@ -8366,7 +8331,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
    * Licensed under the MIT License.
    */
   var require_fill_range = /* @__PURE__ */ __commonJSMin(
-    (exports$31, module$24) => {
+    (exports$18, module$13) => {
       const util$1 = __require('util')
       const toRegexRange = require_to_regex_range()
       const isObject = val =>
@@ -8564,11 +8529,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           return fillNumbers(start, end, step, opts)
         return fillLetters(start, end, _p_MathMax(_p_MathAbs(step), 1), opts)
       }
-      module$24.exports = fill
+      module$13.exports = fill
     },
   )
   var require_compile = /* @__PURE__ */ __commonJSMin(
-    (exports$32, module$25) => {
+    (exports$19, module$14) => {
       const fill = require_fill_range()
       const utils = require_utils$2()
       const compile = (ast, options = {}) => {
@@ -8606,11 +8571,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         }
         return walk(ast)
       }
-      module$25.exports = compile
+      module$14.exports = compile
     },
   )
   var require_expand = /* @__PURE__ */ __commonJSMin(
-    (exports$33, module$26) => {
+    (exports$20, module$15) => {
       const fill = require_fill_range()
       const stringify = require_stringify()
       const utils = require_utils$2()
@@ -8700,12 +8665,12 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         }
         return utils.flatten(walk(ast))
       }
-      module$26.exports = expand
+      module$15.exports = expand
     },
   )
   var require_constants$1 = /* @__PURE__ */ __commonJSMin(
-    (exports$34, module$27) => {
-      module$27.exports = {
+    (exports$21, module$16) => {
+      module$16.exports = {
         MAX_LENGTH: 1e4,
         CHAR_0: '0',
         CHAR_9: '9',
@@ -8754,7 +8719,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
     },
   )
-  var require_parse = /* @__PURE__ */ __commonJSMin((exports$35, module$28) => {
+  var require_parse = /* @__PURE__ */ __commonJSMin((exports$22, module$17) => {
     const stringify = require_stringify()
     /**
      * Constants.
@@ -9073,10 +9038,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       push({ type: 'eos' })
       return ast
     }
-    module$28.exports = parse
+    module$17.exports = parse
   })
   var require_braces = /* @__PURE__ */ __commonJSMin(
-    (exports$36, module$29) => {
+    (exports$23, module$18) => {
       const stringify = require_stringify()
       const compile = require_compile()
       const expand = require_expand()
@@ -9226,11 +9191,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       /**
        * Expose "braces"
        */
-      module$29.exports = braces
+      module$18.exports = braces
     },
   )
   var require_micromatch = /* @__PURE__ */ __commonJSMin(
-    (exports$37, module$30) => {
+    (exports$24, module$19) => {
       const util = __require('util')
       const braces = require_braces()
       const picomatch = require_picomatch()
@@ -9724,35 +9689,35 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
        * Expose micromatch.
        */
       micromatch.hasBraces = hasBraces
-      module$30.exports = micromatch
+      module$19.exports = micromatch
     },
   )
-  var require_pattern = /* @__PURE__ */ __commonJSMin(exports$38 => {
-    _p_ObjectDefineProperty(exports$38, '__esModule', { value: true })
-    exports$38.isAbsolute =
-      exports$38.partitionAbsoluteAndRelative =
-      exports$38.removeDuplicateSlashes =
-      exports$38.matchAny =
-      exports$38.convertPatternsToRe =
-      exports$38.makeRe =
-      exports$38.getPatternParts =
-      exports$38.expandBraceExpansion =
-      exports$38.expandPatternsWithBraceExpansion =
-      exports$38.isAffectDepthOfReadingPattern =
-      exports$38.endsWithSlashGlobStar =
-      exports$38.hasGlobStar =
-      exports$38.getBaseDirectory =
-      exports$38.isPatternRelatedToParentDirectory =
-      exports$38.getPatternsOutsideCurrentDirectory =
-      exports$38.getPatternsInsideCurrentDirectory =
-      exports$38.getPositivePatterns =
-      exports$38.getNegativePatterns =
-      exports$38.isPositivePattern =
-      exports$38.isNegativePattern =
-      exports$38.convertToNegativePattern =
-      exports$38.convertToPositivePattern =
-      exports$38.isDynamicPattern =
-      exports$38.isStaticPattern =
+  var require_pattern = /* @__PURE__ */ __commonJSMin(exports$25 => {
+    _p_ObjectDefineProperty(exports$25, '__esModule', { value: true })
+    exports$25.isAbsolute =
+      exports$25.partitionAbsoluteAndRelative =
+      exports$25.removeDuplicateSlashes =
+      exports$25.matchAny =
+      exports$25.convertPatternsToRe =
+      exports$25.makeRe =
+      exports$25.getPatternParts =
+      exports$25.expandBraceExpansion =
+      exports$25.expandPatternsWithBraceExpansion =
+      exports$25.isAffectDepthOfReadingPattern =
+      exports$25.endsWithSlashGlobStar =
+      exports$25.hasGlobStar =
+      exports$25.getBaseDirectory =
+      exports$25.isPatternRelatedToParentDirectory =
+      exports$25.getPatternsOutsideCurrentDirectory =
+      exports$25.getPatternsInsideCurrentDirectory =
+      exports$25.getPositivePatterns =
+      exports$25.getNegativePatterns =
+      exports$25.isPositivePattern =
+      exports$25.isNegativePattern =
+      exports$25.convertToNegativePattern =
+      exports$25.convertToPositivePattern =
+      exports$25.isDynamicPattern =
+      exports$25.isStaticPattern =
         void 0
     const path$10 = __require('path')
     const globParent = require_glob_parent()
@@ -9773,7 +9738,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     function isStaticPattern(pattern, options = {}) {
       return !isDynamicPattern(pattern, options)
     }
-    exports$38.isStaticPattern = isStaticPattern
+    exports$25.isStaticPattern = isStaticPattern
     function isDynamicPattern(pattern, options = {}) {
       /**
        * A special case with an empty string is necessary for matching patterns
@@ -9804,7 +9769,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return true
       return false
     }
-    exports$38.isDynamicPattern = isDynamicPattern
+    exports$25.isDynamicPattern = isDynamicPattern
     function hasBraceExpansion(pattern) {
       const openingBraceIndex = pattern.indexOf('{')
       if (openingBraceIndex === -1) return false
@@ -9816,27 +9781,27 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     function convertToPositivePattern(pattern) {
       return isNegativePattern(pattern) ? pattern.slice(1) : pattern
     }
-    exports$38.convertToPositivePattern = convertToPositivePattern
+    exports$25.convertToPositivePattern = convertToPositivePattern
     function convertToNegativePattern(pattern) {
       return '!' + pattern
     }
-    exports$38.convertToNegativePattern = convertToNegativePattern
+    exports$25.convertToNegativePattern = convertToNegativePattern
     function isNegativePattern(pattern) {
       return _p_StringPrototypeStartsWith(pattern, '!') && pattern[1] !== '('
     }
-    exports$38.isNegativePattern = isNegativePattern
+    exports$25.isNegativePattern = isNegativePattern
     function isPositivePattern(pattern) {
       return !isNegativePattern(pattern)
     }
-    exports$38.isPositivePattern = isPositivePattern
+    exports$25.isPositivePattern = isPositivePattern
     function getNegativePatterns(patterns) {
       return patterns.filter(isNegativePattern)
     }
-    exports$38.getNegativePatterns = getNegativePatterns
+    exports$25.getNegativePatterns = getNegativePatterns
     function getPositivePatterns(patterns) {
       return patterns.filter(isPositivePattern)
     }
-    exports$38.getPositivePatterns = getPositivePatterns
+    exports$25.getPositivePatterns = getPositivePatterns
     /**
      * Returns patterns that can be applied inside the current directory.
      *
@@ -9849,7 +9814,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         pattern => !isPatternRelatedToParentDirectory(pattern),
       )
     }
-    exports$38.getPatternsInsideCurrentDirectory =
+    exports$25.getPatternsInsideCurrentDirectory =
       getPatternsInsideCurrentDirectory
     /**
      * Returns patterns to be expanded relative to (outside) the current
@@ -9862,7 +9827,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     function getPatternsOutsideCurrentDirectory(patterns) {
       return patterns.filter(isPatternRelatedToParentDirectory)
     }
-    exports$38.getPatternsOutsideCurrentDirectory =
+    exports$25.getPatternsOutsideCurrentDirectory =
       getPatternsOutsideCurrentDirectory
     function isPatternRelatedToParentDirectory(pattern) {
       return (
@@ -9870,31 +9835,31 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         _p_StringPrototypeStartsWith(pattern, './..')
       )
     }
-    exports$38.isPatternRelatedToParentDirectory =
+    exports$25.isPatternRelatedToParentDirectory =
       isPatternRelatedToParentDirectory
     function getBaseDirectory(pattern) {
       return globParent(pattern, { flipBackslashes: false })
     }
-    exports$38.getBaseDirectory = getBaseDirectory
+    exports$25.getBaseDirectory = getBaseDirectory
     function hasGlobStar(pattern) {
       return pattern.includes(GLOBSTAR)
     }
-    exports$38.hasGlobStar = hasGlobStar
+    exports$25.hasGlobStar = hasGlobStar
     function endsWithSlashGlobStar(pattern) {
       return _p_StringPrototypeEndsWith(pattern, '/**')
     }
-    exports$38.endsWithSlashGlobStar = endsWithSlashGlobStar
+    exports$25.endsWithSlashGlobStar = endsWithSlashGlobStar
     function isAffectDepthOfReadingPattern(pattern) {
       const basename = path$10.basename(pattern)
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename)
     }
-    exports$38.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern
+    exports$25.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern
     function expandPatternsWithBraceExpansion(patterns) {
       return patterns.reduce((collection, pattern) => {
         return collection.concat(expandBraceExpansion(pattern))
       }, [])
     }
-    exports$38.expandPatternsWithBraceExpansion =
+    exports$25.expandPatternsWithBraceExpansion =
       expandPatternsWithBraceExpansion
     function expandBraceExpansion(pattern) {
       const patterns = micromatch.braces(pattern, {
@@ -9914,7 +9879,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
        */
       return patterns.filter(pattern => pattern !== '')
     }
-    exports$38.expandBraceExpansion = expandBraceExpansion
+    exports$25.expandBraceExpansion = expandBraceExpansion
     function getPatternParts(pattern, options) {
       let { parts } = micromatch.scan(
         pattern,
@@ -9935,19 +9900,19 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       return parts
     }
-    exports$38.getPatternParts = getPatternParts
+    exports$25.getPatternParts = getPatternParts
     function makeRe(pattern, options) {
       return micromatch.makeRe(pattern, options)
     }
-    exports$38.makeRe = makeRe
+    exports$25.makeRe = makeRe
     function convertPatternsToRe(patterns, options) {
       return patterns.map(pattern => makeRe(pattern, options))
     }
-    exports$38.convertPatternsToRe = convertPatternsToRe
+    exports$25.convertPatternsToRe = convertPatternsToRe
     function matchAny(entry, patternsRe) {
       return patternsRe.some(patternRe => patternRe.test(entry))
     }
-    exports$38.matchAny = matchAny
+    exports$25.matchAny = matchAny
     /**
      * This package only works with forward slashes as a path separator. Because
      * of this, we cannot use the standard `path.normalize` method, because on
@@ -9956,7 +9921,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     function removeDuplicateSlashes(pattern) {
       return pattern.replace(DOUBLE_SLASH_RE, '/')
     }
-    exports$38.removeDuplicateSlashes = removeDuplicateSlashes
+    exports$25.removeDuplicateSlashes = removeDuplicateSlashes
     function partitionAbsoluteAndRelative(patterns) {
       const absolute = []
       const relative = []
@@ -9965,17 +9930,17 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         else relative.push(pattern)
       return [absolute, relative]
     }
-    exports$38.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative
+    exports$25.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative
     function isAbsolute(pattern) {
       return path$10.isAbsolute(pattern)
     }
-    exports$38.isAbsolute = isAbsolute
+    exports$25.isAbsolute = isAbsolute
   })
   var require_merge2 = /* @__PURE__ */ __commonJSMin(
-    (exports$39, module$31) => {
+    (exports$26, module$20) => {
       const PassThrough = __require('stream').PassThrough
       const slice = Array.prototype.slice
-      module$31.exports = merge2
+      module$20.exports = merge2
       function merge2() {
         const streamsQueue = []
         const args = slice.call(arguments)
@@ -10057,9 +10022,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
     },
   )
-  var require_stream$3 = /* @__PURE__ */ __commonJSMin(exports$40 => {
-    _p_ObjectDefineProperty(exports$40, '__esModule', { value: true })
-    exports$40.merge = void 0
+  var require_stream$3 = /* @__PURE__ */ __commonJSMin(exports$27 => {
+    _p_ObjectDefineProperty(exports$27, '__esModule', { value: true })
+    exports$27.merge = void 0
     const merge2 = require_merge2()
     function merge(streams) {
       const mergedStream = merge2(streams)
@@ -10070,50 +10035,50 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       mergedStream.once('end', () => propagateCloseEventToSources(streams))
       return mergedStream
     }
-    exports$40.merge = merge
+    exports$27.merge = merge
     function propagateCloseEventToSources(streams) {
       streams.forEach(stream => stream.emit('close'))
     }
   })
-  var require_string = /* @__PURE__ */ __commonJSMin(exports$41 => {
-    _p_ObjectDefineProperty(exports$41, '__esModule', { value: true })
-    exports$41.isEmpty = exports$41.isString = void 0
+  var require_string = /* @__PURE__ */ __commonJSMin(exports$28 => {
+    _p_ObjectDefineProperty(exports$28, '__esModule', { value: true })
+    exports$28.isEmpty = exports$28.isString = void 0
     function isString(input) {
       return typeof input === 'string'
     }
-    exports$41.isString = isString
+    exports$28.isString = isString
     function isEmpty(input) {
       return input === ''
     }
-    exports$41.isEmpty = isEmpty
+    exports$28.isEmpty = isEmpty
   })
-  var require_utils$1 = /* @__PURE__ */ __commonJSMin(exports$42 => {
-    _p_ObjectDefineProperty(exports$42, '__esModule', { value: true })
-    exports$42.string =
-      exports$42.stream =
-      exports$42.pattern =
-      exports$42.path =
-      exports$42.fs =
-      exports$42.errno =
-      exports$42.array =
+  var require_utils$1 = /* @__PURE__ */ __commonJSMin(exports$29 => {
+    _p_ObjectDefineProperty(exports$29, '__esModule', { value: true })
+    exports$29.string =
+      exports$29.stream =
+      exports$29.pattern =
+      exports$29.path =
+      exports$29.fs =
+      exports$29.errno =
+      exports$29.array =
         void 0
-    exports$42.array = require_array$1()
-    exports$42.errno = require_errno()
-    exports$42.fs = require_fs$3()
-    exports$42.path = require_path()
-    exports$42.pattern = require_pattern()
-    exports$42.stream = require_stream$3()
-    exports$42.string = require_string()
+    exports$29.array = require_array$1()
+    exports$29.errno = require_errno()
+    exports$29.fs = require_fs$3()
+    exports$29.path = require_path()
+    exports$29.pattern = require_pattern()
+    exports$29.stream = require_stream$3()
+    exports$29.string = require_string()
   })
-  var require_tasks = /* @__PURE__ */ __commonJSMin(exports$43 => {
-    _p_ObjectDefineProperty(exports$43, '__esModule', { value: true })
-    exports$43.convertPatternGroupToTask =
-      exports$43.convertPatternGroupsToTasks =
-      exports$43.groupPatternsByBaseDirectory =
-      exports$43.getNegativePatternsAsPositive =
-      exports$43.getPositivePatterns =
-      exports$43.convertPatternsToTasks =
-      exports$43.generate =
+  var require_tasks = /* @__PURE__ */ __commonJSMin(exports$30 => {
+    _p_ObjectDefineProperty(exports$30, '__esModule', { value: true })
+    exports$30.convertPatternGroupToTask =
+      exports$30.convertPatternGroupsToTasks =
+      exports$30.groupPatternsByBaseDirectory =
+      exports$30.getNegativePatternsAsPositive =
+      exports$30.getPositivePatterns =
+      exports$30.convertPatternsToTasks =
+      exports$30.generate =
         void 0
     const utils = require_utils$1()
     function generate(input, settings) {
@@ -10139,7 +10104,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       )
       return staticTasks.concat(dynamicTasks)
     }
-    exports$43.generate = generate
+    exports$30.generate = generate
     function processPatterns(input, settings) {
       let patterns = input
       /**
@@ -10219,18 +10184,18 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         )
       return tasks
     }
-    exports$43.convertPatternsToTasks = convertPatternsToTasks
+    exports$30.convertPatternsToTasks = convertPatternsToTasks
     function getPositivePatterns(patterns) {
       return utils.pattern.getPositivePatterns(patterns)
     }
-    exports$43.getPositivePatterns = getPositivePatterns
+    exports$30.getPositivePatterns = getPositivePatterns
     function getNegativePatternsAsPositive(patterns, ignore) {
       return utils.pattern
         .getNegativePatterns(patterns)
         .concat(ignore)
         .map(utils.pattern.convertToPositivePattern)
     }
-    exports$43.getNegativePatternsAsPositive = getNegativePatternsAsPositive
+    exports$30.getNegativePatternsAsPositive = getNegativePatternsAsPositive
     function groupPatternsByBaseDirectory(patterns) {
       return patterns.reduce((collection, pattern) => {
         const base = utils.pattern.getBaseDirectory(pattern)
@@ -10239,7 +10204,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return collection
       }, {})
     }
-    exports$43.groupPatternsByBaseDirectory = groupPatternsByBaseDirectory
+    exports$30.groupPatternsByBaseDirectory = groupPatternsByBaseDirectory
     function convertPatternGroupsToTasks(positive, negative, dynamic) {
       return _p_ObjectKeys(positive).map(base => {
         return convertPatternGroupToTask(
@@ -10250,7 +10215,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         )
       })
     }
-    exports$43.convertPatternGroupsToTasks = convertPatternGroupsToTasks
+    exports$30.convertPatternGroupsToTasks = convertPatternGroupsToTasks
     function convertPatternGroupToTask(base, positive, negative, dynamic) {
       return {
         dynamic,
@@ -10263,11 +10228,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         ),
       }
     }
-    exports$43.convertPatternGroupToTask = convertPatternGroupToTask
+    exports$30.convertPatternGroupToTask = convertPatternGroupToTask
   })
-  var require_async$5 = /* @__PURE__ */ __commonJSMin(exports$44 => {
-    _p_ObjectDefineProperty(exports$44, '__esModule', { value: true })
-    exports$44.read = void 0
+  var require_async$5 = /* @__PURE__ */ __commonJSMin(exports$31 => {
+    _p_ObjectDefineProperty(exports$31, '__esModule', { value: true })
+    exports$31.read = void 0
     function read(path, settings, callback) {
       settings.fs.lstat(path, (lstatError, lstat) => {
         if (lstatError !== null) {
@@ -10292,7 +10257,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         })
       })
     }
-    exports$44.read = read
+    exports$31.read = read
     function callFailureCallback(callback, error) {
       callback(error)
     }
@@ -10300,9 +10265,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       callback(null, result)
     }
   })
-  var require_sync$5 = /* @__PURE__ */ __commonJSMin(exports$45 => {
-    _p_ObjectDefineProperty(exports$45, '__esModule', { value: true })
-    exports$45.read = void 0
+  var require_sync$5 = /* @__PURE__ */ __commonJSMin(exports$32 => {
+    _p_ObjectDefineProperty(exports$32, '__esModule', { value: true })
+    exports$32.read = void 0
     function read(path, settings) {
       const lstat = settings.fs.lstatSync(path)
       if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) return lstat
@@ -10315,29 +10280,29 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         throw error
       }
     }
-    exports$45.read = read
+    exports$32.read = read
   })
-  var require_fs$2 = /* @__PURE__ */ __commonJSMin(exports$46 => {
-    _p_ObjectDefineProperty(exports$46, '__esModule', { value: true })
-    exports$46.createFileSystemAdapter = exports$46.FILE_SYSTEM_ADAPTER = void 0
+  var require_fs$2 = /* @__PURE__ */ __commonJSMin(exports$33 => {
+    _p_ObjectDefineProperty(exports$33, '__esModule', { value: true })
+    exports$33.createFileSystemAdapter = exports$33.FILE_SYSTEM_ADAPTER = void 0
     const fs$6 = __require('fs')
-    exports$46.FILE_SYSTEM_ADAPTER = {
+    exports$33.FILE_SYSTEM_ADAPTER = {
       lstat: fs$6.lstat,
       stat: fs$6.stat,
       lstatSync: fs$6.lstatSync,
       statSync: fs$6.statSync,
     }
     function createFileSystemAdapter(fsMethods) {
-      if (fsMethods === void 0) return exports$46.FILE_SYSTEM_ADAPTER
+      if (fsMethods === void 0) return exports$33.FILE_SYSTEM_ADAPTER
       return _p_ObjectAssign(
-        _p_ObjectAssign({}, exports$46.FILE_SYSTEM_ADAPTER),
+        _p_ObjectAssign({}, exports$33.FILE_SYSTEM_ADAPTER),
         fsMethods,
       )
     }
-    exports$46.createFileSystemAdapter = createFileSystemAdapter
+    exports$33.createFileSystemAdapter = createFileSystemAdapter
   })
-  var require_settings$3 = /* @__PURE__ */ __commonJSMin(exports$47 => {
-    _p_ObjectDefineProperty(exports$47, '__esModule', { value: true })
+  var require_settings$3 = /* @__PURE__ */ __commonJSMin(exports$34 => {
+    _p_ObjectDefineProperty(exports$34, '__esModule', { value: true })
     const fs = require_fs$2()
     var Settings = class {
       constructor(_options = {}) {
@@ -10360,15 +10325,15 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return option !== null && option !== void 0 ? option : value
       }
     }
-    exports$47.default = Settings
+    exports$34.default = Settings
   })
-  var require_out$3 = /* @__PURE__ */ __commonJSMin(exports$48 => {
-    _p_ObjectDefineProperty(exports$48, '__esModule', { value: true })
-    exports$48.statSync = exports$48.stat = exports$48.Settings = void 0
+  var require_out$3 = /* @__PURE__ */ __commonJSMin(exports$35 => {
+    _p_ObjectDefineProperty(exports$35, '__esModule', { value: true })
+    exports$35.statSync = exports$35.stat = exports$35.Settings = void 0
     const async = require_async$5()
     const sync = require_sync$5()
     const settings_1 = require_settings$3()
-    exports$48.Settings = settings_1.default
+    exports$35.Settings = settings_1.default
     function stat(path, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === 'function') {
         async.read(path, getSettings(), optionsOrSettingsOrCallback)
@@ -10376,12 +10341,12 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       async.read(path, getSettings(optionsOrSettingsOrCallback), callback)
     }
-    exports$48.stat = stat
+    exports$35.stat = stat
     function statSync(path, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings)
       return sync.read(path, settings)
     }
-    exports$48.statSync = statSync
+    exports$35.statSync = statSync
     function getSettings(settingsOrOptions = {}) {
       if (settingsOrOptions instanceof settings_1.default)
         return settingsOrOptions
@@ -10389,10 +10354,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
   })
   var require_queue_microtask = /* @__PURE__ */ __commonJSMin(
-    (exports$49, module$32) => {
+    (exports$36, module$21) => {
       /*! queue-microtask. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
       let promise
-      module$32.exports =
+      module$21.exports =
         typeof queueMicrotask === 'function'
           ? queueMicrotask.bind(typeof window !== 'undefined' ? void 0 : global)
           : cb =>
@@ -10404,9 +10369,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     },
   )
   var require_run_parallel = /* @__PURE__ */ __commonJSMin(
-    (exports$50, module$33) => {
+    (exports$37, module$22) => {
       /*! run-parallel. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
-      module$33.exports = runParallel
+      module$22.exports = runParallel
       const queueMicrotask = require_queue_microtask()
       function runParallel(tasks, cb) {
         let results
@@ -10450,9 +10415,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
     },
   )
-  var require_constants = /* @__PURE__ */ __commonJSMin(exports$51 => {
-    _p_ObjectDefineProperty(exports$51, '__esModule', { value: true })
-    exports$51.IS_SUPPORT_READDIR_WITH_FILE_TYPES = void 0
+  var require_constants = /* @__PURE__ */ __commonJSMin(exports$38 => {
+    _p_ObjectDefineProperty(exports$38, '__esModule', { value: true })
+    exports$38.IS_SUPPORT_READDIR_WITH_FILE_TYPES = void 0
     const NODE_PROCESS_VERSION_PARTS = process.versions.node.split('.')
     if (
       NODE_PROCESS_VERSION_PARTS[0] === void 0 ||
@@ -10467,13 +10432,13 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     /**
      * IS `true` for Node.js 10.10 and greater.
      */
-    exports$51.IS_SUPPORT_READDIR_WITH_FILE_TYPES =
+    exports$38.IS_SUPPORT_READDIR_WITH_FILE_TYPES =
       MAJOR_VERSION > SUPPORTED_MAJOR_VERSION ||
       (MAJOR_VERSION === SUPPORTED_MAJOR_VERSION && MINOR_VERSION >= 10)
   })
-  var require_fs$1 = /* @__PURE__ */ __commonJSMin(exports$52 => {
-    _p_ObjectDefineProperty(exports$52, '__esModule', { value: true })
-    exports$52.createDirentFromStats = void 0
+  var require_fs$1 = /* @__PURE__ */ __commonJSMin(exports$39 => {
+    _p_ObjectDefineProperty(exports$39, '__esModule', { value: true })
+    exports$39.createDirentFromStats = void 0
     var DirentFromStats = class {
       constructor(name, stats) {
         this.name = name
@@ -10489,16 +10454,16 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     function createDirentFromStats(name, stats) {
       return new DirentFromStats(name, stats)
     }
-    exports$52.createDirentFromStats = createDirentFromStats
+    exports$39.createDirentFromStats = createDirentFromStats
   })
-  var require_utils = /* @__PURE__ */ __commonJSMin(exports$53 => {
-    _p_ObjectDefineProperty(exports$53, '__esModule', { value: true })
-    exports$53.fs = void 0
-    exports$53.fs = require_fs$1()
+  var require_utils = /* @__PURE__ */ __commonJSMin(exports$40 => {
+    _p_ObjectDefineProperty(exports$40, '__esModule', { value: true })
+    exports$40.fs = void 0
+    exports$40.fs = require_fs$1()
   })
-  var require_common$1 = /* @__PURE__ */ __commonJSMin(exports$54 => {
-    _p_ObjectDefineProperty(exports$54, '__esModule', { value: true })
-    exports$54.joinPathSegments = void 0
+  var require_common$1 = /* @__PURE__ */ __commonJSMin(exports$41 => {
+    _p_ObjectDefineProperty(exports$41, '__esModule', { value: true })
+    exports$41.joinPathSegments = void 0
     function joinPathSegments(a, b, separator) {
       /**
        * The correct handling of cases when the first segment is a root (`/`,
@@ -10507,13 +10472,13 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       if (_p_StringPrototypeEndsWith(a, separator)) return a + b
       return a + separator + b
     }
-    exports$54.joinPathSegments = joinPathSegments
+    exports$41.joinPathSegments = joinPathSegments
   })
-  var require_async$4 = /* @__PURE__ */ __commonJSMin(exports$55 => {
-    _p_ObjectDefineProperty(exports$55, '__esModule', { value: true })
-    exports$55.readdir =
-      exports$55.readdirWithFileTypes =
-      exports$55.read =
+  var require_async$4 = /* @__PURE__ */ __commonJSMin(exports$42 => {
+    _p_ObjectDefineProperty(exports$42, '__esModule', { value: true })
+    exports$42.readdir =
+      exports$42.readdirWithFileTypes =
+      exports$42.read =
         void 0
     const fsStat = require_out$3()
     const rpl = require_run_parallel()
@@ -10527,7 +10492,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       readdir(directory, settings, callback)
     }
-    exports$55.read = read
+    exports$42.read = read
     function readdirWithFileTypes(directory, settings, callback) {
       settings.fs.readdir(
         directory,
@@ -10561,7 +10526,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         },
       )
     }
-    exports$55.readdirWithFileTypes = readdirWithFileTypes
+    exports$42.readdirWithFileTypes = readdirWithFileTypes
     function makeRplTaskEntry(entry, settings) {
       return done => {
         if (!entry.dirent.isSymbolicLink()) {
@@ -10619,7 +10584,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         })
       })
     }
-    exports$55.readdir = readdir
+    exports$42.readdir = readdir
     function callFailureCallback(callback, error) {
       callback(error)
     }
@@ -10627,11 +10592,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       callback(null, result)
     }
   })
-  var require_sync$4 = /* @__PURE__ */ __commonJSMin(exports$56 => {
-    _p_ObjectDefineProperty(exports$56, '__esModule', { value: true })
-    exports$56.readdir =
-      exports$56.readdirWithFileTypes =
-      exports$56.read =
+  var require_sync$4 = /* @__PURE__ */ __commonJSMin(exports$43 => {
+    _p_ObjectDefineProperty(exports$43, '__esModule', { value: true })
+    exports$43.readdir =
+      exports$43.readdirWithFileTypes =
+      exports$43.read =
         void 0
     const fsStat = require_out$3()
     const constants_1 = require_constants()
@@ -10642,7 +10607,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return readdirWithFileTypes(directory, settings)
       return readdir(directory, settings)
     }
-    exports$56.read = read
+    exports$43.read = read
     function readdirWithFileTypes(directory, settings) {
       return settings.fs
         .readdirSync(directory, { withFileTypes: true })
@@ -10666,7 +10631,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           return entry
         })
     }
-    exports$56.readdirWithFileTypes = readdirWithFileTypes
+    exports$43.readdirWithFileTypes = readdirWithFileTypes
     function readdir(directory, settings) {
       return settings.fs.readdirSync(directory).map(name => {
         const entryPath = common.joinPathSegments(
@@ -10684,13 +10649,13 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return entry
       })
     }
-    exports$56.readdir = readdir
+    exports$43.readdir = readdir
   })
-  var require_fs = /* @__PURE__ */ __commonJSMin(exports$57 => {
-    _p_ObjectDefineProperty(exports$57, '__esModule', { value: true })
-    exports$57.createFileSystemAdapter = exports$57.FILE_SYSTEM_ADAPTER = void 0
+  var require_fs = /* @__PURE__ */ __commonJSMin(exports$44 => {
+    _p_ObjectDefineProperty(exports$44, '__esModule', { value: true })
+    exports$44.createFileSystemAdapter = exports$44.FILE_SYSTEM_ADAPTER = void 0
     const fs$5 = __require('fs')
-    exports$57.FILE_SYSTEM_ADAPTER = {
+    exports$44.FILE_SYSTEM_ADAPTER = {
       lstat: fs$5.lstat,
       stat: fs$5.stat,
       lstatSync: fs$5.lstatSync,
@@ -10699,16 +10664,16 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       readdirSync: fs$5.readdirSync,
     }
     function createFileSystemAdapter(fsMethods) {
-      if (fsMethods === void 0) return exports$57.FILE_SYSTEM_ADAPTER
+      if (fsMethods === void 0) return exports$44.FILE_SYSTEM_ADAPTER
       return _p_ObjectAssign(
-        _p_ObjectAssign({}, exports$57.FILE_SYSTEM_ADAPTER),
+        _p_ObjectAssign({}, exports$44.FILE_SYSTEM_ADAPTER),
         fsMethods,
       )
     }
-    exports$57.createFileSystemAdapter = createFileSystemAdapter
+    exports$44.createFileSystemAdapter = createFileSystemAdapter
   })
-  var require_settings$2 = /* @__PURE__ */ __commonJSMin(exports$58 => {
-    _p_ObjectDefineProperty(exports$58, '__esModule', { value: true })
+  var require_settings$2 = /* @__PURE__ */ __commonJSMin(exports$45 => {
+    _p_ObjectDefineProperty(exports$45, '__esModule', { value: true })
     const path$9 = __require('path')
     const fsStat = require_out$3()
     const fs = require_fs()
@@ -10739,15 +10704,15 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return option !== null && option !== void 0 ? option : value
       }
     }
-    exports$58.default = Settings
+    exports$45.default = Settings
   })
-  var require_out$2 = /* @__PURE__ */ __commonJSMin(exports$59 => {
-    _p_ObjectDefineProperty(exports$59, '__esModule', { value: true })
-    exports$59.Settings = exports$59.scandirSync = exports$59.scandir = void 0
+  var require_out$2 = /* @__PURE__ */ __commonJSMin(exports$46 => {
+    _p_ObjectDefineProperty(exports$46, '__esModule', { value: true })
+    exports$46.Settings = exports$46.scandirSync = exports$46.scandir = void 0
     const async = require_async$4()
     const sync = require_sync$4()
     const settings_1 = require_settings$2()
-    exports$59.Settings = settings_1.default
+    exports$46.Settings = settings_1.default
     function scandir(path, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === 'function') {
         async.read(path, getSettings(), optionsOrSettingsOrCallback)
@@ -10755,12 +10720,12 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       async.read(path, getSettings(optionsOrSettingsOrCallback), callback)
     }
-    exports$59.scandir = scandir
+    exports$46.scandir = scandir
     function scandirSync(path, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings)
       return sync.read(path, settings)
     }
-    exports$59.scandirSync = scandirSync
+    exports$46.scandirSync = scandirSync
     function getSettings(settingsOrOptions = {}) {
       if (settingsOrOptions instanceof settings_1.default)
         return settingsOrOptions
@@ -10768,7 +10733,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
   })
   var require_reusify = /* @__PURE__ */ __commonJSMin(
-    (exports$60, module$34) => {
+    (exports$47, module$23) => {
       function reusify(Constructor) {
         var head = new Constructor()
         var tail = head
@@ -10791,10 +10756,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           release,
         }
       }
-      module$34.exports = reusify
+      module$23.exports = reusify
     },
   )
-  var require_queue = /* @__PURE__ */ __commonJSMin((exports$61, module$35) => {
+  var require_queue = /* @__PURE__ */ __commonJSMin((exports$48, module$24) => {
     var reusify = require_reusify()
     function fastqueue(context, worker, _concurrency) {
       if (typeof context === 'function') {
@@ -11056,29 +11021,29 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         })
       }
     }
-    module$35.exports = fastqueue
-    module$35.exports.promise = queueAsPromised
+    module$24.exports = fastqueue
+    module$24.exports.promise = queueAsPromised
   })
-  var require_common = /* @__PURE__ */ __commonJSMin(exports$62 => {
-    _p_ObjectDefineProperty(exports$62, '__esModule', { value: true })
-    exports$62.joinPathSegments =
-      exports$62.replacePathSegmentSeparator =
-      exports$62.isAppliedFilter =
-      exports$62.isFatalError =
+  var require_common = /* @__PURE__ */ __commonJSMin(exports$49 => {
+    _p_ObjectDefineProperty(exports$49, '__esModule', { value: true })
+    exports$49.joinPathSegments =
+      exports$49.replacePathSegmentSeparator =
+      exports$49.isAppliedFilter =
+      exports$49.isFatalError =
         void 0
     function isFatalError(settings, error) {
       if (settings.errorFilter === null) return true
       return !settings.errorFilter(error)
     }
-    exports$62.isFatalError = isFatalError
+    exports$49.isFatalError = isFatalError
     function isAppliedFilter(filter, value) {
       return filter === null || filter(value)
     }
-    exports$62.isAppliedFilter = isAppliedFilter
+    exports$49.isAppliedFilter = isAppliedFilter
     function replacePathSegmentSeparator(filepath, separator) {
       return filepath.split(/[/\\]/).join(separator)
     }
-    exports$62.replacePathSegmentSeparator = replacePathSegmentSeparator
+    exports$49.replacePathSegmentSeparator = replacePathSegmentSeparator
     function joinPathSegments(a, b, separator) {
       if (a === '') return b
       /**
@@ -11088,10 +11053,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       if (_p_StringPrototypeEndsWith(a, separator)) return a + b
       return a + separator + b
     }
-    exports$62.joinPathSegments = joinPathSegments
+    exports$49.joinPathSegments = joinPathSegments
   })
-  var require_reader$1 = /* @__PURE__ */ __commonJSMin(exports$63 => {
-    _p_ObjectDefineProperty(exports$63, '__esModule', { value: true })
+  var require_reader$1 = /* @__PURE__ */ __commonJSMin(exports$50 => {
+    _p_ObjectDefineProperty(exports$50, '__esModule', { value: true })
     const common = require_common()
     var Reader = class {
       constructor(_root, _settings) {
@@ -11103,10 +11068,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         )
       }
     }
-    exports$63.default = Reader
+    exports$50.default = Reader
   })
-  var require_async$3 = /* @__PURE__ */ __commonJSMin(exports$64 => {
-    _p_ObjectDefineProperty(exports$64, '__esModule', { value: true })
+  var require_async$3 = /* @__PURE__ */ __commonJSMin(exports$51 => {
+    _p_ObjectDefineProperty(exports$51, '__esModule', { value: true })
     const events_1 = __require('events')
     const fsScandir = require_out$2()
     const fastq = require_queue()
@@ -11202,10 +11167,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         this._emitter.emit('entry', entry)
       }
     }
-    exports$64.default = AsyncReader
+    exports$51.default = AsyncReader
   })
-  var require_async$2 = /* @__PURE__ */ __commonJSMin(exports$65 => {
-    _p_ObjectDefineProperty(exports$65, '__esModule', { value: true })
+  var require_async$2 = /* @__PURE__ */ __commonJSMin(exports$52 => {
+    _p_ObjectDefineProperty(exports$52, '__esModule', { value: true })
     const async_1 = require_async$3()
     var AsyncProvider = class {
       constructor(_root, _settings) {
@@ -11227,7 +11192,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         this._reader.read()
       }
     }
-    exports$65.default = AsyncProvider
+    exports$52.default = AsyncProvider
     function callFailureCallback(callback, error) {
       callback(error)
     }
@@ -11235,8 +11200,8 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       callback(null, entries)
     }
   })
-  var require_stream$2 = /* @__PURE__ */ __commonJSMin(exports$66 => {
-    _p_ObjectDefineProperty(exports$66, '__esModule', { value: true })
+  var require_stream$2 = /* @__PURE__ */ __commonJSMin(exports$53 => {
+    _p_ObjectDefineProperty(exports$53, '__esModule', { value: true })
     const stream_1$2 = __require('stream')
     const async_1 = require_async$3()
     var StreamProvider = class {
@@ -11266,10 +11231,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return this._stream
       }
     }
-    exports$66.default = StreamProvider
+    exports$53.default = StreamProvider
   })
-  var require_sync$3 = /* @__PURE__ */ __commonJSMin(exports$67 => {
-    _p_ObjectDefineProperty(exports$67, '__esModule', { value: true })
+  var require_sync$3 = /* @__PURE__ */ __commonJSMin(exports$54 => {
+    _p_ObjectDefineProperty(exports$54, '__esModule', { value: true })
     const fsScandir = require_out$2()
     const common = require_common()
     const reader_1 = require_reader$1()
@@ -11330,10 +11295,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         this._storage.push(entry)
       }
     }
-    exports$67.default = SyncReader
+    exports$54.default = SyncReader
   })
-  var require_sync$2 = /* @__PURE__ */ __commonJSMin(exports$68 => {
-    _p_ObjectDefineProperty(exports$68, '__esModule', { value: true })
+  var require_sync$2 = /* @__PURE__ */ __commonJSMin(exports$55 => {
+    _p_ObjectDefineProperty(exports$55, '__esModule', { value: true })
     const sync_1 = require_sync$3()
     var SyncProvider = class {
       constructor(_root, _settings) {
@@ -11345,10 +11310,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return this._reader.read()
       }
     }
-    exports$68.default = SyncProvider
+    exports$55.default = SyncProvider
   })
-  var require_settings$1 = /* @__PURE__ */ __commonJSMin(exports$69 => {
-    _p_ObjectDefineProperty(exports$69, '__esModule', { value: true })
+  var require_settings$1 = /* @__PURE__ */ __commonJSMin(exports$56 => {
+    _p_ObjectDefineProperty(exports$56, '__esModule', { value: true })
     const path$8 = __require('path')
     const fsScandir = require_out$2()
     var Settings = class {
@@ -11379,20 +11344,20 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return option !== null && option !== void 0 ? option : value
       }
     }
-    exports$69.default = Settings
+    exports$56.default = Settings
   })
-  var require_out$1 = /* @__PURE__ */ __commonJSMin(exports$70 => {
-    _p_ObjectDefineProperty(exports$70, '__esModule', { value: true })
-    exports$70.Settings =
-      exports$70.walkStream =
-      exports$70.walkSync =
-      exports$70.walk =
+  var require_out$1 = /* @__PURE__ */ __commonJSMin(exports$57 => {
+    _p_ObjectDefineProperty(exports$57, '__esModule', { value: true })
+    exports$57.Settings =
+      exports$57.walkStream =
+      exports$57.walkSync =
+      exports$57.walk =
         void 0
     const async_1 = require_async$2()
     const stream_1 = require_stream$2()
     const sync_1 = require_sync$2()
     const settings_1 = require_settings$1()
-    exports$70.Settings = settings_1.default
+    exports$57.Settings = settings_1.default
     function walk(directory, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === 'function') {
         new async_1.default(directory, getSettings()).read(
@@ -11405,25 +11370,25 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         getSettings(optionsOrSettingsOrCallback),
       ).read(callback)
     }
-    exports$70.walk = walk
+    exports$57.walk = walk
     function walkSync(directory, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings)
       return new sync_1.default(directory, settings).read()
     }
-    exports$70.walkSync = walkSync
+    exports$57.walkSync = walkSync
     function walkStream(directory, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings)
       return new stream_1.default(directory, settings).read()
     }
-    exports$70.walkStream = walkStream
+    exports$57.walkStream = walkStream
     function getSettings(settingsOrOptions = {}) {
       if (settingsOrOptions instanceof settings_1.default)
         return settingsOrOptions
       return new settings_1.default(settingsOrOptions)
     }
   })
-  var require_reader = /* @__PURE__ */ __commonJSMin(exports$71 => {
-    _p_ObjectDefineProperty(exports$71, '__esModule', { value: true })
+  var require_reader = /* @__PURE__ */ __commonJSMin(exports$58 => {
+    _p_ObjectDefineProperty(exports$58, '__esModule', { value: true })
     const path$7 = __require('path')
     const fsStat = require_out$3()
     const utils = require_utils$1()
@@ -11455,10 +11420,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         )
       }
     }
-    exports$71.default = Reader
+    exports$58.default = Reader
   })
-  var require_stream$1 = /* @__PURE__ */ __commonJSMin(exports$72 => {
-    _p_ObjectDefineProperty(exports$72, '__esModule', { value: true })
+  var require_stream$1 = /* @__PURE__ */ __commonJSMin(exports$59 => {
+    _p_ObjectDefineProperty(exports$59, '__esModule', { value: true })
     const stream_1$1 = __require('stream')
     const fsStat = require_out$3()
     const fsWalk = require_out$1()
@@ -11504,10 +11469,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         })
       }
     }
-    exports$72.default = ReaderStream
+    exports$59.default = ReaderStream
   })
-  var require_async$1 = /* @__PURE__ */ __commonJSMin(exports$73 => {
-    _p_ObjectDefineProperty(exports$73, '__esModule', { value: true })
+  var require_async$1 = /* @__PURE__ */ __commonJSMin(exports$60 => {
+    _p_ObjectDefineProperty(exports$60, '__esModule', { value: true })
     const fsWalk = require_out$1()
     const reader_1 = require_reader()
     const stream_1 = require_stream$1()
@@ -11535,10 +11500,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         })
       }
     }
-    exports$73.default = ReaderAsync
+    exports$60.default = ReaderAsync
   })
-  var require_matcher = /* @__PURE__ */ __commonJSMin(exports$74 => {
-    _p_ObjectDefineProperty(exports$74, '__esModule', { value: true })
+  var require_matcher = /* @__PURE__ */ __commonJSMin(exports$61 => {
+    _p_ObjectDefineProperty(exports$61, '__esModule', { value: true })
     const utils = require_utils$1()
     var Matcher = class {
       constructor(_patterns, _settings, _micromatchOptions) {
@@ -11584,10 +11549,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         )
       }
     }
-    exports$74.default = Matcher
+    exports$61.default = Matcher
   })
-  var require_partial = /* @__PURE__ */ __commonJSMin(exports$75 => {
-    _p_ObjectDefineProperty(exports$75, '__esModule', { value: true })
+  var require_partial = /* @__PURE__ */ __commonJSMin(exports$62 => {
+    _p_ObjectDefineProperty(exports$62, '__esModule', { value: true })
     const matcher_1 = require_matcher()
     var PartialMatcher = class extends matcher_1.default {
       match(filepath) {
@@ -11620,10 +11585,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return false
       }
     }
-    exports$75.default = PartialMatcher
+    exports$62.default = PartialMatcher
   })
-  var require_deep = /* @__PURE__ */ __commonJSMin(exports$76 => {
-    _p_ObjectDefineProperty(exports$76, '__esModule', { value: true })
+  var require_deep = /* @__PURE__ */ __commonJSMin(exports$63 => {
+    _p_ObjectDefineProperty(exports$63, '__esModule', { value: true })
     const utils = require_utils$1()
     const partial_1 = require_partial()
     var DeepFilter = class {
@@ -11683,10 +11648,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return !utils.pattern.matchAny(entryPath, patternsRe)
       }
     }
-    exports$76.default = DeepFilter
+    exports$63.default = DeepFilter
   })
-  var require_entry$1 = /* @__PURE__ */ __commonJSMin(exports$77 => {
-    _p_ObjectDefineProperty(exports$77, '__esModule', { value: true })
+  var require_entry$1 = /* @__PURE__ */ __commonJSMin(exports$64 => {
+    _p_ObjectDefineProperty(exports$64, '__esModule', { value: true })
     const utils = require_utils$1()
     var EntryFilter = class {
       constructor(_settings, _micromatchOptions) {
@@ -11784,10 +11749,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return isMatched
       }
     }
-    exports$77.default = EntryFilter
+    exports$64.default = EntryFilter
   })
-  var require_error = /* @__PURE__ */ __commonJSMin(exports$78 => {
-    _p_ObjectDefineProperty(exports$78, '__esModule', { value: true })
+  var require_error = /* @__PURE__ */ __commonJSMin(exports$65 => {
+    _p_ObjectDefineProperty(exports$65, '__esModule', { value: true })
     const utils = require_utils$1()
     var ErrorFilter = class {
       constructor(_settings) {
@@ -11802,10 +11767,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         )
       }
     }
-    exports$78.default = ErrorFilter
+    exports$65.default = ErrorFilter
   })
-  var require_entry = /* @__PURE__ */ __commonJSMin(exports$79 => {
-    _p_ObjectDefineProperty(exports$79, '__esModule', { value: true })
+  var require_entry = /* @__PURE__ */ __commonJSMin(exports$66 => {
+    _p_ObjectDefineProperty(exports$66, '__esModule', { value: true })
     const utils = require_utils$1()
     var EntryTransformer = class {
       constructor(_settings) {
@@ -11826,10 +11791,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return _p_ObjectAssign(_p_ObjectAssign({}, entry), { path: filepath })
       }
     }
-    exports$79.default = EntryTransformer
+    exports$66.default = EntryTransformer
   })
-  var require_provider = /* @__PURE__ */ __commonJSMin(exports$80 => {
-    _p_ObjectDefineProperty(exports$80, '__esModule', { value: true })
+  var require_provider = /* @__PURE__ */ __commonJSMin(exports$67 => {
+    _p_ObjectDefineProperty(exports$67, '__esModule', { value: true })
     const path$6 = __require('path')
     const deep_1 = require_deep()
     const entry_1 = require_entry$1()
@@ -11886,10 +11851,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         }
       }
     }
-    exports$80.default = Provider
+    exports$67.default = Provider
   })
-  var require_async = /* @__PURE__ */ __commonJSMin(exports$81 => {
-    _p_ObjectDefineProperty(exports$81, '__esModule', { value: true })
+  var require_async = /* @__PURE__ */ __commonJSMin(exports$68 => {
+    _p_ObjectDefineProperty(exports$68, '__esModule', { value: true })
     const async_1 = require_async$1()
     const provider_1 = require_provider()
     var ProviderAsync = class extends provider_1.default {
@@ -11909,10 +11874,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return this._reader.static(task.patterns, options)
       }
     }
-    exports$81.default = ProviderAsync
+    exports$68.default = ProviderAsync
   })
-  var require_stream$3 = /* @__PURE__ */ __commonJSMin(exports$82 => {
-    _p_ObjectDefineProperty(exports$82, '__esModule', { value: true })
+  var require_stream = /* @__PURE__ */ __commonJSMin(exports$69 => {
+    _p_ObjectDefineProperty(exports$69, '__esModule', { value: true })
     const stream_1 = __require('stream')
     const stream_2 = require_stream$1()
     const provider_1 = require_provider()
@@ -11943,10 +11908,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return this._reader.static(task.patterns, options)
       }
     }
-    exports$82.default = ProviderStream
+    exports$69.default = ProviderStream
   })
-  var require_sync$1 = /* @__PURE__ */ __commonJSMin(exports$83 => {
-    _p_ObjectDefineProperty(exports$83, '__esModule', { value: true })
+  var require_sync$1 = /* @__PURE__ */ __commonJSMin(exports$70 => {
+    _p_ObjectDefineProperty(exports$70, '__esModule', { value: true })
     const fsStat = require_out$3()
     const fsWalk = require_out$1()
     const reader_1 = require_reader()
@@ -11982,10 +11947,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return this._statSync(filepath, this._fsStatSettings)
       }
     }
-    exports$83.default = ReaderSync
+    exports$70.default = ReaderSync
   })
-  var require_sync = /* @__PURE__ */ __commonJSMin(exports$84 => {
-    _p_ObjectDefineProperty(exports$84, '__esModule', { value: true })
+  var require_sync = /* @__PURE__ */ __commonJSMin(exports$71 => {
+    _p_ObjectDefineProperty(exports$71, '__esModule', { value: true })
     const sync_1 = require_sync$1()
     const provider_1 = require_provider()
     var ProviderSync = class extends provider_1.default {
@@ -12003,11 +11968,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         return this._reader.static(task.patterns, options)
       }
     }
-    exports$84.default = ProviderSync
+    exports$71.default = ProviderSync
   })
-  var require_settings = /* @__PURE__ */ __commonJSMin(exports$85 => {
-    _p_ObjectDefineProperty(exports$85, '__esModule', { value: true })
-    exports$85.DEFAULT_FILE_SYSTEM_ADAPTER = void 0
+  var require_settings = /* @__PURE__ */ __commonJSMin(exports$72 => {
+    _p_ObjectDefineProperty(exports$72, '__esModule', { value: true })
+    exports$72.DEFAULT_FILE_SYSTEM_ADAPTER = void 0
     const fs$4 = __require('fs')
     const os$1 = __require('os')
     /**
@@ -12016,7 +11981,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
      * https://github.com/nodejs/node/blob/7faeddf23a98c53896f8b574a6e66589e8fb1eb8/lib/os.js#L106-L107.
      */
     const CPU_COUNT = _p_MathMax(os$1.cpus().length, 1)
-    exports$85.DEFAULT_FILE_SYSTEM_ADAPTER = {
+    exports$72.DEFAULT_FILE_SYSTEM_ADAPTER = {
       lstat: fs$4.lstat,
       lstatSync: fs$4.lstatSync,
       stat: fs$4.stat,
@@ -12075,17 +12040,17 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       _getFileSystemMethods(methods = {}) {
         return _p_ObjectAssign(
-          _p_ObjectAssign({}, exports$85.DEFAULT_FILE_SYSTEM_ADAPTER),
+          _p_ObjectAssign({}, exports$72.DEFAULT_FILE_SYSTEM_ADAPTER),
           methods,
         )
       }
     }
-    exports$85.default = Settings
+    exports$72.default = Settings
   })
-  var require_out = /* @__PURE__ */ __commonJSMin((exports$86, module$36) => {
+  var require_out = /* @__PURE__ */ __commonJSMin((exports$73, module$25) => {
     const taskManager = require_tasks()
     const async_1 = require_async()
-    const stream_1 = require_stream$3()
+    const stream_1 = require_stream()
     const sync_1 = require_sync()
     const settings_1 = require_settings()
     const utils = require_utils$1()
@@ -12185,7 +12150,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           'Patterns must be a string (non empty) or an array of strings',
         )
     }
-    module$36.exports = FastGlob
+    module$25.exports = FastGlob
   })
   var init_default = __esmMin(() => {})
   function toPath(urlOrPath) {
@@ -12195,10 +12160,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
   }
   var init_node = __esmMin(() => {
     init_default()
-    ;(0, node_util$1.promisify)(node_child_process.execFile)
+    ;(0, node_util.promisify)(node_child_process.execFile)
   })
   var require_ignore = /* @__PURE__ */ __commonJSMin(
-    (exports$87, module$37) => {
+    (exports$74, module$26) => {
       function makeArray(subject) {
         return _p_ArrayIsArray(subject) ? subject : [subject]
       }
@@ -12531,19 +12496,19 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       /* istanbul ignore next */
       if (typeof process !== 'undefined' && process.platform === 'win32')
         setupWindows()
-      module$37.exports = factory
+      module$26.exports = factory
       factory.default = factory
-      module$37.exports.isPathValid = isPathValid
-      define(module$37.exports, Symbol.for('setupWindows'), setupWindows)
+      module$26.exports.isPathValid = isPathValid
+      define(module$26.exports, Symbol.for('setupWindows'), setupWindows)
     },
   )
   function isPathInside(childPath, parentPath) {
-    const relation = node_path$1.default.relative(parentPath, childPath)
+    const relation = node_path.default.relative(parentPath, childPath)
     return Boolean(
       relation &&
       relation !== '..' &&
-      !_p_StringPrototypeStartsWith(relation, `..${node_path$1.default.sep}`) &&
-      relation !== node_path$1.default.resolve(childPath),
+      !_p_StringPrototypeStartsWith(relation, `..${node_path.default.sep}`) &&
+      relation !== node_path.default.resolve(childPath),
     )
   }
   var init_is_path_inside = __esmMin(() => {})
@@ -12617,7 +12582,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     absolutePrefixesMatch = (positivePrefix, negativePrefix) =>
       negativePrefix === positivePrefix
     getStaticAbsolutePathPrefix = pattern => {
-      if (!node_path$1.default.isAbsolute(pattern)) return
+      if (!node_path.default.isAbsolute(pattern)) return
       const staticSegments = []
       for (const segment of pattern.split('/')) {
         if (!segment) continue
@@ -12655,7 +12620,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     promisifyFsMethod = (object, methodName) => {
       const method = object?.[methodName]
       if (typeof method !== 'function') return
-      return (0, node_util$1.promisify)(method.bind(object))
+      return (0, node_util.promisify)(method.bind(object))
     }
     normalizeDirectoryPatternForFastGlob = pattern => {
       if (!_p_StringPrototypeEndsWith(pattern, '/')) return pattern
@@ -12707,7 +12672,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       let currentPath = startPath
       chain.push(currentPath)
       while (currentPath !== rootPath) {
-        const parentPath = node_path$1.default.dirname(currentPath)
+        const parentPath = node_path.default.dirname(currentPath)
         if (parentPath === currentPath) break
         currentPath = parentPath
         chain.push(currentPath)
@@ -12716,7 +12681,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
     findGitRootInChain = async (paths, statMethod) => {
       for (const directory of paths) {
-        const gitPath = node_path$1.default.join(directory, '.git')
+        const gitPath = node_path.default.join(directory, '.git')
         try {
           const stats = await statMethod(gitPath)
           if (pathHasGitDirectory(stats)) return directory
@@ -12726,11 +12691,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     findGitRootSyncUncached = (cwd, fsImplementation) => {
       const statSyncMethod = getStatSyncMethod$1(fsImplementation)
       if (!statSyncMethod) return
-      const currentPath = node_path$1.default.resolve(cwd)
-      const { root } = node_path$1.default.parse(currentPath)
+      const currentPath = node_path.default.resolve(cwd)
+      const { root } = node_path.default.parse(currentPath)
       const chain = buildPathChain(currentPath, root)
       for (const directory of chain) {
-        const gitPath = node_path$1.default.join(directory, '.git')
+        const gitPath = node_path.default.join(directory, '.git')
         try {
           const stats = statSyncMethod(gitPath)
           if (pathHasGitDirectory(stats)) return directory
@@ -12745,8 +12710,8 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     findGitRootAsyncUncached = async (cwd, fsImplementation) => {
       const statMethod = getAsyncStatMethod(fsImplementation)
       if (!statMethod) return findGitRootSync(cwd, fsImplementation)
-      const currentPath = node_path$1.default.resolve(cwd)
-      const { root } = node_path$1.default.parse(currentPath)
+      const currentPath = node_path.default.resolve(cwd)
+      const { root } = node_path.default.parse(currentPath)
       const chain = buildPathChain(currentPath, root)
       return findGitRootInChain(chain, statMethod)
     }
@@ -12756,8 +12721,8 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       return findGitRootAsyncUncached(cwd, fsImplementation)
     }
     isWithinGitRoot = (gitRoot, cwd) => {
-      const resolvedGitRoot = node_path$1.default.resolve(gitRoot)
-      const resolvedCwd = node_path$1.default.resolve(cwd)
+      const resolvedGitRoot = node_path.default.resolve(gitRoot)
+      const resolvedCwd = node_path.default.resolve(cwd)
       return (
         resolvedCwd === resolvedGitRoot ||
         isPathInside(resolvedCwd, resolvedGitRoot)
@@ -12772,12 +12737,12 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       if (!isWithinGitRoot(gitRoot, cwd)) return []
       return [
         ...buildPathChain(
-          node_path$1.default.resolve(cwd),
-          node_path$1.default.resolve(gitRoot),
+          node_path.default.resolve(cwd),
+          node_path.default.resolve(gitRoot),
         ),
       ]
         .reverse()
-        .map(directory => node_path$1.default.join(directory, '.gitignore'))
+        .map(directory => node_path.default.join(directory, '.gitignore'))
     }
     GITIGNORE_WILDCARDS = /(?<!\\)[*?[]/u
     hasGitignoreWildcards = value => GITIGNORE_WILDCARDS.test(value)
@@ -12795,12 +12760,12 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     isInsideCwd = relativePath =>
       relativePath !== '' &&
       !_p_StringPrototypeStartsWith(relativePath, '..') &&
-      !node_path$1.default.isAbsolute(relativePath)
+      !node_path.default.isAbsolute(relativePath)
     anchorToCwd = (directory, body, cwd) => {
       const relativePath = slash(
-        node_path$1.default.relative(
+        node_path.default.relative(
           cwd,
-          node_path$1.default.join(directory, body),
+          node_path.default.join(directory, body),
         ),
       )
       return isInsideCwd(relativePath) ? relativePath : void 0
@@ -12921,7 +12886,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         ).replace(/^\//u, '')
       if (!body.includes('/') && canSkipAtAnyDepth(body)) {
         const relativeDirectory = slash(
-          node_path$1.default.relative(cwd, directory),
+          node_path.default.relative(cwd, directory),
         )
         return {
           pattern: toFastGlob(
@@ -12946,9 +12911,8 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
               guardName,
             }
       if (
-        !matcher(
-          node_path$1.default.resolve(cwd, target) + node_path$1.default.sep,
-        ).ignored
+        !matcher(node_path.default.resolve(cwd, target) + node_path.default.sep)
+          .ignored
       )
         return
       const needsGuard = !gitignoreOnlySearch || target.includes('/')
@@ -13177,7 +13141,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         .filter(line => line && !_p_StringPrototypeStartsWith(line, '#'))
     getIgnoreRules = files =>
       _p_ArrayPrototypeFlatMap(files, file => {
-        const directory = node_path$1.default.dirname(file.filePath)
+        const directory = node_path.default.dirname(file.filePath)
         return readIgnoreFileLines(file.content).map(pattern => ({
           pattern,
           directory,
@@ -13208,17 +13172,17 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         slashIndex !== -1 && slashIndex !== cleanPattern.length - 1
       let result
       if (!hasNonTrailingSlash)
-        result = node_path$1.default.posix.join(base, '**', cleanPattern)
+        result = node_path.default.posix.join(base, '**', cleanPattern)
       else if (_p_StringPrototypeStartsWith(cleanPattern, '/'))
-        result = node_path$1.default.posix.join(base, cleanPattern.slice(1))
-      else result = node_path$1.default.posix.join(base, cleanPattern)
+        result = node_path.default.posix.join(base, cleanPattern.slice(1))
+      else result = node_path.default.posix.join(base, cleanPattern)
       return isNegative ? '!' + result : result
     }
     parseIgnoreFile = (file, cwd) => {
       const base = slash(
-        node_path$1.default.relative(
+        node_path.default.relative(
           cwd,
-          node_path$1.default.dirname(file.filePath),
+          node_path.default.dirname(file.filePath),
         ),
       )
       return readIgnoreFileLines(file.content).map(pattern =>
@@ -13226,8 +13190,8 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       )
     }
     toRelativePath = (fileOrDirectory, cwd) => {
-      if (node_path$1.default.isAbsolute(fileOrDirectory)) {
-        const relativePath = node_path$1.default.relative(cwd, fileOrDirectory)
+      if (node_path.default.isAbsolute(fileOrDirectory)) {
+        const relativePath = node_path.default.relative(cwd, fileOrDirectory)
         if (relativePath && !isPathInside(fileOrDirectory, cwd)) return
         return relativePath
       }
@@ -13242,18 +13206,18 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
     createIgnoreMatcher = (patterns, cwd, baseDir) => {
       const ignores = (0, import_ignore.default)().add(patterns)
-      const resolvedCwd = node_path$1.default.normalize(
-        node_path$1.default.resolve(cwd),
+      const resolvedCwd = node_path.default.normalize(
+        node_path.default.resolve(cwd),
       )
-      const resolvedBaseDir = node_path$1.default.normalize(
-        node_path$1.default.resolve(baseDir),
+      const resolvedBaseDir = node_path.default.normalize(
+        node_path.default.resolve(baseDir),
       )
       return fileOrDirectory => {
         fileOrDirectory = toPath(fileOrDirectory)
         const hasTrailingSeparator = /[/\\]$/.test(fileOrDirectory)
         if (
-          node_path$1.default.normalize(
-            node_path$1.default.resolve(fileOrDirectory),
+          node_path.default.normalize(
+            node_path.default.resolve(fileOrDirectory),
           ) === resolvedCwd
         )
           return notIgnored
@@ -13262,9 +13226,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         if (!relativePath) return notIgnored
         if (
           hasTrailingSeparator &&
-          !_p_StringPrototypeEndsWith(relativePath, node_path$1.default.sep)
+          !_p_StringPrototypeEndsWith(relativePath, node_path.default.sep)
         )
-          relativePath += node_path$1.default.sep
+          relativePath += node_path.default.sep
         return ignores.test(slash(relativePath))
       }
     }
@@ -13274,7 +13238,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           ? options.ignore
           : [options.ignore]
         : []
-      const cwd = toPath(options.cwd) ?? node_process$1.default.cwd()
+      const cwd = toPath(options.cwd) ?? node_process.default.cwd()
       const deep =
         typeof options.deep === 'number'
           ? _p_MathMax(0, options.deep) + 1
@@ -13326,21 +13290,21 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
     resolveConfigPath = (filePath, configPath) => {
       if (_p_StringPrototypeStartsWith(configPath, '~/')) {
-        const homeDirectory = node_os$1.default.homedir()
-        const resolved = node_path$1.default.join(
+        const homeDirectory = node_os.default.homedir()
+        const resolved = node_path.default.join(
           homeDirectory,
           configPath.slice(2),
         )
         if (!isPathInside(resolved, homeDirectory))
-          return node_path$1.default.join(
+          return node_path.default.join(
             homeDirectory,
             '.globby-invalid-path-traversal',
           )
         return resolved
       }
-      if (node_path$1.default.isAbsolute(configPath)) return configPath
-      return node_path$1.default.resolve(
-        node_path$1.default.dirname(filePath),
+      if (node_path.default.isAbsolute(configPath)) return configPath
+      return node_path.default.resolve(
+        node_path.default.dirname(filePath),
         configPath,
       )
     }
@@ -13389,17 +13353,16 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
     normalizeGitConfigConditionPattern = (pattern, configFilePath) => {
       if (_p_StringPrototypeStartsWith(pattern, '~/'))
-        pattern = node_path$1.default.join(
-          node_os$1.default.homedir(),
+        pattern = node_path.default.join(
+          node_os.default.homedir(),
           pattern.slice(2),
         )
       else if (_p_StringPrototypeStartsWith(pattern, './'))
-        pattern = node_path$1.default.resolve(
-          node_path$1.default.dirname(configFilePath),
+        pattern = node_path.default.resolve(
+          node_path.default.dirname(configFilePath),
           pattern.slice(2),
         )
-      else if (!node_path$1.default.isAbsolute(pattern))
-        pattern = `**/${pattern}`
+      else if (!node_path.default.isAbsolute(pattern)) pattern = `**/${pattern}`
       if (_p_StringPrototypeEndsWith(pattern, '/')) pattern += '**'
       return slash(pattern)
     }
@@ -13472,7 +13435,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         isCaseInsensitive ? 'i' : void 0,
       )
       const normalizedGitDirectory = slash(
-        node_path$1.default.resolve(gitDirectory),
+        node_path.default.resolve(gitDirectory),
       )
       return regularExpression.test(normalizedGitDirectory)
     }
@@ -13547,7 +13510,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         includeStack = /* @__PURE__ */ new _p_SetCtor(),
         depth = 0,
       } = options
-      const normalizedPath = node_path$1.default.resolve(filePath)
+      const normalizedPath = node_path.default.resolve(filePath)
       if (includeStack.has(normalizedPath)) return
       if (depth >= MAX_INCLUDE_DEPTH) return
       includeStack.add(normalizedPath)
@@ -13592,7 +13555,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         includeStack = /* @__PURE__ */ new _p_SetCtor(),
         depth = 0,
       } = options
-      const normalizedPath = node_path$1.default.resolve(filePath)
+      const normalizedPath = node_path.default.resolve(filePath)
       if (includeStack.has(normalizedPath)) return
       if (depth >= MAX_INCLUDE_DEPTH) return
       includeStack.add(normalizedPath)
@@ -13628,14 +13591,14 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     resolveGitDirectoryFromFile = (gitFilePath, content) => {
       const match = content.match(/^gitdir:\s*(.+?)\s*$/i)
       if (!match) return gitFilePath
-      return node_path$1.default.resolve(
-        node_path$1.default.dirname(gitFilePath),
+      return node_path.default.resolve(
+        node_path.default.dirname(gitFilePath),
         match[1],
       )
     }
     getGitDirectorySync = (gitRoot, readFileSync) => {
       if (!gitRoot) return
-      const gitFilePath = node_path$1.default.join(gitRoot, '.git')
+      const gitFilePath = node_path.default.join(gitRoot, '.git')
       try {
         return resolveGitDirectoryFromFile(
           gitFilePath,
@@ -13647,7 +13610,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
     getGitDirectoryAsync = async (gitRoot, readFile) => {
       if (!gitRoot) return
-      const gitFilePath = node_path$1.default.join(gitRoot, '.git')
+      const gitFilePath = node_path.default.join(gitRoot, '.git')
       try {
         return resolveGitDirectoryFromFile(
           gitFilePath,
@@ -13658,20 +13621,20 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
     }
     getXdgConfigHome = () =>
-      node_process$1.default.env.XDG_CONFIG_HOME ||
-      node_path$1.default.join(node_os$1.default.homedir(), '.config')
+      node_process.default.env.XDG_CONFIG_HOME ||
+      node_path.default.join(node_os.default.homedir(), '.config')
     getGitConfigPaths = () => {
-      if ('GIT_CONFIG_GLOBAL' in node_process$1.default.env) {
-        const value = node_process$1.default.env.GIT_CONFIG_GLOBAL
+      if ('GIT_CONFIG_GLOBAL' in node_process.default.env) {
+        const value = node_process.default.env.GIT_CONFIG_GLOBAL
         return value ? [value] : []
       }
       return [
-        node_path$1.default.join(getXdgConfigHome(), 'git', 'config'),
-        node_path$1.default.join(node_os$1.default.homedir(), '.gitconfig'),
+        node_path.default.join(getXdgConfigHome(), 'git', 'config'),
+        node_path.default.join(node_os.default.homedir(), '.gitconfig'),
       ]
     }
     getDefaultGlobalGitignorePath = () =>
-      node_path$1.default.join(getXdgConfigHome(), 'git', 'ignore')
+      node_path.default.join(getXdgConfigHome(), 'git', 'ignore')
     resolveExcludesFilePath = excludesFileConfig => {
       if (excludesFileConfig?.value === '') return
       if (excludesFileConfig === void 0) return getDefaultGlobalGitignorePath()
@@ -13692,7 +13655,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
     }
     getGlobalGitignoreFile = (options = {}) => {
-      const cwd = toPath(options.cwd) ?? node_process$1.default.cwd()
+      const cwd = toPath(options.cwd) ?? node_process.default.cwd()
       const readFileSync = getReadFileSyncMethod(options.fs)
       const gitRoot = findGitRootSync(cwd, options.fs)
       const gitDirectory = getGitDirectorySync(gitRoot, readFileSync)
@@ -13716,7 +13679,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           )
     }
     getGlobalGitignoreFileAsync = async (options = {}) => {
-      const cwd = toPath(options.cwd) ?? node_process$1.default.cwd()
+      const cwd = toPath(options.cwd) ?? node_process.default.cwd()
       const readFile = getReadFileMethod(options.fs)
       const gitRoot = await findGitRoot(cwd, options.fs)
       const gitDirectory = await getGitDirectoryAsync(gitRoot, readFile)
@@ -13747,7 +13710,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     buildGlobalMatcher = (globalIgnoreFile, cwd, rootDirectory = cwd) => {
       const patterns = parseIgnoreFile(
         globalIgnoreFile,
-        node_path$1.default.dirname(globalIgnoreFile.filePath),
+        node_path.default.dirname(globalIgnoreFile.filePath),
       )
       return createIgnoreMatcher(patterns, cwd, rootDirectory)
     }
@@ -13755,7 +13718,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       if (![patterns].flat().includes('**/.gitignore')) return []
       return gitRoot
         ? getParentGitignorePaths(gitRoot, normalizedOptions.cwd)
-        : [node_path$1.default.join(normalizedOptions.cwd, '.gitignore')]
+        : [node_path.default.join(normalizedOptions.cwd, '.gitignore')]
     }
     getKnownIgnoreFileSearchOptions = (patterns, normalizedOptions) => ({
       ...normalizedOptions,
@@ -13769,16 +13732,16 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     })
     getKnownIgnoreFilePattern = (filePath, cwd) => {
       const pattern = isPathInside(filePath, cwd)
-        ? node_path$1.default.relative(cwd, filePath)
+        ? node_path.default.relative(cwd, filePath)
         : filePath
       return import_out$1.default.convertPathToPattern(pattern)
     }
     getMatchingKnownIgnoreFilePaths = (knownPaths, matchingPaths) => {
       const matchingPathSet = new _p_SetCtor(
-        matchingPaths.map(filePath => node_path$1.default.resolve(filePath)),
+        matchingPaths.map(filePath => node_path.default.resolve(filePath)),
       )
       return knownPaths.filter(filePath =>
-        matchingPathSet.has(node_path$1.default.resolve(filePath)),
+        matchingPathSet.has(node_path.default.resolve(filePath)),
       )
     }
     globKnownIgnoreFilePaths = (
@@ -13858,10 +13821,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           }
     getUnreadPaths = (childPaths, knownPaths) => {
       const alreadyRead = new _p_SetCtor(
-        knownPaths.map(filePath => node_path$1.default.resolve(filePath)),
+        knownPaths.map(filePath => node_path.default.resolve(filePath)),
       )
       return dedupePaths(childPaths).filter(
-        filePath => !alreadyRead.has(node_path$1.default.resolve(filePath)),
+        filePath => !alreadyRead.has(node_path.default.resolve(filePath)),
       )
     }
     collectIgnoreFileArtifactsAsync = async (
@@ -14083,9 +14046,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     }
     normalizePathForDirectoryGlob = (filePath, cwd) => {
       const path = isNegativePattern(filePath) ? filePath.slice(1) : filePath
-      return node_path$1.default.isAbsolute(path)
+      return node_path.default.isAbsolute(path)
         ? path
-        : node_path$1.default.join(cwd, path)
+        : node_path.default.join(cwd, path)
     }
     shouldExpandGlobstarDirectory = pattern => {
       const match = pattern?.match(/\*\*\/([^/]+)$/)
@@ -14093,7 +14056,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       const dirname = match[1]
       const hasWildcards = /[*?[\]{}]/.test(dirname)
       const hasExtension =
-        node_path$1.default.extname(dirname) &&
+        node_path.default.extname(dirname) &&
         !_p_StringPrototypeStartsWith(dirname, '.')
       return !hasWildcards && !hasExtension
     }
@@ -14104,13 +14067,13 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           : ''
       return files
         ? files.map(file =>
-            node_path$1.default.posix.join(
+            node_path.default.posix.join(
               directoryPath,
-              `**/${node_path$1.default.extname(file) ? file : `${file}${extensionGlob}`}`,
+              `**/${node_path.default.extname(file) ? file : `${file}${extensionGlob}`}`,
             ),
           )
         : [
-            node_path$1.default.posix.join(
+            node_path.default.posix.join(
               directoryPath,
               `**${extensionGlob ? `/*${extensionGlob}` : ''}`,
             ),
@@ -14119,7 +14082,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     directoryToGlob = async (
       directoryPaths,
       {
-        cwd = node_process$1.default.cwd(),
+        cwd = node_process.default.cwd(),
         files,
         extensions,
         fs: fsImplementation,
@@ -14155,7 +14118,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     directoryToGlobSync = (
       directoryPaths,
       {
-        cwd = node_process$1.default.cwd(),
+        cwd = node_process.default.cwd(),
         files,
         extensions,
         fs: fsImplementation,
@@ -14232,13 +14195,13 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     hasIgnoredAncestorDirectory = (matcher, globalMatcher, file) => {
       let currentPath = file
       while (true) {
-        const parentDirectory = node_path$1.default.dirname(currentPath)
+        const parentDirectory = node_path.default.dirname(currentPath)
         if (parentDirectory === currentPath) return false
         if (
           isPathIgnored(
             matcher,
             globalMatcher,
-            `${parentDirectory}${node_path$1.default.sep}`,
+            `${parentDirectory}${node_path.default.sep}`,
           )
         )
           return true
@@ -14278,7 +14241,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       ),
     })
     applyIgnoreFilesAndGetFilter = async options => {
-      const cwd = options.cwd ?? node_process$1.default.cwd()
+      const cwd = options.cwd ?? node_process.default.cwd()
       const ignoreFilesPatterns = getIgnoreFilesPatterns(options)
       const globalIgnoreFile = options.globalGitignore
         ? await getGlobalGitignoreFileAsync(options)
@@ -14316,7 +14279,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       })
     }
     applyIgnoreFilesAndGetFilterSync = options => {
-      const cwd = options.cwd ?? node_process$1.default.cwd()
+      const cwd = options.cwd ?? node_process.default.cwd()
       const ignoreFilesPatterns = getIgnoreFilesPatterns(options)
       const globalIgnoreFile = options.globalGitignore
         ? getGlobalGitignoreFile(options)
@@ -14367,15 +14330,15 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         throw new _p_ErrorCtor(globalGitignoreAsyncStatErrorMessage)
     }
     createPathResolver = cwd => {
-      const basePath = cwd || node_process$1.default.cwd()
+      const basePath = cwd || node_process.default.cwd()
       const pathCache = /* @__PURE__ */ new _p_MapCtor()
       return pathKey => {
         let absolutePath = pathCache.get(pathKey)
         if (absolutePath === void 0) {
           if (pathCache.size > 1e4) pathCache.clear()
-          absolutePath = node_path$1.default.isAbsolute(pathKey)
+          absolutePath = node_path.default.isAbsolute(pathKey)
             ? pathKey
-            : node_path$1.default.resolve(basePath, pathKey)
+            : node_path.default.resolve(basePath, pathKey)
           pathCache.set(pathKey, absolutePath)
         }
         return absolutePath
@@ -14420,12 +14383,12 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       return async fastGlobResult => {
         if (!isIgnored) return true
         const absolutePath = resolveAbsolutePath(
-          node_path$1.default.normalize(fastGlobResult.path ?? fastGlobResult),
+          node_path.default.normalize(fastGlobResult.path ?? fastGlobResult),
         )
         if (isIgnored(absolutePath)) return false
         return !(
           (await isDirectoryEntry(absolutePath)) &&
-          isIgnored(`${absolutePath}${node_path$1.default.sep}`)
+          isIgnored(`${absolutePath}${node_path.default.sep}`)
         )
       }
     }
@@ -14436,7 +14399,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         getStatSyncMethod(fsImplementation),
       )
       return fastGlobResult => {
-        const pathKey = node_path$1.default.normalize(
+        const pathKey = node_path.default.normalize(
           fastGlobResult.path ?? fastGlobResult,
         )
         if (seen.has(pathKey)) return false
@@ -14445,7 +14408,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
           if (isIgnored(absolutePath)) return false
           if (
             isDirectoryEntry(absolutePath) &&
-            isIgnored(`${absolutePath}${node_path$1.default.sep}`)
+            isIgnored(`${absolutePath}${node_path.default.sep}`)
           )
             return false
         }
@@ -14465,7 +14428,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       const seen = /* @__PURE__ */ new _p_SetCtor()
       return results.filter((fastGlobResult, index) => {
         if (!matches[index]) return false
-        const pathKey = node_path$1.default.normalize(
+        const pathKey = node_path.default.normalize(
           fastGlobResult.path ?? fastGlobResult,
         )
         if (seen.has(pathKey)) return false
@@ -14664,7 +14627,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
             import_out.default.stream(task.patterns, task.options),
           )
           for await (const fastGlobResult of mergeStreams(streams)) {
-            const pathKey = node_path$1.default.normalize(
+            const pathKey = node_path.default.normalize(
               fastGlobResult.path ?? fastGlobResult,
             )
             if (!seen.has(pathKey) && (await filter(fastGlobResult))) {
@@ -14685,9 +14648,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     ;({ convertPathToPattern } = import_out.default)
   })
   function isPathCwd(path_) {
-    let cwd = node_process$1.default.cwd()
-    path_ = node_path$1.default.resolve(path_)
-    if (node_process$1.default.platform === 'win32') {
+    let cwd = node_process.default.cwd()
+    path_ = node_path.default.resolve(path_)
+    if (node_process.default.platform === 'win32') {
       cwd = _p_StringPrototypeToLowerCase(cwd)
       path_ = _p_StringPrototypeToLowerCase(path_)
     }
@@ -14857,7 +14820,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     patterns = _p_ArrayIsArray(patterns) ? patterns : [patterns]
     patterns = patterns.map(pattern => {
       if (
-        node_process$1.default.platform === 'win32' &&
+        node_process.default.platform === 'win32' &&
         (0, import_is_glob.default)(pattern) === false
       )
         return slash(pattern)
@@ -14870,7 +14833,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     {
       force,
       dryRun,
-      cwd = node_process$1.default.cwd(),
+      cwd = node_process.default.cwd(),
       onProgress = () => {},
       ...options
     } = {},
@@ -14894,7 +14857,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       })
     let deletedCount = 0
     const mapper = async file => {
-      file = node_path$1.default.resolve(cwd, file)
+      file = node_path.default.resolve(cwd, file)
       if (!force) safeCheck(file, cwd)
       if (!dryRun)
         await node_fs_promises.default.rm(file, {
@@ -14916,7 +14879,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
   }
   function deleteSync$1(
     patterns,
-    { force, dryRun, cwd = node_process$1.default.cwd(), ...options } = {},
+    { force, dryRun, cwd = node_process.default.cwd(), ...options } = {},
   ) {
     options = {
       expandDirectories: false,
@@ -14929,7 +14892,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
     const removedFiles = globbySync(patterns, options)
       .sort((a, b) => _p_StringPrototypeLocaleCompare(b, a))
       .map(file => {
-        file = node_path$1.default.resolve(cwd, file)
+        file = node_path.default.resolve(cwd, file)
         if (!force) safeCheck(file, cwd)
         if (!dryRun)
           node_fs.default.rmSync(file, {
@@ -14982,14 +14945,14 @@ var require_del = /* @__PURE__ */ __commonJSMin((exports, module) => {
 var require_safe = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_node_fs = require_fs$1()
-  const require_arrays_predicates = require_predicates$3()
-  const require_paths_shared = require_shared$3()
+  const require_arrays_predicates = require_predicates$2()
+  const require_paths_shared = require_shared$2()
   const require_objects_mutate = require_mutate()
   const require_primordials_array = require_array$2()
-  const require_errors_predicates = require_predicates$1()
+  const require_errors_predicates = require_predicates()
   const require_primordials_globals = require_globals()
   const require_promises_retry = require_retry()
-  const require_fs_shared = require_shared$1()
+  const require_fs_shared = require_shared()
   /**
    * @file Safe deletion + idempotent directory creation. The delete helpers
    *   gate destructive operations behind an "allowed directories" allow-list
@@ -15289,7 +15252,7 @@ var require_safe = /* @__PURE__ */ __commonJSMin(exports => {
   exports.safeMkdirSync = safeMkdirSync
 })
 
-var import_safe$2 = require_safe()
+var import_safe = require_safe()
 const LEGACY_RULE_FILE = 'CLAUDE.md'
 const RULE_FILE = 'AGENTS.md'
 function ruleStat(file) {
@@ -15385,7 +15348,11 @@ function recoverRuleAuthority(dest) {
     `Cannot recover engineering rules in ${dest}: the latest 32 first-parent commits contain no authored CLAUDE.md. Restore authored AGENTS.md before continuing.`,
   )
 }
-function migrateRuleFile(dest, preservedPaths) {
+function migrateRuleFile(dest, options) {
+  const { preservedPaths } = {
+    __proto__: null,
+    ...options,
+  }
   if (preservedPaths?.has('CLAUDE.md') || preservedPaths?.has('AGENTS.md'))
     return false
   return migrateUnpreservedRuleFile(dest)
@@ -15428,7 +15395,7 @@ function migrateUnpreservedRuleFile(dest) {
   try {
     renameSync(temporary, current)
   } finally {
-    if (ruleStat(temporary)) (0, import_safe$2.safeDeleteSync)(temporary)
+    if (ruleStat(temporary)) (0, import_safe.safeDeleteSync)(temporary)
   }
   return true
 }
@@ -15500,6 +15467,48 @@ function trimGitignoreLines(lines) {
   while (result.at(-1)?.trim() === '') result.pop()
   return result
 }
+function closeGitignorePackDirectories(allowed, pack) {
+  const roots = pack
+    .filter(
+      line =>
+        line &&
+        !line.startsWith('!') &&
+        !line.startsWith('#') &&
+        !line.includes('?') &&
+        !line.includes('[') &&
+        !line.includes(']'),
+    )
+    .map(line => {
+      const entry = line
+        .replace(/^\//, '')
+        .replace(/\/\*$/, '')
+        .replace(/\/$/, '')
+      const fleet = entry.indexOf('/fleet/')
+      return fleet < 0 ? entry : entry.slice(0, fleet + 6)
+    })
+  const result = []
+  const seen = /* @__PURE__ */ new Set()
+  for (const line of allowed) {
+    if (!seen.has(line)) {
+      result.push(line)
+      seen.add(line)
+    }
+    if (!line.startsWith('!/') || !line.endsWith('/')) continue
+    const directory = line.slice(2, -1)
+    if (
+      !roots.some(
+        root => directory === root || directory.startsWith(`${root}/`),
+      )
+    )
+      continue
+    const closure = `/${directory}/*`
+    if (!seen.has(closure)) {
+      result.push(closure)
+      seen.add(closure)
+    }
+  }
+  return result
+}
 function composeGitignore(config) {
   const options = {
     __proto__: null,
@@ -15526,9 +15535,6 @@ function composeGitignore(config) {
     '# <fleet>',
     ...((options.denyByDefault ?? current.denyByDefault) ? ['*', '!*/'] : []),
     ...trimGitignoreLines(fleet),
-    ...(allowed.length
-      ? ['# <fleet-allowlist>', ...allowed, '# </fleet-allowlist>']
-      : []),
     ...(pack.length
       ? ['# <fleet-pack>', ...trimGitignoreLines(pack), '# </fleet-pack>']
       : []),
@@ -15536,34 +15542,17 @@ function composeGitignore(config) {
     '# <repo>',
     ...trimGitignoreLines(repo),
     '# </repo>',
+    ...(allowed.length
+      ? [
+          '# <fleet-allowlist>',
+          ...closeGitignorePackDirectories(allowed, pack),
+          '# </fleet-allowlist>',
+        ]
+      : []),
     '',
   ].join('\n')
 }
 
-function sharedClaudeHooksFleetPath(root) {
-  return path.join(root, '.claude', 'hooks', 'fleet')
-}
-function sharedFleetHookBundlePath(fleetHooksDir) {
-  return path.join(fleetHooksDir, '_dist', 'fleet-pack.generated.cjs')
-}
-function sharedClaudeSettingsJsonPath(root) {
-  return path.join(root, '.claude', 'settings.json')
-}
-function sharedConfigFleetOxlintPluginPath(root) {
-  return path.join(root, '.config', 'fleet', 'oxlint-plugin')
-}
-function sharedConfigFleetOxlintPluginMjsPath(root) {
-  return path.join(root, '.config', 'fleet', 'oxlint-plugin.generated.mjs')
-}
-function sharedLocalSharePath(root) {
-  return path.join(root, '.local', 'share')
-}
-function sharedFleetPnpmWorkspaceFleetYamlPath(root) {
-  return path.join(root, 'fleet', 'pnpm-workspace.fleet.yaml')
-}
-function sharedFleetTsconfigCheckJsonPath(root) {
-  return path.join(root, 'fleet', 'tsconfig.check.json')
-}
 function sharedScriptsRepoCommitCascadeManifestFleetFilesJsonPath(root) {
   return path.join(
     root,
@@ -15580,9 +15569,7 @@ function sharedSystem32TarExePath(root) {
 function sharedTemplateBasePath(root) {
   return path.join(root, 'template', 'base', 'universal')
 }
-var init_util = __esmMin(() => {})
 
-init_util()
 const HYBRID_BUNDLE_PATHS = /* @__PURE__ */ new Set([
   '.gitattributes',
   '.gitignore',
@@ -16134,7 +16121,7 @@ function parseYamlEntryChunks(bodyLines) {
  * inside the fleet-owned `hooks` key. Fleet-shipped entries (present in the
  * bundle block) take the bundle's text, comments included; member-local
  * entries that appear only in the consumer block survive in their original
- * order after the fleet set. Scalar-shaped blocks (`saveExact: true`) have no
+ * order after the fleet set. Scalar-shaped workspace settings have no
  * nested entries, so the bundle block replaces wholesale. Trailing blank lines
  * follow the consumer block so inter-block spacing is preserved. The merged
  * block's head (the separator run above its key) is the BUNDLE's when the
@@ -16338,7 +16325,6 @@ function prepareWorkspacePatchMerge(config) {
 function githubReleaseEnabled(config) {
   return config?.release?.github !== false
 }
-var init_config = __esmMin(() => {})
 
 function isPlainObject$3(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value))
@@ -16455,11 +16441,7 @@ function configFlagHolds(flag, raw) {
       return false
   }
 }
-var init_conditional_config = __esmMin(() => {
-  init_config()
-})
 
-init_conditional_config()
 function readConditionalSettings(dest) {
   const settings = resolveSettingsPath(dest)
   if (settings === void 0) return {}
@@ -16472,10 +16454,20 @@ function readConditionalSettings(dest) {
     return {}
   }
 }
+function conditionalMarkerHolds(dest, marker) {
+  const markerPath = path.join(dest, marker)
+  if (!existsSync(markerPath)) return false
+  if (marker !== 'test') return true
+  try {
+    return readdirSync(markerPath).some(entry => entry !== 'fleet')
+  } catch {
+    return true
+  }
+}
 function conditionalManifestGroupHolds(group, raw, dest) {
   if (group.dependency !== void 0)
     return dependencyGraphRequires(dest, group.dependency)
-  if (group.marker !== void 0) return existsSync(path.join(dest, group.marker))
+  if (group.marker !== void 0) return conditionalMarkerHolds(dest, group.marker)
   if (group.configFlag !== void 0) return configFlagHolds(group.configFlag, raw)
   if (group.capability !== void 0) {
     const capabilities = raw['capabilities']
@@ -16555,14 +16547,21 @@ const ALWAYS_TRACKED_PREFIXES = [
   'assets/fleet/socket-combomark-dark.svg',
   'assets/fleet/socket-combomark-light.svg',
   'patches/fleet/@polka__url@1.0.0-next.29.patch',
-  'patches/fleet/brace-expansion@5.0.9.patch',
+  'patches/fleet/brace-expansion@5.0.12.patch',
   'patches/fleet/minimatch@10.2.6.patch',
   'patches/fleet/run-local-ci@0.18.1.patch',
   'patches/fleet/vitest@5.0.0.patch',
-  'scripts/fleet/npm/scan-ci.mts',
-  'scripts/fleet/npm/scan-receipt.mts',
-  'scripts/fleet/registry-infra/npm/scan-ndjson.mts',
-  'scripts/fleet/registry-infra/npm/scan.mts',
+  'patches/fleet/vitest@5.0.3.patch',
+  'scripts/fleet/npm/scan/receipt.mts',
+  'scripts/fleet/npm/scan/staged.mts',
+  'scripts/fleet/registry/npm/scan/ndjson.mts',
+  'scripts/fleet/registry/npm/scan/run.mts',
+  'scripts/fleet/setup/bootstrap/zero-dep-packages.mjs',
+  'scripts/fleet/setup/lib/check/sfw.mjs',
+  'scripts/fleet/setup/lib/error-message.mjs',
+  'scripts/fleet/setup/lib/install-tool.mjs',
+  'scripts/fleet/setup/lib/read-package-integrity.mjs',
+  'scripts/fleet/setup/lib/read-pinned-version.mjs',
   'scripts/repo/bootstrap/',
 ]
 /**
@@ -16878,7 +16877,7 @@ function spliceFleetCanonicalContent(source, target) {
   return source.slice(0, sourceBoundary) + seed + targetTail
 }
 
-const logger$5 = getDep0Logger()
+const logger$3 = getDep0Logger()
 function normalizeManifestEntryPath(entry) {
   return normalizeBundlePath(entry.path)
 }
@@ -16971,12 +16970,16 @@ function filterManifestForShape(manifest, shape) {
  */
 function fleetPackOwnedPaths(manifest) {
   const hybridPaths = computeHybridPaths(manifest)
+  const repoOwnedPaths = new Set(
+    (manifest.repoOwnedFiles ?? []).map(normalizeBundlePath),
+  )
   const entries = /* @__PURE__ */ new Set()
   const files = Object.keys(manifest.files)
   for (let i = 0, { length } = files; i < length; i += 1) {
     const p = normalizeBundlePath(files[i])
     if (
       hybridPaths.has(p) ||
+      repoOwnedPaths.has(p) ||
       isFleetCanonicalSpliceFile(p) ||
       isAlwaysTrackedSurface(p)
     )
@@ -17109,7 +17112,7 @@ function refreshFleetPackIgnores(config) {
   const packBlock = [
     packBeginMarker(),
     '# Fleet-pack untrack set — managed by scripts/repo/bootstrap/fleet.mjs.',
-    '# REGENERATED from the release-bundle manifest on every hydrate; stale',
+    '# REGENERATED from the publish-bundle manifest on every hydrate; stale',
     '# entries are pruned. Hand-added ignores belong OUTSIDE these markers.',
     ...HARNESS_ALIAS_PATHS,
     ...sortedRoots,
@@ -17219,7 +17222,7 @@ function untrackFleetPackPaths(config) {
         },
       )
     } catch (e) {
-      logger$5.log(
+      logger$3.log(
         `install-fleet: --thin: git rm --cached failed (non-fatal) — ${errorMessage(e)}`,
       )
     }
@@ -17242,8 +17245,8 @@ function effectiveMemberManifest(manifest, dest) {
  * parser truncates there — every flag after it is DISCARDED, not collected as a
  * positional. The script then runs with default behaviour while the caller
  * believes they passed flags. That is merely confusing for a read-only script
- * and dangerous for a destructive one: `prune:branch-backups -- --dry-run`
- * drops the `--dry-run` and performs a live run against every repo.
+ * and dangerous for a destructive one: `prune:branch-backups -- <flag>`
+ * drops the trailing flag and performs a live run against every repo.
  *
  * Checked against `process.argv` because by the time parsing finishes the
  * dropped flags are unrecoverable — the parsed result cannot tell you what was
@@ -17259,7 +17262,7 @@ function hasBareDoubleDash(argv) {
 function bareDoubleDashMessage(scriptName) {
   return `a bare \`--\` in the command line
   Where: the argv for ${scriptName}.\n  Saw:   flags after \`--\`. The argv parser truncates there, so those flags were NOT applied and the script ran with its defaults.
-  Fix:   drop the \`--\`, e.g. \`pnpm run ${scriptName} --dry-run\`.`
+  Fix:   drop the \`--\`, e.g. \`pnpm run ${scriptName} --json\`.`
 }
 /**
  * The help request found on argv, if any: `--describe` wins over `-h`/`--help`
@@ -17325,26 +17328,22 @@ function renderScriptResult(result) {
     ...(result.error === void 0 ? {} : { error: result.error }),
   })
 }
-var ScriptExit
-var init_script_result = __esmMin(() => {
-  ScriptExit = class extends Error {
-    exitCode
-    constructor(exitCode) {
-      if (!Number.isInteger(exitCode) || exitCode < 1 || exitCode > 255)
-        throw new Error(
-          'Script abort requires an integer exit code between 1 and 255.',
-        )
-      super(
-        `Script stopped with exit code ${exitCode}. Review the preceding diagnostic and retry.`,
+var ScriptExit = class extends Error {
+  exitCode
+  constructor(exitCode) {
+    if (!Number.isInteger(exitCode) || exitCode < 1 || exitCode > 255)
+      throw new Error(
+        'Script abort requires an integer exit code between 1 and 255.',
       )
-      this.name = 'ScriptExit'
-      this.exitCode = exitCode
-    }
+    super(
+      `Script stopped with exit code ${exitCode}. Review the preceding diagnostic and retry.`,
+    )
+    this.name = 'ScriptExit'
+    this.exitCode = exitCode
   }
-})
+}
 
-init_script_result()
-function errorMessage$2(error) {
+function errorMessage$1(error) {
   if (error instanceof Error) return error.message
   return String(error)
 }
@@ -17390,7 +17389,7 @@ async function runMainMinimalAsync(main, meta) {
       throw new Error('This script has not declared JSON execution support.')
     await invokeMinimalMain(main, meta)
   } catch (error) {
-    const message = errorMessage$2(error)
+    const message = errorMessage$1(error)
     const exitCode = error instanceof ScriptExit ? error.exitCode : 1
     process.exitCode = exitCode
     if (json)
@@ -17423,7 +17422,7 @@ async function invokeMinimalMain(main, meta) {
 
 /**
  * @file The prebuilt dispatch-launcher variant contract - ONE list of
- *   (platform, arch) → filename shared by the release-bundle producer, which
+ *   (platform, arch) → filename shared by the publish-bundle producer, which
  *   stages CI-built binaries under {@link LAUNCHER_VARIANTS_REL_DIR}, the
  *   dir-mirror skip list so a hydrated binary never reads as drift, and
  *   `build-snapshot-launcher.mts`, which copies a matching prebuilt instead of
@@ -17534,7 +17533,6 @@ const RELEASE_ONLY_DIR_MIRROR_FILES = [
 function isErrnoException(e) {
   return typeof e === 'object' && e !== null && typeof e.code === 'string'
 }
-var init_predicates = __esmMin(() => {})
 
 /**
  * @file Mirror-lock lift primitives. The cascade chmods live fleet mirrors
@@ -17545,7 +17543,7 @@ var init_predicates = __esmMin(() => {})
  *   mirror EACCESes without the lift. One implementation here — the cascade's
  *   mirror-mode fixer and the member-side generators (build-hook-bundle,
  *   gen/hook-dispatch) all import it, so the lift semantics cannot drift.
- *   `lockFileReadonlySync` is the other half: the release-bundle installer
+ *   `lockFileReadonlySync` is the other half: the publish-bundle installer
  *   places files with a plain `copyFileSync`, so it applies the lock itself
  *   rather than inheriting it from a cascade that never runs on that path.
  */
@@ -17571,7 +17569,7 @@ function liftMirrorLockSync(filePath) {
  * already carries an exec bit so a git-hook shim stays runnable while
  * unwritable, 0o444 otherwise. Same mode choice the cascade's own
  * `mirrorFileMode` makes, expressed sync and with `node:fs` alone so rolldown
- * can inline it into the dep-0 release-bundle installer.
+ * can inline it into the dep-0 publish-bundle installer.
  *
  * Best-effort on purpose: a missing file or a chmod the filesystem refuses
  * leaves the target as it is instead of throwing. The installer locks each
@@ -17583,25 +17581,6 @@ function lockFileReadonlySync(filePath) {
     const { mode } = statSync(filePath)
     chmodSync(filePath, (mode & 73) === 0 ? 292 : 365)
   } catch {}
-}
-/**
- * Write `data` to a file in one call: lift any read-only cascade lock, write,
- * restore the prior mode (0444 stays 0444). A writable or missing target writes
- * untouched.
- *
- * This is the STANDARD writer for `scripts/fleet/**`, not a mirror-only
- * special case. A caller does not have to know whether its destination is a
- * cascade mirror, which is the knowledge that keeps going missing: a plain
- * writeFileSync EACCESes on a locked target, and the failure only surfaces on
- * the run where that particular file happens to be locked. Routing every write
- * through here removes the question.
- *
- * The cost on an unlocked target is one `statSync`; `chmod` runs only when the
- * file is actually locked. That is noise against the I/O these generators
- * already do, so there is no reason to reach for the raw `writeFileSync`.
- */
-function writeThroughMirrorLock(filePath, data) {
-  withMirrorLockLiftedSync(filePath, () => writeFileSync(filePath, data))
 }
 /**
  * Sync twin of withMirrorLockLifted for writeFileSync-based generators
@@ -17645,11 +17624,7 @@ function withMirrorLockLiftedSync(filePath, fn, options) {
     if (locked && mode !== void 0) chmodSync(filePath, mode)
   }
 }
-var init_mirror_lock = __esmMin(() => {
-  init_predicates()
-})
 
-init_mirror_lock()
 function localTemplateManifests(filesDir, manifest, dest) {
   const groups = [...(manifest.conditionalScopedFiles ?? [])]
   for (const [file, value] of Object.entries(manifest.files)) {
@@ -17669,7 +17644,15 @@ function localTemplateManifests(filesDir, manifest, dest) {
       })
   }
   const conditionalRoot = path.join(path.dirname(filesDir), 'conditional')
-  const roots = [filesDir]
+  const generatedRoot = path.join(
+    path.dirname(filesDir),
+    '..',
+    'generated',
+    'universal',
+  )
+  const roots = existsSync(generatedRoot)
+    ? [generatedRoot, filesDir]
+    : [filesDir]
   if (existsSync(conditionalRoot))
     for (const name of readdirSync(conditionalRoot).toSorted().reverse()) {
       const root = path.join(conditionalRoot, name)
@@ -17741,7 +17724,7 @@ function walkFilesRelative(dir, prefix, out) {
  *
  * The mirror is load-bearing rather than belt-and-braces. A manifest built for
  * a LOCAL template carries no `segments` at all - the segment list is written
- * by the release-bundle producer - so a manifest-only check finds nothing to
+ * by the publish-bundle producer - so a manifest-only check finds nothing to
  * skip on exactly the path where the clobber happens.
  */
 function hybridBundlePaths(manifest) {
@@ -17852,7 +17835,7 @@ function localTemplateFileContent(source, memberPath, templateDir) {
 }
 
 /**
- * True when the release-bundle installer should lock what it places.
+ * True when the publish-bundle installer should lock what it places.
  *
  * Unconditional, matching the cascade's mirror-mode fixer: a file is protected
  * the same way whether a cascade copied it or a bundle install placed it. The
@@ -18640,6 +18623,9 @@ function pruneStaleFleetFiles(dest, manifest, previousFiles, options) {
   }
   const { archiveManifest } = opts
   const candidates = new Set(previousFiles)
+  const repoOwnedPaths = new Set(
+    (manifest.repoOwnedFiles ?? []).map(normalizeBundlePath),
+  )
   for (const group of archiveManifest?.conditionalScopedFiles ?? [])
     for (const file of group.files) {
       const absolute = path.join(dest, normalizeBundlePath(file))
@@ -18663,6 +18649,7 @@ function pruneStaleFleetFiles(dest, manifest, previousFiles, options) {
     const rel = normalizeBundlePath(file)
     if (
       kept.has(rel) ||
+      repoOwnedPaths.has(rel) ||
       [...(opts.preservedPaths ?? [])].some(
         file => file === rel || file.startsWith(`${rel}/`),
       )
@@ -18677,8 +18664,7 @@ function pruneStaleFleetFiles(dest, manifest, previousFiles, options) {
   return pruned
 }
 
-init_util()
-const logger$4 = getDep0Logger()
+const logger$2 = getDep0Logger()
 /**
  * Whether the target already holds the exact bytes a placement would write.
  *
@@ -18915,7 +18901,7 @@ function ensureDirectoryMirrorsMatch(filesDir, dest, mirrorEntries, options) {
             force: true,
             recursive: true,
           })
-        logger$4.log(
+        logger$2.log(
           `install-fleet: failed to sync directory mirror ${entry.path}: ${errorMessage(e)}`,
         )
       }
@@ -18943,20 +18929,33 @@ function installFiles(filesDir, dest, manifest, options) {
   const generatedPaths = new Set(
     (manifest.generatedPaths ?? []).map(normalizeBundlePath),
   )
+  const repoOwnedPaths = new Set(
+    (manifest.repoOwnedFiles ?? []).map(normalizeBundlePath),
+  )
   const hybridPaths = computeHybridPaths(manifest)
   const rels = Object.keys(manifest.files)
   let placed = 0
   let unchanged = 0
   let skippedAlwaysTracked = 0
+  let skippedRepoOwned = 0
   const refreshedTracked = []
   for (let i = 0, { length } = rels; i < length; i += 1) {
     const rel = rels[i]
+    const target = path.join(dest, rel)
+    const stat = repoOwnedPaths.has(normalizeBundlePath(rel))
+      ? lstatSync(target, { throwIfNoEntry: false })
+      : void 0
+    if (stat !== void 0) {
+      if (stat.isFile() && (stat.mode & 128) === 0)
+        chmodSync(target, (stat.mode & 511) | 128)
+      skippedRepoOwned += 1
+      continue
+    }
     if (isPreservedInstallPath(rel, { preservedPaths: opts.preservedPaths })) {
       skippedAlwaysTracked += 1
       continue
     }
     const source = path.join(filesDir, rel)
-    const target = path.join(dest, rel)
     const rewritten =
       opts.templateDir === void 0
         ? void 0
@@ -18983,6 +18982,7 @@ function installFiles(filesDir, dest, manifest, options) {
       if (!refreshTracked && spliced === void 0) {
         if (
           locking &&
+          !repoOwnedPaths.has(normalizeBundlePath(rel)) &&
           isLockablePlacement({
             generatedPaths,
             hybridPaths,
@@ -19013,6 +19013,7 @@ function installFiles(filesDir, dest, manifest, options) {
       unchanged += 1
       if (
         locking &&
+        !repoOwnedPaths.has(normalizeBundlePath(rel)) &&
         isLockablePlacement({
           generatedPaths,
           hybridPaths,
@@ -19029,6 +19030,7 @@ function installFiles(filesDir, dest, manifest, options) {
     placed += 1
     if (
       locking &&
+      !repoOwnedPaths.has(normalizeBundlePath(rel)) &&
       isLockablePlacement({
         generatedPaths,
         hybridPaths,
@@ -19040,6 +19042,7 @@ function installFiles(filesDir, dest, manifest, options) {
   return {
     placed,
     skippedAlwaysTracked,
+    skippedRepoOwned,
     refreshedTracked,
     unchanged,
   }
@@ -19055,7 +19058,7 @@ function installFiles(filesDir, dest, manifest, options) {
  *
  * Why it must live in this dep-0 entry and not in the cascade: the cascade
  * cannot load without the payload it would be materializing.
- * `template/base/universal/scripts/fleet/land-work.mts` and its siblings import
+ * `template/base/universal/scripts/fleet/land.mts` and its siblings import
  * the LIVE `.claude/hooks/fleet/_shared/**`, so a checkout whose mirrors are
  * absent dies at module resolution before any fixer runs. Same reason the
  * fetcher cannot ship inside the bundle it fetches.
@@ -19078,12 +19081,29 @@ function materializeFromLocalTemplate(dest, manifest, options) {
           .map(normalizeBundlePath),
       )
     : options?.preservedPaths
-  migrateRuleFile(dest, preservedPaths)
-  const shaped = effectiveMemberManifest(manifest, dest)
+  migrateRuleFile(dest, { preservedPaths })
+  const localRepoOwnedFiles = Object.entries(manifest.files)
+    .filter(([, entry]) => {
+      if (entry === null || typeof entry !== 'object') return false
+      const metadata = entry
+      return metadata.owner === 'repo' && metadata.seedIfAbsent === true
+    })
+    .map(([rel]) => normalizeBundlePath(rel))
+  const shaped = effectiveMemberManifest(
+    {
+      ...manifest,
+      repoOwnedFiles: [
+        ...(manifest.repoOwnedFiles ?? []),
+        ...localRepoOwnedFiles,
+      ],
+    },
+    dest,
+  )
   const total = {
     placed: 0,
     unchanged: 0,
     skippedAlwaysTracked: 0,
+    skippedRepoOwned: 0,
     refreshedTracked: [],
   }
   for (const source of localTemplateManifests(filesDir, shaped, dest)) {
@@ -19095,6 +19115,7 @@ function materializeFromLocalTemplate(dest, manifest, options) {
     total.placed += result.placed
     total.unchanged += result.unchanged
     total.skippedAlwaysTracked += result.skippedAlwaysTracked
+    total.skippedRepoOwned += result.skippedRepoOwned
     total.refreshedTracked.push(...result.refreshedTracked)
   }
   const mirrorEntries = loadMirrorEntriesFromBundle(dest)
@@ -19144,7 +19165,7 @@ function untrackGeneratedOutputs(dest, generatedPaths) {
       },
     )
   } catch (e) {
-    logger$4.log(
+    logger$2.log(
       `install-fleet: untracking generated outputs failed (non-fatal) — ${errorMessage(e)}`,
     )
   }
@@ -19154,10 +19175,14 @@ function untrackGeneratedOutputs(dest, generatedPaths) {
  * consumer's existing file (or start with an empty string), splice the block
  * in, and write back.
  */
-function installSegments(segmentsDir, dest, manifest, preservedPaths) {
+function installSegments(segmentsDir, dest, manifest, options) {
+  const opts = {
+    __proto__: null,
+    ...options,
+  }
   const segments = manifest.segments
   if (!segments || segments.length === 0) return
-  migrateRuleFile(dest, preservedPaths)
+  migrateRuleFile(dest, opts)
   for (const entry of segments) {
     const destName = segmentFileName(entry.path)
     const blockPath = path.join(segmentsDir, destName)
@@ -19191,7 +19216,7 @@ function installSettingsSegment(segmentsDir, dest, manifest) {
   if (segment === void 0) return 0
   const sourcePath = path.join(segmentsDir, segmentFileName(segment.path))
   if (!existsSync(sourcePath)) {
-    logger$4.log(
+    logger$2.log(
       `install-fleet: Claude settings segment missing at ${sourcePath} — refusing to merge.`,
     )
     return 1
@@ -19210,7 +19235,7 @@ function installSettingsSegment(segmentsDir, dest, manifest) {
     writeFileSync(targetPath, `${JSON.stringify(merged, void 0, 2)}\n`)
     return 0
   } catch (e) {
-    logger$4.log(
+    logger$2.log(
       `install-fleet: Claude settings merge failed for ${targetPath}: ${errorMessage(e)}. Nothing written.`,
     )
     return 1
@@ -19226,7 +19251,7 @@ function installWorkspaceSegment(segmentsDir, dest, manifest) {
   if (ws === void 0) return 0
   const fleetFile = path.join(segmentsDir, 'pnpm-workspace.yaml.fleet')
   if (!existsSync(fleetFile)) {
-    logger$4.log(
+    logger$2.log(
       `install-fleet: workspace segment file missing at ${fleetFile} — skipping workspace merge`,
     )
     return 0
@@ -19248,7 +19273,7 @@ function installWorkspaceSegment(segmentsDir, dest, manifest) {
     })
     writeFileSync(targetPath, merged)
   } catch (e) {
-    logger$4.log(
+    logger$2.log(
       `install-fleet: pnpm-workspace.yaml merge failed — ${errorMessage(e)}. Nothing written.`,
     )
     return 1
@@ -19277,7 +19302,7 @@ const PREPARE_FROM_TEMPLATE =
 function wirePackageJson(dest) {
   const pkgPath = path.join(dest, 'package.json')
   if (!existsSync(pkgPath)) {
-    logger$4.log(
+    logger$2.log(
       `install-fleet: --wire: no package.json at ${pkgPath} — skipping`,
     )
     return
@@ -19694,11 +19719,22 @@ async function fetchOciManifestEnvelope(repo, ref, token, registry, options) {
     manifest,
   }
 }
-/**
- * Choose the tarball layer from an artifact manifest: prefer a layer whose
- * `org.opencontainers.image.title` ends in `.tar.gz`, then a gzip/tar media
- * type, else the sole layer. Throws when no usable layer exists.
- */
+function pickFleetManifestLayer(manifest) {
+  const layers = (manifest.layers ?? []).filter(
+    layer =>
+      layer.mediaType === 'application/vnd.socket.fleet-pack.manifest.v1+json',
+  )
+  const descriptor = layers[0]
+  if (
+    layers.length !== 1 ||
+    !descriptor?.digest ||
+    !OCI_DIGEST_RE.test(descriptor.digest)
+  )
+    throw new Error(
+      'GHCR fleet manifest layer is invalid. Where: OCI artifact layers. Saw no unique digest-identified fleet manifest; wanted one JSON manifest layer. Fix: inspect the published artifact without overwriting its immutable tag.',
+    )
+  return descriptor
+}
 function pickBundleLayer(manifest) {
   const layers = manifest.layers ?? []
   if (layers.length === 0)
@@ -19783,12 +19819,29 @@ async function pullFleetBundleTarball(config) {
     cfg.destDir,
     `socket-wheelhouse-fleet-${cfg.tag}.tar.gz`,
   )
+  let manifestBlob
+  if (cfg.manifestPath !== void 0) {
+    const descriptor = pickFleetManifestLayer(envelope.manifest)
+    manifestBlob = await fetchBlob(
+      cfg.repo,
+      descriptor.digest,
+      token,
+      registry,
+      httpFn,
+    )
+    if (`sha256:${sha256Hex(manifestBlob)}` !== descriptor.digest)
+      throw new Error(
+        'GHCR fleet manifest failed SHA-256 verification. Where: OCI JSON manifest blob. Saw mismatched bytes; wanted the published layer digest. Fix: retry the verified download.',
+      )
+  }
   writeFileSync(tarballPath, blob)
+  if (cfg.manifestPath !== void 0 && manifestBlob !== void 0)
+    writeFileSync(cfg.manifestPath, manifestBlob)
   return tarballPath
 }
 
-const logger$3 = getDep0Logger()
-const MANIFEST_NAME$1 = 'release-bundle-manifest.json'
+const logger$1 = getDep0Logger()
+const MANIFEST_NAME$1 = 'publish-bundle-manifest.json'
 /**
  * Derive the GHCR fleet-pack package repo from the gh `owner/repo`. GHCR
  * package paths are lowercase: `SocketDev/socket-wheelhouse` →
@@ -19798,7 +19851,7 @@ function ghcrBundleRepo(repo) {
   return `${repo.toLowerCase()}/fleet-pack`
 }
 /**
- * Extract just the release-bundle manifest from the bundle tarball root (the
+ * Extract just the publish-bundle manifest from the bundle tarball root (the
  * tarball ships it beside files/ + segments/), so the GHCR path yields the same
  * on-disk `sourceManifest` file the gh-release path downloads separately.
  */
@@ -19812,35 +19865,28 @@ function extractManifestFromTarball(tarball, destDir) {
   ])
   return path.join(destDir, MANIFEST_NAME$1)
 }
-/**
- * Default GHCR fetch: anonymous OCI pull of the fleet-pack tarball, then pull
- * the manifest out of it. Throws on any failure so the selector can fall back.
- */
 async function ghcrFetchBundle(config) {
   const cfg = {
     __proto__: null,
     ...config,
   }
-  const tarball = await pullFleetBundleTarball({
-    destDir: cfg.tmp,
-    repo: ghcrBundleRepo(cfg.repo),
-    tag: cfg.ref,
-    expectedReceipt: cfg.expectedReceipt,
-  })
+  const manifest = path.join(cfg.tmp, MANIFEST_NAME$1)
   return {
-    manifest: extractManifestFromTarball(tarball, cfg.tmp),
-    tarball,
+    manifest,
+    tarball: await pullFleetBundleTarball({
+      destDir: cfg.tmp,
+      manifestPath: manifest,
+      repo: ghcrBundleRepo(cfg.repo),
+      tag: cfg.ref,
+      expectedReceipt: cfg.expectedReceipt,
+    }),
   }
 }
 /**
  * Fetch the fleet bundle from GHCR.
  *
- * GHCR is the only source. A GitHub-Release fallback used to sit behind this,
- * described in its own comment as transitional until the public GHCR package
- * existed. That package exists, and the pack no longer publishes a Release at
- * all, so the fallback could only ever fail now: it turned a clear GHCR error
- * into a confusing `gh` one and hid the real cause. The injected `ghcrFetch`
- * lets tests drive it without network.
+ * GHCR supplies the tarball and the separate verified JSON manifest layer.
+ * The injected fetch function lets tests run without network access.
  */
 async function fetchBundleSource(config) {
   const cfg = {
@@ -19853,7 +19899,7 @@ async function fetchBundleSource(config) {
     tmp: cfg.tmp,
     expectedReceipt: cfg.expectedReceipt,
   })
-  logger$3.error(
+  logger$1.error(
     `install-fleet: fetched ${cfg.ref} from ghcr (${ghcrBundleRepo(cfg.repo)}).`,
   )
   return {
@@ -20071,7 +20117,7 @@ var require_array = /* @__PURE__ */ __commonJSMin(exports => {
   exports.toLength = toLength
 })
 
-var require_format$1 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_format = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_primordials_object = require_object()
   const require_primordials_json = require_json()
@@ -20332,7 +20378,7 @@ var require_format$1 = /* @__PURE__ */ __commonJSMin(exports => {
   exports.stripFormattingSymbols = stripFormattingSymbols
 })
 
-var import_format = require_format$1()
+var import_format = require_format()
 /**
  * @file Paths for the Codex setup step.
  */
@@ -20499,7800 +20545,34 @@ var require_strings = /* @__PURE__ */ __commonJSMin(exports => {
 })
 
 var import_strings = require_strings()
-/**
- * @file Entrypoint detection for fleet scripts. The naive
- *   `import.meta.url === file://argv[1]` comparison is symlink-fragile:
- *   Node resolves the REAL path for a module's `import.meta.url` while
- *   `process.argv[1]` keeps the path as invoked, so a script spawned via a
- *   symlinked location (macOS `/var` → `/private/var`, the shape every
- *   mkdtemp-based integration test hits) never matches and `main()` silently
- *   does not run. Compare realpaths on both sides instead.
- *   V8 startup-snapshot guard: when a fleet script is bundled into the
- *   snapshot dispatch pack (e.g. `ai-balancer/probe.mts` is imported by the
- *   `ai-balancer-proxy-start` hook), `node --build-snapshot <bundle.cjs>`
- *   sets `process.argv[1]` to the bundle path. A bundled module's
- *   `import.meta.url` is rewritten to `pathToFileURL(__filename).href`, which
- *   also resolves to the bundle path, so `isMainModule` returns true and
- *   `runMain(main)` fires at module-eval — calling `probeHealth()` which
- *   loads `node:http`, creating `HTTPParser` and `net.Socket` native handles
- *   V8 refuses to serialize (`CheckGlobalAndEternalHandles` fatal). The
- *   guard mirrors `isGuardRunContext` in `guard.mts`: a snapshot BUILD pass
- *   is never a run context for a standalone script.
- */
-/**
- * True when the module at `importMetaUrl` is the process entrypoint.
- * `entryPath` defaults to `process.argv[1]`; injectable for tests.
- *
- * Returns false during a V8 `--build-snapshot` pass: a bundled script's
- * `import.meta.url` and `process.argv[1]` both resolve to the bundle file,
- * so the entrypoint test would hold and `runMain` would execute `main()` at
- * module-eval — loading `node:http` (native `HTTPParser` / `Socket` handles
- * V8 refuses to serialize) and aborting `CheckGlobalAndEternalHandles`. A
- * deserialized process sees the real entrypoint comparison.
- */
-function isMainModule$1(importMetaUrl, entryPath) {
-  if (v8.startupSnapshot.isBuildingSnapshot()) return false
-  const entry = entryPath ?? process$1.argv[1]
-  if (!entry) return false
-  try {
-    return realpathSync(fileURLToPath(importMetaUrl)) === realpathSync(entry)
-  } catch {
-    return false
-  }
-}
-
-var require_pony_cause$1 = /* @__PURE__ */ __commonJSMin((exports, module) => {
-  const { SetCtor: _p_SetCtor } = require_map_set()
-  var __commonJSMin = (cb, mod) => () => (
-    mod || (cb((mod = { exports: {} }).exports, mod), (cb = null)),
-    mod.exports
-  )
-  var require_error_with_cause = /* @__PURE__ */ __commonJSMin(
-    (exports$11, module$10) => {
-      module$10.exports = {
-        ErrorWithCause: class ErrorWithCause extends Error {
-          /**
-           * @param {string} message
-           * @param {{ cause?: T }} options
-           */
-          constructor(message, { cause } = {}) {
-            super(message)
-            /**
-             * @type {string}
-             */
-            this.name = ErrorWithCause.name
-            if (cause)
-              /**
-               * @type {T}
-               */
-              this.cause = cause
-            /**
-             * @type {string}
-             */
-            this.message = message
-          }
-        },
-      }
-    },
-  )
-  var require_helpers = /* @__PURE__ */ __commonJSMin(
-    (exports$12, module$11) => {
-      const isError =
-        typeof Error.isError === 'function'
-          ? Error.isError
-          : v =>
-              v !== null &&
-              typeof v === 'object' &&
-              Object.prototype.toString.call(v) === '[object Error]'
-      /**
-       * @template {Error} T
-       *
-       * @param {unknown} err
-       * @param {new (...args: any[]) => T} reference
-       *
-       * @returns {T | undefined}
-       */
-      const findCauseByReference = (err, reference) => {
-        if (!err || !reference) return
-        if (!isError(err)) return
-        if (!(reference.prototype instanceof Error) && reference !== Error)
-          return
-        /**
-         * Ensures we don't go circular.
-         *
-         * @type {Set<Error>}
-         */
-        const seen = /* @__PURE__ */ new _p_SetCtor()
-        /**
-         * @type {Error | undefined}
-         */
-        let currentErr = err
-        while (currentErr && !seen.has(currentErr)) {
-          seen.add(currentErr)
-          if (currentErr instanceof reference) return currentErr
-          currentErr = getErrorCause(currentErr)
-        }
-      }
-      /**
-       * @param {Error | { cause?: unknown | (() => err) }} err
-       *
-       * @returns {Error | undefined}
-       */
-      const getErrorCause = err => {
-        if (!err || typeof err !== 'object' || !('cause' in err)) return
-        if (typeof err.cause === 'function') {
-          const causeResult = err.cause()
-          return isError(causeResult) ? causeResult : void 0
-        } else return isError(err.cause) ? err.cause : void 0
-      }
-      /**
-       * Internal method that keeps a track of which error we have already
-       * added, to avoid circular recursion.
-       *
-       * @private
-       *
-       * @param {Error} err
-       * @param {Set<Error>} seen
-       *
-       * @returns {string}
-       */
-      const _stackWithCauses = (err, seen) => {
-        if (!isError(err)) return ''
-        const stack = err.stack || ''
-        if (seen.has(err)) return stack + '\ncauses have become circular...'
-        const cause = getErrorCause(err)
-        if (cause) {
-          seen.add(err)
-          return stack + '\ncaused by: ' + _stackWithCauses(cause, seen)
-        } else return stack
-      }
-      /**
-       * @param {Error} err
-       *
-       * @returns {string}
-       */
-      const stackWithCauses = err =>
-        _stackWithCauses(err, /* @__PURE__ */ new _p_SetCtor())
-      /**
-       * Internal method that keeps a track of which error we have already
-       * added, to avoid circular recursion.
-       *
-       * @private
-       *
-       * @param {Error} err
-       * @param {Set<Error>} seen
-       * @param {boolean} [skip]
-       *
-       * @returns {string}
-       */
-      const _messageWithCauses = (err, seen, skip) => {
-        if (!isError(err)) return ''
-        const message = skip ? '' : err.message || ''
-        if (seen.has(err)) return message + ': ...'
-        const cause = getErrorCause(err)
-        if (cause) {
-          seen.add(err)
-          const skipIfVErrorStyleCause =
-            'cause' in err && typeof err.cause === 'function'
-          return (
-            message +
-            (skipIfVErrorStyleCause ? '' : ': ') +
-            _messageWithCauses(cause, seen, skipIfVErrorStyleCause)
-          )
-        } else return message
-      }
-      /**
-       * @param {Error} err
-       *
-       * @returns {string}
-       */
-      const messageWithCauses = err =>
-        _messageWithCauses(err, /* @__PURE__ */ new _p_SetCtor())
-      module$11.exports = {
-        findCauseByReference,
-        getErrorCause,
-        stackWithCauses,
-        messageWithCauses,
-      }
-    },
-  )
-  var require_pony_cause = /* @__PURE__ */ __commonJSMin(
-    (exports$13, module$12) => {
-      const { ErrorWithCause } = require_error_with_cause()
-      const {
-        findCauseByReference,
-        getErrorCause,
-        messageWithCauses,
-        stackWithCauses,
-      } = require_helpers()
-      module$12.exports = {
-        ErrorWithCause,
-        findCauseByReference,
-        getErrorCause,
-        stackWithCauses,
-        messageWithCauses,
-      }
-    },
-  )
-  module.exports = require_pony_cause()
-})
-
-var require_message = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_constants_sentinels = require_sentinels()
-  const require_errors_predicates = require_predicates$1()
-  let src_external_pony_cause_js = require_pony_cause$1()
-  /**
-   * @file Human-readable error-message extractor. `errorMessage` walks the
-   *   `cause` chain via pony-cause's `messageWithCauses` for Errors and falls
-   *   back to the shared `UNKNOWN_ERROR` sentinel for everything else.
-   *   `messageWithCauses` and `UNKNOWN_ERROR` are re-exported for callers that
-   *   need them directly.
-   */
-  /**
-   * Extract a human-readable message from any caught value.
-   *
-   * Walks the `cause` chain for Errors (via {@link messageWithCauses}); coerces
-   * primitives and objects to string; returns {@link UNKNOWN_ERROR} for `null`,
-   * `undefined`, empty strings, `[object Object]`, or Errors with no message.
-   *
-   * @example
-   *   try {
-   *     await readConfig(path)
-   *   } catch (e) {
-   *     throw new ErrorCtor(`Failed to read ${path}: ${errorMessage(e)}`, {
-   *       cause: e,
-   *     })
-   *   }
-   */
-  function errorMessage(value) {
-    if (require_errors_predicates.isError(value))
-      return (
-        (0, src_external_pony_cause_js.messageWithCauses)(value) ||
-        'Unknown error'
-      )
-    if (value === null || value === void 0)
-      return require_constants_sentinels.UNKNOWN_ERROR
-    const s = String(value)
-    if (s === '' || s === '[object Object]')
-      return require_constants_sentinels.UNKNOWN_ERROR
-    return s
-  }
-  exports.UNKNOWN_ERROR = require_constants_sentinels.UNKNOWN_ERROR
-  exports.errorMessage = errorMessage
-  exports.messageWithCauses = src_external_pony_cause_js.messageWithCauses
-})
-
-var require_presets = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  /**
-   * Socket Security — The signature theme. Refined violet with subtle shimmer,
-   * designed for focus and elegance.
-   */
-  const SOCKET_THEME = {
-    colors: {
-      primary: [140, 82, 255],
-      success: 'greenBright',
-      error: 'redBright',
-      warning: 'yellowBright',
-      info: 'blueBright',
-      step: 'cyanBright',
-      text: 'white',
-      textDim: 'gray',
-      link: 'cyanBright',
-      prompt: 'primary',
-    },
-    displayName: 'Socket Security',
-    effects: {
-      spinner: {
-        color: 'primary',
-        style: 'socket',
-      },
-      shimmer: {
-        enabled: true,
-        color: 'inherit',
-        direction: 'ltr',
-        speed: 0.33,
-      },
-    },
-    meta: {
-      description: 'Signature theme with refined violet and subtle shimmer',
-      version: '1.0.0',
-    },
-    name: 'socket',
-  }
-  /**
-   * Sunset — Vibrant twilight gradient. Warm sunset palette with orange and
-   * purple/pink tones.
-   */
-  const SUNSET_THEME = {
-    colors: {
-      primary: [255, 140, 100],
-      secondary: [200, 100, 180],
-      success: 'greenBright',
-      error: 'redBright',
-      warning: 'yellowBright',
-      info: 'magentaBright',
-      step: 'magentaBright',
-      text: 'white',
-      textDim: 'gray',
-      link: 'primary',
-      prompt: 'primary',
-    },
-    displayName: 'Sunset',
-    effects: {
-      spinner: {
-        color: 'primary',
-        style: 'dots',
-      },
-      shimmer: {
-        enabled: true,
-        color: [
-          [200, 100, 180],
-          [255, 140, 100],
-        ],
-        direction: 'ltr',
-        speed: 0.4,
-      },
-    },
-    meta: {
-      description: 'Warm sunset theme with purple-to-orange gradient',
-      version: '2.0.0',
-    },
-    name: 'sunset',
-  }
-  /**
-   * Terracotta — Solid warmth. Rich terracotta and ember tones for grounded
-   * confidence.
-   */
-  const TERRACOTTA_THEME = {
-    colors: {
-      primary: [255, 100, 50],
-      secondary: [255, 150, 100],
-      success: 'greenBright',
-      error: 'redBright',
-      warning: 'yellowBright',
-      info: 'blueBright',
-      step: 'cyanBright',
-      text: 'white',
-      textDim: 'gray',
-      link: 'secondary',
-      prompt: 'primary',
-    },
-    displayName: 'Terracotta',
-    effects: {
-      spinner: {
-        color: 'primary',
-        style: 'socket',
-      },
-      shimmer: {
-        enabled: true,
-        color: 'inherit',
-        direction: 'ltr',
-        speed: 0.5,
-      },
-    },
-    meta: {
-      description: 'Solid theme with rich terracotta and ember warmth',
-      version: '1.0.0',
-    },
-    name: 'terracotta',
-  }
-  /**
-   * Lush — Steel elegance. Python-inspired steel blue with golden accents.
-   */
-  const LUSH_THEME = {
-    colors: {
-      primary: [70, 130, 180],
-      secondary: [255, 215, 0],
-      success: 'greenBright',
-      error: 'redBright',
-      warning: 'yellowBright',
-      info: 'blueBright',
-      step: 'cyanBright',
-      text: 'white',
-      textDim: 'gray',
-      link: 'cyanBright',
-      prompt: 'primary',
-    },
-    displayName: 'Lush',
-    effects: {
-      spinner: {
-        color: 'primary',
-        style: 'dots',
-      },
-    },
-    meta: {
-      description: 'Elegant theme with steel blue and golden harmony',
-      version: '1.0.0',
-    },
-    name: 'lush',
-  }
-  /**
-   * Ultra — Premium intensity. Prismatic shimmer for deep analysis, where
-   * complexity meets elegance.
-   */
-  const ULTRA_THEME = {
-    colors: {
-      primary: [140, 82, 255],
-      success: 'greenBright',
-      error: 'redBright',
-      warning: 'yellowBright',
-      info: 'cyanBright',
-      step: 'magentaBright',
-      text: 'whiteBright',
-      textDim: 'gray',
-      link: 'cyanBright',
-      prompt: 'primary',
-    },
-    displayName: 'Ultra',
-    effects: {
-      spinner: {
-        color: 'inherit',
-        style: 'socket',
-      },
-      shimmer: {
-        enabled: true,
-        color: 'rainbow',
-        direction: 'bi',
-        speed: 0.5,
-      },
-    },
-    meta: {
-      description: 'Premium theme with prismatic shimmer for deep analysis',
-      version: '1.0.0',
-    },
-    name: 'ultra',
-  }
-  /**
-   * Theme registry — Curated palette collection.
-   */
-  const THEMES = {
-    __proto__: null,
-    lush: LUSH_THEME,
-    socket: SOCKET_THEME,
-    sunset: SUNSET_THEME,
-    terracotta: TERRACOTTA_THEME,
-    ultra: ULTRA_THEME,
-  }
-  exports.LUSH_THEME = LUSH_THEME
-  exports.SOCKET_THEME = SOCKET_THEME
-  exports.SUNSET_THEME = SUNSET_THEME
-  exports.TERRACOTTA_THEME = TERRACOTTA_THEME
-  exports.THEMES = THEMES
-  exports.ULTRA_THEME = ULTRA_THEME
-})
-
-var require_context = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_node_async_hooks = require_async_hooks()
-  const require_primordials_map_set = require_map_set()
-  const require_term_themes_presets = require_presets()
-  /**
-   * Emit theme change event to listeners.
-   *
-   * @private
-   */
-  function emitThemeChange(theme) {
-    for (const listener of listeners) listener(theme)
-  }
-  /**
-   * Lazily load the async_hooks module. Aliases the canonical
-   * `node/async-hooks` accessor, the single owner of the bundler-safe require;
-   * kept as an export so this module's surface is unchanged.
-   *
-   * @private
-   */
-  const getAsyncHooks = require_node_async_hooks.getNodeAsyncHooks
-  let themeStorage
-  /**
-   * Fallback theme for global context.
-   */
-  let fallbackTheme = require_term_themes_presets.SOCKET_THEME
-  /**
-   * Registered theme change listeners.
-   */
-  const listeners = new require_primordials_map_set.SetCtor()
-  /**
-   * Get the active theme from context.
-   *
-   * @example
-   *   ;```ts
-   *   const theme = getTheme()
-   *   console.log(theme.displayName)
-   *   ```
-   *
-   * @returns Current theme
-   */
-  function getTheme() {
-    return getThemeStorage().getStore() ?? fallbackTheme
-  }
-  /**
-   * Get the process-scoped AsyncLocalStorage used for theme context isolation.
-   *
-   * Constructed LAZILY (memoized) rather than at module-eval: an
-   * AsyncLocalStorage holds a live native handle, and constructing it at import
-   * time pins that handle into every module transitively importing this leaf —
-   * aborting V8 --build-snapshot serialization. Deferring to first use keeps
-   * the single-store semantics while leaving module import snapshot-safe.
-   *
-   * @private
-   */
-  function getThemeStorage() {
-    if (themeStorage === void 0) {
-      const { AsyncLocalStorage } = getAsyncHooks()
-      themeStorage = new AsyncLocalStorage()
-    }
-    return themeStorage
-  }
-  /**
-   * Subscribe to theme change events.
-   *
-   * @example
-   *   ;```ts
-   *   const unsubscribe = onThemeChange(theme => {
-   *     console.log('Theme:', theme.displayName)
-   *   })
-   *
-   *   // Cleanup
-   *   unsubscribe()
-   *   ```
-   *
-   * @param listener - Change handler.
-   *
-   * @returns Unsubscribe function
-   */
-  function onThemeChange(listener) {
-    listeners.add(listener)
-    return () => {
-      listeners.delete(listener)
-    }
-  }
-  /**
-   * Set the global fallback theme.
-   *
-   * @example
-   *   ;```ts
-   *   setTheme('socket-firewall')
-   *   ```
-   *
-   * @param theme - Theme name or object.
-   */
-  function setTheme(theme) {
-    fallbackTheme =
-      typeof theme === 'string'
-        ? (require_term_themes_presets.THEMES[theme] ?? fallbackTheme)
-        : theme
-    emitThemeChange(fallbackTheme)
-  }
-  /**
-   * Execute async operation with scoped theme. Theme automatically restored on
-   * completion.
-   *
-   * @example
-   *   ;```ts
-   *   await withTheme('ultra', async () => {
-   *     // Operations use Ultra theme
-   *   })
-   *   ```
-   *
-   * @template T - Return type.
-   *
-   * @param theme - Scoped theme.
-   * @param fn - Async operation.
-   *
-   * @returns Operation result
-   */
-  async function withTheme(theme, fn) {
-    const resolvedTheme =
-      typeof theme === 'string'
-        ? (require_term_themes_presets.THEMES[theme] ?? fallbackTheme)
-        : theme
-    return await getThemeStorage().run(resolvedTheme, async () => {
-      emitThemeChange(resolvedTheme)
-      return await fn()
-    })
-  }
-  /**
-   * Execute sync operation with scoped theme. Theme automatically restored on
-   * completion.
-   *
-   * @example
-   *   ;```ts
-   *   const result = withThemeSync('coana', () => {
-   *     return processData()
-   *   })
-   *   ```
-   *
-   * @template T - Return type.
-   *
-   * @param theme - Scoped theme.
-   * @param fn - Sync operation.
-   *
-   * @returns Operation result
-   */
-  function withThemeSync(theme, fn) {
-    const resolvedTheme =
-      typeof theme === 'string'
-        ? (require_term_themes_presets.THEMES[theme] ?? fallbackTheme)
-        : theme
-    return getThemeStorage().run(resolvedTheme, () => {
-      emitThemeChange(resolvedTheme)
-      return fn()
-    })
-  }
-  exports.emitThemeChange = emitThemeChange
-  exports.getAsyncHooks = getAsyncHooks
-  exports.getTheme = getTheme
-  exports.getThemeStorage = getThemeStorage
-  exports.onThemeChange = onThemeChange
-  exports.setTheme = setTheme
-  exports.withTheme = withTheme
-  exports.withThemeSync = withThemeSync
-})
-
-var require_shared = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_primordials_map_set = require_map_set()
-  /**
-   * @file Private state shared between the `logger/node` class (which owns the
-   *   public `Logger` surface) and `logger/console-init` (which mutates
-   *   `Logger.prototype` to mirror `globalConsole`). The `_` prefix keeps this
-   *   module out of the generated package.json `exports` map (the `dist/**\/_*`
-   *   ignore pattern in `scripts/fleet/make-package-exports.mts` filters it
-   *   out), so it is not part of the public surface — it exists only to give
-   *   the two leaves above a common owner for the WeakMap-backed lazy-init
-   *   state. Why two WeakMaps instead of `#privateField` slots:
-   *
-   *   - Logger adds dynamic console methods to its prototype at first use (see
-   *     `console-init.ts` `ensurePrototypeInitialized`). Those dynamic methods
-   *     are constructed via the `{ [key]: function () }` shorthand and CANNOT
-   *     access TC39 private fields on `this`.
-   *   - WeakMaps work for both the static methods on the `Logger` class body AND
-   *     the dynamically-attached prototype methods. WeakMap entries are GC'd
-   *     alongside the `Logger` instance.
-   *   - `privateConstructorArgs` is deleted after first `Console` build so we
-   *     don't pin the original args for the lifetime of the logger.
-   */
-  /**
-   * The global `console` reference captured at module load. Pinned to a local
-   * so dynamic `console` overrides at runtime can't affect the logger's source
-   * console (e.g., test rewiring of `globalThis.console`).
-   */
-  const globalConsole = console
-  /**
-   * Property-descriptor template used when registering dynamic console methods
-   * on `Logger.prototype`. Writable + configurable so tests can override;
-   * non-enumerable so the methods don't leak into `for...in` iteration on a
-   * logger instance.
-   */
-  const consolePropAttributes = {
-    __proto__: null,
-    configurable: true,
-    enumerable: false,
-    writable: true,
-  }
-  /**
-   * Cap on the indentation prefix length so a runaway `indent(n)` call with a
-   * huge `n` can't allocate a multi-megabyte string.
-   */
-  const maxIndentation = 1e3
-  const boundConsoleMethodNames = [
-    '_stderrErrorHandler',
-    '_stdoutErrorHandler',
-    'assert',
-    'clear',
-    'count',
-    'countReset',
-    'createTask',
-    'debug',
-    'dir',
-    'dirxml',
-    'error',
-    'info',
-    'log',
-    'table',
-    'time',
-    'timeEnd',
-    'timeLog',
-    'trace',
-    'warn',
-  ]
-  let boundConsoleEntries
-  /**
-   * Pre-bound copies of the console methods that need their original `this` to
-   * function (e.g., `console.error.bind(globalConsole)`). Returns `[name,
-   * boundFn]` pairs so `console-init.ts` can apply them onto the per-instance
-   * Console without re-binding on every call.
-   *
-   * Built LAZILY (memoized) rather than at module-eval:
-   * `fn.bind(globalConsole)` of a native console method produces a bound
-   * function wrapping a native C++ function pointer, which serializes as an
-   * unresolvable external reference and aborts V8 --build-snapshot. Deferring
-   * construction to first Console build keeps the bind-once/reuse win while
-   * leaving module import snapshot-safe.
-   */
-  function getBoundConsoleEntries() {
-    if (boundConsoleEntries === void 0)
-      boundConsoleEntries = boundConsoleMethodNames
-        .filter(n => typeof globalConsole[n] === 'function')
-        .map(n => [n, globalConsole[n].bind(globalConsole)])
-    return boundConsoleEntries
-  }
-  /**
-   * WeakMap storing the Console instance for each Logger.
-   *
-   * Console creation is lazy - deferred until first logging method call. This
-   * allows logger to be imported during early Node.js bootstrap before stdout
-   * is ready, avoiding ERR_CONSOLE_WRITABLE_STREAM errors.
-   */
-  const privateConsole = new require_primordials_map_set.WeakMapCtor()
-  /**
-   * WeakMap storing constructor arguments for lazy Console initialization.
-   *
-   * WeakMap is required instead of a private field (#constructorArgs) because: 1.
-   * Private fields can't be accessed from dynamically created functions 2.
-   * Logger adds console methods dynamically to its prototype 3. These dynamic
-   * methods need constructor args for lazy initialization 4. WeakMap allows
-   * both regular methods and dynamic functions to access args.
-   *
-   * The args are deleted from the WeakMap after Console is created (memory
-   * cleanup).
-   */
-  const privateConstructorArgs = new require_primordials_map_set.WeakMapCtor()
-  exports.consolePropAttributes = consolePropAttributes
-  exports.getBoundConsoleEntries = getBoundConsoleEntries
-  exports.globalConsole = globalConsole
-  exports.maxIndentation = maxIndentation
-  exports.privateConsole = privateConsole
-  exports.privateConstructorArgs = privateConstructorArgs
-})
-
-var require_runtime$2 = /* @__PURE__ */ __commonJSMin(exports => {
-  var __create = Object.create
-  var __defProp = Object.defineProperty
-  var __getOwnPropDesc = Object.getOwnPropertyDescriptor
-  var __getOwnPropNames = Object.getOwnPropertyNames
-  var __getProtoOf = Object.getPrototypeOf
-  var __hasOwnProp = Object.prototype.hasOwnProperty
-  var __exportAll = (all, no_symbols) => {
-    let target = {}
-    for (var name in all)
-      __defProp(target, name, {
-        get: all[name],
-        enumerable: true,
-      })
-    if (!no_symbols) __defProp(target, Symbol.toStringTag, { value: 'Module' })
-    return target
-  }
-  var __copyProps = (to, from, except, desc) => {
-    if ((from && typeof from === 'object') || typeof from === 'function')
-      for (
-        var keys = __getOwnPropNames(from), i = 0, n = keys.length, key;
-        i < n;
-        i++
-      ) {
-        key = keys[i]
-        if (!__hasOwnProp.call(to, key) && key !== except)
-          __defProp(to, key, {
-            get: (k => from[k]).bind(null, key),
-            enumerable:
-              !(desc = __getOwnPropDesc(from, key)) || desc.enumerable,
-          })
-      }
-    return to
-  }
-  var __toESM = (mod, isNodeMode, target) => (
-    (target = mod != null ? __create(__getProtoOf(mod)) : {}),
-    __copyProps(
-      isNodeMode ||
-        !mod ||
-        !mod.__esModule ||
-        !__hasOwnProp.call(mod, 'default')
-        ? __defProp(target, 'default', {
-            value: mod,
-            enumerable: true,
-          })
-        : target,
-      mod,
-    )
-  )
-  exports.__exportAll = __exportAll
-  exports.__toESM = __toESM
-})
-
-/**
- * Bundled from external-pack
- * This is a zero-dependency bundle created by rolldown.
- */
-var require_external_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
-  var __create = Object.create
-  var __defProp = Object.defineProperty
-  var __name = (target, value) =>
-    __defProp(target, 'name', {
-      value,
-      configurable: true,
-    })
-  var __getOwnPropDesc = Object.getOwnPropertyDescriptor
-  var __getOwnPropNames = Object.getOwnPropertyNames
-  var __getProtoOf = Object.getPrototypeOf
-  var __hasOwnProp = Object.prototype.hasOwnProperty
-  var __esmMin = (fn, res, err) => () => {
-    if (err) throw err[0]
-    try {
-      return (fn && (res = fn((fn = 0))), res)
-    } catch (e) {
-      throw ((err = [e]), e)
-    }
-  }
-  var __commonJSMin = (cb, mod) => () => (
-    mod || (cb((mod = { exports: {} }).exports, mod), (cb = null)),
-    mod.exports
-  )
-  var __exportAll = (all, no_symbols) => {
-    let target = {}
-    for (var name in all)
-      __defProp(target, name, {
-        get: all[name],
-        enumerable: true,
-      })
-    if (!no_symbols) __defProp(target, Symbol.toStringTag, { value: 'Module' })
-    return target
-  }
-  var __copyProps = (to, from, except, desc) => {
-    if ((from && typeof from === 'object') || typeof from === 'function')
-      for (
-        var keys = __getOwnPropNames(from), i = 0, n = keys.length, key;
-        i < n;
-        i++
-      ) {
-        key = keys[i]
-        if (!__hasOwnProp.call(to, key) && key !== except)
-          __defProp(to, key, {
-            get: (k => from[k]).bind(null, key),
-            enumerable:
-              !(desc = __getOwnPropDesc(from, key)) || desc.enumerable,
-          })
-      }
-    return to
-  }
-  var __toESM = (mod, isNodeMode, target) => (
-    (target = mod != null ? __create(__getProtoOf(mod)) : {}),
-    __copyProps(
-      isNodeMode ||
-        !mod ||
-        !mod.__esModule ||
-        !__hasOwnProp.call(mod, 'default')
-        ? __defProp(target, 'default', {
-            value: mod,
-            enumerable: true,
-          })
-        : target,
-      mod,
-    )
-  )
-  var __toCommonJS = mod =>
-    __hasOwnProp.call(mod, 'module.exports')
-      ? mod['module.exports']
-      : __copyProps(__defProp({}, '__esModule', { value: true }), mod)
-  let node_process = __require('process')
-  node_process = __toESM(node_process, 1)
-  let node_os = __require('os')
-  node_os = __toESM(node_os, 1)
-  let node_tty = __require('tty')
-  node_tty = __toESM(node_tty, 1)
-  let node_async_hooks = __require('async_hooks')
-  let node_util = __require('util')
-  let node_readline = __require('readline')
-  node_readline = __toESM(node_readline, 1)
-  let node_path = __require('path')
-  const { ArrayFrom: _p_ArrayFrom, ArrayIsArray: _p_ArrayIsArray } =
-    require_array$2()
-  const { ErrorCtor: _p_ErrorCtor, TypeErrorCtor: _p_TypeErrorCtor } =
-    require_error$1()
-  const { SetCtor: _p_SetCtor } = require_map_set()
-  const {
-    MathAbs: _p_MathAbs,
-    MathFloor: _p_MathFloor,
-    MathMax: _p_MathMax,
-    MathMin: _p_MathMin,
-    MathRandom: _p_MathRandom,
-  } = require_math()
-  const {
-    NumberIsNaN: _p_NumberIsNaN,
-    NumberParseFloat: _p_NumberParseFloat,
-    NumberParseInt: _p_NumberParseInt,
-  } = require_number$1()
-  const {
-    ObjectAssign: _p_ObjectAssign,
-    ObjectDefineProperty: _p_ObjectDefineProperty,
-    ObjectEntries: _p_ObjectEntries,
-    ObjectGetPrototypeOf: _p_ObjectGetPrototypeOf,
-    ObjectIs: _p_ObjectIs,
-    ObjectKeys: _p_ObjectKeys,
-  } = require_object()
-  const { processCwd: _p_processCwd } = require_process$1()
-  const { PromiseCtor: _p_PromiseCtor } = require_promise()
-  const { RegExpCtor: _p_RegExpCtor } = require_regexp()
-  const {
-    StringPrototypeCodePointAt: _p_StringPrototypeCodePointAt,
-    StringPrototypeReplaceAll: _p_StringPrototypeReplaceAll,
-    StringPrototypeStartsWith: _p_StringPrototypeStartsWith,
-    StringPrototypeToLowerCase: _p_StringPrototypeToLowerCase,
-    StringPrototypeTrim: _p_StringPrototypeTrim,
-    StringPrototypeTrimEnd: _p_StringPrototypeTrimEnd,
-    StringPrototypeTrimStart: _p_StringPrototypeTrimStart,
-  } = require_string$1()
-  node_path = __toESM(node_path, 1)
-  var require_signals = /* @__PURE__ */ __commonJSMin(exports$2 => {
-    _p_ObjectDefineProperty(exports$2, '__esModule', { value: true })
-    exports$2.signals = void 0
-    /**
-     * This is not the set of all possible signals.
-     *
-     * It IS, however, the set of all signals that trigger
-     * an exit on either Linux or BSD systems.  Linux is a
-     * superset of the signal names supported on BSD, and
-     * the unknown signals just fail to register, so we can
-     * catch that easily enough.
-     *
-     * Windows signals are a different set, since there are
-     * signals that terminate Windows processes, but don't
-     * terminate (or don't even exist) on Posix systems.
-     *
-     * Don't bother with SIGKILL.  It's uncatchable, which
-     * means that we can't fire any callbacks anyway.
-     *
-     * If a user does happen to register a handler on a non-
-     * fatal signal like SIGWINCH or something, and then
-     * exit, it'll end up firing `process.emit('exit')`, so
-     * the handler will be fired anyway.
-     *
-     * SIGBUS, SIGFPE, SIGSEGV and SIGILL, when not raised
-     * artificially, inherently leave the process in a
-     * state from which it is not safe to try and enter JS
-     * listeners.
-     */
-    exports$2.signals = []
-    exports$2.signals.push('SIGHUP', 'SIGINT', 'SIGTERM')
-    if (process.platform !== 'win32')
-      exports$2.signals.push(
-        'SIGALRM',
-        'SIGABRT',
-        'SIGVTALRM',
-        'SIGXCPU',
-        'SIGXFSZ',
-        'SIGUSR2',
-        'SIGTRAP',
-        'SIGSYS',
-        'SIGQUIT',
-        'SIGIOT',
-      )
-    if (process.platform === 'linux')
-      exports$2.signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT')
-  })
-  var require_cjs = /* @__PURE__ */ __commonJSMin(exports$3 => {
-    var _a
-    _p_ObjectDefineProperty(exports$3, '__esModule', { value: true })
-    exports$3.unload =
-      exports$3.load =
-      exports$3.onExit =
-      exports$3.signals =
-        void 0
-    const signals_js_1 = require_signals()
-    _p_ObjectDefineProperty(exports$3, 'signals', {
-      enumerable: true,
-      get: function () {
-        return signals_js_1.signals
-      },
-    })
-    const processOk = process =>
-      !!process &&
-      typeof process === 'object' &&
-      typeof process.removeListener === 'function' &&
-      typeof process.emit === 'function' &&
-      typeof process.reallyExit === 'function' &&
-      typeof process.listeners === 'function' &&
-      typeof process.kill === 'function' &&
-      typeof process.pid === 'number' &&
-      typeof process.on === 'function'
-    const kExitEmitter = Symbol.for('signal-exit emitter')
-    const global = globalThis
-    const ObjectDefineProperty = Object.defineProperty.bind(Object)
-    var Emitter = class {
-      emitted = {
-        afterExit: false,
-        exit: false,
-      }
-      listeners = {
-        afterExit: [],
-        exit: [],
-      }
-      count = 0
-      id = _p_MathRandom()
-      constructor() {
-        if (global[kExitEmitter]) return global[kExitEmitter]
-        ObjectDefineProperty(global, kExitEmitter, {
-          value: this,
-          writable: false,
-          enumerable: false,
-          configurable: false,
-        })
-      }
-      on(ev, fn) {
-        this.listeners[ev].push(fn)
-      }
-      removeListener(ev, fn) {
-        const list = this.listeners[ev]
-        const i = list.indexOf(fn)
-        /* c8 ignore start */
-        if (i === -1) return
-        /* c8 ignore stop */
-        if (i === 0 && list.length === 1) list.length = 0
-        else list.splice(i, 1)
-      }
-      emit(ev, code, signal) {
-        if (this.emitted[ev]) return false
-        this.emitted[ev] = true
-        let ret = false
-        for (const fn of this.listeners[ev])
-          ret = fn(code, signal) === true || ret
-        if (ev === 'exit') ret = this.emit('afterExit', code, signal) || ret
-        return ret
-      }
-    }
-    var SignalExitBase = class {}
-    const signalExitWrap = handler => {
-      return {
-        onExit(cb, opts) {
-          return handler.onExit(cb, opts)
-        },
-        load() {
-          return handler.load()
-        },
-        unload() {
-          return handler.unload()
-        },
-      }
-    }
-    var SignalExitFallback = class extends SignalExitBase {
-      onExit() {
-        return () => {}
-      }
-      load() {}
-      unload() {}
-    }
-    var SignalExit = class extends SignalExitBase {
-      /* c8 ignore start */
-      #hupSig = process.platform === 'win32' ? 'SIGINT' : 'SIGHUP'
-      /* c8 ignore stop */
-      #emitter = new Emitter()
-      #process
-      #originalProcessEmit
-      #originalProcessReallyExit
-      #sigListeners = {}
-      #loaded = false
-      constructor(process) {
-        super()
-        this.#process = process
-        this.#sigListeners = {}
-        for (const sig of signals_js_1.signals)
-          this.#sigListeners[sig] = () => {
-            const listeners = this.#process.listeners(sig)
-            let { count } = this.#emitter
-            /* c8 ignore start */
-            const p = process
-            if (
-              typeof p.__signal_exit_emitter__ === 'object' &&
-              typeof p.__signal_exit_emitter__.count === 'number'
-            )
-              count += p.__signal_exit_emitter__.count
-            /* c8 ignore stop */
-            if (listeners.length === count) {
-              this.unload()
-              const ret = this.#emitter.emit('exit', null, sig)
-              /* c8 ignore start */
-              const s = sig === 'SIGHUP' ? this.#hupSig : sig
-              if (!ret) process.kill(process.pid, s)
-            }
-          }
-        this.#originalProcessReallyExit = process.reallyExit
-        this.#originalProcessEmit = process.emit
-      }
-      onExit(cb, opts) {
-        /* c8 ignore start */
-        if (!processOk(this.#process)) return () => {}
-        /* c8 ignore stop */
-        if (this.#loaded === false) this.load()
-        const ev = opts?.alwaysLast ? 'afterExit' : 'exit'
-        this.#emitter.on(ev, cb)
-        return () => {
-          this.#emitter.removeListener(ev, cb)
-          if (
-            this.#emitter.listeners['exit'].length === 0 &&
-            this.#emitter.listeners['afterExit'].length === 0
-          )
-            this.unload()
-        }
-      }
-      load() {
-        if (this.#loaded) return
-        this.#loaded = true
-        this.#emitter.count += 1
-        for (const sig of signals_js_1.signals)
-          try {
-            const fn = this.#sigListeners[sig]
-            if (fn) this.#process.on(sig, fn)
-          } catch (_) {}
-        this.#process.emit = (ev, ...a) => {
-          return this.#processEmit(ev, ...a)
-        }
-        this.#process.reallyExit = code => {
-          return this.#processReallyExit(code)
-        }
-      }
-      unload() {
-        if (!this.#loaded) return
-        this.#loaded = false
-        signals_js_1.signals.forEach(sig => {
-          const listener = this.#sigListeners[sig]
-          /* c8 ignore start */
-          if (!listener)
-            throw new _p_ErrorCtor('Listener not defined for signal: ' + sig)
-          /* c8 ignore stop */
-          try {
-            this.#process.removeListener(sig, listener)
-          } catch (_) {}
-          /* c8 ignore stop */
-        })
-        this.#process.emit = this.#originalProcessEmit
-        this.#process.reallyExit = this.#originalProcessReallyExit
-        this.#emitter.count -= 1
-      }
-      #processReallyExit(code) {
-        /* c8 ignore start */
-        if (!processOk(this.#process)) return 0
-        this.#process.exitCode = code || 0
-        /* c8 ignore stop */
-        this.#emitter.emit('exit', this.#process.exitCode, null)
-        return this.#originalProcessReallyExit.call(
-          this.#process,
-          this.#process.exitCode,
-        )
-      }
-      #processEmit(ev, ...args) {
-        const og = this.#originalProcessEmit
-        if (ev === 'exit' && processOk(this.#process)) {
-          if (typeof args[0] === 'number') this.#process.exitCode = args[0]
-          /* c8 ignore start */
-          const ret = og.call(this.#process, ev, ...args)
-          /* c8 ignore start */
-          this.#emitter.emit('exit', this.#process.exitCode, null)
-          /* c8 ignore stop */
-          return ret
-        } else return og.call(this.#process, ev, ...args)
-      }
-    }
-    const process = globalThis.process
-    ;((_a = signalExitWrap(
-      processOk(process) ? new SignalExit(process) : new SignalExitFallback(),
-    )),
-      (exports$3.onExit = _a.onExit),
-      (exports$3.load = _a.load),
-      (exports$3.unload = _a.unload))
-  })
-  var supports_color_exports = /* @__PURE__ */ __exportAll({
-    createSupportsColor: () => createSupportsColor,
-    default: () => supportsColor$1,
-  })
-  function hasFlag$1(
-    flag,
-    argv = globalThis.Deno ? globalThis.Deno.args : node_process.default.argv,
-  ) {
-    const prefix = _p_StringPrototypeStartsWith(flag, '-')
-      ? ''
-      : flag.length === 1
-        ? '-'
-        : '--'
-    const position = argv.indexOf(prefix + flag)
-    const terminatorPosition = argv.indexOf('--')
-    return (
-      position !== -1 &&
-      (terminatorPosition === -1 || position < terminatorPosition)
-    )
-  }
-  function envForceColor() {
-    if (!('FORCE_COLOR' in env)) return
-    if (env.FORCE_COLOR === 'true') return 1
-    if (env.FORCE_COLOR === 'false') return 0
-    if (env.FORCE_COLOR.length === 0) return 1
-    const level = _p_MathMin(_p_NumberParseInt(env.FORCE_COLOR, 10), 3)
-    if (![0, 1, 2, 3].includes(level)) return
-    return level
-  }
-  function translateLevel(level) {
-    if (level === 0) return false
-    return {
-      level,
-      hasBasic: true,
-      has256: level >= 2,
-      has16m: level >= 3,
-    }
-  }
-  function _supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
-    const noFlagForceColor = envForceColor()
-    if (noFlagForceColor !== void 0) flagForceColor = noFlagForceColor
-    const forceColor = sniffFlags ? flagForceColor : noFlagForceColor
-    if (forceColor === 0) return 0
-    if (sniffFlags) {
-      if (
-        hasFlag$1('color=16m') ||
-        hasFlag$1('color=full') ||
-        hasFlag$1('color=truecolor')
-      )
-        return 3
-      if (hasFlag$1('color=256')) return 2
-    }
-    if ('TF_BUILD' in env && 'AGENT_NAME' in env) return 1
-    if (haveStream && !streamIsTTY && forceColor === void 0) return 0
-    const min = forceColor || 0
-    if (env.TERM === 'dumb') return min
-    if (node_process.default.platform === 'win32') {
-      const osRelease = node_os.default.release().split('.')
-      if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586)
-        return Number(osRelease[2]) >= 14931 ? 3 : 2
-      return 1
-    }
-    if ('CI' in env) {
-      if (
-        ['GITHUB_ACTIONS', 'GITEA_ACTIONS', 'CIRCLECI'].some(key => key in env)
-      )
-        return 3
-      if (
-        ['TRAVIS', 'APPVEYOR', 'GITLAB_CI', 'BUILDKITE', 'DRONE'].some(
-          sign => sign in env,
-        ) ||
-        env.CI_NAME === 'codeship'
-      )
-        return 1
-      return min
-    }
-    if ('TEAMCITY_VERSION' in env)
-      return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0
-    if (env.COLORTERM === 'truecolor') return 3
-    if (env.TERM === 'xterm-kitty') return 3
-    if (env.TERM === 'xterm-ghostty') return 3
-    if (env.TERM === 'wezterm') return 3
-    if ('TERM_PROGRAM' in env) {
-      const version = _p_NumberParseInt(
-        (env.TERM_PROGRAM_VERSION || '').split('.')[0],
-        10,
-      )
-      switch (env.TERM_PROGRAM) {
-        case 'iTerm.app':
-          return version >= 3 ? 3 : 2
-        case 'Apple_Terminal':
-          return 2
-      }
-    }
-    if (/-256(color)?$/i.test(env.TERM)) return 2
-    if (
-      /^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(
-        env.TERM,
-      )
-    )
-      return 1
-    if ('COLORTERM' in env) return 1
-    return min
-  }
-  function createSupportsColor(stream, options = {}) {
-    return translateLevel(
-      _supportsColor(stream, {
-        streamIsTTY: stream && stream.isTTY,
-        ...options,
-      }),
-    )
-  }
-  var env
-  var flagForceColor
-  var supportsColor$1
-  var init_supports_color = __esmMin(() => {
-    __name(hasFlag$1, 'hasFlag')
-    ;({ env } = node_process.default)
-    if (
-      hasFlag$1('no-color') ||
-      hasFlag$1('no-colors') ||
-      hasFlag$1('color=false') ||
-      hasFlag$1('color=never')
-    )
-      flagForceColor = 0
-    else if (
-      hasFlag$1('color') ||
-      hasFlag$1('colors') ||
-      hasFlag$1('color=true') ||
-      hasFlag$1('color=always')
-    )
-      flagForceColor = 1
-    supportsColor$1 = {
-      stdout: createSupportsColor({ isTTY: node_tty.default.isatty(1) }),
-      stderr: createSupportsColor({ isTTY: node_tty.default.isatty(2) }),
-    }
-  })
-  var require__stub_has_flag = /* @__PURE__ */ __commonJSMin(
-    (exports$4, module$3) => {
-      module$3.exports = function hasFlag(flag, argv = process.argv) {
-        const prefix = _p_StringPrototypeStartsWith(flag, '-')
-          ? ''
-          : flag.length === 1
-            ? '-'
-            : '--'
-        const position = argv.indexOf(prefix + flag)
-        const terminatorPosition = argv.indexOf('--')
-        return (
-          position !== -1 &&
-          (terminatorPosition === -1 || position < terminatorPosition)
-        )
-      }
-    },
-  )
-  var require_ansi_escapes = /* @__PURE__ */ __commonJSMin(
-    (exports$5, module$4) => {
-      const ansiEscapes = module$4.exports
-      module$4.exports.default = ansiEscapes
-      const ESC = '\x1B['
-      const OSC = '\x1B]'
-      const BEL = '\x07'
-      const SEP = ';'
-      const isTerminalApp = process.env.TERM_PROGRAM === 'Apple_Terminal'
-      ansiEscapes.cursorTo = (x, y) => {
-        if (typeof x !== 'number')
-          throw new _p_TypeErrorCtor('The `x` argument is required')
-        if (typeof y !== 'number') return ESC + (x + 1) + 'G'
-        return ESC + (y + 1) + ';' + (x + 1) + 'H'
-      }
-      ansiEscapes.cursorMove = (x, y) => {
-        if (typeof x !== 'number')
-          throw new _p_TypeErrorCtor('The `x` argument is required')
-        let ret = ''
-        if (x < 0) ret += ESC + -x + 'D'
-        else if (x > 0) ret += ESC + x + 'C'
-        if (y < 0) ret += ESC + -y + 'A'
-        else if (y > 0) ret += ESC + y + 'B'
-        return ret
-      }
-      ansiEscapes.cursorUp = (count = 1) => ESC + count + 'A'
-      ansiEscapes.cursorDown = (count = 1) => ESC + count + 'B'
-      ansiEscapes.cursorForward = (count = 1) => ESC + count + 'C'
-      ansiEscapes.cursorBackward = (count = 1) => ESC + count + 'D'
-      ansiEscapes.cursorLeft = '\x1B[G'
-      ansiEscapes.cursorSavePosition = isTerminalApp ? '\x1B7' : '\x1B[s'
-      ansiEscapes.cursorRestorePosition = isTerminalApp ? '\x1B8' : '\x1B[u'
-      ansiEscapes.cursorGetPosition = '\x1B[6n'
-      ansiEscapes.cursorNextLine = '\x1B[E'
-      ansiEscapes.cursorPrevLine = '\x1B[F'
-      ansiEscapes.cursorHide = '\x1B[?25l'
-      ansiEscapes.cursorShow = '\x1B[?25h'
-      ansiEscapes.eraseLines = count => {
-        let clear = ''
-        for (let i = 0; i < count; i++)
-          clear +=
-            ansiEscapes.eraseLine +
-            (i < count - 1 ? ansiEscapes.cursorUp() : '')
-        if (count) clear += ansiEscapes.cursorLeft
-        return clear
-      }
-      ansiEscapes.eraseEndLine = '\x1B[K'
-      ansiEscapes.eraseStartLine = '\x1B[1K'
-      ansiEscapes.eraseLine = '\x1B[2K'
-      ansiEscapes.eraseDown = '\x1B[J'
-      ansiEscapes.eraseUp = '\x1B[1J'
-      ansiEscapes.eraseScreen = '\x1B[2J'
-      ansiEscapes.scrollUp = '\x1B[S'
-      ansiEscapes.scrollDown = '\x1B[T'
-      ansiEscapes.clearScreen = '\x1Bc'
-      ansiEscapes.clearTerminal =
-        process.platform === 'win32'
-          ? `${ansiEscapes.eraseScreen}${ESC}0f`
-          : `${ansiEscapes.eraseScreen}${ESC}3J${ESC}H`
-      ansiEscapes.beep = BEL
-      ansiEscapes.link = (text, url) => {
-        return [
-          OSC,
-          '8',
-          SEP,
-          SEP,
-          url,
-          BEL,
-          text,
-          OSC,
-          '8',
-          SEP,
-          SEP,
-          BEL,
-        ].join('')
-      }
-      ansiEscapes.image = (buffer, options = {}) => {
-        let ret = `${OSC}1337;File=inline=1`
-        if (options.width) ret += `;width=${options.width}`
-        if (options.height) ret += `;height=${options.height}`
-        if (options.preserveAspectRatio === false)
-          ret += ';preserveAspectRatio=0'
-        return ret + ':' + buffer.toString('base64') + BEL
-      }
-      ansiEscapes.iTerm = {
-        setCwd: (cwd = _p_processCwd()) => `${OSC}50;CurrentDir=${cwd}${BEL}`,
-        annotation: (message, options = {}) => {
-          let ret = `${OSC}1337;`
-          const hasX = typeof options.x !== 'undefined'
-          const hasY = typeof options.y !== 'undefined'
-          if (
-            (hasX || hasY) &&
-            !(hasX && hasY && typeof options.length !== 'undefined')
-          )
-            throw new _p_ErrorCtor(
-              '`x`, `y` and `length` must be defined when `x` or `y` is defined',
-            )
-          message = message.replace(/\|/g, '')
-          ret += options.isHidden ? 'AddHiddenAnnotation=' : 'AddAnnotation='
-          if (options.length > 0)
-            ret += (
-              hasX
-                ? [message, options.length, options.x, options.y]
-                : [options.length, message]
-            ).join('|')
-          else ret += message
-          return ret + BEL
-        },
-      }
-    },
-  )
-  var require__stub_supports_hyperlinks = /* @__PURE__ */ __commonJSMin(
-    (exports$6, module$5) => {
-      const os = __require('os')
-      const process$3 = __require('process')
-      function parseVersion(version) {
-        const parts = /(\d+)(?:\.(\d+))?(?:\.(\d+))?/.exec(version || '')
-        if (!parts)
-          return {
-            __proto__: null,
-            major: 0,
-            minor: 0,
-            patch: 0,
-          }
-        return {
-          __proto__: null,
-          major: Number(parts[1] || 0),
-          minor: Number(parts[2] || 0),
-          patch: Number(parts[3] || 0),
-        }
-      }
-      function supported(stream) {
-        const { env } = process$3
-        const forced = env['FORCE_HYPERLINK']
-        if (forced !== void 0 && forced.length > 0)
-          return !(
-            forced === '0' || _p_StringPrototypeToLowerCase(forced) === 'false'
-          )
-        if (env['NO_HYPERLINK'] !== void 0 || env['DOMTERM'])
-          return Boolean(env['DOMTERM'])
-        if (stream && stream.isTTY === false) return false
-        if (env['CI']) return false
-        if (env['WT_SESSION']) return true
-        return (
-          terminalProgramSupportsHyperlinks(env) ??
-          platformSupportsHyperlinks(env)
-        )
-      }
-      function terminalProgramSupportsHyperlinks(env) {
-        if (env['TERM_PROGRAM']) {
-          const version = parseVersion(env['TERM_PROGRAM_VERSION'])
-          switch (env['TERM_PROGRAM']) {
-            case 'ghostty':
-            case 'kitty':
-            case 'rio':
-            case 'WezTerm':
-              return true
-            case 'iTerm.app':
-              return (
-                version.major > 3 || (version.major === 3 && version.minor >= 1)
-              )
-            case 'vscode':
-              return (
-                version.major > 1 ||
-                (version.major === 1 && version.minor >= 72)
-              )
-          }
-        }
-      }
-      function platformSupportsHyperlinks(env) {
-        if (env['VTE_VERSION']) {
-          if (env['VTE_VERSION'] === '0.50.0') return false
-          const version = parseVersion(env['VTE_VERSION'])
-          return version.major > 0 || version.minor >= 50
-        }
-        if (os.platform() === 'win32') {
-          const release = parseVersion(os.release())
-          return release.major >= 10 && release.patch >= 14393
-        }
-        return false
-      }
-      module$5.exports = { supportsHyperlink: supported }
-      _p_ObjectDefineProperty(module$5.exports, 'stdout', {
-        configurable: true,
-        enumerable: true,
-        get: () => supported(process$3.stdout),
-      })
-      _p_ObjectDefineProperty(module$5.exports, 'stderr', {
-        configurable: true,
-        enumerable: true,
-        get: () => supported(process$3.stderr),
-      })
-      module$5.exports.default = module$5.exports
-    },
-  )
-  var require_terminal_link = /* @__PURE__ */ __commonJSMin(
-    (exports$7, module$6) => {
-      const ansiEscapes = require_ansi_escapes()
-      const supportsHyperlinks = require__stub_supports_hyperlinks()
-      const terminalLink = (
-        text,
-        url,
-        { target = 'stdout', ...options } = {},
-      ) => {
-        if (!supportsHyperlinks[target]) {
-          if (options.fallback === false) return text
-          return typeof options.fallback === 'function'
-            ? options.fallback(text, url)
-            : `${text} (\u200B${url}\u200B)`
-        }
-        return ansiEscapes.link(text, url)
-      }
-      module$6.exports = (text, url, options = {}) =>
-        terminalLink(text, url, options)
-      module$6.exports.stderr = (text, url, options = {}) =>
-        terminalLink(text, url, {
-          target: 'stderr',
-          ...options,
-        })
-      module$6.exports.isSupported = supportsHyperlinks.stdout
-      module$6.exports.stderr.isSupported = supportsHyperlinks.stderr
-    },
-  )
-  var require_yoctocolors_cjs$1 = /* @__PURE__ */ __commonJSMin(
-    (exports$8, module$7) => {
-      const hasColors =
-        __require('tty')?.WriteStream?.prototype?.hasColors?.() ?? false
-      const format = (open, close) => {
-        if (!hasColors) return input => input
-        const openCode = `\u001B[${open}m`
-        const closeCode = `\u001B[${close}m`
-        return input => {
-          const string = input + ''
-          let index = string.indexOf(closeCode)
-          if (index === -1) return openCode + string + closeCode
-          let result = openCode
-          let lastIndex = 0
-          const replaceCode = (close === 22 ? closeCode : '') + openCode
-          while (index !== -1) {
-            result += string.slice(lastIndex, index) + replaceCode
-            lastIndex = index + closeCode.length
-            index = string.indexOf(closeCode, lastIndex)
-          }
-          result += string.slice(lastIndex) + closeCode
-          return result
-        }
-      }
-      const colors = {}
-      colors.reset = format(0, 0)
-      colors.bold = format(1, 22)
-      colors.dim = format(2, 22)
-      colors.italic = format(3, 23)
-      colors.underline = format(4, 24)
-      colors.overline = format(53, 55)
-      colors.inverse = format(7, 27)
-      colors.hidden = format(8, 28)
-      colors.strikethrough = format(9, 29)
-      colors.black = format(30, 39)
-      colors.red = format(31, 39)
-      colors.green = format(32, 39)
-      colors.yellow = format(33, 39)
-      colors.blue = format(34, 39)
-      colors.magenta = format(35, 39)
-      colors.cyan = format(36, 39)
-      colors.white = format(37, 39)
-      colors.gray = format(90, 39)
-      colors.bgBlack = format(40, 49)
-      colors.bgRed = format(41, 49)
-      colors.bgGreen = format(42, 49)
-      colors.bgYellow = format(43, 49)
-      colors.bgBlue = format(44, 49)
-      colors.bgMagenta = format(45, 49)
-      colors.bgCyan = format(46, 49)
-      colors.bgWhite = format(47, 49)
-      colors.bgGray = format(100, 49)
-      colors.redBright = format(91, 39)
-      colors.greenBright = format(92, 39)
-      colors.yellowBright = format(93, 39)
-      colors.blueBright = format(94, 39)
-      colors.magentaBright = format(95, 39)
-      colors.cyanBright = format(96, 39)
-      colors.whiteBright = format(97, 39)
-      colors.bgRedBright = format(101, 49)
-      colors.bgGreenBright = format(102, 49)
-      colors.bgYellowBright = format(103, 49)
-      colors.bgBlueBright = format(104, 49)
-      colors.bgMagentaBright = format(105, 49)
-      colors.bgCyanBright = format(106, 49)
-      colors.bgWhiteBright = format(107, 49)
-      module$7.exports = colors
-    },
-  )
-  function isKeybinding(value) {
-    return keybindingLookup.has(value)
-  }
-  function getDefaultKeybindings() {
-    const env = process.env['INQUIRER_KEYBINDINGS']
-    if (!env) return []
-    return _p_ArrayFrom(
-      new _p_SetCtor(
-        _p_StringPrototypeToLowerCase(env)
-          .split(/[\s,]+/)
-          .filter(isKeybinding),
-      ),
-    )
-  }
-  var keybindingLookup
-  var isUpKey
-  var isDownKey
-  var isSpaceKey
-  var isBackspaceKey
-  var isTabKey
-  var isNumberKey
-  var isEnterKey
-  var init_key = __esmMin(() => {
-    keybindingLookup = /* @__PURE__ */ new _p_SetCtor(['emacs', 'vim'])
-    isUpKey = (key, keybindings = []) =>
-      key.name === 'up' ||
-      (keybindings.includes('vim') && key.name === 'k') ||
-      (keybindings.includes('emacs') && key.ctrl && key.name === 'p')
-    isDownKey = (key, keybindings = []) =>
-      key.name === 'down' ||
-      (keybindings.includes('vim') && key.name === 'j') ||
-      (keybindings.includes('emacs') && key.ctrl && key.name === 'n')
-    isSpaceKey = key => key.name === 'space'
-    isBackspaceKey = key => key.name === 'backspace'
-    isTabKey = key => key.name === 'tab'
-    isNumberKey = key => '1234567890'.includes(key.name)
-    isEnterKey = key => key.name === 'enter' || key.name === 'return'
-  })
-  var AbortPromptError
-  var CancelPromptError
-  var ExitPromptError
-  var HookError
-  var ValidationError
-  var init_errors = __esmMin(() => {
-    AbortPromptError = class extends Error {
-      name = 'AbortPromptError'
-      message = 'Prompt was aborted'
-      constructor(options) {
-        super()
-        this.cause = options?.cause
-      }
-    }
-    CancelPromptError = class extends Error {
-      name = 'CancelPromptError'
-      message = 'Prompt was canceled'
-    }
-    ExitPromptError = class extends Error {
-      name = 'ExitPromptError'
-    }
-    HookError = class extends Error {
-      name = 'HookError'
-    }
-    ValidationError = class extends Error {
-      name = 'ValidationError'
-    }
-  })
-  function createStore(rl) {
-    return {
-      rl,
-      hooks: [],
-      hooksCleanup: [],
-      hooksEffect: [],
-      index: 0,
-      handleChange() {},
-    }
-  }
-  function withHooks(rl, cb) {
-    const store = createStore(rl)
-    return hookStorage.run(store, () => {
-      function cycle(render) {
-        store.handleChange = () => {
-          store.index = 0
-          render()
-        }
-        store.handleChange()
-      }
-      return cb(cycle)
-    })
-  }
-  function getStore() {
-    const store = hookStorage.getStore()
-    if (!store)
-      throw new HookError(
-        '[Inquirer] Hook functions can only be called from within a prompt',
-      )
-    return store
-  }
-  function readline() {
-    return getStore().rl
-  }
-  function withUpdates(fn) {
-    const wrapped = (...args) => {
-      const store = getStore()
-      let shouldUpdate = false
-      const oldHandleChange = store.handleChange
-      store.handleChange = () => {
-        shouldUpdate = true
-      }
-      const returnValue = fn(...args)
-      if (shouldUpdate) oldHandleChange()
-      store.handleChange = oldHandleChange
-      return returnValue
-    }
-    return node_async_hooks.AsyncResource.bind(wrapped)
-  }
-  function withPointer(cb) {
-    const store = getStore()
-    const { index } = store
-    const returnValue = cb({
-      get() {
-        return store.hooks[index]
-      },
-      set(value) {
-        store.hooks[index] = value
-      },
-      initialized: index in store.hooks,
-    })
-    store.index++
-    return returnValue
-  }
-  function handleChange() {
-    getStore().handleChange()
-  }
-  var hookStorage
-  var effectScheduler
-  var init_hook_engine = __esmMin(() => {
-    init_errors()
-    hookStorage = new node_async_hooks.AsyncLocalStorage()
-    effectScheduler = {
-      queue(cb) {
-        const store = getStore()
-        const { index } = store
-        store.hooksEffect.push(() => {
-          store.hooksCleanup[index]?.()
-          const cleanFn = cb(readline())
-          if (cleanFn != null && typeof cleanFn !== 'function')
-            throw new ValidationError(
-              'useEffect return value must be a cleanup function or nothing.',
-            )
-          store.hooksCleanup[index] = cleanFn
-        })
-      },
-      run() {
-        const store = getStore()
-        withUpdates(() => {
-          store.hooksEffect.forEach(effect => {
-            effect()
-          })
-          store.hooksEffect.length = 0
-        })()
-      },
-      clearAll() {
-        const store = getStore()
-        store.hooksCleanup.forEach(cleanFn => {
-          cleanFn?.()
-        })
-        store.hooksEffect.length = 0
-        store.hooksCleanup.length = 0
-      },
-    }
-  })
-  function isFactory(value) {
-    return typeof value === 'function'
-  }
-  function useState(defaultValue) {
-    return withPointer(pointer => {
-      const setState = node_async_hooks.AsyncResource.bind(
-        function setState(newValue) {
-          if (pointer.get() !== newValue) {
-            pointer.set(newValue)
-            handleChange()
-          }
-        },
-      )
-      if (pointer.initialized) return [pointer.get(), setState]
-      const value = isFactory(defaultValue) ? defaultValue() : defaultValue
-      pointer.set(value)
-      return [value, setState]
-    })
-  }
-  var init_use_state = __esmMin(() => {
-    init_hook_engine()
-  })
-  function useEffect(cb, depArray) {
-    withPointer(pointer => {
-      const oldDeps = pointer.get()
-      if (
-        !_p_ArrayIsArray(oldDeps) ||
-        depArray.some((dep, i) => !_p_ObjectIs(dep, oldDeps[i]))
-      )
-        effectScheduler.queue(cb)
-      pointer.set(depArray)
-    })
-  }
-  var init_use_effect = __esmMin(() => {
-    init_hook_engine()
-  })
-  function isUnicodeSupported() {
-    if (!node_process.default.platform.startsWith('win'))
-      return node_process.default.env['TERM'] !== 'linux'
-    return (
-      Boolean(false) ||
-      Boolean(node_process.default.env['WT_SESSION']) ||
-      Boolean(node_process.default.env['TERMINUS_SUBLIME']) ||
-      node_process.default.env['ConEmuTask'] === '{cmd::Cmder}' ||
-      node_process.default.env['TERM_PROGRAM'] === 'Terminus-Sublime' ||
-      node_process.default.env['TERM_PROGRAM'] === 'vscode' ||
-      node_process.default.env['TERM'] === 'xterm-256color' ||
-      node_process.default.env['TERM'] === 'alacritty' ||
-      node_process.default.env['TERMINAL_EMULATOR'] === 'JetBrains-JediTerm'
-    )
-  }
-  var common
-  var specialMainSymbols
-  var specialFallbackSymbols
-  var mainSymbols
-  var fallbackSymbols
-  var shouldUseMain
-  var figures
-  var init_dist$10 = __esmMin(() => {
-    common = {
-      circleQuestionMark: '(?)',
-      questionMarkPrefix: '(?)',
-      square: '█',
-      squareDarkShade: '▓',
-      squareMediumShade: '▒',
-      squareLightShade: '░',
-      squareTop: '▀',
-      squareBottom: '▄',
-      squareLeft: '▌',
-      squareRight: '▐',
-      squareCenter: '■',
-      bullet: '●',
-      dot: '․',
-      ellipsis: '…',
-      pointerSmall: '›',
-      triangleUp: '▲',
-      triangleUpSmall: '▴',
-      triangleDown: '▼',
-      triangleDownSmall: '▾',
-      triangleLeftSmall: '◂',
-      triangleRightSmall: '▸',
-      home: '⌂',
-      heart: '♥',
-      musicNote: '♪',
-      musicNoteBeamed: '♫',
-      arrowUp: '↑',
-      arrowDown: '↓',
-      arrowLeft: '←',
-      arrowRight: '→',
-      arrowLeftRight: '↔',
-      arrowUpDown: '↕',
-      almostEqual: '≈',
-      notEqual: '≠',
-      lessOrEqual: '≤',
-      greaterOrEqual: '≥',
-      identical: '≡',
-      infinity: '∞',
-      subscriptZero: '₀',
-      subscriptOne: '₁',
-      subscriptTwo: '₂',
-      subscriptThree: '₃',
-      subscriptFour: '₄',
-      subscriptFive: '₅',
-      subscriptSix: '₆',
-      subscriptSeven: '₇',
-      subscriptEight: '₈',
-      subscriptNine: '₉',
-      oneHalf: '½',
-      oneThird: '⅓',
-      oneQuarter: '¼',
-      oneFifth: '⅕',
-      oneSixth: '⅙',
-      oneEighth: '⅛',
-      twoThirds: '⅔',
-      twoFifths: '⅖',
-      threeQuarters: '¾',
-      threeFifths: '⅗',
-      threeEighths: '⅜',
-      fourFifths: '⅘',
-      fiveSixths: '⅚',
-      fiveEighths: '⅝',
-      sevenEighths: '⅞',
-      line: '─',
-      lineBold: '━',
-      lineDouble: '═',
-      lineDashed0: '┄',
-      lineDashed1: '┅',
-      lineDashed2: '┈',
-      lineDashed3: '┉',
-      lineDashed4: '╌',
-      lineDashed5: '╍',
-      lineDashed6: '╴',
-      lineDashed7: '╶',
-      lineDashed8: '╸',
-      lineDashed9: '╺',
-      lineDashed10: '╼',
-      lineDashed11: '╾',
-      lineDashed12: '−',
-      lineDashed13: '–',
-      lineDashed14: '‐',
-      lineDashed15: '⁃',
-      lineVertical: '│',
-      lineVerticalBold: '┃',
-      lineVerticalDouble: '║',
-      lineVerticalDashed0: '┆',
-      lineVerticalDashed1: '┇',
-      lineVerticalDashed2: '┊',
-      lineVerticalDashed3: '┋',
-      lineVerticalDashed4: '╎',
-      lineVerticalDashed5: '╏',
-      lineVerticalDashed6: '╵',
-      lineVerticalDashed7: '╷',
-      lineVerticalDashed8: '╹',
-      lineVerticalDashed9: '╻',
-      lineVerticalDashed10: '╽',
-      lineVerticalDashed11: '╿',
-      lineDownLeft: '┐',
-      lineDownLeftArc: '╮',
-      lineDownBoldLeftBold: '┓',
-      lineDownBoldLeft: '┒',
-      lineDownLeftBold: '┑',
-      lineDownDoubleLeftDouble: '╗',
-      lineDownDoubleLeft: '╖',
-      lineDownLeftDouble: '╕',
-      lineDownRight: '┌',
-      lineDownRightArc: '╭',
-      lineDownBoldRightBold: '┏',
-      lineDownBoldRight: '┎',
-      lineDownRightBold: '┍',
-      lineDownDoubleRightDouble: '╔',
-      lineDownDoubleRight: '╓',
-      lineDownRightDouble: '╒',
-      lineUpLeft: '┘',
-      lineUpLeftArc: '╯',
-      lineUpBoldLeftBold: '┛',
-      lineUpBoldLeft: '┚',
-      lineUpLeftBold: '┙',
-      lineUpDoubleLeftDouble: '╝',
-      lineUpDoubleLeft: '╜',
-      lineUpLeftDouble: '╛',
-      lineUpRight: '└',
-      lineUpRightArc: '╰',
-      lineUpBoldRightBold: '┗',
-      lineUpBoldRight: '┖',
-      lineUpRightBold: '┕',
-      lineUpDoubleRightDouble: '╚',
-      lineUpDoubleRight: '╙',
-      lineUpRightDouble: '╘',
-      lineUpDownLeft: '┤',
-      lineUpBoldDownBoldLeftBold: '┫',
-      lineUpBoldDownBoldLeft: '┨',
-      lineUpDownLeftBold: '┥',
-      lineUpBoldDownLeftBold: '┩',
-      lineUpDownBoldLeftBold: '┪',
-      lineUpDownBoldLeft: '┧',
-      lineUpBoldDownLeft: '┦',
-      lineUpDoubleDownDoubleLeftDouble: '╣',
-      lineUpDoubleDownDoubleLeft: '╢',
-      lineUpDownLeftDouble: '╡',
-      lineUpDownRight: '├',
-      lineUpBoldDownBoldRightBold: '┣',
-      lineUpBoldDownBoldRight: '┠',
-      lineUpDownRightBold: '┝',
-      lineUpBoldDownRightBold: '┡',
-      lineUpDownBoldRightBold: '┢',
-      lineUpDownBoldRight: '┟',
-      lineUpBoldDownRight: '┞',
-      lineUpDoubleDownDoubleRightDouble: '╠',
-      lineUpDoubleDownDoubleRight: '╟',
-      lineUpDownRightDouble: '╞',
-      lineDownLeftRight: '┬',
-      lineDownBoldLeftBoldRightBold: '┳',
-      lineDownLeftBoldRightBold: '┯',
-      lineDownBoldLeftRight: '┰',
-      lineDownBoldLeftBoldRight: '┱',
-      lineDownBoldLeftRightBold: '┲',
-      lineDownLeftRightBold: '┮',
-      lineDownLeftBoldRight: '┭',
-      lineDownDoubleLeftDoubleRightDouble: '╦',
-      lineDownDoubleLeftRight: '╥',
-      lineDownLeftDoubleRightDouble: '╤',
-      lineUpLeftRight: '┴',
-      lineUpBoldLeftBoldRightBold: '┻',
-      lineUpLeftBoldRightBold: '┷',
-      lineUpBoldLeftRight: '┸',
-      lineUpBoldLeftBoldRight: '┹',
-      lineUpBoldLeftRightBold: '┺',
-      lineUpLeftRightBold: '┶',
-      lineUpLeftBoldRight: '┵',
-      lineUpDoubleLeftDoubleRightDouble: '╩',
-      lineUpDoubleLeftRight: '╨',
-      lineUpLeftDoubleRightDouble: '╧',
-      lineUpDownLeftRight: '┼',
-      lineUpBoldDownBoldLeftBoldRightBold: '╋',
-      lineUpDownBoldLeftBoldRightBold: '╈',
-      lineUpBoldDownLeftBoldRightBold: '╇',
-      lineUpBoldDownBoldLeftRightBold: '╊',
-      lineUpBoldDownBoldLeftBoldRight: '╉',
-      lineUpBoldDownLeftRight: '╀',
-      lineUpDownBoldLeftRight: '╁',
-      lineUpDownLeftBoldRight: '┽',
-      lineUpDownLeftRightBold: '┾',
-      lineUpBoldDownBoldLeftRight: '╂',
-      lineUpDownLeftBoldRightBold: '┿',
-      lineUpBoldDownLeftBoldRight: '╃',
-      lineUpBoldDownLeftRightBold: '╄',
-      lineUpDownBoldLeftBoldRight: '╅',
-      lineUpDownBoldLeftRightBold: '╆',
-      lineUpDoubleDownDoubleLeftDoubleRightDouble: '╬',
-      lineUpDoubleDownDoubleLeftRight: '╫',
-      lineUpDownLeftDoubleRightDouble: '╪',
-      lineCross: '╳',
-      lineBackslash: '╲',
-      lineSlash: '╱',
-    }
-    specialMainSymbols = {
-      tick: '✔',
-      info: 'ℹ',
-      warning: '⚠',
-      cross: '✘',
-      squareSmall: '◻',
-      squareSmallFilled: '◼',
-      circle: '◯',
-      circleFilled: '◉',
-      circleDotted: '◌',
-      circleDouble: '◎',
-      circleCircle: 'ⓞ',
-      circleCross: 'ⓧ',
-      circlePipe: 'Ⓘ',
-      radioOn: '◉',
-      radioOff: '◯',
-      checkboxOn: '☒',
-      checkboxOff: '☐',
-      checkboxCircleOn: 'ⓧ',
-      checkboxCircleOff: 'Ⓘ',
-      pointer: '❯',
-      triangleUpOutline: '△',
-      triangleLeft: '◀',
-      triangleRight: '▶',
-      lozenge: '◆',
-      lozengeOutline: '◇',
-      hamburger: '☰',
-      smiley: '㋡',
-      mustache: '෴',
-      star: '★',
-      play: '▶',
-      nodejs: '⬢',
-      oneSeventh: '⅐',
-      oneNinth: '⅑',
-      oneTenth: '⅒',
-    }
-    specialFallbackSymbols = {
-      tick: '√',
-      info: 'i',
-      warning: '‼',
-      cross: '×',
-      squareSmall: '□',
-      squareSmallFilled: '■',
-      circle: '( )',
-      circleFilled: '(*)',
-      circleDotted: '( )',
-      circleDouble: '( )',
-      circleCircle: '(○)',
-      circleCross: '(×)',
-      circlePipe: '(│)',
-      radioOn: '(*)',
-      radioOff: '( )',
-      checkboxOn: '[×]',
-      checkboxOff: '[ ]',
-      checkboxCircleOn: '(×)',
-      checkboxCircleOff: '( )',
-      pointer: '>',
-      triangleUpOutline: '∆',
-      triangleLeft: '◄',
-      triangleRight: '►',
-      lozenge: '♦',
-      lozengeOutline: '◊',
-      hamburger: '≡',
-      smiley: '☺',
-      mustache: '┌─┐',
-      star: '✶',
-      play: '►',
-      nodejs: '♦',
-      oneSeventh: '1/7',
-      oneNinth: '1/9',
-      oneTenth: '1/10',
-    }
-    mainSymbols = {
-      ...common,
-      ...specialMainSymbols,
-    }
-    fallbackSymbols = {
-      ...common,
-      ...specialFallbackSymbols,
-    }
-    shouldUseMain = isUnicodeSupported()
-    figures = shouldUseMain ? mainSymbols : fallbackSymbols
-    _p_ObjectEntries(specialMainSymbols)
-  })
-  function getDefaultTheme() {
-    return {
-      ...defaultTheme,
-      keybindings: getDefaultKeybindings(),
-    }
-  }
-  var defaultTheme
-  var init_theme = __esmMin(() => {
-    init_dist$10()
-    init_key()
-    defaultTheme = {
-      prefix: {
-        idle: (0, node_util.styleText)('blue', '?'),
-        done: (0, node_util.styleText)('green', figures.tick),
-      },
-      spinner: {
-        interval: 80,
-        frames: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'].map(frame =>
-          (0, node_util.styleText)('yellow', frame),
-        ),
-      },
-      keybindings: [],
-      style: {
-        answer: text => (0, node_util.styleText)('cyan', text),
-        message: text => (0, node_util.styleText)('bold', text),
-        error: text => (0, node_util.styleText)('red', `> ${text}`),
-        defaultAnswer: text => (0, node_util.styleText)('dim', `(${text})`),
-        help: text => (0, node_util.styleText)('dim', text),
-        highlight: text => (0, node_util.styleText)('cyan', text),
-        key: text =>
-          (0, node_util.styleText)(
-            'cyan',
-            (0, node_util.styleText)('bold', `<${text}>`),
-          ),
-      },
-    }
-  })
-  function isPlainObject(value) {
-    if (typeof value !== 'object' || value === null) return false
-    let proto = value
-    while (_p_ObjectGetPrototypeOf(proto) !== null)
-      proto = _p_ObjectGetPrototypeOf(proto)
-    return _p_ObjectGetPrototypeOf(value) === proto
-  }
-  function deepMerge(...objects) {
-    const output = {}
-    for (const obj of objects)
-      for (const [key, value] of _p_ObjectEntries(obj)) {
-        const prevValue = output[key]
-        output[key] =
-          isPlainObject(prevValue) && isPlainObject(value)
-            ? deepMerge(prevValue, value)
-            : value
-      }
-    return output
-  }
-  function makeTheme(...themes) {
-    return deepMerge(
-      ...[getDefaultTheme(), ...themes.filter(theme => theme != null)],
-    )
-  }
-  var init_make_theme = __esmMin(() => {
-    init_theme()
-  })
-  function usePrefix({ status = 'idle', theme }) {
-    const [showLoader, setShowLoader] = useState(false)
-    const [tick, setTick] = useState(0)
-    const { prefix, spinner } = makeTheme(theme)
-    useEffect(() => {
-      if (status === 'loading') {
-        let tickInterval
-        let inc = -1
-        const delayTimeout = setTimeout(() => {
-          setShowLoader(true)
-          tickInterval = setInterval(() => {
-            inc = inc + 1
-            setTick(inc % spinner.frames.length)
-          }, spinner.interval)
-        }, 300)
-        return () => {
-          clearTimeout(delayTimeout)
-          clearInterval(tickInterval)
-        }
-      } else setShowLoader(false)
-    }, [status])
-    if (showLoader) return spinner.frames[tick]
-    return typeof prefix === 'string'
-      ? prefix
-      : (prefix[status === 'loading' ? 'idle' : status] ?? prefix['idle'])
-  }
-  var init_use_prefix = __esmMin(() => {
-    init_use_state()
-    init_use_effect()
-    init_make_theme()
-  })
-  function useMemo(fn, dependencies) {
-    return withPointer(pointer => {
-      const prev = pointer.get()
-      if (
-        !prev ||
-        prev.dependencies.length !== dependencies.length ||
-        prev.dependencies.some((dep, i) => dep !== dependencies[i])
-      ) {
-        const value = fn()
-        pointer.set({
-          value,
-          dependencies,
-        })
-        return value
-      }
-      return prev.value
-    })
-  }
-  var init_use_memo = __esmMin(() => {
-    init_hook_engine()
-  })
-  function useRef(val) {
-    return useState({ current: val })[0]
-  }
-  var init_use_ref = __esmMin(() => {
-    init_use_state()
-  })
-  function useKeypress(userHandler) {
-    const signal = useRef(userHandler)
-    signal.current = userHandler
-    useEffect(rl => {
-      let ignore = false
-      const handler = withUpdates((_input, event) => {
-        if (ignore) return
-        signal.current(event, rl)
-      })
-      rl.input.on('keypress', handler)
-      return () => {
-        ignore = true
-        rl.input.removeListener('keypress', handler)
-      }
-    }, [])
-  }
-  var init_use_keypress = __esmMin(() => {
-    init_use_ref()
-    init_use_effect()
-    init_hook_engine()
-  })
-  var require_cli_width = /* @__PURE__ */ __commonJSMin(
-    (exports$9, module$8) => {
-      module$8.exports = cliWidth
-      function normalizeOpts(options) {
-        const defaultOpts = {
-          defaultWidth: 0,
-          output: process.stdout,
-          tty: __require('tty'),
-        }
-        if (!options) return defaultOpts
-        _p_ObjectKeys(defaultOpts).forEach(function (key) {
-          if (!options[key]) options[key] = defaultOpts[key]
-        })
-        return options
-      }
-      function cliWidth(options) {
-        const opts = normalizeOpts(options)
-        if (opts.output.getWindowSize)
-          return opts.output.getWindowSize()[0] || opts.defaultWidth
-        if (opts.tty.getWindowSize)
-          return opts.tty.getWindowSize()[1] || opts.defaultWidth
-        if (opts.output.columns) return opts.output.columns
-        if (process.env.CLI_WIDTH) {
-          const width = parseInt(process.env.CLI_WIDTH, 10)
-          if (!isNaN(width) && width !== 0) return width
-        }
-        return opts.defaultWidth
-      }
-    },
-  )
-  var getCodePointsLength
-  var isFullWidth
-  var isWideNotCJKTNotEmoji
-  var init_utils$1 = __esmMin(() => {
-    getCodePointsLength = (() => {
-      const SURROGATE_PAIR_RE = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g
-      return input => {
-        let surrogatePairsNr = 0
-        SURROGATE_PAIR_RE.lastIndex = 0
-        while (SURROGATE_PAIR_RE.test(input)) surrogatePairsNr += 1
-        return input.length - surrogatePairsNr
-      }
-    })()
-    isFullWidth = x => {
-      return (
-        x === 12288 || (x >= 65281 && x <= 65376) || (x >= 65504 && x <= 65510)
-      )
-    }
-    isWideNotCJKTNotEmoji = x => {
-      return (
-        x === 8987 ||
-        x === 9001 ||
-        (x >= 12272 && x <= 12287) ||
-        (x >= 12289 && x <= 12350) ||
-        (x >= 12441 && x <= 12543) ||
-        (x >= 12549 && x <= 12591) ||
-        (x >= 12593 && x <= 12686) ||
-        (x >= 12688 && x <= 12771) ||
-        (x >= 12783 && x <= 12830) ||
-        (x >= 12832 && x <= 12871) ||
-        (x >= 12880 && x <= 19903) ||
-        (x >= 65040 && x <= 65049) ||
-        (x >= 65072 && x <= 65106) ||
-        (x >= 65108 && x <= 65126) ||
-        (x >= 65128 && x <= 65131) ||
-        (x >= 127488 && x <= 127490) ||
-        (x >= 127504 && x <= 127547) ||
-        (x >= 127552 && x <= 127560) ||
-        (x >= 131072 && x <= 196605) ||
-        (x >= 196608 && x <= 262141)
-      )
-    }
-  })
-  var ANSI_RE
-  var CONTROL_RE
-  var CJKT_WIDE_RE
-  var TAB_RE
-  var EMOJI_RE
-  var LATIN_RE
-  var MODIFIER_RE
-  var NO_TRUNCATION$1
-  var getStringTruncatedWidth
-  var init_dist$9 = __esmMin(() => {
-    init_utils$1()
-    ANSI_RE =
-      /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]|\u001b\]8;[^;]*;.*?(?:\u0007|\u001b\u005c)/y
-    CONTROL_RE = /[\x00-\x08\x0A-\x1F\x7F-\x9F]{1,1000}/y
-    CJKT_WIDE_RE =
-      /(?:(?![\uFF61-\uFF9F\uFF00-\uFFEF])[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Tangut}]){1,1000}/uy
-    TAB_RE = /\t{1,1000}/y
-    EMOJI_RE =
-      /[\u{1F1E6}-\u{1F1FF}]{2}|\u{1F3F4}[\u{E0061}-\u{E007A}]{2}[\u{E0030}-\u{E0039}\u{E0061}-\u{E007A}]{1,3}\u{E007F}|(?:\p{Emoji}\uFE0F\u20E3?|\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation})(?:\u200D(?:\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F\u20E3?))*/uy
-    LATIN_RE = /(?:[\x20-\x7E\xA0-\xFF](?!\uFE0F)){1,1000}/y
-    MODIFIER_RE = /\p{M}+/gu
-    NO_TRUNCATION$1 = {
-      limit: Infinity,
-      ellipsis: '',
-    }
-    getStringTruncatedWidth = (
-      input,
-      truncationOptions = {},
-      widthOptions = {},
-    ) => {
-      const LIMIT = truncationOptions.limit ?? Infinity
-      const ELLIPSIS = truncationOptions.ellipsis ?? ''
-      const ELLIPSIS_WIDTH =
-        truncationOptions?.ellipsisWidth ??
-        (ELLIPSIS
-          ? getStringTruncatedWidth(ELLIPSIS, NO_TRUNCATION$1, widthOptions)
-              .width
-          : 0)
-      const ANSI_WIDTH = 0
-      const CONTROL_WIDTH = widthOptions.controlWidth ?? 0
-      const TAB_WIDTH = widthOptions.tabWidth ?? 8
-      const EMOJI_WIDTH = widthOptions.emojiWidth ?? 2
-      const FULL_WIDTH_WIDTH = 2
-      const REGULAR_WIDTH = widthOptions.regularWidth ?? 1
-      const WIDE_WIDTH = widthOptions.wideWidth ?? FULL_WIDTH_WIDTH
-      const PARSE_BLOCKS = [
-        [LATIN_RE, REGULAR_WIDTH],
-        [ANSI_RE, ANSI_WIDTH],
-        [CONTROL_RE, CONTROL_WIDTH],
-        [TAB_RE, TAB_WIDTH],
-        [EMOJI_RE, EMOJI_WIDTH],
-        [CJKT_WIDE_RE, WIDE_WIDTH],
-      ]
-      let indexPrev = 0
-      let index = 0
-      let length = input.length
-      let lengthExtra = 0
-      let truncationEnabled = false
-      let truncationIndex = length
-      let truncationLimit = _p_MathMax(0, LIMIT - ELLIPSIS_WIDTH)
-      let unmatchedStart = 0
-      let unmatchedEnd = 0
-      let width = 0
-      let widthExtra = 0
-      outer: while (true) {
-        if (
-          unmatchedEnd > unmatchedStart ||
-          (index >= length && index > indexPrev)
-        ) {
-          const unmatched =
-            input.slice(unmatchedStart, unmatchedEnd) ||
-            input.slice(indexPrev, index)
-          lengthExtra = 0
-          for (const char of _p_StringPrototypeReplaceAll(
-            unmatched,
-            MODIFIER_RE,
-            '',
-          )) {
-            const codePoint = _p_StringPrototypeCodePointAt(char, 0) || 0
-            if (isFullWidth(codePoint)) widthExtra = FULL_WIDTH_WIDTH
-            else if (isWideNotCJKTNotEmoji(codePoint)) widthExtra = WIDE_WIDTH
-            else widthExtra = REGULAR_WIDTH
-            if (width + widthExtra > truncationLimit)
-              truncationIndex = _p_MathMin(
-                truncationIndex,
-                _p_MathMax(unmatchedStart, indexPrev) + lengthExtra,
-              )
-            if (width + widthExtra > LIMIT) {
-              truncationEnabled = true
-              break outer
-            }
-            lengthExtra += char.length
-            width += widthExtra
-          }
-          unmatchedStart = unmatchedEnd = 0
-        }
-        if (index >= length) break outer
-        for (let i = 0, l = PARSE_BLOCKS.length; i < l; i++) {
-          const [BLOCK_RE, BLOCK_WIDTH] = PARSE_BLOCKS[i]
-          BLOCK_RE.lastIndex = index
-          if (BLOCK_RE.test(input)) {
-            lengthExtra =
-              BLOCK_RE === CJKT_WIDE_RE
-                ? getCodePointsLength(input.slice(index, BLOCK_RE.lastIndex))
-                : BLOCK_RE === EMOJI_RE
-                  ? 1
-                  : BLOCK_RE.lastIndex - index
-            widthExtra = lengthExtra * BLOCK_WIDTH
-            if (width + widthExtra > truncationLimit)
-              truncationIndex = _p_MathMin(
-                truncationIndex,
-                index + _p_MathFloor((truncationLimit - width) / BLOCK_WIDTH),
-              )
-            if (width + widthExtra > LIMIT) {
-              truncationEnabled = true
-              break outer
-            }
-            width += widthExtra
-            unmatchedStart = indexPrev
-            unmatchedEnd = index
-            index = indexPrev = BLOCK_RE.lastIndex
-            continue outer
-          }
-        }
-        index += 1
-      }
-      return {
-        width: truncationEnabled ? truncationLimit : width,
-        index: truncationEnabled ? truncationIndex : length,
-        truncated: truncationEnabled,
-        ellipsed: truncationEnabled && LIMIT >= ELLIPSIS_WIDTH,
-      }
-    }
-  })
-  var NO_TRUNCATION
-  var fastStringWidth
-  var init_dist$8 = __esmMin(() => {
-    init_dist$9()
-    NO_TRUNCATION = {
-      limit: Infinity,
-      ellipsis: '',
-      ellipsisWidth: 0,
-    }
-    fastStringWidth = (input, options = {}) => {
-      return getStringTruncatedWidth(input, NO_TRUNCATION, options).width
-    }
-  })
-  function wrapAnsi(string, columns, options) {
-    return String(string)
-      .normalize()
-      .split(CRLF_OR_LF)
-      .map(line => exec(line, columns, options))
-      .join('\n')
-  }
-  var ESC$1
-  var CSI
-  var END_CODE
-  var ANSI_ESCAPE_BELL
-  var ANSI_CSI
-  var ANSI_OSC
-  var ANSI_SGR_TERMINATOR
-  var ANSI_ESCAPE_LINK
-  var GROUP_REGEX
-  var getClosingCode
-  var wrapAnsiCode
-  var wrapAnsiHyperlink
-  var wrapWord
-  var stringVisibleTrimSpacesRight
-  var exec
-  var CRLF_OR_LF
-  var init_main = __esmMin(() => {
-    init_dist$8()
-    ESC$1 = '\x1B'
-    CSI = ''
-    END_CODE = 39
-    ANSI_ESCAPE_BELL = '\x07'
-    ANSI_CSI = '['
-    ANSI_OSC = ']'
-    ANSI_SGR_TERMINATOR = 'm'
-    ANSI_ESCAPE_LINK = `${ANSI_OSC}8;;`
-    GROUP_REGEX = new _p_RegExpCtor(
-      `(?:\\${ANSI_CSI}(?<code>\\d+)m|\\${ANSI_ESCAPE_LINK}(?<uri>.*)${ANSI_ESCAPE_BELL})`,
-      'y',
-    )
-    getClosingCode = openingCode => {
-      if (openingCode >= 30 && openingCode <= 37) return 39
-      if (openingCode >= 90 && openingCode <= 97) return 39
-      if (openingCode >= 40 && openingCode <= 47) return 49
-      if (openingCode >= 100 && openingCode <= 107) return 49
-      if (openingCode === 1 || openingCode === 2) return 22
-      if (openingCode === 3) return 23
-      if (openingCode === 4) return 24
-      if (openingCode === 7) return 27
-      if (openingCode === 8) return 28
-      if (openingCode === 9) return 29
-      if (openingCode === 0) return 0
-    }
-    wrapAnsiCode = code => `${ESC$1}${ANSI_CSI}${code}${ANSI_SGR_TERMINATOR}`
-    wrapAnsiHyperlink = url =>
-      `${ESC$1}${ANSI_ESCAPE_LINK}${url}${ANSI_ESCAPE_BELL}`
-    wrapWord = (rows, word, columns) => {
-      const characters = word[Symbol.iterator]()
-      let isInsideEscape = false
-      let isInsideLinkEscape = false
-      let lastRow = rows.at(-1)
-      let visible = lastRow === void 0 ? 0 : fastStringWidth(lastRow)
-      let currentCharacter = characters.next()
-      let nextCharacter = characters.next()
-      let rawCharacterIndex = 0
-      while (!currentCharacter.done) {
-        const character = currentCharacter.value
-        const characterLength = fastStringWidth(character)
-        if (visible + characterLength <= columns)
-          rows[rows.length - 1] += character
-        else {
-          rows.push(character)
-          visible = 0
-        }
-        if (character === ESC$1 || character === CSI) {
-          isInsideEscape = true
-          isInsideLinkEscape = _p_StringPrototypeStartsWith(
-            word,
-            ANSI_ESCAPE_LINK,
-            rawCharacterIndex + 1,
-          )
-        }
-        if (isInsideEscape) {
-          if (isInsideLinkEscape) {
-            if (character === ANSI_ESCAPE_BELL) {
-              isInsideEscape = false
-              isInsideLinkEscape = false
-            }
-          } else if (character === ANSI_SGR_TERMINATOR) isInsideEscape = false
-        } else {
-          visible += characterLength
-          if (visible === columns && !nextCharacter.done) {
-            rows.push('')
-            visible = 0
-          }
-        }
-        currentCharacter = nextCharacter
-        nextCharacter = characters.next()
-        rawCharacterIndex += character.length
-      }
-      lastRow = rows.at(-1)
-      if (!visible && lastRow !== void 0 && lastRow.length && rows.length > 1)
-        rows[rows.length - 2] += rows.pop()
-    }
-    stringVisibleTrimSpacesRight = string => {
-      const words = string.split(' ')
-      let last = words.length
-      while (last) {
-        if (fastStringWidth(words[last - 1])) break
-        last--
-      }
-      if (last === words.length) return string
-      return words.slice(0, last).join(' ') + words.slice(last).join('')
-    }
-    exec = (string, columns, options = {}) => {
-      if (options.trim !== false && _p_StringPrototypeTrim(string) === '')
-        return ''
-      let returnValue = ''
-      let escapeCode
-      let escapeUrl
-      const words = string.split(' ')
-      let rows = ['']
-      let rowLength = 0
-      for (let index = 0; index < words.length; index++) {
-        const word = words[index]
-        if (options.trim !== false) {
-          const row = rows.at(-1) ?? ''
-          const trimmed = _p_StringPrototypeTrimStart(row)
-          if (row.length !== trimmed.length) {
-            rows[rows.length - 1] = trimmed
-            rowLength = fastStringWidth(trimmed)
-          }
-        }
-        if (index !== 0) {
-          if (
-            rowLength >= columns &&
-            (options.wordWrap === false || options.trim === false)
-          ) {
-            rows.push('')
-            rowLength = 0
-          }
-          if (rowLength || options.trim === false) {
-            rows[rows.length - 1] += ' '
-            rowLength++
-          }
-        }
-        const wordLength = fastStringWidth(word)
-        if (options.hard && wordLength > columns) {
-          const remainingColumns = columns - rowLength
-          const breaksStartingThisLine =
-            1 + _p_MathFloor((wordLength - remainingColumns - 1) / columns)
-          if (_p_MathFloor((wordLength - 1) / columns) < breaksStartingThisLine)
-            rows.push('')
-          wrapWord(rows, word, columns)
-          rowLength = fastStringWidth(rows.at(-1) ?? '')
-          continue
-        }
-        if (rowLength + wordLength > columns && rowLength && wordLength) {
-          if (options.wordWrap === false && rowLength < columns) {
-            wrapWord(rows, word, columns)
-            rowLength = fastStringWidth(rows.at(-1) ?? '')
-            continue
-          }
-          rows.push('')
-          rowLength = 0
-        }
-        if (rowLength + wordLength > columns && options.wordWrap === false) {
-          wrapWord(rows, word, columns)
-          rowLength = fastStringWidth(rows.at(-1) ?? '')
-          continue
-        }
-        rows[rows.length - 1] += word
-        rowLength += wordLength
-      }
-      if (options.trim !== false)
-        rows = rows.map(row => stringVisibleTrimSpacesRight(row))
-      const preString = rows.join('\n')
-      let inSurrogate = false
-      for (let i = 0; i < preString.length; i++) {
-        const character = preString[i]
-        returnValue += character
-        if (!inSurrogate) {
-          inSurrogate = character >= '\ud800' && character <= '\udbff'
-          if (inSurrogate) continue
-        } else inSurrogate = false
-        if (character === ESC$1 || character === CSI) {
-          GROUP_REGEX.lastIndex = i + 1
-          const groups = GROUP_REGEX.exec(preString)?.groups
-          if (groups?.code !== void 0) {
-            const code = _p_NumberParseFloat(groups.code)
-            escapeCode = code === END_CODE ? void 0 : code
-          } else if (groups?.uri !== void 0)
-            escapeUrl = groups.uri.length === 0 ? void 0 : groups.uri
-        }
-        if (preString[i + 1] === '\n') {
-          if (escapeUrl) returnValue += wrapAnsiHyperlink('')
-          const closingCode = escapeCode ? getClosingCode(escapeCode) : void 0
-          if (escapeCode && closingCode)
-            returnValue += wrapAnsiCode(closingCode)
-        } else if (character === '\n') {
-          if (escapeCode && getClosingCode(escapeCode))
-            returnValue += wrapAnsiCode(escapeCode)
-          if (escapeUrl) returnValue += wrapAnsiHyperlink(escapeUrl)
-        }
-      }
-      return returnValue
-    }
-    CRLF_OR_LF = /\r?\n/
-  })
-  /**
-   * Force line returns at specific width. This function is ANSI code friendly
-   * and it'll ignore invisible codes during width calculation.
-   *
-   * @param {string} content
-   * @param {number} width
-   *
-   * @returns {string}
-   */
-  function breakLines(content, width) {
-    return content
-      .split('\n')
-      .flatMap(line =>
-        wrapAnsi(line, width, {
-          trim: false,
-          wordWrap: false,
-        })
-          .split('\n')
-          .map(str => _p_StringPrototypeTrimEnd(str)),
-      )
-      .join('\n')
-  }
-  /**
-   * Returns the width of the active readline, or 80 as default value.
-   *
-   * @returns {number}
-   */
-  function readlineWidth() {
-    return (0, import_cli_width.default)({
-      defaultWidth: 80,
-      output: readline().output,
-    })
-  }
-  var import_cli_width
-  var init_utils = __esmMin(() => {
-    import_cli_width = /* @__PURE__ */ __toESM(require_cli_width(), 1)
-    init_main()
-    init_hook_engine()
-  })
-  function usePointerPosition({ active, renderedItems, pageSize, loop }) {
-    const state = useRef({
-      lastPointer: active,
-      lastActive: void 0,
-    })
-    const { lastPointer, lastActive } = state.current
-    const middle = _p_MathFloor(pageSize / 2)
-    const renderedLength = renderedItems.reduce(
-      (acc, item) => acc + item.length,
-      0,
-    )
-    const defaultPointerPosition = renderedItems
-      .slice(0, active)
-      .reduce((acc, item) => acc + item.length, 0)
-    let pointer = defaultPointerPosition
-    if (renderedLength > pageSize) {
-      if (loop) {
-        /**
-         * Creates the next position for the pointer considering an infinitely
-         * looping list of items to be rendered on the page.
-         *
-         * The goal is to progressively move the cursor to the middle position
-         * as the user move down, and then keep the cursor there. When the user
-         * move up, maintain the cursor position.
-         */
-        pointer = lastPointer
-        if (
-          lastActive != null &&
-          lastActive < active &&
-          active - lastActive < pageSize
-        )
-          pointer = _p_MathMin(
-            middle,
-            _p_MathAbs(active - lastActive) === 1
-              ? _p_MathMin(
-                  lastPointer + (renderedItems[lastActive]?.length ?? 0),
-                  _p_MathMax(defaultPointerPosition, lastPointer),
-                )
-              : lastPointer + active - lastActive,
-          )
-      } else {
-        /**
-         * Creates the next position for the pointer considering a finite list
-         * of items to be rendered on a page.
-         *
-         * The goal is to keep the pointer in the middle of the page whenever
-         * possible, until we reach the bounds of the list (top or bottom). In
-         * which case, the cursor moves progressively to the bottom or top of
-         * the list.
-         */
-        const spaceUnderActive = renderedItems
-          .slice(active)
-          .reduce((acc, item) => acc + item.length, 0)
-        pointer =
-          spaceUnderActive < pageSize - middle
-            ? pageSize - spaceUnderActive
-            : _p_MathMin(defaultPointerPosition, middle)
-      }
-    }
-    state.current.lastPointer = pointer
-    state.current.lastActive = active
-    return pointer
-  }
-  function usePagination({ items, active, renderItem, pageSize, loop = true }) {
-    const width = readlineWidth()
-    const bound = num => ((num % items.length) + items.length) % items.length
-    const renderedItems = items.map((item, index) => {
-      if (item == null) return []
-      return breakLines(
-        renderItem({
-          item,
-          index,
-          isActive: index === active,
-        }),
-        width,
-      ).split('\n')
-    })
-    const renderedLength = renderedItems.reduce(
-      (acc, item) => acc + item.length,
-      0,
-    )
-    const renderItemAtIndex = index => renderedItems[index] ?? []
-    const pointer = usePointerPosition({
-      active,
-      renderedItems,
-      pageSize,
-      loop,
-    })
-    const activeItem = renderItemAtIndex(active).slice(0, pageSize)
-    const activeItemPosition =
-      pointer + activeItem.length <= pageSize
-        ? pointer
-        : pageSize - activeItem.length
-    const pageBuffer = _p_ArrayFrom({ length: pageSize })
-    pageBuffer.splice(activeItemPosition, activeItem.length, ...activeItem)
-    const itemVisited = /* @__PURE__ */ new _p_SetCtor([active])
-    let bufferPointer = activeItemPosition + activeItem.length
-    let itemPointer = bound(active + 1)
-    while (
-      bufferPointer < pageSize &&
-      !itemVisited.has(itemPointer) &&
-      (loop && renderedLength > pageSize
-        ? itemPointer !== active
-        : itemPointer > active)
-    ) {
-      const linesToAdd = renderItemAtIndex(itemPointer).slice(
-        0,
-        pageSize - bufferPointer,
-      )
-      pageBuffer.splice(bufferPointer, linesToAdd.length, ...linesToAdd)
-      itemVisited.add(itemPointer)
-      bufferPointer += linesToAdd.length
-      itemPointer = bound(itemPointer + 1)
-    }
-    bufferPointer = activeItemPosition - 1
-    itemPointer = bound(active - 1)
-    while (
-      bufferPointer >= 0 &&
-      !itemVisited.has(itemPointer) &&
-      (loop && renderedLength > pageSize
-        ? itemPointer !== active
-        : itemPointer < active)
-    ) {
-      const lines = renderItemAtIndex(itemPointer)
-      const linesToAdd = lines.slice(
-        _p_MathMax(0, lines.length - bufferPointer - 1),
-      )
-      pageBuffer.splice(
-        bufferPointer - linesToAdd.length + 1,
-        linesToAdd.length,
-        ...linesToAdd,
-      )
-      itemVisited.add(itemPointer)
-      bufferPointer -= linesToAdd.length
-      itemPointer = bound(itemPointer - 1)
-    }
-    return pageBuffer.filter(line => typeof line === 'string').join('\n')
-  }
-  var init_use_pagination = __esmMin(() => {
-    init_use_ref()
-    init_utils()
-  })
-  var require_lib = /* @__PURE__ */ __commonJSMin((exports$10, module$9) => {
-    const Stream = __require('stream')
-    var MuteStream = class extends Stream {
-      #isTTY = null
-      constructor(opts = {}) {
-        super(opts)
-        this.writable = this.readable = true
-        this.muted = false
-        this.on('pipe', this._onpipe)
-        this.replace = opts.replace
-        this._prompt = opts.prompt || null
-        this._hadControl = false
-      }
-      #destSrc(key, def) {
-        if (this._dest) return this._dest[key]
-        if (this._src) return this._src[key]
-        return def
-      }
-      #proxy(method, ...args) {
-        if (typeof this._dest?.[method] === 'function')
-          this._dest[method](...args)
-        if (typeof this._src?.[method] === 'function')
-          this._src[method](...args)
-      }
-      get isTTY() {
-        if (this.#isTTY !== null) return this.#isTTY
-        return this.#destSrc('isTTY', false)
-      }
-      set isTTY(val) {
-        this.#isTTY = val
-      }
-      get rows() {
-        return this.#destSrc('rows')
-      }
-      get columns() {
-        return this.#destSrc('columns')
-      }
-      mute() {
-        this.muted = true
-      }
-      unmute() {
-        this.muted = false
-      }
-      _onpipe(src) {
-        this._src = src
-      }
-      pipe(dest, options) {
-        this._dest = dest
-        return super.pipe(dest, options)
-      }
-      pause() {
-        if (this._src) return this._src.pause()
-      }
-      resume() {
-        if (this._src) return this._src.resume()
-      }
-      write(c) {
-        if (this.muted) {
-          if (!this.replace) return true
-          if (c.match(/^\u001b/)) {
-            if (c.indexOf(this._prompt) === 0) {
-              c = c.slice(this._prompt.length)
-              c = c.replace(/./g, this.replace)
-              c = this._prompt + c
-            }
-            this._hadControl = true
-            return this.emit('data', c)
-          } else {
-            if (
-              this._prompt &&
-              this._hadControl &&
-              c.indexOf(this._prompt) === 0
-            ) {
-              this._hadControl = false
-              this.emit('data', this._prompt)
-              c = c.slice(this._prompt.length)
-            }
-            c = c.toString().replace(/./g, this.replace)
-          }
-        }
-        this.emit('data', c)
-      }
-      end(c) {
-        if (this.muted) {
-          if (c && this.replace) c = c.toString().replace(/./g, this.replace)
-          else c = null
-        }
-        if (c) this.emit('data', c)
-        this.emit('end')
-      }
-      destroy(...args) {
-        return this.#proxy('destroy', ...args)
-      }
-      destroySoon(...args) {
-        return this.#proxy('destroySoon', ...args)
-      }
-      close(...args) {
-        return this.#proxy('close', ...args)
-      }
-    }
-    module$9.exports = MuteStream
-  })
-  var signals
-  var init_signals = __esmMin(() => {
-    signals = []
-    signals.push('SIGHUP', 'SIGINT', 'SIGTERM')
-    if (process.platform !== 'win32')
-      signals.push(
-        'SIGALRM',
-        'SIGABRT',
-        'SIGVTALRM',
-        'SIGXCPU',
-        'SIGXFSZ',
-        'SIGUSR2',
-        'SIGTRAP',
-        'SIGSYS',
-        'SIGQUIT',
-        'SIGIOT',
-      )
-    if (process.platform === 'linux')
-      signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT')
-  })
-  var processOk
-  var kExitEmitter
-  var global
-  var ObjectDefineProperty
-  var Emitter
-  var SignalExitBase
-  var signalExitWrap
-  var SignalExitFallback
-  var SignalExit
-  var process$1
-  var onExit
-  var load
-  var unload
-  var init_mjs = __esmMin(() => {
-    init_signals()
-    processOk = process =>
-      !!process &&
-      typeof process === 'object' &&
-      typeof process.removeListener === 'function' &&
-      typeof process.emit === 'function' &&
-      typeof process.reallyExit === 'function' &&
-      typeof process.listeners === 'function' &&
-      typeof process.kill === 'function' &&
-      typeof process.pid === 'number' &&
-      typeof process.on === 'function'
-    kExitEmitter = Symbol.for('signal-exit emitter')
-    global = globalThis
-    ObjectDefineProperty = Object.defineProperty.bind(Object)
-    Emitter = class {
-      emitted = {
-        afterExit: false,
-        exit: false,
-      }
-      listeners = {
-        afterExit: [],
-        exit: [],
-      }
-      count = 0
-      id = _p_MathRandom()
-      constructor() {
-        if (global[kExitEmitter]) return global[kExitEmitter]
-        ObjectDefineProperty(global, kExitEmitter, {
-          value: this,
-          writable: false,
-          enumerable: false,
-          configurable: false,
-        })
-      }
-      on(ev, fn) {
-        this.listeners[ev].push(fn)
-      }
-      removeListener(ev, fn) {
-        const list = this.listeners[ev]
-        const i = list.indexOf(fn)
-        /* c8 ignore start */
-        if (i === -1) return
-        /* c8 ignore stop */
-        if (i === 0 && list.length === 1) list.length = 0
-        else list.splice(i, 1)
-      }
-      emit(ev, code, signal) {
-        if (this.emitted[ev]) return false
-        this.emitted[ev] = true
-        let ret = false
-        for (const fn of this.listeners[ev])
-          ret = fn(code, signal) === true || ret
-        if (ev === 'exit') ret = this.emit('afterExit', code, signal) || ret
-        return ret
-      }
-    }
-    SignalExitBase = class {}
-    signalExitWrap = handler => {
-      return {
-        onExit(cb, opts) {
-          return handler.onExit(cb, opts)
-        },
-        load() {
-          return handler.load()
-        },
-        unload() {
-          return handler.unload()
-        },
-      }
-    }
-    SignalExitFallback = class extends SignalExitBase {
-      onExit() {
-        return () => {}
-      }
-      load() {}
-      unload() {}
-    }
-    SignalExit = class extends SignalExitBase {
-      /* c8 ignore start */
-      #hupSig = process$1.platform === 'win32' ? 'SIGINT' : 'SIGHUP'
-      /* c8 ignore stop */
-      #emitter = new Emitter()
-      #process
-      #originalProcessEmit
-      #originalProcessReallyExit
-      #sigListeners = {}
-      #loaded = false
-      constructor(process) {
-        super()
-        this.#process = process
-        this.#sigListeners = {}
-        for (const sig of signals)
-          this.#sigListeners[sig] = () => {
-            const listeners = this.#process.listeners(sig)
-            let { count } = this.#emitter
-            /* c8 ignore start */
-            const p = process
-            if (
-              typeof p.__signal_exit_emitter__ === 'object' &&
-              typeof p.__signal_exit_emitter__.count === 'number'
-            )
-              count += p.__signal_exit_emitter__.count
-            /* c8 ignore stop */
-            if (listeners.length === count) {
-              this.unload()
-              const ret = this.#emitter.emit('exit', null, sig)
-              /* c8 ignore start */
-              const s = sig === 'SIGHUP' ? this.#hupSig : sig
-              if (!ret) process.kill(process.pid, s)
-            }
-          }
-        this.#originalProcessReallyExit = process.reallyExit
-        this.#originalProcessEmit = process.emit
-      }
-      onExit(cb, opts) {
-        /* c8 ignore start */
-        if (!processOk(this.#process)) return () => {}
-        /* c8 ignore stop */
-        if (this.#loaded === false) this.load()
-        const ev = opts?.alwaysLast ? 'afterExit' : 'exit'
-        this.#emitter.on(ev, cb)
-        return () => {
-          this.#emitter.removeListener(ev, cb)
-          if (
-            this.#emitter.listeners['exit'].length === 0 &&
-            this.#emitter.listeners['afterExit'].length === 0
-          )
-            this.unload()
-        }
-      }
-      load() {
-        if (this.#loaded) return
-        this.#loaded = true
-        this.#emitter.count += 1
-        for (const sig of signals)
-          try {
-            const fn = this.#sigListeners[sig]
-            if (fn) this.#process.on(sig, fn)
-          } catch (_) {}
-        this.#process.emit = (ev, ...a) => {
-          return this.#processEmit(ev, ...a)
-        }
-        this.#process.reallyExit = code => {
-          return this.#processReallyExit(code)
-        }
-      }
-      unload() {
-        if (!this.#loaded) return
-        this.#loaded = false
-        signals.forEach(sig => {
-          const listener = this.#sigListeners[sig]
-          /* c8 ignore start */
-          if (!listener)
-            throw new _p_ErrorCtor('Listener not defined for signal: ' + sig)
-          /* c8 ignore stop */
-          try {
-            this.#process.removeListener(sig, listener)
-          } catch (_) {}
-          /* c8 ignore stop */
-        })
-        this.#process.emit = this.#originalProcessEmit
-        this.#process.reallyExit = this.#originalProcessReallyExit
-        this.#emitter.count -= 1
-      }
-      #processReallyExit(code) {
-        /* c8 ignore start */
-        if (!processOk(this.#process)) return 0
-        this.#process.exitCode = code || 0
-        /* c8 ignore stop */
-        this.#emitter.emit('exit', this.#process.exitCode, null)
-        return this.#originalProcessReallyExit.call(
-          this.#process,
-          this.#process.exitCode,
-        )
-      }
-      #processEmit(ev, ...args) {
-        const og = this.#originalProcessEmit
-        if (ev === 'exit' && processOk(this.#process)) {
-          if (typeof args[0] === 'number') this.#process.exitCode = args[0]
-          /* c8 ignore start */
-          const ret = og.call(this.#process, ev, ...args)
-          /* c8 ignore start */
-          this.#emitter.emit('exit', this.#process.exitCode, null)
-          /* c8 ignore stop */
-          return ret
-        } else return og.call(this.#process, ev, ...args)
-      }
-    }
-    process$1 = globalThis.process
-    ;({ onExit, load, unload } = signalExitWrap(
-      processOk(process$1)
-        ? new SignalExit(process$1)
-        : new SignalExitFallback(),
-    ))
-  })
-  var ESC
-  var cursorHide
-  var cursorShow
-  var cursorUp
-  var cursorDown
-  var cursorTo
-  var eraseLine
-  var eraseLines
-  var init_dist$7 = __esmMin(() => {
-    ESC = '\x1B['
-    cursorHide = '\x1B[?25l'
-    cursorShow = '\x1B[?25h'
-    cursorUp = (rows = 1) => (rows > 0 ? `${ESC}${rows}A` : '')
-    cursorDown = (rows = 1) => (rows > 0 ? `${ESC}${rows}B` : '')
-    cursorTo = (x, y) => {
-      if (typeof y === 'number' && !_p_NumberIsNaN(y))
-        return `${ESC}${y + 1};${x + 1}H`
-      return `${ESC}${x + 1}G`
-    }
-    eraseLine = '\x1B[2K'
-    eraseLines = lines =>
-      lines > 0
-        ? (eraseLine + cursorUp(1)).repeat(lines - 1) + '\x1B[2K\x1B[G'
-        : ''
-  })
-  var height
-  var lastLine
-  var ScreenManager
-  var init_screen_manager = __esmMin(() => {
-    init_utils()
-    init_dist$7()
-    height = content => content.split('\n').length
-    lastLine = content => content.split('\n').pop() ?? ''
-    ScreenManager = class {
-      height = 0
-      extraLinesUnderPrompt = 0
-      cursorPos
-      rl
-      constructor(rl) {
-        this.rl = rl
-        this.cursorPos = rl.getCursorPos()
-      }
-      write(content) {
-        this.rl.output.unmute()
-        this.rl.output.write(content)
-        this.rl.output.mute()
-      }
-      render(content, bottomContent = '') {
-        const promptLine = lastLine(content)
-        const rawPromptLine = (0, node_util.stripVTControlCharacters)(
-          promptLine,
-        )
-        let prompt = rawPromptLine
-        if (this.rl.line.length > 0)
-          prompt = prompt.slice(0, -this.rl.line.length)
-        this.rl.setPrompt(prompt)
-        this.cursorPos = this.rl.getCursorPos()
-        const width = readlineWidth()
-        content = breakLines(content, width)
-        bottomContent = breakLines(bottomContent, width)
-        if (rawPromptLine.length % width === 0) content += '\n'
-        let output = content + (bottomContent ? '\n' + bottomContent : '')
-        const bottomContentHeight =
-          _p_MathFloor(rawPromptLine.length / width) -
-          this.cursorPos.rows +
-          (bottomContent ? height(bottomContent) : 0)
-        if (bottomContentHeight > 0) output += cursorUp(bottomContentHeight)
-        output += cursorTo(this.cursorPos.cols)
-        /**
-         * Render and store state for future re-rendering.
-         */
-        this.write(
-          cursorDown(this.extraLinesUnderPrompt) +
-            eraseLines(this.height) +
-            output,
-        )
-        this.extraLinesUnderPrompt = bottomContentHeight
-        this.height = height(output)
-      }
-      checkCursorPos() {
-        const cursorPos = this.rl.getCursorPos()
-        if (cursorPos.cols !== this.cursorPos.cols) {
-          this.write(cursorTo(cursorPos.cols))
-          this.cursorPos = cursorPos
-        }
-      }
-      done({ clearContent }) {
-        this.rl.setPrompt('')
-        let output = cursorDown(this.extraLinesUnderPrompt)
-        output += clearContent ? eraseLines(this.height) : '\n'
-        output += '\x1B[G'
-        output += cursorShow
-        this.write(output)
-        this.rl.close()
-      }
-    }
-  })
-  var PromisePolyfill
-  var init_promise_polyfill = __esmMin(() => {
-    PromisePolyfill = class extends Promise {
-      static withResolver() {
-        let resolve
-        let reject
-        return {
-          promise: new _p_PromiseCtor((res, rej) => {
-            resolve = res
-            reject = rej
-          }),
-          resolve,
-          reject,
-        }
-      }
-    }
-  })
-  function getCallSites() {
-    const savedPrepareStackTrace = Error.prepareStackTrace
-    let result = []
-    try {
-      Error.prepareStackTrace = (_, callSites) => {
-        const callSitesWithoutCurrent = callSites.slice(1)
-        result = callSitesWithoutCurrent
-        return callSitesWithoutCurrent
-      }
-      /* @__PURE__ */ new _p_ErrorCtor().stack
-    } catch {
-      return result
-    }
-    Error.prepareStackTrace = savedPrepareStackTrace
-    return result
-  }
-  function createPrompt(view) {
-    const callSites = getCallSites()
-    const prompt = (config, context = {}) => {
-      const { input = process.stdin, signal } = context
-      const cleanups = /* @__PURE__ */ new _p_SetCtor()
-      const output = new import_lib.default()
-      output.pipe(context.output ?? process.stdout)
-      const rl = node_readline.createInterface({
-        terminal: true,
-        input,
-        output,
-      })
-      output.mute()
-      const screen = new ScreenManager(rl)
-      const { promise, resolve, reject } = PromisePolyfill.withResolver()
-      const cancel = () => reject(new CancelPromptError())
-      if (signal) {
-        const abort = () =>
-          reject(new AbortPromptError({ cause: signal.reason }))
-        if (signal.aborted) {
-          abort()
-          return _p_ObjectAssign(promise, { cancel })
-        }
-        signal.addEventListener('abort', abort)
-        cleanups.add(() => signal.removeEventListener('abort', abort))
-      }
-      cleanups.add(
-        onExit((code, signal) => {
-          reject(
-            new ExitPromptError(
-              `User force closed the prompt with ${code} ${signal}`,
-            ),
-          )
-        }),
-      )
-      const sigint = () =>
-        reject(new ExitPromptError(`User force closed the prompt with SIGINT`))
-      rl.on('SIGINT', sigint)
-      cleanups.add(() => rl.removeListener('SIGINT', sigint))
-      return withHooks(rl, cycle => {
-        const hooksCleanup = node_async_hooks.AsyncResource.bind(() =>
-          effectScheduler.clearAll(),
-        )
-        rl.on('close', hooksCleanup)
-        cleanups.add(() => rl.removeListener('close', hooksCleanup))
-        const startCycle = () => {
-          const checkCursorPos = () => screen.checkCursorPos()
-          rl.input.on('keypress', checkCursorPos)
-          cleanups.add(() =>
-            rl.input.removeListener('keypress', checkCursorPos),
-          )
-          let pendingDone = null
-          cycle(() => {
-            let effectsSettled = false
-            try {
-              const nextView = view(config, value => {
-                if (effectsSettled) resolve(value)
-                else pendingDone = { value }
-              })
-              if (nextView === void 0) {
-                let callerFilename = callSites[1]?.getFileName()
-                if (
-                  callerFilename &&
-                  !_p_StringPrototypeStartsWith(callerFilename, 'file://')
-                )
-                  callerFilename = node_path.default.resolve(callerFilename)
-                throw new _p_ErrorCtor(
-                  `Prompt functions must return a string.\n    at ${callerFilename}`,
-                )
-              }
-              const [content, bottomContent] =
-                typeof nextView === 'string' ? [nextView] : nextView
-              screen.render(content, bottomContent)
-              effectScheduler.run()
-            } catch (error) {
-              reject(error)
-            }
-            effectsSettled = true
-            if (pendingDone !== null) {
-              const { value } = pendingDone
-              pendingDone = null
-              resolve(value)
-            }
-          })
-        }
-        if ('readableFlowing' in input) nativeSetImmediate(startCycle)
-        else startCycle()
-        return _p_ObjectAssign(
-          promise
-            .then(
-              answer => {
-                effectScheduler.clearAll()
-                return answer
-              },
-              error => {
-                effectScheduler.clearAll()
-                throw error
-              },
-            )
-            .finally(() => {
-              cleanups.forEach(cleanup => cleanup())
-              screen.done({ clearContent: Boolean(context.clearPromptOnDone) })
-              output.end()
-            })
-            .then(() => promise),
-          { cancel },
-        )
-      })
-    }
-    return prompt
-  }
-  var import_lib
-  var nativeSetImmediate
-  var init_create_prompt = __esmMin(() => {
-    import_lib = /* @__PURE__ */ __toESM(require_lib(), 1)
-    init_mjs()
-    init_screen_manager()
-    init_promise_polyfill()
-    init_hook_engine()
-    init_errors()
-    nativeSetImmediate = globalThis.setImmediate
-  })
-  var Separator
-  var init_Separator = __esmMin(() => {
-    init_dist$10()
-    Separator = class {
-      separator = (0, node_util.styleText)(
-        'dim',
-        _p_ArrayFrom({ length: 15 }).join(figures.line),
-      )
-      type = 'separator'
-      constructor(separator) {
-        if (separator) this.separator = separator
-      }
-      static isSeparator(choice) {
-        return Boolean(
-          choice &&
-          typeof choice === 'object' &&
-          'type' in choice &&
-          choice.type === 'separator',
-        )
-      }
-    }
-  })
-  var init_dist$6 = __esmMin(() => {
-    init_key()
-    init_errors()
-    init_use_prefix()
-    init_use_state()
-    init_use_effect()
-    init_use_memo()
-    init_use_ref()
-    init_use_keypress()
-    init_make_theme()
-    init_use_pagination()
-    init_create_prompt()
-    init_Separator()
-  })
-  var dist_exports$5 = /* @__PURE__ */ __exportAll({
-    Separator: () => Separator,
-    default: () => dist_default$5,
-  })
-  function isSelectable$2(item) {
-    return !Separator.isSeparator(item) && !item.disabled
-  }
-  function isNavigable$1(item) {
-    return !Separator.isSeparator(item)
-  }
-  function isChecked(item) {
-    return !Separator.isSeparator(item) && item.checked
-  }
-  function toggle(item) {
-    return isSelectable$2(item)
-      ? {
-          ...item,
-          checked: !item.checked,
-        }
-      : item
-  }
-  function check(checked) {
-    return function (item) {
-      return isSelectable$2(item)
-        ? {
-            ...item,
-            checked,
-          }
-        : item
-    }
-  }
-  function normalizeChoices$2(choices) {
-    return choices.map(choice => {
-      if (Separator.isSeparator(choice)) return choice
-      if (
-        typeof choice !== 'object' ||
-        choice === null ||
-        !('value' in choice)
-      ) {
-        const name = String(choice)
-        return {
-          value: choice,
-          name,
-          short: name,
-          checkedName: name,
-          disabled: false,
-          checked: false,
-        }
-      }
-      const name = choice.name ?? String(choice.value)
-      const normalizedChoice = {
-        value: choice.value,
-        name,
-        short: choice.short ?? name,
-        checkedName: choice.checkedName ?? name,
-        disabled: choice.disabled ?? false,
-        checked: choice.checked ?? false,
-      }
-      if (choice.description) normalizedChoice.description = choice.description
-      return normalizedChoice
-    })
-  }
-  var checkboxTheme
-  var dist_default$5
-  var init_dist$5 = __esmMin(() => {
-    init_dist$6()
-    init_dist$7()
-    init_dist$10()
-    checkboxTheme = {
-      icon: {
-        checked: (0, node_util.styleText)('green', figures.circleFilled),
-        unchecked: figures.circle,
-        cursor: figures.pointer,
-        disabledChecked: (0, node_util.styleText)(
-          'green',
-          figures.circleDouble,
-        ),
-        disabledUnchecked: '-',
-      },
-      style: {
-        disabled: text => (0, node_util.styleText)('dim', text),
-        renderSelectedChoices: selectedChoices =>
-          selectedChoices.map(choice => choice.short).join(', '),
-        description: text => (0, node_util.styleText)('cyan', text),
-        keysHelpTip: keys =>
-          keys
-            .map(
-              ([key, action]) =>
-                `${(0, node_util.styleText)('bold', key)} ${(0, node_util.styleText)('dim', action)}`,
-            )
-            .join((0, node_util.styleText)('dim', ' • ')),
-      },
-      i18n: { disabledError: 'This option is disabled and cannot be toggled.' },
-    }
-    __name(isSelectable$2, 'isSelectable')
-    __name(isNavigable$1, 'isNavigable')
-    __name(normalizeChoices$2, 'normalizeChoices')
-    dist_default$5 = createPrompt((config, done) => {
-      const {
-        pageSize = 7,
-        loop = true,
-        required,
-        validate = () => true,
-      } = config
-      const shortcuts = {
-        all: 'a',
-        invert: 'i',
-        ...config.shortcuts,
-      }
-      const theme = makeTheme(checkboxTheme, config.theme)
-      const { keybindings } = theme
-      const [status, setStatus] = useState('idle')
-      const prefix = usePrefix({
-        status,
-        theme,
-      })
-      const [items, setItems] = useState(normalizeChoices$2(config.choices))
-      const bounds = useMemo(() => {
-        const first = items.findIndex(isNavigable$1)
-        const last = items.findLastIndex(isNavigable$1)
-        if (first === -1)
-          throw new ValidationError(
-            '[checkbox prompt] No selectable choices. All choices are disabled.',
-          )
-        return {
-          first,
-          last,
-        }
-      }, [items])
-      const [active, setActive] = useState(bounds.first)
-      const [errorMsg, setError] = useState()
-      useKeypress(async key => {
-        if (isEnterKey(key)) {
-          const selection = items.filter(isChecked)
-          const isValid = await validate([...selection])
-          if (required && !selection.length)
-            setError('At least one choice must be selected')
-          else if (isValid === true) {
-            setStatus('done')
-            done(selection.map(choice => choice.value))
-          } else setError(isValid || 'You must select a valid value')
-        } else if (isUpKey(key, keybindings) || isDownKey(key, keybindings)) {
-          if (errorMsg) setError(void 0)
-          if (
-            loop ||
-            (isUpKey(key, keybindings) && active !== bounds.first) ||
-            (isDownKey(key, keybindings) && active !== bounds.last)
-          ) {
-            const offset = isUpKey(key, keybindings) ? -1 : 1
-            let next = active
-            do next = (next + offset + items.length) % items.length
-            while (!isNavigable$1(items[next]))
-            setActive(next)
-          }
-        } else if (isSpaceKey(key)) {
-          const activeItem = items[active]
-          if (activeItem && !Separator.isSeparator(activeItem)) {
-            if (activeItem.disabled) setError(theme.i18n.disabledError)
-            else {
-              setError(void 0)
-              setItems(
-                items.map((choice, i) =>
-                  i === active ? toggle(choice) : choice,
-                ),
-              )
-            }
-          }
-        } else if (key.name === shortcuts.all) {
-          const selectAll = items.some(
-            choice => isSelectable$2(choice) && !choice.checked,
-          )
-          setItems(items.map(check(selectAll)))
-        } else if (key.name === shortcuts.invert) setItems(items.map(toggle))
-        else if (isNumberKey(key)) {
-          const selectedIndex = Number(key.name) - 1
-          let selectableIndex = -1
-          const position = items.findIndex(item => {
-            if (Separator.isSeparator(item)) return false
-            selectableIndex++
-            return selectableIndex === selectedIndex
-          })
-          const selectedItem = items[position]
-          if (selectedItem && isSelectable$2(selectedItem)) {
-            setActive(position)
-            setItems(
-              items.map((choice, i) =>
-                i === position ? toggle(choice) : choice,
-              ),
-            )
-          }
-        }
-      })
-      const message = theme.style.message(config.message, status)
-      let description
-      const page = usePagination({
-        items,
-        active,
-        renderItem({ item, isActive }) {
-          if (Separator.isSeparator(item)) return ` ${item.separator}`
-          const cursor = isActive ? theme.icon.cursor : ' '
-          if (item.disabled) {
-            const disabledLabel =
-              typeof item.disabled === 'string' ? item.disabled : '(disabled)'
-            const checkbox = item.checked
-              ? theme.icon.disabledChecked
-              : theme.icon.disabledUnchecked
-            return theme.style.disabled(
-              `${cursor}${checkbox} ${item.name} ${disabledLabel}`,
-            )
-          }
-          if (isActive) description = item.description
-          const checkbox = item.checked
-            ? theme.icon.checked
-            : theme.icon.unchecked
-          const name = item.checked ? item.checkedName : item.name
-          return (isActive ? theme.style.highlight : x => x)(
-            `${cursor}${checkbox} ${name}`,
-          )
-        },
-        pageSize,
-        loop,
-      })
-      if (status === 'done') {
-        const selection = items.filter(isChecked)
-        return [
-          prefix,
-          message,
-          theme.style.answer(
-            theme.style.renderSelectedChoices(selection, items),
-          ),
-        ]
-          .filter(Boolean)
-          .join(' ')
-      }
-      const keys = [
-        ['↑↓', 'navigate'],
-        ['space', 'select'],
-      ]
-      if (shortcuts.all) keys.push([shortcuts.all, 'all'])
-      if (shortcuts.invert) keys.push([shortcuts.invert, 'invert'])
-      keys.push(['⏎', 'submit'])
-      const helpLine = theme.style.keysHelpTip(keys)
-      return `${[
-        [prefix, message].filter(Boolean).join(' '),
-        page,
-        ' ',
-        description ? theme.style.description(description) : '',
-        errorMsg ? theme.style.error(errorMsg) : '',
-        helpLine,
-      ]
-        .filter(Boolean)
-        .join('\n')
-        .trimEnd()}${cursorHide}`
-    })
-  })
-  var dist_exports$4 = /* @__PURE__ */ __exportAll({
-    default: () => dist_default$4,
-  })
-  function getBooleanValue(value, defaultValue) {
-    let answer = defaultValue !== false
-    if (/^(y|yes)/i.test(value)) answer = true
-    else if (/^(n|no)/i.test(value)) answer = false
-    return answer
-  }
-  function boolToString(value) {
-    return value ? 'Yes' : 'No'
-  }
-  var dist_default$4
-  var init_dist$4 = __esmMin(() => {
-    init_dist$6()
-    dist_default$4 = createPrompt((config, done) => {
-      const { transformer = boolToString } = config
-      const [status, setStatus] = useState('idle')
-      const [value, setValue] = useState('')
-      const theme = makeTheme(config.theme)
-      const prefix = usePrefix({
-        status,
-        theme,
-      })
-      useKeypress((key, rl) => {
-        if (status !== 'idle') return
-        if (isEnterKey(key)) {
-          const answer = getBooleanValue(value, config.default)
-          setValue(transformer(answer))
-          setStatus('done')
-          done(answer)
-        } else if (isTabKey(key)) {
-          const answer = boolToString(!getBooleanValue(value, config.default))
-          rl.clearLine(0)
-          rl.write(answer)
-          setValue(answer)
-        } else setValue(rl.line)
-      })
-      let formattedValue = value
-      let defaultValue = ''
-      if (status === 'done') formattedValue = theme.style.answer(value)
-      else
-        defaultValue = ` ${theme.style.defaultAnswer(config.default === false ? 'y/N' : 'Y/n')}`
-      return `${prefix} ${theme.style.message(config.message, status)}${defaultValue} ${formattedValue}`
-    })
-  })
-  var dist_exports$3 = /* @__PURE__ */ __exportAll({
-    default: () => dist_default$3,
-  })
-  var inputTheme
-  var dist_default$3
-  var init_dist$3 = __esmMin(() => {
-    init_dist$6()
-    inputTheme = { validationFailureMode: 'keep' }
-    dist_default$3 = createPrompt((config, done) => {
-      const { prefill = 'tab' } = config
-      const theme = makeTheme(inputTheme, config.theme)
-      const [status, setStatus] = useState('idle')
-      const [defaultValue, setDefaultValue] = useState(
-        String(config.default ?? ''),
-      )
-      const [errorMsg, setError] = useState()
-      const [value, setValue] = useState('')
-      const prefix = usePrefix({
-        status,
-        theme,
-      })
-      async function validate(value) {
-        const { required, pattern, patternError = 'Invalid input' } = config
-        if (required && !value) return 'You must provide a value'
-        if (pattern && !pattern.test(value)) return patternError
-        if (typeof config.validate === 'function')
-          return (
-            (await config.validate(value)) || 'You must provide a valid value'
-          )
-        return true
-      }
-      useKeypress(async (key, rl) => {
-        if (status !== 'idle') return
-        if (isEnterKey(key)) {
-          const answer = value || defaultValue
-          setStatus('loading')
-          const isValid = await validate(answer)
-          if (isValid === true) {
-            setValue(answer)
-            setStatus('done')
-            done(answer)
-          } else {
-            if (theme.validationFailureMode === 'clear') setValue('')
-            else rl.write(value)
-            setError(isValid)
-            setStatus('idle')
-          }
-        } else if (isBackspaceKey(key) && !value) setDefaultValue('')
-        else if (isTabKey(key) && !value) {
-          setDefaultValue('')
-          rl.clearLine(0)
-          rl.write(defaultValue)
-          setValue(defaultValue)
-        } else {
-          setValue(rl.line)
-          setError(void 0)
-        }
-      })
-      useEffect(rl => {
-        if (prefill === 'editable' && defaultValue) {
-          rl.write(defaultValue)
-          setValue(defaultValue)
-        }
-      }, [])
-      const message = theme.style.message(config.message, status)
-      let formattedValue = value
-      if (typeof config.transformer === 'function')
-        formattedValue = config.transformer(value, {
-          isFinal: status === 'done',
-        })
-      else if (status === 'done') formattedValue = theme.style.answer(value)
-      let defaultStr
-      if (defaultValue && status !== 'done' && !value)
-        defaultStr = theme.style.defaultAnswer(defaultValue)
-      let error = ''
-      if (errorMsg) error = theme.style.error(errorMsg)
-      return [
-        [prefix, message, defaultStr, formattedValue]
-          .filter(v => v !== void 0)
-          .join(' '),
-        error,
-      ]
-    })
-  })
-  var dist_exports$2 = /* @__PURE__ */ __exportAll({
-    default: () => dist_default$2,
-  })
-  var passwordTheme
-  var dist_default$2
-  var init_dist$2 = __esmMin(() => {
-    init_dist$6()
-    init_dist$7()
-    passwordTheme = { style: { maskedText: '[input is masked]' } }
-    dist_default$2 = createPrompt((config, done) => {
-      const { validate = () => true } = config
-      const theme = makeTheme(passwordTheme, config.theme)
-      const [status, setStatus] = useState('idle')
-      const [errorMsg, setError] = useState()
-      const [value, setValue] = useState('')
-      const prefix = usePrefix({
-        status,
-        theme,
-      })
-      useKeypress(async (key, rl) => {
-        if (status !== 'idle') return
-        if (isEnterKey(key)) {
-          const answer = value
-          setStatus('loading')
-          const isValid = await validate(answer)
-          if (isValid === true) {
-            setValue(answer)
-            setStatus('done')
-            done(answer)
-          } else {
-            rl.write(value)
-            setError(isValid || 'You must provide a valid value')
-            setStatus('idle')
-          }
-        } else {
-          setValue(rl.line)
-          setError(void 0)
-        }
-      })
-      const message = theme.style.message(config.message, status)
-      let formattedValue = ''
-      let helpTip
-      if (config.mask)
-        formattedValue = (
-          typeof config.mask === 'string' ? config.mask : '*'
-        ).repeat(value.length)
-      else if (status !== 'done')
-        helpTip = `${theme.style.help(theme.style.maskedText)}${cursorHide}`
-      if (status === 'done') formattedValue = theme.style.answer(formattedValue)
-      let error = ''
-      if (errorMsg) error = theme.style.error(errorMsg)
-      return [
-        [prefix, message, config.mask ? formattedValue : helpTip].join(' '),
-        error,
-      ]
-    })
-  })
-  var dist_exports$1 = /* @__PURE__ */ __exportAll({
-    Separator: () => Separator,
-    default: () => dist_default$1,
-  })
-  function isSelectable$1(item) {
-    return !Separator.isSeparator(item) && !item.disabled
-  }
-  function normalizeChoices$1(choices) {
-    return choices.map(choice => {
-      if (Separator.isSeparator(choice)) return choice
-      if (
-        typeof choice !== 'object' ||
-        choice === null ||
-        !('value' in choice)
-      ) {
-        const name = String(choice)
-        return {
-          value: choice,
-          name,
-          short: name,
-          disabled: false,
-        }
-      }
-      const name = choice.name ?? String(choice.value)
-      const normalizedChoice = {
-        value: choice.value,
-        name,
-        short: choice.short ?? name,
-        disabled: choice.disabled ?? false,
-      }
-      if (choice.description) normalizedChoice.description = choice.description
-      return normalizedChoice
-    })
-  }
-  var searchTheme
-  var dist_default$1
-  var init_dist$1 = __esmMin(() => {
-    init_dist$6()
-    init_dist$10()
-    searchTheme = {
-      icon: { cursor: figures.pointer },
-      style: {
-        disabled: text => (0, node_util.styleText)('dim', `- ${text}`),
-        searchTerm: text => (0, node_util.styleText)('cyan', text),
-        description: text => (0, node_util.styleText)('cyan', text),
-        keysHelpTip: keys =>
-          keys
-            .map(
-              ([key, action]) =>
-                `${(0, node_util.styleText)('bold', key)} ${(0, node_util.styleText)('dim', action)}`,
-            )
-            .join((0, node_util.styleText)('dim', ' • ')),
-      },
-    }
-    __name(isSelectable$1, 'isSelectable')
-    __name(normalizeChoices$1, 'normalizeChoices')
-    dist_default$1 = createPrompt((config, done) => {
-      const { pageSize = 7, validate = () => true } = config
-      const theme = makeTheme(searchTheme, config.theme)
-      const [status, setStatus] = useState('loading')
-      const [searchTerm, setSearchTerm] = useState(config.initialValue ?? '')
-      const [searchResults, setSearchResults] = useState([])
-      const [searchError, setSearchError] = useState()
-      const defaultApplied = useRef(false)
-      const prefix = usePrefix({
-        status,
-        theme,
-      })
-      const bounds = useMemo(() => {
-        return {
-          first: searchResults.findIndex(isSelectable$1),
-          last: searchResults.findLastIndex(isSelectable$1),
-        }
-      }, [searchResults])
-      const [active = bounds.first, setActive] = useState()
-      useEffect(rl => {
-        if (config.initialValue) rl.write(config.initialValue)
-      }, [])
-      useEffect(() => {
-        const controller = new AbortController()
-        setStatus('loading')
-        setSearchError(void 0)
-        const fetchResults = async () => {
-          try {
-            const results = await config.source(searchTerm || void 0, {
-              signal: controller.signal,
-            })
-            if (!controller.signal.aborted) {
-              const normalized = normalizeChoices$1(results)
-              let initialActive
-              if (!defaultApplied.current && 'default' in config) {
-                const defaultIndex = normalized.findIndex(
-                  item => isSelectable$1(item) && item.value === config.default,
-                )
-                initialActive = defaultIndex === -1 ? void 0 : defaultIndex
-                defaultApplied.current = true
-              }
-              setActive(initialActive)
-              setSearchError(void 0)
-              setSearchResults(normalized)
-              setStatus('idle')
-            }
-          } catch (error) {
-            if (!controller.signal.aborted && error instanceof Error)
-              setSearchError(error.message)
-          }
-        }
-        fetchResults()
-        return () => {
-          controller.abort()
-        }
-      }, [searchTerm])
-      const selectedChoice = searchResults[active]
-      useKeypress(async (key, rl) => {
-        if (isEnterKey(key)) {
-          if (selectedChoice) {
-            setStatus('loading')
-            const isValid = await validate(selectedChoice.value)
-            setStatus('idle')
-            if (isValid === true) {
-              setStatus('done')
-              done(selectedChoice.value)
-            } else if (selectedChoice.name === searchTerm)
-              setSearchError(isValid || 'You must provide a valid value')
-            else {
-              rl.write(selectedChoice.name)
-              setSearchTerm(selectedChoice.name)
-            }
-          } else rl.write(searchTerm)
-        } else if (isTabKey(key) && selectedChoice) {
-          rl.clearLine(0)
-          rl.write(selectedChoice.name)
-          setSearchTerm(selectedChoice.name)
-        } else if (status !== 'loading' && (isUpKey(key) || isDownKey(key))) {
-          rl.clearLine(0)
-          if (
-            (isUpKey(key) && active !== bounds.first) ||
-            (isDownKey(key) && active !== bounds.last)
-          ) {
-            const offset = isUpKey(key) ? -1 : 1
-            let next = active
-            do
-              next =
-                (next + offset + searchResults.length) % searchResults.length
-            while (!isSelectable$1(searchResults[next]))
-            setActive(next)
-          }
-        } else setSearchTerm(rl.line)
-      })
-      const message = theme.style.message(config.message, status)
-      const helpLine = theme.style.keysHelpTip([
-        ['↑↓', 'navigate'],
-        ['⏎', 'select'],
-      ])
-      const page = usePagination({
-        items: searchResults,
-        active,
-        renderItem({ item, isActive }) {
-          if (Separator.isSeparator(item)) return ` ${item.separator}`
-          if (item.disabled) {
-            const disabledLabel =
-              typeof item.disabled === 'string' ? item.disabled : '(disabled)'
-            return theme.style.disabled(`${item.name} ${disabledLabel}`)
-          }
-          return (isActive ? theme.style.highlight : x => x)(
-            `${isActive ? theme.icon.cursor : ` `} ${item.name}`,
-          )
-        },
-        pageSize,
-        loop: false,
-      })
-      let error
-      if (searchError) error = theme.style.error(searchError)
-      else if (
-        searchResults.length === 0 &&
-        searchTerm !== '' &&
-        status === 'idle'
-      )
-        error = theme.style.error('No results found')
-      let searchStr
-      if (status === 'done' && selectedChoice)
-        return [prefix, message, theme.style.answer(selectedChoice.short)]
-          .filter(Boolean)
-          .join(' ')
-          .trimEnd()
-      else searchStr = theme.style.searchTerm(searchTerm)
-      const description = selectedChoice?.description
-      return [
-        [prefix, message, searchStr].filter(Boolean).join(' ').trimEnd(),
-        [
-          error ?? page,
-          ' ',
-          description ? theme.style.description(description) : '',
-          helpLine,
-        ]
-          .filter(Boolean)
-          .join('\n')
-          .trimEnd(),
-      ]
-    })
-  })
-  var dist_exports = /* @__PURE__ */ __exportAll({
-    Separator: () => Separator,
-    default: () => dist_default,
-  })
-  function isSelectable(item) {
-    return !Separator.isSeparator(item) && !item.disabled
-  }
-  function isNavigable(item) {
-    return !Separator.isSeparator(item)
-  }
-  function normalizeChoices(choices) {
-    return choices.map(choice => {
-      if (Separator.isSeparator(choice)) return choice
-      if (
-        typeof choice !== 'object' ||
-        choice === null ||
-        !('value' in choice)
-      ) {
-        const name = String(choice)
-        return {
-          value: choice,
-          name,
-          short: name,
-          disabled: false,
-        }
-      }
-      const name = choice.name ?? String(choice.value)
-      const normalizedChoice = {
-        value: choice.value,
-        name,
-        short: choice.short ?? name,
-        disabled: choice.disabled ?? false,
-      }
-      if (choice.description) normalizedChoice.description = choice.description
-      return normalizedChoice
-    })
-  }
-  var selectTheme
-  var dist_default
-  var init_dist = __esmMin(() => {
-    init_dist$6()
-    init_dist$7()
-    init_dist$10()
-    selectTheme = {
-      icon: { cursor: figures.pointer },
-      style: {
-        disabled: text => (0, node_util.styleText)('dim', text),
-        description: text => (0, node_util.styleText)('cyan', text),
-        keysHelpTip: keys =>
-          keys
-            .map(
-              ([key, action]) =>
-                `${(0, node_util.styleText)('bold', key)} ${(0, node_util.styleText)('dim', action)}`,
-            )
-            .join((0, node_util.styleText)('dim', ' • ')),
-      },
-      i18n: {
-        disabledError: 'This option is disabled and cannot be selected.',
-      },
-      indexMode: 'hidden',
-    }
-    dist_default = createPrompt((config, done) => {
-      const { loop = true, pageSize = 7 } = config
-      const theme = makeTheme(selectTheme, config.theme)
-      const { keybindings } = theme
-      const [status, setStatus] = useState('idle')
-      const prefix = usePrefix({
-        status,
-        theme,
-      })
-      const searchTimeoutRef = useRef()
-      const searchEnabled = !keybindings.includes('vim')
-      const items = useMemo(
-        () => normalizeChoices(config.choices),
-        [config.choices],
-      )
-      const bounds = useMemo(() => {
-        const first = items.findIndex(isNavigable)
-        const last = items.findLastIndex(isNavigable)
-        if (first === -1)
-          throw new ValidationError(
-            '[select prompt] No selectable choices. All choices are disabled.',
-          )
-        return {
-          first,
-          last,
-        }
-      }, [items])
-      const defaultItemIndex = useMemo(() => {
-        if (!('default' in config)) return -1
-        return items.findIndex(
-          item => isSelectable(item) && item.value === config.default,
-        )
-      }, [config.default, items])
-      const [active, setActive] = useState(
-        defaultItemIndex === -1 ? bounds.first : defaultItemIndex,
-      )
-      const selectedChoice = items[active]
-      if (selectedChoice == null || Separator.isSeparator(selectedChoice))
-        throw new _p_ErrorCtor('Active index does not point to a choice')
-      const [errorMsg, setError] = useState()
-      useKeypress((key, rl) => {
-        clearTimeout(searchTimeoutRef.current)
-        if (errorMsg) setError(void 0)
-        if (isEnterKey(key)) {
-          if (selectedChoice.disabled) setError(theme.i18n.disabledError)
-          else {
-            setStatus('done')
-            done(selectedChoice.value)
-          }
-        } else if (isUpKey(key, keybindings) || isDownKey(key, keybindings)) {
-          rl.clearLine(0)
-          if (
-            loop ||
-            (isUpKey(key, keybindings) && active !== bounds.first) ||
-            (isDownKey(key, keybindings) && active !== bounds.last)
-          ) {
-            const offset = isUpKey(key, keybindings) ? -1 : 1
-            let next = active
-            do next = (next + offset + items.length) % items.length
-            while (!isNavigable(items[next]))
-            setActive(next)
-          }
-        } else if (isNumberKey(key) && !_p_NumberIsNaN(Number(rl.line))) {
-          const selectedIndex = Number(rl.line) - 1
-          let selectableIndex = -1
-          const position = items.findIndex(item => {
-            if (Separator.isSeparator(item)) return false
-            selectableIndex++
-            return selectableIndex === selectedIndex
-          })
-          const item = items[position]
-          if (item != null && isSelectable(item)) setActive(position)
-          searchTimeoutRef.current = setTimeout(() => {
-            rl.clearLine(0)
-          }, 700)
-        } else if (isBackspaceKey(key)) rl.clearLine(0)
-        else if (searchEnabled) {
-          const searchTerm = rl.line.toLowerCase()
-          const matchIndex = items.findIndex(item => {
-            if (Separator.isSeparator(item) || !isSelectable(item)) return false
-            return item.name.toLowerCase().startsWith(searchTerm)
-          })
-          if (matchIndex !== -1) setActive(matchIndex)
-          searchTimeoutRef.current = setTimeout(() => {
-            rl.clearLine(0)
-          }, 700)
-        }
-      })
-      useEffect(
-        () => () => {
-          clearTimeout(searchTimeoutRef.current)
-        },
-        [],
-      )
-      const message = theme.style.message(config.message, status)
-      const helpLine = theme.style.keysHelpTip([
-        ['↑↓', 'navigate'],
-        ['⏎', 'select'],
-      ])
-      let separatorCount = 0
-      const page = usePagination({
-        items,
-        active,
-        renderItem({ item, isActive, index }) {
-          if (Separator.isSeparator(item)) {
-            separatorCount++
-            return ` ${item.separator}`
-          }
-          const cursor = isActive ? theme.icon.cursor : ' '
-          const indexLabel =
-            theme.indexMode === 'number'
-              ? `${index + 1 - separatorCount}. `
-              : ''
-          if (item.disabled) {
-            const disabledLabel =
-              typeof item.disabled === 'string' ? item.disabled : '(disabled)'
-            const disabledCursor = isActive ? theme.icon.cursor : '-'
-            return theme.style.disabled(
-              `${disabledCursor} ${indexLabel}${item.name} ${disabledLabel}`,
-            )
-          }
-          return (isActive ? theme.style.highlight : x => x)(
-            `${cursor} ${indexLabel}${item.name}`,
-          )
-        },
-        pageSize,
-        loop,
-      })
-      if (status === 'done')
-        return [prefix, message, theme.style.answer(selectedChoice.short)]
-          .filter(Boolean)
-          .join(' ')
-      const { description } = selectedChoice
-      return `${[
-        [prefix, message].filter(Boolean).join(' '),
-        page,
-        ' ',
-        description ? theme.style.description(description) : '',
-        errorMsg ? theme.style.error(errorMsg) : '',
-        helpLine,
-      ]
-        .filter(Boolean)
-        .join('\n')
-        .trimEnd()}${cursorHide}`
-    })
-  })
-  const signalExit = require_cjs()
-  const supportsColor =
-    (init_supports_color(), __toCommonJS(supports_color_exports))
-  const hasFlagNs = require__stub_has_flag()
-  const hasFlag = hasFlagNs.default || hasFlagNs
-  let _terminalLink
-  function getTerminalLink() {
-    if (_terminalLink === void 0) {
-      const ns = require_terminal_link()
-      _terminalLink = ns.default || ns
-    }
-    return _terminalLink
-  }
-  const yoctocolorsCjs = require_yoctocolors_cjs$1()
-  const checkbox = (init_dist$5(), __toCommonJS(dist_exports$5))
-  const confirm = (init_dist$4(), __toCommonJS(dist_exports$4))
-  const input = (init_dist$3(), __toCommonJS(dist_exports$3))
-  const password = (init_dist$2(), __toCommonJS(dist_exports$2))
-  const search = (init_dist$1(), __toCommonJS(dist_exports$1))
-  const select = (init_dist(), __toCommonJS(dist_exports))
-  module.exports = {
-    checkbox,
-    confirm,
-    getTerminalLink,
-    hasFlag,
-    input,
-    password,
-    search,
-    select,
-    signalExit,
-    supportsColor,
-    yoctocolorsCjs,
-  }
-})
-
-var require_supports_color = /* @__PURE__ */ __commonJSMin(
-  (exports, module) => {
-    const { supportsColor } = require_external_pack()
-    const { ObjectAssign: _p_ObjectAssign } = require_object()
-    const eager = supportsColor.default || supportsColor
-    _p_ObjectAssign(module.exports, eager)
-    if (typeof supportsColor.createSupportsColor === 'function')
-      module.exports.createSupportsColor = supportsColor.createSupportsColor
-    module.exports.default = eager
-  },
-)
-
-var require_support = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  let cachedSupportsColor
-  /**
-   * Capability of a stream that accepts no escapes at all.
-   */
-  const COLOR_CAPABILITY_NONE = Object.freeze({
-    palette: 'none',
-    level: 0,
-    hasBasic: false,
-    has256: false,
-    has16m: false,
-  })
-  /**
-   * Resolve what a stream accepts.
-   *
-   * Pass the stream the text is going to. Omitting it resolves nothing and
-   * returns {@link COLOR_CAPABILITY_NONE}, because "no stream named" cannot be
-   * answered as "color is fine".
-   *
-   * @example
-   *   ;```typescript
-   *   getColorCapability({ stream: process.stderr }).has16m
-   *   ```
-   *
-   * @param config - Resolution inputs.
-   *
-   * @returns What the stream accepts.
-   */
-  function getColorCapability(config) {
-    const { sniffFlags, stream } = {
-      __proto__: null,
-      ...config,
-    }
-    if (!stream) return COLOR_CAPABILITY_NONE
-    const options = sniffFlags === void 0 ? void 0 : { sniffFlags }
-    return toColorCapability(
-      getSupportsColor().createSupportsColor(stream, options),
-    )
-  }
-  /**
-   * Get the color detector. Required lazily on first call — see the @file note
-   * on the external-pack top-level.
-   *
-   * @returns The detector module.
-   */
-  function getSupportsColor() {
-    if (cachedSupportsColor === void 0)
-      cachedSupportsColor = require_supports_color()
-    return cachedSupportsColor
-  }
-  /**
-   * Whether a stream accepts any color escape at all.
-   *
-   * The cheap gate to put in front of an escape-emitting write.
-   *
-   * @param config - Resolution inputs.
-   *
-   * @returns `true` when the stream accepts at least the 16-color set.
-   */
-  function isColorSupported(config) {
-    return getColorCapability(config).hasBasic
-  }
-  /**
-   * Whether a stream accepts 24-bit truecolor.
-   *
-   * The gate for an RGB tuple, which has no meaning on a 16-color stream.
-   *
-   * @param config - Resolution inputs.
-   *
-   * @returns `true` when the stream accepts `[38;2;r;g;bm`.
-   */
-  function isTrueColorSupported(config) {
-    return getColorCapability(config).has16m
-  }
-  /**
-   * Convert the detector's result into a {@link ColorCapability}.
-   *
-   * @param info - Detector result, `false` when the stream accepts nothing.
-   *
-   * @returns The equivalent capability.
-   */
-  function toColorCapability(info) {
-    if (!info) return COLOR_CAPABILITY_NONE
-    const { has16m, has256, hasBasic, level } = info
-    return {
-      palette: toColorPalette(level),
-      level,
-      hasBasic,
-      has256,
-      has16m,
-    }
-  }
-  /**
-   * Convert a numeric detector level into its palette name.
-   *
-   * @param level - Level 0 none through 3 truecolor.
-   *
-   * @returns The matching palette name.
-   */
-  function toColorPalette(level) {
-    if (level >= 3) return 'truecolor'
-    if (level === 2) return 'ansi256'
-    if (level === 1) return 'basic'
-    return 'none'
-  }
-  exports.COLOR_CAPABILITY_NONE = COLOR_CAPABILITY_NONE
-  exports.getColorCapability = getColorCapability
-  exports.getSupportsColor = getSupportsColor
-  exports.isColorSupported = isColorSupported
-  exports.isTrueColorSupported = isTrueColorSupported
-  exports.toColorCapability = toColorCapability
-  exports.toColorPalette = toColorPalette
-})
-
-var require_yoctocolors_cjs = /* @__PURE__ */ __commonJSMin(
-  (exports, module) => {
-    const { yoctocolorsCjs } = require_external_pack()
-    module.exports = yoctocolorsCjs
-    module.exports.default = yoctocolorsCjs
-  },
-)
-
-var require_colors = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_term_colors_support = require_support()
-  let cachedYoctocolors
-  /**
-   * Apply a color to text, or return it unchanged when the destination accepts
-   * no color.
-   *
-   * Handles named colors and RGB tuples. The palette a stream accepts decides
-   * which of the two can be honored: an RGB tuple is 24-bit truecolor, so a
-   * stream without truecolor gets plain text rather than an escape it cannot
-   * render.
-   *
-   * @example
-   *   ;```typescript
-   *   applyColor('ok', 'green', { stream: process.stdout })
-   *   ```
-   *
-   * @param text - Text to color.
-   * @param color - Named color or RGB tuple.
-   * @param config - Destination inputs.
-   *
-   * @returns The colored text, or `text` unchanged when color is not accepted.
-   */
-  function applyColor(text, color, config) {
-    const { stream } = {
-      __proto__: null,
-      ...config,
-    }
-    const capability = require_term_colors_support.getColorCapability({
-      stream: stream ?? process.stderr,
-    })
-    if (typeof color === 'string') {
-      if (!capability.hasBasic) return text
-      const formatter = getYoctocolors()[color]
-      return formatter ? formatter(text) : text
-    }
-    if (!capability.has16m) return text
-    const { 0: r, 1: g, 2: b } = color
-    return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
-  }
-  /**
-   * Get the yoctocolors module for terminal colors. Required lazily on first
-   * call — see the @file note on the external-pack top-level.
-   */
-  function getYoctocolors() {
-    if (cachedYoctocolors === void 0)
-      cachedYoctocolors = require_yoctocolors_cjs()
-    return cachedYoctocolors
-  }
-  exports.applyColor = applyColor
-  exports.getYoctocolors = getYoctocolors
-})
-
-/**
- * Bundled from @socketregistry/is-unicode-supported
- * This is a zero-dependency bundle created by rolldown.
- */
-var require_is_unicode_supported$1 = /* @__PURE__ */ __commonJSMin(
-  (exports, module) => {
-    var __commonJSMin = (cb, mod) => () => (
-      mod || (cb((mod = { exports: {} }).exports, mod), (cb = null)),
-      mod.exports
-    )
-    var require_is_unicode_supported = /* @__PURE__ */ __commonJSMin(
-      (exports$1, module$2) => {
-        let _process
-        function getProcess() {
-          if (_process === void 0) _process = __require('process')
-          return _process
-        }
-        module$2.exports = function isUnicodeSupported() {
-          const process = getProcess()
-          if (process.platform !== 'win32') return process.env.TERM !== 'linux'
-          const { env } = process
-          if (
-            env.WT_SESSION ||
-            env.TERMINUS_SUBLIME ||
-            env.ConEmuTask === '{cmd::Cmder}'
-          )
-            return true
-          const { TERM, TERM_PROGRAM } = env
-          return (
-            TERM_PROGRAM === 'Terminus-Sublime' ||
-            TERM_PROGRAM === 'vscode' ||
-            TERM === 'xterm-256color' ||
-            TERM === 'alacritty' ||
-            TERM === 'rxvt-unicode' ||
-            TERM === 'rxvt-unicode-256color' ||
-            env.TERMINAL_EMULATOR === 'JetBrains-JediTerm'
-          )
-        }
-      },
-    )
-    module.exports = require_is_unicode_supported()
-  },
-)
-
-var require_symbols_builder = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_runtime$1 = require_runtime$2()
-  const require_primordials_string = require_string$1()
-  const require_logger_colors = require_colors()
-  let src_external__socketregistry_is_unicode_supported_js =
-    require_is_unicode_supported$1()
-  src_external__socketregistry_is_unicode_supported_js =
-    require_runtime$1.__toESM(
-      src_external__socketregistry_is_unicode_supported_js,
-      1,
-    )
-  /**
-   * @file Free-function helpers for per-instance log-symbol construction +
-   *   symbol stripping. Extracted from `logger/node.ts` (the `Logger` class) so
-   *   the class stays under the 1000-line hard cap and so other callers (alt
-   *   loggers, format helpers) can reuse the same logic without instantiating a
-   *   `Logger`.
-   *
-   *   - `buildLoggerSymbols` — theme + unicode-detection → `LogSymbols` map
-   *   - `stripLoggerSymbols` — strip leading status emoji from a string
-   */
-  /**
-   * Build a `LogSymbols` map for the given theme.
-   *
-   * On unicode-supporting terminals returns the canonical icons (`✔`, `✖`, `⚠`,
-   * `ⓘ`, `→`, `∴`, `↻`); otherwise returns ASCII fallbacks (`√`, `×`, `‼`, `i`,
-   * `>`, `:.`, `@`). Colors are pulled from the supplied theme via
-   * `applyColor`.
-   */
-  function buildLoggerSymbols(theme) {
-    const supported = (0,
-    src_external__socketregistry_is_unicode_supported_js.default)()
-    /* c8 ignore start - ASCII-fallback symbol arms only fire on
-		terminals without unicode support; tests run on unicode TTYs. */
-    return {
-      __proto__: null,
-      fail: require_logger_colors.applyColor(
-        supported ? '✖' : '×',
-        theme.colors.error,
-      ),
-      info: require_logger_colors.applyColor(
-        supported ? 'ⓘ' : 'i',
-        theme.colors.info,
-      ),
-      progress: require_logger_colors.applyColor(
-        supported ? '∴' : ':.',
-        theme.colors.step,
-      ),
-      skip: require_logger_colors.applyColor(
-        supported ? '↻' : '@',
-        theme.colors.step,
-      ),
-      step: require_logger_colors.applyColor(
-        supported ? '→' : '>',
-        theme.colors.step,
-      ),
-      success: require_logger_colors.applyColor(
-        supported ? '✔' : '√',
-        theme.colors.success,
-      ),
-      warn: require_logger_colors.applyColor(
-        supported ? '⚠' : '‼',
-        theme.colors.warning,
-      ),
-    }
-    /* c8 ignore stop */
-  }
-  /**
-   * Strip leading log-status symbols and variation selectors from a string.
-   * Matches both unicode forms (`✖`, `⚠`, `✔`, `ⓘ`, `ℹ`, `→`, `∴`, `↻`) and the
-   * unambiguous ASCII fallback `:.`. Does not strip lone ASCII letters (`i`,
-   * `>`, `@`) since those would mangle real words.
-   *
-   * Handles the trailing variation-selector U+FE0F + whitespace so a `'✔ Done'`
-   * input becomes `'Done'`.
-   */
-  function stripLoggerSymbols(text) {
-    return require_primordials_string.StringPrototypeReplace(
-      text,
-      /^(?::.|[✖✗×⚠‼✔✓√ⓘℹ→∴↻])[️\s]*/u,
-      '',
-    )
-  }
-  exports.buildLoggerSymbols = buildLoggerSymbols
-  exports.stripLoggerSymbols = stripLoggerSymbols
-})
-
-var require_symbols = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_runtime = require_runtime$2()
-  const require_primordials_object = require_object()
-  const require_primordials_reflect = require_reflect()
-  const require_primordials_globals = require_globals()
-  const require_term_themes_context = require_context()
-  const require_logger_shared = require_shared()
-  const require_logger_colors = require_colors()
-  let src_external__socketregistry_is_unicode_supported_js =
-    require_is_unicode_supported$1()
-  src_external__socketregistry_is_unicode_supported_js =
-    require_runtime.__toESM(
-      src_external__socketregistry_is_unicode_supported_js,
-      1,
-    )
-  /**
-   * @file Symbol exports + the `LOG_SYMBOLS` proxy. The two `Symbol.for(...)`
-   *   constants are how the spinner and tests reach into a `Logger` instance to
-   *   bump the call counter and toggle blank-line tracking without exposing
-   *   private fields. The `LOG_SYMBOLS` proxy is the public colored-symbol
-   *   palette that lazily initializes on first access (so importing the logger
-   *   during early Node.js bootstrap doesn't pre-resolve the theme before
-   *   themes are configured) and re-renders whenever `setTheme()` fires
-   *   `onThemeChange`.
-   */
-  let consoleSymbols
-  let kGroupIndentationWidthSymbol
-  function createLogSymbols() {
-    const target = { __proto__: null }
-    let initialized = false
-    const handler = { __proto__: null }
-    const updateSymbols = () => {
-      const supported = (0,
-      src_external__socketregistry_is_unicode_supported_js.default)()
-      const colors = require_logger_colors.getYoctocolors()
-      const theme = require_term_themes_context.getTheme()
-      const successColor = theme.colors.success
-      const errorColor = theme.colors.error
-      const warningColor = theme.colors.warning
-      const infoColor = theme.colors.info
-      const stepColor = theme.colors.step
-      /* c8 ignore start - ASCII-fallback symbol arms only fire on
-			terminals without unicode support; tests run on unicode TTYs. */
-      target['fail'] = require_logger_colors.applyColor(
-        supported ? '✖' : '×',
-        errorColor,
-      )
-      target['info'] = require_logger_colors.applyColor(
-        supported ? 'ⓘ' : 'i',
-        infoColor,
-      )
-      target['progress'] = require_logger_colors.applyColor(
-        supported ? '∴' : ':.',
-        stepColor,
-      )
-      target['reason'] = colors.dim(
-        require_logger_colors.applyColor(supported ? '∴' : ':.', warningColor),
-      )
-      target['skip'] = require_logger_colors.applyColor(
-        supported ? '↻' : '@',
-        stepColor,
-      )
-      target['step'] = require_logger_colors.applyColor(
-        supported ? '→' : '>',
-        stepColor,
-      )
-      target['success'] = require_logger_colors.applyColor(
-        supported ? '✔' : '√',
-        successColor,
-      )
-      target['warn'] = require_logger_colors.applyColor(
-        supported ? '⚠' : '‼',
-        warningColor,
-      )
-      /* c8 ignore stop */
-    }
-    const init = () => {
-      /* c8 ignore start - Idempotent guard; init runs once, second-call branch never re-enters. */
-      if (initialized) return
-      /* c8 ignore stop */
-      updateSymbols()
-      initialized = true
-      for (const trapName in handler) delete handler[trapName]
-    }
-    const reset = () => {
-      /* c8 ignore start - Defensive guard; reset only runs after init, so the un-init branch is unreachable in tests. */
-      if (!initialized) return
-      /* c8 ignore stop */
-      updateSymbols()
-    }
-    for (const trapName of require_primordials_reflect.ReflectOwnKeys(
-      Reflect,
-    )) {
-      const fn = Reflect[trapName]
-      if (typeof fn === 'function')
-        handler[trapName] = (...args) => {
-          init()
-          return fn(...args)
-        }
-    }
-    /* c8 ignore next 4 - onThemeChange callback fires only when
-		setTheme() is called at runtime; tests use the static default
-		theme. */
-    require_term_themes_context.onThemeChange(() => {
-      reset()
-    })
-    return new require_primordials_globals.ProxyCtor(target, handler)
-  }
-  function createLogSymbolsProxyPlaceholder() {}
-  /**
-   * Lazily get console symbols on first access.
-   *
-   * Deferred to avoid accessing global console during early Node.js bootstrap
-   * before stdout is ready.
-   */
-  function getConsoleSymbols() {
-    /* c8 ignore start - Lazy-init second-call branch; module-singleton, the re-init guard never re-enters in tests. */
-    if (consoleSymbols === void 0)
-      consoleSymbols = require_primordials_object.ObjectGetOwnPropertySymbols(
-        require_logger_shared.globalConsole,
-      )
-    /* c8 ignore stop */
-    return consoleSymbols
-  }
-  /**
-   * Lazily get kGroupIndentationWidth symbol on first access.
-   */
-  function getKGroupIndentationWidthSymbol() {
-    /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-    if (kGroupIndentationWidthSymbol === void 0)
-      kGroupIndentationWidthSymbol =
-        getConsoleSymbols().find(s => s.label === 'kGroupIndentWidth') ??
-        Symbol('kGroupIndentWidth')
-    return kGroupIndentationWidthSymbol
-  }
-  /**
-   * Symbol for incrementing the internal log call counter.
-   *
-   * This is an internal symbol used to track the number of times logging
-   * methods have been called on a logger instance.
-   */
-  const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
-  /**
-   * Symbol for tracking whether the last logged line was blank.
-   *
-   * This is used internally to prevent multiple consecutive blank lines and to
-   * determine whether to add spacing before certain messages.
-   */
-  const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
-  const LOG_SYMBOLS = /*@__PURE__*/ createLogSymbols()
-  exports.LOG_SYMBOLS = LOG_SYMBOLS
-  exports.createLogSymbols = createLogSymbols
-  exports.createLogSymbolsProxyPlaceholder = createLogSymbolsProxyPlaceholder
-  exports.getConsoleSymbols = getConsoleSymbols
-  exports.getKGroupIndentationWidthSymbol = getKGroupIndentationWidthSymbol
-  exports.incLogCallCountSymbol = incLogCallCountSymbol
-  exports.lastWasBlankSymbol = lastWasBlankSymbol
-})
-
-var require_process = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const nodeProcess = require_runtime$3().IS_NODE
-    ? /*@__PURE__*/ __require('process')
-    : void 0
-  function getNodeProcess() {
-    return nodeProcess
-  }
-  exports.getNodeProcess = getNodeProcess
-})
-
-var require_console = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_primordials_object = require_object()
-  const require_primordials_reflect = require_reflect()
-  const require_node_process = require_process()
-  const require_logger_shared = require_shared()
-  const require_logger_symbols = require_symbols()
-  const require_logger_node = require_node()
-  let cachedConsole
-  let prototypeInitialized = false
-  /**
-   * Construct a new Console instance.
-   */
-  function constructConsole(...args) {
-    /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-    if (cachedConsole === void 0)
-      cachedConsole = /* @__PURE__ */ __require('console').Console
-    return require_primordials_reflect.ReflectConstruct(cachedConsole, args)
-  }
-  /**
-   * Lazily add dynamic console methods to Logger prototype.
-   *
-   * This is deferred until first access to avoid calling
-   * Object.entries(globalConsole) during early Node.js bootstrap before stdout
-   * is ready.
-   */
-  function ensurePrototypeInitialized() {
-    if (prototypeInitialized) return
-    prototypeInitialized = true
-    const entries = [
-      [
-        require_logger_symbols.getKGroupIndentationWidthSymbol(),
-        {
-          ...require_logger_shared.consolePropAttributes,
-          value: 2,
-        },
-      ],
-      [
-        Symbol.toStringTag,
-        {
-          __proto__: null,
-          configurable: true,
-          value: 'logger',
-        },
-      ],
-    ]
-    for (const { 0: key, 1: value } of require_primordials_object.ObjectEntries(
-      require_logger_shared.globalConsole,
-    ))
-      if (
-        !require_logger_node.Logger.prototype[key] &&
-        typeof value === 'function'
-      ) {
-        const { [key]: func } = {
-          [key](...args) {
-            /* c8 ignore start */
-            let con = require_logger_shared.privateConsole.get(this)
-            if (con === void 0) {
-              const ctorArgs =
-                require_logger_shared.privateConstructorArgs.get(this) ?? []
-              require_logger_shared.privateConstructorArgs.delete(this)
-              if (ctorArgs.length) con = constructConsole(...ctorArgs)
-              else {
-                const nodeProcess = require_node_process.getNodeProcess()
-                con = constructConsole({
-                  stdout: nodeProcess.stdout,
-                  stderr: nodeProcess.stderr,
-                })
-                for (const {
-                  0: k,
-                  1: method,
-                } of require_logger_shared.getBoundConsoleEntries())
-                  con[k] = method
-              }
-              require_logger_shared.privateConsole.set(this, con)
-            }
-            const result = con[key](...args)
-            /* c8 ignore next */
-            return result === void 0 || result === con ? this : result
-          },
-        }
-        entries.push([
-          key,
-          {
-            ...require_logger_shared.consolePropAttributes,
-            value: func,
-          },
-        ])
-      }
-    require_primordials_object.ObjectDefineProperties(
-      require_logger_node.Logger.prototype,
-      require_primordials_object.ObjectFromEntries(entries),
-    )
-  }
-  /**
-   * Resolve (and lazily construct + cache) the per-instance `Console` for a
-   * logger. Ensures the prototype is initialized, then returns the cached
-   * Console from the `privateConsole` WeakMap, building one from the stored
-   * constructor args (or the default stdout/stderr pair) on first access. This
-   * lazy path is what lets the logger be imported during early Node.js
-   * bootstrap before stdout is ready, avoiding `ERR_CONSOLE_WRITABLE_STREAM`.
-   *
-   * @param logger - The logger whose Console to resolve.
-   */
-  function resolveConsole(logger) {
-    ensurePrototypeInitialized()
-    let con = require_logger_shared.privateConsole.get(logger)
-    /* c8 ignore start - ctorArgs.length-truthy fires when caller seeded
-		constructor args; both arms are exercised across tests but not always
-		in the same run. */
-    if (!con) {
-      const ctorArgs =
-        require_logger_shared.privateConstructorArgs.get(logger) ?? []
-      if (ctorArgs.length) con = constructConsole(...ctorArgs)
-      else {
-        const nodeProcess = require_node_process.getNodeProcess()
-        con = constructConsole({
-          stdout: nodeProcess.stdout,
-          stderr: nodeProcess.stderr,
-        })
-        for (const {
-          0: key,
-          1: method,
-        } of require_logger_shared.getBoundConsoleEntries())
-          con[key] = method
-      }
-      require_logger_shared.privateConsole.set(logger, con)
-      require_logger_shared.privateConstructorArgs.delete(logger)
-    }
-    /* c8 ignore stop */
-    return con
-  }
-  exports.constructConsole = constructConsole
-  exports.ensurePrototypeInitialized = ensurePrototypeInitialized
-  exports.resolveConsole = resolveConsole
-})
-
-var require_console_methods = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_logger_symbols = require_symbols()
-  /**
-   * @file Free-function bodies for the `Logger` methods that are thin,
-   *   chainable mirrors of the underlying `node:console` API (`assert`,
-   *   `count`, `dir`, `dirxml`, `table`, `time`, `timeEnd`, `timeLog`,
-   *   `trace`). Each takes the calling logger plus its already-resolved
-   *   `node:console` instance, delegates to the matching console method,
-   *   updates the shared blank-line / call-count tracking via the exported
-   *   logger symbols, and returns the logger for chaining. Pulling these out of
-   *   `./node` keeps the `Logger` class body under the file-size cap while
-   *   preserving the per-method documentation here. The class retains one-line
-   *   delegators that supply `this` and `this.#getConsole()`.
-   */
-  /**
-   * Logs an assertion failure message if the value is falsy.
-   *
-   * Works like `console.assert()` but returns the logger for chaining. If the
-   * value is truthy, nothing is logged. If falsy, logs an error message with an
-   * assertion failure.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param value - The value to test.
-   * @param message - Optional message and additional arguments to log.
-   */
-  function assertMethod(logger, con, value, message) {
-    con.assert(Boolean(value), message[0], ...message.slice(1))
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return value
-      ? logger
-      : logger[require_logger_symbols.incLogCallCountSymbol]()
-  }
-  /**
-   * Increments and logs a counter for the given label.
-   *
-   * Each unique label maintains its own counter. Works like `console.count()`.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param label - Optional label for the counter (defaults to 'default').
-   */
-  function countMethod(logger, con, label) {
-    con.count(label)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger[require_logger_symbols.incLogCallCountSymbol]()
-  }
-  /**
-   * Displays an object's properties in a formatted way.
-   *
-   * Works like `console.dir()` with customizable options for depth, colors,
-   * etc. Useful for inspecting complex objects.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param obj - The object to display.
-   * @param options - Optional formatting options (Node.js inspect options).
-   */
-  function dirMethod(logger, con, obj, options) {
-    con.dir(obj, options)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger[require_logger_symbols.incLogCallCountSymbol]()
-  }
-  /**
-   * Displays data as XML/HTML in a formatted way.
-   *
-   * Works like `console.dirxml()`. In Node.js, behaves the same as `dir()`.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param data - The data to display.
-   */
-  function dirxmlMethod(logger, con, data) {
-    con.dirxml(data)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger[require_logger_symbols.incLogCallCountSymbol]()
-  }
-  /**
-   * Displays data in a table format.
-   *
-   * Works like `console.table()`. Accepts arrays of objects or objects with
-   * nested objects. Optionally specify which properties to include in the
-   * table.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param tabularData - The data to display as a table.
-   * @param properties - Optional array of property names to include.
-   */
-  function tableMethod(logger, con, tabularData, properties) {
-    con.table(tabularData, properties ? [...properties] : void 0)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger[require_logger_symbols.incLogCallCountSymbol]()
-  }
-  /**
-   * Ends a timer and logs the elapsed time.
-   *
-   * Logs the duration since `console.time()` or `logger.time()` was called with
-   * the same label. The timer is stopped and removed.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param label - Optional label for the timer (defaults to 'default').
-   */
-  function timeEndMethod(logger, con, label) {
-    con.timeEnd(label)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger[require_logger_symbols.incLogCallCountSymbol]()
-  }
-  /**
-   * Logs the current value of a timer without stopping it.
-   *
-   * Logs the duration since `console.time()` was called with the same label,
-   * but keeps the timer running. Can include additional data to log alongside
-   * the time.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param label - Optional label for the timer (defaults to 'default').
-   * @param data - Additional data to log with the time.
-   */
-  function timeLogMethod(logger, con, label, data) {
-    con.timeLog(label, ...data)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger[require_logger_symbols.incLogCallCountSymbol]()
-  }
-  /**
-   * Starts a timer for measuring elapsed time.
-   *
-   * Creates a timer with the given label. Use `timeEnd()` with the same label
-   * to stop the timer and log the elapsed time, or use `timeLog()` to check the
-   * time without stopping the timer.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param label - Optional label for the timer (defaults to 'default').
-   */
-  function timeMethod(logger, con, label) {
-    con.time(label)
-    return logger
-  }
-  /**
-   * Logs a stack trace to the console.
-   *
-   * Works like `console.trace()`. Shows the call stack leading to where this
-   * method was called. Useful for debugging.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param message - Optional message to display with the trace.
-   * @param args - Additional arguments to log.
-   */
-  function traceMethod(logger, con, message, args) {
-    con.trace(message, ...args)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger[require_logger_symbols.incLogCallCountSymbol]()
-  }
-  exports.assertMethod = assertMethod
-  exports.countMethod = countMethod
-  exports.dirMethod = dirMethod
-  exports.dirxmlMethod = dirxmlMethod
-  exports.tableMethod = tableMethod
-  exports.timeEndMethod = timeEndMethod
-  exports.timeLogMethod = timeLogMethod
-  exports.timeMethod = timeMethod
-  exports.traceMethod = traceMethod
-})
-
-var require_indentation_methods = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_primordials_reflect = require_reflect()
-  const require_primordials_math = require_math()
-  const require_logger_shared = require_shared()
-  const require_logger_symbols = require_symbols()
-  /**
-   * @file Free-function bodies for the `Logger` indentation-domain methods
-   *   (`indent`, `dedent`, `resetIndent`, `group`, `groupCollapsed`,
-   *   `groupEnd`). Indentation is tracked at the prefix layer as a per-stream
-   *   string of spaces rather than via `node:console`'s frozen
-   *   `Symbol(kGroupIndent)`, so these helpers read and write that prefix
-   *   through a small accessor context handed in by the calling `Logger`.
-   *   Pulling these out of `./node` keeps the `Logger` class body under the
-   *   file-size cap; the class retains one-line delegators that build the
-   *   context from its private state.
-   */
-  /**
-   * Decrease the indentation prefix by `spaces`.
-   *
-   * On the root logger (`boundStream` undefined) both streams shrink; on a
-   * stream-bound logger only the bound stream shrinks. Returns the logger for
-   * chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param ctx - The logger's indentation accessor context.
-   * @param spaces - Number of spaces to remove (default 2).
-   */
-  function dedentMethod(logger, ctx, spaces) {
-    if (ctx.boundStream) {
-      const current = ctx.getIndent(ctx.boundStream)
-      ctx.setIndent(ctx.boundStream, current.slice(0, -spaces))
-    } else {
-      const stderrCurrent = ctx.getIndent('stderr')
-      const stdoutCurrent = ctx.getIndent('stdout')
-      ctx.setIndent('stderr', stderrCurrent.slice(0, -spaces))
-      ctx.setIndent('stdout', stdoutCurrent.slice(0, -spaces))
-    }
-    return logger
-  }
-  /**
-   * End the current log group and decrease indentation by the group-indent
-   * width.
-   *
-   * Call once per `groupMethod` / `groupCollapsed`. Returns the logger for
-   * chaining.
-   *
-   * @param logger - The calling logger instance.
-   */
-  function groupEndMethod(logger) {
-    logger.dedent(
-      logger[require_logger_symbols.getKGroupIndentationWidthSymbol()],
-    )
-    return logger
-  }
-  /**
-   * Start a new indented log group.
-   *
-   * A provided label is logged via the logger's own `log` before indentation
-   * increases by the group-indent width (default 2). Groups nest; close with
-   * `groupEndMethod`. Returns the logger for chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param label - Optional label to display before the group.
-   */
-  function groupMethod(logger, label) {
-    const { length } = label
-    if (length)
-      require_primordials_reflect.ReflectApply(logger.log, logger, label)
-    logger.indent(
-      logger[require_logger_symbols.getKGroupIndentationWidthSymbol()],
-    )
-    if (length) {
-      logger[require_logger_symbols.lastWasBlankSymbol](false)
-      logger[require_logger_symbols.incLogCallCountSymbol]()
-    }
-    return logger
-  }
-  /**
-   * Increase the indentation prefix by `spaces`, capped at `maxIndentation`.
-   *
-   * On the root logger both streams grow; on a stream-bound logger only the
-   * bound stream grows. Returns the logger for chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param ctx - The logger's indentation accessor context.
-   * @param spaces - Number of spaces to add (default 2).
-   */
-  function indentMethod(logger, ctx, spaces) {
-    const spacesToAdd = ' '.repeat(
-      require_primordials_math.MathMin(
-        spaces,
-        require_logger_shared.maxIndentation,
-      ),
-    )
-    if (ctx.boundStream) {
-      const current = ctx.getIndent(ctx.boundStream)
-      ctx.setIndent(ctx.boundStream, current + spacesToAdd)
-    } else {
-      const stderrCurrent = ctx.getIndent('stderr')
-      const stdoutCurrent = ctx.getIndent('stdout')
-      ctx.setIndent('stderr', stderrCurrent + spacesToAdd)
-      ctx.setIndent('stdout', stdoutCurrent + spacesToAdd)
-    }
-    return logger
-  }
-  /**
-   * Reset all indentation to zero.
-   *
-   * On the root logger both streams reset; on a stream-bound logger only the
-   * bound stream resets. Returns the logger for chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param ctx - The logger's indentation accessor context.
-   */
-  function resetIndentMethod(logger, ctx) {
-    if (ctx.boundStream) ctx.setIndent(ctx.boundStream, '')
-    else {
-      ctx.setIndent('stderr', '')
-      ctx.setIndent('stdout', '')
-    }
-    return logger
-  }
-  exports.dedentMethod = dedentMethod
-  exports.groupEndMethod = groupEndMethod
-  exports.groupMethod = groupMethod
-  exports.indentMethod = indentMethod
-  exports.resetIndentMethod = resetIndentMethod
-})
-
-var require_options = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_term_themes_presets = require_presets()
-  /**
-   * @file Constructor-options parsing for the `Logger` class. Pulls the
-   *   options-shape inspection (null-prototype clone, original-stdout capture,
-   *   theme-name-or-object resolution) out of `./node` so the class constructor
-   *   stays a thin shell over `parseLoggerOptions`. Returns a normalized
-   *   `ParsedLoggerOptions`; the constructor copies the fields onto its private
-   *   slots.
-   */
-  /**
-   * Parse the first `Logger` constructor argument into normalized option slots.
-   *
-   * A `theme` string is resolved against `THEMES`, where an unknown name yields
-   * no theme; a `theme` object is used directly. When the first argument is not
-   * an object, every slot defaults: empty null-prototype options, no stdout,
-   * and no theme.
-   *
-   * @param args - The raw `Logger` constructor arguments.
-   */
-  function parseLoggerOptions(args) {
-    const options = args[0]
-    if (typeof options !== 'object' || options === null)
-      return {
-        options: { __proto__: null },
-        originalStdout: void 0,
-        theme: void 0,
-      }
-    const originalStdout = options.stdout
-    const themeOption = options.theme
-    let theme
-    if (typeof themeOption === 'string')
-      theme = require_term_themes_presets.THEMES[themeOption] ?? void 0
-    else if (themeOption) theme = themeOption
-    return {
-      options: {
-        __proto__: null,
-        ...options,
-      },
-      originalStdout,
-      theme,
-    }
-  }
-  exports.parseLoggerOptions = parseLoggerOptions
-})
-
-var require_strip = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_primordials_string = require_string$1()
-  const require_primordials_regexp = require_regexp()
-  /**
-   * @file ANSI escape-code regex factory and stripping helper. Provides
-   *   `ansiRegex()` for matching CSI/OSC sequences and `stripAnsi()` for
-   *   removing ANSI formatting from terminal output.
-   */
-  /**
-   * Create a regular expression for matching ANSI escape codes.
-   *
-   * Inlined ansi-regex:
-   * https://socket.dev/npm/package/ansi-regexp/overview/6.2.2 MIT License
-   * Copyright (c) Sindre Sorhus
-   * [sindresorhus@gmail.com](mailto:sindresorhus@gmail.com)
-   * (https://sindresorhus.com)
-   *
-   * @example
-   *   ;```typescript
-   *   const regex = ansiRegex()
-   *   '\u001b[31mHello\u001b[0m'.match(regex) // ['\u001b[31m', '\u001b[0m']
-   *   ansiRegex({ onlyFirst: true }) // matches only the first code
-   *   ```
-   */
-  function ansiRegex(options) {
-    const { onlyFirst } = options ?? {}
-    return new require_primordials_regexp.RegExpCtor(
-      `(?:\\u001B\\][\\s\\S]*?(?:\\u0007|\\u001B\\u005C|\\u009C))|[\\u001B\\u009B][[\\]()#;?]*(?:\\d{1,4}(?:[;:]\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]`,
-      onlyFirst ? void 0 : 'g',
-    )
-  }
-  const ANSI_FULL = ansiRegex()
-  /**
-   * Strip ANSI escape codes from text. Uses the inlined ansi-regex for
-   * matching.
-   *
-   * @example
-   *   ;```typescript
-   *   stripAnsi('\u001b[31mError\u001b[0m') // 'Error'
-   *   stripAnsi('\u001b[1mBold\u001b[0m') // 'Bold'
-   *   ```
-   */
-  function stripAnsi(text) {
-    return require_primordials_string.StringPrototypeReplace(
-      text,
-      ANSI_FULL,
-      '',
-    )
-  }
-  exports.ansiRegex = ansiRegex
-  exports.stripAnsi = stripAnsi
-})
-
-var require_format = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_primordials_string = require_string$1()
-  const require_term_ansi_strip = require_strip()
-  const require_primordials_math = require_math()
-  /**
-   * @file Line formatting helpers: `applyLinePrefix`, `centerText`,
-   *   `indentString`, `repeatString`. Plus the `fromCharCode` re-export so
-   *   callers don't have to reach into `primordials/string` for the most common
-   *   use case.
-   */
-  const fromCharCode = String.fromCharCode
-  /**
-   * Apply a prefix to each line of a string.
-   *
-   * Prepends the specified prefix to the beginning of each line in the input
-   * string. If the string contains newlines, the prefix is added after each
-   * newline as well. When no prefix is provided or prefix is empty, returns the
-   * original string unchanged.
-   *
-   * @example
-   *   ;```ts
-   *   applyLinePrefix('hello\nworld', { prefix: '> ' })
-   *   // Returns: '> hello\n> world'
-   *
-   *   applyLinePrefix('single line', { prefix: '  ' })
-   *   // Returns: '  single line'
-   *
-   *   applyLinePrefix('no prefix')
-   *   // Returns: 'no prefix'
-   *   ```
-   *
-   * @param str - The string to add prefixes to.
-   * @param options - Configuration options.
-   *
-   * @returns The string with prefix applied to each line
-   */
-  function applyLinePrefix(str, options) {
-    const { prefix = '' } = {
-      __proto__: null,
-      ...options,
-    }
-    return prefix.length
-      ? `${prefix}${require_primordials_string.StringPrototypeIncludes(str, '\n') ? str.replace(/\n/g, () => `\n${prefix}`) : str}`
-      : str
-  }
-  /**
-   * Center text within a given width.
-   *
-   * Adds spaces before and after the text to center it within the specified
-   * width. Distributes padding evenly on both sides. When the padding is odd,
-   * the extra space is added to the right side. Strips ANSI codes before
-   * calculating text length to ensure accurate centering of colored text.
-   *
-   * If the text is already wider than or equal to the target width, returns the
-   * original text unchanged. No truncation occurs.
-   *
-   * @example
-   *   ;```ts
-   *   centerText('hello', 11)
-   *   // Returns: '   hello   '
-   *
-   *   centerText('hi', 10)
-   *   // Returns: '    hi    '
-   *
-   *   centerText('odd', 8)
-   *   // Returns: '  odd   ' (2 left, 3 right)
-   *
-   *   centerText('\x1b[31mred\x1b[0m', 7)
-   *   // Returns: '  \x1b[31mred\x1b[0m  '
-   *
-   *   centerText('too long text', 5)
-   *   // Returns: 'too long text' (no truncation)
-   *   ```
-   *
-   * @param text - The text to center (may include ANSI codes)
-   * @param width - The target width in columns.
-   *
-   * @returns The centered text with padding
-   */
-  function centerText(text, width) {
-    const textLength = require_term_ansi_strip.stripAnsi(text).length
-    if (textLength >= width) return text
-    const padding = width - textLength
-    const leftPad = require_primordials_math.MathFloor(padding / 2)
-    const rightPad = padding - leftPad
-    return ' '.repeat(leftPad) + text + ' '.repeat(rightPad)
-  }
-  /**
-   * Indent each line of a string with spaces.
-   *
-   * Adds the specified number of spaces to the beginning of each non-empty line
-   * in the input string. Lines containing only whitespace are not
-   * indented. Uses a regular expression to efficiently handle multi-line
-   * strings.
-   *
-   * @example
-   *   ;```ts
-   *   indentString('hello\nworld', { count: 2 })
-   *   // Returns: '  hello\n  world'
-   *
-   *   indentString('line1\n\nline3', { count: 4 })
-   *   // Returns: '    line1\n\n    line3'
-   *
-   *   indentString('single line')
-   *   // Returns: ' single line' (default: 1 space)
-   *   ```
-   *
-   * @param str - The string to indent.
-   * @param options - Configuration options.
-   *
-   * @returns The indented string
-   */
-  function indentString(str, options) {
-    const { count = 1 } = {
-      __proto__: null,
-      ...options,
-    }
-    return str.replace(/^(?!\s*$)/gm, () => ' '.repeat(count))
-  }
-  /**
-   * Repeat a string a specified number of times.
-   *
-   * Creates a new string by repeating the input string `count` times. Returns
-   * an empty string if count is 0 or negative.
-   *
-   * @example
-   *   ;```ts
-   *   repeatString('hello', 3) // 'hellohellohello'
-   *   repeatString('x', 5) // 'xxxxx'
-   *   repeatString('hello', 0) // ''
-   *   repeatString('hello', -1) // ''
-   *   ```
-   *
-   * @param str - The string to repeat.
-   * @param count - The number of times to repeat the string.
-   *
-   * @returns The repeated string, or empty string if count <= 0
-   */
-  function repeatString(str, count) {
-    if (count <= 0) return ''
-    return require_primordials_string.StringPrototypeRepeat(str, count)
-  }
-  exports.applyLinePrefix = applyLinePrefix
-  exports.centerText = centerText
-  exports.fromCharCode = fromCharCode
-  exports.indentString = indentString
-  exports.repeatString = repeatString
-})
-
-var require_predicates = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  /**
-   * Check if a value is a blank string: empty or only whitespace.
-   *
-   * A blank string is defined as a string that is either: - Completely empty
-   * (length 0) - Contains only whitespace characters (spaces, tabs, newlines,
-   * etc.)
-   *
-   * This is useful for validation when you need to ensure user input contains
-   * actual content, not just whitespace.
-   *
-   * @example
-   *   ;```ts
-   *   isBlankString('') // true
-   *   isBlankString('   ') // true
-   *   isBlankString('\n\t  ') // true
-   *   isBlankString('hello') // false
-   *   isBlankString(null) // false
-   *   ```
-   *
-   * @param value - The value to check.
-   *
-   * @returns `true` if the value is a blank string, `false` otherwise
-   */
-  function isBlankString(value) {
-    return typeof value === 'string' && (!value.length || /^\s+$/.test(value))
-  }
-  /**
-   * Check if a value is a non-empty string.
-   *
-   * Returns `true` only if the value is a string with at least one character.
-   * This includes strings containing only whitespace (use `isBlankString()` if
-   * you want to exclude those). Type guard ensures TypeScript knows the value
-   * is a string after this check.
-   *
-   * @example
-   *   ;```ts
-   *   isNonEmptyString('hello') // true
-   *   isNonEmptyString('   ') // true (contains whitespace)
-   *   isNonEmptyString('') // false
-   *   isNonEmptyString(null) // false
-   *   isNonEmptyString(123) // false
-   *   ```
-   *
-   * @param value - The value to check.
-   *
-   * @returns `true` if the value is a non-empty string, `false` otherwise
-   */
-  function isNonEmptyString(value) {
-    return typeof value === 'string' && value.length > 0
-  }
-  exports.isBlankString = isBlankString
-  exports.isNonEmptyString = isNonEmptyString
-})
-
-var require_semantic_methods = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_primordials_reflect = require_reflect()
-  const require_primordials_array = require_array$2()
-  const require_logger_symbols_builder = require_symbols_builder()
-  const require_logger_symbols = require_symbols()
-  const require_strings_format = require_format()
-  const require_strings_predicates = require_predicates()
-  /**
-   * @file Free-function bodies for the symbol-prefixed semantic `Logger`
-   *   methods (`done`, `fail`, `info`, `skip`, `step`, `success`, `warn`). Each
-   *   strips any leading status symbol from the message, re-prefixes it with
-   *   the theme's colored symbol, writes to the appropriate stream (status
-   *   messages to stderr, `step` to stdout), and updates the shared blank-line
-   *   / call-count tracking via the exported logger symbols. Pulling these out
-   *   of `./node` keeps the `Logger` class body under the file-size cap. The
-   *   class retains one-line delegators that resolve `con` / `indent` /
-   *   `symbols` from its private state and forward them here.
-   */
-  /**
-   * Apply a `node:console` method with the given indentation prefix on its
-   * first (string) argument.
-   *
-   * Mirrors the former private `#apply`: when the first argument is a string it
-   * is line-prefixed with `indent`; otherwise the args pass through unchanged.
-   * Tracks the blank-line state for `targetStream` and bumps the call count.
-   * Returns the logger for chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param methodName - The `node:console` method to invoke (`log`, `error`,
-   *   ...).
-   * @param args - The arguments forwarded to the console method.
-   * @param targetStream - The stream the method writes to.
-   * @param indent - The resolved indentation prefix for `targetStream`.
-   */
-  function applyMethod(logger, con, methodName, args, targetStream, indent) {
-    const text = require_primordials_array.ArrayPrototypeAt(args, 0)
-    const hasText = typeof text === 'string'
-    const logArgs = hasText
-      ? [
-          require_strings_format.applyLinePrefix(text, { prefix: indent }),
-          ...require_primordials_array.ArrayPrototypeSlice(args, 1),
-        ]
-      : args
-    require_primordials_reflect.ReflectApply(con[methodName], con, logArgs)
-    logger[require_logger_symbols.lastWasBlankSymbol](
-      hasText && require_strings_predicates.isBlankString(logArgs[0]),
-      targetStream,
-    )
-    logger[require_logger_symbols.incLogCallCountSymbol]()
-    return logger
-  }
-  /**
-   * Logs a main step message with a colored arrow symbol to stdout.
-   *
-   * Strips any leading status symbol from `msg`, re-prefixes it with the
-   * theme's `step` symbol, and writes to stdout (unlike the other semantic
-   * methods, which go to stderr). The blank line before the step is handled by
-   * the caller. Returns the logger for chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param indent - The resolved stdout indentation prefix.
-   * @param symbols - The logger's resolved `LogSymbols` map.
-   * @param msg - The step message to log.
-   * @param extras - Additional arguments to log.
-   */
-  function stepMethod(logger, con, indent, symbols, msg, extras) {
-    const text = require_logger_symbols_builder.stripLoggerSymbols(msg)
-    con.log(
-      require_strings_format.applyLinePrefix(`${symbols.step} ${text}`, {
-        prefix: indent,
-      }),
-      ...extras,
-    )
-    logger[require_logger_symbols.lastWasBlankSymbol](false, 'stdout')
-    logger[require_logger_symbols.incLogCallCountSymbol]()
-    return logger
-  }
-  /**
-   * Strip a leading status symbol, re-prefix with the colored symbol for
-   * `symbolType`, and write to stderr.
-   *
-   * Mirrors the former private `#symbolApply`: status messages (info / fail /
-   * success / warn / skip / done) always go to stderr. Returns the logger for
-   * chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param indent - The resolved stderr indentation prefix.
-   * @param symbols - The logger's resolved `LogSymbols` map.
-   * @param symbolType - The `LogSymbols` key whose symbol prefixes the message.
-   * @param args - The message and additional arguments to log.
-   */
-  function symbolApplyMethod(logger, con, indent, symbols, symbolType, args) {
-    let text = args[0]
-    let extras
-    /* c8 ignore start - text-non-string arm fires only when caller passes
-		an object as the first argument; tests always pass a string. */
-    if (typeof text === 'string') {
-      text = require_logger_symbols_builder.stripLoggerSymbols(text)
-      extras = args.slice(1)
-    } else {
-      extras = args
-      text = ''
-    }
-    /* c8 ignore stop */
-    con.error(
-      require_strings_format.applyLinePrefix(`${symbols[symbolType]} ${text}`, {
-        prefix: indent,
-      }),
-      ...extras,
-    )
-    logger[require_logger_symbols.lastWasBlankSymbol](false, 'stderr')
-    logger[require_logger_symbols.incLogCallCountSymbol]()
-    return logger
-  }
-  exports.applyMethod = applyMethod
-  exports.stepMethod = stepMethod
-  exports.symbolApplyMethod = symbolApplyMethod
-})
-
-var require_stream = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  /**
-   * @file Terminal stream resolution + line-clearing helpers shared by the
-   *   Node-side `Logger` methods that write directly to a stream (`clearLine`,
-   *   `clearVisible`, `progress`). The Logger's `node:console` instance keeps
-   *   its underlying writable streams on the internal `_stderr` / `_stdout`
-   *   symbols; these helpers resolve the right one for a given target stream
-   *   and centralize the TTY-vs-non-TTY clear sequence (`cursorTo(0) +
-   *   clearLine(0)` on a TTY, `\r\x1b[K` fallback elsewhere — which still works
-   *   in CI logs).
-   */
-  /**
-   * Clear the current line on a writable stream. Uses `cursorTo(0) +
-   * clearLine(0)` on a TTY and falls back to `\r\x1b[K` otherwise so the same
-   * call redraws cleanly in both interactive terminals and CI logs.
-   *
-   * @param streamObj - The resolved writable stream to clear.
-   */
-  function clearTerminalLine(streamObj) {
-    if (streamObj.isTTY) {
-      streamObj.cursorTo(0)
-      streamObj.clearLine(0)
-    } else streamObj.write('\r\x1B[K')
-  }
-  /**
-   * Resolve the underlying writable stream for a target stream from a console
-   * instance, casting from the console's internal `_stderr` / `_stdout` slots
-   * to the cursor-aware shape the logger writes to directly.
-   *
-   * @param con - The console instance exposing `_stderr` / `_stdout`.
-   * @param stream - Which target stream to resolve.
-   */
-  function resolveWriteStream(con, stream) {
-    return stream === 'stderr' ? con['_stderr'] : con['_stdout']
-  }
-  exports.clearTerminalLine = clearTerminalLine
-  exports.resolveWriteStream = resolveWriteStream
-})
-
-var require_stream_methods = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_primordials_error = require_error$1()
-  const require_logger_symbols = require_symbols()
-  const require_logger_stream = require_stream()
-  /**
-   * @file Free-function bodies for the `Logger` methods that write to or clear
-   *   a raw stream rather than going through the indented `#apply` path
-   *   (`clearLine`, `clearVisible`, `progress`, `write`). Each takes the
-   *   calling logger plus the already-resolved `node:console` instance and
-   *   whatever stream / symbol state it needs, then updates the shared
-   *   blank-line / call-count tracking via the exported logger symbols. Pulling
-   *   these out of `./node` keeps the `Logger` class body under the file-size
-   *   cap; the class retains one-line delegators that resolve the arguments
-   *   from its private state.
-   */
-  /**
-   * Clears the current terminal line on the logger's target stream (TTY and
-   * non-TTY). Useful after `progress()`. Returns the logger for chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param stream - The target stream to clear.
-   */
-  function clearLineMethod(logger, con, stream) {
-    require_logger_stream.clearTerminalLine(
-      require_logger_stream.resolveWriteStream(con, stream),
-    )
-    return logger
-  }
-  /**
-   * Clears the visible terminal screen. Only valid on the main
-   * (non-stream-bound) logger. When the underlying stdout is a TTY, resets
-   * blank-line tracking and invokes `resetCount` to zero the log-call counter.
-   * Returns the logger for chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param boundStream - The logger's bound stream, or `undefined` on the root.
-   * @param resetCount - Callback that zeroes the logger's log-call counter.
-   *
-   * @throws {Error} If called on a stream-bound logger instance.
-   */
-  function clearVisibleMethod(logger, con, boundStream, resetCount) {
-    /* c8 ignore start - clearVisible TTY-mode behavior; tests use non-TTY
-		capture streams so the bound-stream throw and TTY clear branches
-		aren't reached. */
-    if (boundStream)
-      throw new require_primordials_error.ErrorCtor(
-        'clearVisible() is only available on the main logger instance, not on stream-bound instances',
-      )
-    con.clear()
-    if (con['_stdout'].isTTY) {
-      logger[require_logger_symbols.lastWasBlankSymbol](true)
-      resetCount()
-    }
-    return logger
-    /* c8 ignore stop */
-  }
-  /**
-   * Shows a progress indicator (a `∴`-prefixed status message) that can be
-   * cleared with `clearLine()`. Always clears the current line first so
-   * repeated `progress(...)` calls redraw cleanly. Returns the logger for
-   * chaining.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param stream - The target stream to write to.
-   * @param symbols - The logger's resolved `LogSymbols` map.
-   * @param text - The progress message to display.
-   */
-  function progressMethod(logger, con, stream, symbols, text) {
-    const streamObj = require_logger_stream.resolveWriteStream(con, stream)
-    require_logger_stream.clearTerminalLine(streamObj)
-    streamObj.write(`${symbols.progress} ${text}`)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger
-  }
-  /**
-   * Writes text directly to the original stdout stream, bypassing Console
-   * formatting and applying no indentation. Returns the logger for chaining.
-   *
-   * The original stdout is resolved with a three-way fallback: the seeded
-   * `originalStdout`, then the constructor args' `stdout`, then the Console's
-   * internal `_stdout` slot.
-   *
-   * @param logger - The calling logger instance.
-   * @param con - The logger's resolved console instance.
-   * @param originalStdout - The stdout seeded at construction, if any.
-   * @param ctorArgs - The logger's stored constructor args.
-   * @param text - The text to write.
-   */
-  function writeMethod(logger, con, originalStdout, ctorArgs, text) {
-    /* c8 ignore stop */
-    ;(originalStdout || ctorArgs[0]?.stdout || con._stdout).write(text)
-    logger[require_logger_symbols.lastWasBlankSymbol](false)
-    return logger
-  }
-  exports.clearLineMethod = clearLineMethod
-  exports.clearVisibleMethod = clearVisibleMethod
-  exports.progressMethod = progressMethod
-  exports.writeMethod = writeMethod
-})
-
-var require_node = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_primordials_reflect = require_reflect()
-  const require_term_themes_context = require_context()
-  const require_logger_shared = require_shared()
-  const require_logger_symbols_builder = require_symbols_builder()
-  const require_logger_symbols = require_symbols()
-  const require_logger_console = require_console()
-  const require_logger_console_methods = require_console_methods()
-  const require_logger_indentation_methods = require_indentation_methods()
-  const require_logger_options = require_options()
-  const require_logger_semantic_methods = require_semantic_methods()
-  const require_logger_stream_methods = require_stream_methods()
-  /**
-   * @file Node-side `Logger` class — owns per-instance state (parent, bound
-   *   stream, indent buffers, theme) and exposes the public surface as thin
-   *   delegators over sibling free-function leaves. Console construction is
-   *   lazy: the constructor stashes its args in `shared.privateConstructorArgs`
-   *   and the `node:console` instance is built on first `#getConsole()`, so the
-   *   logger can be imported during early Node.js bootstrap before stdout is
-   *   ready (avoiding `ERR_CONSOLE_WRITABLE_STREAM`). Method bodies live in the
-   *   leaves: `./console-methods`, `./semantic-methods`,
-   *   `./indentation-methods`, `./stream-methods`, `./console`, `./options`,
-   *   `./symbols`, `./symbols-builder`, `./shared`.
-   */
-  /**
-   * Enhanced console logger with indentation, colored symbols, and stream
-   * management.
-   */
-  var Logger = class Logger {
-    /**
-     * Static reference to log symbols for convenience.
-     */
-    static LOG_SYMBOLS = require_logger_symbols.LOG_SYMBOLS
-    #parent
-    #boundStream
-    #stderrLogger
-    #stdoutLogger
-    #stderrIndention = ''
-    #stdoutIndention = ''
-    #stderrLastWasBlank = false
-    #stdoutLastWasBlank = false
-    #logCallCount = 0
-    #options
-    #originalStdout
-    #theme
-    /**
-     * Creates a new Logger. With no args it uses the default `process.stdout` /
-     * `process.stderr`; an options object customizes stream / theme. See
-     * {@link parseLoggerOptions}.
-     *
-     * @param args - Optional console constructor arguments.
-     */
-    constructor(...args) {
-      require_logger_shared.privateConstructorArgs.set(this, args)
-      const parsed = require_logger_options.parseLoggerOptions(args)
-      this.#options = parsed.options
-      this.#originalStdout = parsed.originalStdout
-      this.#theme = parsed.theme
-    }
-    #apply(methodName, args, stream) {
-      const targetStream =
-        stream || (methodName === 'log' ? 'stdout' : 'stderr')
-      return require_logger_semantic_methods.applyMethod(
-        this,
-        this.#getConsole(),
-        methodName,
-        args,
-        targetStream,
-        this.#getIndent(targetStream),
-      )
-    }
-    #getConsole() {
-      return require_logger_console.resolveConsole(this)
-    }
-    #getIndent(stream) {
-      const root = this.#getRoot()
-      return stream === 'stderr' ? root.#stderrIndention : root.#stdoutIndention
-    }
-    #getLastWasBlank(stream) {
-      const root = this.#getRoot()
-      return stream === 'stderr'
-        ? root.#stderrLastWasBlank
-        : root.#stdoutLastWasBlank
-    }
-    #getRoot() {
-      return this.#parent || this
-    }
-    #getSymbols() {
-      return require_logger_symbols_builder.buildLoggerSymbols(this.#getTheme())
-    }
-    #getTargetStream() {
-      return this.#boundStream || 'stderr'
-    }
-    #getTheme() {
-      return this.#theme ?? require_term_themes_context.getTheme()
-    }
-    #indentCtx() {
-      return {
-        boundStream: this.#boundStream,
-        getIndent: stream => this.#getIndent(stream),
-        setIndent: (stream, value) => this.#setIndent(stream, value),
-      }
-    }
-    #setIndent(stream, value) {
-      const root = this.#getRoot()
-      if (stream === 'stderr') root.#stderrIndention = value
-      else root.#stdoutIndention = value
-    }
-    #setLastWasBlank(stream, value) {
-      const root = this.#getRoot()
-      if (stream === 'stderr') root.#stderrLastWasBlank = value
-      else root.#stdoutLastWasBlank = value
-    }
-    #streamChild(stream) {
-      const ctorArgs =
-        require_logger_shared.privateConstructorArgs.get(this) ?? []
-      const instance = new Logger(...ctorArgs)
-      instance.#parent = this
-      instance.#boundStream = stream
-      instance.#options = {
-        __proto__: null,
-        ...this.#options,
-      }
-      if (this.#theme) instance.#theme = this.#theme
-      return instance
-    }
-    #symbol(symbolType, args) {
-      return require_logger_semantic_methods.symbolApplyMethod(
-        this,
-        this.#getConsole(),
-        this.#getIndent('stderr'),
-        this.#getSymbols(),
-        symbolType,
-        args,
-      )
-    }
-    get stderr() {
-      if (!this.#stderrLogger) this.#stderrLogger = this.#streamChild('stderr')
-      return this.#stderrLogger
-    }
-    get stdout() {
-      if (!this.#stdoutLogger) this.#stdoutLogger = this.#streamChild('stdout')
-      return this.#stdoutLogger
-    }
-    get logCallCount() {
-      return this.#getRoot().#logCallCount
-    }
-    [require_logger_symbols.incLogCallCountSymbol]() {
-      const root = this.#getRoot()
-      root.#logCallCount += 1
-      return this
-    }
-    [require_logger_symbols.lastWasBlankSymbol](value, stream) {
-      if (stream) this.#setLastWasBlank(stream, !!value)
-      else if (this.#boundStream)
-        this.#setLastWasBlank(this.#boundStream, !!value)
-      else {
-        this.#setLastWasBlank('stderr', !!value)
-        this.#setLastWasBlank('stdout', !!value)
-      }
-      return this
-    }
-    assert(value, ...message) {
-      return require_logger_console_methods.assertMethod(
-        this,
-        this.#getConsole(),
-        value,
-        message,
-      )
-    }
-    clearLine() {
-      return require_logger_stream_methods.clearLineMethod(
-        this,
-        this.#getConsole(),
-        this.#getTargetStream(),
-      )
-    }
-    clearVisible() {
-      return require_logger_stream_methods.clearVisibleMethod(
-        this,
-        this.#getConsole(),
-        this.#boundStream,
-        () => {
-          this.#logCallCount = 0
-        },
-      )
-    }
-    count(label) {
-      return require_logger_console_methods.countMethod(
-        this,
-        this.#getConsole(),
-        label,
-      )
-    }
-    /**
-     * Creates a task whose `run()` logs "Starting task: {name}" before running
-     * the provided function and "Completed task: {name}" after.
-     *
-     * @param name - The name of the task.
-     *
-     * @returns A task object with a `run()` method.
-     */
-    createTask(name) {
-      return {
-        run: f => {
-          this.log(`Starting task: ${name}`)
-          const result = f()
-          this.log(`Completed task: ${name}`)
-          return result
-        },
-      }
-    }
-    dedent(spaces = 2) {
-      return require_logger_indentation_methods.dedentMethod(
-        this,
-        this.#indentCtx(),
-        spaces,
-      )
-    }
-    dir(obj, options) {
-      return require_logger_console_methods.dirMethod(
-        this,
-        this.#getConsole(),
-        obj,
-        options,
-      )
-    }
-    dirxml(...data) {
-      return require_logger_console_methods.dirxmlMethod(
-        this,
-        this.#getConsole(),
-        data,
-      )
-    }
-    done(...args) {
-      return this.#symbol('success', args)
-    }
-    error(...args) {
-      return this.#apply('error', args)
-    }
-    errorNewline() {
-      return this.#getLastWasBlank('stderr') ? this : this.error('')
-    }
-    fail(...args) {
-      return this.#symbol('fail', args)
-    }
-    group(...label) {
-      return require_logger_indentation_methods.groupMethod(this, label)
-    }
-    groupCollapsed(...label) {
-      return require_primordials_reflect.ReflectApply(this.group, this, label)
-    }
-    groupEnd() {
-      return require_logger_indentation_methods.groupEndMethod(this)
-    }
-    indent(spaces = 2) {
-      return require_logger_indentation_methods.indentMethod(
-        this,
-        this.#indentCtx(),
-        spaces,
-      )
-    }
-    info(...args) {
-      return this.#symbol('info', args)
-    }
-    log(...args) {
-      return this.#apply('log', args)
-    }
-    logNewline() {
-      return this.#getLastWasBlank('stdout') ? this : this.log('')
-    }
-    progress(text) {
-      return require_logger_stream_methods.progressMethod(
-        this,
-        this.#getConsole(),
-        this.#getTargetStream(),
-        this.#getSymbols(),
-        text,
-      )
-    }
-    resetIndent() {
-      return require_logger_indentation_methods.resetIndentMethod(
-        this,
-        this.#indentCtx(),
-      )
-    }
-    skip(...args) {
-      return this.#symbol('skip', args)
-    }
-    step(msg, ...extras) {
-      if (!this.#getLastWasBlank('stdout')) this.log('')
-      return require_logger_semantic_methods.stepMethod(
-        this,
-        this.#getConsole(),
-        this.#getIndent('stdout'),
-        this.#getSymbols(),
-        msg,
-        extras,
-      )
-    }
-    substep(msg, ...extras) {
-      return this.log(`  ${msg}`, ...extras)
-    }
-    success(...args) {
-      return this.#symbol('success', args)
-    }
-    table(tabularData, properties) {
-      return require_logger_console_methods.tableMethod(
-        this,
-        this.#getConsole(),
-        tabularData,
-        properties,
-      )
-    }
-    time(label) {
-      return require_logger_console_methods.timeMethod(
-        this,
-        this.#getConsole(),
-        label,
-      )
-    }
-    timeEnd(label) {
-      return require_logger_console_methods.timeEndMethod(
-        this,
-        this.#getConsole(),
-        label,
-      )
-    }
-    timeLog(label, ...data) {
-      return require_logger_console_methods.timeLogMethod(
-        this,
-        this.#getConsole(),
-        label,
-        data,
-      )
-    }
-    trace(message, ...args) {
-      return require_logger_console_methods.traceMethod(
-        this,
-        this.#getConsole(),
-        message,
-        args,
-      )
-    }
-    warn(...args) {
-      return this.#symbol('warn', args)
-    }
-    write(text) {
-      return require_logger_stream_methods.writeMethod(
-        this,
-        this.#getConsole(),
-        this.#originalStdout,
-        require_logger_shared.privateConstructorArgs.get(this) ?? [],
-        text,
-      )
-    }
-  }
-  exports.Logger = Logger
-})
-
-var require_default = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_logger_node = require_node()
-  /**
-   * @file Shared-default `Logger` singleton. One process-wide instance,
-   *   constructed lazily on first call so importing the module during early
-   *   bootstrap doesn't try to resolve `node:console` before stdout is ready on
-   *   the Node side, or touch `globalThis.console` during a service-worker cold
-   *   start on the browser side. The `Logger` class itself comes from
-   *   `./logger`, which the package.json `'browser'` condition routes to the
-   *   right implementation per platform.
-   */
-  let sharedLogger
-  function getDefaultLogger() {
-    if (sharedLogger === void 0) sharedLogger = new require_logger_node.Logger()
-    return sharedLogger
-  }
-  exports.getDefaultLogger = getDefaultLogger
-})
-
-var require_ci = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_env_rewire = require_rewire$1()
-  /**
-   * @file CI environment predicate. Exports `isCI()`, which returns whether the
-   *   `CI` environment variable is present (using the rewire helper so tests
-   *   can override without touching `process.env`). Deliberately not memoized:
-   *   the rewire overrides must stay live between calls.
-   */
-  /**
-   * Returns whether the CI environment variable is set.
-   *
-   * @example
-   *   ;```typescript
-   *   import { isCI } from '@socketsecurity/lib/env/ci'
-   *
-   *   if (isCI()) {
-   *     console.log('Running in CI')
-   *   }
-   *   ```
-   *
-   * @returns `true` if running in a CI environment, `false` otherwise
-   */
-  function isCI() {
-    return require_env_rewire.isInEnv('CI')
-  }
-  exports.isCI = isCI
-})
-
-var require_time = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  /**
-   * @file Time-related numeric constants. Provides millisecond-per-unit
-   *   multipliers (second/minute/hour/day) and derived cache TTLs such as the
-   *   DLX binary cache expiration.
-   */
-  const MILLISECONDS_PER_SECOND = 1e3
-  const MILLISECONDS_PER_MINUTE = 60 * MILLISECONDS_PER_SECOND
-  const MILLISECONDS_PER_HOUR = 60 * MILLISECONDS_PER_MINUTE
-  const MILLISECONDS_PER_DAY = 24 * MILLISECONDS_PER_HOUR
-  const DLX_BINARY_CACHE_TTL = 7 * MILLISECONDS_PER_DAY
-  exports.DLX_BINARY_CACHE_TTL = DLX_BINARY_CACHE_TTL
-  exports.MILLISECONDS_PER_DAY = MILLISECONDS_PER_DAY
-  exports.MILLISECONDS_PER_HOUR = MILLISECONDS_PER_HOUR
-  exports.MILLISECONDS_PER_MINUTE = MILLISECONDS_PER_MINUTE
-  exports.MILLISECONDS_PER_SECOND = MILLISECONDS_PER_SECOND
-})
-
-function normalizeCoverageExpiry(value) {
-  if (value === void 0) return COVERAGE_EXPIRY_MODES[0].value
-  const normalized = typeof value === 'string' ? value.toLowerCase() : ''
-  const mode = COVERAGE_EXPIRY_MODES.find(
-    option =>
-      option.value === normalized ||
-      option.aliases.some(alias => alias === normalized),
-  )
-  if (mode) return mode.value
-  throw new Error(
-    `Coverage expiry is invalid. Where: --expires. Saw: an unsupported value; wanted ${COVERAGE_EXPIRY_VALUES.join(', ')}. Fix: choose an expiry mode.`,
-  )
-}
-var import_time,
-  LANE_BUDGET_MS,
-  TEST_BUDGET_MS,
-  COVERAGE_BASELINE_HEADROOM_RATIO,
-  COVERAGE_EXPIRY_MODES,
-  COVERAGE_EXPIRY_VALUES,
-  COVER_BUDGET_MS
-var init_test_budget = __esmMin(() => {
-  import_time = require_time()
-  LANE_BUDGET_MS = Object.freeze({
-    __proto__: null,
-    fast: 10 * import_time.MILLISECONDS_PER_SECOND,
-    mid: 30 * import_time.MILLISECONDS_PER_SECOND,
-    slow: import_time.MILLISECONDS_PER_MINUTE,
-  })
-  TEST_BUDGET_MS = LANE_BUDGET_MS['fast']
-  COVERAGE_BASELINE_HEADROOM_RATIO = 0.05
-  COVERAGE_EXPIRY_MODES = [
-    {
-      value: 'default',
-      aliases: ['auto', 'yes'],
-    },
-    {
-      value: 'never',
-      aliases: ['no', 'infinity'],
-    },
-  ]
-  COVERAGE_EXPIRY_VALUES = Object.freeze(
-    COVERAGE_EXPIRY_MODES.flatMap(option => [option.value, ...option.aliases]),
-  )
-  COVER_BUDGET_MS = Object.freeze({
-    __proto__: null,
-    ci: 10 * import_time.MILLISECONDS_PER_MINUTE,
-    local: 2 * import_time.MILLISECONDS_PER_MINUTE,
-  })
-})
-
-function extractLane(argv) {
-  const rest = []
-  let lane
-  for (let i = 0, { length } = argv; i < length; i += 1) {
-    const arg = argv[i]
-    let value
-    if (arg === '--lane') {
-      i += 1
-      value = argv[i]
-    } else if (arg.startsWith('--lane=')) value = arg.slice(7)
-    else {
-      rest.push(arg)
-      continue
-    }
-    if (!value || !VALID_LANES.has(value))
-      throw new Error(`Invalid --lane value.
-  Where: scripts/fleet/test.mts CLI argument parsing.
-  Saw: ${value ?? '(missing value)'}; wanted one of fast | mid | slow.\n  Fix: pass --lane fast (the bare \`pnpm test\` default), --lane mid, or --lane slow.`)
-    lane = value
-  }
-  return {
-    lane,
-    rest,
-  }
-}
-var VALID_LANES
-var init_cli_args = __esmMin(() => {
-  VALID_LANES = /* @__PURE__ */ new Set(['fast', 'mid', 'slow'])
-})
-
-var MAX_CAPACITY_TIMEOUT_MS
-var init_budget = __esmMin(() => {
-  MAX_CAPACITY_TIMEOUT_MS = 2 ** 31 - 1
-})
-
-function parseCoverageMaximum(value) {
-  if (value === void 0) return
-  if (typeof value === 'string' && value.toLowerCase() === 'auto') return 'auto'
-  const maximum = Number(value)
-  if (
-    typeof value !== 'string' ||
-    !/^\d+$/u.test(value) ||
-    !Number.isSafeInteger(maximum) ||
-    maximum <= 0 ||
-    maximum > MAX_CAPACITY_TIMEOUT_MS
-  )
-    throw new Error(
-      `Coverage maximum is invalid. Where: --max-ms. Saw: ${String(value)}; wanted auto or a positive integer through ${MAX_CAPACITY_TIMEOUT_MS}. Fix: provide milliseconds or auto.`,
-    )
-  return maximum
-}
-function extractCoverageMaximum(args) {
-  const { tokens, values } = parseArgs$1({
-    args,
-    options: {
-      'max-ms': { type: 'string' },
-      expires: { type: 'string' },
-    },
-    strict: false,
-    allowPositionals: true,
-    tokens: true,
-  })
-  const indices = /* @__PURE__ */ new Set()
-  const names = /* @__PURE__ */ new Set()
-  for (const token of tokens) {
-    if (
-      token.kind !== 'option' ||
-      (token.name !== 'expires' && token.name !== 'max-ms')
-    )
-      continue
-    if (names.has(token.name))
-      throw new Error(
-        `Coverage option is repeated. Where: --${token.name}. Saw: multiple values; wanted one value. Fix: supply the option once.`,
-      )
-    names.add(token.name)
-    indices.add(token.index)
-    if (!token.inlineValue) indices.add(token.index + 1)
-  }
-  return {
-    __proto__: null,
-    maximum: parseCoverageMaximum(values['max-ms']),
-    expires: normalizeCoverageExpiry(values.expires),
-    expiresSpecified: names.has('expires'),
-    rest: args.flatMap((arg, index) => (indices.has(index) ? [] : [arg])),
-  }
-}
-var COVERAGE_HELP
-var init_options = __esmMin(() => {
-  init_test_budget()
-  init_budget()
-  COVERAGE_HELP = `Usage: node scripts/fleet/cover.mts [flags]
-
-  SOCKET_DEBUG=1 DEBUG=fleet:cover  show diagnostic progress and phase timings
-
-  --code-only  run only code coverage, skip type coverage
-  --type-only  run only type coverage
-  --summary    hide the detailed v8 table, show only the summary
-  --lane fast|mid|slow  run one speed lane in a separate artifact directory
-  --measure --lane <lane>  time JavaScript coverage to completion; diagnostic artifacts only, no suite deadline
-  --max-ms <milliseconds>  set the runtime deadline for this run without saving it
-  --max-ms auto --lane <lane>  measure and save a successful complete measurement with ${COVERAGE_BASELINE_HEADROOM_RATIO * 100}% headroom as an allowance; no test overrides
-  --expires ${COVERAGE_EXPIRY_VALUES.join('|')}  expiry for auto budgeting; auto (one month) is the default; values ignore case`
-})
-
-function resolveCoverageScope(argv, options) {
-  const opts = {
-    __proto__: null,
-    ...options,
-  }
-  const lane =
-    (path.basename(argv[1] ?? '') === 'cover.mts'
-      ? extractLane(argv.slice(2)).lane
-      : void 0) ?? opts.inherited
-  if (lane !== void 0 && lane !== 'fast' && lane !== 'mid' && lane !== 'slow')
-    throw new Error('Invalid coverage lane; expected fast, mid, or slow')
-  return lane
-}
-function resolveCoverageMeasurement(argv) {
-  const requested =
-    path.basename(argv[1] ?? '') === 'cover.mts' &&
-    (argv.includes('--measure') ||
-      extractCoverageMaximum(argv.slice(2)).maximum === 'auto')
-  if (requested && !extractLane(argv.slice(2)).lane)
-    throw new Error('Coverage measurement requires --lane fast, mid, or slow.')
-  return requested
-}
-function coverageOutputSegments(lane, options = {}) {
-  return [
-    'coverage',
-    ...({
-      __proto__: null,
-      ...options,
-    }.measurement
-      ? ['measurement']
-      : []),
-    ...(lane ? [`lane-${lane}`] : []),
-  ]
-}
-var import_rewire$2,
-  COVERAGE_SCOPE,
-  COVERAGE_MEASUREMENT,
-  COVERAGE_MEASUREMENT_ARTIFACTS
-var init_scope = __esmMin(() => {
-  init_options()
-  init_cli_args()
-  import_rewire$2 = require_rewire$1()
-  COVERAGE_SCOPE = resolveCoverageScope(process$1.argv, {
-    inherited: (0, import_rewire$2.getEnvValue)('FLEET_COVER_LANE'),
-  })
-  COVERAGE_MEASUREMENT = resolveCoverageMeasurement(process$1.argv)
-  if (COVERAGE_MEASUREMENT) process$1.env['FLEET_COVER_MEASURE'] = '1'
-  COVERAGE_MEASUREMENT_ARTIFACTS =
-    COVERAGE_MEASUREMENT ||
-    (0, import_rewire$2.getEnvValue)('FLEET_COVER_MEASURE') === '1'
-})
-
-function repoRootFromDirectory(directory) {
-  let cur = directory
-  const root = path.parse(cur).root
-  while (cur && cur !== root) {
-    if (existsSync(path.join(cur, 'package.json'))) return cur
-    const parent = path.dirname(cur)
-    if (parent === cur) break
-    cur = parent
-  }
-}
-function resolveRepoRoot$1() {
-  let directories
-  if (typeof process$1.versions['perry'] === 'string') {
-    const cwd = process$1.cwd()
-    directories = [path.dirname(path.resolve(cwd, process$1.execPath)), cwd]
-  } else directories = [path.dirname(fileURLToPath(import.meta.url))]
-  for (let i = 0, { length } = directories; i < length; i += 1) {
-    const directory = directories[i]
-    const root = repoRootFromDirectory(directory)
-    if (root) return root
-  }
-  throw new Error(
-    `Could not resolve repo root. Where: ${directories.join(', ')}. Saw no package.json ancestor; wanted the runtime repository. Fix: restore the repository checkout for this runtime.`,
-  )
-}
-var REPO_ROOT,
-  TOOL_CACHE_DIR,
-  FLEET_CACHE_DIR,
-  FLEET_REPORTS_DIR,
-  CLAUDE_HOME,
-  CLAUDE_ACCOUNT_CONFIG,
-  XDG_DATA_HOME,
-  OPENCODE_HOME
-var init_runtime = __esmMin(() => {
-  init_util()
-  REPO_ROOT = resolveRepoRoot$1()
-  TOOL_CACHE_DIR = path.join(REPO_ROOT, '.cache')
-  FLEET_CACHE_DIR = path.join(TOOL_CACHE_DIR, 'fleet')
-  FLEET_REPORTS_DIR = path.join(FLEET_CACHE_DIR, 'reports')
-  CLAUDE_HOME = path.join(os.homedir(), '.claude')
-  CLAUDE_ACCOUNT_CONFIG = path.join(os.homedir(), '.claude.json')
-  XDG_DATA_HOME = sharedLocalSharePath(os.homedir())
-  OPENCODE_HOME = path.join(XDG_DATA_HOME, 'opencode')
-})
-
-var import_socket$1,
-  BROWSER_BRIDGE_RUNTIME_DIR,
-  BROWSER_BRIDGE_LAST_FAILURE,
-  BROWSER_BRIDGE_LOCAL_ROOT,
-  BROWSER_BRIDGE_LOCAL_ACTIVE,
-  BROWSER_BRIDGE_LOCAL_EXTENSION,
-  BROWSER_BRIDGE_LOCAL_APP,
-  BROWSER_BRIDGE_LOCAL_RECEIPT,
-  BROWSER_BRIDGE_RECEIPT_RELATIVE_PATH,
-  BROWSER_BRIDGE_LOCAL_MANIFEST
-var init_browser = __esmMin(() => {
-  import_socket$1 = require_socket()
-  BROWSER_BRIDGE_RUNTIME_DIR = path.join(
-    (0, import_socket$1.getSocketWheelhouseDir)(),
-    'browser-bridge',
-  )
-  BROWSER_BRIDGE_LAST_FAILURE = path.join(
-    BROWSER_BRIDGE_RUNTIME_DIR,
-    'last-failure.json',
-  )
-  BROWSER_BRIDGE_LOCAL_ROOT = path.join(BROWSER_BRIDGE_RUNTIME_DIR, 'installed')
-  BROWSER_BRIDGE_LOCAL_ACTIVE = path.join(BROWSER_BRIDGE_LOCAL_ROOT, 'active')
-  BROWSER_BRIDGE_LOCAL_EXTENSION = path.join(
-    BROWSER_BRIDGE_LOCAL_ACTIVE,
-    'extension',
-  )
-  BROWSER_BRIDGE_LOCAL_APP = path.join(
-    BROWSER_BRIDGE_LOCAL_ACTIVE,
-    'Wheelhouse Browser Bridge.app',
-  )
-  BROWSER_BRIDGE_LOCAL_RECEIPT = path.join(
-    BROWSER_BRIDGE_LOCAL_ACTIVE,
-    'bridge-build.json',
-  )
-  BROWSER_BRIDGE_RECEIPT_RELATIVE_PATH = path.join(
-    'Contents',
-    'Resources',
-    'bridge-build.json',
-  )
-  BROWSER_BRIDGE_LOCAL_MANIFEST = path.join(
-    os.homedir(),
-    'Library',
-    'Application Support',
-    'Google',
-    'Chrome',
-    'NativeMessagingHosts',
-    'dev.socket.wheelhouse.browser_bridge.json',
-  )
-})
-
-/**
- * @file Canonical path constants + resolvers for this package. Mantra: 1 path,
- *   1 reference. Every path the scripts in this directory need — config files,
- *   lockfiles, build outputs, cache dirs, manifest files — gets constructed
- *   exactly once here. Every consumer imports the constructed value. A future
- *   rename or relocation is a one-file edit; consumers don't have to be
- *   re-audited. Per-package, like package.json: every package that has its own
- *   `scripts/` directory has its own `paths.mts`. A sub-package can inherit
- *   from a parent's paths.mts by re-exporting: // packages/foo/bar/paths.mts
- *   export * from '../../../scripts/fleet/paths.mts' // Add
- *   sub-package-specific overrides below the export line. export const
- *   FOO_BAR_DIST = path.join(REPO_ROOT, 'packages', 'foo', 'bar', 'dist')
- *   Consumers resolve `paths.mts` the same way Node resolves `package.json` —
- *   relative to the importing file's location, with `..`-walks finding the
- *   nearest one. Two flavors of path live in this file:
- *
- *   1. STATIC CONSTANTS — paths that don't depend on runtime input. Example:
- *      `REPO_ROOT`, `CONFIG_DIR`, `TOOL_CACHE_DIR`. Importable as-is.
- *   2. RESOLVER FUNCTIONS — paths that need a search, multiple accepted locations
- *      or runtime input, a target directory, a package name. Example:
- *      `findSocketWheelhouseConfig(repoRoot)` resolves
- *      `.config/repo/socket-wheelhouse.json` when it exists. Resolution from
- *      script call sites: every script anchors on its own location via
- *      `fileURLToPath(import.meta.url)`, then walks up to the
- *      package.json-bearing ancestor. `process.cwd()` is forbidden in scripts/
- *      per fleet rule (the user / Claude Code may invoke from any subdir).
- *
- * @see The fleet rule: CLAUDE.md "1 path, 1 reference" and the
- *   `socket/no-process-cwd-in-scripts-hooks` oxlint rule.
- */
-function resolveActiveRunDir(homeDir) {
-  return path.join(
-    homeDir,
-    '.claude',
-    'hooks',
-    'stale-process-sweeper',
-    'active-runs',
-  )
-}
-/**
- * Absolute path to a given repo root's `package.json`.
- */
-function resolvePackageJsonPath(repoRoot) {
-  return path.join(repoRoot, 'package.json')
-}
-/**
- * Absolute path to a given repo root's `pnpm-lock.yaml`. Tooling that analyzes
- * an arbitrary checkout (a fleet member, a test fixture tree) resolves it from
- * here instead of rebuilding the segment.
- */
-function resolvePnpmLockPath(repoRoot) {
-  return path.join(repoRoot, 'pnpm-lock.yaml')
-}
-/**
- * The pricing data the cost tooling reads, and the module rendered from it.
- *
- * The JSON is the editable source the pricing skill writes. The module is a
- * BUILD OUTPUT: `gen/model-pricing-module.mts` inlines the data there so
- * rolldown bakes it into `fleet-pack.generated.cjs`, which is why no consumer
- * needs the JSON on disk and neither file joins the cascade payload.
- */
-function resolveModelPricingJson(repoRoot) {
-  return path.join(
-    repoRoot,
-    'scripts',
-    'fleet',
-    'constants',
-    'model-pricing.json',
-  )
-}
-var import_socket,
-  import_rewire$1,
-  TONE_SETTINGS_PATH,
-  CLAUDE_USER_SETTINGS,
-  CODEX_HOME,
-  FIRECONNECT_HOME,
-  TEMPLATE_BASE_DIR,
-  CONFIG_DIR,
-  CONFIG_FLEET_DIR,
-  CONFIG_REPO_DIR,
-  CONFIG_FLEET_PLAYWRIGHT_DIR,
-  LOCKSTEP_SCHEMA,
-  NODE_MODULES_DIR,
-  NOTION_BACKUPS_DIR,
-  MCP_BROWSER_OUTPUT_DIR,
-  COMPILE_CACHE_DIR,
-  TYPECHECK_CACHE_DIR,
-  REPO_CACHE_DIR,
-  BROWSER_BRIDGE_EXTENSION_SOURCE_DIR,
-  BROWSER_BRIDGE_MARKER_ASSET_SOURCE_DIR,
-  COVERAGE_DIR,
-  COVERAGE_FINAL_MAIN_PATH,
-  COVERAGE_FINAL_ISOLATED_PATH,
-  COVERAGE_FINAL_ENFORCERS_PATH,
-  COVERAGE_FINAL_CHILDREN_PATH,
-  COVERAGE_FINAL_PATH,
-  COVERAGE_SUMMARY_PATH,
-  COVERAGE_SCRATCH_DIR,
-  COVERAGE_SCRATCH_VITEST_DIR,
-  COVERAGE_CHILDREN_RAW_DIR,
-  CLAUDE_SETTINGS_JSON,
-  HOOKS_ROOT_OVERRIDE,
-  FLEET_HOOKS_DIR,
-  DISPATCH_DIR,
-  DIST_DIR,
-  FLEET_HOOK_INDEX_PATH,
-  DISPATCH_TABLE_PATH,
-  DISPATCH_TABLE_SNAPSHOT_PATH,
-  DISPATCH_TABLE_EXCLUDED_PATH,
-  EXCLUDED_BUNDLE_PATH,
-  BROWSER_BRIDGE_INSTALLER_RELATIVE_PATH,
-  DISPATCH_MANIFEST_PATH,
-  HOOK_VALIDATORS_PATH,
-  ATA_VALIDATORS_REL,
-  ATA_VALIDATORS_PATH,
-  DISPATCH_ENTRY_PATH,
-  HOOK_BUNDLE_PATH,
-  SNAPSHOT_BUNDLE_PATH,
-  OXLINT_PLUGIN_DIR,
-  OXLINT_PLUGIN_SOURCE_ENTRY,
-  OXLINT_PLUGIN_BUNDLE_PATH,
-  PNPM_WORKSPACE_YAML,
-  FLEET_CATALOG_YAML,
-  PACKAGE_JSON,
-  MISE_INSTALLER_PATH,
-  MISE_SHIM_PATH,
-  NODE_VERSION_PATH,
-  PNPM_LOCK,
-  MODEL_PRICING_JSON,
-  MODEL_PRICING_MODULE,
-  TEMPLATE_MODEL_PRICING_JSON,
-  TEMPLATE_MODEL_PRICING_MODULE,
-  FLEET_PACK_VERSION_MODULE,
-  TEMPLATE_FLEET_PACK_VERSION_MODULE,
-  REPO_PACKAGE_JSON,
-  FLEET_SCRIPTS_DIR,
-  FLEET_TYPE_SCRIPT,
-  BUILD_HOOK_BUNDLE_SCRIPT,
-  FLEET_CHECK_DIR,
-  TSCONFIG_CHECK_PATH,
-  TEST_REPO_DIR,
-  AI_BALANCER_RELATIVE_DIR,
-  BALANCER_PROXY_RELATIVE_PATH,
-  BALANCER_PROXY_PATH,
-  LINT_RULE_TEST_DIRS,
-  HOOK_TEST_DIRS,
-  GIT_HOOK_TEST_DIRS,
-  OWNS_RELOCATED_TESTS
-var init_paths = __esmMin(() => {
-  init_scope()
-  init_conditional_config()
-  init_util()
-  init_runtime()
-  import_socket = require_socket()
-  import_rewire$1 = require_rewire$1()
-  init_browser()
-  TONE_SETTINGS_PATH = path.join(
-    (0, import_socket.getSocketHomePath)(),
-    'config',
-    'tone.json',
-  )
-  CLAUDE_USER_SETTINGS = path.join(CLAUDE_HOME, 'settings.json')
-  CODEX_HOME = path.join(os.homedir(), '.codex')
-  FIRECONNECT_HOME = path.join(os.homedir(), '.fireconnect')
-  TEMPLATE_BASE_DIR = sharedTemplateBasePath(REPO_ROOT)
-  CONFIG_DIR = path.join(REPO_ROOT, '.config')
-  CONFIG_FLEET_DIR = path.join(CONFIG_DIR, 'fleet')
-  CONFIG_REPO_DIR = path.join(CONFIG_DIR, 'repo')
-  CONFIG_FLEET_PLAYWRIGHT_DIR = path.join(CONFIG_FLEET_DIR, 'playwright')
-  LOCKSTEP_SCHEMA = path.join(CONFIG_FLEET_DIR, 'lockstep.schema.json')
-  NODE_MODULES_DIR = path.join(REPO_ROOT, 'node_modules')
-  NOTION_BACKUPS_DIR = path.join(
-    (0, import_socket.getSocketWheelhouseDir)(),
-    'notion-backups',
-  )
-  MCP_BROWSER_OUTPUT_DIR = path.join(
-    (0, import_socket.getSocketWheelhouseDir)(),
-    'mcp-browser-output',
-  )
-  COMPILE_CACHE_DIR = path.join(
-    (0, import_socket.getOsTmpDir)(),
-    'socket',
-    'compile-cache',
-  )
-  TYPECHECK_CACHE_DIR = path.join(FLEET_CACHE_DIR, 'typecheck')
-  REPO_CACHE_DIR = path.join(TOOL_CACHE_DIR, 'repo')
-  BROWSER_BRIDGE_EXTENSION_SOURCE_DIR = path.join(
-    import.meta.dirname,
-    'browser',
-    'bridge',
-    'extension',
-  )
-  BROWSER_BRIDGE_MARKER_ASSET_SOURCE_DIR = path.resolve(
-    import.meta.dirname,
-    '..',
-    '..',
-    '.config',
-    'fleet',
-    'playwright',
-  )
-  COVERAGE_DIR = path.join(
-    FLEET_CACHE_DIR,
-    coverageOutputSegments(COVERAGE_SCOPE, {
-      measurement: COVERAGE_MEASUREMENT_ARTIFACTS,
-    }).join(path.sep),
-  )
-  COVERAGE_FINAL_MAIN_PATH = path.join(COVERAGE_DIR, 'coverage-final.main.json')
-  COVERAGE_FINAL_ISOLATED_PATH = path.join(
-    COVERAGE_DIR,
-    'coverage-final.isolated.json',
-  )
-  COVERAGE_FINAL_ENFORCERS_PATH = path.join(
-    COVERAGE_DIR,
-    'coverage-final.enforcers.json',
-  )
-  COVERAGE_FINAL_CHILDREN_PATH = path.join(
-    COVERAGE_DIR,
-    'coverage-final.children.json',
-  )
-  COVERAGE_FINAL_PATH = path.join(COVERAGE_DIR, 'coverage-final.json')
-  COVERAGE_SUMMARY_PATH = path.join(COVERAGE_DIR, 'coverage-summary.json')
-  COVERAGE_SCRATCH_DIR =
-    (0, import_rewire$1.getEnvValue)('FLEET_COVERAGE_SCRATCH_DIR') ||
-    path.join(os.tmpdir(), 'fleet-coverage-scratch')
-  COVERAGE_SCRATCH_VITEST_DIR = path.join(COVERAGE_SCRATCH_DIR, 'vitest')
-  COVERAGE_CHILDREN_RAW_DIR = path.join(COVERAGE_SCRATCH_DIR, 'children-raw')
-  CLAUDE_SETTINGS_JSON = sharedClaudeSettingsJsonPath(REPO_ROOT)
-  HOOKS_ROOT_OVERRIDE = (0, import_rewire$1.getEnvValue)('FLEET_HOOKS_ROOT')
-  FLEET_HOOKS_DIR = HOOKS_ROOT_OVERRIDE
-    ? path.resolve(HOOKS_ROOT_OVERRIDE)
-    : sharedClaudeHooksFleetPath(REPO_ROOT)
-  DISPATCH_DIR = path.join(FLEET_HOOKS_DIR, '_shared')
-  DIST_DIR = path.join(FLEET_HOOKS_DIR, '_dist')
-  FLEET_HOOK_INDEX_PATH = path.join(FLEET_HOOKS_DIR, 'index.cjs')
-  DISPATCH_TABLE_PATH = path.join(DISPATCH_DIR, 'dispatch-table.generated.mts')
-  DISPATCH_TABLE_SNAPSHOT_PATH = path.join(
-    DISPATCH_DIR,
-    'dispatch-table.snapshot.generated.mts',
-  )
-  DISPATCH_TABLE_EXCLUDED_PATH = path.join(
-    DISPATCH_DIR,
-    'dispatch-table.excluded.generated.mts',
-  )
-  EXCLUDED_BUNDLE_PATH = path.join(
-    DIST_DIR,
-    'fleet-pack.excluded.generated.cjs',
-  )
-  BROWSER_BRIDGE_INSTALLER_RELATIVE_PATH = path.join(
-    'Contents',
-    'MacOS',
-    'browser-bridge-installer',
-  )
-  DISPATCH_MANIFEST_PATH = path.join(
-    FLEET_HOOKS_DIR,
-    '_shared',
-    'dispatch-manifest.generated.json',
-  )
-  HOOK_VALIDATORS_PATH = path.join(DISPATCH_DIR, 'validators.generated.mts')
-  ATA_VALIDATORS_REL = 'scripts/fleet/lib/ata-validators.generated.cjs'
-  ATA_VALIDATORS_PATH = path.join(REPO_ROOT, ATA_VALIDATORS_REL)
-  DISPATCH_ENTRY_PATH = path.join(DISPATCH_DIR, 'dispatch-entry.mts')
-  HOOK_BUNDLE_PATH = sharedFleetHookBundlePath(FLEET_HOOKS_DIR)
-  SNAPSHOT_BUNDLE_PATH = path.join(
-    DIST_DIR,
-    'fleet-pack.snapshot.generated.cjs',
-  )
-  OXLINT_PLUGIN_DIR = sharedConfigFleetOxlintPluginPath(REPO_ROOT)
-  OXLINT_PLUGIN_SOURCE_ENTRY = path.join(OXLINT_PLUGIN_DIR, 'index.mts')
-  OXLINT_PLUGIN_BUNDLE_PATH = sharedConfigFleetOxlintPluginMjsPath(REPO_ROOT)
-  PNPM_WORKSPACE_YAML = path.join(REPO_ROOT, 'pnpm-workspace.yaml')
-  FLEET_CATALOG_YAML = sharedFleetPnpmWorkspaceFleetYamlPath(CONFIG_DIR)
-  PACKAGE_JSON = resolvePackageJsonPath(REPO_ROOT)
-  MISE_INSTALLER_PATH = path.join(
-    REPO_ROOT,
-    'scripts',
-    'fleet',
-    'setup',
-    'lib',
-    'install-mise.mjs',
-  )
-  MISE_SHIM_PATH = path.join(
-    (0, import_socket.getSocketWheelhouseDir)(),
-    'bin',
-    process$1.platform === 'win32' ? 'mise.cmd' : 'mise',
-  )
-  NODE_VERSION_PATH = path.join(REPO_ROOT, '.node-version')
-  PNPM_LOCK = resolvePnpmLockPath(REPO_ROOT)
-  MODEL_PRICING_JSON = resolveModelPricingJson(REPO_ROOT)
-  MODEL_PRICING_MODULE = path.join(
-    REPO_ROOT,
-    'scripts',
-    'fleet',
-    'constants',
-    'model-pricing.generated.mts',
-  )
-  TEMPLATE_MODEL_PRICING_JSON = resolveModelPricingJson(TEMPLATE_BASE_DIR)
-  TEMPLATE_MODEL_PRICING_MODULE = path.join(
-    TEMPLATE_BASE_DIR,
-    'scripts',
-    'fleet',
-    'constants',
-    'model-pricing.generated.mts',
-  )
-  FLEET_PACK_VERSION_MODULE = path.join(
-    REPO_ROOT,
-    'scripts',
-    'fleet',
-    'constants',
-    'fleet-pack-version.generated.mts',
-  )
-  TEMPLATE_FLEET_PACK_VERSION_MODULE = path.join(
-    TEMPLATE_BASE_DIR,
-    'scripts',
-    'fleet',
-    'constants',
-    'fleet-pack-version.generated.mts',
-  )
-  REPO_PACKAGE_JSON = path.join(REPO_ROOT, 'package.json')
-  FLEET_SCRIPTS_DIR = path.join('scripts', 'fleet')
-  FLEET_TYPE_SCRIPT = path.join(FLEET_SCRIPTS_DIR, 'type.mts')
-  BUILD_HOOK_BUNDLE_SCRIPT = path.join(
-    FLEET_SCRIPTS_DIR,
-    'build-hook-bundle.mts',
-  )
-  FLEET_CHECK_DIR = path.join(FLEET_SCRIPTS_DIR, 'check')
-  TSCONFIG_CHECK_PATH = sharedFleetTsconfigCheckJsonPath(CONFIG_DIR)
-  TEST_REPO_DIR = path.join(REPO_ROOT, 'test', 'repo')
-  AI_BALANCER_RELATIVE_DIR = 'scripts/fleet/ai/balancer'
-  BALANCER_PROXY_RELATIVE_PATH = `${AI_BALANCER_RELATIVE_DIR}/proxy.mts`
-  BALANCER_PROXY_PATH = path.join(REPO_ROOT, BALANCER_PROXY_RELATIVE_PATH)
-  LINT_RULE_TEST_DIRS = [
-    path.join(REPO_ROOT, 'test', 'fleet', 'unit', 'oxlint-plugin', 'fleet'),
-    path.join(
-      REPO_ROOT,
-      'test',
-      'fleet',
-      'integration',
-      'oxlint-plugin',
-      'fleet',
-    ),
-    path.join(TEST_REPO_DIR, 'unit', 'lint-rules'),
-    path.join(TEST_REPO_DIR, 'integration', 'lint-rules'),
-    path.join(REPO_ROOT, 'test', 'fleet', 'unit', 'lint', 'rules'),
-  ]
-  HOOK_TEST_DIRS = [
-    path.join(TEST_REPO_DIR, 'integration', 'hooks'),
-    path.join(TEST_REPO_DIR, 'integration', 'hooks-shared'),
-    path.join(TEST_REPO_DIR, 'unit', 'hooks'),
-    path.join(TEST_REPO_DIR, 'unit', 'hooks-shared'),
-    path.join(REPO_ROOT, 'test', 'fleet', 'unit', 'hooks'),
-  ]
-  GIT_HOOK_TEST_DIRS = [
-    path.join(TEST_REPO_DIR, 'integration', 'git-hooks'),
-    path.join(TEST_REPO_DIR, 'unit', 'git-hooks'),
-  ]
-  OWNS_RELOCATED_TESTS = existsSync(TEMPLATE_BASE_DIR)
-})
-
-/**
- * @file The refusal that stands between a computed delete target and a repo
- *   root. Every `safeDelete*` whose target is BUILT from a variable goes
- *   through here.
- *   `path.join(root, rel)` collapses to `root` whenever `rel` is `''` or `'.'`.
- *   That is not a hypothetical: a delete target assembled from a parsed patch
- *   key, a scan finding, or a manifest entry is empty exactly when the parse
- *   found nothing, and `existsSync` says TRUE for a repo root, so an
- *   existence check waves it through. The result is a checkout deleted with
- *   its `.git` directory.
- *   The underlying `safeDelete` carries its own cwd guard, but that guard is
- *   only armed when `force` is off, and a caller passing no options at all can
- *   arm nothing — @socketsecurity/lib 6.7.0 computed `force` as
- *   `opts.force !== false`, which is TRUE for an absent option, so the guard
- *   was unreachable on every default call. Depending on a dependency's
- *   internal default is what made this reachable; refusing here does not.
- *   Four refusals, all cheap and all before any I/O: an empty or dot target, a
- *   filesystem root, the current working directory or any ancestor of it, and
- *   any directory that looks like a repository root (it holds `.git`).
- *   Everything else deletes normally.
- *   Those four ARE the boundary, so the delegated call names the base as an
- *   allowed root rather than forcing. The dependency's own cwd guard refuses
- *   any target outside the process cwd, which is most of what this wrapper
- *   legitimately deletes: a per-user marker under `~/.claude`, a scratch tree
- *   in the temp dir, a sibling checkout. Naming the base keeps that guard
- *   live for every OTHER path, so a target that escapes the base still
- *   refuses - which a blanket `force` would have waved through.
- */
-/**
- * The checkout root at or above `from`, or undefined when there is none.
- *
- * Walks UP, so a script running deep under `scripts/fleet/` still names the
- * repo above it. Stops at the filesystem root.
- */
-function enclosingCheckoutRoot(from) {
-  let dir = path.resolve(from)
-  const { root } = path.parse(dir)
-  while (dir !== root) {
-    if (existsSync(path.join(dir, '.git'))) return dir
-    dir = path.dirname(dir)
-  }
-}
-/**
- * The checkouts a live agent session stands in, which no delete may take.
- *
- * WHY THE `.git` PROBE BELOW IS NOT ENOUGH. It refuses a target that HOLDS a
- * `.git` today. The delete that hurts is the one aimed at the host checkout
- * mid-session, and the host is exactly the directory whose `.git` the same
- * command is about to remove — the probe passes, then the session loses the
- * ground it stands on. Naming the session's own roots refuses that by identity
- * instead of by a probe of the thing being destroyed.
- *
- * Two sources, both stable: the harness variable a host exports to its children
- * (Claude Code sets `CLAUDE_PROJECT_DIR`) and `REPO_ROOT`, which is anchored on
- * this file rather than on wherever the host was launched. `process.cwd()` is
- * deliberately absent — `socket/no-process-cwd-in-scripts-hooks` bans it here,
- * and a script that chdir'd into a scratch tree would otherwise stop protecting
- * the checkout it came from. Each source is walked up to its checkout root, and
- * a missing or unreadable one drops out silently.
- *
- * Env is read for ADDITIONAL refusals only, never to permit one, so a hostile
- * value can widen the refusal and can never narrow it.
- */
-function sessionCheckoutRoots() {
-  const roots = /* @__PURE__ */ new Set()
-  const sources = [
-    (0, import_rewire.getEnvValue)('CLAUDE_PROJECT_DIR'),
-    REPO_ROOT,
-  ]
-  for (let i = 0, { length } = sources; i < length; i += 1) {
-    const source = sources[i]
-    if (typeof source !== 'string' || source.trim() === '') continue
-    const root = enclosingCheckoutRoot(source)
-    if (root !== void 0) roots.add(root)
-  }
-  return [...roots]
-}
-function deleteTargetContainsPath(target, protectedPath, options) {
-  const pathApi =
-    {
-      __proto__: null,
-      ...options,
-    }.path ?? path
-  const relative = pathApi.relative(target, protectedPath)
-  return !pathApi.isAbsolute(relative) && !relative.startsWith('..')
-}
-/**
- * Why a target is refused, or undefined when it is safe to delete. Pure apart
- * from the `.git` probe, so the verdict table is directly testable.
- */
-function deleteRefusalReason(target, options) {
-  const opts = {
-    __proto__: null,
-    ...options,
-  }
-  if (typeof target !== 'string' || target.trim() === '')
-    return 'the target is empty — a path built from a failed parse deletes its base directory'
-  const trimmed = target.trim()
-  if (trimmed === '.' || trimmed === '..')
-    return `the target is "${trimmed}" — a relative self/parent reference deletes the directory it was joined onto`
-  const resolved = path.resolve(trimmed)
-  if (resolved === path.parse(resolved).root)
-    return `the target resolves to the filesystem root (${resolved})`
-  for (const root of sessionCheckoutRoots()) {
-    if (resolved === root)
-      return `the target is a live session's checkout root (${resolved})`
-    if (deleteTargetContainsPath(resolved, root))
-      return `the target contains a live session's checkout root (${root})`
-  }
-  const base = path.resolve(opts.base ?? REPO_ROOT)
-  if (resolved === base)
-    return `the target resolves to the base directory itself (${resolved})`
-  if (deleteTargetContainsPath(resolved, base))
-    return `the target is an ancestor of the base directory (${resolved})`
-  if (existsSync(path.join(resolved, '.git')))
-    return `the target is a repository root — it holds .git (${resolved})`
-}
-/**
- * Throw the four-ingredient refusal unless `target` is safe to delete.
- */
-function assertDeletableTarget(target, options) {
-  const opts = {
-    __proto__: null,
-    ...options,
-  }
-  const reason = deleteRefusalReason(target, { base: opts.base })
-  if (reason === void 0) return
-  throw new Error(`Refusing to delete a root-resolving path.
-  Where: ${opts.where ?? 'a guarded safeDelete call site'}\n  Saw:   ${JSON.stringify(target)} — ${reason}.\n  Wanted: a target strictly BELOW the base directory and below any repo root.
-  Fix:   the caller computed an empty or root-collapsing segment; refuse the
-         delete upstream instead of joining it onto a base directory.`)
-}
-/**
- * The roots a guarded delete may reach into.
- *
- * `assertDeletableTarget` has already refused anything that resolves to a
- * root, so the remaining job is to tell the underlying delete that this base
- * is legitimate even when it sits outside the cwd - a tmp fixture tree, say.
- * Naming the base beats forcing: a target elsewhere still refuses.
- */
-function allowedDirsFor(base) {
-  return [path.resolve(base ?? REPO_ROOT)]
-}
-/**
- * `safeDeleteSync` behind the root refusal. Use for any target built from a
- * variable.
- */
-function strictDeleteSync(target, options) {
-  const opts = {
-    __proto__: null,
-    ...options,
-  }
-  assertDeletableTarget(target, opts)
-  ;(0, import_safe$1.safeDeleteSync)(target, {
-    allowedDirs: allowedDirsFor(opts.base),
-  })
-}
-var import_safe$1, import_rewire
-var init_strict = __esmMin(() => {
-  import_safe$1 = require_safe()
-  init_paths()
-  import_rewire = require_rewire$1()
-})
-
-/**
- * Active-run markers — a pidfile contract between long-running fleet
- * commands, coverage, full builds, and the stale-process-sweeper hook.
- *
- * The sweeper's "stuck" heuristic kills live-parent test workers that run
- * long at high CPU and RSS. A coverage-instrumented vitest worker looks
- * exactly like that while perfectly healthy (incident: three consecutive
- * `pnpm run cover` runs SIGKILLed at ~15 minutes with flat ~650MB RSS).
- * A command that registers an active-run marker declares "my worker tree
- * is doing real work"; the sweeper's stuck branch skips descendants of a
- * live registered pid. Orphan reaping is unaffected — a dead registrant's
- * marker is ignored, and cleaned by the next writer.
- *
- * CONTRACT (the sweeper hook implements its own tiny reader against the
- * same layout — keep in lockstep with
- * `.claude/hooks/fleet/stale-process-sweeper/index.mts`):
- * directory  ~/.claude/hooks/stale-process-sweeper/active-runs/
- * entry      one empty file per registrant, named `<pid>`
- * liveness   the file counts only while `kill -0 <pid>` succeeds.
- */
-function activeRunsDir(homeDir) {
-  return resolveActiveRunDir(homeDir ?? os.homedir())
-}
-function pidIsAlive(pid) {
-  if (!Number.isFinite(pid) || pid <= 1) return false
-  try {
-    process$1.kill(pid, 0)
-    return true
-  } catch {
-    return false
-  }
-}
-function registerActiveRun(options) {
-  const opts = {
-    __proto__: null,
-    ...options,
-  }
-  const dir = activeRunsDir(opts.homeDir)
-  mkdirSync(dir, { recursive: true })
-  for (const entry of readdirSync(dir))
-    if (!pidIsAlive(Number(entry)))
-      strictDeleteSync(path.join(dir, entry), {
-        base: dir,
-        where: '_shared/active-run-marker.mts',
-      })
-  writeThroughMirrorLock(path.join(dir, String(opts.pid ?? process$1.pid)), '')
-}
-function unregisterActiveRun(options) {
-  const opts = {
-    __proto__: null,
-    ...options,
-  }
-  const dir = activeRunsDir(opts.homeDir)
-  const file = path.join(dir, String(opts.pid ?? process$1.pid))
-  if (existsSync(file))
-    (0, import_safe.safeDeleteSync)(file, { allowedDirs: [dir] })
-}
-function readLiveActiveRunPids(options = {}) {
-  let entries
-  try {
-    entries = readdirSync(activeRunsDir(options.homeDir))
-  } catch {
-    return /* @__PURE__ */ new Set()
-  }
-  return new Set(entries.map(Number).filter(pidIsAlive))
-}
-var import_safe
-var init_active_run_marker = __esmMin(() => {
-  import_safe = require_safe()
-  init_strict()
-  init_mirror_lock()
-  init_paths()
-})
-
-function parseHeavyJobOwner(value) {
-  if (typeof value !== 'object' || value === null) return
-  const owner = value
-  if (
-    !Number.isSafeInteger(owner.pid) ||
-    (owner.pid ?? 0) <= 1 ||
-    typeof owner.token !== 'string' ||
-    !/^[a-f\d]{32}$/.test(owner.token) ||
-    typeof owner.job !== 'string' ||
-    typeof owner.root !== 'string'
-  )
-    return
-  return owner
-}
-function isHeavyJobAncestor(owner, pid, rows) {
-  const parents = new Map(rows.map(row => [row.pid, row.ppid]))
-  const seen = /* @__PURE__ */ new Set()
-  while (pid > 1 && !seen.has(pid)) {
-    if (pid === owner) return true
-    seen.add(pid)
-    pid = parents.get(pid) ?? 0
-  }
-  return false
-}
-async function readHeavyJobProcesses() {
-  const windows = process.platform === 'win32'
-  const result = await readHeavyJobTable(
-    windows ? 'powershell.exe' : 'ps',
-    windows
-      ? [
-          '-NoProfile',
-          '-NonInteractive',
-          '-Command',
-          'Get-CimInstance Win32_Process | Select-Object ProcessId,ParentProcessId | ConvertTo-Json -Compress',
-        ]
-      : ['-Ao', 'pid=,ppid='],
-    {
-      encoding: 'utf8',
-      timeout: PROCESS_TABLE_TIMEOUT_MS,
-      maxBuffer: PROCESS_TABLE_MAX_BYTES,
-    },
-  )
-  const output = String(result.stdout ?? '')
-  if (windows) {
-    const value = JSON.parse(output)
-    if (!Array.isArray(value))
-      throw new Error(
-        'Cannot verify heavy job process ancestry. Retry after the process inspector recovers.',
-      )
-    return value.map(row => ({
-      __proto__: null,
-      pid: Number(row.ProcessId),
-      ppid: Number(row.ParentProcessId),
-    }))
-  }
-  return output
-    .trim()
-    .split(/\r?\n/)
-    .map(line => {
-      const { 0: pid, 1: ppid } = line.trim().split(/\s+/).map(Number)
-      return {
-        __proto__: null,
-        pid: pid ?? 0,
-        ppid: ppid ?? 0,
-      }
-    })
-}
-function isHeavyJobProcessAlive(pid) {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return error.code !== 'ESRCH'
-  }
-}
-var readHeavyJobTable, PROCESS_TABLE_TIMEOUT_MS, PROCESS_TABLE_MAX_BYTES
-var init_owner = __esmMin(() => {
-  readHeavyJobTable = promisify(execFile)
-  PROCESS_TABLE_TIMEOUT_MS = 5e3
-  PROCESS_TABLE_MAX_BYTES = 4194304
-})
-
-var admission_exports = /* @__PURE__ */ __exportAll({
-  HEAVY_JOB_BUSY_EXIT_CODE: () => 75,
-  HEAVY_JOB_OWNER_ENV: () => HEAVY_JOB_OWNER_ENV,
-  HeavyJobBusy: () => HeavyJobBusy,
-  acquireHeavyJob: () => acquireHeavyJob,
-  hasHeavyJobAdmission: () => hasHeavyJobAdmission,
-  heavyJobDirectory: () => heavyJobDirectory,
-  withHeavyJob: () => withHeavyJob,
-})
-function hasHeavyJobAdmission() {
-  return (
-    runtimeActive &&
-    activeScope !== void 0 &&
-    heavyJobContext?.getStore() === activeScope
-  )
-}
-function heavyJobDirectory() {
-  return path.join(os.homedir(), '.socket', '_runtime', 'heavy-job')
-}
-function readOwner(directory, token) {
-  const file = path.join(directory, token)
-  const stat = lstatSync(file)
-  if (!stat.isFile() || stat.size > MAX_OWNER_BYTES)
-    throw new Error(
-      'Heavy job owner is not a bounded regular file. Inspect the per-user admission state.',
-    )
-  const owner = parseHeavyJobOwner(JSON.parse(readFileSync(file, 'utf8')))
-  if (!owner || token !== owner.token)
-    throw new Error(
-      'Heavy job ownership is invalid. Inspect the per-user admission state before retrying.',
-    )
-  return {
-    owner,
-    file,
-  }
-}
-function readOwners(directory) {
-  if (!lstatSync(directory).isDirectory())
-    throw new Error(
-      'Heavy job admission path is not a directory. Inspect the per-user admission state.',
-    )
-  const files = readdirSync(directory)
-  if (!files.length || files.length > MAX_PARTICIPANTS)
-    throw new Error(
-      'Heavy job ownership is unverified. Inspect the per-user admission state before retrying.',
-    )
-  return files.map(token => readOwner(directory, token))
-}
-function removeOwner(directory, file) {
-  assertDeletableTarget(file, { base: directory })
-  try {
-    unlinkSync(file)
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error
-  }
-  assertDeletableTarget(directory, { base: path.dirname(directory) })
-  try {
-    rmdirSync(directory)
-  } catch (error) {
-    if (!['ENOENT', 'ENOTEMPTY', 'EEXIST'].includes(error.code ?? ''))
-      throw error
-  }
-}
-function publishOwner(staging, directory) {
-  try {
-    renameSync(staging, directory)
-    return true
-  } catch (error) {
-    if (!['EEXIST', 'ENOTEMPTY', 'EPERM'].includes(error.code ?? ''))
-      throw error
-    return false
-  }
-}
-function ownerLease(config) {
-  const { directory, token, env, previous, owned } = config
-  env[HEAVY_JOB_OWNER_ENV] = token
-  let released = false
-  return {
-    owned,
-    release() {
-      if (released) return
-      released = true
-      if (env['FLEET_HEAVY_JOB_OWNER'] === token) {
-        if (previous === void 0) delete env[HEAVY_JOB_OWNER_ENV]
-        else env[HEAVY_JOB_OWNER_ENV] = previous
-      }
-      removeOwner(directory, path.join(directory, token))
-    },
-  }
-}
-async function assertExistingRuns(config, pid) {
-  const active = [...(config.activePids ?? readLiveActiveRunPids)()].filter(
-    activePid => activePid !== pid,
-  )
-  if (!active.length) return
-  const rows = await (config.processes ?? readHeavyJobProcesses)()
-  const peer = active.find(
-    activePid => !isHeavyJobAncestor(activePid, pid, rows),
-  )
-  if (peer !== void 0)
-    throw new HeavyJobBusy({
-      pid: peer,
-      token: '',
-      job: 'coverage or build',
-      root: 'the shared active-run registry',
-    })
-}
-async function joinOwner(config) {
-  const {
-    records,
-    admissionConfig,
-    previous,
-    pid,
-    directory,
-    stagedOwner,
-    token,
-  } = config
-  const parent = records.find(record => record.owner.token === previous)
-  if (!parent) return false
-  const identity = lstatSync(directory, { bigint: true })
-  const rows = await (admissionConfig.processes ?? readHeavyJobProcesses)()
-  if (!isHeavyJobAncestor(parent.owner.pid, pid, rows)) return false
-  const file = path.join(directory, token)
-  linkSync(stagedOwner, file)
-  const current = lstatSync(directory, { bigint: true })
-  if (identity.dev !== current.dev || identity.ino !== current.ino) {
-    removeOwner(directory, file)
-    throw new Error(
-      'Heavy job ownership changed during nested admission. Retry after the current job finishes.',
-    )
-  }
-  return true
-}
-async function acquireHeavyJob(config) {
-  if (config.ci ?? (0, import_ci.isCI)())
-    return {
-      owned: false,
-      release() {},
-    }
-  const directory = config.directory ?? heavyJobDirectory()
-  const parent = path.dirname(directory)
-  mkdirSync(parent, {
-    recursive: true,
-    mode: 448,
-  })
-  const pid = config.pid ?? process.pid
-  const env = config.env ?? process.env
-  const previous = env[HEAVY_JOB_OWNER_ENV]
-  const alive = config.alive ?? isHeavyJobProcessAlive
-  const token = crypto.randomBytes(16).toString('hex')
-  const owner = {
-    pid,
-    token,
-    job: config.job,
-    root: config.root ?? REPO_ROOT,
-  }
-  const staging = mkdtempSync(path.join(parent, '.heavy-job-'))
-  const stagedOwner = path.join(staging, token)
-  try {
-    writeFileSync(stagedOwner, JSON.stringify(owner), {
-      mode: 384,
-      flag: 'wx',
-    })
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      if (publishOwner(staging, directory)) {
-        try {
-          await assertExistingRuns(config, pid)
-        } catch (error) {
-          removeOwner(directory, path.join(directory, token))
-          throw error
-        }
-        return ownerLease({
-          directory,
-          token,
-          env,
-          previous,
-          owned: true,
-        })
-      }
-      const records = readOwners(directory)
-      const living = records.filter(record => alive(record.owner.pid))
-      if (!living.length) {
-        for (const record of records) removeOwner(directory, record.file)
-        continue
-      }
-      if (
-        await joinOwner({
-          records: living,
-          admissionConfig: config,
-          previous,
-          pid,
-          directory,
-          stagedOwner,
-          token,
-        })
-      )
-        return ownerLease({
-          directory,
-          token,
-          env,
-          previous,
-          owned: false,
-        })
-      throw new HeavyJobBusy(living[0].owner)
-    }
-    throw new Error(
-      'Heavy job admission changed during acquisition. Retry after the current job finishes.',
-    )
-  } finally {
-    removeOwner(staging, stagedOwner)
-  }
-}
-async function withHeavyJob(config) {
-  if (config.ci ?? (0, import_ci.isCI)()) return await config.run()
-  if (hasHeavyJobAdmission()) {
-    const scope = activeScope
-    const pending = Promise.resolve().then(config.run)
-    scope.pending.add(pending)
-    try {
-      return await pending
-    } finally {
-      scope.pending.delete(pending)
-    }
-  }
-  if (runtimeActive)
-    throw new HeavyJobBusy({
-      pid: process.pid,
-      token: '',
-      job: 'another invocation in this process',
-      root: REPO_ROOT,
-    })
-  runtimeActive = true
-  try {
-    return await runAdmittedJob(config, await acquireHeavyJob(config))
-  } finally {
-    activeScope = void 0
-    runtimeActive = false
-  }
-}
-async function runAdmittedJob(config, lease) {
-  let signal
-  function stop(next) {
-    signal = next
-    ;(0, import_abort.getAbortController)().abort()
-  }
-  function cleanup() {
-    try {
-      ;(config.unregister ?? unregisterActiveRun)()
-    } finally {
-      lease.release()
-    }
-  }
-  function interrupt() {
-    stop('SIGINT')
-  }
-  function terminate() {
-    stop('SIGTERM')
-  }
-  process.once('exit', cleanup)
-  process.on('SIGINT', interrupt)
-  process.on('SIGTERM', terminate)
-  try {
-    ;(config.register ?? registerActiveRun)()
-    heavyJobContext ??= new AsyncLocalStorage()
-    const scope = { pending: /* @__PURE__ */ new Set() }
-    activeScope = scope
-    try {
-      return await heavyJobContext.run(scope, config.run)
-    } finally {
-      while (scope.pending.size) await Promise.allSettled(scope.pending)
-    }
-  } finally {
-    process.removeListener('exit', cleanup)
-    process.removeListener('SIGINT', interrupt)
-    process.removeListener('SIGTERM', terminate)
-    try {
-      cleanup()
-    } finally {
-      if (signal) process.kill(process.pid, signal)
-    }
-  }
-}
-var import_ci,
-  import_abort,
-  HEAVY_JOB_OWNER_ENV,
-  HEAVY_JOB_BUSY_EXIT_CODE,
-  MAX_OWNER_BYTES,
-  MAX_PARTICIPANTS,
-  heavyJobContext,
-  activeScope,
-  runtimeActive,
-  HeavyJobBusy
-var init_admission = __esmMin(() => {
-  import_ci = require_ci()
-  import_abort = require_abort()
-  init_active_run_marker()
-  init_script_result()
-  init_strict()
-  init_paths()
-  init_owner()
-  HEAVY_JOB_OWNER_ENV = 'FLEET_HEAVY_JOB_OWNER'
-  HEAVY_JOB_BUSY_EXIT_CODE = 75
-  MAX_OWNER_BYTES = 16384
-  MAX_PARTICIPANTS = 1024
-  runtimeActive = false
-  HeavyJobBusy = class extends ScriptExit {
-    constructor(owner) {
-      super(75)
-      this.message = `Heavy job admission is occupied by ${owner.job} (pid ${owner.pid}) at ${owner.root}. Wanted an available host. Retry when that job finishes.`
-    }
-  }
-})
-
-/**
- * @file Fail-soft entrypoint runner for fleet + repo CLI scripts. Wraps a
- *   script's `main()` so a throw / rejection can NEVER escape as an unhandled
- *   rejection + raw stack trace: the error is surfaced via the logger as a
- *   MESSAGE, never a stack, and the process exits non-zero. `main()` may return
- *   its exit code (or nothing → 0). This replaces the bare `void (async () => {
- *   process.exitCode = await main() })()` entry pattern, which crashes with a
- *   raw stack if `main()` throws. Enforced by
- *   `scripts/fleet/check/entry-scripts-are-fail-soft.mts` (a fleet CLI entry
- *   must fail soft — never hard-crash the user). It also owns the whole-argv
- *   concerns every entry shares, so a new script inherits them instead of
- *   having to remember each: `--describe` prints the script's one-line purpose,
- *   `-h`/`--help` prints its usage (both from the {@link ScriptMeta} the entry
- *   passes, both BEFORE `main()` runs or any lock is taken), `--describe
- *   --json` (either order) prints the same identity as a machine-readable
- *   manifest instead, and a bare `--` in argv is refused before `main()`
- *   runs. Native JSON handlers explicitly declare `json: 'native'`.
- *   {@link isJsonRequested} lets a script's own `main()` switch its RESULT
- *   output to structured JSON without re-parsing argv itself. Enforced by
- *   `scripts/fleet/check/entry-scripts-are-self-describing.mts` (every entry
- *   script answers --describe and --help without running its side effect).
- */
-var import_message = require_message()
-var import_default = require_default()
-init_script_result()
-const logger$2 = (0, import_default.getDefaultLogger)()
-/**
- * The version stamped into a script's manifest: the invoking repo root's
- * `package.json` version. Fail-soft — a script must answer `--describe`
- * anywhere, including a cwd with no manifest at all.
- */
-function repoVersion() {
-  try {
-    return JSON.parse(readFileSync('package.json', 'utf8')).version || '0.0.0'
-  } catch {
-    return '0.0.0'
-  }
-}
-function scriptBasename(filePath, fallback) {
-  return filePath?.split(/[\\/]/u).pop() || fallback
-}
-/**
- * Run a script's `main()` FAIL-SOFT: set `process.exitCode` to its resolved
- * return (`?? 0`), and on ANY throw / rejection log the message (never a raw
- * stack) via the default logger and set `process.exitCode = 1`. Never rethrows,
- * so a fleet CLI can't crash the user with an unhandled stack. Call it inside
- * the entrypoint guard:
- *
- * @example
- *   ;```ts
- *   if (isMainModule(import.meta.url)) {
- *     runMain(main)
- *   }
- *   ```
- */
-function runMain(main, meta) {
-  executeMain(main, meta)
-}
-async function executeMain(main, meta) {
-  const argv = process$1.argv.slice(2)
-  if (answerScriptHelp(argv, meta)) return
-  const json = isJsonRequested(argv)
-  if (json && !meta?.json) {
-    logger$2.log(
-      renderScriptResult({
-        exitCode: 1,
-        error: 'This script has not declared JSON execution support.',
-      }),
-    )
-    process$1.exitCode = 1
-    return
-  }
-  if (hasBareDoubleDash(argv)) {
-    const scriptName = scriptBasename(process$1.argv[1], 'this script')
-    const error = bareDoubleDashMessage(scriptName)
-    if (json)
-      logger$2.log(
-        renderScriptResult({
-          exitCode: 1,
-          error,
-        }),
-      )
-    else logger$2.error(error)
-    process$1.exitCode = 1
-    return
-  }
-  try {
-    await invokeScriptMain(main, meta)
-  } catch (e) {
-    const exitCode = e instanceof ScriptExit ? e.exitCode : 1
-    if (json)
-      logger$2.log(
-        renderScriptResult({
-          exitCode,
-          error: (0, import_message.errorMessage)(e),
-        }),
-      )
-    else logger$2.error((0, import_message.errorMessage)(e))
-    process$1.exitCode = exitCode
-  }
-}
-function answerScriptHelp(argv, meta) {
-  if (meta) {
-    const request = helpRequest(argv)
-    if (request) {
-      if (request === 'describe' && argv.includes('--json'))
-        logger$2.log(
-          describeManifestText(meta, {
-            name: scriptBasename(process$1.argv[1], 'script'),
-            version: repoVersion(),
-          }),
-        )
-      else logger$2.log(helpText(request, meta))
-      process$1.exitCode = 0
-      return true
-    }
-  }
-  return false
-}
-function applyScriptExitCode(result) {
-  const code =
-    typeof result === 'object' && result !== null ? result.exitCode : result
-  if (typeof code === 'number') process$1.exitCode = code
-  else if (!process$1.exitCode) process$1.exitCode = 0
-}
-async function invokeScriptMain(main, meta) {
-  const json = isJsonRequested(process$1.argv.slice(2))
-  let result
-  if (meta?.heavyJob) {
-    const { withHeavyJob } = await Promise.resolve().then(
-      () => (init_admission(), admission_exports),
-    )
-    result = await withHeavyJob({
-      job: meta.heavyJob,
-      run: async () => await main(),
-    })
-  } else result = await main()
-  applyScriptExitCode(result)
-  if (!json && typeof result === 'object' && result?.error)
-    logger$2.error(result.error)
-  if (json && meta?.json === 'result')
-    logger$2.log(
-      renderScriptResult({
-        ...(typeof result === 'object' && result !== null ? result : {}),
-        exitCode: Number(process$1.exitCode ?? 0),
-      }),
-    )
-}
-
-const logger$1 = (0, import_default.getDefaultLogger)()
-function writeScriptStdout(...args) {
-  return (
-    process$1.argv.includes('--json') ? process$1.stderr : process$1.stdout
-  ).write(...args)
-}
-
-/**
- * @file Canonical MCP configuration and generated native client paths.
- */
-init_util()
-const MCP_CONFIG_REL = '.mcp.json'
-const CODEX_MCP_CONFIG_REL = '.codex/config.toml'
-const CODEX_MCP_HOOKS_REL = '.codex/hooks.json'
-const OPENCODE_MCP_ADAPTER_REL = 'opencode.json'
-function mcpConfigFilePath(root, relative) {
-  return path.join(root, relative)
-}
-function canonicalMcpConfigPath(repoRoot) {
-  const template = mcpConfigFilePath(
-    sharedTemplateBasePath(repoRoot),
-    MCP_CONFIG_REL,
-  )
-  return existsSync(template)
-    ? template
-    : mcpConfigFilePath(repoRoot, MCP_CONFIG_REL)
-}
-
-var import_predicates = require_predicates$2()
+var import_predicates = require_predicates$1()
 const MCP_PROVIDERS = {
+  linear: {
+    connectOrder: 5,
+    serverName: 'fleet-linear',
+    url: 'https://mcp.linear.app/mcp',
+    auth: 'oauth',
+    setupUrl: 'https://linear.app',
+    allowedAuthorizationHosts: ['linear.app', 'mcp.linear.app'],
+    clients: {
+      claude: { kind: 'oauth' },
+      codex: { kind: 'oauth' },
+      opencode: { kind: 'oauth' },
+    },
+  },
+  notion: {
+    connectOrder: 4,
+    serverName: 'fleet-notion',
+    url: 'https://mcp.notion.com/mcp',
+    auth: 'oauth',
+    setupUrl: 'https://mcp.notion.com',
+    allowedAuthorizationHosts: ['app.notion.com', 'mcp.notion.com'],
+    clients: {
+      claude: { kind: 'oauth' },
+      codex: { kind: 'oauth' },
+      opencode: { kind: 'oauth' },
+    },
+  },
   readme: {
     connectOrder: 1,
     serverName: 'fleet-readme',
@@ -28363,8 +20643,14 @@ const MCP_PROVIDER_NAMES = Object.entries(MCP_PROVIDERS)
   .toSorted(([, left], [, right]) => left.connectOrder - right.connectOrder)
   .map(([name]) => name)
 function findMcpProviderForServer(name) {
-  return Object.values(MCP_PROVIDERS).find(
-    provider => provider.serverName === name,
+  const providerName = findMcpProviderNameForServer(name)
+  return providerName === void 0 ? void 0 : MCP_PROVIDERS[providerName]
+}
+function findMcpProviderNameForServer(name) {
+  return (
+    MCP_PROVIDER_NAMES.find(
+      provider => MCP_PROVIDERS[provider].serverName === name,
+    ) ?? MCP_PROVIDER_NAMES.find(provider => provider === name)
   )
 }
 const CREDENTIAL_KEY_PATTERN =
@@ -28493,16 +20779,20 @@ function assertMcpUrlHasNoCredentials(value) {
   assertMcpConfigHasNoCredentials(Object.fromEntries(url.searchParams))
 }
 
-/**
- * @file Pure adapters from the fleet-canonical Claude `.mcp.json` shape to
- *   project-local Codex and OpenCode configs.
- *   Credentials never belong in the canonical or generated project files; each
- *   client owns OAuth state in its user data directory.
- */
-init_mirror_lock()
-init_paths()
 const OPENCODE_COMMAND_INDENT = ' '.repeat(6)
 const OPENCODE_COMMAND_ITEM_INDENT = ' '.repeat(8)
+function clientMcpServers(servers, client) {
+  return Object.entries(sortRecord(servers)).filter(
+    ([name]) =>
+      findMcpProviderForServer(name)?.clients[client].kind !==
+      'registration-unavailable',
+  )
+}
+function codexMcpOAuth(name, server) {
+  const support = findMcpProviderForServer(name)?.clients.codex
+  if (support?.kind !== 'oauth') return server.oauth
+  return support.clientId || support.callbackPort ? support : void 0
+}
 function compactOpenCodeCommandArrays(text, servers) {
   let result = text
   const items = Object.values(servers)
@@ -28524,40 +20814,35 @@ function compactOpenCodeCommandArrays(text, servers) {
   }
   return result
 }
-function main$1() {
-  if (!process$1.argv.includes('--write'))
-    throw new Error(
-      'Usage: node scripts/fleet/mcp/config.mts --write (regenerates project MCP client configs)',
-    )
-  writeMcpClientConfigs(REPO_ROOT)
-  writeScriptStdout('Generated .codex/config.toml and opencode.json.\n')
+function createOpenCodeMcpConfig(servers) {
+  const entries = {}
+  for (const [name, server] of clientMcpServers(servers, 'opencode'))
+    entries[name] =
+      server.kind === 'http'
+        ? {
+            type: 'remote',
+            url: server.url,
+            ...(server.oauth === void 0 ? {} : { oauth: server.oauth }),
+            ...(server.bearerTokenEnv === void 0
+              ? {}
+              : {
+                  headers: {
+                    Authorization: `Bearer {env:${server.bearerTokenEnv}}`,
+                  },
+                  oauth: false,
+                }),
+          }
+        : {
+            command: [server.command, ...server.args],
+            type: 'local',
+          }
+  return {
+    $schema: 'https://opencode.ai/config.json',
+    mcp: entries,
+  }
 }
-function parseStringArray(value, field) {
-  if (!Array.isArray(value) || value.some(item => typeof item !== 'string'))
-    throw new Error(`MCP server ${field} must be an array of strings`)
-  return [...value]
-}
-function sortRecord(record) {
-  return Object.fromEntries(
-    Object.entries(record).toSorted(([left], [right]) =>
-      (0, import_strings.compareStr)(left, right),
-    ),
-  )
-}
-function clientMcpServers(servers, client) {
-  return Object.entries(sortRecord(servers)).filter(
-    ([name]) =>
-      findMcpProviderForServer(name)?.clients[client].kind !==
-      'registration-unavailable',
-  )
-}
-function tomlString(value) {
-  return JSON.stringify(value)
-}
-function tomlStringArray(values) {
-  const compact = JSON.stringify(values)
-  if (`args = ${compact}`.length <= 80) return [`args = ${compact}`]
-  return ['args = [', ...values.map(value => `  ${tomlString(value)},`), ']']
+function formatOpenCodeMcpConfig(config, servers) {
+  return `${compactOpenCodeCommandArrays(JSON.stringify(config, void 0, 2), servers)}\n`
 }
 /**
  * Parse and validate the one committed MCP authority.
@@ -28605,10 +20890,10 @@ function parseCanonicalMcpConfig(text) {
   }
   return sortRecord(servers)
 }
-function readCanonicalMcpConfig(repoRoot) {
-  return parseCanonicalMcpConfig(
-    readFileSync(canonicalMcpConfigPath(repoRoot), 'utf8'),
-  )
+function parseStringArray(value, field) {
+  if (!Array.isArray(value) || value.some(item => typeof item !== 'string'))
+    throw new Error(`MCP server ${field} must be an array of strings`)
+  return [...value]
 }
 /**
  * Render the trusted-project `.codex/config.toml` MCP section.
@@ -28642,129 +20927,28 @@ function renderCodexMcpConfig(servers) {
   }
   return `${lines.join('\n')}\n`
 }
-function codexMcpOAuth(name, server) {
-  const support = findMcpProviderForServer(name)?.clients.codex
-  if (support?.kind !== 'oauth') return server.oauth
-  return support.clientId || support.callbackPort ? support : void 0
-}
-/**
- * Render OpenCode's project-root `opencode.json`.
- */
 function renderOpenCodeMcpConfig(servers) {
-  const entries = {}
-  for (const [name, server] of clientMcpServers(servers, 'opencode'))
-    entries[name] =
-      server.kind === 'http'
-        ? {
-            type: 'remote',
-            url: server.url,
-            ...(server.oauth === void 0 ? {} : { oauth: server.oauth }),
-            ...(server.bearerTokenEnv === void 0
-              ? {}
-              : {
-                  headers: {
-                    Authorization: `Bearer {env:${server.bearerTokenEnv}}`,
-                  },
-                  oauth: false,
-                }),
-          }
-        : {
-            command: [server.command, ...server.args],
-            type: 'local',
-          }
-  return `${compactOpenCodeCommandArrays(
-    JSON.stringify(
-      {
-        $schema: 'https://opencode.ai/config.json',
-        mcp: entries,
-      },
-      void 0,
-      2,
+  return formatOpenCodeMcpConfig(createOpenCodeMcpConfig(servers), servers)
+}
+function sortRecord(record) {
+  return Object.fromEntries(
+    Object.entries(record).toSorted(([left], [right]) =>
+      (0, import_strings.compareStr)(left, right),
     ),
-    servers,
-  )}\n`
-}
-const CODEX_ADAPTERS = [
-  {
-    path: CODEX_MCP_CONFIG_REL,
-    render: renderCodexMcpConfig,
-  },
-  {
-    path: CODEX_MCP_HOOKS_REL,
-    render: () => renderCodexHooksConfig(),
-  },
-]
-const CODEX_ADAPTER_PATHS = CODEX_ADAPTERS.map(adapter => adapter.path)
-/**
- * Write the Codex project adapters into `repoRoot`'s LIVE tree. Generated-
- * untracked, gitignored, regenerated at setup — so they land at the repo root,
- * never `template/base/universal`, they are not a cascade source, and never
- * committed.
- */
-function writeCodexAdapters(repoRoot, servers) {
-  for (let i = 0, { length } = CODEX_ADAPTERS; i < length; i += 1) {
-    const adapter = CODEX_ADAPTERS[i]
-    const dest = mcpConfigFilePath(repoRoot, adapter.path)
-    mkdirSync(path.dirname(dest), { recursive: true })
-    writeThroughMirrorLock(dest, adapter.render(servers))
-  }
-}
-/**
- * Regenerate the project MCP adapters from `.mcp.json`.
- *
- * The SOURCE is read from `configRoot` — `template/base/universal` in the
- * wheelhouse, the repo root in a member — because that is where the canonical
- * `.mcp.json` lives. Every OUTPUT lands in the repo-root LIVE tree,
- * generated-untracked and gitignored.
- *
- * `opencode.json` lands at the repo root, never beside its source in
- * `template/base/universal`: a generated per-repo alias inside the cascade
- * source makes the wheelhouse carry a copy no member wants, and leaves a fresh
- * clone with none at the root, where the harness actually reads it.
- */
-function writeMcpClientConfigs(repoRoot) {
-  const servers = readCanonicalMcpConfig(repoRoot)
-  writeCodexAdapters(repoRoot, servers)
-  const configPath = mcpConfigFilePath(repoRoot, OPENCODE_MCP_ADAPTER_REL)
-  const existing = existsSync(configPath)
-    ? JSON.parse(readFileSync(configPath, 'utf8'))
-    : {}
-  if (!(0, import_predicates.isPlainObject)(existing))
-    throw new TypeError(
-      'Cannot update opencode.json: expected an object. Fix the existing config before regenerating MCP servers.',
-    )
-  const generated = JSON.parse(renderOpenCodeMcpConfig(servers))
-  writeThroughMirrorLock(
-    configPath,
-    `${compactOpenCodeCommandArrays(
-      JSON.stringify(
-        {
-          ...generated,
-          ...existing,
-          mcp: generated.mcp,
-        },
-        null,
-        2,
-      ),
-      servers,
-    )}\n`,
   )
 }
-const SCRIPT_META$1 = {
-  describe:
-    'regenerates the Codex and OpenCode MCP client configs from the canonical .mcp.json',
-  help: `Usage: node scripts/fleet/mcp/config.mts --write
-
-  --write  regenerate .codex/config.toml and opencode.json (required)`,
-  json: 'result',
+function tomlString(value) {
+  return JSON.stringify(value)
 }
-if (
-  path.basename(fileURLToPath(import.meta.url)) === 'config.mts' &&
-  isMainModule$1(import.meta.url)
-)
-  runMain(main$1, SCRIPT_META$1)
+function tomlStringArray(values) {
+  const compact = JSON.stringify(values)
+  if (`args = ${compact}`.length <= 80) return [`args = ${compact}`]
+  return ['args = [', ...values.map(value => `  ${tomlString(value)},`), ']']
+}
 
-init_mirror_lock()
+const CODEX_MCP_CONFIG_REL = '.codex/config.toml'
+const OPENCODE_MCP_ADAPTER_REL = 'opencode.json'
+
 const INSTALLED_ADAPTER_PATHS = [
   ...ADAPTERS.map(adapter => adapter.dest),
   CODEX_MCP_CONFIG_REL,
@@ -28843,8 +21027,13 @@ function writeRuleAlias(dest, relative) {
     writeIfChanged(dest, POINTER_BODY)
   }
 }
-function projectInstalledAdapters(dest, preservedPaths) {
-  migrateRuleFile(dest, preservedPaths)
+function projectInstalledAdapters(dest, options) {
+  const opts = {
+    __proto__: null,
+    ...options,
+  }
+  const { preservedPaths } = opts
+  migrateRuleFile(dest, opts)
   for (let i = 0, { length } = ADAPTERS; i < length; i += 1) {
     const adapter = ADAPTERS[i]
     if (
@@ -28891,17 +21080,15 @@ function projectInstalledAdapters(dest, preservedPaths) {
   return INSTALLED_ADAPTER_PATHS
 }
 
-init_script_result()
-init_util()
 const SCRIPT_META = {
   describe:
     'Fetch, verify, and materialize the current green fleet tooling bundle.',
-  help: 'Usage: pnpm run sync-fleet [--from-template] [--json]',
+  help: 'Usage: pnpm run sync-fleet [--from-template] [--cached] [--json]',
   json: 'native',
 }
 const logger = getDep0Logger()
 const DEFAULT_REPO = 'SocketDev/socket-wheelhouse'
-const MANIFEST_NAME = 'release-bundle-manifest.json'
+const MANIFEST_NAME = 'publish-bundle-manifest.json'
 function resolveRepoRoot(startDir) {
   let cur = startDir
   const { root } = path.parse(cur)
@@ -28923,6 +21110,7 @@ function parseArgs(argv) {
     json: false,
     manifest: void 0,
     quiet: false,
+    refresh: void 0,
     refreshTracked: false,
     preserveTracked: false,
     repairTracked: false,
@@ -28942,6 +21130,7 @@ function parseArgs(argv) {
     else if (arg === '--from-template') opts.fromTemplate = true
     else if (arg === '--manifest') opts.manifest = argv[++i]
     else if (arg === '--quiet') opts.quiet = true
+    else if (arg === '--cached') opts.refresh = false
     else if (arg === '--preserve-tracked') opts.preserveTracked = true
     else if (arg === '--repair-tracked') opts.repairTracked = true
     else if (arg === '--refresh-tracked') opts.refreshTracked = true
@@ -29083,15 +21272,17 @@ async function ensureCurrentFleet(config, dependencies) {
     ...dependencies,
   }
   const dest = path.resolve(cfg.dest ?? repoRoot)
-  migrateRuleFile(
-    dest,
-    existsSync(path.join(dest, '.git')) ? readFleetTrackedPaths(dest) : void 0,
-  )
+  migrateRuleFile(dest, {
+    preservedPaths: existsSync(path.join(dest, '.git'))
+      ? readFleetTrackedPaths(dest)
+      : void 0,
+  })
   if (existsSync(sharedTemplateBasePath(dest))) return 0
   repairTrackedHydration(dest, { restoreMissing: cfg.repairTracked === true })
   const now = deps.now ?? Date.now
   const receipt = readEnsureCurrentReceipt(dest)
   if (
+    cfg.refresh !== true &&
     receipt !== void 0 &&
     isEnsureCurrentFresh(receipt, { now: now() }) &&
     appliedPayloadIsComplete(dest, receipt.ref)
@@ -29106,6 +21297,8 @@ async function ensureCurrentFleet(config, dependencies) {
     const current = readEnsureCurrentReceipt(dest)
     if (
       current !== void 0 &&
+      (cfg.refresh !== true ||
+        current.checkedAt > (receipt?.checkedAt ?? -Infinity)) &&
       isEnsureCurrentFresh(current, { now: now() }) &&
       appliedPayloadIsComplete(dest, current.ref)
     )
@@ -29125,13 +21318,19 @@ async function ensureCurrentFleet(config, dependencies) {
   )
   heartbeat.unref()
   try {
+    const latestReceipt = readEnsureCurrentReceipt(dest)
     const resolution = await (deps.resolve ?? resolveGreenPack)(
       cfg.repo ?? DEFAULT_REPO,
     )
     if (resolution === void 0) {
       const appliedRef = readAppliedRef(dest)
-      if (appliedRef !== void 0 && appliedPayloadIsComplete(dest, appliedRef))
+      if (appliedRef !== void 0 && appliedPayloadIsComplete(dest, appliedRef)) {
+        if (cfg.refresh === true)
+          logger.error(
+            `install-fleet: GHCR lookup failed; reusing verified local pack ${appliedRef}. The latest green pack was not confirmed.`,
+          )
         return 0
+      }
       logger.error(
         'install-fleet: no verified fleet pack is available locally or from GHCR. Run pnpm run sync-fleet when online.',
       )
@@ -29139,11 +21338,11 @@ async function ensureCurrentFleet(config, dependencies) {
     }
     const { receipt: oci, ref } = resolution
     if (
-      receipt !== void 0 &&
-      Date.parse(oci.created) < Date.parse(receipt.oci.created)
+      latestReceipt !== void 0 &&
+      Date.parse(oci.created) < Date.parse(latestReceipt.oci.created)
     ) {
       logger.error(
-        `install-fleet: refusing green-channel rollback from ${receipt.ref} (${receipt.oci.created}) to ${ref} (${oci.created}).`,
+        `install-fleet: refusing green-channel rollback from ${latestReceipt.ref} (${latestReceipt.oci.created}) to ${ref} (${oci.created}).`,
       )
       return 1
     }
@@ -29268,7 +21467,7 @@ async function installFleet(config) {
     const preservedPaths = preserveTracked
       ? readFleetTrackedPaths(dest)
       : void 0
-    migrateRuleFile(dest, preservedPaths)
+    migrateRuleFile(dest, { preservedPaths })
     const runtimeManifest = preservedPaths
       ? {
           ...memberManifest,
@@ -29325,7 +21524,7 @@ async function installFleet(config) {
           },
         }
       : memberManifest
-    installSegments(segmentsDir, dest, runtimeManifest, preservedPaths)
+    installSegments(segmentsDir, dest, runtimeManifest, { preservedPaths })
     const settingsResult = installSettingsSegment(
       segmentsDir,
       dest,
@@ -29346,7 +21545,7 @@ async function installFleet(config) {
         manifest: runtimeManifest,
       })
     try {
-      projectInstalledAdapters(dest, preservedPaths)
+      projectInstalledAdapters(dest, { preservedPaths })
       if (!preserveTracked)
         untrackGeneratedOutputs(dest, INSTALLED_ADAPTER_PATHS)
     } catch (error) {
@@ -29372,13 +21571,17 @@ async function installFleet(config) {
       installResult.skippedAlwaysTracked > 0
         ? ` ${installResult.skippedAlwaysTracked} always-tracked file(s) left to the cascade (run commit-cascade to refresh them).`
         : ''
+    const repoOwnedNote =
+      installResult.skippedRepoOwned > 0
+        ? ` ${installResult.skippedRepoOwned} repo-owned file(s) preserved.`
+        : ''
     const refreshedNote =
       installResult.refreshedTracked.length > 0
         ? ` Refreshed ${installResult.refreshedTracked.length} always-tracked file(s) from the bundle — commit these changes:\n` +
           installResult.refreshedTracked.map(rel => `  • ${rel}`).join('\n')
         : ''
     logger.log(
-      `install-fleet: placed ${installResult.placed} (+${installResult.unchanged} already current) of ${fileCount} file(s) + ${segmentCount} segment(s)${prunedNote} from ${sourceRef} (template ${manifest.templateSha}) → ${dest}.${skippedNote}${refreshedNote}`,
+      `install-fleet: placed ${installResult.placed} (+${installResult.unchanged} already current) of ${fileCount} file(s) + ${segmentCount} segment(s)${prunedNote} from ${sourceRef} (template ${manifest.templateSha}) → ${dest}.${skippedNote}${repoOwnedNote}${refreshedNote}`,
     )
     return 0
   } finally {
@@ -29428,17 +21631,20 @@ function runFromTemplate(config) {
   }
   if (!config.quiet)
     logger.log(
-      `install-fleet: materialized ${result.placed} file(s) from template/base/universal (${result.unchanged} already current, ${result.skippedAlwaysTracked} always-tracked left alone).`,
+      `install-fleet: materialized ${result.placed} file(s) from template/base/universal (${result.unchanged} already current, ${result.skippedAlwaysTracked} always-tracked left alone, ${result.skippedRepoOwned} repo-owned preserved).`,
     )
   return 0
 }
-async function main() {
+async function main(dependencies) {
   const parsed = parseArgs(process$1.argv.slice(2))
   const exitCode = parsed.fromTemplate
     ? runFromTemplate(parsed)
     : parsed.bundle !== void 0 || parsed.ref !== ''
       ? await installFleet(parsed)
-      : await ensureCurrentFleet(parsed)
+      : await (dependencies?.ensureCurrent ?? ensureCurrentFleet)({
+          ...parsed,
+          refresh: parsed.refresh !== false,
+        })
   if (parsed.json)
     process$1.stdout.write(`${renderScriptResult({ exitCode })}\n`)
   return exitCode
@@ -29506,6 +21712,7 @@ export {
   parseYamlEntryChunks,
   parseYamlKeyBlocks,
   pickBundleLayer,
+  pickFleetManifestLayer,
   pruneStaleFleetFiles,
   pullFleetBundleTarball,
   readAppliedFiles,
