@@ -274,7 +274,10 @@ function respondToUploadManifestFilesCoverage({ res }: CoverageRequest): void {
 }
 
 const sdkCoverageRoutes: CoverageRoute[] = [
-  { matches: url => url.includes('/purl'), respond: respondToPurlCoverage },
+  {
+    matches: url => url.includes('/purl') || url.endsWith('/batch'),
+    respond: respondToPurlCoverage,
+  },
   { matches: url => url.includes('/npm/'), respond: respondToNpmCoverage },
   {
     matches: url => url.includes('/organizations'),
