@@ -163,6 +163,7 @@
     "sweep:worktrees": "node scripts/fleet/worktree-sweep.mts",
     "sweep:worktrees:visit": "node scripts/fleet/worktree/sweep/run.mts",
     "release:hint": "node scripts/fleet/release/hint.mts",
+    "release:nightly:plan": "node scripts/repo/nightly-plan.mts",
     "slack:auth": "node scripts/fleet/setup/slack-token.mts",
     "slack:token": "node scripts/fleet/setup/slack-token.mts",
     "lockstep:assist": "node scripts/fleet/lockstep/assist/run.mts",
