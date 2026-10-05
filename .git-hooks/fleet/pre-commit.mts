@@ -390,6 +390,26 @@ function checkSoakExcludeDates(stagedFiles: string[]): number {
   return errors
 }
 
+// Files whose npx mentions are DATA, not commands: generated dispatch bundles
+// embed the npx-DETECTING guards themselves (pattern tables plus
+// fix-guidance strings showing real `npx <pkg>` examples). Their SOURCES are
+// scanned; the built artifact is exempt (flagging it blocks every cascade
+// that ships a rebuilt bundle). A hook README documents what that hook
+// BLOCKS, so a guard banning a command has to be able to name it. Same
+// reasoning as the built bundle above: the prose IS the ban.
+function isNpxScanExempt(file: string): boolean {
+  const normalized = normalizePath(file)
+  return (
+    file.endsWith('pnpm-lock.yaml') ||
+    file === 'CHANGELOG.md' ||
+    normalized.endsWith('/CHANGELOG.md') ||
+    normalized.endsWith('/hooks/fleet/_dist/fleet-pack.generated.cjs') ||
+    normalized.endsWith('/_dist/fleet-pack.snapshot.generated.cjs') ||
+    /(?:^|\/)\.config\/fleet\/oxlint-plugin\.mjs$/.test(normalized) ||
+    /\/hooks\/(?:fleet|repo)\/[^/]+\/README\.md$/.test(normalized)
+  )
+}
+
 function checkNpxDlxUsage(stagedFiles: string[]): number {
   let errors = 0
   // npx/dlx usage.
@@ -402,37 +422,7 @@ function checkNpxDlxUsage(stagedFiles: string[]): number {
     if (shouldSkipFile(file)) {
       continue
     }
-    // A generated rule table or detector corpus DESCRIBES npx risk in its own
-    // data; rewriting those strings would corrupt the payload. Markdown docs
-    // and package.json scripts stay in scope — an `npx` there is a real
-    // command, which is what this rule is for.
-    if (isStructuredDataFile(file)) {
-      continue
-    }
-    if (
-      file.endsWith('pnpm-lock.yaml') ||
-      // CHANGELOG entries discuss npx ecosystem *behavior* (cache
-      // semantics, naming conventions) as historical documentation —
-      // they're not commands. Skip the npx/dlx scan for changelogs.
-      file === 'CHANGELOG.md' ||
-      normalizePath(file).endsWith('/CHANGELOG.md') ||
-      // Generated dispatch bundles embed the npx-DETECTING guards
-      // themselves — pattern tables plus fix-guidance strings showing
-      // real `npx <pkg>` examples. Their SOURCES are scanned; the built
-      // artifact is exempt (flagging it blocks every cascade that ships
-      // a rebuilt bundle).
-      normalizePath(file).endsWith(
-        '/hooks/fleet/_dist/fleet-pack.generated.cjs',
-      ) ||
-      normalizePath(file).endsWith(
-        '/_dist/fleet-pack.snapshot.generated.cjs',
-      ) ||
-      // A hook README documents what that hook BLOCKS, so a guard banning a
-      // command has to be able to name it. Same reasoning as the built bundle
-      // above: the prose IS the ban, never an instruction to run it. The hook
-      // source is still scanned.
-      /\/hooks\/(?:fleet|repo)\/[^/]+\/README\.md$/.test(normalizePath(file))
-    ) {
+    if (isNpxScanExempt(file)) {
       continue
     }
     const text = readFileForScan(file)
@@ -443,17 +433,14 @@ function checkNpxDlxUsage(stagedFiles: string[]): number {
     if (hits.length > 0) {
       logger.fail(`npx/dlx usage found in: ${file}`)
       const hItems2 = hits.slice(0, 3)
-      for (let i = 0, { length } = hItems2; i < length; i += 1) {
-        const h = hItems2[i]!
-        logger.info(`${h.lineNumber}: ${h.line.trim()}`)
-        if (h.suggested && h.suggested !== h.line) {
-          logger.info(`     fix: ${h.suggested.trim()}`)
-        }
+      for (let k = 0, { length: klen } = hits; k < klen; k += 1) {
+        logger.info(`${hits[k]!.lineNumber}: ${hits[k]!.line.trim()}`)
       }
       logger.info(
-        "Use 'pnpm exec <package>' or 'pnpm run <script>' instead. For " +
-          'documentation lines that need the literal `npx` form, append ' +
-          `the marker \`${suppressionFor(file, 'npx')}\`.`,
+        'pnpm is the fleet package runner: `pnpm dlx <pkg>` / `pnpm <script>` ' +
+          'replaces npx/dlx. For documentation lines that need the literal ' +
+          '`npx` form, append the marker ' +
+          `\`${suppressionFor(file, 'npx')}\`.`,
       )
       errors++
     }
