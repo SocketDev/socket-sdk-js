@@ -12,6 +12,11 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  isLinkedAgentWorktree,
+  pathsOutsideAgentWorktreeScope,
+  readAgentWorktreeScope,
+} from '../../scripts/fleet/worktree/agent-scope.mts'
 import { debugCheck } from '../_shared/check-output.mts'
 
 import {
@@ -101,6 +106,42 @@ function refuseEmptyStagedIndex(): number {
     return 1
   }
   return 0
+}
+
+function refuseOutOfScopeStagedPaths(repoRoot: string): number {
+  if (!isLinkedAgentWorktree(repoRoot)) {
+    return 0
+  }
+  const scope = readAgentWorktreeScope(repoRoot)
+  if (!scope) {
+    logger.fail('Refusing to commit from an unregistered linked worktree.')
+    logger.info(
+      '  fix: create the worktree with --agent and one or more --scope paths.',
+    )
+    return 1
+  }
+  const stagedPaths = gitLines(
+    'diff',
+    '--cached',
+    '--name-only',
+    '--diff-filter=ACMRD',
+  ).map(normalizePath)
+  const outside = pathsOutsideAgentWorktreeScope(stagedPaths, scope.paths)
+  if (outside.length === 0) {
+    return 0
+  }
+  logger.fail('Refusing to commit paths outside this feature worktree scope.')
+  const shownPaths = outside.slice(0, 8)
+  for (let i = 0, { length } = shownPaths; i < length; i += 1) {
+    logger.info(`  ${shownPaths[i]!}`)
+  }
+  if (outside.length > 8) {
+    logger.info(`  …and ${outside.length - 8} more`)
+  }
+  logger.info(
+    '  fix: unstage those paths or create a separate scoped worktree.',
+  )
+  return 1
 }
 
 function checkSigningConfig(): number {
@@ -768,6 +809,10 @@ const main = (): number => {
     '--name-only',
     '--diff-filter=ACM',
   ).map(normalizePath)
+  const repoTopline = gitLines('rev-parse', '--show-toplevel')[0] ?? ''
+  if (refuseOutOfScopeStagedPaths(repoTopline || process.cwd()) > 0) {
+    return 1
+  }
   // No add/change/modify staged — but the empty-index gate above already
   // proved the commit is non-empty, a pure-deletion or merge commit. Nothing
   // for the content scanners to read, so the security sweep is a no-op.
@@ -782,8 +827,6 @@ const main = (): number => {
 
   // Repo toplevel — used below as the wiring root. The cross-repo scanner now
   // derives the repo name per-file from each file's `.git` root.
-  const repoTopline = gitLines('rev-parse', '--show-toplevel')[0] ?? ''
-
   let errors = 0
   errors += checkDsStoreFiles(stagedFiles)
   errors += checkLogFiles(stagedFiles)
