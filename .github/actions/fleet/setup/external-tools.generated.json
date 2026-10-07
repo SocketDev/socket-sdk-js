@@ -445,11 +445,7 @@
         "autoInstall": false,
         "autoUpdate": false,
         "execAutoInstall": false,
-        "idiomaticVersionFileEnableTools": [
-          "node",
-          "rust",
-          "go"
-        ],
+        "idiomaticVersionFileEnableTools": ["node", "rust", "go"],
         "locked": true,
         "notFoundAutoInstall": false,
         "notFoundSystemFallback": false,
@@ -747,54 +743,54 @@
     },
     "pnpm": {
       "notes": [
-        "Eight supported platforms use native binaries from the pnpm v12.9.1 GitHub release, including darwin-x64.",
+        "Eight supported platforms use native binaries from the pnpm v12.10.1 GitHub release, including darwin-x64.",
         "Linux glibc and musl platforms use distinct assets and integrity values.",
         "Each platform asset has a verified SHA-512 integrity value.",
-        "The dated soak exception expires on 2026-10-10."
+        "The dated soak exception expires on 2026-10-13."
       ],
       "description": "Fast, disk space efficient package manager",
       "repository": "github:pnpm/pnpm",
-      "version": "12.9.1",
-      "tag": "v12.9.1",
+      "version": "12.10.1",
+      "tag": "v12.10.1",
       "platforms": {
         "darwin-arm64": {
           "asset": "pnpm-darwin-arm64.tar.gz",
-          "integrity": "sha512-KBY1efj7bUwzOPymmQAVJCAiSW2OpIiwX9GnuhzB9c66ZEdKT+MxKc3eNQ4t7WxaCmeVasuxnIs3GWmaE2f6xA=="
+          "integrity": "sha512-5SvbhcEv699H17dZ7u0Ab3DF1P//qJGri9IJ3hF+Wmw3bDDX3k6igPG7itAHoytAVIAt5/wo3x/kPaFnXktOFg=="
         },
         "darwin-x64": {
           "asset": "pnpm-darwin-x64.tar.gz",
-          "integrity": "sha512-kO4lMv3NTPjDu08ITCz7amdql7XdNIBhsb7GNjB4N46EQbOEIg1jKqFucxc8zFChhksofi5GrRQxQ+ePyOBI2Q=="
+          "integrity": "sha512-25OcWYI3scMDKSS35wwh1RfmpwsyWr+f1GJmJhl3UGLgc2aM08WFLXZqbwnIloTqFaLBf36AtHrdiKj3/1n5yQ=="
         },
         "linux-arm64": {
           "asset": "pnpm-linux-arm64.tar.gz",
-          "integrity": "sha512-jqPz0eakopYiDsgn4hNeNPN1Yfx8rvh0ngGxAUXcuwi0HYNyn2h0/tc0iAbiS4okSWuNKJ00WFtMteELAqHwXg=="
+          "integrity": "sha512-248GmCrXat/zoxnIIiDP2rfV0iPxP456eI4U/Yq3a0VdQRPmh/WLL3juSFVAyrQWgUOFRbTqIgBBHCX3il5Pfw=="
         },
         "linux-arm64-musl": {
           "asset": "pnpm-linux-arm64-musl.tar.gz",
-          "integrity": "sha512-N/fLbCzGzfVpFjHoi5wS0QrDy2NkQnDS4WrZSD4rZQOZfZ6lbzcfy/wVy8jt+NmOUtBEomR3Kkd1YNKe42muYA=="
+          "integrity": "sha512-JAL5hrzKHe2ZXQPLSe5NQg30vtPGb5wEbhJVEGCQgWBpHS6ubA5famQunPQ716xJeWcyGeGzRdFdaMlz9wZZqQ=="
         },
         "linux-x64": {
           "asset": "pnpm-linux-x64.tar.gz",
-          "integrity": "sha512-vGKnhv2BjECcBAbTlRooQdrXhYgdRbKEqD4VLL4tML+0rDD7kdyURlL6KD+NxjXvsVB2fekcJX/vKBWdyTEZqQ=="
+          "integrity": "sha512-vvgv2+2omqOZKWdj06GVnC+huCGnoi1B8gYoLiGJSmpmJCbtSbzG8PXh+K/l8+E2poCBCFG5jjfAt/rslpGhGA=="
         },
         "linux-x64-musl": {
           "asset": "pnpm-linux-x64-musl.tar.gz",
-          "integrity": "sha512-e/nbnXVLVcpxXGt+DjpvliW0JS+bElUwePmb3mwfrFDS/tIs7/w2Lxm7/Bz+y1ZZlKXb/oW35BgVXIuAQvbcHA=="
+          "integrity": "sha512-PQpjyJgG+unKNVelOKAFGgHZoBgF4nYKveCMUqjPM68vyq94VHrw/nKPedRrPSAnu+6p+I4gfweaGIJfWpyedw=="
         },
         "win32-arm64": {
           "asset": "pnpm-win32-arm64.zip",
-          "integrity": "sha512-UsILAOi1l8ASIQIiT8i/YL4Q7onj8Wo5XVIhN5KrlCOF86/FGhO+C/nEgeD1OkuY6jc3sYlPIJE4ouvM0h5Ucw=="
+          "integrity": "sha512-fE+4VjTu1g9DP6akXA7LwudU9AgGvqsBEFbAZFjQi5bY7sGxIU9Rp7xfEHrAGp/b7XnBzdRVgnEsk8une5oIvw=="
         },
         "win32-x64": {
           "asset": "pnpm-win32-x64.zip",
-          "integrity": "sha512-iWK++jwlMf4Mjb61AdXXYp5f8MPnwkNfTQDZaHNb4jf+Gtkt7wJ65wqXcYYuVtO1fh+b3FMTfh4mUJH97PRg+g=="
+          "integrity": "sha512-+EAJeSq0IHPqO2LuMa12eqBDt04tmYB60lFNPpc3Z6n9O2T5YR+AhcDsUe6CFfxaYIZ74ccWz01UGeNfPmyFbQ=="
         }
       },
       "origin": "gh-asset",
       "soakBypass": {
-        "version": "12.9.1",
-        "published": "2026-10-03",
-        "removable": "2026-10-10"
+        "version": "12.10.1",
+        "published": "2026-10-06",
+        "removable": "2026-10-13"
       }
     },
     "rustup": {

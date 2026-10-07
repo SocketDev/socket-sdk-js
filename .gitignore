@@ -4,7 +4,7 @@
 # re-cascade via `pnpm run sync`. Project-specific ignores stay
 # OUTSIDE this block; the fixer preserves them.
 # Per-machine Claude Code permission config + log dirs stay ignored;
-# the cascaded subdirs (agents, commands, hooks, output-styles,
+# the cascaded subdirs (agents, commands, hooks, output-styles, plugins,
 # settings.json, skills, workflows) are explicitly re-included so the
 # wheelhouse cascade can ship them.
 /.claude/*
@@ -12,6 +12,7 @@
 !/.claude/commands/
 !/.claude/hooks/
 !/.claude/output-styles/
+!/.claude/plugins/
 !/.claude/rules/
 !/.claude/settings.json
 !/.claude/skills/
@@ -71,7 +72,7 @@
 
 # Derived cross-harness rule adapters — generated per-repo, per-platform by
 # the multi-agent scaffolding (setup / init / sync) script from .claude/skills/
-# and CLAUDE.md, never committed. A tracked symlink checks out as a plain
+# and AGENTS.md, never committed. A tracked symlink checks out as a plain
 # pointer file on Windows, so each host gets a real symlink generated on its
 # own OS. Tracking them only produces churn + merge conflicts. Keep in sync
 # with ADAPTERS in scripts/fleet/gen/harness-adapters.mts + the .agents/ mirror
@@ -90,7 +91,7 @@
 /.kiro/
 /.opencode/
 /.windsurf/
-/AGENTS.md
+/CLAUDE.md
 /opencode.json
 
 # VS Code: ignore the dir contents so a hidden tasks.json with a `folderOpen`
@@ -189,7 +190,9 @@ opencode.json
 .claude/commands/fleet/update-hooks-dry.md
 .claude/commands/fleet/update-pricing.md
 .claude/commands/fleet/update-security.md
+.claude/hooks/fleet/_dist/fleet-pack.excluded.generated.cjs
 .claude/hooks/fleet/_dist/fleet-pack.generated.cjs
+.claude/hooks/fleet/_dist/fleet-pack.snapshot.generated.cjs
 .claude/hooks/fleet/_dist/launchers/dispatch-launcher-darwin-arm64
 .claude/hooks/fleet/_dist/launchers/dispatch-launcher-darwin-x64
 .claude/hooks/fleet/_dist/launchers/dispatch-launcher-linux-arm64
@@ -4730,7 +4733,6 @@ desktop.ini
 *.lnk
 
 # Environment & config
-/.claude/*
 !/.claude/agents/
 !/.claude/commands/
 !/.claude/ops/
