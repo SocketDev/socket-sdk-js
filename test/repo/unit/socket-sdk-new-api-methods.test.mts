@@ -20,8 +20,8 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
           retryable: false,
         },
       }
-      nock('https://api.socket.dev')
-        .post('/v0/orgs/example-org/purl', {
+      nock('https://purl-api.socket.dev')
+        .post('/orgs/example-org/batch', {
           components: [{ purl: 'pkg:npm/example-missing' }],
         })
         .query({ labels: 'production', purlErrors: true })
@@ -53,8 +53,8 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
         },
       ]
 
-      nock('https://api.socket.dev')
-        .post('/v0/orgs/test-org/purl?alerts=true&labels=production')
+      nock('https://purl-api.socket.dev')
+        .post('/orgs/test-org/batch?alerts=true&labels=production')
         .reply(200, mockResponse.map(item => JSON.stringify(item)).join('\n'))
 
       const result = await getClient().batchOrgPackageFetch(
@@ -83,8 +83,8 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
     })
 
     it('should handle error responses for batchOrgPackageFetch', async () => {
-      nock('https://api.socket.dev')
-        .post('/v0/orgs/test-org/purl')
+      nock('https://purl-api.socket.dev')
+        .post('/orgs/test-org/batch')
         .reply(400, { error: { message: 'Invalid request' } })
 
       const result = await getClient().batchOrgPackageFetch('test-org', {
@@ -107,8 +107,8 @@ describe('Socket SDK - New API Methods (v3.3.0)', () => {
         },
       ]
 
-      nock('https://api.socket.dev')
-        .post('/v0/orgs/test-org/purl?compact=true')
+      nock('https://purl-api.socket.dev')
+        .post('/orgs/test-org/batch?compact=true')
         .reply(200, mockResponse.map(item => JSON.stringify(item)).join('\n'))
 
       const result = await getClient().batchOrgPackageFetch(

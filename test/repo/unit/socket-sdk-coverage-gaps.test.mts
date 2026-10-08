@@ -28,7 +28,7 @@ describe('SocketSdk - batchOrgPackageFetch', () => {
         body += chunk.toString()
       })
       req.on('end', () => {
-        if (url.includes('/orgs/test-org/purl') && req.method === 'POST') {
+        if (url.includes('/orgs/test-org/batch') && req.method === 'POST') {
           res.writeHead(200, { 'Content-Type': 'application/x-ndjson' })
 
           if (url.includes('compact=true')) {
