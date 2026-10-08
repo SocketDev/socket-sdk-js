@@ -2815,7 +2815,7 @@ var require_socket$2 = /* @__PURE__ */ __commonJSMin(exports => {
     wheelhouse: `_wheelhouse`,
   }
   const SOCKET_LIB_NAME = '@socketsecurity/lib'
-  const SOCKET_LIB_VERSION = '7.0.3'
+  const SOCKET_LIB_VERSION = '7.1.0'
   const SOCKET_IPC_HANDSHAKE = 'SOCKET_IPC_HANDSHAKE'
   const CACHE_SOCKET_API_DIR = 'socket-api'
   const REGISTRY = 'registry'
@@ -8721,6 +8721,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
   )
   var require_parse = /* @__PURE__ */ __commonJSMin((exports$22, module$17) => {
     const stringify = require_stringify()
+    const MAX_DEPTH = 64
     /**
      * Constants.
      */
@@ -8908,6 +8909,10 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
          */
         if (value === CHAR_LEFT_CURLY_BRACE) {
           depth++
+          if (depth > MAX_DEPTH)
+            throw new _p_SyntaxErrorCtor(
+              `Input nesting depth exceeds limit. Where: braces parser. Saw ${depth}; wanted at most ${MAX_DEPTH}. Fix: reduce nested brace groups.`,
+            )
           block = push({
             type: 'brace',
             open: true,
@@ -14690,9 +14695,9 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       let resolvingCount = 0
       let currentIndex = 0
       const iterator =
-        iterable[Symbol.iterator] === void 0
-          ? iterable[Symbol.asyncIterator]()
-          : iterable[Symbol.iterator]()
+        iterable[Symbol.asyncIterator] === void 0
+          ? iterable[Symbol.iterator]()
+          : iterable[Symbol.asyncIterator]()
       const signalListener = () => {
         reject(signal.reason)
       }
@@ -14704,10 +14709,12 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         cleanup()
       }
       const reject = reason => {
+        if (isResolved) return
         isRejected = true
         isResolved = true
         reject_(reason)
         cleanup()
+        if (!isIterableDone) closeIterator(iterator)
       }
       if (signal) {
         if (signal.aborted) {
@@ -14718,7 +14725,7 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
       }
       const next = async () => {
         if (isResolved) return
-        const nextItem = await iterator.next()
+        const nextItem = isIterableDone ? { done: true } : await iterator.next()
         const index = currentIndex
         currentIndex++
         if (nextItem.done) {
@@ -14750,19 +14757,18 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
             const value = await mapper(element, index)
             if (value === pMapSkip) skippedIndexesMap.set(index, value)
             result[index] = value
-            resolvingCount--
+          } catch (error) {
+            if (stopOnError) {
+              reject(error)
+              return
+            }
+            errors.push(error)
+          }
+          resolvingCount--
+          try {
             await next()
           } catch (error) {
-            if (stopOnError) reject(error)
-            else {
-              errors.push(error)
-              resolvingCount--
-              try {
-                await next()
-              } catch (error) {
-                reject(error)
-              }
-            }
+            reject(error)
           }
         })()
       }
@@ -14778,6 +14784,11 @@ var require_pico_pack = /* @__PURE__ */ __commonJSMin((exports, module) => {
         }
       })()
     })
+  }
+  async function closeIterator(iterator) {
+    try {
+      await iterator.return?.()
+    } catch {}
   }
   var pMapSkip
   var init_p_map = __esmMin(() => {
@@ -17186,7 +17197,7 @@ var require_predicates = /* @__PURE__ */ __commonJSMin(exports => {
   function separatorWrappedSubstring(pathLike) {
     if (!isSeparatorWrapped(pathLike)) return
     const filepath = require_paths_shared.pathLikeToString(pathLike)
-    return `/${require_primordials_string.StringPrototypeSlice(filepath, 1, -1).replaceAll('\\', '/')}/`
+    return `/${require_paths_shared.normalizePath(require_primordials_string.StringPrototypeSlice(filepath, 1, -1))}/`
   }
   exports.isAbsolute = isAbsolute
   exports.isNodeModules = isNodeModules
