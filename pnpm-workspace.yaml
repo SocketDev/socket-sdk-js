@@ -211,7 +211,7 @@ catalog:
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
   # dated minimumReleaseAgeExclude entry above.
   'typebox': 1.3.34
-  '@socketregistry/packageurl-js': 1.5.3
+  '@socketregistry/packageurl-js': 1.6.0
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used INSIDE that same package — Node ESM treats it as a
   # self-reference and resolves through the local exports map, not
@@ -222,7 +222,7 @@ catalog:
   # version regardless of where the importing file lives. src/ +
   # test/ code uses the canonical name because vitest aliases that
   # to local src/.
-  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.3'
+  '@socketregistry/packageurl-js-stable': npm:@socketregistry/packageurl-js@1.6.0
   '@socketsecurity/lib': 7.1.0
   '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@7.1.0'
   '@socketsecurity/registry': 2.0.5
