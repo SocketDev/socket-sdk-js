@@ -4385,10 +4385,14 @@ scripts/fleet/npm/auth-token.mts
 scripts/fleet/npm/native-artifacts.mts
 scripts/fleet/npm/publish-npm.mts
 scripts/fleet/npm/publish/coordinator.mts
+scripts/fleet/npm/publish/finalize-retry.mts
 scripts/fleet/npm/publish/journal.mts
 scripts/fleet/npm/publish/release-reservation.mts
+scripts/fleet/npm/publish/retry-state.mts
+scripts/fleet/npm/publish/retry.mts
 scripts/fleet/npm/publish/run-cli.mts
 scripts/fleet/npm/publish/run.mts
+scripts/fleet/npm/publish/scan-retry.mts
 scripts/fleet/npm/scan.mts
 scripts/fleet/npm/staged.mts
 scripts/fleet/npm/trusted-publisher/migrate.mts
@@ -4686,6 +4690,7 @@ scripts/fleet/registry/npm/account-inventory/collect.mts
 scripts/fleet/registry/npm/account-inventory/projection.mts
 scripts/fleet/registry/npm/account-inventory/redaction.mts
 scripts/fleet/registry/npm/account-inventory/types.mts
+scripts/fleet/registry/npm/approval-scan.mts
 scripts/fleet/registry/npm/approve.mts
 scripts/fleet/registry/npm/auth-identity.mts
 scripts/fleet/registry/npm/auth-posture.mts
@@ -4712,6 +4717,7 @@ scripts/fleet/registry/npm/publish-failure.mts
 scripts/fleet/registry/npm/region-comments.mts
 scripts/fleet/registry/npm/registry.mts
 scripts/fleet/registry/npm/release-assets.mts
+scripts/fleet/registry/npm/remote-scan-artifact.mts
 scripts/fleet/registry/npm/remote-scan-receipt.mts
 scripts/fleet/registry/npm/reserve-release.mts
 scripts/fleet/registry/npm/settings/migrations.mts

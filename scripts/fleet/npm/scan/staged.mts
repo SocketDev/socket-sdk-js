@@ -29,7 +29,7 @@ const SHA_RE = /^[0-9a-f]{40}$/u
 const STAGE_ID_RE = /^[0-9a-f-]{36}$/u
 const RECEIPT_PATH = path.join(
   rootPath,
-  '.cache/fleet/npm-socket-staged-scan',
+  '.cache/fleet/npm-scan-staged',
   NPM_SCAN_RECEIPT_FILE,
 )
 
@@ -135,6 +135,8 @@ function receiptFrom(
     packageName: config.packageName,
     packageVersion: config.packageVersion,
     policy: {
+      gate: 'malware',
+      blockingAlerts: verdict.blockingAlerts,
       errorAlerts: verdict.errorAlerts.length,
       totalAlerts: verdict.totalAlerts,
       warnAlerts: verdict.warnAlerts.length,
@@ -144,7 +146,7 @@ function receiptFrom(
     runAttempt: config.currentRunAttempt,
     runId: config.currentRunId,
     scanId: verdict.scanId,
-    schemaVersion: 1,
+    schemaVersion: 2,
     sourceSha: config.sourceSha,
     stageId: config.stageId,
     stageSha1: config.stageSha1,
@@ -153,11 +155,29 @@ function receiptFrom(
   })
 }
 
+async function buildAndPackScanTarball(
+  packageName: string,
+  packageVersion: string,
+): Promise<string | undefined> {
+  for (const [command, ...args] of [
+    [process.execPath, 'scripts/fleet/build/production.mts'],
+    ['pnpm', 'run', '--if-present', 'build:publish'],
+  ] as const) {
+    const result = await runCapture(command, args, rootPath)
+    if (result.code !== 0) {
+      throw new Error(
+        `Scan artifact build failed. Where: ${command} ${args.join(' ')}. Saw: exit ${result.code}; wanted 0. Fix: repair the signed release build before scanning staged bytes.`,
+      )
+    }
+  }
+  return await defaultPackTarball(packageName, packageVersion)
+}
+
 function runtimeDeps(packageName: string): ScanCiDeps {
   return {
     headSha: currentHeadSha,
     download: defaultDownloadStagedTarball,
-    pack: defaultPackTarball,
+    pack: buildAndPackScanTarball,
     scan: scanStagedEntryDetailed,
     subject(root) {
       const layout = resolveNpmWorkspaceLayout(root)

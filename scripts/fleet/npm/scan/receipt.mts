@@ -58,7 +58,7 @@ export function verifyNpmScanSourceBinding(config: {
 }
 
 export interface NpmRemoteScanReceipt {
-  schemaVersion: 1
+  schemaVersion: 2
   repository: string
   workflow: 'publish-npm.yml'
   runId: number
@@ -72,6 +72,8 @@ export interface NpmRemoteScanReceipt {
   scanId: string
   verdict: 'passed'
   policy: {
+    gate: 'malware'
+    blockingAlerts: number
     errorAlerts: number
     totalAlerts: number
     warnAlerts: number
@@ -82,6 +84,29 @@ function recordOf(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {}
+}
+
+export function hasPassingNpmScanPolicyCounts(value: unknown): boolean {
+  const policy = recordOf(value)
+  const errors = policy['errorAlerts']
+  const total = policy['totalAlerts']
+  const warnings = policy['warnAlerts']
+  const blocking = policy['blockingAlerts']
+  return (
+    policy['gate'] === 'malware' &&
+    blocking === 0 &&
+    typeof errors === 'number' &&
+    Number.isSafeInteger(errors) &&
+    errors >= 0 &&
+    typeof total === 'number' &&
+    Number.isSafeInteger(total) &&
+    total >= 0 &&
+    typeof warnings === 'number' &&
+    Number.isSafeInteger(warnings) &&
+    warnings >= 0 &&
+    errors <= total &&
+    warnings <= total - errors
+  )
 }
 
 export function npmScanReceiptArtifactName(
@@ -119,13 +144,15 @@ export function parseNpmRemoteScanReceipt(
     scanId: receipt['scanId'],
     verdict: receipt['verdict'],
     policy: {
+      gate: policy['gate'],
+      blockingAlerts: policy['blockingAlerts'],
       errorAlerts: policy['errorAlerts'],
       totalAlerts: policy['totalAlerts'],
       warnAlerts: policy['warnAlerts'],
     },
   }
   const checks = [
-    parsed.schemaVersion === 1,
+    parsed.schemaVersion === 2,
     typeof parsed.repository === 'string',
     parsed.workflow === 'publish-npm.yml',
     Number.isSafeInteger(parsed.runId),
@@ -141,12 +168,7 @@ export function parseNpmRemoteScanReceipt(
     typeof parsed.stageSha1 === 'string' && SHA_RE.test(parsed.stageSha1),
     typeof parsed.scanId === 'string' && parsed.scanId !== '',
     parsed.verdict === 'passed',
-    Number.isSafeInteger(parsed.policy.errorAlerts),
-    parsed.policy.errorAlerts === 0,
-    Number.isSafeInteger(parsed.policy.totalAlerts),
-    parsed.policy.totalAlerts === 0,
-    Number.isSafeInteger(parsed.policy.warnAlerts),
-    parsed.policy.warnAlerts === 0,
+    hasPassingNpmScanPolicyCounts(parsed.policy),
   ]
   if (checks.includes(false)) {
     throw new Error('Remote npm scan receipt is malformed or non-passing.')
