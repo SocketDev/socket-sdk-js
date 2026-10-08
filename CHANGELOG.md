@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [4.2.0](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.2.0) - 2026-10-08
+
+### Fixed
+
+- **`build`** — align SDK bundle tooling
+- **`purl`** — route batch requests through purl api
+
+### Internal
+
+- **`deps`** — repair SDK workspace catalog
+- **`fleet`** — point run-main imports at process/main/run
+- **`bootstrap`** — point preinstall at current fleet payload
+
 ## [4.1.5](https://github.com/SocketDev/socket-sdk-js/releases/tag/v4.1.5) - 2026-09-22
 
 ### Added
