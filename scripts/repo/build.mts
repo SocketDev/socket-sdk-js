@@ -68,7 +68,13 @@ export async function buildSource(
   try {
     const startTime = Date.now()
     const { output, ...inputOptions } = buildConfig
-    const bundle = await rolldown(inputOptions)
+    const bundle = await rolldown({
+      ...inputOptions,
+      experimental: {
+        ...inputOptions.experimental,
+        attachDebugInfo: 'none',
+      },
+    })
     try {
       await bundle.write(output)
     } finally {
@@ -78,7 +84,13 @@ export async function buildSource(
     // Node-free so it runs in a Chrome MV3 service worker; the package.json
     // `browser` export condition selects it.
     const { output: browserOutput, ...browserInputOptions } = browserBuildConfig
-    const browserBundle = await rolldown(browserInputOptions)
+    const browserBundle = await rolldown({
+      ...browserInputOptions,
+      experimental: {
+        ...browserInputOptions.experimental,
+        attachDebugInfo: 'none',
+      },
+    })
     try {
       await browserBundle.write(browserOutput)
     } finally {
@@ -89,7 +101,13 @@ export async function buildSource(
     // verbatim relative requires.
     const { output: externalsOutput, ...externalsInputOptions } =
       externalsBuildConfig
-    const externalsBundle = await rolldown(externalsInputOptions)
+    const externalsBundle = await rolldown({
+      ...externalsInputOptions,
+      experimental: {
+        ...externalsInputOptions.experimental,
+        attachDebugInfo: 'none',
+      },
+    })
     try {
       await externalsBundle.write(externalsOutput)
     } finally {
@@ -178,7 +196,14 @@ export async function watchBuild(options: BuildOptions = {}): Promise<number> {
 
   try {
     const { output, ...inputOptions } = buildConfig
-    const watcher = watch({ ...inputOptions, output })
+    const watcher = watch({
+      ...inputOptions,
+      experimental: {
+        ...inputOptions.experimental,
+        attachDebugInfo: 'none',
+      },
+      output,
+    })
 
     // rolldown requires closing each build's result on BUNDLE_END to avoid
     // leaking native handles; ERROR surfaces a failed rebuild.

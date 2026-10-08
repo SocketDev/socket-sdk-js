@@ -409,7 +409,7 @@ overrides:
   picomatch: 4.0.7
   protobufjs: 7.6.6
   rolldown: 1.2.12
-  sharp: 0.35.4
+  sharp: 0.35.5
   string-width: 8.2.2
   strip-ansi: 7.2.0
   undici: 6.28.1
@@ -1043,10 +1043,6 @@ importers:
         version: 26.6.3
 
   .claude/hooks/fleet/claude-md-rule-add-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260930.4)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1333,12 +1329,6 @@ importers:
         specifier: 'catalog:'
         version: 26.6.3
 
-  .claude/hooks/fleet/done-is-done-nudge:
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.6.3
-
   .claude/hooks/fleet/dont-blame-nudge:
     devDependencies:
       '@types/node':
@@ -1441,12 +1431,6 @@ importers:
         specifier: 'catalog:'
         version: 26.6.3
 
-  .claude/hooks/fleet/fleet-membership-claim-guard:
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.6.3
-
   .claude/hooks/fleet/follow-direct-imperative-nudge:
     devDependencies:
       '@types/node':
@@ -1523,12 +1507,6 @@ importers:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260930.4)'
-
-  .claude/hooks/fleet/goal-scope-nudge:
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.6.3
 
   .claude/hooks/fleet/golden-fixtures-are-named-golden-at-edit:
     devDependencies:
@@ -1733,10 +1711,6 @@ importers:
         version: 26.6.3
 
   .claude/hooks/fleet/memory-codify-nudge:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260930.4)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2170,10 +2144,6 @@ importers:
         version: 26.6.3
 
   .claude/hooks/fleet/no-pr-assets-in-branch-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260930.4)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2620,10 +2590,6 @@ importers:
         version: 26.6.3
 
   .claude/hooks/fleet/parallel-agent-edit-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260930.4)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2712,10 +2678,6 @@ importers:
         version: 26.6.3
 
   .claude/hooks/fleet/peer-workstream-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260930.4)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3374,10 +3336,6 @@ importers:
         version: 26.6.3
 
   .claude/hooks/fleet/snapshot-hostile-require-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260930.4)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3685,16 +3643,6 @@ importers:
         specifier: 'catalog:'
         version: 26.6.3
 
-  .claude/hooks/fleet/use-package-json-scripts-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260930.4)'
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.6.3
-
   .claude/hooks/fleet/use-repo-test-script-guard:
     devDependencies:
       '@types/node':
@@ -3875,8 +3823,6 @@ importers:
   .config/fleet/oxlint-plugin/fleet/export-top-level-functions: {}
 
   .config/fleet/oxlint-plugin/fleet/exported-name-has-domain-word: {}
-
-  .config/fleet/oxlint-plugin/fleet/git-directories-are-hierarchical: {}
 
   .config/fleet/oxlint-plugin/fleet/guard-contract: {}
 
@@ -4067,8 +4013,6 @@ importers:
   .config/fleet/oxlint-plugin/fleet/prefer-mirror-lock-write: {}
 
   .config/fleet/oxlint-plugin/fleet/prefer-mock-import: {}
-
-  .config/fleet/oxlint-plugin/fleet/prefer-modern-syntax: {}
 
   .config/fleet/oxlint-plugin/fleet/prefer-node-builtin-imports: {}
 

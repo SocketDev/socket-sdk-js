@@ -167,7 +167,7 @@ overrides:
   # sharp 0.35.0 dropped its install script (source compile is opt-in); pin the
   # logo generator's sharp to 0.35.3 so it stays on a no-build-script line — its
   # prebuilt @img/sharp-* binaries cover the rasterize + animated-GIF encode.
-  'sharp': '0.35.4'
+  'sharp': '0.35.5'
   'string-width': '8.2.2'
   # Dedup compat shim: strip-ansi 6 (CJS yargs@17 cluster) vs 7 (ESM,
   # via string-width@8 -> markdownlint). See the patchedDependencies comment
