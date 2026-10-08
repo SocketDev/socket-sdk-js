@@ -27,7 +27,7 @@
 - The `squash-history` opt-in tracks the release boundary: the first release FREEZES history through that commit, and only the unreleased tail squashes. [`squash-until-release`](docs/fleet/agents.md/squash-until-release.md)
 - `fleet-main-protection` blocks force-push, `fleet-tag-protection` blocks `v*` tag deletes. [`history-rewrites`](docs/fleet/agents.md/history-rewrites.md)
 - npm stages burn versions: minor default, odai patch/minor, major needs `X.Y.Z-prerelease`. [`version-bumps`](docs/fleet/agents.md/version-bumps.md)
-- Never hand-create a version-bump PR. The npm publish workflow uses the PR App to sign the bump, open its reviewed PR, and resume staging after merge; the Release App handles Actions and release operations. (`.claude/hooks/fleet/no-version-bump-pr-guard/`) [`version-bumps`](docs/fleet/agents.md/version-bumps.md)
+- npm stages after the PR App's signed bump PR merges; the Release App manages Actions and releases. (`.claude/hooks/fleet/no-version-bump-pr-guard/`) [`version-bumps`](docs/fleet/agents.md/version-bumps.md)
 - Dot-naming `@owner/<name>[.<lang>].<target>[-<platform>]`: the `.target` token carries the domain. [`binary-vs-napi-naming`](docs/fleet/agents.md/binary-vs-napi-naming.md)
 - A private package is unscoped `local-<directory>` at version `0.0.0`. [`private-package-identity`](docs/fleet/agents.md/private-package-identity.md)
 - Every `release.publishedPackages` entry is non-private and the set carries ONE version. (`scripts/fleet/check/published-packages-are-release-ready.mts`) [`private-package-identity`](docs/fleet/agents.md/private-package-identity.md)

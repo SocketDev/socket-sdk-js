@@ -311,7 +311,7 @@ async function main() {
   }
 
   // PREFLIGHT: the installation's own grant must already cover every requested
-  // scope. Runs before the mint and before any branch or pull-request write.
+  // scope. Runs before the mint and before any release or Actions operation.
   if (permissions !== undefined) {
     const missing = findMissingAppPermissions({
       granted: installation.permissions,
