@@ -14,7 +14,7 @@ import {
   MAX_RESPONSE_SIZE,
   publicPolicy as defaultPublicPolicy,
 } from './constants.mts'
-import { resolveSdkRequestHeaders } from './api-auth.mts'
+import { resolveSdkRequestHeaders } from './auth.mts'
 import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
 import type {

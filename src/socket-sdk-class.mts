@@ -81,7 +81,7 @@ import type {
 } from './types/purl.mts'
 import type { MalwareCheckEntry } from './types/malware.mts'
 
-import { validateSdkApiToken } from './api-auth.mts'
+import { validateSdkApiToken } from './auth.mts'
 import { createSdkApiContext, requestSdkApi } from './api-client.mts'
 import { handleSdkApiError } from './api-errors.mts'
 import { executeSdkWithRetry } from './api-retry.mts'

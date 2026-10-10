@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest'
 
-import { SdkAuthenticationError } from '../../../src/api-auth.mts'
+import { SdkAuthenticationError } from '../../../src/auth.mts'
 import FormData from '../../../src/external/form-data.js'
 import { createUploadRequest } from '../../../src/file-upload.mts'
 import {

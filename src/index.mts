@@ -5,6 +5,8 @@
 
 /* c8 ignore start - Re-export module, no testable logic */
 // Re-export the content-addressed blob helpers (socketusercontent.com).
+export { SdkAuthenticationError } from './auth.mts'
+
 export {
   fetchBlob,
   fetchChunkedBytes,

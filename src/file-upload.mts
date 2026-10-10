@@ -8,7 +8,7 @@ import { isErrnoException } from '@socketsecurity/lib/errors/predicates'
 import { httpRequest } from '@socketsecurity/lib/http-request'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { resolveSdkRequestHeaders } from './api-auth.mts'
+import { resolveSdkRequestHeaders } from './auth.mts'
 import { MAX_RESPONSE_SIZE } from './constants.mts'
 
 import { sanitizeHeaders } from './utils/header-sanitization.mts'

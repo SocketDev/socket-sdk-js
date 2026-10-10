@@ -1,7 +1,7 @@
 /**
  * @file Shared request context for Socket API domain clients.
  */
-import { getSdkAuthorization } from './api-auth.mts'
+import { getSdkAuthorization } from './auth.mts'
 import { handleSdkApiError } from './api-errors.mts'
 import { executeSdkWithRetry } from './api-retry.mts'
 import {

@@ -7,7 +7,7 @@ import {
   getSdkAuthorization,
   resolveSdkRequestHeaders,
   SdkAuthenticationError,
-} from '../../../src/api-auth.mts'
+} from '../../../src/auth.mts'
 import { createSdkApiContext } from '../../../src/api-client.mts'
 import { SocketSdk } from '../../../src/socket-sdk-class.mts'
 import {

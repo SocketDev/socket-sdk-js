@@ -3,7 +3,7 @@
  */
 import { pRetry } from '@socketsecurity/lib/promises/retry'
 
-import { SdkAuthenticationError } from './api-auth.mts'
+import { SdkAuthenticationError } from './auth.mts'
 import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY } from './constants.mts'
 import { ResponseError } from './http-client.mts'
 
