@@ -1,6 +1,7 @@
 /**
  * @file Shared request context for Socket API domain clients.
  */
+import { getSdkAuthorization } from './api-auth.mts'
 import { handleSdkApiError } from './api-errors.mts'
 import { executeSdkWithRetry } from './api-retry.mts'
 import {
@@ -58,6 +59,7 @@ export function createSdkApiContext(
     baseUrl: normalizeBaseUrl(opts.baseUrl),
     requestOptions: {
       headers,
+      authProvider: opts.authProvider,
       timeout,
       signal: opts.signal,
       hooks: opts.hooks,
@@ -97,6 +99,7 @@ export interface SdkApiRequest {
 
 export type SdkApiClientOptions = Pick<
   SocketSdkOptions,
+  | 'authProvider'
   | 'authScheme'
   | 'hooks'
   | 'retries'
@@ -105,20 +108,6 @@ export type SdkApiClientOptions = Pick<
   | 'timeout'
   | 'userAgent'
 > & { baseUrl: string; apiToken?: string | undefined }
-
-export function getSdkAuthorization(
-  token: string,
-  scheme: 'basic' | 'bearer' = 'basic',
-): string {
-  const trimmed = validateSdkApiToken(token)
-  if (scheme === 'bearer') {
-    return `Bearer ${trimmed}`
-  }
-  if (scheme === 'basic') {
-    return `Basic ${btoa(`${trimmed}:`)}`
-  }
-  throw new TypeError('Invalid "authScheme": use basic or bearer')
-}
 
 export function getSdkRequestPath(request: SdkApiRequest): string {
   const query = new URLSearchParams()
@@ -214,25 +203,4 @@ export async function sendSdkApiRequest(
     throw new ResponseError(response, method, `${baseUrl}${path}`)
   }
   return response
-}
-
-export function validateSdkApiToken(apiToken: string): string {
-  const MAX_API_TOKEN_LENGTH = 1024
-  if (typeof apiToken !== 'string') {
-    throw new TypeError('"apiToken" is required and must be a string')
-  }
-  const trimmedToken = apiToken.trim()
-  if (!trimmedToken) {
-    throw new Error('"apiToken" cannot be empty or whitespace-only')
-  }
-  if (trimmedToken.length > MAX_API_TOKEN_LENGTH) {
-    throw new Error(
-      `"apiToken" exceeds maximum length of ${MAX_API_TOKEN_LENGTH} characters`,
-    )
-  }
-
-  if (/[\r\n]/.test(trimmedToken)) {
-    throw new TypeError('Invalid "apiToken": remove newline characters')
-  }
-  return trimmedToken
 }

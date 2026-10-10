@@ -3,6 +3,7 @@
  */
 import { pRetry } from '@socketsecurity/lib/promises/retry'
 
+import { SdkAuthenticationError } from './api-auth.mts'
 import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY } from './constants.mts'
 import { ResponseError } from './http-client.mts'
 
@@ -30,6 +31,9 @@ export async function executeSdkWithRetry<T>(
 }
 
 export function getSdkRetryDelay(error: unknown): number | undefined {
+  if (error instanceof SdkAuthenticationError) {
+    throw error
+  }
   if (!(error instanceof ResponseError)) {
     return undefined
   }

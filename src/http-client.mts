@@ -14,6 +14,7 @@ import {
   MAX_RESPONSE_SIZE,
   publicPolicy as defaultPublicPolicy,
 } from './constants.mts'
+import { resolveSdkRequestHeaders } from './api-auth.mts'
 import { sanitizeHeaders } from './utils/header-sanitization.mts'
 
 import type {
@@ -58,6 +59,7 @@ export async function createDeleteRequest(
     ...options,
   } as unknown as RequestOptionsWithHooks
   const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
+  opts.headers = await resolveSdkRequestHeaders({ ...options, ...opts })
 
   if (hooks?.onRequest) {
     hooks.onRequest({
@@ -134,6 +136,7 @@ export async function createGetRequest(
     ...options,
   } as unknown as GetRequestOptions
   const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
+  opts.headers = await resolveSdkRequestHeaders({ ...options, ...opts })
 
   if (hooks?.onRequest) {
     hooks.onRequest({
@@ -199,6 +202,7 @@ export async function createRequestWithJson(
     ...options,
   } as unknown as GetRequestOptions
   const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
+  opts.headers = await resolveSdkRequestHeaders({ ...options, ...opts })
   const body = JSON.stringify(json)
   const headers = {
     // opts.headers is the SDK's HeadersRecord (a plain object); the

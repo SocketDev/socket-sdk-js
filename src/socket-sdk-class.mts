@@ -81,11 +81,8 @@ import type {
 } from './types/purl.mts'
 import type { MalwareCheckEntry } from './types/malware.mts'
 
-import {
-  createSdkApiContext,
-  requestSdkApi,
-  validateSdkApiToken,
-} from './api-client.mts'
+import { validateSdkApiToken } from './api-auth.mts'
+import { createSdkApiContext, requestSdkApi } from './api-client.mts'
 import { handleSdkApiError } from './api-errors.mts'
 import { executeSdkWithRetry } from './api-retry.mts'
 import type { SdkApiContext } from './api-client.mts'
@@ -252,6 +249,8 @@ export function getSdkAbortSignal(): AbortSignal {
  * analysis.
  */
 export class SocketSdk {
+  static readonly supportsAuthProvider = true
+
   readonly #apiContext: SdkApiContext
   readonly #purlApiContext: SdkApiContext
   readonly #apiV1BaseUrl: string | undefined

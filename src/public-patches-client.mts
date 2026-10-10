@@ -34,6 +34,7 @@ export class SocketPatchClient {
     this.#context = createSdkApiContext({
       ...opts,
       apiToken: undefined,
+      authProvider: undefined,
       baseUrl: opts.baseUrl ?? SOCKET_PATCH_API_URL,
     })
   }

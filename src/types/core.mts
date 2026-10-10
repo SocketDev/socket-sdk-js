@@ -105,6 +105,7 @@ export type RequestOptions = (
 }
 
 export type RequestOptionsWithHooks = RequestOptions & {
+  authProvider?: SocketSdkAuthProvider | undefined
   hooks?:
     | {
         onRequest?: ((info: RequestInfo) => void) | undefined
@@ -279,10 +280,20 @@ export type FileValidationCallback = (
   },
 ) => FileValidationResult | Promise<FileValidationResult>
 
+export type SocketSdkAuthProvider = () => Promise<{
+  token: string
+  authScheme: 'basic' | 'bearer'
+}>
+
 /**
  * Configuration options for SocketSdk.
  */
 export interface SocketSdkOptions {
+  /**
+   * Resolve current credentials before each request; rejection prevents
+   * sending.
+   */
+  authProvider?: SocketSdkAuthProvider | undefined
   /**
    * Authentication scheme for API tokens or OAuth access tokens.
    */

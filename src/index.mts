@@ -140,6 +140,7 @@ export type {
   SocketSdkErrorResult,
   SocketSdkGenericResult,
   SocketSdkOperations,
+  SocketSdkAuthProvider,
   SocketSdkOptions,
   SocketSdkResult,
   SocketSdkSuccessResult,

@@ -1,3 +1,6 @@
+/**
+ * @file Multipart upload transport for Socket API requests.
+ */
 import { createReadStream } from 'node:fs'
 import path from 'node:path'
 
@@ -5,6 +8,7 @@ import { isErrnoException } from '@socketsecurity/lib/errors/predicates'
 import { httpRequest } from '@socketsecurity/lib/http-request'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
+import { resolveSdkRequestHeaders } from './api-auth.mts'
 import { MAX_RESPONSE_SIZE } from './constants.mts'
 
 import { sanitizeHeaders } from './utils/header-sanitization.mts'
@@ -82,6 +86,7 @@ export async function createUploadRequest(
     ...options,
   } as unknown as RequestOptionsWithHooks
   const opts = { __proto__: null, ...rawOpts } as unknown as RequestOptions
+  opts.headers = await resolveSdkRequestHeaders({ ...options, ...opts })
   const url = new URL(urlPath, baseUrl).toString()
   const method = 'POST'
   const startTime = Date.now()
@@ -106,6 +111,7 @@ export async function createUploadRequest(
       headers,
       maxResponseSize: MAX_RESPONSE_SIZE,
       timeout: opts.timeout,
+      signal: opts.signal,
     })
 
     if (hooks?.onResponse) {
