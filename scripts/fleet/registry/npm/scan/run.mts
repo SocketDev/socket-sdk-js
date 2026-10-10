@@ -588,8 +588,9 @@ export function isTransientNpmScanRead(error: unknown): boolean {
 
 export async function retryNpmScanRead(
   read: () => Promise<FullScanAttempt>,
-  retry: typeof pRetry = pRetry,
+  options: { retry?: typeof pRetry | undefined } = {},
 ): Promise<FullScanAttempt> {
+  const { retry = pRetry } = options
   const result = await retry(
     async () => {
       const attempt = await read()

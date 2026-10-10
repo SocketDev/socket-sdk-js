@@ -27311,6 +27311,18 @@ async function ensureCurrentFleet(config, dependencies) {
  * Download, verify, and apply the fleet bundle identified by `config.ref`.
  * Returns 0 on success, 1 on any error.
  */
+function shouldDeferLegacyRuleSeed(dest, preservedPaths) {
+  if (
+    !preservedPaths?.has('CLAUDE.md') ||
+    preservedPaths.has('AGENTS.md') ||
+    lstatSync(path.join(dest, 'AGENTS.md'), { throwIfNoEntry: false })
+  )
+    return false
+  const legacyPath = path.join(dest, LEGACY_RULE_FILE)
+  if (!lstatSync(legacyPath, { throwIfNoEntry: false })?.isFile()) return false
+  const body = readFileSync(legacyPath, 'utf8')
+  return body.trim().length > 0 && !isGeneratedRuleBody(body)
+}
 async function installFleet(config) {
   const cfg = {
     __proto__: null,
@@ -27410,16 +27422,24 @@ async function installFleet(config) {
       ? readFleetTrackedPaths(dest)
       : void 0
     migrateRuleFile(dest, { preservedPaths })
+    const deferLegacyRuleSeed = shouldDeferLegacyRuleSeed(dest, preservedPaths)
+    function shouldInstallBundlePath(file) {
+      const normalized = normalizeBundlePath(file)
+      return (
+        !preservedPaths?.has(normalized) &&
+        !(deferLegacyRuleSeed && normalized === 'AGENTS.md')
+      )
+    }
     const runtimeManifest = preservedPaths
       ? {
           ...memberManifest,
           files: Object.fromEntries(
-            Object.entries(memberManifest.files).filter(
-              ([file]) => !preservedPaths.has(normalizeBundlePath(file)),
+            Object.entries(memberManifest.files).filter(([file]) =>
+              shouldInstallBundlePath(file),
             ),
           ),
-          segments: memberManifest.segments?.filter(
-            segment => !preservedPaths.has(normalizeBundlePath(segment.path)),
+          segments: memberManifest.segments?.filter(segment =>
+            shouldInstallBundlePath(segment.path),
           ),
           settingsSegment:
             memberManifest.settingsSegment !== void 0 &&
@@ -27487,7 +27507,8 @@ async function installFleet(config) {
         manifest: runtimeManifest,
       })
     try {
-      projectInstalledAdapters(dest, { preservedPaths })
+      if (!deferLegacyRuleSeed)
+        projectInstalledAdapters(dest, { preservedPaths })
       if (!preserveTracked)
         untrackGeneratedOutputs(dest, INSTALLED_ADAPTER_PATHS)
     } catch (error) {
@@ -27676,6 +27697,7 @@ export {
   sameOciManifestReceipt,
   segmentFileName,
   sha256Hex,
+  shouldDeferLegacyRuleSeed,
   spliceFleetBlock,
   splicePackBlock,
   spliceYamlSeparatorRun,
