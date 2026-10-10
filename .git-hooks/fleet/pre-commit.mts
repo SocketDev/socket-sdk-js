@@ -851,12 +851,7 @@ const main = (): number => {
     return 1
   }
 
-  // Staged tests are run ONCE, by the shell hook's bounded
-  // `run_pkg_step_bounded test --staged` step (PRECOMMIT_STEP_BUDGET_S) — not
-  // here. Running
-  // them in this security pass too meant the staged delta was tested twice, and
-  // this pass used the old 60s ceiling, which is what blew the ≤10s pre-commit
-  // budget. The single bounded shell step keeps the commit fast.
+  // Quality validation runs after commit through explicit checks and CI.
   debugCheck('All security checks passed!')
   return 0
 }

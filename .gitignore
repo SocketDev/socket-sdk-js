@@ -2101,6 +2101,7 @@ opencode.json
 .claude/skills/fleet/guarding-paths/references/install.md
 .claude/skills/fleet/guarding-paths/templates/check-paths.mts.tmpl
 .claude/skills/fleet/handing-off/SKILL.md
+.claude/skills/fleet/html-report/SKILL.md
 .claude/skills/fleet/improve/SKILL.md
 .claude/skills/fleet/improve/references/audit-playbook.md
 .claude/skills/fleet/improve/references/closing-the-loop.md
@@ -2116,6 +2117,7 @@ opencode.json
 .claude/skills/fleet/managing-worktrees/SKILL.md
 .claude/skills/fleet/managing-worktrees/lib/gate-dependencies.mts
 .claude/skills/fleet/managing-worktrees/lib/gate-hydration.mts
+.claude/skills/fleet/managing-worktrees/lib/land-integrity.mts
 .claude/skills/fleet/managing-worktrees/lib/land.mts
 .claude/skills/fleet/managing-worktrees/references/land-mode.md
 .claude/skills/fleet/managing-worktrees/references/pr-fanout-mode.md
@@ -2845,6 +2847,9 @@ docs/fleet/workflows/odai-cache.md
 docs/fleet/workflows/practices.md
 docs/fleet/workflows/publishing.md
 docs/fleet/workflows/registry-settings.md
+docs/references/fleet/fixtures/package-intelligence-v1/checks-request.json
+docs/references/fleet/fixtures/package-intelligence-v1/summary-response.json
+docs/references/fleet/package-intelligence-v1.md
 docs/references/fleet/sfw-local-install.md
 patches/brace-expansion@5.0.9.patch
 patches/minimatch@10.2.6.patch
@@ -2994,6 +2999,7 @@ scripts/fleet/ai/browser/auth-navigation.mts
 scripts/fleet/ai/browser/bridge.mts
 scripts/fleet/ai/browser/bridge/actions.mts
 scripts/fleet/ai/browser/bridge/authorization.mts
+scripts/fleet/ai/browser/bridge/browser-selection.mts
 scripts/fleet/ai/browser/bridge/bundle-inputs.mts
 scripts/fleet/ai/browser/bridge/cleanup.mts
 scripts/fleet/ai/browser/bridge/cli.mts
@@ -3001,9 +3007,12 @@ scripts/fleet/ai/browser/bridge/compatibility.mts
 scripts/fleet/ai/browser/bridge/confirmation.mts
 scripts/fleet/ai/browser/bridge/crates-token-schema.mts
 scripts/fleet/ai/browser/bridge/crates-token.mts
+scripts/fleet/ai/browser/bridge/diagnostics-cause.mts
 scripts/fleet/ai/browser/bridge/diagnostics.mts
 scripts/fleet/ai/browser/bridge/doctor-contract.mts
+scripts/fleet/ai/browser/bridge/doctor-profile.mts
 scripts/fleet/ai/browser/bridge/doctor.mts
+scripts/fleet/ai/browser/bridge/endpoint-discovery.mts
 scripts/fleet/ai/browser/bridge/extension/apple-profile.mts
 scripts/fleet/ai/browser/bridge/extension/apple.mts
 scripts/fleet/ai/browser/bridge/extension/background.mts
@@ -3089,6 +3098,7 @@ scripts/fleet/ai/browser/bridge/native-helper/process-attestation.h
 scripts/fleet/ai/browser/bridge/native/endpoint.mts
 scripts/fleet/ai/browser/bridge/native/endpoint/close.mts
 scripts/fleet/ai/browser/bridge/native/endpoint/lock.mts
+scripts/fleet/ai/browser/bridge/native/endpoint/recovery-record.mts
 scripts/fleet/ai/browser/bridge/native/endpoint/recovery.mts
 scripts/fleet/ai/browser/bridge/native/entry.mts
 scripts/fleet/ai/browser/bridge/native/host.mts
@@ -3111,6 +3121,8 @@ scripts/fleet/ai/browser/bridge/protocol/util.mts
 scripts/fleet/ai/browser/bridge/readiness.mts
 scripts/fleet/ai/browser/bridge/runtime.mts
 scripts/fleet/ai/browser/bridge/sessions.mts
+scripts/fleet/ai/browser/bridge/transport-routing.mts
+scripts/fleet/ai/browser/bridge/transport-status.mts
 scripts/fleet/ai/browser/bridge/transport.mts
 scripts/fleet/ai/browser/bridge/verify-installed.mts
 scripts/fleet/ai/browser/bridge/worker-artifact.mts
@@ -3159,6 +3171,7 @@ scripts/fleet/ai/model-target-ids.mts
 scripts/fleet/ai/model-targets.mts
 scripts/fleet/ai/model-training-policy.mts
 scripts/fleet/ai/odai.mts
+scripts/fleet/ai/odai/ci.mts
 scripts/fleet/ai/odai/diagnostics.mts
 scripts/fleet/ai/odai/run.mts
 scripts/fleet/ai/opencode-auth-store.mts
@@ -3802,7 +3815,9 @@ scripts/fleet/checks/steps.mts
 scripts/fleet/checks/success-output.mts
 scripts/fleet/checks/untrack-offenders.mts
 scripts/fleet/ci/fix/api.mts
+scripts/fleet/ci/fix/batch.mts
 scripts/fleet/ci/fix/delivery.mts
+scripts/fleet/ci/fix/followup-route.mts
 scripts/fleet/ci/fix/receipt.mts
 scripts/fleet/ci/fix/resume.mts
 scripts/fleet/ci/fix/run.mts
@@ -3997,6 +4012,7 @@ scripts/fleet/cross-cli/util.mts
 scripts/fleet/depot-ci.mts
 scripts/fleet/dismiss-stale-dependabot-alerts.mts
 scripts/fleet/doctor-git-probes.mts
+scripts/fleet/doctor-hook-probes.mts
 scripts/fleet/doctor-resource-probes.mts
 scripts/fleet/doctor-worktree-probes.mts
 scripts/fleet/doctor.mts
@@ -4127,6 +4143,9 @@ scripts/fleet/gh-heartbeat.mts
 scripts/fleet/git-partial-submodule.mts
 scripts/fleet/git-partial-submodule/commands.mts
 scripts/fleet/git-partial-submodule/internal.mts
+scripts/fleet/git/admin/merge.mts
+scripts/fleet/git/admin/merge/github.mts
+scripts/fleet/git/admin/merge/model.mts
 scripts/fleet/git/admin/push.mts
 scripts/fleet/git/admin/push/git.mts
 scripts/fleet/git/admin/push/github.mts
@@ -4134,6 +4153,12 @@ scripts/fleet/git/admin/push/lock.mts
 scripts/fleet/git/admin/push/tracking-transaction.mts
 scripts/fleet/git/admin/push/transaction.mts
 scripts/fleet/git/commit/named-paths.mts
+scripts/fleet/git/deliver/candidate.mts
+scripts/fleet/git/deliver/cli.mts
+scripts/fleet/git/deliver/pr.mts
+scripts/fleet/git/deliver/publish.mts
+scripts/fleet/git/deliver/run.mts
+scripts/fleet/git/deliver/state.mts
 scripts/fleet/git/exec.mts
 scripts/fleet/git/fast-forward.mts
 scripts/fleet/git/lock-retry.mts
@@ -4141,6 +4166,7 @@ scripts/fleet/git/merge-json.mts
 scripts/fleet/git/modules-pin-contract.mts
 scripts/fleet/git/modules.mts
 scripts/fleet/git/mutex.mts
+scripts/fleet/git/object-id.mts
 scripts/fleet/git/porcelain.mts
 scripts/fleet/git/quiescence.mts
 scripts/fleet/git/staged-commit.mts
