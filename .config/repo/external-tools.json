@@ -3,34 +3,34 @@
   "description": "External tools required to build + release this repo. The canonical schema lives at socket-wheelhouse/packages/build-infra/lib/external-tools-schema.json (generated from scripts/fleet/lib/external-tools-schema.mts); every fleet repo references it via the $schema field above so validators pick up the single source of truth. Extend the `tools` map with repo-specific entries (e.g. language toolchains for sdxgen, git credential helpers for packageurl-js).",
   "tools": {
     "gh": {
-      "version": "2.100.0",
-      "tag": "v2.100.0",
+      "version": "2.102.0",
+      "tag": "v2.102.0",
       "repository": "github:cli/cli",
       "origin": "gh-asset",
       "platforms": {
         "darwin-arm64": {
-          "asset": "gh_2.100.0_macOS_arm64.zip",
-          "integrity": "sha512-Lrdo+idc/clJQWGzu0XOvJ25TP4sGwk5Pl/m1FURE1aR7RGklf/Tg2OEV1WfymwSTtSPigNxrFAjg30rbwveAQ=="
+          "asset": "gh_2.102.0_macOS_arm64.zip",
+          "integrity": "sha512-qkhAZkd8DNaUSR/DgcvVLKbyMbrElQqkr8OmtU3iZup9oMPjYz02+QxsWeMrXzup9NsAhpjd1i87O3gYYCnWbA=="
         },
         "darwin-x64": {
-          "asset": "gh_2.100.0_macOS_amd64.zip",
-          "integrity": "sha512-sMabqJhbngQlEMEqWuWb1Xs5Tf6ti+PJnVAYV51n6yxwzazPoTdZZHc6A+31GaKvRPP1HU1aq3QxU5qKzIk+Ow=="
+          "asset": "gh_2.102.0_macOS_amd64.zip",
+          "integrity": "sha512-Kr79Oseq+6Y7kH0fUFKxiT999ua6NxPtHpdDHsS1Bh1k4aKpBIb3W9G6scoRl69+rSkP6FfOHxpbFC6r7X9p1g=="
         },
         "linux-arm64": {
-          "asset": "gh_2.100.0_linux_arm64.tar.gz",
-          "integrity": "sha512-7FfnaEOjwQZzjlShYn+9aqDyhKsnFuoy4HVd6YnC4VGLFrdWxYNhMvUaBPUU0SeYasHK8uvqYiqEPMTziNhF9w=="
+          "asset": "gh_2.102.0_linux_arm64.tar.gz",
+          "integrity": "sha512-KZjWje9NXHR1QTRmC0QsZ3WJIA1V611TvkTnJENRzqek/Jtuxxuj4CGm0zNCDhQi2sXsKGRK1dDoUcMxJAY7IA=="
         },
         "linux-x64": {
-          "asset": "gh_2.100.0_linux_amd64.tar.gz",
-          "integrity": "sha512-R2MunQhy/Rr5FsAF+ohqA8SWshdlKjEYEf2Qw/6WCemZ0nki+IgpPd0hHeomGQ7L9SeuwlSr2XT+7mIPgjY5WQ=="
+          "asset": "gh_2.102.0_linux_amd64.tar.gz",
+          "integrity": "sha512-B+JUzdN4qZ0JaCFEHFKgtrNtBeGA7VJlYpfstmrrBV15Kg8UonpjI3Uv72B77EYz7USknG9vrWd6LD5Ndp+Ufw=="
         },
         "win32-arm64": {
-          "asset": "gh_2.100.0_windows_arm64.zip",
-          "integrity": "sha512-kcXzOQXYVS3nHnvtpW/CRQoVl4KNKTrZDmrpJecMX1ssSlc8dGwrQuU5awSFNDdhc5lN1GmwAlUEPUXdKnYjlQ=="
+          "asset": "gh_2.102.0_windows_arm64.zip",
+          "integrity": "sha512-KxezAuutF/hGDD1hMAoTgwseIk3dRUtZvSAYdmEDWaslC2SJ+B9E6zSh1wKznHMHkZxwRtc3F0pfe2VFspJoMQ=="
         },
         "win32-x64": {
-          "asset": "gh_2.100.0_windows_amd64.zip",
-          "integrity": "sha512-eOppqRvfG2MkDPdwaQ9hFkA7OX/wSIqwUBC78VIkuEiNA9q746IzsE6gnqIW2g7sIIXzUsvfhxPH1da9JZxQpg=="
+          "asset": "gh_2.102.0_windows_amd64.zip",
+          "integrity": "sha512-/SYpgiu5qMBueC/AUFT2pArT6OngLFWwZI7p9HK9A31eWCs+fmHzORqfLSJck5bsOIgtKPOOpie7hly4zvw9rg=="
         }
       },
       "description": "GitHub CLI - workflow dispatch, release downloads, PR creation, and the --attach media uploader; host for the gh-aw agentic-workflows extension.",
