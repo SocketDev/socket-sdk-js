@@ -39,6 +39,89 @@ describe('OpenAPI response types', () => {
       }>
     }>()
   })
+  it('exposes package checks request, result, and policy context types', () => {
+    type Operation = paths['/v1/orgs/{org_slug}/packages/checks']['post']
+    type Request = Operation['requestBody']['content']['application/json']
+    type Response = OpReturnType<Operation>
+    expectTypeOf<Request>().toEqualTypeOf<{
+      packages: { purl: string }[]
+    }>()
+    expectTypeOf<Response['context']>().toMatchTypeOf<{
+      mode: 'organization'
+      organizationSlug: string
+      policyScope: 'organization-default'
+      policyRevision: number
+    }>()
+    expectTypeOf<Response['results'][number]>().toMatchTypeOf<{
+      index: number
+      inputPurl: string
+      resolvedPurls: string[]
+      status: 'complete' | 'pending' | 'unknown' | 'unsupported' | 'error'
+      action: 'block' | 'warn' | 'monitor' | 'allow' | 'indeterminate'
+    }>()
+    expectTypeOf<Response['results'][number]['coverage']>().toMatchTypeOf<{
+      scope: 'published-artifacts'
+      complete: boolean
+      artifactCount: number
+      evaluatedArtifactCount: number
+      reason: string | null
+    }>()
+    expectTypeOf<Response['results'][number]['freshness']>().toMatchTypeOf<{
+      evaluatedAt: string
+      analysisAt: null
+      source: 'artifact-state'
+      state: 'current' | 'stale' | 'unknown'
+    }>()
+  })
+
+  it('preserves package summary artifact scores and findings in its type', () => {
+    type Operation = paths['/v1/orgs/{org_slug}/packages/summaries']['post']
+    type Request = Operation['requestBody']['content']['application/json']
+    type Response = OpReturnType<Operation>
+    expectTypeOf<Request>().toEqualTypeOf<{
+      packages: { purl: string }[]
+    }>()
+    expectTypeOf<Response['context']>().toMatchTypeOf<{
+      mode: 'organization'
+      organizationSlug: string
+      policyScope: 'organization-default'
+      policyRevision: number
+    }>()
+    expectTypeOf<
+      Response['results'][number]['artifacts'][number]
+    >().toMatchTypeOf<{
+      reference: string
+      purl: string
+      state: 'complete' | 'pending' | 'revalidate' | 'error' | 'unknown'
+      scores: null | {
+        supplyChain: number
+        quality: number
+        maintenance: number
+        vulnerability: number
+        license: number
+        overall: number
+      }
+      alerts: {
+        key: string
+        type: string
+        action: 'error' | 'warn' | 'monitor' | 'ignore' | null
+      }[]
+      detailUrl: string
+    }>()
+    expectTypeOf<Response['results'][number]['coverage']>().toMatchTypeOf<{
+      scope: 'published-artifacts'
+      complete: boolean
+      artifactCount: number
+      evaluatedArtifactCount: number
+      reason: string | null
+    }>()
+    expectTypeOf<Response['results'][number]['freshness']>().toMatchTypeOf<{
+      evaluatedAt: string
+      analysisAt: null
+      source: 'artifact-state'
+      state: 'current' | 'stale' | 'unknown'
+    }>()
+  })
 
   it('combines every successful status and content type', () => {
     expectTypeOf<OpReturnType<ExampleOperation>>().toEqualTypeOf<

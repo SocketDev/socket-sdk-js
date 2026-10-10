@@ -792,6 +792,496 @@ export interface paths {
       }
     }
   }
+  '/v1/orgs/{org_slug}/packages/checks': {
+    /**
+     * Evaluate package versions against organization policy.
+     *
+     * Evaluates cached facts for published, explicitly versioned public npm and
+     * PyPI packages against the organization default policy. This endpoint does
+     * not start scans.
+     */
+    post: {
+      parameters: {
+        path: {
+          org_slug: string
+        }
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            packages: {
+              purl: string
+            }[]
+          }
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        200: {
+          content: {
+            'application/json': {
+              context: {
+                /**
+                 * @enum {unknown}
+                 */
+                mode: 'organization'
+                organizationSlug: string
+                /**
+                 * @enum {unknown}
+                 */
+                policyScope: 'organization-default'
+                policyRevision: number
+                [key: string]: unknown
+              }
+              results: {
+                index: number
+                inputPurl: string
+                resolvedPurls: string[]
+                /**
+                 * @enum {unknown}
+                 */
+                status:
+                  | 'complete'
+                  | 'pending'
+                  | 'unknown'
+                  | 'unsupported'
+                  | 'error'
+                /**
+                 * @enum {unknown}
+                 */
+                action: 'block' | 'warn' | 'monitor' | 'allow' | 'indeterminate'
+                reasons: {
+                  /**
+                   * @enum {unknown}
+                   */
+                  code:
+                    | 'invalid_purl'
+                    | 'version_required'
+                    | 'unsupported_ecosystem'
+                    | 'unsupported_identity'
+                    | 'metadata_unavailable'
+                    | 'analysis_pending'
+                    | 'analysis_stale'
+                    | 'artifact_limit'
+                    | 'result_limit'
+                    | 'deadline_exceeded'
+                    | 'lookup_failed'
+                    | 'policy_action_unavailable'
+                    | 'policy_block'
+                    | 'policy_warn'
+                    | 'policy_monitor'
+                  alertKey?: string
+                  alertType?: string
+                  artifactPurls?: string[]
+                  [key: string]: unknown
+                }[]
+                coverage: {
+                  /**
+                   * @enum {unknown}
+                   */
+                  scope: 'published-artifacts'
+                  complete: boolean
+                  artifactCount: number
+                  evaluatedArtifactCount: number
+                  /**
+                   * @enum {null|string}
+                   */
+                  reason:
+                    | 'metadata_unavailable'
+                    | 'analysis_incomplete'
+                    | 'artifact_limit'
+                    | 'result_limit'
+                    | 'deadline_exceeded'
+                    | 'lookup_failed'
+                    | null
+                  [key: string]: unknown
+                }
+                freshness: {
+                  /**
+                   * Format: date-time.
+                   */
+                  evaluatedAt: string
+                  analysisAt: null
+                  /**
+                   * @enum {unknown}
+                   */
+                  source: 'artifact-state'
+                  /**
+                   * @enum {unknown}
+                   */
+                  state: 'current' | 'stale' | 'unknown'
+                  [key: string]: unknown
+                }
+                [key: string]: unknown
+              }[]
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        400: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        401: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        403: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        404: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        413: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        429: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        503: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
+  '/v1/orgs/{org_slug}/packages/summaries': {
+    /**
+     * Summarize package intelligence and findings.
+     *
+     * Returns organization-default policy decisions, per-artifact scores,
+     * findings, and detail links for cached published public npm and PyPI
+     * artifacts. This endpoint does not start scans.
+     */
+    post: {
+      parameters: {
+        path: {
+          org_slug: string
+        }
+      }
+      requestBody: {
+        content: {
+          'application/json': {
+            packages: {
+              purl: string
+            }[]
+          }
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        200: {
+          content: {
+            'application/json': {
+              context: {
+                /**
+                 * @enum {unknown}
+                 */
+                mode: 'organization'
+                organizationSlug: string
+                /**
+                 * @enum {unknown}
+                 */
+                policyScope: 'organization-default'
+                policyRevision: number
+                [key: string]: unknown
+              }
+              results: {
+                index: number
+                inputPurl: string
+                resolvedPurls: string[]
+                /**
+                 * @enum {unknown}
+                 */
+                status:
+                  | 'complete'
+                  | 'pending'
+                  | 'unknown'
+                  | 'unsupported'
+                  | 'error'
+                /**
+                 * @enum {unknown}
+                 */
+                action: 'block' | 'warn' | 'monitor' | 'allow' | 'indeterminate'
+                reasons: {
+                  /**
+                   * @enum {unknown}
+                   */
+                  code:
+                    | 'invalid_purl'
+                    | 'version_required'
+                    | 'unsupported_ecosystem'
+                    | 'unsupported_identity'
+                    | 'metadata_unavailable'
+                    | 'analysis_pending'
+                    | 'analysis_stale'
+                    | 'artifact_limit'
+                    | 'result_limit'
+                    | 'deadline_exceeded'
+                    | 'lookup_failed'
+                    | 'policy_action_unavailable'
+                    | 'policy_block'
+                    | 'policy_warn'
+                    | 'policy_monitor'
+                  alertKey?: string
+                  alertType?: string
+                  artifactPurls?: string[]
+                  [key: string]: unknown
+                }[]
+                coverage: {
+                  /**
+                   * @enum {unknown}
+                   */
+                  scope: 'published-artifacts'
+                  complete: boolean
+                  artifactCount: number
+                  evaluatedArtifactCount: number
+                  /**
+                   * @enum {null|string}
+                   */
+                  reason:
+                    | 'metadata_unavailable'
+                    | 'analysis_incomplete'
+                    | 'artifact_limit'
+                    | 'result_limit'
+                    | 'deadline_exceeded'
+                    | 'lookup_failed'
+                    | null
+                  [key: string]: unknown
+                }
+                freshness: {
+                  /**
+                   * Format: date-time.
+                   */
+                  evaluatedAt: string
+                  analysisAt: null
+                  /**
+                   * @enum {unknown}
+                   */
+                  source: 'artifact-state'
+                  /**
+                   * @enum {unknown}
+                   */
+                  state: 'current' | 'stale' | 'unknown'
+                  [key: string]: unknown
+                }
+                artifacts: {
+                  reference: string
+                  purl: string
+                  /**
+                   * @enum {unknown}
+                   */
+                  state:
+                    | 'complete'
+                    | 'pending'
+                    | 'revalidate'
+                    | 'error'
+                    | 'unknown'
+                  scores: null | {
+                    supplyChain: number
+                    quality: number
+                    maintenance: number
+                    vulnerability: number
+                    license: number
+                    overall: number
+                    [key: string]: unknown
+                  }
+                  alerts: {
+                    key: string
+                    type: string
+                    /**
+                     * @enum {null|string}
+                     */
+                    action: 'error' | 'warn' | 'monitor' | 'ignore' | null
+                    [key: string]: unknown
+                  }[]
+                  /**
+                   * Format: uri.
+                   */
+                  detailUrl: string
+                  [key: string]: unknown
+                }[]
+                alerts: {
+                  key: string
+                  type: string
+                  /**
+                   * @enum {null|string}
+                   */
+                  action: 'error' | 'warn' | 'monitor' | 'ignore' | null
+                  artifactPurls: string[]
+                  [key: string]: unknown
+                }[]
+                [key: string]: unknown
+              }[]
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        400: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        401: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        403: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        404: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        413: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        429: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        503: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 export type webhooks = Record<string, never>

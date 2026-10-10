@@ -1276,6 +1276,966 @@
           }
         }
       }
+    },
+    "/v1/orgs/{org_slug}/packages/checks": {
+      "post": {
+        "summary": "Evaluate package versions against organization policy",
+        "tags": ["packages"],
+        "description": "Evaluates cached facts for published, explicitly versioned public npm and PyPI packages against the organization default policy. This endpoint does not start scans.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["packages"],
+                "properties": {
+                  "packages": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["purl"],
+                      "properties": {
+                        "purl": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "org_slug",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": ["context", "results"],
+                  "properties": {
+                    "context": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "required": [
+                        "mode",
+                        "organizationSlug",
+                        "policyScope",
+                        "policyRevision"
+                      ],
+                      "properties": {
+                        "mode": {
+                          "enum": ["organization"]
+                        },
+                        "organizationSlug": {
+                          "type": "string"
+                        },
+                        "policyScope": {
+                          "enum": ["organization-default"]
+                        },
+                        "policyRevision": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "required": [
+                          "index",
+                          "inputPurl",
+                          "resolvedPurls",
+                          "status",
+                          "action",
+                          "reasons",
+                          "coverage",
+                          "freshness"
+                        ],
+                        "properties": {
+                          "index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "inputPurl": {
+                            "type": "string"
+                          },
+                          "resolvedPurls": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "enum": [
+                              "complete",
+                              "pending",
+                              "unknown",
+                              "unsupported",
+                              "error"
+                            ]
+                          },
+                          "action": {
+                            "enum": [
+                              "block",
+                              "warn",
+                              "monitor",
+                              "allow",
+                              "indeterminate"
+                            ]
+                          },
+                          "reasons": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "required": ["code"],
+                              "properties": {
+                                "code": {
+                                  "enum": [
+                                    "invalid_purl",
+                                    "version_required",
+                                    "unsupported_ecosystem",
+                                    "unsupported_identity",
+                                    "metadata_unavailable",
+                                    "analysis_pending",
+                                    "analysis_stale",
+                                    "artifact_limit",
+                                    "result_limit",
+                                    "deadline_exceeded",
+                                    "lookup_failed",
+                                    "policy_action_unavailable",
+                                    "policy_block",
+                                    "policy_warn",
+                                    "policy_monitor"
+                                  ]
+                                },
+                                "alertKey": {
+                                  "type": "string"
+                                },
+                                "alertType": {
+                                  "type": "string"
+                                },
+                                "artifactPurls": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "coverage": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "required": [
+                              "scope",
+                              "complete",
+                              "artifactCount",
+                              "evaluatedArtifactCount",
+                              "reason"
+                            ],
+                            "properties": {
+                              "scope": {
+                                "enum": ["published-artifacts"]
+                              },
+                              "complete": {
+                                "type": "boolean"
+                              },
+                              "artifactCount": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "evaluatedArtifactCount": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "reason": {
+                                "type": ["null", "string"],
+                                "enum": [
+                                  "metadata_unavailable",
+                                  "analysis_incomplete",
+                                  "artifact_limit",
+                                  "result_limit",
+                                  "deadline_exceeded",
+                                  "lookup_failed",
+                                  null
+                                ]
+                              }
+                            }
+                          },
+                          "freshness": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "required": [
+                              "evaluatedAt",
+                              "analysisAt",
+                              "source",
+                              "state"
+                            ],
+                            "properties": {
+                              "evaluatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "analysisAt": {
+                                "type": "null"
+                              },
+                              "source": {
+                                "enum": ["artifact-state"]
+                              },
+                              "state": {
+                                "enum": ["current", "stale", "unknown"]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orgs/{org_slug}/packages/summaries": {
+      "post": {
+        "summary": "Summarize package intelligence and findings",
+        "tags": ["packages"],
+        "description": "Returns organization-default policy decisions, per-artifact scores, findings, and detail links for cached published public npm and PyPI artifacts. This endpoint does not start scans.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["packages"],
+                "properties": {
+                  "packages": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["purl"],
+                      "properties": {
+                        "purl": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "org_slug",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": ["context", "results"],
+                  "properties": {
+                    "context": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "required": [
+                        "mode",
+                        "organizationSlug",
+                        "policyScope",
+                        "policyRevision"
+                      ],
+                      "properties": {
+                        "mode": {
+                          "enum": ["organization"]
+                        },
+                        "organizationSlug": {
+                          "type": "string"
+                        },
+                        "policyScope": {
+                          "enum": ["organization-default"]
+                        },
+                        "policyRevision": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      }
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "required": [
+                          "index",
+                          "inputPurl",
+                          "resolvedPurls",
+                          "status",
+                          "action",
+                          "reasons",
+                          "coverage",
+                          "freshness",
+                          "artifacts",
+                          "alerts"
+                        ],
+                        "properties": {
+                          "index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "inputPurl": {
+                            "type": "string"
+                          },
+                          "resolvedPurls": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "enum": [
+                              "complete",
+                              "pending",
+                              "unknown",
+                              "unsupported",
+                              "error"
+                            ]
+                          },
+                          "action": {
+                            "enum": [
+                              "block",
+                              "warn",
+                              "monitor",
+                              "allow",
+                              "indeterminate"
+                            ]
+                          },
+                          "reasons": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "required": ["code"],
+                              "properties": {
+                                "code": {
+                                  "enum": [
+                                    "invalid_purl",
+                                    "version_required",
+                                    "unsupported_ecosystem",
+                                    "unsupported_identity",
+                                    "metadata_unavailable",
+                                    "analysis_pending",
+                                    "analysis_stale",
+                                    "artifact_limit",
+                                    "result_limit",
+                                    "deadline_exceeded",
+                                    "lookup_failed",
+                                    "policy_action_unavailable",
+                                    "policy_block",
+                                    "policy_warn",
+                                    "policy_monitor"
+                                  ]
+                                },
+                                "alertKey": {
+                                  "type": "string"
+                                },
+                                "alertType": {
+                                  "type": "string"
+                                },
+                                "artifactPurls": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "coverage": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "required": [
+                              "scope",
+                              "complete",
+                              "artifactCount",
+                              "evaluatedArtifactCount",
+                              "reason"
+                            ],
+                            "properties": {
+                              "scope": {
+                                "enum": ["published-artifacts"]
+                              },
+                              "complete": {
+                                "type": "boolean"
+                              },
+                              "artifactCount": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "evaluatedArtifactCount": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "reason": {
+                                "type": ["null", "string"],
+                                "enum": [
+                                  "metadata_unavailable",
+                                  "analysis_incomplete",
+                                  "artifact_limit",
+                                  "result_limit",
+                                  "deadline_exceeded",
+                                  "lookup_failed",
+                                  null
+                                ]
+                              }
+                            }
+                          },
+                          "freshness": {
+                            "type": "object",
+                            "additionalProperties": true,
+                            "required": [
+                              "evaluatedAt",
+                              "analysisAt",
+                              "source",
+                              "state"
+                            ],
+                            "properties": {
+                              "evaluatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "analysisAt": {
+                                "type": "null"
+                              },
+                              "source": {
+                                "enum": ["artifact-state"]
+                              },
+                              "state": {
+                                "enum": ["current", "stale", "unknown"]
+                              }
+                            }
+                          },
+                          "artifacts": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "required": [
+                                "reference",
+                                "purl",
+                                "state",
+                                "scores",
+                                "alerts",
+                                "detailUrl"
+                              ],
+                              "properties": {
+                                "reference": {
+                                  "type": "string"
+                                },
+                                "purl": {
+                                  "type": "string"
+                                },
+                                "state": {
+                                  "enum": [
+                                    "complete",
+                                    "pending",
+                                    "revalidate",
+                                    "error",
+                                    "unknown"
+                                  ]
+                                },
+                                "scores": {
+                                  "anyOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "type": "object",
+                                      "additionalProperties": true,
+                                      "required": [
+                                        "supplyChain",
+                                        "quality",
+                                        "maintenance",
+                                        "vulnerability",
+                                        "license",
+                                        "overall"
+                                      ],
+                                      "properties": {
+                                        "supplyChain": {
+                                          "type": "number"
+                                        },
+                                        "quality": {
+                                          "type": "number"
+                                        },
+                                        "maintenance": {
+                                          "type": "number"
+                                        },
+                                        "vulnerability": {
+                                          "type": "number"
+                                        },
+                                        "license": {
+                                          "type": "number"
+                                        },
+                                        "overall": {
+                                          "type": "number"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                "alerts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "required": ["key", "type", "action"],
+                                    "properties": {
+                                      "key": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "action": {
+                                        "type": ["null", "string"],
+                                        "enum": [
+                                          "error",
+                                          "warn",
+                                          "monitor",
+                                          "ignore",
+                                          null
+                                        ]
+                                      }
+                                    }
+                                  }
+                                },
+                                "detailUrl": {
+                                  "type": "string",
+                                  "format": "uri"
+                                }
+                              }
+                            }
+                          },
+                          "alerts": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true,
+                              "required": [
+                                "key",
+                                "type",
+                                "action",
+                                "artifactPurls"
+                              ],
+                              "properties": {
+                                "key": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                },
+                                "action": {
+                                  "type": ["null", "string"],
+                                  "enum": [
+                                    "error",
+                                    "warn",
+                                    "monitor",
+                                    "ignore",
+                                    null
+                                  ]
+                                },
+                                "artifactPurls": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["statusCode", "error", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "tags": [
