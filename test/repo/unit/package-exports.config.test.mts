@@ -13,7 +13,7 @@ describe('package-exports config: vendored externals', () => {
   const rootPath = path.join(import.meta.dirname, '../../..')
   const pkgJson = JSON.parse(
     readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
-  ) as { files: string[] }
+  ) as { exports: Record<string, unknown>; files: string[] }
 
   it('ships dist/external in the published files allowlist', () => {
     // Without this, a loader that leaves the relative require verbatim
@@ -25,5 +25,11 @@ describe('package-exports config: vendored externals', () => {
     // Re-exporting it would regenerate package.json with a public
     // ./form-data subpath the SDK does not mean to support.
     expect(exportsConfig.ignore).toContain('dist/external/*')
+  })
+
+  it('ships auth declarations through the root type graph only', () => {
+    expect(pkgJson.files).toContain('dist/*.d.mts')
+    expect(exportsConfig.ignore).toContain('dist/auth.d.mts')
+    expect(pkgJson.exports).not.toHaveProperty('./auth')
   })
 })

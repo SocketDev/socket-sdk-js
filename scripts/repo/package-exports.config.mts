@@ -16,6 +16,7 @@ export const config: ExportsConfig = {
     'dist/api-client.d.mts',
     'dist/api-errors.d.mts',
     'dist/api-retry.d.mts',
+    'dist/auth.d.mts',
     'dist/blob.d.mts',
     'dist/constants.d.mts',
     'dist/events-v1.d.mts',
