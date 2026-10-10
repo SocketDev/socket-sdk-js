@@ -29,6 +29,7 @@ export const config: ExportsConfig = {
     'dist/malware.d.mts',
     'dist/org-api.d.mts',
     'dist/org-fixes.d.mts',
+    'dist/package-intelligence-v1.d.mts',
     'dist/patch-verification.d.mts',
     'dist/public-patches-client.d.mts',
     'dist/public-purl-client.d.mts',

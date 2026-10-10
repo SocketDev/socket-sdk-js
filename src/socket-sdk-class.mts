@@ -29,6 +29,10 @@ import {
   startOrgFixComputation as requestStartOrgFixComputation,
 } from './org-fixes.mts'
 import { getOrgPurlVersions } from './purl-versions-v1.mts'
+import {
+  postOrgPackageChecks as requestPostOrgPackageChecks,
+  postOrgPackageSummaries as requestPostOrgPackageSummaries,
+} from './package-intelligence-v1.mts'
 import { getOrgFullScanV1 } from './full-scan-results-v1.mts'
 import { pollOrgFullScanV1 } from './full-scan-polling-v1.mts'
 import { downloadOrgPatchVerificationBundle } from './patch-verification.mts'
@@ -43,6 +47,10 @@ import type {
 } from './types/alert-policies.mts'
 import type { OrgFixesOptions } from './types/fixes.mts'
 import type { PurlVersionsOptions } from './purl-versions-v1.mts'
+import type {
+  PostOrgPackageChecksBody,
+  PostOrgPackageSummariesBody,
+} from './package-intelligence-v1.mts'
 import type { PollFullScanV1Options } from './types/full-scan-results-v1.mts'
 
 import path from 'node:path'
@@ -6792,6 +6800,49 @@ export class SocketSdk {
       orgSlug,
       purl,
       options,
+      this.#requireApiV1BaseUrl(),
+    )
+  }
+
+  /**
+   * Evaluate package versions with cached facts and the organization-default
+   * policy. This uses 100 quota units per request and does not start a scan.
+   * Pending, unknown, unsupported, and error rows remain in successful data.
+   *
+   * @quota 100 units
+   *
+   * @scopes packages:list
+   */
+  async postOrgPackageChecks(
+    orgSlug: string,
+    body: PostOrgPackageChecksBody,
+  ): ReturnType<typeof requestPostOrgPackageChecks> {
+    return await requestPostOrgPackageChecks(
+      this.#apiContext,
+      orgSlug,
+      body,
+      this.#requireApiV1BaseUrl(),
+    )
+  }
+
+  /**
+   * Summarize cached package artifacts with organization-default policy
+   * decisions, scores, findings, coverage, and freshness. This uses 100 quota
+   * units per request and does not start a scan. Incomplete artifact results
+   * remain visible in successful data.
+   *
+   * @quota 100 units
+   *
+   * @scopes packages:list
+   */
+  async postOrgPackageSummaries(
+    orgSlug: string,
+    body: PostOrgPackageSummariesBody,
+  ): ReturnType<typeof requestPostOrgPackageSummaries> {
+    return await requestPostOrgPackageSummaries(
+      this.#apiContext,
+      orgSlug,
+      body,
       this.#requireApiV1BaseUrl(),
     )
   }

@@ -16,6 +16,12 @@ describe('index.ts exports', () => {
     expect(typeof sdk.SocketSdk).toBe('function')
   })
 
+  it('exposes package intelligence methods on SocketSdk', () => {
+    const client = new sdk.SocketSdk('test-token', { retries: 0 })
+    expect(typeof client.postOrgPackageChecks).toBe('function')
+    expect(typeof client.postOrgPackageSummaries).toBe('function')
+  })
+
   it('exports usable public API clients without credentials', async () => {
     const purlClient = new sdk.SocketPurlClient({ retries: 0 })
     const patchClient = new sdk.SocketPatchClient({ retries: 0 })
@@ -48,6 +54,7 @@ describe('index.ts exports', () => {
     const expectedExports = [
       // Main SDK class
       'ResponseError',
+      'SdkAuthenticationError',
       'SocketPatchClient',
       'SocketPurlClient',
       'SocketSdk',
@@ -104,6 +111,7 @@ describe('index.ts exports', () => {
       'hashFile',
       'hasQuotaForMethods',
       'ResponseError',
+      'SdkAuthenticationError',
       'SocketPatchClient',
       'SocketPurlClient',
       'SocketSdk',

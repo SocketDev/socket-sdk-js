@@ -47,6 +47,14 @@ export type {
   PostEventsResult,
   SocketEvent,
 } from './events-v1.mts'
+export type {
+  PostOrgPackageChecksBody,
+  PostOrgPackageChecksData,
+  PostOrgPackageChecksResult,
+  PostOrgPackageSummariesBody,
+  PostOrgPackageSummariesData,
+  PostOrgPackageSummariesResult,
+} from './package-intelligence-v1.mts'
 // Re-export types for the v1 threat-campaigns endpoints.
 export type {
   GetThreatCampaignResult,

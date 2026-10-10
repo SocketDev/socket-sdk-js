@@ -6,6 +6,12 @@ import { describe, expectTypeOf, it } from 'vitest'
 
 import type { OpErrorType, OpReturnType } from '../../../types/api-helpers.d.ts'
 import type { paths } from '../../../types/api-v1.d.ts'
+import type {
+  PostOrgPackageChecksBody,
+  PostOrgPackageChecksData,
+  PostOrgPackageSummariesBody,
+  PostOrgPackageSummariesData,
+} from '../../../src/index.mts'
 
 interface ExampleOperation {
   responses: {
@@ -43,6 +49,8 @@ describe('OpenAPI response types', () => {
     type Operation = paths['/v1/orgs/{org_slug}/packages/checks']['post']
     type Request = Operation['requestBody']['content']['application/json']
     type Response = OpReturnType<Operation>
+    expectTypeOf<PostOrgPackageChecksBody>().toEqualTypeOf<Request>()
+    expectTypeOf<PostOrgPackageChecksData>().toEqualTypeOf<Response>()
     expectTypeOf<Request>().toEqualTypeOf<{
       packages: { purl: string }[]
     }>()
@@ -78,6 +86,8 @@ describe('OpenAPI response types', () => {
     type Operation = paths['/v1/orgs/{org_slug}/packages/summaries']['post']
     type Request = Operation['requestBody']['content']['application/json']
     type Response = OpReturnType<Operation>
+    expectTypeOf<PostOrgPackageSummariesBody>().toEqualTypeOf<Request>()
+    expectTypeOf<PostOrgPackageSummariesData>().toEqualTypeOf<Response>()
     expectTypeOf<Request>().toEqualTypeOf<{
       packages: { purl: string }[]
     }>()

@@ -27,9 +27,11 @@ describe('package-exports config: vendored externals', () => {
     expect(exportsConfig.ignore).toContain('dist/external/*')
   })
 
-  it('ships auth declarations through the root type graph only', () => {
+  it('ships internal declarations through the root type graph only', () => {
     expect(pkgJson.files).toContain('dist/*.d.mts')
     expect(exportsConfig.ignore).toContain('dist/auth.d.mts')
+    expect(exportsConfig.ignore).toContain('dist/package-intelligence-v1.d.mts')
     expect(pkgJson.exports).not.toHaveProperty('./auth')
+    expect(pkgJson.exports).not.toHaveProperty('./package-intelligence-v1')
   })
 })
