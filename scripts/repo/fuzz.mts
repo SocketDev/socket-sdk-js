@@ -156,6 +156,7 @@ function main(): number {
 
 const SCRIPT_META: ScriptMeta = {
   describe: 'run SDK fuzz targets',
+  heavyJob: 'test',
   help: `Usage: node scripts/repo/fuzz.mts [vitest options]\n\narguments are forwarded to Vitest\n--help, -h  show usage\n--describe  show purpose`,
   json: 'result',
 }
