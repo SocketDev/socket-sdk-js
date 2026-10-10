@@ -5,6 +5,7 @@
 
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
@@ -12,6 +13,7 @@ import _traverse from '@babel/traverse'
 import { describe, expect, it } from 'vitest'
 
 import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 const logger = getDefaultLogger()
 
@@ -305,6 +307,43 @@ export function hasAbsolutePaths(content: string): {
 }
 
 describe('Bundle validation', () => {
+  it('calls the shipped SDK bundle with debug logging enabled', async () => {
+    const indexPath = path.join(distPath, 'index.js')
+    const result = await spawn(
+      process.execPath,
+      [
+        '-e',
+        `const { createServer } = require('node:http')
+const { SocketSdk } = require(${JSON.stringify(indexPath)})
+const server = createServer((_req, res) => {
+  res.setHeader('content-type', 'application/json')
+  res.end('{"organizations":{}}')
+})
+server.listen(0, '127.0.0.1', async () => {
+  try {
+    const baseUrl = 'http://127.0.0.1:' + server.address().port + '/v0/'
+    const result = await new SocketSdk('test-token', { baseUrl }).listOrganizations()
+    if (!result.success || !result.data?.organizations) {
+      throw new Error(JSON.stringify(result))
+    }
+  } catch (error) {
+    console.error(error)
+    process.exitCode = 1
+  } finally {
+    server.close()
+  }
+})`,
+      ],
+      {
+        env: { ...process.env, SOCKET_DEBUG: 'true' },
+        stdio: 'pipe',
+        stdioString: true,
+        throws: false,
+      },
+    )
+    expect(result.code, result.stderr).toBe(0)
+  })
+
   it('should not contain absolute paths in dist/index.js', async () => {
     const indexPath = path.join(distPath, 'index.js')
     const content = await fs.readFile(indexPath, 'utf8')
