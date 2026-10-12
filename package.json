@@ -118,6 +118,8 @@
     "cover:types": "node scripts/fleet/cover/types/run.mts",
     "cover:update": "node scripts/fleet/commands/run.mts cover update",
     "crates:auth": "node scripts/fleet/registry/cargo/auth.mts",
+    "credentials": "node scripts/fleet/credentials/run.mts",
+    "credentials:gh": "node scripts/fleet/credentials/gh/run.mts",
     "credentials:migrate": "node scripts/fleet/credentials/migrate.mts",
     "depot:auth": "node scripts/fleet/registry/depot/browser-auth.mts",
     "docs:api": "node scripts/repo/gen-api-docs.mts",
@@ -139,7 +141,10 @@
     "gen:mcp:config": "node scripts/fleet/mcp/config.mts",
     "generate-sdk": "node scripts/repo/generate-sdk.mts",
     "gh:auth": "node scripts/fleet/gh-auth.mts",
+    "git:admin:merge": "node scripts/fleet/git/admin/merge.mts",
+    "git:admin:push": "node scripts/fleet/git/admin/push.mts",
     "git:deliver": "node scripts/fleet/git/deliver/cli.mts",
+    "git:history": "node scripts/fleet/git/history/cli.mts",
     "github:browser": "node scripts/fleet/ai/browser/drive/github.com/auth/run.mts",
     "hide-comments": "node scripts/fleet/github/comments/hide.mts",
     "hooks:global:sync": "node scripts/fleet/sync-global-hooks.mts",
@@ -266,12 +271,7 @@
     "update:pnpm": "node scripts/fleet/update/pnpm.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
     "weekly-update:ci": "gh workflow run cron-weekly-update.yml",
-    "worktree:create": "node scripts/fleet/worktree/create/run.mts",
-    "credentials:gh": "node scripts/fleet/credentials/gh/run.mts",
-    "credentials": "node scripts/fleet/credentials/run.mts",
-    "git:admin:merge": "node scripts/fleet/git/admin/merge.mts",
-    "git:admin:push": "node scripts/fleet/git/admin/push.mts",
-    "git:history": "node scripts/fleet/git/history/cli.mts"
+    "worktree:create": "node scripts/fleet/worktree/create/run.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
