@@ -28,7 +28,14 @@ export class SocketPurlClient {
 
   constructor(options: PublicApiClientOptions = {}) {
     const opts = { __proto__: null, ...options } as typeof options
-    this.#authenticated = opts.apiToken !== undefined
+    if (
+      opts.authProvider !== undefined &&
+      typeof opts.authProvider !== 'function'
+    ) {
+      throw new TypeError('Invalid "authProvider": use a function')
+    }
+    this.#authenticated =
+      opts.apiToken !== undefined || opts.authProvider !== undefined
     this.#context = createSdkApiContext({
       ...opts,
       baseUrl: opts.baseUrl ?? SOCKET_PURL_API_URL,

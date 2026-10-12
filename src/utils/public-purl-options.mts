@@ -29,7 +29,7 @@ export function assertPublicPurlOrganization(
   const opts = { __proto__: null, ...options } as typeof options
   if (!opts.authenticated) {
     throw new TypeError(
-      'Missing apiToken in organization PURL request: anonymous credentials cannot select an organization; provide an explicit apiToken',
+      'Missing credentials in organization PURL request: provide an explicit apiToken or authProvider',
     )
   }
   if (!/^[a-zA-Z0-9][a-zA-Z0-9-_.]{0,99}$/.test(orgSlug)) {

@@ -65,6 +65,7 @@ export type PurlStreamOptions<Query = PurlQuery> = {
 export type PublicApiClientOptions = Pick<
   SocketSdkOptions,
   | 'authScheme'
+  | 'authProvider'
   | 'baseUrl'
   | 'hooks'
   | 'retries'

@@ -60,7 +60,7 @@ inapplicable fixes, and computation failures.
 
 | Client              | Service                  | Authentication                                                   |
 | ------------------- | ------------------------ | ---------------------------------------------------------------- |
-| `SocketPurlClient`  | `purl-api.socket.dev`    | Optional explicit credentials; required for organization methods |
+| `SocketPurlClient`  | `purl-api.socket.dev`    | Optional; organization methods need `apiToken` or `authProvider` |
 | `SocketPatchClient` | `patches-api.socket.dev` | Public requests                                                  |
 
 Public clients do not inherit credentials from `SocketSdk`. They send no
@@ -71,6 +71,28 @@ and organization batches. Proxy query options include `alerts`, `actions`,
 `compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, and
 `cachedResultsOnly`. Organization calls also accept one `labels` string.
 Unsupported proxy options are rejected.
+
+Set `apiToken` for a static credential or `authProvider` to resolve a credential
+for each request. The provider returns a token and its `basic` or `bearer`
+scheme. Provider credentials take precedence over a valid static token. A
+provider failure stops the request and does not select anonymous access.
+Omitted or `undefined` credentials leave public PURL methods anonymous.
+
+```typescript
+const purlClient = new SocketPurlClient({
+  authProvider: async () => ({
+    token: await refreshApplicationToken(),
+    authScheme: 'bearer',
+  }),
+})
+
+const result = await purlClient.batchOrgPackageFetch('example-org', {
+  components: [{ purl: 'pkg:npm/example-package@1.0.0' }],
+})
+```
+
+The provider function must be valid. If you also set `apiToken`, the client
+validates it even when the provider supplies request credentials.
 
 `SocketPatchClient` supports searches by CVE, GHSA, and package; patch views;
 batch searches; free package download grants; blobs; and diffs. Binary methods
