@@ -61,10 +61,11 @@ inapplicable fixes, and computation failures.
 <details>
 <summary>Public PURL and patch client methods</summary>
 
-| Client              | Service                  | Authentication                                                   |
-| ------------------- | ------------------------ | ---------------------------------------------------------------- |
-| `SocketPurlClient`  | `purl-api.socket.dev`    | Optional; organization methods need `apiToken` or `authProvider` |
-| `SocketPatchClient` | `patches-api.socket.dev` | Public requests                                                  |
+| Client                      | Service                  | Authentication                                                   |
+| --------------------------- | ------------------------ | ---------------------------------------------------------------- |
+| `SocketPurlClient`          | `purl-api.socket.dev`    | Optional; organization methods need `apiToken` or `authProvider` |
+| `SocketPatchClient`         | `patches-api.socket.dev` | Public requests                                                  |
+| `SocketPublicMalwareClient` | `purl-api.socket.dev`    | Anonymous requests only                                          |
 
 Public clients do not inherit credentials from `SocketSdk`. They send no
 automatic telemetry.
@@ -100,6 +101,26 @@ validates it even when the provider supplies request credentials.
 `SocketPatchClient` supports searches by CVE, GHSA, and package; patch views;
 batch searches; free package download grants; blobs; and diffs. Binary methods
 return bytes. They do not extract or execute downloaded content.
+
+`SocketPublicMalwareClient.checkPackages` posts package PURLs to the public v1
+malware check endpoint. It preserves input order and duplicate entries. Results
+use `confirmed_malware`, `no_known_malware`, `unknown`, `unsupported`, or
+`error`. `no_known_malware` reports complete observations for the request; it
+does not prove that a package is safe. The optional `candidateRevision` is
+request context only. Results use `reuse: 'none'` and do not establish a
+reusable revision.
+
+This client rejects credential options and URLs with user information. It does
+not read credentials from the environment or keychain. The production route
+must be deployed and available before applications adopt this client; a
+disabled route returns an unsuccessful 404 result.
+
+```typescript
+const publicMalwareClient = new SocketPublicMalwareClient()
+const result = await publicMalwareClient.checkPackages({
+  packages: [{ purl: 'pkg:npm/example-package@1.0.0' }],
+})
+```
 
 `checkMalware` uses public PURL analysis and returns one entry per input,
 including duplicate inputs. Each entry has `inputPurl` and a status:

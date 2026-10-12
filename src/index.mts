@@ -194,6 +194,16 @@ export { createUserAgentFromPkgJson } from './user-agent.mts'
 export { SocketPurlClient } from './public-purl-client.mts'
 export { SocketPatchClient } from './public-patches-client.mts'
 export type { SocketPatchClientOptions } from './public-patches-client.mts'
+export { SocketPublicMalwareClient } from './public-malware-client.mts'
+export type {
+  PublicMalwareCoverage,
+  PublicMalwareFinding,
+  PublicMalwareReasonCode,
+  PublicMalwareRequest,
+  PublicMalwareResponse,
+  PublicMalwareResult,
+  SocketPublicMalwareClientOptions,
+} from './types/public-malware.mts'
 export type * from './types/alert-policies.mts'
 export type * from './types/fixes.mts'
 export type * from './types/full-scan-results-v1.mts'

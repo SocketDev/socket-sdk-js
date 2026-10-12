@@ -197,7 +197,12 @@ export async function createRequestWithJson(
   const stopTimer = perfTimer(`http:${method.toLowerCase()}`, {
     urlPath,
   })
-  const { hooks, stream, ...rawOpts } = {
+  const {
+    hooks,
+    stream,
+    maxResponseSize = MAX_RESPONSE_SIZE,
+    ...rawOpts
+  } = {
     __proto__: null,
     ...options,
   } as unknown as GetRequestOptions
@@ -229,7 +234,7 @@ export async function createRequestWithJson(
       headers,
       timeout: opts.timeout,
       signal: opts.signal,
-      ...(stream ? { stream: true } : { maxResponseSize: MAX_RESPONSE_SIZE }),
+      ...(stream ? { stream: true } : { maxResponseSize }),
     })
     stopTimer({ statusCode: response.status })
 
