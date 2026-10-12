@@ -58,6 +58,9 @@ inapplicable fixes, and computation failures.
 
 ## Public clients
 
+<details>
+<summary>Public PURL and patch client methods</summary>
+
 | Client              | Service                  | Authentication                                                   |
 | ------------------- | ------------------------ | ---------------------------------------------------------------- |
 | `SocketPurlClient`  | `purl-api.socket.dev`    | Optional; organization methods need `apiToken` or `authProvider` |
@@ -102,6 +105,8 @@ return bytes. They do not extract or execute downloaded content.
 including duplicate inputs. Each entry has `inputPurl` and a status:
 `complete`, `pending`, `not_found`, or `error`. An empty alert list establishes
 completed analysis only when the status is `complete`.
+
+</details>
 
 ## Authentication and cancellation
 
