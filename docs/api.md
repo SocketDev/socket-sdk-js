@@ -38,7 +38,8 @@ There are **137** public methods.
 - [Meta](#meta)
 - [Escape hatches](#escape-hatches)
 - [Other](#other)
-- [Package exports](#package-exports)
+- [Package entrypoints](#package-entrypoints)
+- [Exported symbols](#exported-symbols)
 
 ## Full scans
 
@@ -2304,178 +2305,3639 @@ async postOrgPackageSummaries(
 
 **Quota:** _not tracked_
 
-## Package exports
+## Package entrypoints
 
-Values and types exported from `src/index.mts`. Source links point to their declaration modules. See the linked declarations for signatures, fields, and type relationships.
+Public import paths from `package.json`. The package metadata path exposes package metadata rather than callable SDK API.
 
-| Export | Kind | Declaration |
-| --- | --- | --- |
-| `ALERT_ACTION` | type | [./types/core.mts](../src/types/core.mts#L17) |
-| `ALERT_TYPE` | type | [./types/core.mts](../src/types/core.mts#L19) |
-| `All types from ./types/alert-policies.mts` | type | [./types/alert-policies.mts](../src/types/alert-policies.mts) |
-| `All types from ./types/fixes.mts` | type | [./types/fixes.mts](../src/types/fixes.mts) |
-| `All types from ./types/full-scan-results-v1.mts` | type | [./types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts) |
-| `All types from ./types/malware.mts` | type | [./types/malware.mts](../src/types/malware.mts) |
-| `All types from ./types/purl.mts` | type | [./types/purl.mts](../src/types/purl.mts) |
-| `ArtifactPatches` | type | [./types/patches.mts](../src/types/patches.mts#L52) |
-| `AssembledManifest` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L120) |
-| `assembleManifest` | value | [./full-scans-v1.mts](../src/full-scans-v1.mts#L138) |
-| `BatchPackageFetchResultType` | type | [./types/core.mts](../src/types/core.mts#L420) |
-| `BatchPackageStreamOptions` | type | [./types/core.mts](../src/types/core.mts#L422) |
-| `BlobRef` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L30) |
-| `BlobResult` | type | [./blob.mts](../src/blob.mts#L17) |
-| `BlobsUploadData` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L89) |
-| `BlobUploadEntry` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L102) |
-| `calculateTotalQuotaCost` | value | [./quota-utils.mts](../src/quota-utils.mts#L59) |
-| `ChunkedFetchResult` | type | [./blob.mts](../src/blob.mts#L25) |
-| `CompactSocketArtifact` | type | [./types/core.mts](../src/types/core.mts#L56) |
-| `CompactSocketArtifactAlert` | type | [./types/core.mts](../src/types/core.mts#L49) |
-| `CreateDependenciesSnapshotOptions` | type | [./types/core.mts](../src/types/core.mts#L424) |
-| `CreateFullScanFromManifestParams` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L36) |
-| `CreateFullScanFromManifestResult` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L73) |
-| `CreateFullScanOptions` | type | [./types/strict.mts](../src/types/strict.mts#L12) |
-| `CreateOrgRepoDiffOptions` | type | [./types/parity.mts](../src/types/parity.mts#L50) |
-| `createUserAgentFromPkgJson` | value | [./user-agent.mts](../src/user-agent.mts#L36) |
-| `CustomResponseType` | type | [./types/core.mts](../src/types/core.mts#L77) |
-| `DeleteRepositoryLabelResult` | type | [./types/strict.mts](../src/types/strict.mts#L393) |
-| `DeleteResult` | type | [./types/strict.mts](../src/types/strict.mts#L349) |
-| `deriveApiV1BaseUrl` | value | [./full-scans-v1.mts](../src/full-scans-v1.mts#L192) |
-| `Entitlement` | type | [./types/core.mts](../src/types/core.mts#L23) |
-| `EntitlementsResponse` | type | [./types/core.mts](../src/types/core.mts#L28) |
-| `fetchBlob` | value | [./blob.mts](../src/blob.mts#L101) |
-| `FetchBlobOptions` | type | [./blob.mts](../src/blob.mts#L34) |
-| `fetchChunkedBytes` | value | [./blob.mts](../src/blob.mts#L143) |
-| `fetchRawBytes` | value | [./blob.mts](../src/blob.mts#L227) |
-| `FileHashResult` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L15) |
-| `FileValidationCallback` | type | [./types/core.mts](../src/types/core.mts#L270) |
-| `FileValidationResult` | type | [./types/core.mts](../src/types/core.mts#L239) |
-| `FullScanItem` | type | [./types/strict.mts](../src/types/strict.mts#L39) |
-| `FullScanListData` | type | [./types/strict.mts](../src/types/strict.mts#L69) |
-| `FullScanListResult` | type | [./types/strict.mts](../src/types/strict.mts#L292) |
-| `FullScanManifest` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L25) |
-| `FullScanManifestEntry` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L20) |
-| `FullScanResult` | type | [./types/strict.mts](../src/types/strict.mts#L303) |
-| `FullScanV1CreatedData` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L50) |
-| `FullScanV1PendingData` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L66) |
-| `getAllMethodRequirements` | value | [./quota-utils.mts](../src/quota-utils.mts#L72) |
-| `getMethodRequirements` | value | [./quota-utils.mts](../src/quota-utils.mts#L98) |
-| `getMethodsByPermissions` | value | [./quota-utils.mts](../src/quota-utils.mts#L120) |
-| `getMethodsByQuotaCost` | value | [./quota-utils.mts](../src/quota-utils.mts#L146) |
-| `GetOptions` | type | [./types/core.mts](../src/types/core.mts#L79) |
-| `GetOrgFullScanCsvOptions` | type | [./types/parity.mts](../src/types/parity.mts#L33) |
-| `GetOrgFullScanPdfOptions` | type | [./types/parity.mts](../src/types/parity.mts#L40) |
-| `GetPatchPackagesResponse` | type | [./types/patches.mts](../src/types/patches.mts#L128) |
-| `getQuotaCost` | value | [./quota-utils.mts](../src/quota-utils.mts#L167) |
-| `getQuotaUsageSummary` | value | [./quota-utils.mts](../src/quota-utils.mts#L186) |
-| `GetRepositoryOptions` | type | [./types/strict.mts](../src/types/strict.mts#L78) |
-| `getRequiredPermissions` | value | [./quota-utils.mts](../src/quota-utils.mts#L221) |
-| `GetThreatCampaignResult` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L43) |
-| `hashFile` | value | [./full-scans-v1.mts](../src/full-scans-v1.mts#L203) |
-| `hasQuotaForMethods` | value | [./quota-utils.mts](../src/quota-utils.mts#L239) |
-| `HeadersRecord` | type | [./types/core.mts](../src/types/core.mts#L86) |
-| `HistoricalAlertsListOptions` | type | [./types/parity.mts](../src/types/parity.mts#L14) |
-| `HistoricalAlertsTrendOptions` | type | [./types/parity.mts](../src/types/parity.mts#L18) |
-| `HistoricalDependenciesTrendOptions` | type | [./types/parity.mts](../src/types/parity.mts#L22) |
-| `HistoricalSnapshotsListOptions` | type | [./types/parity.mts](../src/types/parity.mts#L26) |
-| `LicensePolicyViolations` | type | [./types/parity.mts](../src/types/parity.mts#L64) |
-| `ListFullScansOptions` | type | [./types/strict.mts](../src/types/strict.mts#L85) |
-| `ListRepositoriesOptions` | type | [./types/strict.mts](../src/types/strict.mts#L104) |
-| `ListThreatCampaignPackagesOptions` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L51) |
-| `ListThreatCampaignPackagesResult` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L61) |
-| `ListThreatCampaignsOptions` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L22) |
-| `ListThreatCampaignsResult` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L35) |
-| `LookupPatchPackageResponse` | type | [./types/patches.mts](../src/types/patches.mts#L152) |
-| `MalwareCheckAlert` | type | [./types/core.mts](../src/types/core.mts#L204) |
-| `MalwareCheckPackage` | type | [./types/core.mts](../src/types/core.mts#L213) |
-| `MalwareCheckResult` | type | [./types/core.mts](../src/types/core.mts#L222) |
-| `MalwareCheckScore` | type | [./types/core.mts](../src/types/core.mts#L224) |
-| `ManifestLocalEntry` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L108) |
-| `OrganizationItem` | type | [./types/strict.mts](../src/types/strict.mts#L116) |
-| `OrganizationsResult` | type | [./types/strict.mts](../src/types/strict.mts#L325) |
-| `PatchesBatchResponse` | type | [./types/patches.mts](../src/types/patches.mts#L161) |
-| `PatchFile` | type | [./types/patches.mts](../src/types/patches.mts#L11) |
-| `PatchPackageStatsResponse` | type | [./types/patches.mts](../src/types/patches.mts#L143) |
-| `PatchRecord` | type | [./types/patches.mts](../src/types/patches.mts#L32) |
-| `PatchRecordsResponse` | type | [./types/patches.mts](../src/types/patches.mts#L183) |
-| `PatchSearchResponse` | type | [./types/patches.mts](../src/types/patches.mts#L67) |
-| `PatchViewResponse` | type | [./types/patches.mts](../src/types/patches.mts#L41) |
-| `PostEventsData` | type | [./events-v1.mts](../src/events-v1.mts#L26) |
-| `PostEventsResult` | type | [./events-v1.mts](../src/events-v1.mts#L28) |
-| `PostOrgPackageChecksBody` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L20) |
-| `PostOrgPackageChecksData` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L22) |
-| `PostOrgPackageChecksResult` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L23) |
-| `PostOrgPackageSummariesBody` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L25) |
-| `PostOrgPackageSummariesData` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L27) |
-| `PostOrgPackageSummariesResult` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L29) |
-| `PostOrgTelemetryPayload` | type | [./types/core.mts](../src/types/core.mts#L433) |
-| `PostOrgTelemetryResponse` | type | [./types/core.mts](../src/types/core.mts#L435) |
-| `PublicMalwareCoverage` | type | [./types/public-malware.mts](../src/types/public-malware.mts#L33) |
-| `PublicMalwareFinding` | type | [./types/public-malware.mts](../src/types/public-malware.mts#L27) |
-| `PublicMalwareReasonCode` | type | [./types/public-malware.mts](../src/types/public-malware.mts#L3) |
-| `PublicMalwareRequest` | type | [./types/public-malware.mts](../src/types/public-malware.mts#L107) |
-| `PublicMalwareResponse` | type | [./types/public-malware.mts](../src/types/public-malware.mts#L112) |
-| `PublicMalwareResult` | type | [./types/public-malware.mts](../src/types/public-malware.mts#L47) |
-| `PurlVersionEntry` | type | [./purl-versions-v1.mts](../src/purl-versions-v1.mts#L14) |
-| `PurlVersionsData` | type | [./purl-versions-v1.mts](../src/purl-versions-v1.mts#L12) |
-| `PurlVersionsOptions` | type | [./purl-versions-v1.mts](../src/purl-versions-v1.mts#L15) |
-| `QueryParams` | type | [./types/core.mts](../src/types/core.mts#L84) |
-| `RawFetchResult` | type | [./blob.mts](../src/blob.mts#L58) |
-| `RepositoriesListData` | type | [./types/strict.mts](../src/types/strict.mts#L127) |
-| `RepositoriesListResult` | type | [./types/strict.mts](../src/types/strict.mts#L338) |
-| `RepositoryItem` | type | [./types/strict.mts](../src/types/strict.mts#L135) |
-| `RepositoryLabelItem` | type | [./types/strict.mts](../src/types/strict.mts#L191) |
-| `RepositoryLabelResult` | type | [./types/strict.mts](../src/types/strict.mts#L382) |
-| `RepositoryLabelsListData` | type | [./types/strict.mts](../src/types/strict.mts#L202) |
-| `RepositoryLabelsListResult` | type | [./types/strict.mts](../src/types/strict.mts#L371) |
-| `RepositoryListItem` | type | [./types/strict.mts](../src/types/strict.mts#L210) |
-| `RepositoryResult` | type | [./types/strict.mts](../src/types/strict.mts#L360) |
-| `RequestInfo` | type | [./types/core.mts](../src/types/core.mts#L32) |
-| `RequestOptions` | type | [./types/core.mts](../src/types/core.mts#L98) |
-| `RequestOptionsWithHooks` | type | [./types/core.mts](../src/types/core.mts#L107) |
-| `ResponseError` | value | [./http-client.mts](../src/http-client.mts#L30) |
-| `ResponseInfo` | type | [./types/core.mts](../src/types/core.mts#L39) |
-| `SdkAuthenticationError` | value | [./auth.mts](../src/auth.mts#L6) |
-| `SecurityAlert` | type | [./types/patches.mts](../src/types/patches.mts#L24) |
-| `SendMethod` | type | [./types/core.mts](../src/types/core.mts#L117) |
-| `SendOptions` | type | [./types/core.mts](../src/types/core.mts#L119) |
-| `SkippedManifestPath` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L115) |
-| `SocketArtifact` | type | [./types/core.mts](../src/types/core.mts#L125) |
-| `SocketArtifactAlert` | type | [./types/core.mts](../src/types/core.mts#L131) |
-| `SocketArtifactWithExtras` | type | [./types/core.mts](../src/types/core.mts#L92) |
-| `SocketEvent` | type | [./events-v1.mts](../src/events-v1.mts#L10) |
-| `SocketId` | type | [./types/core.mts](../src/types/core.mts#L90) |
-| `SocketMetricSchema` | type | [./types/core.mts](../src/types/core.mts#L88) |
-| `SocketPatchClient` | value | [./public-patches-client.mts](../src/public-patches-client.mts#L29) |
-| `SocketPatchClientOptions` | type | [./public-patches-client.mts](../src/public-patches-client.mts#L24) |
-| `SocketPublicMalwareClient` | value | [./public-malware-client.mts](../src/public-malware-client.mts#L66) |
-| `SocketPublicMalwareClientOptions` | type | [./types/public-malware.mts](../src/types/public-malware.mts#L126) |
-| `SocketPurlClient` | value | [./public-purl-client.mts](../src/public-purl-client.mts#L25) |
-| `SocketSdk` | value | [./socket-sdk-class.mts](../src/socket-sdk-class.mts#L259) |
-| `SocketSdkArrayElement` | type | [./types/core.mts](../src/types/core.mts#L181) |
-| `SocketSdkAuthProvider` | type | [./types/core.mts](../src/types/core.mts#L283) |
-| `SocketSdkData` | type | [./types/core.mts](../src/types/core.mts#L170) |
-| `SocketSdkErrorResult` | type | [./types/core.mts](../src/types/core.mts#L149) |
-| `SocketSdkGenericResult` | type | [./types/core.mts](../src/types/core.mts#L187) |
-| `SocketSdkHttpResponse` | type | [./types/http.mts](../src/types/http.mts#L6) |
-| `SocketSdkJsonValue` | type | [./types/util.mts](../src/types/util.mts#L6) |
-| `SocketSdkOperations` | type | [./types/core.mts](../src/types/core.mts#L139) |
-| `SocketSdkOptions` | type | [./types/core.mts](../src/types/core.mts#L291) |
-| `SocketSdkResult` | type | [./types/core.mts](../src/types/core.mts#L160) |
-| `SocketSdkSuccessResult` | type | [./types/core.mts](../src/types/core.mts#L141) |
-| `StreamFullScanOptions` | type | [./types/strict.mts](../src/types/strict.mts#L314) |
-| `StreamOrgFullScanOptions` | type | [./types/core.mts](../src/types/core.mts#L429) |
-| `StrictErrorResult` | type | [./types/strict.mts](../src/types/strict.mts#L268) |
-| `StrictResult` | type | [./types/strict.mts](../src/types/strict.mts#L279) |
-| `TelemetryConfig` | type | [./types/core.mts](../src/types/core.mts#L441) |
-| `ThreatCampaign` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L10) |
-| `ThreatCampaignPackagesData` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L56) |
-| `ThreatCampaignsListData` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L30) |
-| `ThreatCampaignStatus` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L8) |
-| `tryDecodeText` | value | [./blob.mts](../src/blob.mts#L283) |
-| `UpdateOrgRepoLabelSettingBody` | type | [./types/parity.mts](../src/types/parity.mts#L58) |
-| `UploadBlobsResult` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#L94) |
-| `UploadManifestFilesError` | type | [./types/core.mts](../src/types/core.mts#L411) |
-| `UploadManifestFilesOptions` | type | [./types/core.mts](../src/types/core.mts#L447) |
-| `UploadManifestFilesResponse` | type | [./types/core.mts](../src/types/core.mts#L398) |
-| `UploadManifestFilesReturnType` | type | [./types/core.mts](../src/types/core.mts#L403) |
-| `Vulnerability` | type | [./types/patches.mts](../src/types/patches.mts#L17) |
+| Import path | Target |
+| --- | --- |
+| `.` | ./src/index.mts |
+| `./package.json` | `package.json` (metadata) |
+| `./testing` | ./src/testing.mts |
+| `./types/api` | ./types/api.d.ts |
+| `./types/api-helpers` | ./types/api-helpers.d.ts |
+| `./types/api-v1` | ./types/api-v1.d.ts |
+
+## Exported symbols
+
+Each symbol is scoped to its package import path. Callable helpers and authored types include available signatures and JSDoc. Generated OpenAPI types link to their canonical declarations.
+
+### `.`
+
+#### `ALERT_ACTION` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L17).
+
+```typescript
+type ALERT_ACTION = 'error' | 'monitor' | 'warn' | 'ignore'
+```
+
+#### `ALERT_TYPE` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L19).
+
+```typescript
+type ALERT_TYPE = keyof NonNullable<
+  operations['getOrgSecurityPolicy']['responses']['200']['content']['application/json']['securityPolicyRules']
+>
+```
+
+#### `AlertPolicyWriteOptions` (type)
+
+Declared in [src/types/alert-policies.mts](../src/types/alert-policies.mts#L6).
+
+```typescript
+type AlertPolicyWriteOptions = { dry_run?: boolean | undefined }
+```
+
+#### `ArtifactPatches` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L52).
+
+```typescript
+type ArtifactPatches = {
+  artifactId: string
+  patches: PatchRecord[]
+}
+```
+
+#### `AssembledManifest` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L120).
+
+```typescript
+type AssembledManifest = {
+  entries: ManifestLocalEntry[]
+  manifest: FullScanManifest
+  skipped: SkippedManifestPath[]
+}
+```
+
+#### `BatchPackageFetchResultType` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L420).
+
+```typescript
+type BatchPackageFetchResultType = PurlFetchResult
+```
+
+#### `BatchPackageStreamOptions` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L422).
+
+```typescript
+type BatchPackageStreamOptions = PurlStreamOptions
+```
+
+#### `BlobRef` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L30).
+
+```typescript
+type BlobRef = {
+  hash: string
+  path: string
+  size: number
+}
+```
+
+#### `BlobResult` (type)
+
+Declared in [src/blob.mts](../src/blob.mts#L17).
+
+```typescript
+interface BlobResult {
+  binary: boolean
+  bytes: number
+  contentType: string | undefined
+  text: string
+  truncated: boolean
+}
+```
+
+#### `BlobUploadEntry` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L102).
+
+```typescript
+type BlobUploadEntry = {
+  hash?: string | undefined
+  localPath: string
+  name?: string | undefined
+}
+```
+
+#### `BlobsUploadData` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L89).
+
+```typescript
+type BlobsUploadData = {
+  already_existed: string[]
+  stored: string[]
+}
+```
+
+#### `ChunkedFetchResult` (type)
+
+Declared in [src/blob.mts](../src/blob.mts#L25).
+
+```typescript
+interface ChunkedFetchResult {
+  // Concatenated chunk bytes, possibly fewer than `totalSize` when stopped
+  // early at maxBytes.
+  bytes: Uint8Array
+  // Total file size from the manifest, regardless of how many chunks were
+  // fetched.
+  totalSize: number
+}
+```
+
+#### `CompactSocketArtifact` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L56).
+
+```typescript
+type CompactSocketArtifact = Remap<
+  Omit<
+    SocketArtifact,
+    | 'alerts'
+    | 'alertKeysToReachabilitySummaries'
+    | 'alertKeysToReachabilityTypes'
+    | 'artifact'
+    | 'batchIndex'
+    | 'dead'
+    | 'dependencies'
+    | 'dev'
+    | 'direct'
+    | 'manifestFiles'
+    | 'score'
+    | 'size'
+    | 'topLevelAncestors'
+  > & {
+    alerts: CompactSocketArtifactAlert[]
+  }
+>
+```
+
+#### `CompactSocketArtifactAlert` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L49).
+
+```typescript
+type CompactSocketArtifactAlert = Remap<
+  Omit<
+    SocketArtifactAlert,
+    'actionSource' | 'category' | 'end' | 'file' | 'start'
+  >
+>
+```
+
+#### `CreateDependenciesSnapshotOptions` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L424).
+
+```typescript
+type CreateDependenciesSnapshotOptions = {
+  pathsRelativeTo?: string | undefined
+  queryParams?: QueryParams | undefined
+}
+```
+
+#### `CreateFullScanFromManifestParams` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L36).
+
+```typescript
+type CreateFullScanFromManifestParams = {
+  branch?: string | undefined
+  commit_hash?: string | undefined
+  commit_message?: string | undefined
+  committers?: string[] | undefined
+  ephemeral?: boolean | undefined
+  make_default_branch?: boolean | undefined
+  pull_request?: number | undefined
+  repo: string
+  scan_type?: string | undefined
+  set_as_pending_head?: boolean | undefined
+  workspace?: string | undefined
+}
+```
+
+#### `CreateFullScanFromManifestResult` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L73).
+
+```typescript
+type CreateFullScanFromManifestResult =
+  | {
+      cause: undefined
+      data: FullScanV1CreatedData
+      error: undefined
+      status: 201
+      success: true
+    }
+  | {
+      cause: undefined
+      data: FullScanV1PendingData
+      error: undefined
+      status: 202
+      success: true
+    }
+```
+
+#### `CreateFullScanOptions` (type)
+
+Strict type for create full scan options.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L12).
+
+```typescript
+type CreateFullScanOptions = {
+  branch?: string | undefined
+  commit_hash?: string | undefined
+  commit_message?: string | undefined
+  committers?: string | undefined
+  integration_org_slug?: string | undefined
+  integration_type?:
+    | 'api'
+    | 'github'
+    | 'gitlab'
+    | 'bitbucket'
+    | 'azure'
+    | 'web'
+    | undefined
+  make_default_branch?: boolean | undefined
+  pathsRelativeTo?: string | undefined
+  pull_request?: number | undefined
+  repo: string
+  scan_type?: string | undefined
+  set_as_pending_head?: boolean | undefined
+  tmp?: boolean | undefined
+  workspace?: string | undefined
+}
+```
+
+#### `CreateOrgAlertPolicyBody` (type)
+
+Declared in [src/types/alert-policies.mts](../src/types/alert-policies.mts#L8).
+
+```typescript
+type CreateOrgAlertPolicyBody =
+  operations['createOrgAlertPolicy']['requestBody']['content']['application/json']
+```
+
+#### `CreateOrgAlertPolicyRuleBody` (type)
+
+Declared in [src/types/alert-policies.mts](../src/types/alert-policies.mts#L12).
+
+```typescript
+type CreateOrgAlertPolicyRuleBody =
+  operations['createOrgAlertPolicyRule']['requestBody']['content']['application/json']
+```
+
+#### `CreateOrgAlertResolutionBody` (type)
+
+Declared in [src/types/alert-policies.mts](../src/types/alert-policies.mts#L16).
+
+```typescript
+type CreateOrgAlertResolutionBody =
+  operations['createOrgAlertResolution']['requestBody']['content']['application/json']
+```
+
+#### `CreateOrgRepoDiffOptions` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L50).
+
+```typescript
+type CreateOrgRepoDiffOptions = NonNullable<
+  operations['createOrgRepoDiff']['parameters']['query']
+> & {
+  pathsRelativeTo?: string | undefined
+}
+```
+
+#### `CustomResponseType` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L77).
+
+```typescript
+type CustomResponseType = 'response' | 'text' | 'json'
+```
+
+#### `DeleteRepositoryLabelResult` (type)
+
+Strict type for delete repository label result.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L393).
+
+```typescript
+type DeleteRepositoryLabelResult = {
+  cause?: undefined | undefined
+  data: { status: string }
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `DeleteResult` (type)
+
+Strict type for delete operation result.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L349).
+
+```typescript
+type DeleteResult = {
+  cause?: undefined | undefined
+  data: { success: boolean }
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `Entitlement` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L23).
+
+```typescript
+type Entitlement = {
+  enabled: boolean
+  key: string
+}
+```
+
+#### `EntitlementsResponse` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L28).
+
+```typescript
+type EntitlementsResponse = {
+  items: Entitlement[]
+}
+```
+
+#### `ErrorComputingFixValue` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L118).
+
+```typescript
+type ErrorComputingFixValue = Omit<FixAdvisoryReference, 'ghsa'> & {
+  type: 'errorComputingFix'
+  ghsa: string | null
+  message: string
+}
+```
+
+#### `FetchBlobOptions` (type)
+
+Declared in [src/blob.mts](../src/blob.mts#L34).
+
+```typescript
+interface FetchBlobOptions {
+  baseUrl: string
+  // Extra headers merged into the outbound request. Values overwrite
+  // user-agent if it is also set here.
+  extraHeaders?: Record<string, string> | undefined
+  // Hard cap on bytes returned. Larger blobs are truncated and flagged.
+  maxBytes?: number | undefined
+  // Hard cap on the bytes any single request may buffer, enforced at the
+  // socket layer (httpRequest's maxResponseSize) so an oversized body is
+  // rejected before it is read into memory — `maxBytes` only trims what was
+  // already buffered, so this is what actually bounds peak memory. Defaults to
+  // `maxBytes` (or DEFAULT_MAX_BYTES), floored at MIN_MAX_RESPONSE_BYTES so a
+  // chunked manifest still fits.
+  maxResponseBytes?: number | undefined
+  // Called with the resolved URL right before each request is dispatched
+  // (chunked blobs fire this once per chunk).
+  onRequest?: ((url: string) => void) | undefined
+  userAgent?: string | undefined
+  // Verify that fetched bytes content-address to the requested hash (the whole
+  // point of a content-addressed store). On by default; throws on mismatch.
+  // Set false only to read from a store that does not use Socket's hash scheme.
+  verifyHash?: boolean | undefined
+}
+```
+
+#### `FileHashResult` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L15).
+
+```typescript
+type FileHashResult = {
+  hash: string
+  size: number
+}
+```
+
+#### `FileValidationCallback` (type)
+
+Callback invoked when file validation detects unreadable files. Gives consumers control over error messages and logging.
+
+Declared in [src/types/core.mts](../src/types/core.mts#L270).
+
+```typescript
+type FileValidationCallback = (
+  validPaths: string[],
+  invalidPaths: string[],
+  context: {
+    operation:
+      | 'createDependenciesSnapshot'
+      | 'createFullScan'
+      | 'uploadManifestFiles'
+    orgSlug?: string | undefined
+    [key: string]: unknown
+  },
+) => FileValidationResult | Promise<FileValidationResult>
+```
+
+#### `FileValidationResult` (type)
+
+Result from file validation callback. Allows consumers to customize error handling and logging.
+
+Declared in [src/types/core.mts](../src/types/core.mts#L239).
+
+```typescript
+interface FileValidationResult {
+  /**
+   * Whether to continue with the operation using valid files. If false, the SDK
+   * operation will fail with the provided error message.
+   */
+  shouldContinue: boolean
+
+  /**
+   * Optional custom error message if shouldContinue is false. If not provided,
+   * SDK will use default error message.
+   */
+  errorMessage?: string | undefined
+
+  /**
+   * Optional cause/reason for the error.
+   */
+  errorCause?: string | undefined
+}
+```
+
+#### `FixAdvisoryDetails` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L70).
+
+```typescript
+type FixAdvisoryDetails = {
+  title?: string | null | undefined
+  description?: string | null | undefined
+  cwes?: string[] | undefined
+  severity?: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL' | undefined
+  cvssVector?: string | null | undefined
+  publishedAt?: string | undefined
+  kev?: boolean | undefined
+  epss?: number | null | undefined
+  affectedPurls?: Array<{ purl: string; affectedRange: string }> | undefined
+}
+```
+
+#### `FixAdvisoryReference` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L90).
+
+```typescript
+type FixAdvisoryReference = {
+  ghsa: string
+  cve: string | null
+  advisoryDetails: FixAdvisoryDetails | null
+}
+```
+
+#### `FixArtifact` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L52).
+
+```typescript
+type FixArtifact = {
+  purl: string
+  manifestFiles: string[]
+  manifestFilesWithOffsets: FixManifestFile[]
+  direct: boolean
+  dev: boolean
+  toplevelAncestors: FixToplevelAncestor[]
+}
+```
+
+#### `FixComputationStatus` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L140).
+
+```typescript
+type FixComputationStatus =
+  | 'pending'
+  | 'running'
+  | 'succeeded'
+  | 'failed'
+```
+
+#### `FixDetail` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L129).
+
+```typescript
+type FixDetail = {
+  [Variant in FixDetailValue as Variant['type']]: {
+    type: Variant['type']
+    value: Variant
+  }
+}[FixDetailValue['type']]
+```
+
+#### `FixDetailValue` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L123).
+
+```typescript
+type FixDetailValue =
+  | FixFoundValue
+  | PartialFixFoundValue
+  | NoFixAvailableValue
+  | FixNotApplicableValue
+  | ErrorComputingFixValue
+```
+
+#### `FixFoundValue` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L95).
+
+```typescript
+type FixFoundValue = FixAdvisoryReference & {
+  type: 'fixFound'
+  fixDetails: {
+    fixes: PackageFix[]
+    responsibleDirectDependencies?: ResponsibleDirectDependencies | undefined
+  }
+}
+```
+
+#### `FixManifestFile` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L43).
+
+```typescript
+type FixManifestFile = {
+  file: string
+  start?: number | undefined
+  end?: number | undefined
+}
+```
+
+#### `FixNotApplicableValue` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L114).
+
+```typescript
+type FixNotApplicableValue = FixAdvisoryReference & {
+  type: 'fixNotApplicable'
+  vulnerableArtifacts: VulnerableFixArtifact[]
+}
+```
+
+#### `FixToplevelAncestor` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L48).
+
+```typescript
+type FixToplevelAncestor = {
+  purl: string
+  manifestFiles: FixManifestFile[]
+}
+```
+
+#### `FixUpdateType` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L33).
+
+```typescript
+type FixUpdateType = 'patch' | 'minor' | 'major' | 'unknown'
+```
+
+#### `FixVersionUpdate` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L81).
+
+```typescript
+type FixVersionUpdate = { version: string; updateType: FixUpdateType }
+```
+
+#### `FullScanItem` (type)
+
+Strict type for full scan item.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L39).
+
+```typescript
+type FullScanItem = {
+  api_url: string | null
+  branch?: string | null | undefined
+  commit_hash?: string | null | undefined
+  commit_message?: string | null | undefined
+  committers?: string[] | undefined
+  created_at: string
+  html_report_url: string
+  html_url?: string | null | undefined
+  id: string
+  integration_branch_url?: string | null | undefined
+  integration_commit_url?: string | null | undefined
+  integration_pull_request_url?: string | null | undefined
+  integration_repo_url: string | null
+  integration_type: string | null
+  organization_id: string
+  organization_slug: string
+  pull_request?: number | null | undefined
+  repo: string
+  repository_id: string
+  repository_slug: string
+  scan_state?: 'pending' | 'precrawl' | 'resolve' | 'scan' | null | undefined
+  scan_type?: string | null | undefined
+  updated_at: string
+  workspace?: string | undefined
+}
+```
+
+#### `FullScanListData` (type)
+
+Strict type for full scan list data.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L69).
+
+```typescript
+type FullScanListData = {
+  nextPage?: number | null | undefined
+  nextPageCursor?: string | null | undefined
+  results: FullScanItem[]
+}
+```
+
+#### `FullScanListResult` (type)
+
+Strict type for full scan list result.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L292).
+
+```typescript
+type FullScanListResult = {
+  cause?: undefined | undefined
+  data: FullScanListData
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `FullScanManifest` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L25).
+
+```typescript
+type FullScanManifest = {
+  algo: 'sha256'
+  files: Record<FilePath, FullScanManifestEntry>
+}
+```
+
+#### `FullScanManifestEntry` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L20).
+
+```typescript
+type FullScanManifestEntry = {
+  hash: string
+  size: number
+}
+```
+
+#### `FullScanResult` (type)
+
+Strict type for single full scan result.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L303).
+
+```typescript
+type FullScanResult = {
+  cause?: undefined | undefined
+  data: FullScanItem
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `FullScanScore` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L6).
+
+```typescript
+type FullScanScore = {
+  value: {
+    result: number
+    components?: Record<string, number> | undefined
+    formula?: string | undefined
+  }
+}
+```
+
+#### `FullScanScoresRecord` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L13).
+
+```typescript
+type FullScanScoresRecord = {
+  _type: 'scores'
+  value: Record<
+    | 'supplyChainRisk'
+    | 'quality'
+    | 'maintenance'
+    | 'vulnerability'
+    | 'license'
+    | 'overall',
+    FullScanScore
+  >
+}
+```
+
+#### `FullScanV1Complete` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L36).
+
+```typescript
+type FullScanV1Complete = {
+  status: 'complete'
+  records: AsyncGenerator<FullScanV1Record>
+  scannedAt?: string | undefined
+}
+```
+
+#### `FullScanV1CreatedData` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L50).
+
+```typescript
+type FullScanV1CreatedData = {
+  branch: string
+  commit_hash: string
+  commit_message: string
+  committers: string[]
+  created_at: string
+  html_report_url: string
+  id: string
+  organization_id: string
+  pull_request: number
+  repository_id: string
+  scan_type: string
+  unsupported_files: BlobRef[]
+  updated_at: string
+}
+```
+
+#### `FullScanV1Data` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L42).
+
+```typescript
+type FullScanV1Data =
+  | FullScanV1Processing
+  | FullScanV1Complete
+  | FullScanV1Failed
+```
+
+#### `FullScanV1Failed` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L41).
+
+```typescript
+type FullScanV1Failed = { status: 'failed'; error: FullScanV1Failure }
+```
+
+#### `FullScanV1Failure` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L26).
+
+```typescript
+type FullScanV1Failure = {
+  code: string
+  retryable: boolean
+  message: string
+}
+```
+
+#### `FullScanV1PendingData` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L66).
+
+```typescript
+type FullScanV1PendingData = {
+  algo: string
+  missing: BlobRef[]
+  present: BlobRef[]
+  unsupported: BlobRef[]
+}
+```
+
+#### `FullScanV1Processing` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L31).
+
+```typescript
+type FullScanV1Processing = {
+  status: 'processing'
+  id: string
+  progress?: number | undefined
+}
+```
+
+#### `FullScanV1Record` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L25).
+
+```typescript
+type FullScanV1Record = SocketArtifact | FullScanScoresRecord
+```
+
+#### `FullScanV1Result` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L46).
+
+```typescript
+type FullScanV1Result = SocketSdkGenericResult<FullScanV1Data>
+```
+
+#### `FullScanV1TerminalResult` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L47).
+
+```typescript
+type FullScanV1TerminalResult = SocketSdkGenericResult<
+  FullScanV1Complete | FullScanV1Failed
+>
+```
+
+#### `GetOptions` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L79).
+
+```typescript
+type GetOptions = {
+  responseType?: CustomResponseType | undefined
+  throws?: boolean | undefined
+}
+```
+
+#### `GetOrgFullScanCsvOptions` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L33).
+
+```typescript
+type GetOrgFullScanCsvOptions = NonNullable<
+  operations['getOrgFullScanCsv']['parameters']['query']
+> &
+  NonNullable<
+    NonNullable<operations['getOrgFullScanCsv']['requestBody']>['content']
+  >['application/json']
+```
+
+#### `GetOrgFullScanPdfOptions` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L40).
+
+```typescript
+type GetOrgFullScanPdfOptions = NonNullable<
+  operations['getOrgFullScanPdf']['parameters']['query']
+> &
+  NonNullable<
+    NonNullable<operations['getOrgFullScanPdf']['requestBody']>['content']
+  >['application/json']
+```
+
+#### `GetPatchPackagesResponse` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L128).
+
+```typescript
+type GetPatchPackagesResponse = {
+  results: Record<Purl, PatchPackageResult>
+}
+```
+
+#### `GetRepositoryOptions` (type)
+
+Strict type for get repository options.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L78).
+
+```typescript
+type GetRepositoryOptions = {
+  workspace?: string | undefined
+}
+```
+
+#### `GetThreatCampaignResult` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L43).
+
+```typescript
+type GetThreatCampaignResult = {
+  cause: undefined
+  data: ThreatCampaign
+  error: undefined
+  status: 200
+  success: true
+}
+```
+
+#### `HeadersRecord` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L86).
+
+```typescript
+type HeadersRecord = Record<string, string | string[]> | undefined
+```
+
+#### `HistoricalAlertsListOptions` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L14).
+
+```typescript
+type HistoricalAlertsListOptions = NonNullable<
+  operations['historicalAlertsList']['parameters']['query']
+>
+```
+
+#### `HistoricalAlertsTrendOptions` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L18).
+
+```typescript
+type HistoricalAlertsTrendOptions = NonNullable<
+  operations['historicalAlertsTrend']['parameters']['query']
+>
+```
+
+#### `HistoricalDependenciesTrendOptions` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L22).
+
+```typescript
+type HistoricalDependenciesTrendOptions = NonNullable<
+  operations['historicalDependenciesTrend']['parameters']['query']
+>
+```
+
+#### `HistoricalSnapshotsListOptions` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L26).
+
+```typescript
+type HistoricalSnapshotsListOptions = NonNullable<
+  operations['historicalSnapshotsList']['parameters']['query']
+>
+```
+
+#### `LicensePolicyViolations` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L64).
+
+```typescript
+type LicensePolicyViolations = NonNullable<
+  NonNullable<operations['licensePolicy']['responses']['200']['content']>
+>['application/x-ndjson']
+```
+
+#### `ListFullScansOptions` (type)
+
+Strict type for list full scans options.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L85).
+
+```typescript
+type ListFullScansOptions = {
+  branch?: string | undefined
+  commit_hash?: string | undefined
+  direction?: 'asc' | 'desc' | undefined
+  from?: string | undefined
+  page?: number | undefined
+  per_page?: number | undefined
+  pull_request?: string | undefined
+  repo?: string | undefined
+  scan_type?: string | undefined
+  sort?: 'name' | 'created_at' | undefined
+  startAfterCursor?: string | undefined
+  use_cursor?: boolean | undefined
+  workspace?: string | undefined
+}
+```
+
+#### `ListRepositoriesOptions` (type)
+
+Strict type for list repositories options.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L104).
+
+```typescript
+type ListRepositoriesOptions = {
+  direction?: 'asc' | 'desc' | undefined
+  include_archived?: boolean | undefined
+  page?: number | undefined
+  per_page?: number | undefined
+  sort?: 'name' | 'updated_at' | 'created_at' | undefined
+  workspace?: string | undefined
+}
+```
+
+#### `ListThreatCampaignPackagesOptions` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L51).
+
+```typescript
+type ListThreatCampaignPackagesOptions = {
+  cursor?: string | undefined
+  per_page?: number | undefined
+}
+```
+
+#### `ListThreatCampaignPackagesResult` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L61).
+
+```typescript
+type ListThreatCampaignPackagesResult = {
+  cause: undefined
+  data: ThreatCampaignPackagesData
+  error: undefined
+  status: 200
+  success: true
+}
+```
+
+#### `ListThreatCampaignsOptions` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L22).
+
+```typescript
+type ListThreatCampaignsOptions = {
+  cursor?: string | undefined
+  ecosystem?: string | undefined
+  per_page?: number | undefined
+  status?: ThreatCampaignStatus | undefined
+  updated_after?: string | undefined
+}
+```
+
+#### `ListThreatCampaignsResult` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L35).
+
+```typescript
+type ListThreatCampaignsResult = {
+  cause: undefined
+  data: ThreatCampaignsListData
+  error: undefined
+  status: 200
+  success: true
+}
+```
+
+#### `LookupPatchPackageResponse` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L152).
+
+```typescript
+type LookupPatchPackageResponse = {
+  results: Record<Purl, LookupPatchPackageResult>
+}
+```
+
+#### `MalwareCheckAlert` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L204).
+
+```typescript
+type MalwareCheckAlert = {
+  category?: string | undefined
+  fix?: { description: string; type: string } | undefined
+  key: string
+  props?: Record<string, unknown> | undefined
+  severity?: string | undefined
+  type: ALERT_TYPE
+}
+```
+
+#### `MalwareCheckEntry` (type)
+
+Declared in [src/types/malware.mts](../src/types/malware.mts#L8).
+
+```typescript
+type MalwareCheckEntry = MalwareCheckPackage & {
+  error?: string | undefined
+  inputPurl: string
+  retryable?: boolean | undefined
+  status: 'complete' | 'pending' | 'not_found' | 'error'
+}
+```
+
+#### `MalwareCheckPackage` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L213).
+
+```typescript
+type MalwareCheckPackage = {
+  alerts: MalwareCheckAlert[]
+  name?: string | undefined
+  namespace?: string | undefined
+  score?: MalwareCheckScore | undefined
+  type: string
+  version?: string | undefined
+}
+```
+
+#### `MalwareCheckResult` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L222).
+
+```typescript
+type MalwareCheckResult = MalwareCheckEntry[]
+```
+
+#### `MalwareCheckScore` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L224).
+
+```typescript
+type MalwareCheckScore = {
+  license: number
+  maintenance: number
+  overall: number
+  quality: number
+  supplyChain: number
+  vulnerability: number
+}
+```
+
+#### `ManifestLocalEntry` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L108).
+
+```typescript
+type ManifestLocalEntry = {
+  absPath: string
+  hash: string
+  relPath: string
+  size: number
+}
+```
+
+#### `NoFixAvailableValue` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L110).
+
+```typescript
+type NoFixAvailableValue = FixAdvisoryReference & {
+  type: 'noFixAvailable'
+  vulnerableArtifacts: VulnerableFixArtifact[]
+}
+```
+
+#### `OrgFixComputationData` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L149).
+
+```typescript
+type OrgFixComputationData = StartOrgFixComputationData & {
+  createdAt: string
+  startedAt?: string | undefined
+  finishedAt?: string | undefined
+  failureReason?: string | undefined
+  failureDetail?: string | undefined
+  result?: OrgFixesData | undefined
+}
+```
+
+#### `OrgFixesData` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L135).
+
+```typescript
+type OrgFixesData = {
+  fixDetails: Record<VulnerabilityId, FixDetail>
+  allDetectedGhsas?: string[] | undefined
+  statefulAlertIds?: Record<VulnerabilityId, string[]> | undefined
+}
+```
+
+#### `OrgFixesOptions` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L22).
+
+```typescript
+type OrgFixesOptions = OrgFixesTarget & {
+  vulnerability_ids: string
+  allow_major_updates?: boolean | undefined
+  minimum_release_age?: string | undefined
+  include_details?: boolean | undefined
+  include_responsible_direct_dependencies?: boolean | undefined
+  include_all_detected_ghsas?: boolean | undefined
+  include_stateful_alert_ids?: boolean | undefined
+  autofix_run_id?: string | undefined
+}
+```
+
+#### `OrgFixesTarget` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L5).
+
+```typescript
+type OrgFixesTarget =
+  | {
+      repo_slug: string
+      full_scan_id?: never | undefined
+      tar_hash?: never | undefined
+    }
+  | {
+      repo_slug?: never | undefined
+      full_scan_id: string
+      tar_hash?: never | undefined
+    }
+  | {
+      repo_slug?: never | undefined
+      full_scan_id?: never | undefined
+      tar_hash: string
+    }
+```
+
+#### `OrgPurlQuery` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L54).
+
+```typescript
+type OrgPurlQuery = PurlQuery & {
+  labels?: string | undefined
+}
+```
+
+#### `OrganizationItem` (type)
+
+Strict type for organization item.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L116).
+
+```typescript
+type OrganizationItem = {
+  id: string
+  image?: string | null | undefined
+  name?: string | null | undefined
+  plan: string
+  slug: string
+}
+```
+
+#### `OrganizationsResult` (type)
+
+Strict type for organizations list result. The GET /organizations endpoint returns `organizations` as a map keyed by organization id (OpenAPI `additionalProperties`), not an array. Type it as a Record so consumers iterate with Object.values()/Object.entries().
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L325).
+
+```typescript
+type OrganizationsResult = {
+  cause?: undefined | undefined
+  data: {
+    organizations: Record<OrganizationSlug, OrganizationItem>
+  }
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `PackageFix` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L60).
+
+```typescript
+type PackageFix = FixArtifact & {
+  fixedVersion: string
+  updateType: FixUpdateType
+}
+```
+
+#### `PartialFixFoundValue` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L102).
+
+```typescript
+type PartialFixFoundValue = FixAdvisoryReference & {
+  type: 'partialFixFound'
+  fixDetails: {
+    fixes: PackageFix[]
+    unfixablePurls: UnfixablePurl[]
+    responsibleDirectDependencies?: ResponsibleDirectDependencies | undefined
+  }
+}
+```
+
+#### `PatchFile` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L11).
+
+```typescript
+type PatchFile = {
+  afterHash?: string | undefined
+  beforeHash?: string | undefined
+  socketBlob?: string | null | undefined
+}
+```
+
+#### `PatchPackageStatsResponse` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L143).
+
+```typescript
+type PatchPackageStatsResponse = {
+  results: Record<Purl, PatchPackageStatsResult>
+}
+```
+
+#### `PatchRecord` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L32).
+
+```typescript
+type PatchRecord = {
+  description: string
+  license: string
+  publishedAt: string
+  securityAlerts: SecurityAlert[]
+  tier: 'free' | 'paid'
+  uuid: string
+}
+```
+
+#### `PatchRecordsResponse` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L183).
+
+```typescript
+type PatchRecordsResponse = {
+  forbidden: string[]
+  missing: string[]
+  records: Record<Purl, PatchRecordDetail>
+}
+```
+
+#### `PatchSearchResponse` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L67).
+
+```typescript
+type PatchSearchResponse = {
+  canAccessPaidPatches: boolean
+  patches: PatchSearchResult[]
+}
+```
+
+#### `PatchViewResponse` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L41).
+
+```typescript
+type PatchViewResponse = {
+  description: string
+  files: Record<FilePath, PatchFile>
+  license: string
+  publishedAt: string
+  purl: string
+  tier: 'free' | 'paid'
+  uuid: string
+  vulnerabilities: Record<VulnerabilityId, Vulnerability>
+}
+```
+
+#### `PatchesBatchResponse` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L161).
+
+```typescript
+type PatchesBatchResponse = {
+  canAccessPaidPatches: boolean
+  packages: ArtifactPatches[]
+  skipped: PatchesSkippedComponent[]
+}
+```
+
+#### `PollFullScanV1Options` (type)
+
+Declared in [src/types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts#L50).
+
+```typescript
+type PollFullScanV1Options = {
+  maxPollMs?: number | undefined
+  pollIntervalMs?: number | undefined
+  signal?: AbortSignal | undefined
+}
+```
+
+#### `PostEventsData` (type)
+
+Declared in [src/events-v1.mts](../src/events-v1.mts#L26).
+
+```typescript
+type PostEventsData = Record<string, JsonValue>
+```
+
+#### `PostEventsResult` (type)
+
+Declared in [src/events-v1.mts](../src/events-v1.mts#L28).
+
+```typescript
+type PostEventsResult = {
+  cause: undefined
+  data: PostEventsData
+  error: undefined
+  status: 200 | 201
+  success: true
+}
+```
+
+#### `PostOrgPackageChecksBody` (type)
+
+Declared in [src/package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L20).
+
+```typescript
+type PostOrgPackageChecksBody =
+  PackageChecksOperation['requestBody']['content']['application/json']
+```
+
+#### `PostOrgPackageChecksData` (type)
+
+Declared in [src/package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L22).
+
+```typescript
+type PostOrgPackageChecksData = OpReturnType<PackageChecksOperation>
+```
+
+#### `PostOrgPackageChecksResult` (type)
+
+Declared in [src/package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L23).
+
+```typescript
+type PostOrgPackageChecksResult =
+  SocketSdkGenericResult<PostOrgPackageChecksData>
+```
+
+#### `PostOrgPackageSummariesBody` (type)
+
+Declared in [src/package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L25).
+
+```typescript
+type PostOrgPackageSummariesBody =
+  PackageSummariesOperation['requestBody']['content']['application/json']
+```
+
+#### `PostOrgPackageSummariesData` (type)
+
+Declared in [src/package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L27).
+
+```typescript
+type PostOrgPackageSummariesData =
+  OpReturnType<PackageSummariesOperation>
+```
+
+#### `PostOrgPackageSummariesResult` (type)
+
+Declared in [src/package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L29).
+
+```typescript
+type PostOrgPackageSummariesResult =
+  SocketSdkGenericResult<PostOrgPackageSummariesData>
+```
+
+#### `PostOrgTelemetryPayload` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L433).
+
+```typescript
+type PostOrgTelemetryPayload = Record<string, unknown>
+```
+
+#### `PostOrgTelemetryResponse` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L435).
+
+```typescript
+type PostOrgTelemetryResponse = Record<string, never>
+```
+
+#### `PublicApiClientOptions` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L65).
+
+```typescript
+type PublicApiClientOptions = Pick<
+  SocketSdkOptions,
+  | 'authScheme'
+  | 'authProvider'
+  | 'baseUrl'
+  | 'hooks'
+  | 'retries'
+  | 'retryDelay'
+  | 'signal'
+  | 'timeout'
+  | 'userAgent'
+> & {
+  apiToken?: string | undefined
+}
+```
+
+#### `PublicMalwareCoverage` (type)
+
+Declared in [src/types/public-malware.mts](../src/types/public-malware.mts#L33).
+
+```typescript
+type PublicMalwareCoverage = {
+  registry: 'https://registry.npmjs.org'
+  reviewedThreats: 'complete' | 'unavailable'
+  packageVerdicts: 'complete' | 'unavailable'
+  authorVerdicts: 'complete' | 'unknown' | 'unavailable'
+  identity: 'known' | 'unknown'
+}
+```
+
+#### `PublicMalwareFinding` (type)
+
+Declared in [src/types/public-malware.mts](../src/types/public-malware.mts#L27).
+
+```typescript
+type PublicMalwareFinding = {
+  scope: 'version' | 'package' | 'author'
+  code: 'reviewed_malware' | 'package_bad_intent' | 'author_bad_intent'
+  url: string
+}
+```
+
+#### `PublicMalwareReasonCode` (type)
+
+Declared in [src/types/public-malware.mts](../src/types/public-malware.mts#L3).
+
+```typescript
+type PublicMalwareReasonCode =
+  | 'invalid_purl'
+  | 'version_required'
+  | 'unsupported_ecosystem'
+  | 'unsupported_identity'
+  | 'identity_not_observed'
+  | 'author_evidence_missing'
+  | 'coverage_incomplete'
+  | 'lookup_failed'
+  | 'deadline_exceeded'
+```
+
+#### `PublicMalwareRequest` (type)
+
+Declared in [src/types/public-malware.mts](../src/types/public-malware.mts#L107).
+
+```typescript
+type PublicMalwareRequest = {
+  packages: ReadonlyArray<{ purl: string }>
+  candidateRevision?: string | undefined
+}
+```
+
+#### `PublicMalwareResponse` (type)
+
+Declared in [src/types/public-malware.mts](../src/types/public-malware.mts#L112).
+
+```typescript
+type PublicMalwareResponse = {
+  context: {
+    mode: 'public-malware'
+    evaluatorVersion: 'public-malware-v1'
+    consistency: 'request-observation'
+    intelligenceRevision: null
+    observedAt: string
+    reuse: 'none'
+    expiresAt: null
+    sourceAsOf: null
+  }
+  results: PublicMalwareResult[]
+}
+```
+
+#### `PublicMalwareResult` (type)
+
+Declared in [src/types/public-malware.mts](../src/types/public-malware.mts#L47).
+
+```typescript
+type PublicMalwareResult =
+  | (PublicMalwareResultBase & {
+      status: 'confirmed_malware'
+      reasonCodes: []
+      findings: [PublicMalwareFinding, ...PublicMalwareFinding[]]
+      findingsTruncated: boolean
+      coverage: PublicMalwareCoverage
+    })
+  | (PublicMalwareResultBase & {
+      status: 'no_known_malware'
+      reasonCodes: []
+      findings: []
+      findingsTruncated: false
+      coverage: PublicMalwareCoverage & {
+        reviewedThreats: 'complete'
+        packageVerdicts: 'complete'
+        authorVerdicts: 'complete'
+        identity: 'known'
+      }
+    })
+  | (PublicMalwareResultBase & {
+      status: 'unknown'
+      reasonCodes: [
+        (
+          | 'identity_not_observed'
+          | 'author_evidence_missing'
+          | 'coverage_incomplete'
+        ),
+        ...PublicMalwareUnknownReason[],
+      ]
+      findings: []
+      findingsTruncated: false
+      coverage: PublicMalwareCoverage
+    })
+  | (PublicMalwareResultBase & {
+      status: 'unsupported'
+      reasonCodes: [
+        'unsupported_ecosystem' | 'unsupported_identity',
+        ...PublicMalwareUnsupportedReason[],
+      ]
+      findings: []
+      findingsTruncated: false
+      coverage: null
+    })
+  | (PublicMalwareResultBase & {
+      status: 'error'
+      reasonCodes: [
+        (
+          | 'invalid_purl'
+          | 'version_required'
+          | 'lookup_failed'
+          | 'deadline_exceeded'
+        ),
+        ...PublicMalwareErrorReason[],
+      ]
+      findings: []
+      findingsTruncated: false
+      coverage: null
+    })
+```
+
+#### `PublicOrgPurlQuery` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L44).
+
+```typescript
+type PublicOrgPurlQuery = PublicPurlQuery & {
+  labels?: string | undefined
+}
+```
+
+#### `PublicPurlQuery` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L33).
+
+```typescript
+type PublicPurlQuery = {
+  actions?: string | undefined
+  alerts?: boolean | undefined
+  cachedResultsOnly?: boolean | undefined
+  compact?: boolean | undefined
+  fixable?: boolean | undefined
+  licenseattrib?: boolean | undefined
+  licensedetails?: boolean | undefined
+  purlErrors?: boolean | undefined
+}
+```
+
+#### `PurlArtifact` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L25).
+
+```typescript
+type PurlArtifact = SocketArtifact | CompactSocketArtifact
+```
+
+#### `PurlComponents` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L13).
+
+```typescript
+type PurlComponents = { components: Array<{ purl: string }> }
+```
+
+#### `PurlErrorRecord` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L15).
+
+```typescript
+type PurlErrorRecord = {
+  _type: 'purlError'
+  value: components['schemas']['PurlErrorSchema']
+}
+```
+
+#### `PurlFetchResult` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L29).
+
+```typescript
+type PurlFetchResult = SocketSdkGenericResult<PurlRecord[]>
+```
+
+#### `PurlQuery` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L48).
+
+```typescript
+type PurlQuery = PublicPurlQuery & {
+  poll?: boolean | undefined
+  summary?: boolean | undefined
+  timeoutSec?: number | undefined
+}
+```
+
+#### `PurlRecord` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L27).
+
+```typescript
+type PurlRecord = PurlArtifact | PurlErrorRecord | PurlSummaryRecord
+```
+
+#### `PurlStreamOptions` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L58).
+
+```typescript
+type PurlStreamOptions<Query = PurlQuery> = {
+  chunkSize?: number | undefined
+  concurrencyLimit?: number | undefined
+  queryParams?: Query | undefined
+  signal?: AbortSignal | undefined
+}
+```
+
+#### `PurlStreamResult` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L31).
+
+```typescript
+type PurlStreamResult = SocketSdkGenericResult<PurlRecord>
+```
+
+#### `PurlSummaryRecord` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L20).
+
+```typescript
+type PurlSummaryRecord = {
+  _type: 'summary'
+  value: components['schemas']['PurlSummarySchema']
+}
+```
+
+#### `PurlVersionEntry` (type)
+
+Declared in [src/purl-versions-v1.mts](../src/purl-versions-v1.mts#L14).
+
+```typescript
+type PurlVersionEntry = PurlVersionsData['versions'][number]
+```
+
+#### `PurlVersionsData` (type)
+
+Declared in [src/purl-versions-v1.mts](../src/purl-versions-v1.mts#L12).
+
+```typescript
+type PurlVersionsData =
+  paths['/v1/orgs/{org_slug}/purl/versions/{purl}']['get']['responses'][200]['content']['application/json']
+```
+
+#### `PurlVersionsOptions` (type)
+
+Declared in [src/purl-versions-v1.mts](../src/purl-versions-v1.mts#L15).
+
+```typescript
+type PurlVersionsOptions = { limit?: number | undefined }
+```
+
+#### `QueryParams` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L84).
+
+```typescript
+type QueryParams = Record<string, unknown>
+```
+
+#### `RawFetchResult` (type)
+
+Declared in [src/blob.mts](../src/blob.mts#L58).
+
+```typescript
+interface RawFetchResult {
+  bytes: Uint8Array
+  contentType: string | undefined
+}
+```
+
+#### `RepositoriesListData` (type)
+
+Strict type for repositories list data.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L127).
+
+```typescript
+type RepositoriesListData = {
+  nextPage?: number | null | undefined
+  results: RepositoryListItem[]
+}
+```
+
+#### `RepositoriesListResult` (type)
+
+Strict type for repositories list result.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L338).
+
+```typescript
+type RepositoriesListResult = {
+  cause?: undefined | undefined
+  data: RepositoriesListData
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `RepositoryItem` (type)
+
+Strict type for repository item.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L135).
+
+```typescript
+type RepositoryItem = {
+  archived: boolean
+  created_at: string
+  default_branch: string | null
+  description: string | null
+  head_full_scan_id: string | null
+  homepage: string | null
+  html_url?: string | undefined
+  id: string
+  integration_meta: {
+    /**
+     * @enum {string}
+     */
+    type?: 'github' | undefined
+    value?:
+      | {
+          /**
+           * The GitHub installation_id of the active associated Socket
+           * GitHub App.
+           *
+           * @default
+           */
+          installation_id: string
+          /**
+           * The GitHub login name that the active Socket GitHub App
+           * installation is installed to.
+           *
+           * @default
+           */
+          installation_login: string
+          /**
+           * The name of the associated GitHub repo.
+           *
+           * @default
+           */
+          repo_name: string | null
+          /**
+           * The id of the associated GitHub repo.
+           *
+           * @default
+           */
+          repo_id: string | null
+        }
+      | undefined
+  } | null
+  name: string
+  slig: string
+  slug: string
+  updated_at: string
+  visibility: 'public' | 'private'
+  workspace: string
+}
+```
+
+#### `RepositoryLabelItem` (type)
+
+Strict type for repository label item.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L191).
+
+```typescript
+type RepositoryLabelItem = {
+  has_license_policy?: boolean | undefined
+  has_security_policy?: boolean | undefined
+  id: string
+  name: string
+  repository_ids?: string[] | undefined
+}
+```
+
+#### `RepositoryLabelResult` (type)
+
+Strict type for single repository label result.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L382).
+
+```typescript
+type RepositoryLabelResult = {
+  cause?: undefined | undefined
+  data: RepositoryLabelItem
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `RepositoryLabelsListData` (type)
+
+Strict type for repository labels list data.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L202).
+
+```typescript
+type RepositoryLabelsListData = {
+  nextPage?: number | null | undefined
+  results: RepositoryLabelItem[]
+}
+```
+
+#### `RepositoryLabelsListResult` (type)
+
+Strict type for repository labels list result.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L371).
+
+```typescript
+type RepositoryLabelsListResult = {
+  cause?: undefined | undefined
+  data: RepositoryLabelsListData
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `RepositoryListItem` (type)
+
+Strict type for repository list item.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L210).
+
+```typescript
+type RepositoryListItem = {
+  archived: boolean
+  created_at: string
+  default_branch: string | null
+  description: string | null
+  head_full_scan_id: string | null
+  homepage: string | null
+  html_url?: string | undefined
+  id: string
+  integration_meta?:
+    | {
+        /**
+         * @enum {string}
+         */
+        type?: 'github' | undefined
+        value?:
+          | {
+              /**
+               * The GitHub installation_id of the active associated
+               * Socket GitHub App.
+               *
+               * @default
+               */
+              installation_id: string
+              /**
+               * The GitHub login name that the active Socket GitHub App
+               * installation is installed to.
+               *
+               * @default
+               */
+              installation_login: string
+              /**
+               * The name of the associated GitHub repo.
+               *
+               * @default
+               */
+              repo_name: string | null
+              /**
+               * The id of the associated GitHub repo.
+               *
+               * @default
+               */
+              repo_id: string | null
+            }
+          | undefined
+      }
+    | null
+    | undefined
+  name: string
+  slug: string
+  updated_at: string
+  visibility: 'public' | 'private'
+  workspace: string
+}
+```
+
+#### `RepositoryResult` (type)
+
+Strict type for single repository result.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L360).
+
+```typescript
+type RepositoryResult = {
+  cause?: undefined | undefined
+  data: RepositoryItem
+  error?: undefined | undefined
+  status: number
+  success: true
+}
+```
+
+#### `RequestInfo` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L32).
+
+```typescript
+interface RequestInfo {
+  method: string
+  url: string
+  headers?: Record<string, string> | undefined
+  timeout?: number | undefined
+}
+```
+
+#### `RequestOptions` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L98).
+
+```typescript
+type RequestOptions = (
+  | (HttpsRequestOptions & { headers?: HeadersRecord | undefined })
+  | (HttpRequestOptions & { headers?: HeadersRecord | undefined })
+  | (ClientSessionRequestOptions & { headers?: HeadersRecord | undefined })
+) & {
+  signal?: AbortSignal | undefined
+  timeout?: number | undefined
+}
+```
+
+#### `RequestOptionsWithHooks` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L107).
+
+```typescript
+type RequestOptionsWithHooks = RequestOptions & {
+  authProvider?: SocketSdkAuthProvider | undefined
+  hooks?:
+    | {
+        onRequest?: ((info: RequestInfo) => void) | undefined
+        onResponse?: ((info: ResponseInfo) => void) | undefined
+      }
+    | undefined
+}
+```
+
+#### `ResponseError` (value)
+
+Declared in [src/http-client.mts](../src/http-client.mts#L30).
+
+```typescript
+class ResponseError extends Error {
+  response: HttpResponse
+  url?: string | undefined
+  constructor(response: HttpResponse, message = '', url?: string | undefined)
+}
+```
+
+#### `ResponseInfo` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L39).
+
+```typescript
+interface ResponseInfo {
+  method: string
+  url: string
+  duration: number
+  status?: number | undefined
+  statusText?: string | undefined
+  headers?: Record<string, string> | undefined
+  error?: Error | undefined
+}
+```
+
+#### `ResponsibleDirectDependencies` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L82).
+
+```typescript
+type ResponsibleDirectDependencies = Record<
+  Purl,
+  {
+    currentVersion: string
+    nextAvailableVersion?: FixVersionUpdate | null | undefined
+    fixByUpgradingTo?: FixVersionUpdate | null | undefined
+  }
+> | null
+```
+
+#### `SdkAuthenticationError` (value)
+
+Declared in [src/auth.mts](../src/auth.mts#L6).
+
+```typescript
+class SdkAuthenticationError extends Error {
+  constructor(cause: unknown)
+}
+```
+
+#### `SecurityAlert` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L24).
+
+```typescript
+type SecurityAlert = {
+  description: string
+  severity: string
+  summary: string
+  cveId?: string | null | undefined
+  ghsaId?: string | null | undefined
+}
+```
+
+#### `SendMethod` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L117).
+
+```typescript
+type SendMethod = 'POST' | 'PUT'
+```
+
+#### `SendOptions` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L119).
+
+```typescript
+type SendOptions = {
+  body?: unknown | undefined
+  method?: SendMethod | undefined
+  throws?: boolean | undefined
+}
+```
+
+#### `SkippedManifestPath` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L115).
+
+```typescript
+type SkippedManifestPath = {
+  path: string
+  reason: string
+}
+```
+
+#### `SocketArtifact` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L125).
+
+```typescript
+type SocketArtifact = Remap<
+  Omit<components['schemas']['SocketArtifact'], 'alerts'> & {
+    alerts?: SocketArtifactAlert[] | undefined
+  }
+>
+```
+
+#### `SocketArtifactAlert` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L131).
+
+```typescript
+type SocketArtifactAlert = Remap<
+  Omit<components['schemas']['SocketAlert'], 'action' | 'props' | 'type'> & {
+    type: ALERT_TYPE
+    action?: ALERT_ACTION | undefined
+    props?: Record<string, unknown> | undefined
+  }
+>
+```
+
+#### `SocketArtifactWithExtras` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L92).
+
+```typescript
+type SocketArtifactWithExtras = SocketArtifact & {
+  scorecards?: unknown | undefined
+  supplyChainRisk?: SocketMetricSchema | undefined
+  topLevelAncestors?: SocketId[] | undefined
+}
+```
+
+#### `SocketEvent` (type)
+
+Declared in [src/events-v1.mts](../src/events-v1.mts#L10).
+
+```typescript
+type SocketEvent = {
+  [key: string]: JsonValue | undefined
+  alert_action?: string | undefined
+  artifact_purl?: string | undefined
+  client_action?: string | undefined
+  event_id?: string | undefined
+  event_kind?: string | undefined
+  event_sender_created_at?: string | undefined
+  input_purl?: string | undefined
+  user_agent?: string | undefined
+}
+```
+
+#### `SocketId` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L90).
+
+```typescript
+type SocketId = components['schemas']['SocketId']
+```
+
+#### `SocketMetricSchema` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L88).
+
+```typescript
+type SocketMetricSchema = components['schemas']['SocketMetricSchema']
+```
+
+#### `SocketPatchClient` (value)
+
+Declared in [src/public-patches-client.mts](../src/public-patches-client.mts#L29).
+
+```typescript
+class SocketPatchClient {
+  constructor(options: SocketPatchClientOptions = {})
+  fetchPatchesByCVE(
+    cveId: string,
+  ): Promise<SocketSdkGenericResult<PatchSearchResponse>>
+  fetchPatchesByGHSA(
+    ghsaId: string,
+  ): Promise<SocketSdkGenericResult<PatchSearchResponse>>
+  fetchPatchesByPackage(
+    purl: string,
+  ): Promise<SocketSdkGenericResult<PatchSearchResponse>>
+  viewPatch(uuid: string): Promise<SocketSdkGenericResult<PatchViewResponse>>
+  fetchPatches(
+    payload: PurlComponents,
+  ): Promise<SocketSdkGenericResult<PatchesBatchResponse>>
+  getPatchPackages(
+    uuids: string[],
+  ): Promise<SocketSdkGenericResult<GetPatchPackagesResponse>>
+  getPatchBlob(hash: string): Promise<SocketSdkGenericResult<Uint8Array>>
+  getPatchDiff(uuid: string): Promise<SocketSdkGenericResult<Uint8Array>>
+}
+```
+
+#### `SocketPatchClientOptions` (type)
+
+Declared in [src/public-patches-client.mts](../src/public-patches-client.mts#L24).
+
+```typescript
+type SocketPatchClientOptions = Omit<
+  PublicApiClientOptions,
+  'apiToken' | 'authScheme'
+>
+```
+
+#### `SocketPublicMalwareClient` (value)
+
+Declared in [src/public-malware-client.mts](../src/public-malware-client.mts#L66).
+
+```typescript
+class SocketPublicMalwareClient {
+  constructor(options: SocketPublicMalwareClientOptions = {})
+  async checkPackages(
+    request: PublicMalwareRequest,
+  ): Promise<PublicMalwareClientResult>
+}
+```
+
+#### `SocketPublicMalwareClientOptions` (type)
+
+Declared in [src/types/public-malware.mts](../src/types/public-malware.mts#L126).
+
+```typescript
+type SocketPublicMalwareClientOptions = Pick<
+  SocketSdkOptions,
+  'timeout' | 'signal' | 'retries' | 'retryDelay' | 'userAgent'
+> & { baseUrl?: string | undefined }
+```
+
+#### `SocketPurlClient` (value)
+
+Declared in [src/public-purl-client.mts](../src/public-purl-client.mts#L25).
+
+```typescript
+class SocketPurlClient {
+  constructor(options: PublicApiClientOptions = {})
+  getPurl(
+    purl: string,
+    queryParams?: PublicPurlQuery | undefined,
+  ): Promise<PurlFetchResult>
+  batchPackageFetch(
+    payload: PurlComponents,
+    queryParams?: PublicPurlQuery | undefined,
+  ): Promise<PurlFetchResult>
+  batchPackageStream(
+    payload: PurlComponents,
+    options?: PurlStreamOptions<PublicPurlQuery> | undefined,
+  ): AsyncGenerator<PurlStreamResult>
+  batchOrgPackageFetch(
+    orgSlug: string,
+    payload: PurlComponents,
+    queryParams?: PublicOrgPurlQuery | undefined,
+  ): Promise<PurlFetchResult>
+  batchOrgPackageStream(
+    orgSlug: string,
+    payload: PurlComponents,
+    options?: PurlStreamOptions<PublicOrgPurlQuery> | undefined,
+  ): AsyncGenerator<PurlStreamResult>
+}
+```
+
+#### `SocketSdk` (value)
+
+Socket SDK for programmatic access to Socket.dev security analysis APIs. Provides methods for package scanning, organization management, and security analysis.
+
+Construct with `new SocketSdk(apiToken, options?)`; see [SDK Concepts](./concepts.md) for authentication and configuration.
+
+#### `SocketSdkArrayElement` (type)
+
+Helper type to extract array element type from SDK operation results. Useful for typing items from paginated results.
+
+Example:
+
+```typescript
+type RepoItem = SocketSdkArrayElement<'getOrgRepoList', 'results'>
+```
+
+Declared in [src/types/core.mts](../src/types/core.mts#L181).
+
+```typescript
+type SocketSdkArrayElement<
+  T extends SocketSdkOperations,
+  K extends keyof SocketSdkData<T>,
+> = SocketSdkData<T>[K] extends Array<infer U> ? U : never
+```
+
+#### `SocketSdkAuthProvider` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L283).
+
+```typescript
+type SocketSdkAuthProvider = () => Promise<{
+  token: string
+  authScheme: 'basic' | 'bearer'
+}>
+```
+
+#### `SocketSdkData` (type)
+
+Helper type to extract the data from a successful SDK operation result.
+
+Example:
+
+```typescript
+type RepoData = SocketSdkData<'getOrgRepoList'>
+```
+
+Declared in [src/types/core.mts](../src/types/core.mts#L170).
+
+```typescript
+type SocketSdkData<T extends SocketSdkOperations> = OpReturnType<
+  operations[T]
+>
+```
+
+#### `SocketSdkErrorResult` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L149).
+
+```typescript
+type SocketSdkErrorResult<T extends SocketSdkOperations> = {
+  cause?: string | undefined
+  data?: undefined
+  error: string
+  status: number
+  success: false
+  url?: string | undefined
+  // Phantom type to use T
+  _operation?: T | undefined
+}
+```
+
+#### `SocketSdkGenericResult` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L187).
+
+```typescript
+type SocketSdkGenericResult<T> =
+  | {
+      cause?: undefined
+      data: T
+      error?: undefined
+      status: number
+      success: true
+    }
+  | {
+      cause?: string | undefined
+      data?: undefined
+      error: string
+      status: number
+      success: false
+      url?: string | undefined
+    }
+```
+
+#### `SocketSdkHttpResponse` (type)
+
+Declared in [src/types/http.mts](../src/types/http.mts#L6).
+
+```typescript
+interface SocketSdkHttpResponse {
+  arrayBuffer(): ArrayBuffer
+  body: Buffer
+  headers: IncomingHttpHeaders
+  json(): unknown
+  ok: boolean
+  rawResponse?: IncomingMessage | undefined
+  status: number
+  statusText: string
+  text(): string
+}
+```
+
+#### `SocketSdkJsonValue` (type)
+
+Declared in [src/types/util.mts](../src/types/util.mts#L6).
+
+```typescript
+type SocketSdkJsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | SocketSdkJsonValue[]
+  | { [key: string]: SocketSdkJsonValue }
+```
+
+#### `SocketSdkOperations` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L139).
+
+```typescript
+type SocketSdkOperations = keyof operations
+```
+
+#### `SocketSdkOptions` (type)
+
+Configuration options for SocketSdk.
+
+Declared in [src/types/core.mts](../src/types/core.mts#L291).
+
+```typescript
+interface SocketSdkOptions {
+  /**
+   * Resolve current credentials before each request; rejection prevents
+   * sending.
+   */
+  authProvider?: SocketSdkAuthProvider | undefined
+  /**
+   * Authentication scheme for API tokens or OAuth access tokens.
+   */
+  authScheme?: 'basic' | 'bearer' | undefined
+  /**
+   * Explicit v1 base URL for custom API deployments.
+   */
+  apiV1BaseUrl?: string | undefined
+  /**
+   * Cancel requests and retry waits.
+   */
+  signal?: AbortSignal | undefined
+  /**
+   * Base URL for Socket API (default: 'https://api.socket.dev/v0/')
+   */
+  baseUrl?: string | undefined
+  /**
+   * Enable TTL caching for API responses (default: false). When enabled, GET
+   * requests are cached with configurable TTLs. Only applies to
+   * listOrganizations() and getQuota() methods.
+   */
+  cache?: boolean | undefined
+  /**
+   * Cache TTL in milliseconds (default: 300_000 = 5 minutes). Only used when
+   * cache is enabled. Can be a single number for all endpoints or an object for
+   * per-endpoint TTLs.
+   *
+   * Recommended TTLs by endpoint:
+   *
+   * - Organizations: 30 minutes (rarely changes)
+   * - Quota: 10 minutes (changes incrementally)
+   *
+   * @example
+   *   // Single TTL for all endpoints.
+   *   cacheTtl: 15 * 60 * 1000 // 15 minutes
+   *
+   * @example
+   *   // Per-endpoint TTLs with recommended values.
+   *   cacheTtl: {
+   *   default: 5 * 60 * 1000,        // 5 minutes default
+   *   organizations: 30 * 60 * 1000, // 30 minutes (recommended)
+   *   quota: 10 * 60 * 1000          // 10 minutes (recommended)
+   *   }
+   */
+  cacheTtl?:
+    | number
+    | {
+        default?: number | undefined
+        organizations?: number | undefined
+        quota?: number | undefined
+      }
+    | undefined
+  /**
+   * Callback for file validation events. Called when any file-upload method
+   * detects unreadable files: - createDependenciesSnapshot - createFullScan
+   * (formerly createOrgFullScan) - uploadManifestFiles.
+   *
+   * Default behavior (if not provided): - Warns about invalid files
+   * (console.warn) - Continues with valid files if any exist - Throws error if
+   * all files are invalid.
+   *
+   * @since V3.0.0
+   */
+  onFileValidation?: FileValidationCallback | undefined
+  /**
+   * Request/response logging hooks.
+   */
+  hooks?:
+    | {
+        onRequest?: ((info: RequestInfo) => void) | undefined
+        onResponse?: ((info: ResponseInfo) => void) | undefined
+      }
+    | undefined
+  /**
+   * Delay in milliseconds between polls when a cached scan endpoint
+   * (getDiffScanById, getFullScan) returns 202 Accepted (default: 2000). On a
+   * cache miss the API computes the result in the background and the SDK polls
+   * until it is ready.
+   */
+  pollIntervalMs?: number | undefined
+  /**
+   * Number of retry attempts on failure (default: 3). Uses exponential backoff
+   * between retries.
+   */
+  retries?: number | undefined
+  /**
+   * Initial delay in milliseconds between retries (default: 1000). Uses
+   * exponential backoff: 1000ms, 2000ms, 4000ms, etc.
+   */
+  retryDelay?: number | undefined
+  /**
+   * Request timeout in milliseconds.
+   */
+  timeout?: number | undefined
+  /**
+   * User-Agent token appended to the SDK's base User-Agent (which already
+   * carries the SDK name/version, Node.js version, and OS platform/arch).
+   */
+  userAgent?: string | undefined
+}
+```
+
+#### `SocketSdkResult` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L160).
+
+```typescript
+type SocketSdkResult<T extends SocketSdkOperations> =
+  | SocketSdkSuccessResult<T>
+  | SocketSdkErrorResult<T>
+```
+
+#### `SocketSdkSuccessResult` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L141).
+
+```typescript
+type SocketSdkSuccessResult<T extends SocketSdkOperations> = {
+  cause?: undefined
+  data: OpReturnType<operations[T]>
+  error?: undefined
+  status: number
+  success: true
+}
+```
+
+#### `StartOrgFixComputationData` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L145).
+
+```typescript
+type StartOrgFixComputationData = {
+  id: string
+  status: FixComputationStatus
+}
+```
+
+#### `StreamFullScanOptions` (type)
+
+Options for streaming a full scan.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L314).
+
+```typescript
+type StreamFullScanOptions = {
+  output?: boolean | string | undefined
+}
+```
+
+#### `StreamOrgFullScanOptions` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L429).
+
+```typescript
+type StreamOrgFullScanOptions = {
+  output?: boolean | string | undefined
+}
+```
+
+#### `StrictErrorResult` (type)
+
+Error result type for all SDK operations.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L268).
+
+```typescript
+type StrictErrorResult = {
+  cause?: string | undefined
+  data?: undefined | undefined
+  error: string
+  status: number
+  success: false
+}
+```
+
+#### `StrictResult` (type)
+
+Generic strict result type combining success and error.
+
+Declared in [src/types/strict.mts](../src/types/strict.mts#L279).
+
+```typescript
+type StrictResult<T> =
+  | {
+      cause?: undefined | undefined
+      data: T
+      error?: undefined | undefined
+      status: number
+      success: true
+    }
+  | StrictErrorResult
+```
+
+#### `TelemetryConfig` (type)
+
+Configuration for telemetry collection. Controls whether telemetry is enabled and how events are collected.
+
+Declared in [src/types/core.mts](../src/types/core.mts#L441).
+
+```typescript
+interface TelemetryConfig {
+  telemetry: {
+    enabled: boolean
+  }
+}
+```
+
+#### `ThreatCampaign` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L10).
+
+```typescript
+type ThreatCampaign = {
+  blogUrls: string[]
+  description: string
+  ecosystem: string[] | null
+  firstDiscovered: string | null
+  id: string
+  lastActivity: string | null
+  name: string
+  status: ThreatCampaignStatus
+  updatedAt: string
+}
+```
+
+#### `ThreatCampaignPackagesData` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L56).
+
+```typescript
+type ThreatCampaignPackagesData = {
+  endCursor?: string | null | undefined
+  items: string[]
+}
+```
+
+#### `ThreatCampaignStatus` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L8).
+
+```typescript
+type ThreatCampaignStatus = 'ongoing' | 'past'
+```
+
+#### `ThreatCampaignsListData` (type)
+
+Declared in [src/threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#L30).
+
+```typescript
+type ThreatCampaignsListData = {
+  endCursor?: string | null | undefined
+  items: ThreatCampaign[]
+}
+```
+
+#### `TranslateOrgAlertPolicyMigrationTriageBody` (type)
+
+Declared in [src/types/alert-policies.mts](../src/types/alert-policies.mts#L18).
+
+```typescript
+type TranslateOrgAlertPolicyMigrationTriageBody =
+  operations['translateOrgAlertPolicyMigrationTriage']['requestBody']['content']['application/json']
+```
+
+#### `UnfixablePurl` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L69).
+
+```typescript
+type UnfixablePurl = VulnerableFixArtifact & { reasons: string[] }
+```
+
+#### `UpdateOrgAlertPolicyBody` (type)
+
+Declared in [src/types/alert-policies.mts](../src/types/alert-policies.mts#L10).
+
+```typescript
+type UpdateOrgAlertPolicyBody =
+  operations['updateOrgAlertPolicy']['requestBody']['content']['application/json']
+```
+
+#### `UpdateOrgAlertPolicyRuleBody` (type)
+
+Declared in [src/types/alert-policies.mts](../src/types/alert-policies.mts#L14).
+
+```typescript
+type UpdateOrgAlertPolicyRuleBody =
+  operations['updateOrgAlertPolicyRule']['requestBody']['content']['application/json']
+```
+
+#### `UpdateOrgRepoLabelSettingBody` (type)
+
+Declared in [src/types/parity.mts](../src/types/parity.mts#L58).
+
+```typescript
+type UpdateOrgRepoLabelSettingBody = NonNullable<
+  NonNullable<operations['updateOrgRepoLabelSetting']['requestBody']>['content']
+>['application/json']
+```
+
+#### `UploadBlobsResult` (type)
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L94).
+
+```typescript
+type UploadBlobsResult = {
+  cause: undefined
+  data: BlobsUploadData
+  error: undefined
+  status: 200
+  success: true
+}
+```
+
+#### `UploadManifestFilesError` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L411).
+
+```typescript
+type UploadManifestFilesError = {
+  cause?: string | undefined
+  data?: undefined
+  error: string
+  status: number
+  success: false
+}
+```
+
+#### `UploadManifestFilesOptions` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L447).
+
+```typescript
+type UploadManifestFilesOptions = {
+  pathsRelativeTo?: string | undefined
+}
+```
+
+#### `UploadManifestFilesResponse` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L398).
+
+```typescript
+type UploadManifestFilesResponse = {
+  tarHash: string
+  unmatchedFiles: string[]
+}
+```
+
+#### `UploadManifestFilesReturnType` (type)
+
+Declared in [src/types/core.mts](../src/types/core.mts#L403).
+
+```typescript
+type UploadManifestFilesReturnType = {
+  cause?: undefined
+  data: UploadManifestFilesResponse
+  error?: undefined
+  status: 200
+  success: true
+}
+```
+
+#### `Vulnerability` (type)
+
+Declared in [src/types/patches.mts](../src/types/patches.mts#L17).
+
+```typescript
+type Vulnerability = {
+  cves: string[]
+  description: string
+  severity: string
+  summary: string
+}
+```
+
+#### `VulnerableFixArtifact` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L64).
+
+```typescript
+type VulnerableFixArtifact = FixArtifact & {
+  reasons?: string[] | undefined
+  dependencyChain?: string[] | undefined
+  withheldFix?: WithheldFix | undefined
+}
+```
+
+#### `WithheldFix` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L38).
+
+```typescript
+type WithheldFix = {
+  purl: string
+  version: string
+  reason: WithheldFixReason
+}
+```
+
+#### `WithheldFixReason` (type)
+
+Declared in [src/types/fixes.mts](../src/types/fixes.mts#L34).
+
+```typescript
+type WithheldFixReason =
+  | 'majorUpdate'
+  | 'releaseAge'
+  | 'publishDateUnknown'
+```
+
+#### `assembleManifest` (value)
+
+Build a v1 content-addressed manifest for `filepaths` (absolute paths) relative to `basePath`. A path that cannot be represented in a v1 manifest — outside `basePath`, absolute, or a duplicate of an already-included relative path — is recorded in `skipped` instead of `entries`/`manifest`. Every included file is streamed through `hashFile`, so peak memory stays bounded regardless of file count or size.
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L138).
+
+```typescript
+async function assembleManifest(
+  basePath: string,
+  filepaths: string[],
+): Promise<AssembledManifest>
+```
+
+#### `calculateTotalQuotaCost` (value)
+
+Calculate total quota cost for multiple SDK method calls. Returns sum of quota units for all specified methods.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L59).
+
+```typescript
+function calculateTotalQuotaCost(
+  methodNames: Array<SocketSdkOperations | string>,
+): number
+```
+
+#### `createUserAgentFromPkgJson` (value)
+
+Generate a User-Agent string from package.json data. Creates standardized User-Agent format with optional homepage URL. Pass the result as `userAgent` in `SocketSdkOptions` to identify your application; it is appended to the SDK's own base User-Agent string.
+
+Declared in [src/user-agent.mts](../src/user-agent.mts#L36).
+
+```typescript
+function createUserAgentFromPkgJson(pkgData: {
+  name: string
+  version: string
+  homepage?: string | undefined
+}): string
+```
+
+#### `deriveApiV1BaseUrl` (value)
+
+Derive the v1 API base URL from a v0 base URL by swapping the trailing `/v0/` segment for `/v1/`. Returns undefined when `baseUrl` does not end in `/v0/` — a custom base with a different version segment has no known v1 counterpart.
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L192).
+
+```typescript
+function deriveApiV1BaseUrl(baseUrl: string): string | undefined
+```
+
+#### `fetchBlob` (value)
+
+Fetch a content-addressed blob by hash. Single-blob (`Q`) hashes resolve to one GET; chunked (`S`) hashes are reconstructed from their manifest. Bytes beyond `maxBytes` (default 1 MB) are dropped and `truncated` is set.
+
+Declared in [src/blob.mts](../src/blob.mts#L101).
+
+```typescript
+async function fetchBlob(
+  hash: string,
+  options: FetchBlobOptions,
+): Promise<BlobResult>
+```
+
+#### `fetchChunkedBytes` (value)
+
+Resolve an `S`-prefixed chunked blob: fetch the manifest at the `Q`-swapped hash, then fetch the listed chunks and concatenate them. Honors `maxBytes` by stopping at the first chunk past the cap (using the manifest's `offset` array when present, otherwise running totals).
+
+Declared in [src/blob.mts](../src/blob.mts#L143).
+
+```typescript
+async function fetchChunkedBytes(
+  sHash: string,
+  options: FetchBlobOptions,
+  maxBytes: number,
+): Promise<ChunkedFetchResult>
+```
+
+#### `fetchRawBytes` (value)
+
+Single GET against `<baseUrl>/blob/<hash>`. No prefix logic — callers pass an already-resolved hash (manifest hash, chunk hash, or single blob).
+
+Declared in [src/blob.mts](../src/blob.mts#L227).
+
+```typescript
+async function fetchRawBytes(
+  hash: string,
+  options: FetchBlobOptions,
+): Promise<RawFetchResult>
+```
+
+#### `getAllMethodRequirements` (value)
+
+Get all available SDK methods with their requirements. Returns complete mapping of methods to quota and permissions. Creates a fresh deep copy each time to prevent external mutations.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L72).
+
+```typescript
+function getAllMethodRequirements(): Record<
+  ApiMethodName,
+  ApiRequirement
+>
+```
+
+#### `getMethodRequirements` (value)
+
+Get complete requirement information for a SDK method. Returns both quota cost and required permissions. Memoized to avoid repeated lookups for the same method.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L98).
+
+```typescript
+function getMethodRequirements(methodName: SocketSdkOperations | string): ApiRequirement
+```
+
+#### `getMethodsByPermissions` (value)
+
+Get all methods that require specific permissions. Returns methods that need any of the specified permissions. Memoized since the same permission queries are often repeated.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L120).
+
+```typescript
+function getMethodsByPermissions(permissions: string[]): string[]
+```
+
+#### `getMethodsByQuotaCost` (value)
+
+Get all methods that consume a specific quota amount. Useful for finding high-cost or free operations. Memoized to cache results for commonly queried quota costs.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L146).
+
+```typescript
+function getMethodsByQuotaCost(quotaCost: number): string[]
+```
+
+#### `getQuotaCost` (value)
+
+Get quota cost for a specific SDK method. Returns the number of quota units consumed by the method. Memoized since quota costs are frequently queried.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L167).
+
+```typescript
+function getQuotaCost(methodName: SocketSdkOperations | string): number
+```
+
+#### `getQuotaUsageSummary` (value)
+
+Get quota usage summary grouped by cost levels. Returns methods categorized by their quota consumption. Memoized since the summary structure is immutable after load.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L186).
+
+```typescript
+function getQuotaUsageSummary(): Record<QuotaCost, ApiMethodName[]>
+```
+
+#### `getRequiredPermissions` (value)
+
+Get required permissions for a specific SDK method. Returns array of permission strings needed to call the method. Memoized to cache permission lookups per method.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L221).
+
+```typescript
+function getRequiredPermissions(methodName: SocketSdkOperations | string): string[]
+```
+
+#### `hasQuotaForMethods` (value)
+
+Check if user has sufficient quota for method calls. Returns true if available quota covers the total cost.
+
+Declared in [src/quota-utils.mts](../src/quota-utils.mts#L239).
+
+```typescript
+function hasQuotaForMethods(
+  availableQuota: number,
+  methodNames: Array<SocketSdkOperations | string>,
+): boolean
+```
+
+#### `hashFile` (value)
+
+Stream-hash a file's contents with sha256 (1 MiB read chunks), never buffering the whole file in memory. Returns the lowercase hex digest and the total byte count read.
+
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L203).
+
+```typescript
+async function hashFile(filePath: string): Promise<FileHashResult>
+```
+
+#### `tryDecodeText` (value)
+
+Decode bytes as UTF-8 in fatal mode to detect binary content. Returns undefined when the bytes are not valid UTF-8 or contain a NUL byte (a typical binary marker).
+
+Declared in [src/blob.mts](../src/blob.mts#L283).
+
+```typescript
+function tryDecodeText(bytes: Uint8Array): string | undefined
+```
+
+### `./testing`
+
+#### `fixtures` (value)
+
+All fixture categories in one object.
+
+Declared in [src/testing.mts](../src/testing.mts#L260).
+
+```typescript
+const fixtures = {
+  issues: issueFixtures,
+  organizations: organizationFixtures,
+  packages: packageFixtures,
+  repositories: repositoryFixtures,
+  scans: scanFixtures,
+} as const
+```
+
+#### `isErrorResult` (value)
+
+Type guard to check if SDK result is an error.
+
+Example:
+
+```typescript
+const result = await sdk.getRepo('org', 'repo')
+  if (isErrorResult(result)) {
+    console.error(result.error) // Type-safe access
+  }
+```
+
+Declared in [src/testing.mts](../src/testing.mts#L29).
+
+```typescript
+function isErrorResult<T>(
+  result: SocketSdkGenericResult<T>,
+): result is Extract<SocketSdkGenericResult<T>, { success: false }>
+```
+
+#### `isSuccessResult` (value)
+
+Type guard to check if SDK result is successful.
+
+Example:
+
+```typescript
+const result = await sdk.getRepo('org', 'repo')
+  if (isSuccessResult(result)) {
+    console.log(result.data.name) // Type-safe access
+  }
+```
+
+Declared in [src/testing.mts](../src/testing.mts#L50).
+
+```typescript
+function isSuccessResult<T>(
+  result: SocketSdkGenericResult<T>,
+): result is Extract<SocketSdkGenericResult<T>, { success: true }>
+```
+
+#### `issueFixtures` (value)
+
+Common fixture data for issue/alert responses.
+
+Declared in [src/testing.mts](../src/testing.mts#L227).
+
+```typescript
+const issueFixtures = {
+  /**
+   * License issue.
+   */
+  license: {
+    type: 'license',
+    severity: 'medium',
+    key: 'license-incompatible',
+    description: 'License incompatible with project',
+  },
+  /**
+   * Malware issue.
+   */
+  malware: {
+    type: 'malware',
+    severity: 'critical',
+    key: 'malware-detected',
+    description: 'Malicious code detected',
+  },
+  /**
+   * Vulnerability issue.
+   */
+  vulnerability: {
+    type: 'vulnerability',
+    severity: 'high',
+    key: 'CVE-2024-1234',
+    description: 'SQL Injection vulnerability',
+  },
+} as const
+```
+
+#### `mockApiErrorBody` (value)
+
+Create a mock Socket API error response body.
+
+Example:
+
+```typescript
+nock('https://api.socket.dev')
+    .get('/v0/repo/org/repo')
+    .reply(404, mockApiErrorBody('Repository not found'))
+```
+
+Declared in [src/testing.mts](../src/testing.mts#L71).
+
+```typescript
+function mockApiErrorBody(
+  message: string,
+  details?: Record<string, unknown> | undefined,
+): {
+  error: { message: string; details?: Record<string, unknown> | undefined }
+}
+```
+
+#### `mockErrorResponse` (value)
+
+Create an error SDK response.
+
+Example:
+
+```typescript
+const response = mockErrorResponse('Not found', 404)
+  expect(response.success).toBe(false)
+```
+
+Declared in [src/testing.mts](../src/testing.mts#L285).
+
+```typescript
+function mockErrorResponse<T>(
+  error: string,
+  status = 500,
+  cause?: string | undefined,
+): SocketSdkGenericResult<T>
+```
+
+#### `mockSdkError` (value)
+
+Create a mock SDK error with proper structure.
+
+Example:
+
+```typescript
+const mockMethod = vi
+    .fn()
+    .mockRejectedValue(
+      mockSdkError('NOT_FOUND', {
+        status: 404,
+        message: 'Repository not found',
+      }),
+    )
+```
+
+Declared in [src/testing.mts](../src/testing.mts#L319).
+
+```typescript
+function mockSdkError(
+  type: 'NOT_FOUND' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'SERVER_ERROR' | 'TIMEOUT',
+  options: {
+    cause?: string | undefined
+    message?: string | undefined
+    status?: number | undefined
+  } = {},
+): Error & { status: number; cause?: string | undefined }
+```
+
+#### `mockSdkResult` (value)
+
+Mock SDK method result with proper typing.
+
+Example:
+
+```typescript
+const mockGet = vi
+    .fn()
+    .mockResolvedValue(
+      mockSdkResult<'getRepo'>(true, { id: '123', name: 'repo' }),
+    )
+```
+
+Declared in [src/testing.mts](../src/testing.mts#L394).
+
+```typescript
+function mockSdkResult<T extends SocketSdkOperations>(
+  success: true,
+  data: SocketSdkSuccessResult<T>['data'],
+  status?: number | undefined,
+): SocketSdkSuccessResult<T>
+function mockSdkResult<T extends SocketSdkOperations>(
+  success: false,
+  error: string,
+  status?: number | undefined,
+  cause?: string | undefined,
+): SocketSdkErrorResult<T>
+function mockSdkResult<T extends SocketSdkOperations>(
+  success: boolean,
+  dataOrError: unknown,
+  status = success ? 200 : 500,
+  cause?: string | undefined,
+): SocketSdkResult<T>
+```
+
+#### `mockSuccessResponse` (value)
+
+Create a successful SDK response.
+
+Example:
+
+```typescript
+const response = mockSuccessResponse({ id: '123', name: 'test' })
+  expect(response.success).toBe(true)
+```
+
+Declared in [src/testing.mts](../src/testing.mts#L434).
+
+```typescript
+function mockSuccessResponse<T>(
+  data: T,
+  status = 200,
+): SocketSdkGenericResult<T>
+```
+
+#### `organizationFixtures` (value)
+
+Common fixture data for organization responses.
+
+Declared in [src/testing.mts](../src/testing.mts#L88).
+
+```typescript
+const organizationFixtures = {
+  /**
+   * Basic organization with minimal data.
+   */
+  basic: {
+    id: 'org_123',
+    name: 'test-org',
+    plan: 'free',
+  },
+  /**
+   * Organization with full details.
+   */
+  full: {
+    id: 'org_123',
+    name: 'test-org',
+    plan: 'enterprise',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-02T00:00:00Z',
+  },
+} as const
+```
+
+#### `packageFixtures` (value)
+
+Common fixture data for package/artifact responses.
+
+Declared in [src/testing.mts](../src/testing.mts#L192).
+
+```typescript
+const packageFixtures = {
+  /**
+   * Package with malware alert.
+   */
+  malware: {
+    id: 'pkg_malware',
+    name: 'malware-package',
+    version: '3.0.0',
+    score: 0,
+    issues: ['malware'],
+  },
+  /**
+   * Safe package with high score.
+   */
+  safe: {
+    id: 'pkg_safe',
+    name: 'safe-package',
+    version: '1.0.0',
+    score: 95,
+  },
+  /**
+   * Package with vulnerabilities.
+   */
+  vulnerable: {
+    id: 'pkg_vuln',
+    name: 'vulnerable-package',
+    version: '2.0.0',
+    score: 45,
+    issues: ['vulnerability'],
+  },
+} as const
+```
+
+#### `repositoryFixtures` (value)
+
+Common fixture data for repository responses.
+
+Declared in [src/testing.mts](../src/testing.mts#L112).
+
+```typescript
+const repositoryFixtures = {
+  /**
+   * Archived repository.
+   */
+  archived: {
+    id: 'repo_456',
+    name: 'old-repo',
+    archived: true,
+    default_branch: 'master', // inclusive-language: external-api -- GitHub repo.default_branch field; legacy archived repo fixture.
+  },
+  /**
+   * Basic repository with minimal data.
+   */
+  basic: {
+    id: 'repo_123',
+    name: 'test-repo',
+    archived: false,
+    default_branch: 'main',
+  },
+  /**
+   * Repository with full details.
+   */
+  full: {
+    id: 'repo_123',
+    name: 'test-repo',
+    archived: false,
+    default_branch: 'main',
+    homepage: 'https://example.com',
+    visibility: 'public',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-02T00:00:00Z',
+  },
+} as const
+```
+
+#### `scanFixtures` (value)
+
+Common fixture data for scan responses.
+
+Declared in [src/testing.mts](../src/testing.mts#L149).
+
+```typescript
+const scanFixtures = {
+  /**
+   * Completed scan with no issues.
+   */
+  completed: {
+    id: 'scan_completed',
+    status: 'completed',
+    created_at: '2024-01-01T00:00:00Z',
+    completed_at: '2024-01-01T00:01:00Z',
+    issues_found: 0,
+  },
+  /**
+   * Failed scan.
+   */
+  failed: {
+    id: 'scan_failed',
+    status: 'failed',
+    created_at: '2024-01-01T00:00:00Z',
+    error: 'Scan timeout',
+  },
+  /**
+   * Pending scan.
+   */
+  pending: {
+    id: 'scan_pending',
+    status: 'pending',
+    created_at: '2024-01-01T00:00:00Z',
+  },
+  /**
+   * Completed scan with issues.
+   */
+  withIssues: {
+    id: 'scan_with_issues',
+    status: 'completed',
+    created_at: '2024-01-01T00:00:00Z',
+    completed_at: '2024-01-01T00:01:00Z',
+    issues_found: 3,
+  },
+} as const
+```
+
+### `./types/api`
+
+#### `$defs` (type)
+
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8143).
+
+#### `components` (type)
+
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2300).
+
+#### `external` (type)
+
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8145).
+
+#### `operations` (type)
+
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L30799).
+
+#### `paths` (type)
+
+This file was auto-generated by openapi-typescript. Do not make direct changes to the file.
+
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L6).
+
+#### `webhooks` (type)
+
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2298).
+
+### `./types/api-helpers`
+
+#### `OpErrorType` (type)
+
+Declared in [types/api-helpers.d.ts](../types/api-helpers.d.ts#L27).
+
+```typescript
+type OpErrorType<Operation> = Operation extends {
+  responses: infer Responses
+}
+  ? [OpResponsesByStatus<Responses, '4' | '5'>] extends [never]
+    ? { error?: string | undefined }
+    : OpResponsesByStatus<Responses, '4' | '5'>
+  : { error?: string | undefined }
+```
+
+#### `OpResponseBody` (type)
+
+Declared in [types/api-helpers.d.ts](../types/api-helpers.d.ts#L5).
+
+```typescript
+type OpResponseBody<Response> = Response extends {
+  content: infer Content
+}
+  ? [Content] extends [never]
+    ? undefined
+    : Content[keyof Content]
+  : undefined
+```
+
+#### `OpResponsesByStatus` (type)
+
+Declared in [types/api-helpers.d.ts](../types/api-helpers.d.ts#L13).
+
+```typescript
+type OpResponsesByStatus<Responses, Prefix extends string> = {
+  [Status in keyof Responses]: Status extends string | number
+    ? `${Status}` extends `${Prefix}${string}`
+      ? OpResponseBody<Responses[Status]>
+      : never
+    : never
+}[keyof Responses]
+```
+
+#### `OpReturnType` (type)
+
+Declared in [types/api-helpers.d.ts](../types/api-helpers.d.ts#L21).
+
+```typescript
+type OpReturnType<Operation> = Operation extends {
+  responses: infer Responses
+}
+  ? OpResponsesByStatus<Responses, '2'>
+  : unknown
+```
+
+### `./types/api-v1`
+
+#### `$defs` (type)
+
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1298).
+
+#### `components` (type)
+
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1289).
+
+#### `external` (type)
+
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1300).
+
+#### `operations` (type)
+
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1302).
+
+#### `paths` (type)
+
+This file was auto-generated by openapi-typescript. Do not make direct changes to the file.
+
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L6).
+
+#### `webhooks` (type)
+
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1287).

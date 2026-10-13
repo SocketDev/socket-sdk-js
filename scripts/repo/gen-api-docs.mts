@@ -12,10 +12,12 @@ import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {
+  extractIndexDescription,
   extractMethods,
-  extractPublicExports,
   renderApiDocs,
 } from './gen-api-docs-lib.mts'
+import { extractPackageExports } from './gen-api-docs-exports.mts'
+import { packageExportTargets } from './gen-api-docs-export-source.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
 import type { ScriptMeta } from '../fleet/process/main/run.mts'
 
@@ -34,17 +36,28 @@ const outPath = path.join(rootPath, 'docs/api.md')
 export function generateApiDocs(): void {
   const check = process.argv.includes('--check')
   const methods = extractMethods()
+  const packageJson: unknown = JSON.parse(
+    readFileSync(rootPackageJsonPath, 'utf8'),
+  )
+  if (
+    typeof packageJson !== 'object' ||
+    packageJson === null ||
+    !('exports' in packageJson)
+  ) {
+    throw new Error('package.json does not define an exports map.')
+  }
   const entryPath = path.join(rootPath, 'src/index.mts')
   const entrySource = readFileSync(entryPath, 'utf8')
-  const description =
-    entrySource
-      .match(/@file\s+([\s\S]*?)\*\//)?.[1]
-      ?.split(/\r?\n/)
-      .map(line => line.replace(/^\s*\*\s?/, '').trim())
-      .filter(Boolean)
-      .join(' ') ?? ''
-  const publicExports = extractPublicExports(entrySource)
-  const next = renderApiDocs(methods, publicExports, description)
+  const description = extractIndexDescription(entrySource)
+  const targets = packageExportTargets(packageJson.exports)
+  const publicExports = extractPackageExports(targets, packagePath =>
+    readFileSync(path.join(rootPath, packagePath), 'utf8'),
+  )
+  const next = renderApiDocs(methods, {
+    publicExports,
+    indexDescription: description,
+    entrypoints: targets,
+  })
 
   if (check) {
     const current = existsSync(outPath) ? readFileSync(outPath, 'utf8') : ''

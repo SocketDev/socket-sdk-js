@@ -8,14 +8,21 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { tsPlugin } from '@sveltejs/acorn-typescript'
+import { Parser } from 'acorn'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 
 import { MAX_UNFOLDED_CODE_LINES } from '../fleet/check/long-doc-sections-are-folded.mts'
 import { GROUPS, QUOTA_LABELS } from './gen-api-docs-groups.mts'
-import { extractSdkClassMethods } from './sdk-method-extraction.mts'
-import { parseTypeScript } from './generate-strict-types-lib.mts'
-
+import { trimBlankLines } from './gen-api-docs-signatures.mts'
+import type {
+  ExportInfo,
+  PackageExportTarget,
+} from './gen-api-docs-exports.mts'
 import type { AstNode } from './generate-strict-types-lib.mts'
+import { extractSdkClassMethods } from './sdk-method-extraction.mts'
+
+const documentationParser = Parser.extend(tsPlugin())
 
 const rootPackageJsonPath = findUpSync('package.json', {
   cwd: path.dirname(fileURLToPath(import.meta.url)),
@@ -44,11 +51,150 @@ export interface MethodInfo {
   permissions: string[]
 }
 
-export interface PublicExport {
-  name: string
-  kind: 'value' | 'type'
-  modulePath: string
-  line: number | undefined
+export type PublicExport = ExportInfo
+
+export function extractClassSignature(
+  declaration: AstNode,
+  source: string,
+  signatureForMember: (member: AstNode, source: string) => string,
+): string {
+  const start = numeric(declaration.start) ?? 0
+  const body = asNode(declaration.body)
+  const bodyStart = numeric(body?.start)
+  const end = numeric(declaration.end) ?? start
+  const header = source.slice(start, bodyStart ?? end).trimEnd()
+  const members = nodes(body?.body)
+    .filter(member => {
+      if (member.type === 'StaticBlock') {
+        return false
+      }
+      const key = asNode(member.key)
+      const name = typeof key?.name === 'string' ? key.name : undefined
+      return (
+        member.accessibility !== 'private' &&
+        member.accessibility !== 'protected' &&
+        key?.type !== 'PrivateIdentifier' &&
+        !name?.startsWith('#')
+      )
+    })
+    .map(member => signatureForMember(member, source))
+    .filter(Boolean)
+  return members.length > 0
+    ? `${header} {\n${members.map(member => `  ${member}`).join('\n')}\n}`
+    : `${header} {}`
+}
+
+export function isGeneratedApiDeclaration(packagePath: string): boolean {
+  return packagePath === 'types/api-v1.d.ts' || packagePath === 'types/api.d.ts'
+}
+
+export function extractDeclarationDocumentation(
+  declaration: AstNode,
+  source: string,
+): { description: string; example: string } {
+  const start = numeric(declaration.start) ?? 0
+  const preceding = source.slice(0, start)
+  const commentStart = preceding.lastIndexOf('/**')
+  const commentEnd = preceding.indexOf('*/', commentStart)
+  if (commentStart < 0 || commentEnd < 0) {
+    return { description: '', example: '' }
+  }
+  const suffix = preceding.slice(commentEnd + 2)
+  if (!/^(?:\s+[A-Za-z]+)*\s*$/.test(suffix)) {
+    return { description: '', example: '' }
+  }
+  const description: string[] = []
+  const example: string[] = []
+  let inExample = false
+  let exampleFence = false
+  const commentLines = preceding
+    .slice(commentStart + 3, commentEnd)
+    .split(/\r?\n/)
+    .map(value => value.replace(/^\s*\* ?/, ''))
+  for (let i = 0, { length } = commentLines; i < length; i += 1) {
+    const line = commentLines[i]!
+    if (line.startsWith('@example')) {
+      inExample = true
+      const firstLine = line.slice('@example'.length).trim()
+      if (firstLine) {
+        example.push(firstLine)
+      }
+      continue
+    }
+    if (inExample) {
+      if (line.trim().startsWith('@')) {
+        break
+      }
+      if (line.trim().startsWith('```')) {
+        exampleFence = !exampleFence
+        if (!exampleFence) {
+          inExample = false
+        }
+        continue
+      }
+      example.push(line.replace(/^\s*;?\s*```(?:ts|typescript)\s*/, ''))
+      continue
+    }
+    if (line.trim().startsWith('@') || line.trim().startsWith('```')) {
+      break
+    }
+    if (line) {
+      description.push(line.trim())
+    }
+  }
+  return {
+    description: description.join(' ').trim(),
+    example: trimBlankLines(example.join('\n')),
+  }
+}
+
+export function extractIndexDescription(source: string): string {
+  let description = ''
+  documentationParser.parse(source, {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    locations: true,
+    onComment: (block, text, start) => {
+      if (!block || source.slice(0, start).trim()) {
+        return
+      }
+      const lines = text
+        .split(/\r?\n/)
+        .map(line => line.replace(/^\s*\*\s?/, '').trim())
+      const fileIndex = lines.findIndex(line => line.startsWith('@file'))
+      if (fileIndex >= 0) {
+        const fileLine = lines[fileIndex]!.slice('@file'.length).trim()
+        const followingLines: string[] = []
+        for (let i = fileIndex + 1, { length } = lines; i < length; i += 1) {
+          const line = lines[i]!
+          if (line.startsWith('@')) {
+            break
+          }
+          if (line) {
+            followingLines.push(line)
+          }
+        }
+        description = [fileLine, ...followingLines].filter(Boolean).join(' ')
+      }
+    },
+  })
+  return description
+}
+
+function asNode(value: unknown): AstNode | undefined {
+  return isAstNode(value) ? value : undefined
+}
+
+function isAstNode(value: unknown): value is AstNode {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function numeric(value: unknown): number | undefined {
+  return typeof value === 'number' ? value : undefined
+}
+
+function nodes(value: unknown): AstNode[] {
+  return Array.isArray(value) ? value.filter(isAstNode) : []
 }
 
 /**
@@ -62,7 +208,9 @@ export function extractMethods(
     options
   const methods: MethodInfo[] = []
   const names = new Set<string>()
-  for (const method of extractSdkClassMethods(source)) {
+  const extractedMethods = extractSdkClassMethods(source)
+  for (let i = 0, { length } = extractedMethods; i < length; i += 1) {
+    const method = extractedMethods[i]!
     const { name, isGenerator, signature, summary, hadOperationIdNone } = method
     if (names.has(name)) {
       continue
@@ -96,188 +244,201 @@ export function loadQuotaData(): QuotaData {
   return JSON.parse(readFileSync(dataPath, 'utf8')) as QuotaData
 }
 
-export function extractPublicExports(source: string): PublicExport[] {
-  const exports: PublicExport[] = []
-  const ast = parseTypeScript(source)
-  const declarations = Array.isArray(ast.body) ? ast.body : []
-  const declarationCache = new Map<string, string>()
-  for (const statement of declarations) {
-    if (
-      statement.type !== 'ExportNamedDeclaration' &&
-      statement.type !== 'ExportAllDeclaration'
-    ) {
-      continue
-    }
-    const modulePath = (statement.source as AstNode | undefined)?.['value']
-    if (typeof modulePath !== 'string') {
-      continue
-    }
-    const specifiers = Array.isArray(statement.specifiers)
-      ? statement.specifiers
-      : []
-    const isTypeOnly = statement['exportKind'] === 'type'
-    if (
-      statement.type === 'ExportAllDeclaration' ||
-      (specifiers.length === 0 && isTypeOnly)
-    ) {
-      const exportName =
-        statement.type === 'ExportAllDeclaration' && statement.exported
-          ? String((statement.exported as AstNode)['name'] ?? 'namespace')
-          : `All ${isTypeOnly ? 'types' : 'exports'} from ${modulePath}`
-      exports.push({
-        name: exportName,
-        kind: isTypeOnly ? 'type' : 'value',
-        modulePath,
-        line: undefined,
-      })
-      continue
-    }
-    let declarationSource = declarationCache.get(modulePath)
-    if (declarationSource === undefined) {
-      const sourcePath = path.join(rootPath, 'src', modulePath.slice(2))
-      try {
-        declarationSource = readFileSync(sourcePath, 'utf8')
-        declarationCache.set(modulePath, declarationSource)
-      } catch {
-        declarationSource = ''
-      }
-    }
-    for (const specifier of specifiers) {
-      const exported = specifier.exported as AstNode | undefined
-      const name = exported?.['name'] ?? exported?.['value']
-      if (typeof name !== 'string') {
-        continue
-      }
-      const local = specifier.local as AstNode | undefined
-      const localName = local?.['name'] ?? local?.['value']
-      const declaration = String(localName ?? name)
-      exports.push({
-        name,
-        kind:
-          isTypeOnly || specifier['exportKind'] === 'type' ? 'type' : 'value',
-        modulePath,
-        line: findDeclarationLine(declarationSource, declaration),
-      })
-    }
-  }
-  return exports.toSorted((a, b) => a.name.localeCompare(b.name))
-}
-
-function findDeclarationLine(source: string, name: string): number | undefined {
-  if (!source) {
-    return undefined
-  }
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const match = new RegExp(
-    `\\b(?:export\\s+)?(?:declare\\s+)?(?:abstract\\s+)?(?:async\\s+)?(?:class|const|enum|function|interface|type|var|let)\\s+${escaped}\\b`,
-  ).exec(source)
-  return match ? source.slice(0, match.index).split('\n').length : undefined
-}
-
 /**
  * Render the full markdown document from extracted methods.
  */
 export function renderApiDocs(
   methods: MethodInfo[],
-  publicExports: PublicExport[] = [],
-  indexDescription = '',
+  options: {
+    readonly publicExports?: PublicExport[] | undefined
+    readonly indexDescription?: string | undefined
+    readonly entrypoints?: readonly PackageExportTarget[] | undefined
+  } = {},
 ): string {
-  const byName = new Map(methods.map(m => [m.name, m]))
-  const sections: string[] = []
-  sections.push('<!--')
-  sections.push('  AUTOGENERATED. Do not edit by hand.')
-  sections.push('  Regenerate with: pnpm run docs:api')
-  sections.push('  Source: scripts/repo/gen-api-docs.mts')
-  sections.push('-->')
-  sections.push('')
-  sections.push('# API Reference')
-  sections.push('')
-  sections.push(
-    'Public SDK class methods, exported values, and types. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).',
-  )
-  if (indexDescription) {
-    sections.push('')
-    sections.push(indexDescription)
+  const normalizedOptions = { __proto__: null, ...options }
+  const {
+    publicExports = [],
+    indexDescription = '',
+    entrypoints = [],
+  } = normalizedOptions
+  const sections = documentHeader(methods.length, indexDescription)
+  const byName = new Map(methods.map(method => [method.name, method]))
+  const groupedNames = new Set(GROUPS.flatMap(group => group.methods))
+  const otherMethods = methods.filter(method => !groupedNames.has(method.name))
+  appendContents(sections, { hasOtherMethods: otherMethods.length > 0 })
+  appendMethodGroups(sections, byName, otherMethods)
+  appendEntrypoints(sections, entrypoints)
+  appendPublicExports(sections, publicExports)
+  return normalizeDocument(sections.join('\n'))
+}
+
+function normalizeDocument(document: string): string {
+  const output: string[] = []
+  let previousWasBlank = false
+  const lines = document.split(/\r?\n/)
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    const blank = line.length === 0
+    if (blank && previousWasBlank) {
+      continue
+    }
+    output.push(line)
+    previousWasBlank = blank
   }
-  sections.push('')
-  sections.push(`There are **${methods.length}** public methods.`)
-  sections.push('')
-  sections.push('## Contents')
-  sections.push('')
-  for (let i = 0, { length } = GROUPS; i < length; i += 1) {
-    const group = GROUPS[i]!
+  while (output.at(-1) === '') {
+    output.pop()
+  }
+  return `${output.join('\n')}\n`
+}
+
+function documentHeader(
+  methodCount: number,
+  indexDescription: string,
+): string[] {
+  const sections = [
+    '<!--',
+    '  AUTOGENERATED. Do not edit by hand.',
+    '  Regenerate with: pnpm run docs:api',
+    '  Source: scripts/repo/gen-api-docs.mts',
+    '-->',
+    '',
+    '# API Reference',
+    '',
+    'Public SDK class methods, exported values, and types. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).',
+  ]
+  if (indexDescription) {
+    sections.push('', indexDescription)
+  }
+  sections.push('', `There are **${methodCount}** public methods.`, '')
+  return sections
+}
+
+function appendContents(
+  sections: string[],
+  options: { readonly hasOtherMethods: boolean },
+): void {
+  const safeOptions = { __proto__: null, ...options }
+  sections.push('## Contents', '')
+  for (const group of GROUPS) {
     const anchor = group.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '')
     sections.push(`- [${group.title}](#${anchor})`)
   }
-  const inGroups = new Set<string>()
-  for (let i = 0, { length } = GROUPS; i < length; i += 1) {
-    const g = GROUPS[i]!
-    const methodNames = g.methods
-    for (let j = 0, { length: jlen } = methodNames; j < jlen; j += 1) {
-      inGroups.add(methodNames[j]!)
-    }
-  }
-  const otherMethods = methods.filter(m => !inGroups.has(m.name))
-  if (otherMethods.length > 0) {
+  if (safeOptions.hasOtherMethods) {
     sections.push('- [Other](#other)')
   }
-  sections.push('- [Package exports](#package-exports)')
-  sections.push('')
-
-  for (let i = 0, { length } = GROUPS; i < length; i += 1) {
-    const group = GROUPS[i]!
-    sections.push(`## ${group.title}`)
-    sections.push('')
-    sections.push(group.description)
-    sections.push('')
-    const methodNames = group.methods
-    for (let j = 0, { length: jlen } = methodNames; j < jlen; j += 1) {
-      const m = byName.get(methodNames[j]!)
-      if (!m) {
-        continue
-      }
-      sections.push(renderMethod(m))
-    }
-  }
-
-  if (otherMethods.length > 0) {
-    sections.push('## Other')
-    sections.push('')
-    sections.push(
-      'Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/repo/gen-api-docs.mts`.',
-    )
-    sections.push('')
-    for (let i = 0, { length } = otherMethods; i < length; i += 1) {
-      const m = otherMethods[i]!
-      sections.push(renderMethod(m))
-    }
-  }
-
-  sections.push('## Package exports')
-  sections.push('')
   sections.push(
-    'Values and types exported from `src/index.mts`. Source links point to their declaration modules. See the linked declarations for signatures, fields, and type relationships.',
+    '- [Package entrypoints](#package-entrypoints)',
+    '- [Exported symbols](#exported-symbols)',
+    '',
   )
-  sections.push('')
-  sections.push('| Export | Kind | Declaration |')
-  sections.push('| --- | --- | --- |')
-  for (const item of publicExports) {
-    const fragment = item.line ? `#L${item.line}` : ''
+}
+
+function appendMethodGroups(
+  sections: string[],
+  byName: ReadonlyMap<string, MethodInfo>,
+  otherMethods: readonly MethodInfo[],
+): void {
+  for (const group of GROUPS) {
+    sections.push(`## ${group.title}`, '', group.description, '')
+    for (const name of group.methods) {
+      const method = byName.get(name)
+      if (method) {
+        sections.push(renderMethod(method))
+      }
+    }
+  }
+  if (otherMethods.length > 0) {
     sections.push(
-      `| \`${item.name}\` | ${item.kind} | [${item.modulePath}](../src/${item.modulePath.replace('./', '')}${fragment}) |`,
+      '## Other',
+      '',
+      'Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/repo/gen-api-docs.mts`.',
+      '',
     )
+    for (const method of otherMethods) {
+      sections.push(renderMethod(method))
+    }
+  }
+}
+
+function appendEntrypoints(
+  sections: string[],
+  entrypoints: readonly PackageExportTarget[],
+): void {
+  sections.push(
+    '## Package entrypoints',
+    '',
+    'Public import paths from `package.json`. The package metadata path exposes package metadata rather than callable SDK API.',
+    '',
+    '| Import path | Target |',
+    '| --- | --- |',
+  )
+  for (const entry of entrypoints) {
+    const target = entry.target ?? '`package.json` (metadata)'
+    sections.push(`| \`${entry.subpath}\` | ${target} |`)
   }
   sections.push('')
+}
 
-  return (
-    sections
-      .join('\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trimEnd() + '\n'
+function appendPublicExports(
+  sections: string[],
+  publicExports: readonly PublicExport[],
+): void {
+  sections.push(
+    '## Exported symbols',
+    '',
+    'Each symbol is scoped to its package import path. Callable helpers and authored types include available signatures and JSDoc. Generated OpenAPI types link to their canonical declarations.',
+    '',
   )
+  let currentSubpath = ''
+  for (const item of publicExports) {
+    if (currentSubpath !== item.subpath) {
+      currentSubpath = item.subpath
+      sections.push(`### \`${currentSubpath}\``, '')
+    }
+    appendPublicExport(sections, item)
+  }
+  sections.push('')
+}
+
+function appendPublicExport(sections: string[], item: PublicExport): void {
+  const local =
+    item.packagePath.startsWith('src/') || item.packagePath.startsWith('types/')
+  const sourceLink = local
+    ? `[${item.packagePath}](../${item.packagePath}#L${item.line})`
+    : `external package \`${item.packagePath}\``
+  sections.push(`#### \`${item.name}\` (${item.kind})`, '')
+  if (item.description) {
+    sections.push(item.description, '')
+  }
+  if (item.example) {
+    sections.push(
+      'Example:',
+      '',
+      '```typescript',
+      item.example.trim(),
+      '```',
+      '',
+    )
+  }
+  if (item.name === 'SocketSdk') {
+    sections.push(
+      'Construct with `new SocketSdk(apiToken, options?)`; see [SDK Concepts](./concepts.md) for authentication and configuration.',
+    )
+  } else if (
+    item.packagePath === 'types/api-v1.d.ts' ||
+    item.packagePath === 'types/api.d.ts'
+  ) {
+    sections.push(`Canonical generated API declaration: ${sourceLink}.`)
+  } else {
+    sections.push(`Declared in ${sourceLink}.`, '')
+    if (item.signature) {
+      sections.push('```typescript', item.signature, '```')
+    }
+  }
+  sections.push('')
 }
 
 /**
