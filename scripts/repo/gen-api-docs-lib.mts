@@ -13,6 +13,9 @@ import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { MAX_UNFOLDED_CODE_LINES } from '../fleet/check/long-doc-sections-are-folded.mts'
 import { GROUPS, QUOTA_LABELS } from './gen-api-docs-groups.mts'
 import { extractSdkClassMethods } from './sdk-method-extraction.mts'
+import { parseTypeScript } from './generate-strict-types-lib.mts'
+
+import type { AstNode } from './generate-strict-types-lib.mts'
 
 const rootPackageJsonPath = findUpSync('package.json', {
   cwd: path.dirname(fileURLToPath(import.meta.url)),
@@ -45,8 +48,7 @@ export interface PublicExport {
   name: string
   kind: 'value' | 'type'
   modulePath: string
-  declaration: string
-  moduleOnly?: boolean | undefined
+  line: number | undefined
 }
 
 /**
@@ -96,42 +98,80 @@ export function loadQuotaData(): QuotaData {
 
 export function extractPublicExports(source: string): PublicExport[] {
   const exports: PublicExport[] = []
-  const pattern = /export\s+(type\s+)?\{([\s\S]*?)\}\s+from\s+'([^']+)'/g
-  for (const match of source.matchAll(pattern)) {
-    const isType = match[1] !== undefined
-    const names = match[2] ?? ''
-    const modulePath = match[3] ?? ''
-    for (const item of names.split(',')) {
-      const normalized = item.trim().replace(/^type\s+/, '')
-      const name = normalized
-        .split(/\s+as\s+/)
-        .at(-1)
-        ?.trim()
-      if (name) {
-        exports.push({
-          name,
-          kind: isType || item.trim().startsWith('type ') ? 'type' : 'value',
-          modulePath,
-          declaration: normalized.split(/\s+as\s+/)[0]?.trim() ?? name,
-        })
-      }
-    }
-  }
-  const starPattern = /export\s+type\s+\*\s+from\s+'([^']+)'/g
-  for (const match of source.matchAll(starPattern)) {
-    const modulePath = match[1]
-    if (!modulePath) {
+  const ast = parseTypeScript(source)
+  const declarations = Array.isArray(ast.body) ? ast.body : []
+  const declarationCache = new Map<string, string>()
+  for (const statement of declarations) {
+    if (
+      statement.type !== 'ExportNamedDeclaration' &&
+      statement.type !== 'ExportAllDeclaration'
+    ) {
       continue
     }
-    exports.push({
-      name: `All types from ${modulePath}`,
-      kind: 'type',
-      modulePath,
-      declaration: '',
-      moduleOnly: true,
-    })
+    const modulePath = (statement.source as AstNode | undefined)?.['value']
+    if (typeof modulePath !== 'string') {
+      continue
+    }
+    const specifiers = Array.isArray(statement.specifiers)
+      ? statement.specifiers
+      : []
+    const isTypeOnly = statement['exportKind'] === 'type'
+    if (
+      statement.type === 'ExportAllDeclaration' ||
+      (specifiers.length === 0 && isTypeOnly)
+    ) {
+      const exportName =
+        statement.type === 'ExportAllDeclaration' && statement.exported
+          ? String((statement.exported as AstNode)['name'] ?? 'namespace')
+          : `All ${isTypeOnly ? 'types' : 'exports'} from ${modulePath}`
+      exports.push({
+        name: exportName,
+        kind: isTypeOnly ? 'type' : 'value',
+        modulePath,
+        line: undefined,
+      })
+      continue
+    }
+    let declarationSource = declarationCache.get(modulePath)
+    if (declarationSource === undefined) {
+      const sourcePath = path.join(rootPath, 'src', modulePath.slice(2))
+      try {
+        declarationSource = readFileSync(sourcePath, 'utf8')
+        declarationCache.set(modulePath, declarationSource)
+      } catch {
+        declarationSource = ''
+      }
+    }
+    for (const specifier of specifiers) {
+      const exported = specifier.exported as AstNode | undefined
+      const name = exported?.['name'] ?? exported?.['value']
+      if (typeof name !== 'string') {
+        continue
+      }
+      const local = specifier.local as AstNode | undefined
+      const localName = local?.['name'] ?? local?.['value']
+      const declaration = String(localName ?? name)
+      exports.push({
+        name,
+        kind:
+          isTypeOnly || specifier['exportKind'] === 'type' ? 'type' : 'value',
+        modulePath,
+        line: findDeclarationLine(declarationSource, declaration),
+      })
+    }
   }
   return exports.toSorted((a, b) => a.name.localeCompare(b.name))
+}
+
+function findDeclarationLine(source: string, name: string): number | undefined {
+  if (!source) {
+    return undefined
+  }
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = new RegExp(
+    `\\b(?:export\\s+)?(?:declare\\s+)?(?:abstract\\s+)?(?:async\\s+)?(?:class|const|enum|function|interface|type|var|let)\\s+${escaped}\\b`,
+  ).exec(source)
+  return match ? source.slice(0, match.index).split('\n').length : undefined
 }
 
 /**
@@ -184,6 +224,7 @@ export function renderApiDocs(
   if (otherMethods.length > 0) {
     sections.push('- [Other](#other)')
   }
+  sections.push('- [Package exports](#package-exports)')
   sections.push('')
 
   for (let i = 0, { length } = GROUPS; i < length; i += 1) {
@@ -224,7 +265,7 @@ export function renderApiDocs(
   sections.push('| Export | Kind | Declaration |')
   sections.push('| --- | --- | --- |')
   for (const item of publicExports) {
-    const fragment = item.moduleOnly ? '' : `#${item.declaration.toLowerCase()}`
+    const fragment = item.line ? `#L${item.line}` : ''
     sections.push(
       `| \`${item.name}\` | ${item.kind} | [${item.modulePath}](../src/${item.modulePath.replace('./', '')}${fragment}) |`,
     )
