@@ -271,7 +271,8 @@
     "update:pnpm": "node scripts/fleet/update/pnpm.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
     "weekly-update:ci": "gh workflow run cron-weekly-update.yml",
-    "worktree:create": "node scripts/fleet/worktree/create/run.mts"
+    "worktree:create": "node scripts/fleet/worktree/create/run.mts",
+    "ci:fix:preview": "node scripts/fleet/ci/fix/preview.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
