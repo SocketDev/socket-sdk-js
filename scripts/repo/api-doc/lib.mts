@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url'
 import { tsPlugin } from '@sveltejs/acorn-typescript'
 import { Parser } from 'acorn'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
+import { isPlainObject } from '@socketsecurity/lib-stable/objects/predicates'
 
 import { MAX_UNFOLDED_CODE_LINES } from '../../fleet/check/long-doc-sections-are-folded.mts'
 import { GROUPS, QUOTA_LABELS } from './groups.mts'
@@ -132,10 +133,6 @@ function isAstNode(value: unknown): value is AstNode {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
 function numeric(value: unknown): number | undefined {
   return typeof value === 'number' ? value : undefined
 }
@@ -199,14 +196,14 @@ export function loadQuotaData(): QuotaData {
 }
 
 function isQuotaData(value: unknown): value is QuotaData {
-  if (!isRecord(value) || !isRecord(value['api'])) {
+  if (!isPlainObject(value) || !isPlainObject(value['api'])) {
     return false
   }
   const api = value['api']
   if (
     !Object.values(api).every(
       entry =>
-        isRecord(entry) &&
+        isPlainObject(entry) &&
         typeof entry['quota'] === 'number' &&
         Array.isArray(entry['permissions']) &&
         entry['permissions'].every(

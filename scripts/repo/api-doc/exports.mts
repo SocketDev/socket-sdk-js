@@ -212,6 +212,11 @@ function enumerateDeclaration(
     if (!name) {
       throw new Error(`Unsupported exported declaration in ${packagePath}.`)
     }
+    const declarationKindValue = declaration['kind']
+    const prefix =
+      typeof declarationKindValue === 'string'
+        ? `${declarationKindValue} `
+        : 'const '
     return declarationExport(
       subpath,
       name,
@@ -220,10 +225,7 @@ function enumerateDeclaration(
       sourceForPath(traversal, packagePath),
       {
         kind: declarationKind(item, kind),
-        prefix:
-          declaration.type === 'VariableDeclaration'
-            ? `${String(declaration['kind'] ?? 'const')} `
-            : '',
+        prefix: declaration.type === 'VariableDeclaration' ? prefix : '',
       },
     )
   })

@@ -32,6 +32,15 @@ export interface ImportBinding {
   readonly kind: 'type' | 'value'
 }
 
+type DiscoverModulesOptions = {
+  readonly visiting?: Set<string> | undefined
+}
+
+type DeclarationExportOptions = {
+  readonly kind: 'value' | 'type'
+  readonly prefix?: string | undefined
+}
+
 export function moduleBindings(statements: readonly ExportNode[]): {
   declarations: Map<string, ExportNode>
   imports: Map<string, ImportBinding>
@@ -151,9 +160,10 @@ export function discoverModules(
   packagePath: string,
   readSource: (packagePath: string) => string,
   traversal: ExportTraversal,
-  options: { readonly visiting?: Set<string> } = {},
+  options: DiscoverModulesOptions = {},
 ): void {
-  const visiting = options.visiting ?? new Set<string>()
+  const opts = { __proto__: null, ...options }
+  const visiting = opts.visiting ?? new Set<string>()
   if (traversal.sources.has(packagePath) || visiting.has(packagePath)) {
     return
   }
@@ -399,9 +409,10 @@ export function declarationExport(
   declaration: ExportNode,
   packagePath: string,
   source: string,
-  options: { readonly kind: 'value' | 'type'; readonly prefix?: string },
+  options: DeclarationExportOptions,
 ): ExportInfo {
-  const { kind, prefix = '' } = options
+  const opts = { __proto__: null, ...options }
+  const { kind, prefix = '' } = opts
   const start = typeof declaration.start === 'number' ? declaration.start : 0
   const initializer = nodeOf(declaration['init'])
   const signature =

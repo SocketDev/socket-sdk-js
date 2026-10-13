@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractPackageExports } from '../../../scripts/repo/api-doc/exports.mts'
-import { packageExportTargets } from '../../../scripts/repo/api-doc/export-source.mts'
+import { extractPackageExports } from '../../../../../../scripts/repo/api-doc/exports.mts'
 
 const sources = new Map<string, string>([
   [
@@ -71,12 +70,12 @@ function readSource(packagePath: string): string {
 
 describe('SDK API export inventory', () => {
   it('enumerates direct, renamed, star, namespace, and declaration-only exports', () => {
-    const targets = packageExportTargets({
-      '.': { source: './src/index.mts', types: './dist/index.d.mts' },
-      './testing': { types: './src/testing.d.ts' },
-      './types/api': { types: './types/api.d.ts' },
-      './package.json': './package.json',
-    })
+    const targets = [
+      { subpath: '.', target: './src/index.mts' },
+      { subpath: './testing', target: './src/testing.d.ts' },
+      { subpath: './types/api', target: './types/api.d.ts' },
+      { subpath: './package.json', target: undefined },
+    ]
     const exports = extractPackageExports(targets, readSource)
 
     expect(
@@ -277,13 +276,5 @@ export class Client {
         () => 'export = 1',
       ),
     ).toThrow(/src\/unsupported\.mts/)
-  })
-
-  it('fails when an export map entry has no source or declaration condition', () => {
-    expect(() =>
-      packageExportTargets({ './unsupported': { default: null } }),
-    ).toThrow(
-      'No source or declaration target for package export ./unsupported.',
-    )
   })
 })

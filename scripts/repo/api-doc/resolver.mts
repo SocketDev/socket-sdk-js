@@ -18,18 +18,21 @@ import type {
   ImportBinding,
 } from './export-source.mts'
 
+type ResolveNamedExportOptions = {
+  readonly resolving?: Set<string> | undefined
+  readonly forcedKind?: 'value' | 'type' | undefined
+}
+
 export function resolveNamedExport(
   subpath: string,
   packagePath: string,
   name: string,
   traversal: ExportTraversal,
-  options: {
-    readonly resolving?: Set<string>
-    readonly forcedKind?: 'value' | 'type'
-  } = {},
+  options: ResolveNamedExportOptions = {},
 ): ExportInfo | undefined {
-  const resolving = options.resolving ?? new Set<string>()
-  const forcedKind = options.forcedKind ?? 'value'
+  const opts = { __proto__: null, ...options }
+  const resolving = opts.resolving ?? new Set<string>()
+  const forcedKind = opts.forcedKind ?? 'value'
   const key = `${packagePath}\0${name}`
   if (resolving.has(key)) {
     return undefined

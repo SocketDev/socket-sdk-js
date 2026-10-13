@@ -4,7 +4,7 @@ import {
   extractMethods,
   renderApiDocs,
   renderMethod,
-} from '../../../scripts/repo/api-doc/lib.mts'
+} from '../../../../../../scripts/repo/api-doc/lib.mts'
 
 const source = `class SocketSdk {
   /**

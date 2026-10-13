@@ -182,21 +182,15 @@ export function extractDeclarationDocumentation(
 ): { description: string; example: string } {
   const start = numeric(declaration.start) ?? 0
   const preceding = source.slice(0, start)
-  const commentStart = preceding.lastIndexOf('/**')
-  const commentEnd = preceding.indexOf('*/', commentStart)
-  if (commentStart < 0 || commentEnd < 0) {
-    return { description: '', example: '' }
-  }
-  const suffix = preceding.slice(commentEnd + 2)
-  if (!/^(?:\s+[A-Za-z]+)*\s*$/.test(suffix)) {
+  const comment = adjacentDocumentationComment(preceding)
+  if (comment === undefined) {
     return { description: '', example: '' }
   }
   const description: string[] = []
   const example: string[] = []
   let inExample = false
   let exampleFence = false
-  const commentLines = preceding
-    .slice(commentStart + 3, commentEnd)
+  const commentLines = comment
     .split(/\r?\n/)
     .map(value => value.replace(/^\s*\* ?/, ''))
   for (let i = 0, { length } = commentLines; i < length; i += 1) {
@@ -237,6 +231,19 @@ export function extractDeclarationDocumentation(
     description: description.join(' ').trim(),
     example: trimBlankLines(example.join('\n')),
   }
+}
+
+function adjacentDocumentationComment(preceding: string): string | undefined {
+  const commentStart = preceding.lastIndexOf('/**')
+  const commentEnd = preceding.indexOf('*/', commentStart)
+  if (commentStart < 0 || commentEnd < 0) {
+    return undefined
+  }
+  const suffix = preceding.slice(commentEnd + 2)
+  if (!/^(?:\s+[A-Za-z]+)*\s*$/.test(suffix)) {
+    return undefined
+  }
+  return preceding.slice(commentStart + 3, commentEnd)
 }
 
 function sourceNode(source: string, node: AstNode): string {
