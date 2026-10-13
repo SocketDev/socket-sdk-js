@@ -1438,6 +1438,7 @@ const ALWAYS_TRACKED_PREFIXES = [
   'scripts/fleet/npm/scan/staged.mts',
   'scripts/fleet/registry/npm/scan/ndjson.mts',
   'scripts/fleet/registry/npm/scan/run.mts',
+  'scripts/fleet/registry/npm/staged.mts',
   'scripts/fleet/setup/bootstrap/zero-dep-packages.mjs',
   'scripts/fleet/setup/lib/check/sfw.mjs',
   'scripts/fleet/setup/lib/error-message.mjs',

@@ -46,7 +46,7 @@ import {
   stagedIndexIsEmpty,
   stripTemplateLayer,
   suppressionFor,
-} from '../_shared/helpers.mts'
+} from '../_shared/util.mts'
 
 const logger = getDefaultLogger()
 
@@ -63,7 +63,7 @@ function refuseCatastrophicDeletion(): number {
   // excluded before the count, so it needs no bypass either. A surgical
   // `git commit --only <paths>` sees ONLY the named paths, never a foreign
   // deletion staged elsewhere in the working index — see
-  // catastrophicDeletionReason's comment in _shared/helpers.mts for the
+  // catastrophicDeletionReason's comment in _shared/util.mts for the
   // verified GIT_INDEX_FILE scoping this relies on.
   const wipeReason = catastrophicDeletionReason()
   if (wipeReason) {

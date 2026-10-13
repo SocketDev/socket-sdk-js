@@ -3,39 +3,122 @@ export const NPM_SCAN_RECEIPT_FILE = 'npm-stage-scan-receipt.json'
 const SHA_RE = /^[a-f0-9]{40}$/u
 const STAGE_ID_RE = /^[0-9a-f-]{36}$/u
 
+export interface NpmPublishSourceEvidence {
+  kind: 'committed' | 'prepared' | 'resumed'
+  prefix: string
+}
+
+export function parseNpmPublishSourceEvidence(config: {
+  logs: string
+  version?: string | undefined
+}): NpmPublishSourceEvidence {
+  // These patterns match the source receipts emitted by the publish workflow.
+  const committed = [
+    ...config.logs.matchAll(
+      /^.*\[bump\].* committed ([a-f\d]{7,40}) .*via the release App\.$/gmu,
+    ),
+  ].map(match => match[1]!)
+  const resumed = [
+    ...config.logs.matchAll(
+      /^.*\[bump\] resuming reserved \S+ from ([a-f\d]{7,40})\.$/gmu,
+    ),
+  ].map(match => match[1]!)
+  const preparedVersions = [
+    ...config.logs.matchAll(
+      /^.*Bump already applied: releasing prepared version (\d+\.\d+\.\d+)\.$/gmu,
+    ),
+  ].map(match => match[1]!)
+  const ordinary = [
+    ...committed.map(prefix => ({
+      __proto__: null,
+      kind: 'committed' as const,
+      prefix,
+    })),
+    ...resumed.map(prefix => ({
+      __proto__: null,
+      kind: 'resumed' as const,
+      prefix,
+    })),
+  ]
+  if (ordinary.length > 0) {
+    const unique = [
+      ...new Map(
+        ordinary.map(evidence => [
+          `${evidence.kind}:${evidence.prefix}`,
+          evidence,
+        ]),
+      ).values(),
+    ]
+    if (unique.length !== 1 || preparedVersions.length > 0) {
+      throw new Error(
+        'Publish logs do not contain one unique reserved source commit.',
+      )
+    }
+    return unique[0]!
+  }
+  const preparedVersion = preparedVersions[0]
+  const expectedVersion = config.version ?? preparedVersion
+  // A prepared release has no bump commit, so require its matching branch line.
+  const branchMarkers = [
+    ...config.logs.matchAll(
+      /^.*\[release-branch\] opened npm-publish-v(\d+\.\d+\.\d+) at ([a-f\d]{7,40})\.$/gmu,
+    ),
+  ].filter(match => match[1] === expectedVersion)
+  if (
+    preparedVersions.length !== 1 ||
+    (config.version !== undefined && preparedVersion !== config.version) ||
+    branchMarkers.length !== 1
+  ) {
+    throw new Error(
+      'Publish logs do not contain one unique reserved source commit.',
+    )
+  }
+  return { kind: 'prepared', prefix: branchMarkers[0]![2]! }
+}
+
+export function verifyNpmPreparedSourceBinding(config: {
+  runHead: string
+  sourceSha: string
+}): void {
+  if (
+    !/^[a-f\d]{40}$/iu.test(config.sourceSha) ||
+    config.sourceSha !== config.runHead
+  ) {
+    throw new Error(
+      'Prepared release source does not match the publish workflow head.',
+    )
+  }
+}
+
 export function verifyNpmScanSourceBinding(config: {
   sourceSha: string
   runHead: string
   parents: readonly string[]
   logs: string
+  version?: string | undefined
 }): void {
-  const committed = [
-    ...config.logs.matchAll(
-      // Match a complete bump receipt, allowing the logger prefix and capturing its commit SHA.
-      /^(?:✔ )?\[bump\].* committed ([0-9a-f]{7,40}) .*via the release App\.$/gmu,
-    ),
-  ].map(match => match[1]!)
-  const resumed = [
-    ...config.logs.matchAll(
-      /^\[bump\] resuming reserved \S+ from ([0-9a-f]{7,40})\.$/gmu,
-    ),
-  ].map(match => match[1]!)
-  const prefixes = [...new Set([...committed, ...resumed])]
+  const evidence = parseNpmPublishSourceEvidence({
+    logs: config.logs,
+    version: config.version,
+  })
   if (
     !SHA_RE.test(config.sourceSha) ||
     !SHA_RE.test(config.runHead) ||
-    prefixes.length !== 1 ||
-    !config.sourceSha.startsWith(prefixes[0]!)
+    !config.sourceSha.startsWith(evidence.prefix)
   ) {
     throw new Error(
       'Scan source has no unique release receipt in the original publish run.',
     )
   }
+  if (evidence.kind === 'prepared') {
+    verifyNpmPreparedSourceBinding(config)
+    return
+  }
   if (config.sourceSha === config.runHead) {
     return
   }
   if (
-    resumed.length &&
+    evidence.kind === 'resumed' &&
     config.logs.split(/\r?\n/).includes(`[reserved-source] ${config.sourceSha}`)
   ) {
     return
@@ -45,7 +128,7 @@ export function verifyNpmScanSourceBinding(config: {
     'mu',
   )
   if (
-    committed.length &&
+    evidence.kind === 'committed' &&
     config.parents.length === 1 &&
     config.parents[0] === config.runHead &&
     fetched.test(config.logs)
