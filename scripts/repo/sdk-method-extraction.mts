@@ -105,12 +105,17 @@ export function readSdkMethodMetadata(
   const quota = jsdoc.match(/@quota\s+(?<quota>\d+)\s*units?/)?.groups?.[
     'quota'
   ]
-  const summary =
-    jsdoc
-      .replace(/^\/\*\*|\*\/$/g, '')
-      .split(/\r?\n/)
-      .map(line => line.replace(/^\s*\*\s?/, '').trim())
-      .find(line => line && !line.startsWith('@')) ?? ''
+  const descriptionLines = jsdoc
+    .replace(/^\/\*\*|\*\/$/g, '')
+    .split(/\r?\n/)
+    .map(line => line.replace(/^\s*\*\s?/, '').trimEnd())
+  const descriptionEnd = descriptionLines.findIndex(line =>
+    line.startsWith('@'),
+  )
+  const summary = descriptionLines
+    .slice(0, descriptionEnd < 0 ? undefined : descriptionEnd)
+    .join('\n')
+    .trim()
   return {
     summary,
     operationId: hadOperationIdNone ? undefined : (operationTag ?? generic),

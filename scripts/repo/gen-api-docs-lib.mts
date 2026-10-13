@@ -41,6 +41,14 @@ export interface MethodInfo {
   permissions: string[]
 }
 
+export interface PublicExport {
+  name: string
+  kind: 'value' | 'type'
+  modulePath: string
+  declaration: string
+  moduleOnly?: boolean | undefined
+}
+
 /**
  * Extract public ordinary, async, and generator methods from the SocketSdk
  * class and attach adjacent JSDoc metadata.
@@ -86,10 +94,54 @@ export function loadQuotaData(): QuotaData {
   return JSON.parse(readFileSync(dataPath, 'utf8')) as QuotaData
 }
 
+export function extractPublicExports(source: string): PublicExport[] {
+  const exports: PublicExport[] = []
+  const pattern = /export\s+(type\s+)?\{([\s\S]*?)\}\s+from\s+'([^']+)'/g
+  for (const match of source.matchAll(pattern)) {
+    const isType = match[1] !== undefined
+    const names = match[2] ?? ''
+    const modulePath = match[3] ?? ''
+    for (const item of names.split(',')) {
+      const normalized = item.trim().replace(/^type\s+/, '')
+      const name = normalized
+        .split(/\s+as\s+/)
+        .at(-1)
+        ?.trim()
+      if (name) {
+        exports.push({
+          name,
+          kind: isType || item.trim().startsWith('type ') ? 'type' : 'value',
+          modulePath,
+          declaration: normalized.split(/\s+as\s+/)[0]?.trim() ?? name,
+        })
+      }
+    }
+  }
+  const starPattern = /export\s+type\s+\*\s+from\s+'([^']+)'/g
+  for (const match of source.matchAll(starPattern)) {
+    const modulePath = match[1]
+    if (!modulePath) {
+      continue
+    }
+    exports.push({
+      name: `All types from ${modulePath}`,
+      kind: 'type',
+      modulePath,
+      declaration: '',
+      moduleOnly: true,
+    })
+  }
+  return exports.toSorted((a, b) => a.name.localeCompare(b.name))
+}
+
 /**
  * Render the full markdown document from extracted methods.
  */
-export function renderApiDocs(methods: MethodInfo[]): string {
+export function renderApiDocs(
+  methods: MethodInfo[],
+  publicExports: PublicExport[] = [],
+  indexDescription = '',
+): string {
   const byName = new Map(methods.map(m => [m.name, m]))
   const sections: string[] = []
   sections.push('<!--')
@@ -101,8 +153,12 @@ export function renderApiDocs(methods: MethodInfo[]): string {
   sections.push('# API Reference')
   sections.push('')
   sections.push(
-    'Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).',
+    'Public SDK class methods, exported values, and types. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).',
   )
+  if (indexDescription) {
+    sections.push('')
+    sections.push(indexDescription)
+  }
   sections.push('')
   sections.push(`There are **${methods.length}** public methods.`)
   sections.push('')
@@ -158,6 +214,22 @@ export function renderApiDocs(methods: MethodInfo[]): string {
       sections.push(renderMethod(m))
     }
   }
+
+  sections.push('## Package exports')
+  sections.push('')
+  sections.push(
+    'Values and types exported from `src/index.mts`. Source links point to their declaration modules. See the linked declarations for signatures, fields, and type relationships.',
+  )
+  sections.push('')
+  sections.push('| Export | Kind | Declaration |')
+  sections.push('| --- | --- | --- |')
+  for (const item of publicExports) {
+    const fragment = item.moduleOnly ? '' : `#${item.declaration.toLowerCase()}`
+    sections.push(
+      `| \`${item.name}\` | ${item.kind} | [${item.modulePath}](../src/${item.modulePath.replace('./', '')}${fragment}) |`,
+    )
+  }
+  sections.push('')
 
   return (
     sections

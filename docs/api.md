@@ -6,9 +6,11 @@
 
 # API Reference
 
-Every public method on `SocketSdk`, grouped by domain. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
+Public SDK class methods, exported values, and types. For the runtime model (result shape, pagination, file uploads, escape hatches), see [SDK Concepts](./concepts.md). For quota planning, see [Quota Management](./quota-management.md).
 
-There are **135** public methods.
+Main entry point for the Socket SDK. Provides the SocketSdk class and utility functions for Socket security analysis API interactions.
+
+There are **137** public methods.
 
 ## Contents
 
@@ -45,6 +47,14 @@ Create, fetch, list, and delete organization-level full security scans.
 
 Create a full security scan for an organization.
 
+Uploads project manifest files and initiates full security analysis.
+Returns scan metadata with guaranteed required fields.
+
+Transparently attempts the v1 content-addressed blob-cache path first; that
+attempt may issue additional HTTP requests (manifest post, blob uploads)
+before the scan is created, observable through the `onRequest`/`onResponse`
+hooks, before falling back to the v0 multipart upload.
+
 ```typescript
 async createFullScan(
   orgSlug: string,
@@ -58,6 +68,10 @@ async createFullScan(
 ### `createFullScanFromManifest`
 
 Create a full scan from a pre-built content-addressed manifest (v1 API,
+internal preview — hidden from the public OpenAPI spec). A 201 means the
+scan was created outright; a 202 means one or more manifest entries are
+unknown to the org's blob store — upload the blobs named in
+`data.missing` via `uploadBlobs`, then re-post the same manifest.
 
 ```typescript
 async createFullScanFromManifest(
@@ -72,6 +86,7 @@ async createFullScanFromManifest(
 ### `createOrgFullScanFromArchive`
 
 Create a full scan from an archive file (.tar, .tar.gz/.tgz, or .zip).
+Uploads and scans a compressed archive of project files.
 
 <details>
 <summary>Signature</summary>
@@ -112,6 +127,10 @@ async createOrgFullScanFromArchive(
 ### `uploadBlobs`
 
 Upload blobs to an organization's content-addressed blob store (v1 API,
+internal preview — hidden from the public OpenAPI spec). Each entry's
+hash is computed from `localPath` when omitted; `name` is diagnostics-
+only metadata (defaults to the file's basename). Idempotent: re-uploading
+an already-stored digest reports it under `already_existed`.
 
 ```typescript
 async uploadBlobs(
@@ -125,6 +144,9 @@ async uploadBlobs(
 ### `getFullScan`
 
 Get complete full scan results buffered in memory.
+
+Returns entire scan data as JSON for programmatic processing. For large
+scans, consider using streamFullScan() instead.
 
 ```typescript
 async getFullScan(
@@ -173,6 +195,10 @@ async pollOrgFullScanV1(
 
 Get metadata for a specific full scan.
 
+Returns scan configuration, status, and summary information without full
+artifact data. Useful for checking scan status without downloading complete
+results.
+
 ```typescript
 async getFullScanMetadata(
   orgSlug: string,
@@ -186,6 +212,9 @@ async getFullScanMetadata(
 
 List all full scans for an organization.
 
+Returns paginated list of full scan metadata with guaranteed required
+fields for improved TypeScript autocomplete.
+
 ```typescript
 async listFullScans(
   orgSlug: string,
@@ -198,6 +227,11 @@ async listFullScans(
 ### `streamFullScan`
 
 Stream a full scan's results to a file, to stdout, or to the caller.
+
+The response body is never buffered: the request resolves as soon as the
+headers arrive, and the body is piped straight to the destination. Without
+an `output` the body is left unread on `data.rawResponse` for the caller to
+pipe or iterate — read or destroy that stream, or the socket stays open.
 
 ```typescript
 async streamFullScan(
@@ -213,6 +247,9 @@ async streamFullScan(
 
 Download full scan files as a tar archive.
 
+Streams the full scan file contents to the specified output path as a tar
+file. Includes size limit enforcement to prevent excessive disk usage.
+
 ```typescript
 async downloadOrgFullScanFilesAsTar(
   orgSlug: string,
@@ -226,6 +263,7 @@ async downloadOrgFullScanFilesAsTar(
 ### `getOrgFullScanCsv`
 
 Export a full scan's alerts as CSV. The endpoint responds with raw
+`text/csv`, so the result data is the CSV text rather than a parsed object.
 
 ```typescript
 async getOrgFullScanCsv(
@@ -240,6 +278,7 @@ async getOrgFullScanCsv(
 ### `getOrgFullScanPdf`
 
 Export a full scan's alerts as a PDF report. The endpoint responds with raw
+`application/pdf`, so the result data is the PDF bytes as a Buffer.
 
 ```typescript
 async getOrgFullScanPdf(
@@ -254,6 +293,7 @@ async getOrgFullScanPdf(
 ### `rescanFullScan`
 
 Create a new full scan by rescanning an existing scan. Supports shallow
+(policy reapplication) and deep (dependency resolution rerun) modes.
 
 ```typescript
 async rescanFullScan(
@@ -273,6 +313,8 @@ async rescanFullScan(
 
 Delete a full scan from an organization.
 
+Permanently removes scan data and results.
+
 ```typescript
 async deleteFullScan(
   orgSlug: string,
@@ -289,6 +331,7 @@ Compare two scans and inspect the diff.
 ### `createOrgDiffScanFromIds`
 
 Create a diff scan from two full scan IDs. Compares two existing full scans
+to identify changes.
 
 ```typescript
 async createOrgDiffScanFromIds(
@@ -309,6 +352,8 @@ async createOrgDiffScanFromIds(
 ### `createOrgRepoDiff`
 
 Create a diff scan between a repository's current HEAD full scan and a new
+full scan built from the uploaded manifest files. Returns metadata about
+the new full scan and the diff scan.
 
 ```typescript
 async createOrgRepoDiff(
@@ -324,6 +369,15 @@ async createOrgRepoDiff(
 ### `getDiffScanById`
 
 Get details for a specific diff scan. Returns comparison between two full
+scans with artifact changes.
+
+Reads from the immutable cached-scan store by default (`cached: true`). On
+a cache miss the API returns 202 Accepted and computes the result in the
+background; this method polls transparently until the result is ready, so
+callers only ever observe the final comparison. Pass `cached: false` to
+bypass the cache and live-compute the diff (slower, for debugging). When
+`cached` is true the `omit_license_details` option is ignored server-side —
+cached results always include license details.
 
 ```typescript
 async getDiffScanById(
@@ -344,6 +398,7 @@ async getDiffScanById(
 ### `getDiffScanGfm`
 
 Get GitHub-flavored markdown comments for a diff scan. Returns dependency
+overview and alert comments suitable for pull requests.
 
 ```typescript
 async getDiffScanGfm(
@@ -358,6 +413,7 @@ async getDiffScanGfm(
 ### `listOrgDiffScans`
 
 List all diff scans for an organization. Returns paginated list of diff
+scan metadata and status.
 
 ```typescript
 async listOrgDiffScans(
@@ -370,6 +426,7 @@ async listOrgDiffScans(
 ### `deleteOrgDiffScan`
 
 Delete a diff scan from an organization. Permanently removes diff scan data
+and results.
 
 ```typescript
 async deleteOrgDiffScan(
@@ -387,6 +444,8 @@ Manage repositories tracked by the organization.
 ### `createRepository`
 
 Create a new repository in an organization.
+
+Registers a repository for monitoring and security scanning.
 
 ```typescript
 async createRepository(
@@ -411,6 +470,8 @@ async createRepository(
 
 Get details for a specific repository.
 
+Returns repository configuration, monitoring status, and metadata.
+
 ```typescript
 async getRepository(
   orgSlug: string,
@@ -425,6 +486,9 @@ async getRepository(
 
 List all repositories in an organization.
 
+Returns paginated list of repository metadata with guaranteed required
+fields.
+
 ```typescript
 async listRepositories(
   orgSlug: string,
@@ -437,6 +501,8 @@ async listRepositories(
 ### `updateRepository`
 
 Update configuration for a repository.
+
+Modifies monitoring settings, branch configuration, and scan preferences.
 
 ```typescript
 async updateRepository(
@@ -452,6 +518,8 @@ async updateRepository(
 ### `deleteRepository`
 
 Delete a repository from an organization.
+
+Removes repository monitoring and associated scan data.
 
 ```typescript
 async deleteRepository(
@@ -471,6 +539,9 @@ Per-repo labels for filtering and grouping.
 
 Create a new repository label for an organization.
 
+Labels can be used to group and organize repositories and apply
+security/license policies.
+
 ```typescript
 async createRepositoryLabel(
   orgSlug: string,
@@ -483,6 +554,8 @@ async createRepositoryLabel(
 ### `getRepositoryLabel`
 
 Get details for a specific repository label.
+
+Returns label configuration, associated repositories, and policy settings.
 
 ```typescript
 async getRepositoryLabel(
@@ -497,6 +570,9 @@ async getRepositoryLabel(
 
 List all repository labels for an organization.
 
+Returns paginated list of labels configured for repository organization and
+policy management.
+
 ```typescript
 async listRepositoryLabels(
   orgSlug: string,
@@ -509,6 +585,9 @@ async listRepositoryLabels(
 ### `updateRepositoryLabel`
 
 Update a repository label for an organization.
+
+Modifies label properties like name. Label names must be non-empty and less
+than 1000 characters.
 
 ```typescript
 async updateRepositoryLabel(
@@ -523,6 +602,9 @@ async updateRepositoryLabel(
 ### `deleteRepositoryLabel`
 
 Delete a repository label from an organization.
+
+Removes label and all its associations (repositories, security policy,
+license policy, etc.).
 
 ```typescript
 async deleteRepositoryLabel(
@@ -578,6 +660,7 @@ async getOrgRepoLabelSetting(
 ### `updateOrgRepoLabelSetting`
 
 Update the settings for a repository label. Accepts the structured
+issue-rules body defined by the API.
 
 ```typescript
 async updateOrgRepoLabelSetting(
@@ -611,6 +694,9 @@ Org listing, analytics, and entitlements.
 
 List all organizations accessible to the current user.
 
+Returns organization details and access permissions with guaranteed
+required fields.
+
 ```typescript
 async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult>
 ```
@@ -620,6 +706,7 @@ async listOrganizations(): Promise<OrganizationsResult | StrictErrorResult>
 ### `getOrgAnalytics`
 
 Get analytics data for organization usage patterns and security metrics.
+Returns statistical analysis for specified time period.
 
 ```typescript
 async getOrgAnalytics(
@@ -632,6 +719,7 @@ async getOrgAnalytics(
 ### `getRepoAnalytics`
 
 Get analytics data for a specific repository. Returns security metrics,
+dependency trends, and vulnerability statistics.
 
 ```typescript
 async getRepoAnalytics(
@@ -646,6 +734,10 @@ async getRepoAnalytics(
 
 Retrieve the enabled entitlements for an organization.
 
+This method fetches the organization's entitlements and filters for only
+the enabled ones, returning their keys. Entitlements represent Socket
+Products that the organization has access to use.
+
 ```typescript
 async getEnabledEntitlements(orgSlug: string): Promise<string[]>
 ```
@@ -655,6 +747,10 @@ async getEnabledEntitlements(orgSlug: string): Promise<string[]>
 ### `getEntitlements`
 
 Retrieve all entitlements for an organization.
+
+This method fetches all entitlements for an organization and returns the
+complete list with their status. The result covers both enabled and
+disabled entitlements.
 
 ```typescript
 async getEntitlements(orgSlug: string): Promise<Entitlement[]>
@@ -669,6 +765,7 @@ Surface and triage alerts across an organization.
 ### `getOrgAlertsList`
 
 List latest alerts for an organization (Beta). Returns paginated alerts
+with comprehensive filtering options.
 
 <details>
 <summary>Signature</summary>
@@ -731,6 +828,7 @@ async getOrgAlertsList(
 ### `getOrgAlertFullScans`
 
 List full scans associated with a specific alert. Returns paginated full
+scan references for alert investigation.
 
 ```typescript
 async getOrgAlertFullScans(
@@ -749,6 +847,7 @@ async getOrgAlertFullScans(
 ### `getOrgAlertResolutions`
 
 List active alert resolutions for an organization. Results are
+paginated via an opaque cursor and ordered by created_at.
 
 ```typescript
 async getOrgAlertResolutions(
@@ -782,6 +881,7 @@ async createOrgAlertResolution(
 ### `getOrgAlertResolution`
 
 Fetch a single active alert resolution by UUID. Returns the same row
+shape as the list endpoint.
 
 ```typescript
 async getOrgAlertResolution(
@@ -795,6 +895,7 @@ async getOrgAlertResolution(
 ### `deleteOrgAlertResolution`
 
 Delete an alert resolution by UUID. Once deleted, alerts previously
+hidden by this resolution reappear after the next org snapshot.
 
 ```typescript
 async deleteOrgAlertResolution(
@@ -808,6 +909,7 @@ async deleteOrgAlertResolution(
 ### `getOrgTriage`
 
 Get organization triage settings and status. Returns alert triage
+configuration and current state.
 
 ```typescript
 async getOrgTriage(
@@ -820,6 +922,7 @@ async getOrgTriage(
 ### `updateOrgAlertTriage`
 
 Update alert triage status for an organization. Modifies alert resolution
+status and triage decisions.
 
 ```typescript
 async updateOrgAlertTriage(
@@ -834,6 +937,7 @@ async updateOrgAlertTriage(
 ### `deleteOrgAlertTriage`
 
 Delete a triage entry for a specific alert in an organization. Removes the
+triage record identified by its UUID.
 
 ```typescript
 async deleteOrgAlertTriage(
@@ -847,6 +951,7 @@ async deleteOrgAlertTriage(
 ### `getOrgFixes`
 
 Fetch available fixes for vulnerabilities in a repository or scan. Returns
+fix recommendations including version upgrades and update types.
 
 ```typescript
 async getOrgFixes(
@@ -890,6 +995,7 @@ Point-in-time alert and dependency history, trends, and snapshots.
 ### `historicalAlertsList`
 
 List historical alerts for an organization. Returns point-in-time alert
+data across repositories with extensive filtering and cursor pagination.
 
 ```typescript
 async historicalAlertsList(
@@ -903,6 +1009,7 @@ async historicalAlertsList(
 ### `historicalAlertsTrend`
 
 Get a trend of historical alert counts for an organization. Returns
+aggregated alert totals over the requested time range.
 
 ```typescript
 async historicalAlertsTrend(
@@ -916,6 +1023,7 @@ async historicalAlertsTrend(
 ### `historicalDependenciesTrend`
 
 Get a trend of historical dependency counts for an organization. Returns
+aggregated dependency totals over the requested time range.
 
 ```typescript
 async historicalDependenciesTrend(
@@ -929,6 +1037,7 @@ async historicalDependenciesTrend(
 ### `historicalSnapshotsList`
 
 List historical dependency snapshots for an organization. Returns snapshot
+metadata with status filtering and cursor pagination.
 
 ```typescript
 async historicalSnapshotsList(
@@ -942,6 +1051,7 @@ async historicalSnapshotsList(
 ### `historicalSnapshotsStart`
 
 Start a new historical dependency snapshot for an organization. Triggers
+the background computation of a point-in-time dependency snapshot.
 
 ```typescript
 async historicalSnapshotsStart(
@@ -958,6 +1068,7 @@ Manage outbound webhooks for organization events.
 ### `createOrgWebhook`
 
 Create a new webhook for an organization. Webhooks allow you to receive
+HTTP POST notifications when specific events occur.
 
 ```typescript
 async createOrgWebhook(
@@ -979,6 +1090,7 @@ async createOrgWebhook(
 ### `getOrgWebhook`
 
 Get details of a specific webhook. Returns webhook configuration including
+events, URL, and filters.
 
 ```typescript
 async getOrgWebhook(
@@ -992,6 +1104,7 @@ async getOrgWebhook(
 ### `getOrgWebhooksList`
 
 List all webhooks for an organization. Supports pagination and sorting
+options.
 
 ```typescript
 async getOrgWebhooksList(
@@ -1012,6 +1125,7 @@ async getOrgWebhooksList(
 ### `updateOrgWebhook`
 
 Update an existing webhook's configuration. All fields are optional - only
+provided fields will be updated.
 
 ```typescript
 async updateOrgWebhook(
@@ -1034,6 +1148,7 @@ async updateOrgWebhook(
 ### `deleteOrgWebhook`
 
 Delete a webhook from an organization. This will stop all future webhook
+deliveries to the webhook URL.
 
 ```typescript
 async deleteOrgWebhook(
@@ -1052,6 +1167,9 @@ Browse and download Socket security patches.
 
 View detailed information about a specific patch by its UUID.
 
+This method retrieves comprehensive patch details including files,
+vulnerabilities, description, license, and tier information.
+
 ```typescript
 async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse>
 ```
@@ -1061,6 +1179,11 @@ async viewPatch(orgSlug: string, uuid: string): Promise<PatchViewResponse>
 ### `downloadPatch`
 
 Download patch file content from Socket blob storage. Retrieves patched
+file contents using SSRI hash or hex hash.
+
+This is a low-level utility method - you'll typically use this after
+calling `viewPatch()` to get patch metadata, then download individual
+patched files.
 
 ```typescript
 async downloadPatch(
@@ -1088,6 +1211,16 @@ async downloadOrgPatchVerificationBundle(
 
 Stream patches for artifacts in a scan report.
 
+This method streams all available patches for artifacts in a scan. Free
+tier users will only receive free patches.
+
+The returned ReadableStream is pull-driven: each `read()` parses only as
+much of the NDJSON response as that record needs, so the first record is
+available before the API has finished sending, a slow consumer applies
+backpressure to the socket, and the full dataset is never resident. A
+transport that cannot expose the response stream (the browser build's
+`fetch` backend) falls back to reading the buffered body.
+
 ```typescript
 async streamPatchesFromScan(
   orgSlug: string,
@@ -1104,6 +1237,7 @@ Provision, rotate, and revoke API tokens for the organization.
 ### `getAPITokens`
 
 Get list of API tokens for an organization. Returns organization API tokens
+with metadata and permissions.
 
 ```typescript
 async getAPITokens(
@@ -1116,6 +1250,7 @@ async getAPITokens(
 ### `postAPIToken`
 
 Create a new API token for an organization. Generates API token with
+specified scopes and metadata.
 
 ```typescript
 async postAPIToken(
@@ -1129,6 +1264,7 @@ async postAPIToken(
 ### `postAPITokenUpdate`
 
 Update an existing API token for an organization. Modifies token metadata,
+scopes, or other properties.
 
 ```typescript
 async postAPITokenUpdate(
@@ -1143,6 +1279,7 @@ async postAPITokenUpdate(
 ### `postAPITokensRotate`
 
 Rotate an API token for an organization. Generates new token value while
+preserving token metadata.
 
 ```typescript
 async postAPITokensRotate(
@@ -1156,6 +1293,7 @@ async postAPITokensRotate(
 ### `postAPITokensRevoke`
 
 Revoke an API token for an organization. Permanently disables the token and
+removes access.
 
 ```typescript
 async postAPITokensRevoke(
@@ -1339,6 +1477,7 @@ async translateOrgAlertPolicyMigrationTriage(
 ### `getOrgLicensePolicy`
 
 Get organization's license policy configuration. Returns allowed,
+restricted, and monitored license types.
 
 ```typescript
 async getOrgLicensePolicy(
@@ -1351,6 +1490,7 @@ async getOrgLicensePolicy(
 ### `updateOrgLicensePolicy`
 
 Update organization's license policy configuration. Modifies allowed,
+restricted, and monitored license types.
 
 ```typescript
 async updateOrgLicensePolicy(
@@ -1365,6 +1505,7 @@ async updateOrgLicensePolicy(
 ### `viewLicensePolicy`
 
 View an organization's computed license policy allow list (Beta). Returns
+the saturated license policy for the organization.
 
 ```typescript
 async viewLicensePolicy(
@@ -1377,6 +1518,8 @@ async viewLicensePolicy(
 ### `licensePolicy`
 
 Compute license policy violations for a set of packages (Beta). The
+endpoint streams newline-delimited JSON, which this method parses into an
+array of violation records.
 
 ```typescript
 async licensePolicy(
@@ -1389,6 +1532,7 @@ async licensePolicy(
 ### `getOrgSecurityPolicy`
 
 Get organization's security policy configuration. Returns alert rules,
+severity thresholds, and enforcement settings.
 
 ```typescript
 async getOrgSecurityPolicy(
@@ -1401,6 +1545,7 @@ async getOrgSecurityPolicy(
 ### `updateOrgSecurityPolicy`
 
 Update organization's security policy configuration. Modifies alert rules,
+severity thresholds, and enforcement settings.
 
 ```typescript
 async updateOrgSecurityPolicy(
@@ -1414,6 +1559,7 @@ async updateOrgSecurityPolicy(
 ### `postSettings`
 
 Update user or organization settings. Configures preferences,
+notifications, and security policies.
 
 ```typescript
 async postSettings(
@@ -1459,6 +1605,7 @@ Inspect and configure organization telemetry.
 ### `getOrgTelemetryConfig`
 
 Get organization's telemetry configuration. Returns whether telemetry is
+enabled for the organization.
 
 ```typescript
 async getOrgTelemetryConfig(
@@ -1471,6 +1618,7 @@ async getOrgTelemetryConfig(
 ### `updateOrgTelemetryConfig`
 
 Update organization's telemetry configuration. Enables or disables
+telemetry for the organization.
 
 ```typescript
 async updateOrgTelemetryConfig(
@@ -1484,6 +1632,7 @@ async updateOrgTelemetryConfig(
 ### `postOrgTelemetry`
 
 Post telemetry data for an organization. Sends telemetry events and
+analytics data for monitoring and analysis.
 
 ```typescript
 async postOrgTelemetry(
@@ -1501,6 +1650,7 @@ Fetch organization audit log events.
 ### `getAuditLogEvents`
 
 Retrieve audit log events for an organization. Returns chronological log of
+security and administrative actions.
 
 ```typescript
 async getAuditLogEvents(
@@ -1518,6 +1668,11 @@ Browse supply chain attack campaigns and the packages they affect.
 ### `listThreatCampaigns`
 
 List threat campaigns for an organization (v1 API, public route),
+paginated and filterable by status, ecosystem, and an incremental sync
+parameter (`updated_after`). Package PURLs are not inlined — fetch them
+per campaign via `listThreatCampaignPackages`. Requires an Enterprise
+plan with the Threat Feed add-on and the `threat-campaigns:list` token
+scope.
 
 ```typescript
 async listThreatCampaigns(
@@ -1531,6 +1686,9 @@ async listThreatCampaigns(
 ### `getThreatCampaign`
 
 Get a single threat campaign by ID (v1 API, public route). Same shape as
+one item from `listThreatCampaigns`; package PURLs are not inlined —
+fetch them via `listThreatCampaignPackages`. Requires an Enterprise plan
+with the Threat Feed add-on and the `threat-campaigns:list` token scope.
 
 ```typescript
 async getThreatCampaign(
@@ -1544,6 +1702,9 @@ async getThreatCampaign(
 ### `listThreatCampaignPackages`
 
 List package PURLs affected by a single threat campaign (v1 API, public
+route), cursor-paginated. Pass the previous response's `endCursor` back
+as `options.cursor` to fetch the next page. Requires an Enterprise plan
+with the Threat Feed add-on and the `threat-campaigns:list` token scope.
 
 ```typescript
 async listThreatCampaignPackages(
@@ -1562,6 +1723,8 @@ Ingest organization telemetry events.
 ### `postEvents`
 
 Post organization events for telemetry ingestion (v1 API, public route).
+Send events directly to Socket; an empty batch is accepted as a no-op.
+Requires an organization API token (any scope).
 
 ```typescript
 async postEvents(
@@ -1579,6 +1742,7 @@ Per-package and batch package analysis.
 ### `getScoreByNpmPackage`
 
 Get security score for a specific npm package and version. Returns
+numerical security rating and scoring breakdown.
 
 ```typescript
 async getScoreByNpmPackage(
@@ -1592,6 +1756,7 @@ async getScoreByNpmPackage(
 ### `getIssuesByNpmPackage`
 
 Get security issues for a specific npm package and version. Returns
+detailed vulnerability and security alert information.
 
 ```typescript
 async getIssuesByNpmPackage(
@@ -1605,6 +1770,7 @@ async getIssuesByNpmPackage(
 ### `batchPackageFetch`
 
 Fetch package analysis data for multiple packages in a single batch
+request. Returns all results at once after processing is complete.
 
 ```typescript
 async batchPackageFetch(
@@ -1618,6 +1784,8 @@ async batchPackageFetch(
 ### `batchOrgPackageFetch`
 
 Get package metadata and alerts by PURL strings for a specific
+organization. Organization-scoped version of batchPackageFetch with
+security policy label support.
 
 ```typescript
 async batchOrgPackageFetch(
@@ -1660,6 +1828,8 @@ async getOrgPurlVersions(
 ### `batchPackageStream`
 
 Stream package analysis data for multiple packages with chunked processing
+and concurrency control. Returns results as they become available via async
+generator.
 
 ```typescript
 batchPackageStream(
@@ -1673,6 +1843,7 @@ batchPackageStream(
 ### `checkMalware`
 
 Check every input PURL for malware. Incomplete analysis has an explicit
+status.
 
 ```typescript
 async checkMalware(
@@ -1685,6 +1856,7 @@ async checkMalware(
 ### `searchDependencies`
 
 Search for dependencies across monitored projects. Returns matching
+packages with security information and usage patterns.
 
 ```typescript
 async searchDependencies(
@@ -1701,6 +1873,7 @@ Upload manifests and snapshot dependency graphs.
 ### `uploadManifestFiles`
 
 Upload manifest files for dependency analysis. Processes package files to
+create dependency snapshots and security analysis.
 
 ```typescript
 async uploadManifestFiles(
@@ -1715,6 +1888,7 @@ async uploadManifestFiles(
 ### `createDependenciesSnapshot`
 
 Create a snapshot of project dependencies by uploading manifest files.
+Analyzes dependency files to generate a comprehensive security report.
 
 ```typescript
 async createDependenciesSnapshot(
@@ -1728,6 +1902,12 @@ async createDependenciesSnapshot(
 ### `getSupportedFiles`
 
 Get list of supported file types for full scan generation. Returns glob
+patterns for supported manifest files, lockfiles, and configuration
+formats.
+
+Files whose names match the patterns returned by this endpoint can be
+uploaded for report generation. Examples include `package.json`,
+`package-lock.json`, and `yarn.lock`.
 
 ```typescript
 async getSupportedFiles(
@@ -1744,6 +1924,7 @@ Export full scans in industry-standard formats.
 ### `exportCDX`
 
 Export scan results in CycloneDX SBOM format. Returns Software Bill of
+Materials compliant with CycloneDX standard.
 
 ```typescript
 async exportCDX(
@@ -1757,6 +1938,7 @@ async exportCDX(
 ### `exportSPDX`
 
 Export scan results in SPDX SBOM format. Returns Software Bill of Materials
+compliant with SPDX standard.
 
 ```typescript
 async exportSPDX(
@@ -1770,6 +1952,8 @@ async exportSPDX(
 ### `exportOpenVEX`
 
 Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
+Includes patch data and reachability analysis for vulnerability
+assessment.
 
 ```typescript
 async exportOpenVEX(
@@ -1794,6 +1978,7 @@ Inspect current API quota.
 ### `getQuota`
 
 Get current API quota usage and limits. Returns remaining requests, rate
+limits, and quota reset times.
 
 ```typescript
 async getQuota(): Promise<SocketSdkResult<'getQuota'>>
@@ -1808,6 +1993,8 @@ Alert-type and license metadata lookups.
 ### `alertTypes`
 
 Get metadata for a set of alert types. Accepts an array of alert type
+identifiers and returns human-readable metadata for each, optionally
+localized via the `language` query param.
 
 ```typescript
 async alertTypes(
@@ -1862,6 +2049,7 @@ Raw HTTP access for endpoints the SDK does not wrap.
 ### `getApi`
 
 Execute a raw GET request to any API endpoint with configurable response
+type. Supports both throwing (default) and non-throwing modes.
 
 ```typescript
 async getApi<T = HttpResponse>(
@@ -1875,6 +2063,7 @@ async getApi<T = HttpResponse>(
 ### `sendApi`
 
 Send POST or PUT request with JSON body and return parsed JSON response.
+Supports both throwing (default) and non-throwing modes.
 
 ```typescript
 async sendApi<T>(
@@ -1892,6 +2081,9 @@ Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/rep
 ### `getOrgThreatFeedItems`
 
 List threat-feed items for an organization. Returns recently observed
+malicious / suspicious packages, paginated and filterable by ecosystem,
+name, version, and review state. Requires an Enterprise plan with the
+Threat Feed add-on and the `threat-feed:list` scope.
 
 ```typescript
 async getOrgThreatFeedItems(
@@ -1905,6 +2097,11 @@ async getOrgThreatFeedItems(
 ### `getThreatFeedItems`
 
 List threat-feed items across all organizations the token can see. Returns
+recently observed malicious / suspicious packages, paginated and filterable
+by ecosystem, name, version, and review state.
+
+The backend marks the top-level `/threat-feed` route as the legacy form;
+prefer the org-scoped {@link getOrgThreatFeedItems}.
 
 ```typescript
 async getThreatFeedItems(
@@ -1917,6 +2114,9 @@ async getThreatFeedItems(
 ### `fetchPatchesByCVE`
 
 Search for available patches that fix a specific CVE.
+
+Returns a list of patches with high-level metadata (no blob content).
+Use `viewPatch()` to fetch full patch details including blob content.
 
 ```typescript
 async fetchPatchesByCVE(
@@ -1931,6 +2131,9 @@ async fetchPatchesByCVE(
 
 Search for available patches that fix a specific GHSA.
 
+Returns a list of patches with high-level metadata (no blob content).
+Use `viewPatch()` to fetch full patch details including blob content.
+
 ```typescript
 async fetchPatchesByGHSA(
   orgSlug: string,
@@ -1943,6 +2146,9 @@ async fetchPatchesByGHSA(
 ### `fetchPatchesByPackage`
 
 Search for available patches for a package specified by PURL.
+
+Returns a list of patches with high-level metadata (no blob content).
+Use `viewPatch()` to fetch full patch details including blob content.
 
 ```typescript
 async fetchPatchesByPackage(
@@ -1957,6 +2163,10 @@ async fetchPatchesByPackage(
 
 Search for available patches for multiple packages specified by PURL.
 
+Accepts a `components` array in CycloneDX SBOM format, where each
+component has a `purl` field, allowing direct upload of a CDX file's
+components array for batch scanning.
+
 ```typescript
 async fetchPatchesBatch(
   orgSlug: string,
@@ -1969,6 +2179,11 @@ async fetchPatchesBatch(
 ### `fetchPatchRecords`
 
 Fetch the metadata records of multiple patches by UUID in one request:
+the view-endpoint shape (serving PURL, publish date, vulnerabilities,
+per-file before/after hashes) WITHOUT file contents.
+
+Unknown or unpublished UUIDs are listed in `missing`; patches the
+organization is not entitled to are listed in `forbidden`.
 
 ```typescript
 async fetchPatchRecords(
@@ -1983,6 +2198,10 @@ async fetchPatchRecords(
 
 Get org-scoped download references for a batch of patches.
 
+Send a list of published-patch UUIDs. For each UUID the response
+returns either a stable, org-unique set of download references for the
+patched package, or a status explaining why no URL was issued.
+
 ```typescript
 async getPatchPackages(
   orgSlug: string,
@@ -1996,6 +2215,11 @@ async getPatchPackages(
 ### `patchPackageStats`
 
 High-level statistics for a batch of patch package references granted
+to this organization.
+
+Send a list of package references — each is the download URL, the
+grant token (the "patch key"), OR the patch UUID. Results are keyed by
+the reference string sent.
 
 ```typescript
 async patchPackageStats(
@@ -2009,6 +2233,11 @@ async patchPackageStats(
 ### `lookupPatchPackage`
 
 Look up the patch metadata behind a batch of patch package references
+granted to this organization.
+
+Send a list of package references — each is either the grant token
+(the "patch key") or the full download URL issued. Results are keyed
+by the reference string sent.
 
 ```typescript
 async lookupPatchPackage(
@@ -2022,6 +2251,9 @@ async lookupPatchPackage(
 ### `getPatchDiff`
 
 Download a compact per-file binary delta (bsdiff/BSDIFF40) archive for
+the patched files in this patch. The returned bytes are a `.tar.gz`
+whose entries are named verbatim by the manifest `file_path` and
+contain the BSDIFF40 bytes for that file.
 
 ```typescript
 async getPatchDiff(orgSlug: string, uuid: string): Promise<Uint8Array>
@@ -2032,9 +2264,217 @@ async getPatchDiff(orgSlug: string, uuid: string): Promise<Uint8Array>
 ### `getPatchBlob`
 
 Download a patch blob by its SHA256 content hash. Returns the raw
+binary content.
 
 ```typescript
 async getPatchBlob(orgSlug: string, hash: string): Promise<Uint8Array>
 ```
 
 **Quota:** `1` (1 units) · **OpenAPI:** `getPatchBlob`
+
+### `postOrgPackageChecks`
+
+Evaluate package versions with cached facts and the organization-default
+policy. This uses 100 quota units per request and does not start a scan.
+Pending, unknown, unsupported, and error rows remain in successful data.
+
+```typescript
+async postOrgPackageChecks(
+  orgSlug: string,
+  body: PostOrgPackageChecksBody,
+): ReturnType<typeof requestPostOrgPackageChecks>
+```
+
+**Quota:** _not tracked_
+
+### `postOrgPackageSummaries`
+
+Summarize cached package artifacts with organization-default policy
+decisions, scores, findings, coverage, and freshness. This uses 100 quota
+units per request and does not start a scan. Incomplete artifact results
+remain visible in successful data.
+
+```typescript
+async postOrgPackageSummaries(
+  orgSlug: string,
+  body: PostOrgPackageSummariesBody,
+): ReturnType<typeof requestPostOrgPackageSummaries>
+```
+
+**Quota:** _not tracked_
+
+## Package exports
+
+Values and types exported from `src/index.mts`. Source links point to their declaration modules. See the linked declarations for signatures, fields, and type relationships.
+
+| Export | Kind | Declaration |
+| --- | --- | --- |
+| `ALERT_ACTION` | type | [./types/core.mts](../src/types/core.mts#alert_action) |
+| `ALERT_TYPE` | type | [./types/core.mts](../src/types/core.mts#alert_type) |
+| `All types from ./types/alert-policies.mts` | type | [./types/alert-policies.mts](../src/types/alert-policies.mts) |
+| `All types from ./types/fixes.mts` | type | [./types/fixes.mts](../src/types/fixes.mts) |
+| `All types from ./types/full-scan-results-v1.mts` | type | [./types/full-scan-results-v1.mts](../src/types/full-scan-results-v1.mts) |
+| `All types from ./types/malware.mts` | type | [./types/malware.mts](../src/types/malware.mts) |
+| `All types from ./types/purl.mts` | type | [./types/purl.mts](../src/types/purl.mts) |
+| `ArtifactPatches` | type | [./types/patches.mts](../src/types/patches.mts#artifactpatches) |
+| `AssembledManifest` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#assembledmanifest) |
+| `assembleManifest` | value | [./full-scans-v1.mts](../src/full-scans-v1.mts#assemblemanifest) |
+| `BatchPackageFetchResultType` | type | [./types/core.mts](../src/types/core.mts#batchpackagefetchresulttype) |
+| `BatchPackageStreamOptions` | type | [./types/core.mts](../src/types/core.mts#batchpackagestreamoptions) |
+| `BlobRef` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#blobref) |
+| `BlobResult` | type | [./blob.mts](../src/blob.mts#blobresult) |
+| `BlobsUploadData` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#blobsuploaddata) |
+| `BlobUploadEntry` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#blobuploadentry) |
+| `calculateTotalQuotaCost` | value | [./quota-utils.mts](../src/quota-utils.mts#calculatetotalquotacost) |
+| `ChunkedFetchResult` | type | [./blob.mts](../src/blob.mts#chunkedfetchresult) |
+| `CompactSocketArtifact` | type | [./types/core.mts](../src/types/core.mts#compactsocketartifact) |
+| `CompactSocketArtifactAlert` | type | [./types/core.mts](../src/types/core.mts#compactsocketartifactalert) |
+| `CreateDependenciesSnapshotOptions` | type | [./types/core.mts](../src/types/core.mts#createdependenciessnapshotoptions) |
+| `CreateFullScanFromManifestParams` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#createfullscanfrommanifestparams) |
+| `CreateFullScanFromManifestResult` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#createfullscanfrommanifestresult) |
+| `CreateFullScanOptions` | type | [./types/strict.mts](../src/types/strict.mts#createfullscanoptions) |
+| `CreateOrgRepoDiffOptions` | type | [./types/parity.mts](../src/types/parity.mts#createorgrepodiffoptions) |
+| `createUserAgentFromPkgJson` | value | [./user-agent.mts](../src/user-agent.mts#createuseragentfrompkgjson) |
+| `CustomResponseType` | type | [./types/core.mts](../src/types/core.mts#customresponsetype) |
+| `DeleteRepositoryLabelResult` | type | [./types/strict.mts](../src/types/strict.mts#deleterepositorylabelresult) |
+| `DeleteResult` | type | [./types/strict.mts](../src/types/strict.mts#deleteresult) |
+| `deriveApiV1BaseUrl` | value | [./full-scans-v1.mts](../src/full-scans-v1.mts#deriveapiv1baseurl) |
+| `Entitlement` | type | [./types/core.mts](../src/types/core.mts#entitlement) |
+| `EntitlementsResponse` | type | [./types/core.mts](../src/types/core.mts#entitlementsresponse) |
+| `fetchBlob` | value | [./blob.mts](../src/blob.mts#fetchblob) |
+| `FetchBlobOptions` | type | [./blob.mts](../src/blob.mts#fetchbloboptions) |
+| `fetchChunkedBytes` | value | [./blob.mts](../src/blob.mts#fetchchunkedbytes) |
+| `fetchRawBytes` | value | [./blob.mts](../src/blob.mts#fetchrawbytes) |
+| `FileHashResult` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#filehashresult) |
+| `FileValidationCallback` | type | [./types/core.mts](../src/types/core.mts#filevalidationcallback) |
+| `FileValidationResult` | type | [./types/core.mts](../src/types/core.mts#filevalidationresult) |
+| `FullScanItem` | type | [./types/strict.mts](../src/types/strict.mts#fullscanitem) |
+| `FullScanListData` | type | [./types/strict.mts](../src/types/strict.mts#fullscanlistdata) |
+| `FullScanListResult` | type | [./types/strict.mts](../src/types/strict.mts#fullscanlistresult) |
+| `FullScanManifest` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#fullscanmanifest) |
+| `FullScanManifestEntry` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#fullscanmanifestentry) |
+| `FullScanResult` | type | [./types/strict.mts](../src/types/strict.mts#fullscanresult) |
+| `FullScanV1CreatedData` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#fullscanv1createddata) |
+| `FullScanV1PendingData` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#fullscanv1pendingdata) |
+| `getAllMethodRequirements` | value | [./quota-utils.mts](../src/quota-utils.mts#getallmethodrequirements) |
+| `getMethodRequirements` | value | [./quota-utils.mts](../src/quota-utils.mts#getmethodrequirements) |
+| `getMethodsByPermissions` | value | [./quota-utils.mts](../src/quota-utils.mts#getmethodsbypermissions) |
+| `getMethodsByQuotaCost` | value | [./quota-utils.mts](../src/quota-utils.mts#getmethodsbyquotacost) |
+| `GetOptions` | type | [./types/core.mts](../src/types/core.mts#getoptions) |
+| `GetOrgFullScanCsvOptions` | type | [./types/parity.mts](../src/types/parity.mts#getorgfullscancsvoptions) |
+| `GetOrgFullScanPdfOptions` | type | [./types/parity.mts](../src/types/parity.mts#getorgfullscanpdfoptions) |
+| `GetPatchPackagesResponse` | type | [./types/patches.mts](../src/types/patches.mts#getpatchpackagesresponse) |
+| `getQuotaCost` | value | [./quota-utils.mts](../src/quota-utils.mts#getquotacost) |
+| `getQuotaUsageSummary` | value | [./quota-utils.mts](../src/quota-utils.mts#getquotausagesummary) |
+| `GetRepositoryOptions` | type | [./types/strict.mts](../src/types/strict.mts#getrepositoryoptions) |
+| `getRequiredPermissions` | value | [./quota-utils.mts](../src/quota-utils.mts#getrequiredpermissions) |
+| `GetThreatCampaignResult` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#getthreatcampaignresult) |
+| `hashFile` | value | [./full-scans-v1.mts](../src/full-scans-v1.mts#hashfile) |
+| `hasQuotaForMethods` | value | [./quota-utils.mts](../src/quota-utils.mts#hasquotaformethods) |
+| `HeadersRecord` | type | [./types/core.mts](../src/types/core.mts#headersrecord) |
+| `HistoricalAlertsListOptions` | type | [./types/parity.mts](../src/types/parity.mts#historicalalertslistoptions) |
+| `HistoricalAlertsTrendOptions` | type | [./types/parity.mts](../src/types/parity.mts#historicalalertstrendoptions) |
+| `HistoricalDependenciesTrendOptions` | type | [./types/parity.mts](../src/types/parity.mts#historicaldependenciestrendoptions) |
+| `HistoricalSnapshotsListOptions` | type | [./types/parity.mts](../src/types/parity.mts#historicalsnapshotslistoptions) |
+| `LicensePolicyViolations` | type | [./types/parity.mts](../src/types/parity.mts#licensepolicyviolations) |
+| `ListFullScansOptions` | type | [./types/strict.mts](../src/types/strict.mts#listfullscansoptions) |
+| `ListRepositoriesOptions` | type | [./types/strict.mts](../src/types/strict.mts#listrepositoriesoptions) |
+| `ListThreatCampaignPackagesOptions` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#listthreatcampaignpackagesoptions) |
+| `ListThreatCampaignPackagesResult` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#listthreatcampaignpackagesresult) |
+| `ListThreatCampaignsOptions` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#listthreatcampaignsoptions) |
+| `ListThreatCampaignsResult` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#listthreatcampaignsresult) |
+| `LookupPatchPackageResponse` | type | [./types/patches.mts](../src/types/patches.mts#lookuppatchpackageresponse) |
+| `MalwareCheckAlert` | type | [./types/core.mts](../src/types/core.mts#malwarecheckalert) |
+| `MalwareCheckPackage` | type | [./types/core.mts](../src/types/core.mts#malwarecheckpackage) |
+| `MalwareCheckResult` | type | [./types/core.mts](../src/types/core.mts#malwarecheckresult) |
+| `MalwareCheckScore` | type | [./types/core.mts](../src/types/core.mts#malwarecheckscore) |
+| `ManifestLocalEntry` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#manifestlocalentry) |
+| `OrganizationItem` | type | [./types/strict.mts](../src/types/strict.mts#organizationitem) |
+| `OrganizationsResult` | type | [./types/strict.mts](../src/types/strict.mts#organizationsresult) |
+| `PatchesBatchResponse` | type | [./types/patches.mts](../src/types/patches.mts#patchesbatchresponse) |
+| `PatchFile` | type | [./types/patches.mts](../src/types/patches.mts#patchfile) |
+| `PatchPackageStatsResponse` | type | [./types/patches.mts](../src/types/patches.mts#patchpackagestatsresponse) |
+| `PatchRecord` | type | [./types/patches.mts](../src/types/patches.mts#patchrecord) |
+| `PatchRecordsResponse` | type | [./types/patches.mts](../src/types/patches.mts#patchrecordsresponse) |
+| `PatchSearchResponse` | type | [./types/patches.mts](../src/types/patches.mts#patchsearchresponse) |
+| `PatchViewResponse` | type | [./types/patches.mts](../src/types/patches.mts#patchviewresponse) |
+| `PostEventsData` | type | [./events-v1.mts](../src/events-v1.mts#posteventsdata) |
+| `PostEventsResult` | type | [./events-v1.mts](../src/events-v1.mts#posteventsresult) |
+| `PostOrgPackageChecksBody` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#postorgpackagechecksbody) |
+| `PostOrgPackageChecksData` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#postorgpackagechecksdata) |
+| `PostOrgPackageChecksResult` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#postorgpackagechecksresult) |
+| `PostOrgPackageSummariesBody` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#postorgpackagesummariesbody) |
+| `PostOrgPackageSummariesData` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#postorgpackagesummariesdata) |
+| `PostOrgPackageSummariesResult` | type | [./package-intelligence-v1.mts](../src/package-intelligence-v1.mts#postorgpackagesummariesresult) |
+| `PostOrgTelemetryPayload` | type | [./types/core.mts](../src/types/core.mts#postorgtelemetrypayload) |
+| `PostOrgTelemetryResponse` | type | [./types/core.mts](../src/types/core.mts#postorgtelemetryresponse) |
+| `PublicMalwareCoverage` | type | [./types/public-malware.mts](../src/types/public-malware.mts#publicmalwarecoverage) |
+| `PublicMalwareFinding` | type | [./types/public-malware.mts](../src/types/public-malware.mts#publicmalwarefinding) |
+| `PublicMalwareReasonCode` | type | [./types/public-malware.mts](../src/types/public-malware.mts#publicmalwarereasoncode) |
+| `PublicMalwareRequest` | type | [./types/public-malware.mts](../src/types/public-malware.mts#publicmalwarerequest) |
+| `PublicMalwareResponse` | type | [./types/public-malware.mts](../src/types/public-malware.mts#publicmalwareresponse) |
+| `PublicMalwareResult` | type | [./types/public-malware.mts](../src/types/public-malware.mts#publicmalwareresult) |
+| `PurlVersionEntry` | type | [./purl-versions-v1.mts](../src/purl-versions-v1.mts#purlversionentry) |
+| `PurlVersionsData` | type | [./purl-versions-v1.mts](../src/purl-versions-v1.mts#purlversionsdata) |
+| `PurlVersionsOptions` | type | [./purl-versions-v1.mts](../src/purl-versions-v1.mts#purlversionsoptions) |
+| `QueryParams` | type | [./types/core.mts](../src/types/core.mts#queryparams) |
+| `RawFetchResult` | type | [./blob.mts](../src/blob.mts#rawfetchresult) |
+| `RepositoriesListData` | type | [./types/strict.mts](../src/types/strict.mts#repositorieslistdata) |
+| `RepositoriesListResult` | type | [./types/strict.mts](../src/types/strict.mts#repositorieslistresult) |
+| `RepositoryItem` | type | [./types/strict.mts](../src/types/strict.mts#repositoryitem) |
+| `RepositoryLabelItem` | type | [./types/strict.mts](../src/types/strict.mts#repositorylabelitem) |
+| `RepositoryLabelResult` | type | [./types/strict.mts](../src/types/strict.mts#repositorylabelresult) |
+| `RepositoryLabelsListData` | type | [./types/strict.mts](../src/types/strict.mts#repositorylabelslistdata) |
+| `RepositoryLabelsListResult` | type | [./types/strict.mts](../src/types/strict.mts#repositorylabelslistresult) |
+| `RepositoryListItem` | type | [./types/strict.mts](../src/types/strict.mts#repositorylistitem) |
+| `RepositoryResult` | type | [./types/strict.mts](../src/types/strict.mts#repositoryresult) |
+| `RequestInfo` | type | [./types/core.mts](../src/types/core.mts#requestinfo) |
+| `RequestOptions` | type | [./types/core.mts](../src/types/core.mts#requestoptions) |
+| `RequestOptionsWithHooks` | type | [./types/core.mts](../src/types/core.mts#requestoptionswithhooks) |
+| `ResponseError` | value | [./http-client.mts](../src/http-client.mts#responseerror) |
+| `ResponseInfo` | type | [./types/core.mts](../src/types/core.mts#responseinfo) |
+| `SdkAuthenticationError` | value | [./auth.mts](../src/auth.mts#sdkauthenticationerror) |
+| `SecurityAlert` | type | [./types/patches.mts](../src/types/patches.mts#securityalert) |
+| `SendMethod` | type | [./types/core.mts](../src/types/core.mts#sendmethod) |
+| `SendOptions` | type | [./types/core.mts](../src/types/core.mts#sendoptions) |
+| `SkippedManifestPath` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#skippedmanifestpath) |
+| `SocketArtifact` | type | [./types/core.mts](../src/types/core.mts#socketartifact) |
+| `SocketArtifactAlert` | type | [./types/core.mts](../src/types/core.mts#socketartifactalert) |
+| `SocketArtifactWithExtras` | type | [./types/core.mts](../src/types/core.mts#socketartifactwithextras) |
+| `SocketEvent` | type | [./events-v1.mts](../src/events-v1.mts#socketevent) |
+| `SocketId` | type | [./types/core.mts](../src/types/core.mts#socketid) |
+| `SocketMetricSchema` | type | [./types/core.mts](../src/types/core.mts#socketmetricschema) |
+| `SocketPatchClient` | value | [./public-patches-client.mts](../src/public-patches-client.mts#socketpatchclient) |
+| `SocketPatchClientOptions` | type | [./public-patches-client.mts](../src/public-patches-client.mts#socketpatchclientoptions) |
+| `SocketPublicMalwareClient` | value | [./public-malware-client.mts](../src/public-malware-client.mts#socketpublicmalwareclient) |
+| `SocketPublicMalwareClientOptions` | type | [./types/public-malware.mts](../src/types/public-malware.mts#socketpublicmalwareclientoptions) |
+| `SocketPurlClient` | value | [./public-purl-client.mts](../src/public-purl-client.mts#socketpurlclient) |
+| `SocketSdk` | value | [./socket-sdk-class.mts](../src/socket-sdk-class.mts#socketsdk) |
+| `SocketSdkArrayElement` | type | [./types/core.mts](../src/types/core.mts#socketsdkarrayelement) |
+| `SocketSdkAuthProvider` | type | [./types/core.mts](../src/types/core.mts#socketsdkauthprovider) |
+| `SocketSdkData` | type | [./types/core.mts](../src/types/core.mts#socketsdkdata) |
+| `SocketSdkErrorResult` | type | [./types/core.mts](../src/types/core.mts#socketsdkerrorresult) |
+| `SocketSdkGenericResult` | type | [./types/core.mts](../src/types/core.mts#socketsdkgenericresult) |
+| `SocketSdkHttpResponse` | type | [./types/http.mts](../src/types/http.mts#socketsdkhttpresponse) |
+| `SocketSdkJsonValue` | type | [./types/util.mts](../src/types/util.mts#socketsdkjsonvalue) |
+| `SocketSdkOperations` | type | [./types/core.mts](../src/types/core.mts#socketsdkoperations) |
+| `SocketSdkOptions` | type | [./types/core.mts](../src/types/core.mts#socketsdkoptions) |
+| `SocketSdkResult` | type | [./types/core.mts](../src/types/core.mts#socketsdkresult) |
+| `SocketSdkSuccessResult` | type | [./types/core.mts](../src/types/core.mts#socketsdksuccessresult) |
+| `StreamFullScanOptions` | type | [./types/strict.mts](../src/types/strict.mts#streamfullscanoptions) |
+| `StreamOrgFullScanOptions` | type | [./types/core.mts](../src/types/core.mts#streamorgfullscanoptions) |
+| `StrictErrorResult` | type | [./types/strict.mts](../src/types/strict.mts#stricterrorresult) |
+| `StrictResult` | type | [./types/strict.mts](../src/types/strict.mts#strictresult) |
+| `TelemetryConfig` | type | [./types/core.mts](../src/types/core.mts#telemetryconfig) |
+| `ThreatCampaign` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#threatcampaign) |
+| `ThreatCampaignPackagesData` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#threatcampaignpackagesdata) |
+| `ThreatCampaignsListData` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#threatcampaignslistdata) |
+| `ThreatCampaignStatus` | type | [./threat-campaigns-v1.mts](../src/threat-campaigns-v1.mts#threatcampaignstatus) |
+| `tryDecodeText` | value | [./blob.mts](../src/blob.mts#trydecodetext) |
+| `UpdateOrgRepoLabelSettingBody` | type | [./types/parity.mts](../src/types/parity.mts#updateorgrepolabelsettingbody) |
+| `UploadBlobsResult` | type | [./full-scans-v1.mts](../src/full-scans-v1.mts#uploadblobsresult) |
+| `UploadManifestFilesError` | type | [./types/core.mts](../src/types/core.mts#uploadmanifestfileserror) |
+| `UploadManifestFilesOptions` | type | [./types/core.mts](../src/types/core.mts#uploadmanifestfilesoptions) |
+| `UploadManifestFilesResponse` | type | [./types/core.mts](../src/types/core.mts#uploadmanifestfilesresponse) |
+| `UploadManifestFilesReturnType` | type | [./types/core.mts](../src/types/core.mts#uploadmanifestfilesreturntype) |
+| `Vulnerability` | type | [./types/patches.mts](../src/types/patches.mts#vulnerability) |

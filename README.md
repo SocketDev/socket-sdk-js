@@ -65,13 +65,14 @@ pnpm test
 pnpm run check
 ```
 
-### Documentation map
+### Documentation
 
-| Guide                                              | Description                          |
-| -------------------------------------------------- | ------------------------------------ |
-| **[API Reference](./docs/api.md)**                 | Complete API method documentation    |
-| **[Quota Management](./docs/quota-management.md)** | Cost tiers (0/10/100) and utilities  |
-| **[Unsupported endpoints](./docs/unsupported.md)** | Deprecated ops the SDK does not wrap |
+| Guide                                              | Description                                        |
+| -------------------------------------------------- | -------------------------------------------------- |
+| **[API Reference](./docs/api.md)**                 | Class methods, exported helpers, and types         |
+| **[SDK Concepts](./docs/concepts.md)**             | Results, pagination, uploads, and runtime behavior |
+| **[Quota Management](./docs/quota-management.md)** | Metadata-backed costs and quota helpers            |
+| **[Unsupported endpoints](./docs/unsupported.md)** | Endpoints the SDK does not wrap                    |
 
 </details>
 

@@ -131,7 +131,7 @@ const client = new SocketSdk('token', {
 
 ## Quota costs
 
-Every method has a fixed quota cost: **0**, **10**, or **100** units. Free methods (status checks, listing your own resources) cost 0; standard reads cost 10; expensive batch and scan operations cost 100.
+Quota costs vary by method. Read the [authoritative quota metadata](../data/api-method-quota-and-permissions.json) or use `getQuotaCost()` to obtain a method's configured cost. Do not infer a method's cost from its name or domain.
 
 See [Quota Management](./quota-management.md) for the helpers (`getQuotaCost`, `hasQuotaForMethods`, `calculateTotalQuotaCost`) and a per-method cost table.
 

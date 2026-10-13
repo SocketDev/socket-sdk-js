@@ -1,12 +1,14 @@
 # Quota Management
 
-Every Socket API call costs a fixed number of quota units:
+Each SDK method has a configured quota cost in units. The table below summarizes common values and examples; the [method metadata](../data/api-method-quota-and-permissions.json) is authoritative.
 
 | Cost  | Tier      | What's in it                                                                                                                                                                                       |
 | ----- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `0`   | Free      | Status and listing methods - `getQuota`, `listOrganizations`, `getEntitlements`, scan CRUD, repo management, triage, labels, exports.                                                              |
 | `10`  | Standard  | Per-package reads and analytics - `getScoreByNpmPackage`, `getIssuesByNpmPackage`, `getOrgAnalytics`, `getRepoAnalytics`, `getAuditLogEvents`, API-token operations.                               |
 | `100` | Expensive | Batch and scan creation - `batchPackageFetch`, `batchOrgPackageFetch`, `batchPackageStream`, `createDependenciesSnapshot`, `createScanFromFilepaths`, `searchDependencies`, `uploadManifestFiles`. |
+
+These values are examples, not an exhaustive set of costs. Use `getQuotaCost()` for a method or read its entry in the metadata file.
 
 The authoritative per-method table is [`data/api-method-quota-and-permissions.json`](../data/api-method-quota-and-permissions.json).
 
