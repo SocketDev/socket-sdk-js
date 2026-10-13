@@ -33,6 +33,7 @@ export const config: ExportsConfig = {
     'dist/patch-verification.d.mts',
     'dist/public-patches-client.d.mts',
     'dist/public-purl-client.d.mts',
+    'dist/public-malware-client.d.mts',
     'dist/purl-versions-v1.d.mts',
     'dist/purl.d.mts',
     'dist/quota-utils.d.mts',

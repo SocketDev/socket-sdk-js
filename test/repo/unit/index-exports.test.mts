@@ -25,6 +25,7 @@ describe('index.ts exports', () => {
   it('exports usable public API clients without credentials', async () => {
     const purlClient = new sdk.SocketPurlClient({ retries: 0 })
     const patchClient = new sdk.SocketPatchClient({ retries: 0 })
+    const malwareClient = new sdk.SocketPublicMalwareClient({ retries: 0 })
 
     expect(
       await purlClient.batchPackageStream({ components: [] }).next(),
@@ -32,6 +33,10 @@ describe('index.ts exports', () => {
     expect(typeof patchClient.getPatchPackages).toBe('function')
     expect(typeof patchClient.getPatchBlob).toBe('function')
     expect(() => new sdk.SocketPatchClient({ timeout: 0 })).toThrow(TypeError)
+    expect(typeof malwareClient.checkPackages).toBe('function')
+    expect(() => new sdk.SocketPublicMalwareClient({ timeout: 0 })).toThrow(
+      TypeError,
+    )
   })
 
   it('should export user-agent function', () => {
@@ -57,6 +62,7 @@ describe('index.ts exports', () => {
       'SdkAuthenticationError',
       'SocketPatchClient',
       'SocketPurlClient',
+      'SocketPublicMalwareClient',
       'SocketSdk',
 
       // Quota utility functions
@@ -114,6 +120,7 @@ describe('index.ts exports', () => {
       'SdkAuthenticationError',
       'SocketPatchClient',
       'SocketPurlClient',
+      'SocketPublicMalwareClient',
       'SocketSdk',
       'tryDecodeText',
     ])
