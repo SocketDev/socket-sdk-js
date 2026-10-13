@@ -14,17 +14,14 @@ import {
   normalizeTarget,
   resolveRelative,
   stringValue,
-} from './gen-api-docs-export-source.mts'
+} from './export-source.mts'
+import { resolveDefaultIdentifier, resolveNamedExport } from './resolver.mts'
 import type {
   ExportInfo,
   ExportNode,
   ExportTraversal,
   PackageExportTarget,
-} from './gen-api-docs-export-source.mts'
-import {
-  resolveDefaultIdentifier,
-  resolveNamedExport,
-} from './gen-api-docs-resolver.mts'
+} from './export-source.mts'
 
 export function extractPackageExports(
   targets: readonly PackageExportTarget[],
@@ -105,8 +102,8 @@ function enumerateStatement(
             'default',
             declaration,
             packagePath,
-            traversal.sources.get(packagePath)!.source,
-            declarationKind(declaration, 'value'),
+            sourceForPath(traversal, packagePath),
+            { kind: declarationKind(declaration, 'value') },
           )
     if (!found) {
       throw new Error(`Unresolved default export in ${packagePath}.`)
@@ -140,11 +137,11 @@ function enumerateStatement(
       subpath,
       packagePath,
       declaration,
-      statement.exportKind === 'type' ? 'type' : 'value',
+      statement['exportKind'] === 'type' ? 'type' : 'value',
       traversal,
     )
   }
-  const modulePath = stringValue(statement.source)
+  const modulePath = stringValue(statement['source'])
   if (modulePath) {
     return enumerateNamedSource(
       subpath,
@@ -173,19 +170,19 @@ function enumerateStar(
   traversal: ExportTraversal,
   resolving: Set<string>,
 ): ExportInfo[] {
-  const modulePath = stringValue(statement.source)
+  const modulePath = stringValue(statement['source'])
   if (!modulePath) {
     throw new Error(`Unsupported export-star syntax in ${packagePath}.`)
   }
   const destination = resolveRelative(packagePath, modulePath)
-  const namespaceName = nodeName(statement.exported)
+  const namespaceName = nodeName(statement['exported'])
   if (namespaceName) {
     return [
       namespaceContract(
         subpath,
         namespaceName,
         destination,
-        statement.exportKind === 'type' ? 'type' : 'value',
+        statement['exportKind'] === 'type' ? 'type' : 'value',
         traversal,
       ),
     ]
@@ -195,7 +192,7 @@ function enumerateStar(
     .map(item => ({
       __proto__: null,
       ...item,
-      kind: statement.exportKind === 'type' ? 'type' : item.kind,
+      kind: statement['exportKind'] === 'type' ? 'type' : item.kind,
     }))
 }
 
@@ -208,7 +205,7 @@ function enumerateDeclaration(
 ): ExportInfo[] {
   const items =
     declaration.type === 'VariableDeclaration'
-      ? nodeArray(declaration.declarations)
+      ? nodeArray(declaration['declarations'])
       : [declaration]
   return items.map(item => {
     const name = nodeName(item.id)
@@ -220,11 +217,14 @@ function enumerateDeclaration(
       name,
       item,
       packagePath,
-      traversal.sources.get(packagePath)!.source,
-      declarationKind(item, kind),
-      declaration.type === 'VariableDeclaration'
-        ? `${String(declaration.kind ?? 'const')} `
-        : '',
+      sourceForPath(traversal, packagePath),
+      {
+        kind: declarationKind(item, kind),
+        prefix:
+          declaration.type === 'VariableDeclaration'
+            ? `${String(declaration['kind'] ?? 'const')} `
+            : '',
+      },
     )
   })
 }
@@ -240,16 +240,16 @@ function enumerateNamedSource(
   const destination = modulePath.startsWith('.')
     ? resolveRelative(packagePath, modulePath)
     : undefined
-  const kind = statement.exportKind === 'type' ? 'type' : 'value'
+  const kind = statement['exportKind'] === 'type' ? 'type' : 'value'
   const output: ExportInfo[] = []
-  for (const specifier of nodeArray(statement.specifiers)) {
-    const localName = nodeName(specifier.local)
-    const name = nodeName(specifier.exported) ?? localName
+  for (const specifier of nodeArray(statement['specifiers'])) {
+    const localName = nodeName(specifier['local'])
+    const name = nodeName(specifier['exported']) ?? localName
     if (!name || !localName) {
       throw new Error(`Unsupported named export in ${packagePath}.`)
     }
     const exportKind =
-      kind === 'type' || specifier.exportKind === 'type' ? 'type' : 'value'
+      kind === 'type' || specifier['exportKind'] === 'type' ? 'type' : 'value'
     if (!destination) {
       output.push(externalContract(subpath, name, modulePath, exportKind))
       continue
@@ -259,8 +259,7 @@ function enumerateNamedSource(
       destination,
       localName,
       traversal,
-      new Set(resolving),
-      exportKind,
+      { resolving: new Set(resolving), forcedKind: exportKind },
     )
     if (!found) {
       throw new Error(
@@ -286,15 +285,15 @@ function enumerateLocalNames(
   resolving: Set<string>,
 ): ExportInfo[] {
   const output: ExportInfo[] = []
-  for (const specifier of nodeArray(statement.specifiers)) {
-    const localName = nodeName(specifier.local)
-    const name = nodeName(specifier.exported) ?? localName
+  for (const specifier of nodeArray(statement['specifiers'])) {
+    const localName = nodeName(specifier['local'])
+    const name = nodeName(specifier['exported']) ?? localName
     if (!name || !localName) {
       throw new Error(`Unsupported local export in ${packagePath}.`)
     }
     const direct = bindings.declarations.get(localName)
     const kind =
-      statement.exportKind === 'type' || specifier.exportKind === 'type'
+      statement['exportKind'] === 'type' || specifier['exportKind'] === 'type'
         ? 'type'
         : 'value'
     if (direct) {
@@ -304,8 +303,8 @@ function enumerateLocalNames(
           name,
           direct,
           packagePath,
-          traversal.sources.get(packagePath)!.source,
-          declarationKind(direct, kind),
+          sourceForPath(traversal, packagePath),
+          { kind: declarationKind(direct, kind) },
         ),
       )
       continue
@@ -313,14 +312,10 @@ function enumerateLocalNames(
     const imported = bindings.imports.get(localName)
     const found =
       imported &&
-      resolveNamedExport(
-        subpath,
-        packagePath,
-        name,
-        traversal,
-        new Set(resolving),
-        kind,
-      )
+      resolveNamedExport(subpath, packagePath, name, traversal, {
+        resolving: new Set(resolving),
+        forcedKind: kind,
+      })
     if (!found) {
       throw new Error(`Unresolved public export ${name} in ${packagePath}.`)
     }
@@ -361,4 +356,15 @@ function deduplicateExports(exports: readonly ExportInfo[]): ExportInfo[] {
   return [...unique.values()].toSorted(
     (a, b) => compareStr(a.subpath, b.subpath) || compareStr(a.name, b.name),
   )
+}
+
+function sourceForPath(
+  traversal: ExportTraversal,
+  packagePath: string,
+): string {
+  const parsed = traversal.sources.get(packagePath)
+  if (!parsed) {
+    throw new Error(`Public export module was not discovered: ${packagePath}.`)
+  }
+  return parsed.source
 }

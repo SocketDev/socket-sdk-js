@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractPackageExports } from '../../../scripts/repo/gen-api-docs-exports.mts'
-import { packageExportTargets } from '../../../scripts/repo/gen-api-docs-export-source.mts'
+import { extractPackageExports } from '../../../scripts/repo/api-doc/exports.mts'
+import { packageExportTargets } from '../../../scripts/repo/api-doc/export-source.mts'
 
 const sources = new Map<string, string>([
   [
@@ -217,7 +217,7 @@ export class Client {
     const sources = new Map([
       [
         'src/index.mts',
-        `import { Alias, ns as leafNs } from './inner.mts'\nimport * as ns from './inner.mts'\nexport { Alias, ns, leafNs }`,
+        `import type { Alias } from './inner.mts'\nimport { ns as leafNs } from './inner.mts'\nimport * as ns from './inner.mts'\nexport { Alias, ns, leafNs }`,
       ],
       [
         'src/inner.mts',

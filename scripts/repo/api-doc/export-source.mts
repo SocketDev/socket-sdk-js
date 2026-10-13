@@ -2,14 +2,13 @@ import path from 'node:path'
 
 import { compareStr } from '@socketsecurity/lib-stable/sorts/strings'
 
-import { parseTypeScript } from './generate-strict-types-lib.mts'
-import type { AstNode } from './generate-strict-types-lib.mts'
+import { parseTypeScript } from '../generate-strict-types-lib.mts'
+import { extractClassSignature, isGeneratedApiDeclaration } from './lib.mts'
 import {
-  extractClassSignature,
   extractDeclarationDocumentation,
-  isGeneratedApiDeclaration,
-} from './gen-api-docs-lib.mts'
-import { extractDeclarationSignature } from './gen-api-docs-signatures.mts'
+  extractDeclarationSignature,
+} from './signatures.mts'
+import type { AstNode } from '../generate-strict-types-lib.mts'
 
 export type ExportNode = AstNode
 
@@ -53,24 +52,25 @@ function addImportBindings(
   if (statement.type !== 'ImportDeclaration') {
     return
   }
-  const modulePath = stringValue(statement.source)
+  const modulePath = stringValue(statement['source'])
   if (!modulePath) {
     return
   }
-  for (const specifier of nodeArray(statement.specifiers)) {
-    const localName = nodeName(specifier.local)
+  for (const specifier of nodeArray(statement['specifiers'])) {
+    const localName = nodeName(specifier['local'])
     const imported =
       specifier.type === 'ImportDefaultSpecifier'
         ? 'default'
         : specifier.type === 'ImportNamespaceSpecifier'
           ? '*'
-          : nodeName(specifier.imported)
+          : nodeName(specifier['imported'])
     if (localName && imported) {
       imports.set(localName, {
         modulePath,
         imported,
         kind:
-          statement.importKind === 'type' || specifier.importKind === 'type'
+          statement['importKind'] === 'type' ||
+          specifier['importKind'] === 'type'
             ? 'type'
             : 'value',
       })
@@ -91,7 +91,7 @@ function addDeclarationBindings(
     return
   }
   if (declaration.type === 'VariableDeclaration') {
-    for (const item of nodeArray(declaration.declarations)) {
+    for (const item of nodeArray(declaration['declarations'])) {
       const name = nodeName(item.id)
       if (name) {
         declarations.set(name, item)
@@ -151,8 +151,9 @@ export function discoverModules(
   packagePath: string,
   readSource: (packagePath: string) => string,
   traversal: ExportTraversal,
-  visiting = new Set<string>(),
+  options: { readonly visiting?: Set<string> } = {},
 ): void {
+  const visiting = options.visiting ?? new Set<string>()
   if (traversal.sources.has(packagePath) || visiting.has(packagePath)) {
     return
   }
@@ -163,7 +164,7 @@ export function discoverModules(
     parsed?.statements ?? [],
     packagePath,
   )) {
-    discoverModules(destination, readSource, traversal, visiting)
+    discoverModules(destination, readSource, traversal, { visiting })
   }
   visiting.delete(packagePath)
 }
@@ -186,16 +187,16 @@ function moduleDependencies(
       addRelativeDependency(
         dependencies,
         packagePath,
-        stringValue(statement.source),
+        stringValue(statement['source']),
       )
     }
     if (statement.type === 'ExportNamedDeclaration') {
-      const source = stringValue(statement.source)
+      const source = stringValue(statement['source'])
       if (source) {
         addRelativeDependency(dependencies, packagePath, source)
       } else {
-        for (const specifier of nodeArray(statement.specifiers)) {
-          const name = nodeName(specifier.local)
+        for (const specifier of nodeArray(statement['specifiers'])) {
+          const name = nodeName(specifier['local'])
           if (name) {
             importedNames.add(name)
           }
@@ -207,11 +208,13 @@ function moduleDependencies(
     if (statement.type !== 'ImportDeclaration') {
       continue
     }
-    const source = stringValue(statement.source)
-    const hasUsedBinding = nodeArray(statement.specifiers).some(specifier => {
-      const name = nodeName(specifier.local)
-      return Boolean(name && importedNames.has(name))
-    })
+    const source = stringValue(statement['source'])
+    const hasUsedBinding = nodeArray(statement['specifiers']).some(
+      specifier => {
+        const name = nodeName(specifier['local'])
+        return Boolean(name && importedNames.has(name))
+      },
+    )
     if (hasUsedBinding) {
       addRelativeDependency(dependencies, packagePath, source)
     }
@@ -264,7 +267,7 @@ export function exportedNames(statements: readonly ExportNode[]): Set<string> {
       continue
     }
     if (statement.type === 'ExportAllDeclaration') {
-      const namespaceName = nodeName(statement.exported)
+      const namespaceName = nodeName(statement['exported'])
       if (namespaceName) {
         names.add(namespaceName)
       }
@@ -275,7 +278,7 @@ export function exportedNames(statements: readonly ExportNode[]): Set<string> {
     }
     const declaration = nodeOf(statement.declaration)
     for (const item of declaration?.type === 'VariableDeclaration'
-      ? nodeArray(declaration.declarations)
+      ? nodeArray(declaration['declarations'])
       : declaration
         ? [declaration]
         : []) {
@@ -284,39 +287,15 @@ export function exportedNames(statements: readonly ExportNode[]): Set<string> {
         names.add(name)
       }
     }
-    for (const specifier of nodeArray(statement.specifiers)) {
-      const name = nodeName(specifier.exported) ?? nodeName(specifier.local)
+    for (const specifier of nodeArray(statement['specifiers'])) {
+      const name =
+        nodeName(specifier['exported']) ?? nodeName(specifier['local'])
       if (name) {
         names.add(name)
       }
     }
   }
   return names
-}
-
-export function localDeclarationFor(
-  statements: readonly ExportNode[],
-  name: string,
-): ExportNode | undefined {
-  for (const statement of statements) {
-    const declaration =
-      statement.type === 'ExportNamedDeclaration'
-        ? nodeOf(statement.declaration)
-        : statement
-    if (declaration?.type === 'VariableDeclaration') {
-      const found = nodeArray(declaration.declarations).find(
-        item => nodeName(item.id) === name,
-      )
-      if (found) {
-        return found
-      }
-      continue
-    }
-    if (nodeName(declaration?.id) === name) {
-      return declaration
-    }
-  }
-  return undefined
 }
 
 export function isNode(value: unknown): value is ExportNode {
@@ -336,18 +315,18 @@ export function numberValue(value: unknown): number | undefined {
 }
 
 export function lineNumber(node: ExportNode): number | undefined {
-  const location = nodeOf(node.loc)
-  return numberValue(nodeOf(location?.start)?.line)
+  const location = nodeOf(node['loc'])
+  return numberValue(nodeOf(location?.['start'])?.['line'])
 }
 
 export function stringValue(value: unknown): string | undefined {
   const node = nodeOf(value)
-  return typeof node?.value === 'string' ? node.value : undefined
+  return typeof node?.['value'] === 'string' ? node['value'] : undefined
 }
 
 export function nodeName(value: unknown): string | undefined {
   const node = nodeOf(value)
-  const actual = node?.name ?? node?.value
+  const actual = node?.['name'] ?? node?.['value']
   return typeof actual === 'string' ? actual : undefined
 }
 
@@ -420,11 +399,11 @@ export function declarationExport(
   declaration: ExportNode,
   packagePath: string,
   source: string,
-  kind: 'value' | 'type',
-  prefix = '',
+  options: { readonly kind: 'value' | 'type'; readonly prefix?: string },
 ): ExportInfo {
+  const { kind, prefix = '' } = options
   const start = typeof declaration.start === 'number' ? declaration.start : 0
-  const initializer = nodeOf(declaration.init)
+  const initializer = nodeOf(declaration['init'])
   const signature =
     declaration.type === 'ClassDeclaration' && name !== 'SocketSdk'
       ? extractClassSignature(declaration, source, extractDeclarationSignature)
@@ -457,15 +436,22 @@ function selectTarget(value: unknown): string | undefined {
   if (!value || typeof value !== 'object') {
     return undefined
   }
-  const conditions = value as Record<string, unknown>
+  const conditions = nodeOf(value)
+  if (!conditions) {
+    return undefined
+  }
   for (const condition of ['source', 'types', 'typings']) {
-    if (typeof conditions[condition] === 'string') {
-      return conditions[condition] as string
+    const target = conditions[condition]
+    if (typeof target === 'string') {
+      return target
     }
   }
   const candidates = Object.values(conditions)
   for (let i = 0, { length } = candidates; i < length; i += 1) {
-    const candidate = candidates[i]!
+    const candidate = candidates[i]
+    if (candidate === undefined) {
+      continue
+    }
     const nested = selectTarget(candidate)
     if (nested) {
       return nested

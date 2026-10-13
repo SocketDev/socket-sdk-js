@@ -221,7 +221,7 @@ export async function fetchChunkedBytes(
 }
 
 /**
- * Single GET against `<baseUrl>/blob/<hash>`. No prefix logic — callers pass an
+ * Single GET against `<baseUrl>/blob/<hash>`. Callers pass an
  * already-resolved hash (manifest hash, chunk hash, or single blob).
  */
 export async function fetchRawBytes(
@@ -277,8 +277,8 @@ export async function fetchRawBytes(
 
 /**
  * Decode bytes as UTF-8 in fatal mode to detect binary content. Returns
- * undefined when the bytes are not valid UTF-8 or contain a NUL byte (a typical
- * binary marker).
+ * undefined when the bytes are not valid UTF-8 or contain a NUL byte, which
+ * marks binary content.
  */
 export function tryDecodeText(bytes: Uint8Array): string | undefined {
   // NUL bytes inside the first 4 KB strongly suggest binary; cheap pre-check.

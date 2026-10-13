@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest'
 
-import { extractMethods as extractDocsMethods } from '../../../scripts/repo/gen-api-docs-lib.mts'
+import { extractMethods as extractDocsMethods } from '../../../scripts/repo/api-doc/lib.mts'
 import { extractSdkClassMethods } from '../../../scripts/repo/sdk-method-extraction.mts'
 import { extractMethods as extractQuotaMethods } from '../../../scripts/repo/validate-quota-sync.mts'
 

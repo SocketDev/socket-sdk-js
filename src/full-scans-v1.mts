@@ -1,8 +1,8 @@
 /**
  * @file Content-addressed full-scan and blob-upload primitives for the v1
- *   API. These endpoints are internal/preview — hidden from the public
- *   OpenAPI spec — so the types here are hand-written rather than generated
- *   (mirrors src/blob.mts, the other hand-written non-OpenAPI module).
+ *   API. These endpoints are hidden from the public OpenAPI spec, so the types
+ *   here are hand-written rather than generated. The blob module follows the
+ *   same approach.
  */
 import crypto from 'node:crypto'
 import { createReadStream } from 'node:fs'
@@ -128,10 +128,9 @@ export type AssembledManifest = {
 const V0_BASE_URL_SUFFIX = '/v0/'
 
 /**
- * Build a v1 content-addressed manifest for `filepaths` (absolute paths)
- * relative to `basePath`. A path that cannot be represented in a v1 manifest
- * — outside `basePath`, absolute, or a duplicate of an already-included
- * relative path — is recorded in `skipped` instead of `entries`/`manifest`.
+ * Build a v1 content-addressed manifest for absolute `filepaths` relative to
+ * `basePath`. Record a path that cannot be represented in a v1 manifest in
+ * `skipped` instead of `entries` or `manifest`.
  * Every included file is streamed through `hashFile`, so peak memory stays
  * bounded regardless of file count or size.
  */
@@ -186,7 +185,7 @@ export async function assembleManifest(
 /**
  * Derive the v1 API base URL from a v0 base URL by swapping the trailing
  * `/v0/` segment for `/v1/`. Returns undefined when `baseUrl` does not end in
- * `/v0/` — a custom base with a different version segment has no known v1
+ * `/v0/`. A custom base with a different version segment has no known v1
  * counterpart.
  */
 export function deriveApiV1BaseUrl(baseUrl: string): string | undefined {

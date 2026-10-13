@@ -12,15 +12,11 @@ import { tsPlugin } from '@sveltejs/acorn-typescript'
 import { Parser } from 'acorn'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 
-import { MAX_UNFOLDED_CODE_LINES } from '../fleet/check/long-doc-sections-are-folded.mts'
-import { GROUPS, QUOTA_LABELS } from './gen-api-docs-groups.mts'
-import { trimBlankLines } from './gen-api-docs-signatures.mts'
-import type {
-  ExportInfo,
-  PackageExportTarget,
-} from './gen-api-docs-exports.mts'
-import type { AstNode } from './generate-strict-types-lib.mts'
-import { extractSdkClassMethods } from './sdk-method-extraction.mts'
+import { MAX_UNFOLDED_CODE_LINES } from '../../fleet/check/long-doc-sections-are-folded.mts'
+import { GROUPS, QUOTA_LABELS } from './groups.mts'
+import { extractSdkClassMethods } from '../sdk-method-extraction.mts'
+import type { AstNode } from '../generate-strict-types-lib.mts'
+import type { ExportInfo, PackageExportTarget } from './export-source.mts'
 
 const documentationParser = Parser.extend(tsPlugin())
 
@@ -69,10 +65,10 @@ export function extractClassSignature(
         return false
       }
       const key = asNode(member.key)
-      const name = typeof key?.name === 'string' ? key.name : undefined
+      const name = typeof key?.['name'] === 'string' ? key['name'] : undefined
       return (
-        member.accessibility !== 'private' &&
-        member.accessibility !== 'protected' &&
+        member['accessibility'] !== 'private' &&
+        member['accessibility'] !== 'protected' &&
         key?.type !== 'PrivateIdentifier' &&
         !name?.startsWith('#')
       )
@@ -86,66 +82,6 @@ export function extractClassSignature(
 
 export function isGeneratedApiDeclaration(packagePath: string): boolean {
   return packagePath === 'types/api-v1.d.ts' || packagePath === 'types/api.d.ts'
-}
-
-export function extractDeclarationDocumentation(
-  declaration: AstNode,
-  source: string,
-): { description: string; example: string } {
-  const start = numeric(declaration.start) ?? 0
-  const preceding = source.slice(0, start)
-  const commentStart = preceding.lastIndexOf('/**')
-  const commentEnd = preceding.indexOf('*/', commentStart)
-  if (commentStart < 0 || commentEnd < 0) {
-    return { description: '', example: '' }
-  }
-  const suffix = preceding.slice(commentEnd + 2)
-  if (!/^(?:\s+[A-Za-z]+)*\s*$/.test(suffix)) {
-    return { description: '', example: '' }
-  }
-  const description: string[] = []
-  const example: string[] = []
-  let inExample = false
-  let exampleFence = false
-  const commentLines = preceding
-    .slice(commentStart + 3, commentEnd)
-    .split(/\r?\n/)
-    .map(value => value.replace(/^\s*\* ?/, ''))
-  for (let i = 0, { length } = commentLines; i < length; i += 1) {
-    const line = commentLines[i]!
-    if (line.startsWith('@example')) {
-      inExample = true
-      const firstLine = line.slice('@example'.length).trim()
-      if (firstLine) {
-        example.push(firstLine)
-      }
-      continue
-    }
-    if (inExample) {
-      if (line.trim().startsWith('@')) {
-        break
-      }
-      if (line.trim().startsWith('```')) {
-        exampleFence = !exampleFence
-        if (!exampleFence) {
-          inExample = false
-        }
-        continue
-      }
-      example.push(line.replace(/^\s*;?\s*```(?:ts|typescript)\s*/, ''))
-      continue
-    }
-    if (line.trim().startsWith('@') || line.trim().startsWith('```')) {
-      break
-    }
-    if (line) {
-      description.push(line.trim())
-    }
-  }
-  return {
-    description: description.join(' ').trim(),
-    example: trimBlankLines(example.join('\n')),
-  }
 }
 
 export function extractIndexDescription(source: string): string {
@@ -163,10 +99,17 @@ export function extractIndexDescription(source: string): string {
         .map(line => line.replace(/^\s*\*\s?/, '').trim())
       const fileIndex = lines.findIndex(line => line.startsWith('@file'))
       if (fileIndex >= 0) {
-        const fileLine = lines[fileIndex]!.slice('@file'.length).trim()
+        const fileTagLine = lines[fileIndex]
+        if (fileTagLine === undefined) {
+          return
+        }
+        const fileLine = fileTagLine.slice('@file'.length).trim()
         const followingLines: string[] = []
         for (let i = fileIndex + 1, { length } = lines; i < length; i += 1) {
-          const line = lines[i]!
+          const line = lines[i]
+          if (line === undefined) {
+            continue
+          }
           if (line.startsWith('@')) {
             break
           }
@@ -186,6 +129,10 @@ function asNode(value: unknown): AstNode | undefined {
 }
 
 function isAstNode(value: unknown): value is AstNode {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
@@ -210,7 +157,10 @@ export function extractMethods(
   const names = new Set<string>()
   const extractedMethods = extractSdkClassMethods(source)
   for (let i = 0, { length } = extractedMethods; i < length; i += 1) {
-    const method = extractedMethods[i]!
+    const method = extractedMethods[i]
+    if (!method) {
+      continue
+    }
     const { name, isGenerator, signature, summary, hadOperationIdNone } = method
     if (names.has(name)) {
       continue
@@ -241,7 +191,32 @@ export function extractMethods(
  * Load and parse the quota data file.
  */
 export function loadQuotaData(): QuotaData {
-  return JSON.parse(readFileSync(dataPath, 'utf8')) as QuotaData
+  const data: unknown = JSON.parse(readFileSync(dataPath, 'utf8'))
+  if (!isQuotaData(data)) {
+    throw new Error('Quota data does not match the expected API shape.')
+  }
+  return data
+}
+
+function isQuotaData(value: unknown): value is QuotaData {
+  if (!isRecord(value) || !isRecord(value['api'])) {
+    return false
+  }
+  const api = value['api']
+  if (
+    !Object.values(api).every(
+      entry =>
+        isRecord(entry) &&
+        typeof entry['quota'] === 'number' &&
+        Array.isArray(entry['permissions']) &&
+        entry['permissions'].every(
+          permission => typeof permission === 'string',
+        ),
+    )
+  ) {
+    return false
+  }
+  return true
 }
 
 /**
@@ -277,7 +252,10 @@ function normalizeDocument(document: string): string {
   let previousWasBlank = false
   const lines = document.split(/\r?\n/)
   for (let i = 0, { length } = lines; i < length; i += 1) {
-    const line = lines[i]!
+    const line = lines[i]
+    if (line === undefined) {
+      continue
+    }
     const blank = line.length === 0
     if (blank && previousWasBlank) {
       continue
@@ -354,7 +332,7 @@ function appendMethodGroups(
     sections.push(
       '## Other',
       '',
-      'Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/repo/gen-api-docs.mts`.',
+      'Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/repo/api-doc/groups.mts`.',
       '',
     )
     for (const method of otherMethods) {
@@ -393,12 +371,26 @@ function appendPublicExports(
     '',
   )
   let currentSubpath = ''
+  let subpathIsOpen = false
   for (const item of publicExports) {
     if (currentSubpath !== item.subpath) {
+      if (subpathIsOpen) {
+        sections.push('</details>', '')
+      }
       currentSubpath = item.subpath
-      sections.push(`### \`${currentSubpath}\``, '')
+      sections.push(
+        `### \`${currentSubpath}\``,
+        '',
+        '<details>',
+        '<summary>Public exports</summary>',
+        '',
+      )
+      subpathIsOpen = true
     }
     appendPublicExport(sections, item)
+  }
+  if (subpathIsOpen) {
+    sections.push('</details>', '')
   }
   sections.push('')
 }

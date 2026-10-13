@@ -1,4 +1,4 @@
-import type { AstNode } from './generate-strict-types-lib.mts'
+import type { AstNode } from '../generate-strict-types-lib.mts'
 
 export function extractDeclarationSignature(
   declaration: AstNode,
@@ -15,20 +15,20 @@ function extractCallSignature(
   declaration: AstNode,
   source: string,
 ): string | undefined {
-  const initializer = asNode(declaration.init)
+  const initializer = asNode(declaration['init'])
   if (initializer?.type !== 'CallExpression') {
     return undefined
   }
-  const callee = asNode(initializer.callee)
-  const callable = nodes(initializer.arguments)[0]
-  if (callee?.name === 'memoize') {
+  const callee = asNode(initializer['callee'])
+  const callable = nodes(initializer['arguments'])[0]
+  if (callee?.['name'] === 'memoize') {
     if (!callable) {
       throw new Error('Unsupported memoize wrapper without a callable.')
     }
     return memoizedCallableSignature(declaration, callable, source)
   }
   if (isCallable(callable)) {
-    const name = asNode(declaration.id)?.name
+    const name = asNode(declaration.id)?.['name']
     throw new Error(`Unsupported callable wrapper for ${String(name)}.`)
   }
   return undefined
@@ -44,7 +44,7 @@ function extractPropertySignature(
   ) {
     return undefined
   }
-  const value = asNode(declaration.value)
+  const value = asNode(declaration['value'])
   if (!value) {
     return undefined
   }
@@ -88,8 +88,8 @@ function extractBodySignature(declaration: AstNode, source: string): string {
   const start = numeric(declaration.start) ?? 0
   const end = numeric(declaration.end) ?? start
   const body = asNode(declaration.body)
-  const methodBody = asNode(asNode(declaration.value)?.body)
-  const initializer = asNode(declaration.init)
+  const methodBody = asNode(asNode(declaration['value'])?.['body'])
+  const initializer = asNode(declaration['init'])
   const functionBody = isCallable(initializer)
     ? asNode(initializer.body)
     : undefined
@@ -114,7 +114,7 @@ function isLiteralInitializer(value: AstNode): boolean {
   return (
     value.type === 'Literal' ||
     (value.type === 'UnaryExpression' &&
-      asNode(value.argument)?.type === 'Literal')
+      asNode(value['argument'])?.type === 'Literal')
   )
 }
 
@@ -123,7 +123,7 @@ export function memoizedCallableSignature(
   callable: AstNode,
   source: string,
 ): string {
-  const name = asNode(declaration.id)?.name
+  const name = asNode(declaration.id)?.['name']
   if (typeof name !== 'string') {
     throw new Error('Unsupported memoize wrapper without a named export.')
   }
@@ -134,18 +134,16 @@ export function memoizedCallableSignature(
     throw new Error(`Unsupported callable passed to memoize for ${name}.`)
   }
   const typeParameters = asNode(callable.typeParameters)
-  const params = nodes(callable.params)
+  const params = nodes(callable['params'])
+  const firstParameter = params[0]
+  const lastParameter = params.at(-1)
   const parameters =
-    params.length > 0
-      ? `(${source.slice(numeric(params[0]!.start)!, numeric(params.at(-1)!.end)!)})`
+    firstParameter && lastParameter
+      ? `(${sourceRange(source, firstParameter, lastParameter)})`
       : '()'
-  const generics = typeParameters
-    ? source.slice(numeric(typeParameters.start)!, numeric(typeParameters.end)!)
-    : ''
-  const returnType = asNode(callable.returnType)
-  const returnAnnotation = returnType
-    ? source.slice(numeric(returnType.start)!, numeric(returnType.end)!)
-    : ''
+  const generics = typeParameters ? sourceNode(source, typeParameters) : ''
+  const returnType = asNode(callable['returnType'])
+  const returnAnnotation = returnType ? sourceNode(source, returnType) : ''
   return `function ${name}${generics}${parameters}${returnAnnotation}`
 }
 
@@ -153,14 +151,16 @@ export function functionTypeSignature(
   callable: AstNode,
   source: string,
 ): string {
-  const params = nodes(callable.params)
+  const params = nodes(callable['params'])
+  const firstParameter = params[0]
+  const lastParameter = params.at(-1)
   const parameters =
-    params.length > 0
-      ? source.slice(numeric(params[0]!.start)!, numeric(params.at(-1)!.end)!)
+    firstParameter && lastParameter
+      ? sourceRange(source, firstParameter, lastParameter)
       : ''
-  const returnType = asNode(callable.returnType)
+  const returnType = asNode(callable['returnType'])
   const returnAnnotation = returnType
-    ? source.slice(numeric(returnType.start)!, numeric(returnType.end)!)
+    ? sourceNode(source, returnType)
     : 'unknown'
   return `(${parameters}) => ${returnAnnotation.replace(/^:\s*/, '')}`
 }
@@ -174,6 +174,85 @@ export function trimBlankLines(value: string): string {
     lines.pop()
   }
   return lines.join('\n')
+}
+
+export function extractDeclarationDocumentation(
+  declaration: AstNode,
+  source: string,
+): { description: string; example: string } {
+  const start = numeric(declaration.start) ?? 0
+  const preceding = source.slice(0, start)
+  const commentStart = preceding.lastIndexOf('/**')
+  const commentEnd = preceding.indexOf('*/', commentStart)
+  if (commentStart < 0 || commentEnd < 0) {
+    return { description: '', example: '' }
+  }
+  const suffix = preceding.slice(commentEnd + 2)
+  if (!/^(?:\s+[A-Za-z]+)*\s*$/.test(suffix)) {
+    return { description: '', example: '' }
+  }
+  const description: string[] = []
+  const example: string[] = []
+  let inExample = false
+  let exampleFence = false
+  const commentLines = preceding
+    .slice(commentStart + 3, commentEnd)
+    .split(/\r?\n/)
+    .map(value => value.replace(/^\s*\* ?/, ''))
+  for (let i = 0, { length } = commentLines; i < length; i += 1) {
+    const line = commentLines[i]
+    if (line === undefined) {
+      continue
+    }
+    if (line.startsWith('@example')) {
+      inExample = true
+      const firstLine = line.slice('@example'.length).trim()
+      if (firstLine) {
+        example.push(firstLine)
+      }
+      continue
+    }
+    if (inExample) {
+      if (line.trim().startsWith('@')) {
+        break
+      }
+      if (line.trim().startsWith('```')) {
+        exampleFence = !exampleFence
+        if (!exampleFence) {
+          inExample = false
+        }
+        continue
+      }
+      example.push(line.replace(/^\s*;?\s*```(?:ts|typescript)\s*/, ''))
+      continue
+    }
+    if (line.trim().startsWith('@') || line.trim().startsWith('```')) {
+      break
+    }
+    if (line) {
+      description.push(line.trim())
+    }
+  }
+  return {
+    description: description.join(' ').trim(),
+    example: trimBlankLines(example.join('\n')),
+  }
+}
+
+function sourceNode(source: string, node: AstNode): string {
+  const start = numeric(node.start)
+  const end = numeric(node.end)
+  return start === undefined || end === undefined
+    ? ''
+    : source.slice(start, end)
+}
+
+function sourceRange(source: string, first: AstNode, last: AstNode): string {
+  const start = numeric(first.start)
+  const end = numeric(last.end)
+  return start === undefined || end === undefined
+    ? ''
+    : source.slice(start, end)
 }
 
 function asNode(value: unknown): AstNode | undefined {

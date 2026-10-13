@@ -10,22 +10,26 @@ import {
   nodeOf,
   resolveRelative,
   stringValue,
-} from './gen-api-docs-export-source.mts'
+} from './export-source.mts'
 import type {
   ExportInfo,
   ExportNode,
   ExportTraversal,
   ImportBinding,
-} from './gen-api-docs-export-source.mts'
+} from './export-source.mts'
 
 export function resolveNamedExport(
   subpath: string,
   packagePath: string,
   name: string,
   traversal: ExportTraversal,
-  resolving = new Set<string>(),
-  forcedKind: 'value' | 'type' = 'value',
+  options: {
+    readonly resolving?: Set<string>
+    readonly forcedKind?: 'value' | 'type'
+  } = {},
 ): ExportInfo | undefined {
+  const resolving = options.resolving ?? new Set<string>()
+  const forcedKind = options.forcedKind ?? 'value'
   const key = `${packagePath}\0${name}`
   if (resolving.has(key)) {
     return undefined
@@ -95,14 +99,9 @@ function resolveDirectOrDefault(
 ): ExportInfo | undefined {
   const direct = declarations.get(name)
   if (direct && hasDirectExport(statements, name)) {
-    return declarationExport(
-      subpath,
-      name,
-      direct,
-      packagePath,
-      source,
-      declarationKind(direct, forcedKind),
-    )
+    return declarationExport(subpath, name, direct, packagePath, source, {
+      kind: declarationKind(direct, forcedKind),
+    })
   }
   if (name !== 'default') {
     return undefined
@@ -124,14 +123,14 @@ function resolveDirectOrDefault(
     )
   }
   const localName = nodeName(declaration)
-  const local = localName && declarations.get(localName)
+  const local = localName ? declarations.get(localName) : undefined
   return declarationExport(
     subpath,
     name,
     local ?? declaration,
     packagePath,
     source,
-    forcedKind,
+    { kind: forcedKind },
   )
 }
 
@@ -190,8 +189,7 @@ function resolveNamedSourceEdge(
     resolveRelative(packagePath, edge.modulePath),
     edge.localName,
     traversal,
-    resolving,
-    kind,
+    { resolving, forcedKind: kind },
   )
   return found
     ? { ...found, subpath, name, kind: kind === 'type' ? 'type' : found.kind }
@@ -218,14 +216,9 @@ function resolveLocalExport(
   if (local) {
     const kind =
       edge.kind === 'type' || forcedKind === 'type' ? 'type' : 'value'
-    return declarationExport(
-      subpath,
-      name,
-      local,
-      packagePath,
-      source,
-      declarationKind(local, kind),
-    )
+    return declarationExport(subpath, name, local, packagePath, source, {
+      kind: declarationKind(local, kind),
+    })
   }
   const imported = imports.get(edge.localName)
   return imported
@@ -257,12 +250,12 @@ function resolveStarExport(
     if (statement.type !== 'ExportAllDeclaration') {
       continue
     }
-    const modulePath = stringValue(statement.source)
+    const modulePath = stringValue(statement['source'])
     if (!modulePath?.startsWith('.')) {
       continue
     }
     const kind =
-      forcedKind === 'type' || statement.exportKind === 'type'
+      forcedKind === 'type' || statement['exportKind'] === 'type'
         ? 'type'
         : 'value'
     const found = resolveNamedExport(
@@ -270,8 +263,7 @@ function resolveStarExport(
       resolveRelative(packagePath, modulePath),
       name,
       traversal,
-      resolving,
-      kind,
+      { resolving, forcedKind: kind },
     )
     if (found) {
       return { ...found, kind: kind === 'type' ? 'type' : found.kind }
@@ -303,8 +295,7 @@ function resolveImport(
     target,
     binding.imported,
     traversal,
-    resolving,
-    kind,
+    { resolving, forcedKind: kind },
   )
   return found
     ? { ...found, subpath, name, kind: kind === 'type' ? 'type' : found.kind }
@@ -323,7 +314,7 @@ function hasDirectExport(
     if (declaration) {
       const items =
         declaration.type === 'VariableDeclaration'
-          ? nodeArray(declaration.declarations)
+          ? nodeArray(declaration['declarations'])
           : [declaration]
       return items.some(item => nodeName(item.id) === name)
     }
@@ -336,18 +327,19 @@ function localExportEdge(
   name: string,
 ): { localName: string; kind: 'type' | 'value' } | undefined {
   for (const statement of statements) {
-    if (statement.type !== 'ExportNamedDeclaration' || statement.source) {
+    if (statement.type !== 'ExportNamedDeclaration' || statement['source']) {
       continue
     }
-    const specifier = nodeArray(statement.specifiers).find(
-      item => (nodeName(item.exported) ?? nodeName(item.local)) === name,
+    const specifier = nodeArray(statement['specifiers']).find(
+      item => (nodeName(item['exported']) ?? nodeName(item['local'])) === name,
     )
-    const localName = specifier && nodeName(specifier.local)
+    const localName = specifier && nodeName(specifier['local'])
     if (localName && specifier) {
       return {
         localName,
         kind:
-          statement.exportKind === 'type' || specifier.exportKind === 'type'
+          statement['exportKind'] === 'type' ||
+          specifier['exportKind'] === 'type'
             ? 'type'
             : 'value',
       }
@@ -362,14 +354,14 @@ function namedSourceEdge(
 ):
   | { modulePath: string; localName: string; kind: 'type' | 'value' }
   | undefined {
-  if (statement.type !== 'ExportNamedDeclaration' || !statement.source) {
+  if (statement.type !== 'ExportNamedDeclaration' || !statement['source']) {
     return undefined
   }
-  const modulePath = stringValue(statement.source)
-  const specifier = nodeArray(statement.specifiers).find(
-    item => nodeName(item.exported) === name,
+  const modulePath = stringValue(statement['source'])
+  const specifier = nodeArray(statement['specifiers']).find(
+    item => nodeName(item['exported']) === name,
   )
-  const localName = specifier && nodeName(specifier.local)
+  const localName = specifier && nodeName(specifier['local'])
   if (!modulePath || !localName || !specifier) {
     return undefined
   }
@@ -377,7 +369,7 @@ function namedSourceEdge(
     modulePath,
     localName,
     kind:
-      statement.exportKind === 'type' || specifier.exportKind === 'type'
+      statement['exportKind'] === 'type' || specifier['exportKind'] === 'type'
         ? 'type'
         : 'value',
   }
@@ -393,16 +385,18 @@ function namespaceFromStatement(
 ): ExportInfo | undefined {
   if (
     statement.type !== 'ExportAllDeclaration' ||
-    nodeName(statement.exported) !== name
+    nodeName(statement['exported']) !== name
   ) {
     return undefined
   }
-  const modulePath = stringValue(statement.source)
+  const modulePath = stringValue(statement['source'])
   if (!modulePath?.startsWith('.')) {
     return undefined
   }
   const kind =
-    forcedKind === 'type' || statement.exportKind === 'type' ? 'type' : 'value'
+    forcedKind === 'type' || statement['exportKind'] === 'type'
+      ? 'type'
+      : 'value'
   return namespaceContract(
     subpath,
     name,
@@ -433,7 +427,7 @@ export function resolveDefaultIdentifier(
       local,
       packagePath,
       parsed.source,
-      declarationKind(local, 'value'),
+      { kind: declarationKind(local, 'value') },
     )
   }
   const imported = imports.get(name)
@@ -443,10 +437,12 @@ export function resolveDefaultIdentifier(
       packagePath,
       'default',
       imported,
-      'value',
+      imported.kind,
       traversal,
       resolving,
     )
   }
-  return resolveNamedExport(subpath, packagePath, name, traversal, resolving)
+  return resolveNamedExport(subpath, packagePath, name, traversal, {
+    resolving,
+  })
 }

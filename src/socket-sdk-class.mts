@@ -1121,7 +1121,7 @@ export class SocketSdk {
   /**
    * Attempt `createFullScan` via the v1 content-addressed manifest flow.
    * Returns the v0-shaped success envelope on a 201, or undefined when the
-   * caller should fall back to the v0 multipart upload — an unavailable v1
+   * caller should fall back to the v0 multipart upload. An unavailable v1
    * route, a path the manifest can't represent, a genuine request error, or
    * retry exhaustion all fall back rather than surfacing to the caller, so
    * `createFullScan`'s caller-visible behavior never regresses.
@@ -1267,9 +1267,9 @@ export class SocketSdk {
 
   /**
    * Create a full scan from a pre-built content-addressed manifest (v1 API,
-   * internal preview — hidden from the public OpenAPI spec). A 201 means the
+   * internal preview, hidden from the public OpenAPI spec. A 201 means the
    * scan was created outright; a 202 means one or more manifest entries are
-   * unknown to the org's blob store — upload the blobs named in
+   * unknown to the org's blob store. Upload the blobs named in
    * `data.missing` via `uploadBlobs`, then re-post the same manifest.
    *
    * @param orgSlug - Organization identifier.
@@ -2581,7 +2581,7 @@ export class SocketSdk {
    * background; this method polls transparently until the result is ready, so
    * callers only ever observe the final comparison. Pass `cached: false` to
    * bypass the cache and live-compute the diff (slower, for debugging). When
-   * `cached` is true the `omit_license_details` option is ignored server-side —
+   * `cached` is true, the `omit_license_details` option is ignored server-side.
    * cached results always include license details.
    *
    * @example
@@ -4052,7 +4052,7 @@ export class SocketSdk {
 
   /**
    * Get a single threat campaign by ID (v1 API, public route). Same shape as
-   * one item from `listThreatCampaigns`; package PURLs are not inlined —
+   * one item from `listThreatCampaigns`. Package PURLs are not inlined.
    * fetch them via `listThreatCampaignPackages`. Requires an Enterprise plan
    * with the Threat Feed add-on and the `threat-campaigns:list` token scope.
    *
@@ -4777,7 +4777,8 @@ export class SocketSdk {
    * @param campaignId - Campaign identifier.
    * @param options - Pagination options (`per_page`, `cursor`).
    *
-   * @returns `{ items, endCursor }` — opaque PURL strings and the next cursor
+   * @returns `{ items, endCursor }` with opaque PURL strings and the next
+   *   cursor.
    *
    * @throws {Error} When server returns 5xx status codes
    *
@@ -4836,7 +4837,7 @@ export class SocketSdk {
   /**
    * List threat campaigns for an organization (v1 API, public route),
    * paginated and filterable by status, ecosystem, and an incremental sync
-   * parameter (`updated_after`). Package PURLs are not inlined — fetch them
+   * parameter (`updated_after`). Package PURLs are not inlined. Fetch them
    * per campaign via `listThreatCampaignPackages`. Requires an Enterprise
    * plan with the Threat Feed add-on and the `threat-campaigns:list` token
    * scope.
@@ -4845,7 +4846,7 @@ export class SocketSdk {
    * @param options - Filter and pagination options; `status` defaults to
    *   `'ongoing'` server-side when omitted.
    *
-   * @returns `{ items, endCursor }` — campaigns and the next cursor
+   * @returns `{ items, endCursor }` with campaigns and the next cursor
    *
    * @throws {Error} When server returns 5xx status codes
    *
@@ -5359,7 +5360,7 @@ export class SocketSdk {
    * The response body is never buffered: the request resolves as soon as the
    * headers arrive, and the body is piped straight to the destination. Without
    * an `output` the body is left unread on `data.rawResponse` for the caller to
-   * pipe or iterate — read or destroy that stream, or the socket stays open.
+   * pipe or iterate it. Read or destroy that stream, or the socket stays open.
    *
    * @example
    *   ;```typescript
@@ -5883,7 +5884,7 @@ export class SocketSdk {
 
   /**
    * Upload blobs to an organization's content-addressed blob store (v1 API,
-   * internal preview — hidden from the public OpenAPI spec). Each entry's
+   * internal preview, hidden from the public OpenAPI spec. Each entry's
    * hash is computed from `localPath` when omitted; `name` is diagnostics-
    * only metadata (defaults to the file's basename). Idempotent: re-uploading
    * an already-stored digest reports it under `already_existed`.
@@ -6367,7 +6368,7 @@ export class SocketSdk {
    * High-level statistics for a batch of patch package references granted
    * to this organization.
    *
-   * Send a list of package references — each is the download URL, the
+   * Send a list of package references. Each is the download URL, the
    * grant token (the "patch key"), OR the patch UUID. Results are keyed by
    * the reference string sent.
    *
@@ -6403,7 +6404,7 @@ export class SocketSdk {
    * Look up the patch metadata behind a batch of patch package references
    * granted to this organization.
    *
-   * Send a list of package references — each is either the grant token
+   * Send a list of package references. Each is either the grant token
    * (the "patch key") or the full download URL issued. Results are keyed
    * by the reference string sent.
    *

@@ -70,9 +70,9 @@ async createFullScan(
 ### `createFullScanFromManifest`
 
 Create a full scan from a pre-built content-addressed manifest (v1 API,
-internal preview — hidden from the public OpenAPI spec). A 201 means the
+internal preview, hidden from the public OpenAPI spec. A 201 means the
 scan was created outright; a 202 means one or more manifest entries are
-unknown to the org's blob store — upload the blobs named in
+unknown to the org's blob store. Upload the blobs named in
 `data.missing` via `uploadBlobs`, then re-post the same manifest.
 
 ```typescript
@@ -129,7 +129,7 @@ async createOrgFullScanFromArchive(
 ### `uploadBlobs`
 
 Upload blobs to an organization's content-addressed blob store (v1 API,
-internal preview — hidden from the public OpenAPI spec). Each entry's
+internal preview, hidden from the public OpenAPI spec. Each entry's
 hash is computed from `localPath` when omitted; `name` is diagnostics-
 only metadata (defaults to the file's basename). Idempotent: re-uploading
 an already-stored digest reports it under `already_existed`.
@@ -233,7 +233,7 @@ Stream a full scan's results to a file, to stdout, or to the caller.
 The response body is never buffered: the request resolves as soon as the
 headers arrive, and the body is piped straight to the destination. Without
 an `output` the body is left unread on `data.rawResponse` for the caller to
-pipe or iterate — read or destroy that stream, or the socket stays open.
+pipe or iterate it. Read or destroy that stream, or the socket stays open.
 
 ```typescript
 async streamFullScan(
@@ -378,7 +378,7 @@ a cache miss the API returns 202 Accepted and computes the result in the
 background; this method polls transparently until the result is ready, so
 callers only ever observe the final comparison. Pass `cached: false` to
 bypass the cache and live-compute the diff (slower, for debugging). When
-`cached` is true the `omit_license_details` option is ignored server-side —
+`cached` is true, the `omit_license_details` option is ignored server-side.
 cached results always include license details.
 
 ```typescript
@@ -1671,7 +1671,7 @@ Browse supply chain attack campaigns and the packages they affect.
 
 List threat campaigns for an organization (v1 API, public route),
 paginated and filterable by status, ecosystem, and an incremental sync
-parameter (`updated_after`). Package PURLs are not inlined — fetch them
+parameter (`updated_after`). Package PURLs are not inlined. Fetch them
 per campaign via `listThreatCampaignPackages`. Requires an Enterprise
 plan with the Threat Feed add-on and the `threat-campaigns:list` token
 scope.
@@ -1688,7 +1688,7 @@ async listThreatCampaigns(
 ### `getThreatCampaign`
 
 Get a single threat campaign by ID (v1 API, public route). Same shape as
-one item from `listThreatCampaigns`; package PURLs are not inlined —
+one item from `listThreatCampaigns`. Package PURLs are not inlined.
 fetch them via `listThreatCampaignPackages`. Requires an Enterprise plan
 with the Threat Feed add-on and the `threat-campaigns:list` token scope.
 
@@ -2078,7 +2078,7 @@ async sendApi<T>(
 
 ## Other
 
-Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/repo/gen-api-docs.mts`.
+Methods not yet placed into a domain group. Add them to `GROUPS` in `scripts/repo/api-doc/groups.mts`.
 
 ### `getOrgThreatFeedItems`
 
@@ -2219,7 +2219,7 @@ async getPatchPackages(
 High-level statistics for a batch of patch package references granted
 to this organization.
 
-Send a list of package references — each is the download URL, the
+Send a list of package references. Each is the download URL, the
 grant token (the "patch key"), OR the patch UUID. Results are keyed by
 the reference string sent.
 
@@ -2237,7 +2237,7 @@ async patchPackageStats(
 Look up the patch metadata behind a batch of patch package references
 granted to this organization.
 
-Send a list of package references — each is either the grant token
+Send a list of package references. Each is either the grant token
 (the "patch key") or the full download URL issued. Results are keyed
 by the reference string sent.
 
@@ -2309,20 +2309,23 @@ async postOrgPackageSummaries(
 
 Public import paths from `package.json`. The package metadata path exposes package metadata rather than callable SDK API.
 
-| Import path | Target |
-| --- | --- |
-| `.` | ./src/index.mts |
-| `./package.json` | `package.json` (metadata) |
-| `./testing` | ./src/testing.mts |
-| `./types/api` | ./types/api.d.ts |
-| `./types/api-helpers` | ./types/api-helpers.d.ts |
-| `./types/api-v1` | ./types/api-v1.d.ts |
+| Import path           | Target                    |
+| --------------------- | ------------------------- |
+| `.`                   | ./src/index.mts           |
+| `./package.json`      | `package.json` (metadata) |
+| `./testing`           | ./src/testing.mts         |
+| `./types/api`         | ./types/api.d.ts          |
+| `./types/api-helpers` | ./types/api-helpers.d.ts  |
+| `./types/api-v1`      | ./types/api-v1.d.ts       |
 
 ## Exported symbols
 
 Each symbol is scoped to its package import path. Callable helpers and authored types include available signatures and JSDoc. Generated OpenAPI types link to their canonical declarations.
 
 ### `.`
+
+<details>
+<summary>Public exports</summary>
 
 #### `ALERT_ACTION` (type)
 
@@ -2829,11 +2832,7 @@ type FixArtifact = {
 Declared in [src/types/fixes.mts](../src/types/fixes.mts#L140).
 
 ```typescript
-type FixComputationStatus =
-  | 'pending'
-  | 'running'
-  | 'succeeded'
-  | 'failed'
+type FixComputationStatus = 'pending' | 'running' | 'succeeded' | 'failed'
 ```
 
 #### `FixDetail` (type)
@@ -3803,8 +3802,7 @@ type PostOrgPackageSummariesBody =
 Declared in [src/package-intelligence-v1.mts](../src/package-intelligence-v1.mts#L27).
 
 ```typescript
-type PostOrgPackageSummariesData =
-  OpReturnType<PackageSummariesOperation>
+type PostOrgPackageSummariesData = OpReturnType<PackageSummariesOperation>
 ```
 
 #### `PostOrgPackageSummariesResult` (type)
@@ -4739,9 +4737,7 @@ type RepoData = SocketSdkData<'getOrgRepoList'>
 Declared in [src/types/core.mts](../src/types/core.mts#L170).
 
 ```typescript
-type SocketSdkData<T extends SocketSdkOperations> = OpReturnType<
-  operations[T]
->
+type SocketSdkData<T extends SocketSdkOperations> = OpReturnType<operations[T]>
 ```
 
 #### `SocketSdkErrorResult` (type)
@@ -5242,17 +5238,14 @@ type WithheldFix = {
 Declared in [src/types/fixes.mts](../src/types/fixes.mts#L34).
 
 ```typescript
-type WithheldFixReason =
-  | 'majorUpdate'
-  | 'releaseAge'
-  | 'publishDateUnknown'
+type WithheldFixReason = 'majorUpdate' | 'releaseAge' | 'publishDateUnknown'
 ```
 
 #### `assembleManifest` (value)
 
-Build a v1 content-addressed manifest for `filepaths` (absolute paths) relative to `basePath`. A path that cannot be represented in a v1 manifest — outside `basePath`, absolute, or a duplicate of an already-included relative path — is recorded in `skipped` instead of `entries`/`manifest`. Every included file is streamed through `hashFile`, so peak memory stays bounded regardless of file count or size.
+Build a v1 content-addressed manifest for absolute `filepaths` relative to `basePath`. Record a path that cannot be represented in a v1 manifest in `skipped` instead of `entries` or `manifest`. Every included file is streamed through `hashFile`, so peak memory stays bounded regardless of file count or size.
 
-Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L138).
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L137).
 
 ```typescript
 async function assembleManifest(
@@ -5289,9 +5282,9 @@ function createUserAgentFromPkgJson(pkgData: {
 
 #### `deriveApiV1BaseUrl` (value)
 
-Derive the v1 API base URL from a v0 base URL by swapping the trailing `/v0/` segment for `/v1/`. Returns undefined when `baseUrl` does not end in `/v0/` — a custom base with a different version segment has no known v1 counterpart.
+Derive the v1 API base URL from a v0 base URL by swapping the trailing `/v0/` segment for `/v1/`. Returns undefined when `baseUrl` does not end in `/v0/`. A custom base with a different version segment has no known v1 counterpart.
 
-Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L192).
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L191).
 
 ```typescript
 function deriveApiV1BaseUrl(baseUrl: string): string | undefined
@@ -5326,7 +5319,7 @@ async function fetchChunkedBytes(
 
 #### `fetchRawBytes` (value)
 
-Single GET against `<baseUrl>/blob/<hash>`. No prefix logic — callers pass an already-resolved hash (manifest hash, chunk hash, or single blob).
+Single GET against `<baseUrl>/blob/<hash>`. Callers pass an already-resolved hash (manifest hash, chunk hash, or single blob).
 
 Declared in [src/blob.mts](../src/blob.mts#L227).
 
@@ -5344,10 +5337,7 @@ Get all available SDK methods with their requirements. Returns complete mapping 
 Declared in [src/quota-utils.mts](../src/quota-utils.mts#L72).
 
 ```typescript
-function getAllMethodRequirements(): Record<
-  ApiMethodName,
-  ApiRequirement
->
+function getAllMethodRequirements(): Record<ApiMethodName, ApiRequirement>
 ```
 
 #### `getMethodRequirements` (value)
@@ -5357,7 +5347,9 @@ Get complete requirement information for a SDK method. Returns both quota cost a
 Declared in [src/quota-utils.mts](../src/quota-utils.mts#L98).
 
 ```typescript
-function getMethodRequirements(methodName: SocketSdkOperations | string): ApiRequirement
+function getMethodRequirements(
+  methodName: SocketSdkOperations | string,
+): ApiRequirement
 ```
 
 #### `getMethodsByPermissions` (value)
@@ -5407,7 +5399,9 @@ Get required permissions for a specific SDK method. Returns array of permission 
 Declared in [src/quota-utils.mts](../src/quota-utils.mts#L221).
 
 ```typescript
-function getRequiredPermissions(methodName: SocketSdkOperations | string): string[]
+function getRequiredPermissions(
+  methodName: SocketSdkOperations | string,
+): string[]
 ```
 
 #### `hasQuotaForMethods` (value)
@@ -5427,7 +5421,7 @@ function hasQuotaForMethods(
 
 Stream-hash a file's contents with sha256 (1 MiB read chunks), never buffering the whole file in memory. Returns the lowercase hex digest and the total byte count read.
 
-Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L203).
+Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L202).
 
 ```typescript
 async function hashFile(filePath: string): Promise<FileHashResult>
@@ -5435,7 +5429,7 @@ async function hashFile(filePath: string): Promise<FileHashResult>
 
 #### `tryDecodeText` (value)
 
-Decode bytes as UTF-8 in fatal mode to detect binary content. Returns undefined when the bytes are not valid UTF-8 or contain a NUL byte (a typical binary marker).
+Decode bytes as UTF-8 in fatal mode to detect binary content. Returns undefined when the bytes are not valid UTF-8 or contain a NUL byte, which marks binary content.
 
 Declared in [src/blob.mts](../src/blob.mts#L283).
 
@@ -5443,7 +5437,12 @@ Declared in [src/blob.mts](../src/blob.mts#L283).
 function tryDecodeText(bytes: Uint8Array): string | undefined
 ```
 
+</details>
+
 ### `./testing`
+
+<details>
+<summary>Public exports</summary>
 
 #### `fixtures` (value)
 
@@ -5469,9 +5468,9 @@ Example:
 
 ```typescript
 const result = await sdk.getRepo('org', 'repo')
-  if (isErrorResult(result)) {
-    console.error(result.error) // Type-safe access
-  }
+if (isErrorResult(result)) {
+  console.error(result.error) // Type-safe access
+}
 ```
 
 Declared in [src/testing.mts](../src/testing.mts#L29).
@@ -5490,9 +5489,9 @@ Example:
 
 ```typescript
 const result = await sdk.getRepo('org', 'repo')
-  if (isSuccessResult(result)) {
-    console.log(result.data.name) // Type-safe access
-  }
+if (isSuccessResult(result)) {
+  console.log(result.data.name) // Type-safe access
+}
 ```
 
 Declared in [src/testing.mts](../src/testing.mts#L50).
@@ -5549,8 +5548,8 @@ Example:
 
 ```typescript
 nock('https://api.socket.dev')
-    .get('/v0/repo/org/repo')
-    .reply(404, mockApiErrorBody('Repository not found'))
+  .get('/v0/repo/org/repo')
+  .reply(404, mockApiErrorBody('Repository not found'))
 ```
 
 Declared in [src/testing.mts](../src/testing.mts#L71).
@@ -5572,7 +5571,7 @@ Example:
 
 ```typescript
 const response = mockErrorResponse('Not found', 404)
-  expect(response.success).toBe(false)
+expect(response.success).toBe(false)
 ```
 
 Declared in [src/testing.mts](../src/testing.mts#L285).
@@ -5592,14 +5591,12 @@ Create a mock SDK error with proper structure.
 Example:
 
 ```typescript
-const mockMethod = vi
-    .fn()
-    .mockRejectedValue(
-      mockSdkError('NOT_FOUND', {
-        status: 404,
-        message: 'Repository not found',
-      }),
-    )
+const mockMethod = vi.fn().mockRejectedValue(
+  mockSdkError('NOT_FOUND', {
+    status: 404,
+    message: 'Repository not found',
+  }),
+)
 ```
 
 Declared in [src/testing.mts](../src/testing.mts#L319).
@@ -5623,10 +5620,10 @@ Example:
 
 ```typescript
 const mockGet = vi
-    .fn()
-    .mockResolvedValue(
-      mockSdkResult<'getRepo'>(true, { id: '123', name: 'repo' }),
-    )
+  .fn()
+  .mockResolvedValue(
+    mockSdkResult<'getRepo'>(true, { id: '123', name: 'repo' }),
+  )
 ```
 
 Declared in [src/testing.mts](../src/testing.mts#L394).
@@ -5659,7 +5656,7 @@ Example:
 
 ```typescript
 const response = mockSuccessResponse({ id: '123', name: 'test' })
-  expect(response.success).toBe(true)
+expect(response.success).toBe(true)
 ```
 
 Declared in [src/testing.mts](../src/testing.mts#L434).
@@ -5830,7 +5827,12 @@ const scanFixtures = {
 } as const
 ```
 
+</details>
+
 ### `./types/api`
+
+<details>
+<summary>Public exports</summary>
 
 #### `$defs` (type)
 
@@ -5858,7 +5860,12 @@ Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L6).
 
 Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2298).
 
+</details>
+
 ### `./types/api-helpers`
+
+<details>
+<summary>Public exports</summary>
 
 #### `OpErrorType` (type)
 
@@ -5914,7 +5921,12 @@ type OpReturnType<Operation> = Operation extends {
   : unknown
 ```
 
+</details>
+
 ### `./types/api-v1`
+
+<details>
+<summary>Public exports</summary>
 
 #### `$defs` (type)
 
@@ -5941,3 +5953,5 @@ Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L6
 #### `webhooks` (type)
 
 Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1287).
+
+</details>

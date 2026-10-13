@@ -1,6 +1,6 @@
 /**
  * @file Domain group definitions and quota labels for the API docs generator
- *   (`scripts/repo/gen-api-docs.mts`). Extracted from `gen-api-docs-lib.mts`
+ *   (`scripts/repo/gen-api-docs.mts`). Extracted from `api-doc/lib.mts`
  *   so that file stays under the file-size cap. Each GROUPS entry's `methods`
  *   list controls inclusion + ordering inside the rendered domain section; any
  *   method not listed falls through to the catch-all "Other" group.
