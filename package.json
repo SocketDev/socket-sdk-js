@@ -176,6 +176,8 @@
     "mcp:schemas:check": "node scripts/fleet/mcp/schemas.mts check",
     "mcp:schemas:save": "node scripts/fleet/mcp/schemas.mts save",
     "mcp:status": "node scripts/fleet/mcp/connect.mts --status",
+    "notion:planning:update": "node scripts/fleet/notion/planning/update.mts",
+    "notion:standup:update": "node scripts/fleet/notion/standup/update.mts",
     "npm:approve": "node scripts/fleet/npm/approve.mts",
     "npm:auth": "node scripts/fleet/npm/auth/run.mts",
     "npm:auth:browser": "node scripts/fleet/npm-auth-browser.mts",
@@ -272,10 +274,8 @@
     "update:pnpm": "node scripts/fleet/update/pnpm.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
     "weekly-update:ci": "gh workflow run cron-weekly-update.yml",
-    "worktree:create": "node scripts/fleet/worktree/create/run.mts",
-    "notion:planning:update": "node scripts/fleet/notion/planning/update.mts",
-    "notion:standup:update": "node scripts/fleet/notion/standup/update.mts",
-    "workflow:actions:lock": "node scripts/fleet/workflow/actions-lock/run.mts"
+    "workflow:actions:lock": "node scripts/fleet/workflow/actions-lock/run.mts",
+    "worktree:create": "node scripts/fleet/worktree/create/run.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
