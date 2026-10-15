@@ -421,12 +421,7 @@
           "integrity": "sha512-BflfuUwzGfNGYPnbhIjs2bDXTSjpNqpXUjZ4AjPQhN/Eklpg1K2dlnyfeJX2ZQCikLknO02e5QnowSxuFgiihw=="
         }
       },
-      "description": "Cache front-end for cargo: put mbx in front of any cargo command and one cache warms every worktree and CI run, pruning itself to a size budget.",
-      "soakBypass": {
-        "published": "2026-10-03",
-        "removable": "2026-10-10",
-        "version": "1.22.0"
-      }
+      "description": "Cache front-end for cargo: put mbx in front of any cargo command and one cache warms every worktree and CI run, pruning itself to a size budget."
     },
     "mise": {
       "binaryName": "mise",
@@ -444,7 +439,11 @@
         "autoInstall": false,
         "autoUpdate": false,
         "execAutoInstall": false,
-        "idiomaticVersionFileEnableTools": ["node", "rust", "go"],
+        "idiomaticVersionFileEnableTools": [
+          "node",
+          "rust",
+          "go"
+        ],
         "locked": true,
         "notFoundAutoInstall": false,
         "notFoundSystemFallback": false,
@@ -521,12 +520,7 @@
           "integrity": "sha512-zaBDy80sdWAo7Ht71p1wmrgyTvdN1FkeirMzKTHH++kX+ahDzEPaeoGsLEvFTR20OL8VysuLGKQVfxhbSqNlRA=="
         }
       },
-      "description": "mold high-speed ELF linker for Linux builds",
-      "soakBypass": {
-        "version": "3.0.0",
-        "published": "2026-10-05",
-        "removable": "2026-10-12"
-      }
+      "description": "mold high-speed ELF linker for Linux builds"
     },
     "npm": {
       "notes": [
@@ -538,11 +532,6 @@
       "repository": "npm:npm",
       "version": "12.2.0",
       "integrity": "sha512-ZsJjKpTnlmSXOLLXiU1xDCzC4Wlok4IwZmh/aw2KUuXytU7q6qMv/cUT7MoeSf95Slwuw/lRXYefGzGCspHPNQ==",
-      "soakBypass": {
-        "version": "12.2.0",
-        "published": "2026-09-30",
-        "removable": "2026-10-07"
-      },
       "origin": "npm"
     },
     "opencode": {
@@ -915,12 +904,7 @@
           "integrity": "sha512-zi2isECucghnSVLVDjTaABKr/2nsmiUHVGEELcj1/7DRLbFIYLq+m3zpcfRJTLstElWbht2PjIJQuHWtnrzLrw=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-10-01",
-        "removable": "2026-10-08",
-        "version": "1.15.4"
-      }
+      "origin": "gh-asset"
     },
     "sfw-free": {
       "notes": [
@@ -962,12 +946,7 @@
           "integrity": "sha512-kh7yWn5TzLGI+rpujGwzX+HIaVa1/BHTVpJ58cBAYnwPSuYRhgUciX0vqKKoK3P3nYYMGrN7IvhZ4L91krsYLw=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-10-01",
-        "removable": "2026-10-08",
-        "version": "1.15.4"
-      }
+      "origin": "gh-asset"
     },
     "uv": {
       "notes": [
@@ -1006,12 +985,7 @@
           "integrity": "sha512-8vtkGZbm5WXtEcuwkrgp50tNdxZpHah9tcwR/F9uMeNgw1yYTyVf6RYHhvliPnPUpMY3JEdzgUbID4LOhLflsw=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "version": "0.12.23",
-        "published": "2026-10-03",
-        "removable": "2026-10-10"
-      }
+      "origin": "gh-asset"
     },
     "zizmor": {
       "description": "GitHub Actions security linter — audits .github/ for workflow-injection / credential-leak patterns.",

@@ -178,17 +178,24 @@ export async function main(): Promise<void> {
   })
   safeDeleteSync(plan.outputDirectory)
   mkdirSync(plan.outputDirectory, { recursive: true })
-  const code = await runInherit(
-    process.execPath,
-    [plan.scriptPath, plan.target, plan.outputDirectory],
-    rootPath,
-  )
+  const code = await runNativeProducer(plan)
   if (code !== 0) {
     throw new Error(
       `Native producer failed. Where: ${plan.scriptPath}. Saw exit code ${code}; wanted exit code 0. Fix: repair the configured producer script.`,
     )
   }
   validateNativeBuildOutputs(plan)
+}
+
+export async function runNativeProducer(
+  plan: NativeBuildPlan,
+): Promise<number> {
+  return await runInherit(
+    process.execPath,
+    [plan.scriptPath, plan.target, plan.outputDirectory],
+    rootPath,
+    { MBX_REMOTE_URL: '' },
+  )
 }
 
 function loadConfig(): Record<string, unknown> | undefined {

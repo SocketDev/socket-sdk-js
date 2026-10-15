@@ -3194,6 +3194,7 @@ scripts/fleet/ai/model-training-policy.mts
 scripts/fleet/ai/odai.mts
 scripts/fleet/ai/odai/ci.mts
 scripts/fleet/ai/odai/diagnostics.mts
+scripts/fleet/ai/odai/image.generated.json
 scripts/fleet/ai/odai/run.mts
 scripts/fleet/ai/opencode-auth-store.mts
 scripts/fleet/ai/opencode-auth.mts
@@ -3814,7 +3815,10 @@ scripts/fleet/check/vite-is-rolldown-native.mts
 scripts/fleet/check/vitest-config-is-consolidated.mts
 scripts/fleet/check/webhooks-are-allowlisted.mts
 scripts/fleet/check/wheelhouse-controlled-files-are-classified.mts
+scripts/fleet/check/workflow-actions-are-locked.mts
+scripts/fleet/check/workflow-actions-lock-provenance-is-verified.mts
 scripts/fleet/check/workflow-cache-modes-are-safe.mts
+scripts/fleet/check/workflow-cache-modes-are-safe/release.mts
 scripts/fleet/check/workflow-cache-modes-are-safe/util.mts
 scripts/fleet/check/workflow-env-is-action-supplied.mts
 scripts/fleet/check/workflow-envs-have-full-fleet-env.mts
@@ -3969,6 +3973,7 @@ scripts/fleet/cover/group-thresholds.mts
 scripts/fleet/cover/lane-budget.mts
 scripts/fleet/cover/lane-contract.mts
 scripts/fleet/cover/lane-paths.mts
+scripts/fleet/cover/lane-report.mts
 scripts/fleet/cover/lanes.mts
 scripts/fleet/cover/launcher.mts
 scripts/fleet/cover/line-totals.mts
@@ -3994,6 +3999,7 @@ scripts/fleet/cover/shard/coverage.mts
 scripts/fleet/cover/shard/discovery.mts
 scripts/fleet/cover/shard/gate.mts
 scripts/fleet/cover/shard/inventory.mts
+scripts/fleet/cover/shard/partitions.mts
 scripts/fleet/cover/shard/paths.mts
 scripts/fleet/cover/shard/reporter.mts
 scripts/fleet/cover/shard/revision.mts
@@ -4158,6 +4164,7 @@ scripts/fleet/fs/strict.mts
 scripts/fleet/fs/tracked-globs.mts
 scripts/fleet/fs/unix-path.mts
 scripts/fleet/fsync-dist.mts
+scripts/fleet/fuzz.mts
 scripts/fleet/fuzz/report-crash.mts
 scripts/fleet/gen/_shared/opencode/server.mts
 scripts/fleet/gen/_shared/opencode/tool.mts
@@ -4863,6 +4870,7 @@ scripts/fleet/registry/npm/pinned-npm.mts
 scripts/fleet/registry/npm/placeholder.mts
 scripts/fleet/registry/npm/promote.mts
 scripts/fleet/registry/npm/provenance.mts
+scripts/fleet/registry/npm/provenance/verify.mts
 scripts/fleet/registry/npm/publish-command.mts
 scripts/fleet/registry/npm/publish-context.mts
 scripts/fleet/registry/npm/publish-dispatch-context.mts
@@ -4935,6 +4943,7 @@ scripts/fleet/release/pipeline/gate-runners.mts
 scripts/fleet/release/pipeline/reconcile/run.mts
 scripts/fleet/release/pipeline/release-runners.mts
 scripts/fleet/release/pipeline/release-runners/promote.mts
+scripts/fleet/release/pipeline/release-runners/provenance.mts
 scripts/fleet/release/pipeline/release-runners/release-markers.mts
 scripts/fleet/release/pipeline/release-runners/scan-stage.mts
 scripts/fleet/release/pipeline/release-runners/stage-availability.mts
@@ -5318,6 +5327,13 @@ scripts/fleet/weekly-update/stale-pr.mts
 scripts/fleet/weekly-update/superseded-cli.mts
 scripts/fleet/weekly-update/superseded.mts
 scripts/fleet/whose-work.mts
+scripts/fleet/workflow/actions-lock/coverage.mts
+scripts/fleet/workflow/actions-lock/parse.mts
+scripts/fleet/workflow/actions-lock/projection.mts
+scripts/fleet/workflow/actions-lock/refs.mts
+scripts/fleet/workflow/actions-lock/run.mts
+scripts/fleet/workflow/actions-lock/sources.mts
+scripts/fleet/workflow/actions-lock/types.mts
 scripts/fleet/workflow/caches/prune.mts
 scripts/fleet/workflow/runs/prune.mts
 scripts/fleet/worktree-sweep.mts

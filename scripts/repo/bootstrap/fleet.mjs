@@ -10892,6 +10892,13 @@ function installFiles(filesDir, dest, manifest, options) {
   for (let i = 0, { length } = rels; i < length; i += 1) {
     const rel = rels[i]
     const target = path.join(dest, rel)
+    if (
+      opts.preserveTracked === true &&
+      (isAlwaysTrackedSurface(rel) || rel === '.gitignore')
+    ) {
+      skippedAlwaysTracked += 1
+      continue
+    }
     const stat = repoOwnedPaths.has(normalizeBundlePath(rel))
       ? lstatSync(target, { throwIfNoEntry: false })
       : void 0
@@ -14270,6 +14277,7 @@ async function installFleet(config) {
         }
       : memberManifest
     const installResult = installFiles(filesDir, dest, runtimeManifest, {
+      preserveTracked,
       refreshTracked: cfg.refreshTracked === true,
       preservedPaths,
     })
