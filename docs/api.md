@@ -4468,7 +4468,7 @@ type ResponsibleDirectDependencies = Record<
 
 #### `SdkAuthenticationError` (value)
 
-Declared in [src/auth.mts](../src/auth.mts#L6).
+Declared in [src/auth.mts](../src/auth.mts#L7).
 
 ```typescript
 class SdkAuthenticationError extends Error {
