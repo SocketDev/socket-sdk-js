@@ -99,6 +99,7 @@
     "ci:check": "node scripts/fleet/commands/run.mts ci check",
     "ci:diagnose": "node .claude/skills/fleet/agent-ci/run.mts",
     "ci:fix": "node scripts/fleet/ci/fix/run.mts",
+    "ci:fix:preview": "node scripts/fleet/ci/fix/preview.mts",
     "ci:gates": "node scripts/fleet/ci/gates/run.mts",
     "ci:local": "node scripts/fleet/ci/local/run.mts run --all --quiet --github-token --pause-on-failure",
     "ci:test": "node scripts/fleet/commands/run.mts ci test",
@@ -272,7 +273,9 @@
     "weekly-update": "node scripts/fleet/weekly-update.mts",
     "weekly-update:ci": "gh workflow run cron-weekly-update.yml",
     "worktree:create": "node scripts/fleet/worktree/create/run.mts",
-    "ci:fix:preview": "node scripts/fleet/ci/fix/preview.mts"
+    "notion:planning:update": "node scripts/fleet/notion/planning/update.mts",
+    "notion:standup:update": "node scripts/fleet/notion/standup/update.mts",
+    "workflow:actions:lock": "node scripts/fleet/workflow/actions-lock/run.mts"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",

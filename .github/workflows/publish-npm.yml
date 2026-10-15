@@ -164,9 +164,11 @@ jobs:
           node --input-type=module <<'NODE'
           import { appendFileSync } from 'node:fs';
           import { resolveRunPlan } from './scripts/fleet/cover/execution.mts';
+          import { resolveShardCoverageSources } from './scripts/fleet/cover/shard/sources.mts';
           const plan = resolveRunPlan(process.cwd());
           if (plan.configErrors.length) throw new Error(plan.configErrors.join('\n'));
           if (!['bun', 'vitest'].includes(plan.runner)) throw new Error('Unsupported coverage runner. Fix the repository coverage settings.');
+          if (plan.runner === 'vitest') resolveShardCoverageSources(process.cwd());
           appendFileSync(process.env.GITHUB_OUTPUT, `runner=${plan.runner}\n`);
           const config = JSON.parse(await (await import('node:fs/promises')).readFile('.config/repo/socket-wheelhouse.json', 'utf8'));
           appendFileSync(process.env.GITHUB_OUTPUT, `shared-build=${plan.runner === 'vitest' && Array.isArray(config.build?.coverageArtifacts) && config.build.coverageArtifacts.length > 0}\n`);
@@ -638,6 +640,14 @@ jobs:
           fi
           echo "dist-tag 'latest' is allowed from $REF (consumable line: $LATEST_BRANCH)."
 
+      - name: Snapshot source-bound native controllers
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 0600 scripts/fleet/registry/napi-matrix.mts "$RUNNER_TEMP/napi-matrix.mts"
+          install -m 0600 scripts/fleet/npm/native/build.mts "$RUNNER_TEMP/native-build.mts"
+          install -m 0600 scripts/fleet/npm/native-artifact-files.mts "$RUNNER_TEMP/native-artifact-files.mts"
+          install -m 0600 scripts/fleet/npm/native-artifacts.mts "$RUNNER_TEMP/native-artifacts.mts"
       - name: Set up and install
         uses: ./.github/actions/fleet/setup-and-install
         env:
@@ -652,6 +662,15 @@ jobs:
           # key, hydration still pulls public GHCR anonymously.
           payload-token-client-id: ${{ steps.content-trust.outputs.trusted == 'true' && (secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID) || '' }}
           payload-token-private-key: ${{ steps.content-trust.outputs.trusted == 'true' && secrets.SOCKET_RELEASE_APP_PRIVATE_KEY || '' }}
+      - name: Restore source-bound native controllers
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p scripts/fleet/npm/native
+          install -m 0600 "$RUNNER_TEMP/napi-matrix.mts" scripts/fleet/registry/napi-matrix.mts
+          install -m 0600 "$RUNNER_TEMP/native-build.mts" scripts/fleet/npm/native/build.mts
+          install -m 0600 "$RUNNER_TEMP/native-artifact-files.mts" scripts/fleet/npm/native-artifact-files.mts
+          install -m 0600 "$RUNNER_TEMP/native-artifacts.mts" scripts/fleet/npm/native-artifacts.mts
       - name: Validate publish task name
         env:
           PUBLISH_TASK_NAME: ${{ inputs.task-name }}
@@ -720,6 +739,7 @@ jobs:
         with:
           client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
           private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
       # The version resolver consumes a prerelease hint, uses configured odai
       # for patch/minor, or defaults to minor.
@@ -769,6 +789,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           SERVER_URL: ${{ github.server_url }}
+          SOURCE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           if [ "$GITHUB_REF" != "refs/heads/$DEFAULT_BRANCH" ]; then
@@ -783,13 +804,17 @@ jobs:
           export GIT_CONFIG_COUNT=1
           export GIT_CONFIG_KEY_0="http.${SERVER_URL}/.extraheader"
           export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic ${AUTH_B64}"
-          git fetch --no-tags --prune --depth 1 origin "+refs/heads/${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}"
-          git checkout -q --detach "refs/remotes/origin/${DEFAULT_BRANCH}"
+          git fetch --no-tags --prune --depth 1 origin "$SOURCE_SHA"
+          git checkout -q --detach FETCH_HEAD
           install -m 0600 scripts/fleet/npm/scan/staged.mts "$RUNNER_TEMP/npm-scan-staged.mts"
           install -m 0600 scripts/fleet/npm/scan/receipt.mts "$RUNNER_TEMP/npm-scan-receipt.mts"
           install -m 0600 scripts/fleet/registry/npm/scan/ndjson.mts "$RUNNER_TEMP/npm-registry-scan-ndjson.mts"
           install -m 0600 scripts/fleet/registry/npm/scan/run.mts "$RUNNER_TEMP/npm-registry-scan.mts"
           install -m 0600 scripts/fleet/registry/npm/staged.mts "$RUNNER_TEMP/npm-registry-staged.mts"
+          install -m 0600 scripts/fleet/registry/napi-matrix.mts "$RUNNER_TEMP/napi-matrix.mts"
+          install -m 0600 scripts/fleet/npm/native/build.mts "$RUNNER_TEMP/native-build.mts"
+          install -m 0600 scripts/fleet/npm/native-artifact-files.mts "$RUNNER_TEMP/native-artifact-files.mts"
+          install -m 0600 scripts/fleet/npm/native-artifacts.mts "$RUNNER_TEMP/native-artifacts.mts"
       - name: Verify release source before setup
         shell: bash
         env:
@@ -877,11 +902,17 @@ jobs:
       - name: Restore trusted scan controller
         shell: bash
         run: |
+          set -euo pipefail
           install -m 0600 "$RUNNER_TEMP/npm-scan-staged.mts" scripts/fleet/npm/scan/staged.mts
           install -m 0600 "$RUNNER_TEMP/npm-scan-receipt.mts" scripts/fleet/npm/scan/receipt.mts
           install -m 0600 "$RUNNER_TEMP/npm-registry-scan-ndjson.mts" scripts/fleet/registry/npm/scan/ndjson.mts
           install -m 0600 "$RUNNER_TEMP/npm-registry-scan.mts" scripts/fleet/registry/npm/scan/run.mts
           install -m 0600 "$RUNNER_TEMP/npm-registry-staged.mts" scripts/fleet/registry/npm/staged.mts
+          mkdir -p scripts/fleet/npm/native
+          install -m 0600 "$RUNNER_TEMP/napi-matrix.mts" scripts/fleet/registry/napi-matrix.mts
+          install -m 0600 "$RUNNER_TEMP/native-build.mts" scripts/fleet/npm/native/build.mts
+          install -m 0600 "$RUNNER_TEMP/native-artifact-files.mts" scripts/fleet/npm/native-artifact-files.mts
+          install -m 0600 "$RUNNER_TEMP/native-artifacts.mts" scripts/fleet/npm/native-artifacts.mts
       - name: Validate publish task name
         env:
           PUBLISH_TASK_NAME: ${{ inputs.task-name }}

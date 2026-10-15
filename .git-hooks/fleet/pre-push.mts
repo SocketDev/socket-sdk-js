@@ -47,6 +47,7 @@ import {
 } from '../_shared/push/repo-gates.mts'
 import { scanSignedCommits } from '../_shared/push/signatures.mts'
 import { isDurableBackupPush } from '../_shared/push/durable-ref.mts'
+import { verifyReleaseLedgerGenesisPush } from '../_shared/push/release-ledger.mts'
 import { isSquashHistoryRepo } from '../_shared/push/squash-history.mts'
 import { checkPrCommitCount } from '../_shared/push/pr-commit-count.mts'
 
@@ -62,6 +63,13 @@ const readStdin = (): Promise<string> =>
     process.stdin.on('end', () => resolve(buf))
   })
 
+function resolvePushArguments(): { remote: string; destination: string } {
+  return {
+    remote: process.argv[2] || 'origin',
+    destination: process.argv[3] ?? '',
+  }
+}
+
 const main = async (): Promise<number> => {
   debugCheck('Running mandatory pre-push validation…')
 
@@ -70,12 +78,16 @@ const main = async (): Promise<number> => {
     return 1
   }
 
-  const remote = process.argv[2] || 'origin'
-  // url at process.argv[3] is unused.
+  const { remote, destination } = resolvePushArguments()
 
   const stdin = await readStdin()
   let totalErrors = 0
   const refLines = splitLines(stdin.trim()).filter(Boolean)
+  if (
+    await verifyReleaseLedgerGenesisPush(refLines, destination, process.cwd())
+  ) {
+    return 0
+  }
   // Every range this push carries, accumulated so the file-oriented gates below
   // can scope to the pushed commits instead of the working tree.
   const pushedRanges: string[] = []
