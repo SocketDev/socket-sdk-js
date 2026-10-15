@@ -1,6 +1,7 @@
 /**
  * @file Socket API authentication resolved for each request.
  */
+import { SOCKET_PUBLIC_API_TOKEN } from './constants.mts'
 import type { HeadersRecord, RequestOptionsWithHooks } from './types/core.mts'
 
 export class SdkAuthenticationError extends Error {
@@ -73,6 +74,11 @@ export function validateSdkApiToken(apiToken: string): string {
 
   if (/[\r\n]/.test(trimmedToken)) {
     throw new TypeError('Invalid "apiToken": remove newline characters')
+  }
+  if (trimmedToken === SOCKET_PUBLIC_API_TOKEN) {
+    throw new TypeError(
+      'The retired public Socket API credential cannot be used for authentication. Use a current credential or token-free SocketPurlClient.',
+    )
   }
   return trimmedToken
 }

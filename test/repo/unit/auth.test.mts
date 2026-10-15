@@ -7,11 +7,53 @@ import {
   getSdkAuthorization,
   resolveSdkRequestHeaders,
   SdkAuthenticationError,
+  validateSdkApiToken,
 } from '../../../src/auth.mts'
+import { SOCKET_PUBLIC_API_TOKEN } from '../../../src/constants.mts'
 
 import type { RequestOptionsWithHooks } from '../../../src/types/core.mts'
 
 describe('per-request authentication', () => {
+  it.each([SOCKET_PUBLIC_API_TOKEN, `\t ${SOCKET_PUBLIC_API_TOKEN} \n`])(
+    'rejects the retired public credential',
+    token => {
+      expect(() => validateSdkApiToken(token)).toThrow(TypeError)
+    },
+  )
+
+  it.each(['basic', 'bearer'] as const)(
+    'rejects the retired public credential with %s authorization',
+    authScheme => {
+      expect(() =>
+        getSdkAuthorization(SOCKET_PUBLIC_API_TOKEN, authScheme),
+      ).toThrow(TypeError)
+    },
+  )
+
+  it.each(['basic', 'bearer'] as const)(
+    'rejects a retired provider credential with %s authorization before replacing static headers',
+    async authScheme => {
+      let failure: unknown
+      try {
+        await resolveSdkRequestHeaders({
+          headers: { Authorization: 'synthetic-valid-static-token' },
+          authProvider: async () => ({
+            token: ` ${SOCKET_PUBLIC_API_TOKEN}\t`,
+            authScheme,
+          }),
+        })
+      } catch (error) {
+        failure = error
+      }
+      expect(failure).toBeInstanceOf(SdkAuthenticationError)
+      if (!(failure instanceof SdkAuthenticationError)) {
+        throw new Error('Expected SDK authentication failure')
+      }
+      expect(String(failure)).not.toContain(SOCKET_PUBLIC_API_TOKEN)
+      expect(String(failure.cause)).not.toContain(SOCKET_PUBLIC_API_TOKEN)
+    },
+  )
+
   it('removes case-insensitive stale authorization without dropping other headers', async () => {
     const headers = await resolveSdkRequestHeaders({
       headers: {

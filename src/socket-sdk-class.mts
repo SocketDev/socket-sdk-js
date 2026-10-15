@@ -77,7 +77,6 @@ import {
 import { correlateMalwareResults } from './malware.mts'
 import { SOCKET_PURL_API_URL, SocketPurlClient } from './public-purl-client.mts'
 import { fetchPurlRecords, streamBatchPurlRecords } from './purl.mts'
-import type { PurlRecordTransform } from './purl.mts'
 import type {
   OrgPurlQuery,
   PurlComponents,
@@ -100,8 +99,6 @@ import {
   DEFAULT_POLL_INTERVAL,
   DEFAULT_RETRIES,
   DEFAULT_RETRY_DELAY,
-  publicPolicy,
-  SOCKET_PUBLIC_API_TOKEN,
   SOCKET_PUBLIC_BLOB_STORE_URL,
 } from './constants.mts'
 import {
@@ -120,7 +117,6 @@ import {
   createRequestWithJson,
   getResponseJson,
   isResponseOk,
-  reshapeArtifactForPublicPolicy,
   ResponseError,
 } from './http-client.mts'
 import {
@@ -262,7 +258,6 @@ export class SocketSdk {
   readonly #apiContext: SdkApiContext
   readonly #purlApiContext: SdkApiContext
   readonly #apiV1BaseUrl: string | undefined
-  readonly #apiToken: string
   readonly #baseUrl: string
   readonly #cache: TtlCache | undefined
   readonly #cacheByTtl: Map<number, TtlCache>
@@ -299,7 +294,6 @@ export class SocketSdk {
 
     this.#apiV1BaseUrl =
       apiV1BaseUrl === undefined ? undefined : normalizeBaseUrl(apiV1BaseUrl)
-    this.#apiToken = trimmedToken
     this.#baseUrl = normalizeBaseUrl(baseUrl)
     this.#cacheTtlConfig = cacheTtl
     // For backward compatibility, if cacheTtl is a number, use it as default TTL.
@@ -744,16 +738,12 @@ export class SocketSdk {
     componentsObj: PurlComponents,
     queryParams?: PurlQuery | undefined,
   ): Promise<PurlFetchResult> {
-    return await fetchPurlRecords(
-      this.#purlApiContext,
-      {
-        path: 'batch',
-        method: 'POST',
-        body: componentsObj,
-        query: queryParams,
-      },
-      this.#purlTransform(queryParams),
-    )
+    return await fetchPurlRecords(this.#purlApiContext, {
+      path: 'batch',
+      method: 'POST',
+      body: componentsObj,
+      query: queryParams,
+    })
   }
 
   /**
@@ -773,30 +763,12 @@ export class SocketSdk {
     componentsObj: PurlComponents,
     options?: BatchPackageStreamOptions | undefined,
   ): AsyncGenerator<PurlStreamResult> {
-    const opts = { __proto__: null, ...options } as typeof options
     return streamBatchPurlRecords(
       this.#purlApiContext,
       'batch',
       componentsObj,
       options,
-      this.#purlTransform(opts?.queryParams),
     )
-  }
-
-  #purlTransform(
-    queryParams?: PurlQuery | undefined,
-  ): PurlRecordTransform | undefined {
-    if (this.#apiToken !== SOCKET_PUBLIC_API_TOKEN) {
-      return undefined
-    }
-    return record =>
-      '_type' in record
-        ? record
-        : reshapeArtifactForPublicPolicy(record, {
-            actions: queryParams?.actions,
-            isAuthenticated: false,
-            policy: publicPolicy,
-          })
   }
 
   /**
