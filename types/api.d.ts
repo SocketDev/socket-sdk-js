@@ -8,38 +8,52 @@ export interface paths {
     /**
      * Get Packages by PURL.
      *
-     * _This endpoint is deprecated._* Deprecated since 2026-01-05. Batch
-     * retrieval of package metadata and alerts by PURL strings. Compatible with
-     * CycloneDX reports. Package URLs (PURLs) are an ecosystem agnostic way to
-     * identify packages. CycloneDX SBOMs use the purl format to identify
-     * components. This endpoint supports fetching metadata and alerts for
-     * multiple packages at once by passing an array of purl strings, or by
-     * passing an entire CycloneDX report. **Note:** This endpoint has a batch
-     * size limit (default: 1024 PURLs per request). Requests exceeding this
-     * limit will return a 400 Bad Request error. More information on purl and
-     * CycloneDX:
+     * _This endpoint is deprecated._* Deprecated since 2026-01-05.
+     *
+     * Batch retrieval of package metadata and alerts by PURL strings.
+     * Compatible with CycloneDX reports.
+     *
+     * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+     * CycloneDX SBOMs use the purl format to identify components. This endpoint
+     * supports fetching metadata and alerts for multiple packages at once by
+     * passing an array of purl strings, or by passing an entire CycloneDX
+     * report.
+     *
+     * **Note:** This endpoint has a batch size limit (default: 1024 PURLs per
+     * request). Requests exceeding this limit will return a 400 Bad Request
+     * error.
+     *
+     * More information on purl and CycloneDX:
      *
      * - [`purl` Spec](https://github.com/package-url/purl-spec)
      * - [CycloneDX
-     *   Spec](https://cyclonedx.org/specification/overview/#components) This
-     *   endpoint returns the latest available alert data for artifacts in the
-     *   batch (stale while revalidate). Actively running analysis will be
-     *   returned when available on subsequent runs. When `alerts=true`, Socket
-     *   may synthesize two alert types to make partial results actionable:
+     *   Spec](https://cyclonedx.org/specification/overview/#components)
+     *
+     * This endpoint returns the latest available alert data for artifacts in
+     * the batch (stale while revalidate). Actively running analysis will be
+     * returned when available on subsequent runs.
+     *
+     * When `alerts=true`, Socket may synthesize two alert types to make partial
+     * results actionable:
+     *
      * - `pendingScan`: the package is known but analysis has not completed yet
-     * - `notFound`: Socket could not resolve the package/version metadata When
-     *   `purlErrors=true`, unresolved `notFound` inputs keep the legacy
-     *   `purlError` stream shape instead of emitting synthetic `notFound`
-     *   artifacts. Use `poll=false` (default) to fail open and return the
-     *   current known state quickly. Use `poll=true` to fail closed and wait up
-     *   to `timeoutSec` for pending analysis before returning. **Conda
-     *   (temporary compatibility):** `pkg:conda` inputs are served from the
-     *   already-scanned PyPI package with the same normalized name and version
-     *   when one exists; the response row keeps the original conda PURL in
-     *   `inputPurl` but reports `type: pypi`. Conda `build`, `subdir`, `type`,
-     *   and `channel` qualifiers are ignored, and conda packages without a
-     *   scanned PyPI counterpart return the normal `notFound` result. This
-     *   mapping will be replaced by native conda support.
+     * - `notFound`: Socket could not resolve the package/version metadata
+     *
+     * When `purlErrors=true`, unresolved `notFound` inputs keep the legacy
+     * `purlError` stream shape instead of emitting synthetic `notFound`
+     * artifacts.
+     *
+     * Use `poll=false` (default) to fail open and return the current known
+     * state quickly. Use `poll=true` to fail closed and wait up to `timeoutSec`
+     * for pending analysis before returning.
+     *
+     * **Conda (temporary compatibility):** `pkg:conda` inputs are served from
+     * the already-scanned PyPI package with the same normalized name and
+     * version when one exists; the response row keeps the original conda PURL
+     * in `inputPurl` but reports `type: pypi`. Conda `build`, `subdir`, `type`,
+     * and `channel` qualifiers are ignored, and conda packages without a
+     * scanned PyPI counterpart return the normal `notFound` result. This
+     * mapping will be replaced by native conda support.
      *
      * ## Examples:
      *
@@ -98,6 +112,7 @@ export interface paths {
      * ```
      *
      * This endpoint consumes 100 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Packages:list
@@ -111,7 +126,9 @@ export interface paths {
      * Search dependencies.
      *
      * Search for any dependency that is being used in your organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - No Scopes Required, but authentication is required
@@ -122,13 +139,21 @@ export interface paths {
     /**
      * Create a snapshot of all dependencies from manifest information.
      *
-     * _This endpoint is deprecated._* Upload a set of manifest or lockfiles to
-     * get your dependency tree analyzed by Socket. You can upload multiple
-     * lockfiles in the same request, but each filename must be unique. The name
-     * of the file must be in the supported list. For example, these are valid
-     * filenames: "requirements.txt", "package.json", "folder/package.json", and
-     * "deep/nested/folder/package.json". This endpoint consumes 100 units of
-     * your quota. This endpoint requires the following org token scopes:
+     * _This endpoint is deprecated._*
+     *
+     * Upload a set of manifest or lockfiles to get your dependency tree
+     * analyzed by Socket. You can upload multiple lockfiles in the same
+     * request, but each filename must be unique.
+     *
+     * The name of the file must be in the supported list.
+     *
+     * For example, these are valid filenames: "requirements.txt",
+     * "package.json", "folder/package.json", and
+     * "deep/nested/folder/package.json".
+     *
+     * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Report:write
      *
@@ -141,8 +166,11 @@ export interface paths {
      * List full scans.
      *
      * Returns a paginated list of all full scans in an org, excluding SBOM
-     * artifacts. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * artifacts.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Full-scans:list
      */
@@ -151,16 +179,25 @@ export interface paths {
      * Create full scan.
      *
      * Create a full scan from a set of package manifest files. Returns a full
-     * scan including all SBOM artifacts. To get a list of supported filetypes
-     * that can be uploaded in a full-scan, see the [Get supported file
-     * types](/reference/getsupportedfiles) endpoint. The maximum number of
-     * files you can upload at a time is 10000 and each file can be no bigger
-     * than 268 MB. **Query Parameters:**
+     * scan including all SBOM artifacts.
+     *
+     * To get a list of supported filetypes that can be uploaded in a full-scan,
+     * see the [Get supported file types](/reference/getsupportedfiles)
+     * endpoint.
+     *
+     * The maximum number of files you can upload at a time is 10000 and each
+     * file can be no bigger than 268 MB.
+     *
+     * **Query Parameters:**
      *
      * - `scan_type` (optional): The type of scan to perform. Defaults to
      *   'socket'. Must be 32 characters or less. Used for categorizing multiple
-     *   SBOM heads per repository branch. This endpoint consumes 1 unit of your
-     *   quota. This endpoint requires the following org token scopes:
+     *   SBOM heads per repository branch.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Full-scans:create
      */
     post: operations['CreateOrgFullScan']
@@ -169,11 +206,15 @@ export interface paths {
     /**
      * Stream full scan.
      *
-     * Stream all SBOM artifacts for a full scan. This endpoint returns the
-     * latest, available alert data for artifacts in the full scan (stale while
-     * revalidate). Actively running analysis will be returned when available on
-     * subsequent runs. This endpoint consumes 1 unit of your quota. This
-     * endpoint requires the following org token scopes:
+     * Stream all SBOM artifacts for a full scan.
+     *
+     * This endpoint returns the latest, available alert data for artifacts in
+     * the full scan (stale while revalidate). Actively running analysis will be
+     * returned when available on subsequent runs.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Full-scans:list
      */
@@ -182,7 +223,9 @@ export interface paths {
      * Delete full scan.
      *
      * Delete an existing full scan.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Full-scans:delete
@@ -193,8 +236,10 @@ export interface paths {
     /**
      * Get full scan metadata.
      *
-     * Get metadata for a single full scan
+     * Get metadata for a single full scan.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Full-scans:list
@@ -205,10 +250,15 @@ export interface paths {
     /**
      * Diff Full Scans.
      *
-     * _This endpoint is deprecated._* Get the immutable difference between two
-     * existing Full Scans. The result uses the policies active when it was
-     * computed and may be cached for reuse. This endpoint consumes 1 unit of
-     * your quota. This endpoint requires the following org token scopes:
+     * _This endpoint is deprecated._*
+     *
+     * Get the immutable difference between two existing Full Scans. The result
+     * uses the policies active when it was computed and may be cached for
+     * reuse.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Full-scans:list
      *
@@ -220,10 +270,14 @@ export interface paths {
     /**
      * SCM Comment for Scan Diff.
      *
-     * _This endpoint is deprecated._* Get the dependency overview and
-     * dependency alert comments in GitHub flavored markdown between the diff
-     * between two existing full scans. This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes:
+     * _This endpoint is deprecated._*
+     *
+     * Get the dependency overview and dependency alert comments in GitHub
+     * flavored markdown between the diff between two existing full scans.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Full-scans:list
      *
@@ -236,7 +290,9 @@ export interface paths {
      * Download full scan files as tarball.
      *
      * Download all files associated with a full scan in tar format.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Full-scans:list
@@ -248,15 +304,20 @@ export interface paths {
      * Create full scan from archive.
      *
      * Create a full scan by uploading one or more archives. Supported archive
-     * formats include **.tar**, **.tar.gz/.tgz**, and **.zip**. Each uploaded
-     * archive is extracted server-side and any supported manifest files (like
-     * package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for
-     * the scan. If you upload multiple archives in a single request, the
-     * manifests from every archive are merged into one full scan. The response
-     * includes any files that were ignored. The maximum combined number of
-     * files extracted from your upload is 10000 and each extracted file can be
-     * no bigger than 268 MB. This endpoint consumes 1 unit of your quota. This
-     * endpoint requires the following org token scopes:
+     * formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.
+     *
+     * Each uploaded archive is extracted server-side and any supported manifest
+     * files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are
+     * ingested for the scan. If you upload multiple archives in a single
+     * request, the manifests from every archive are merged into one full scan.
+     * The response includes any files that were ignored.
+     *
+     * The maximum combined number of files extracted from your upload is 10000
+     * and each extracted file can be no bigger than 268 MB.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Full-scans:create
      */
@@ -269,8 +330,11 @@ export interface paths {
      * Create a new full scan by rescanning an existing scan. A "shallow" rescan
      * reapplies the latest policies to the previously cached dependency
      * resolution results. A "deep" rescan reruns dependency resolution and
-     * applies the latest policies to the results. This endpoint consumes 1 unit
-     * of your quota. This endpoint requires the following org token scopes:
+     * applies the latest policies to the results.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Full-scans:create
      */
@@ -280,9 +344,10 @@ export interface paths {
     /**
      * Export CSV of alerts for full scan.
      *
-     * Export a CSV file containing all alerts from a full scan. The CSV
-     * includes details about each alert and the affected packages. You can
-     * optionally filter using the request body "filters" array. Supported
+     * Export a CSV file containing all alerts from a full scan.
+     *
+     * The CSV includes details about each alert and the affected packages. You
+     * can optionally filter using the request body "filters" array. Supported
      * filter IDs include:
      *
      * - Alert.action (error|warn|monitor|ignore)
@@ -293,8 +358,12 @@ export interface paths {
      * - Dependency.type (direct|transitive)
      * - Dependency.scope (dev|normal)
      * - Dependency.usage (used|unused)
-     * - Manifest.file This endpoint consumes 1 unit of your quota. This endpoint
-     *   requires the following org token scopes:
+     * - Manifest.file
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Full-scans:list
      */
     post: operations['getOrgFullScanCsv']
@@ -303,10 +372,12 @@ export interface paths {
     /**
      * Generate PDF report for full scan.
      *
-     * Generate a PDF report for all alerts in a full scan. This endpoint
-     * streams a PDF document containing all alerts found in the full scan, with
-     * optional filtering and grouping options. Supported request body filter
-     * IDs include:
+     * Generate a PDF report for all alerts in a full scan.
+     *
+     * This endpoint streams a PDF document containing all alerts found in the
+     * full scan, with optional filtering and grouping options.
+     *
+     * Supported request body filter IDs include:
      *
      * - Alert.action (error|warn|monitor|ignore)
      * - Alert.type
@@ -316,8 +387,12 @@ export interface paths {
      * - Dependency.type (direct|transitive)
      * - Dependency.scope (dev|normal)
      * - Dependency.usage (used|unused)
-     * - Manifest.file This endpoint consumes 1 unit of your quota. This endpoint
-     *   requires the following org token scopes:
+     * - Manifest.file
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Full-scans:list
      */
     post: operations['getOrgFullScanPdf']
@@ -326,7 +401,8 @@ export interface paths {
     /**
      * Export CycloneDX SBOM (Beta)
      *
-     * Export a Socket SBOM as a CycloneDX SBOM
+     * Export a Socket SBOM as a CycloneDX SBOM.
+     *
      * Supported ecosystems:
      *
      * - Crates
@@ -337,9 +413,14 @@ export interface paths {
      * - Pypi
      * - Rubygems
      * - Spdx
-     * - Cdx Unsupported ecosystems are filtered from the export. This endpoint
-     *   consumes 1 unit of your quota. This endpoint requires the following org
-     *   token scopes:
+     * - Cdx
+     *
+     * Unsupported ecosystems are filtered from the export.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Report:read
      */
     get: operations['exportCDX']
@@ -349,6 +430,7 @@ export interface paths {
      * Export OpenVEX Document (Beta)
      *
      * Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
+     *
      * OpenVEX (Vulnerability Exploitability eXchange) documents communicate the
      * exploitability status of vulnerabilities in software products. This
      * export includes:
@@ -359,10 +441,15 @@ export interface paths {
      *   code is exploitable:
      * - Unreachable code → "not_affected" with justification
      * - Reachable code → "affected"
-     * - Unknown/pending → "under_investigation" Each statement in the document
-     *   represents a single artifact-vulnerability pair for granular
-     *   reachability information. This endpoint consumes 1 unit of your quota.
-     *   This endpoint requires the following org token scopes:
+     * - Unknown/pending → "under_investigation"
+     *
+     * Each statement in the document represents a single artifact-vulnerability
+     * pair for granular reachability information.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Report:read
      */
     get: operations['exportOpenVEX']
@@ -371,7 +458,8 @@ export interface paths {
     /**
      * Export SPDX SBOM (Beta)
      *
-     * Export a Socket SBOM as a SPDX SBOM
+     * Export a Socket SBOM as a SPDX SBOM.
+     *
      * Supported ecosystems:
      *
      * - Crates
@@ -382,9 +470,14 @@ export interface paths {
      * - Pypi
      * - Rubygems
      * - Spdx
-     * - Cdx Unsupported ecosystems are filtered from the export. This endpoint
-     *   consumes 1 unit of your quota. This endpoint requires the following org
-     *   token scopes:
+     * - Cdx
+     *
+     * Unsupported ecosystems are filtered from the export.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Report:read
      */
     get: operations['exportSPDX']
@@ -394,7 +487,9 @@ export interface paths {
      * List diff scans.
      *
      * Returns a paginated list of all diff scans in an organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Diff-scans:list
@@ -406,8 +501,11 @@ export interface paths {
      * Get diff scan.
      *
      * Get the difference between two full scans from an existing diff scan
-     * resource. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * resource.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Diff-scans:list
      */
@@ -416,7 +514,9 @@ export interface paths {
      * Delete diff scan.
      *
      * Delete an existing diff scan.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Diff-scans:delete
@@ -428,9 +528,11 @@ export interface paths {
      * SCM Comment for Diff Scan.
      *
      * Get the dependency overview and dependency alert comments in GitHub
-     * flavored markdown for an existing diff scan. This endpoint consumes 1
-     * unit of your quota. This endpoint requires the following org token
-     * scopes:
+     * flavored markdown for an existing diff scan.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Diff-scans:list
      */
@@ -444,11 +546,16 @@ export interface paths {
      * new full scan from uploaded manifest files. Returns metadata about the
      * diff scan. Once the diff scan is created, fetch the diff scan from the
      * [api_url](/reference/getDiffScanById) URL to get the contents of the
-     * diff. The maximum number of files you can upload at a time is 10000 and
-     * each file can be no bigger than 268 MB. This endpoint consumes 1 unit of
-     * your quota. This endpoint requires the following org token scopes:
+     * diff.
      *
-     * - Repo:list
+     * The maximum number of files you can upload at a time is 10000 and each
+     * file can be no bigger than 268 MB.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - repo:list.
+     *
      * - Diff-scans:create
      * - Full-scans:create
      */
@@ -462,10 +569,13 @@ export interface paths {
      * be in the same repository. Returns metadata about the diff scan. Once the
      * diff scan is created, fetch the diff scan from the
      * [api_url](/reference/getDiffScanById) URL to get the contents of the
-     * diff. This endpoint consumes 1 unit of your quota. This endpoint requires
-     * the following org token scopes:
+     * diff.
      *
-     * - Diff-scans:create
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - diff-scans:create.
+     *
      * - Full-scans:list
      */
     post: operations['createOrgDiffScanFromIds']
@@ -475,8 +585,11 @@ export interface paths {
      * List Org Alert Triage.
      *
      * List triage actions for an organization. Results are paginated and can be
-     * sorted by created_at or updated_at. This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes:
+     * sorted by created_at or updated_at.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Triage:alerts-list
      */
@@ -487,9 +600,11 @@ export interface paths {
      * Create or update triage actions on organization alerts. Accepts a batch
      * of triage entries. Omit `uuid` to create a new entry; provide an existing
      * `uuid` to update it. Use `?force=true` for broad triages that lack a
-     * specific `alertKey` or granular package information. This endpoint
-     * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes:
+     * specific `alertKey` or granular package information.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Triage:alerts-update
      */
@@ -500,7 +615,9 @@ export interface paths {
      * Delete Org Alert Triage.
      *
      * Delete a specific triage rule by UUID.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Triage:alerts-update
@@ -516,8 +633,11 @@ export interface paths {
      * anchor fields (alert_type, repo, repo_label, artifact_*) that describe
      * the resolution scope. Tokens restricted to specific repositories only see
      * org-wide resolutions and resolutions anchored to their granted
-     * repositories. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * repositories.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-resolution:list
      */
@@ -530,9 +650,11 @@ export interface paths {
      * snapshot. Returns the same row shape as the list endpoint. Tokens
      * restricted to specific repositories may only create resolutions anchored
      * to a single granted repository via `location.repo`; org-wide or
-     * multi-repository selectors require an org-wide token. This endpoint
-     * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes:
+     * multi-repository selectors require an org-wide token.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-resolution:create
      */
@@ -545,8 +667,10 @@ export interface paths {
      * Fetch a single active alert resolution by UUID. Returns the same row
      * shape as the list endpoint. Tokens restricted to specific repositories
      * cannot read resolutions anchored to repositories outside their grants.
-     * This endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-resolution:read
      */
@@ -557,8 +681,11 @@ export interface paths {
      * Delete an alert resolution by UUID. Once deleted, alerts previously
      * hidden by this resolution will reappear after the next org snapshot.
      * Tokens restricted to specific repositories may only delete resolutions
-     * anchored to a granted repository. This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes:
+     * anchored to a granted repository.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-resolution:delete
      */
@@ -571,9 +698,11 @@ export interface paths {
      * List the alert policies of an organization. The default policy (which
      * applies to all repositories without a policy label) is always first,
      * followed by custom policies ordered by creation time. Requires a token
-     * with org-wide repository access; repo-restricted tokens receive 403. This
-     * endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     * with org-wide repository access; repo-restricted tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:list
      */
@@ -584,8 +713,11 @@ export interface paths {
      * Create an alert policy. A repo label with the same name is created to
      * scope the policy; repositories carrying that label are governed by the
      * policy. Requires a token with org-wide repository access; repo-restricted
-     * tokens receive 403. This endpoint consumes 1 unit of your quota. This
-     * endpoint requires the following org token scopes:
+     * tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:create
      */
@@ -598,8 +730,11 @@ export interface paths {
      * Fetch a single alert policy by ID. Use `default` as the ID for the
      * default policy, which applies to all repositories without a policy label.
      * Requires a token with org-wide repository access; repo-restricted tokens
-     * receive 403. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:read
      */
@@ -610,9 +745,11 @@ export interface paths {
      * Update an alert policy. Only the provided fields change; `repository_ids`
      * replaces the full set of repositories the policy scopes to. The default
      * policy cannot be renamed and its scope is implicit. Requires a token with
-     * org-wide repository access; repo-restricted tokens receive 403. This
-     * endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     * org-wide repository access; repo-restricted tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:update
      */
@@ -623,9 +760,11 @@ export interface paths {
      * Delete an alert policy along with its rules and repo label. Repositories
      * previously scoped to the policy fall back to the default policy after the
      * next org snapshot. The default policy cannot be deleted. Requires a token
-     * with org-wide repository access; repo-restricted tokens receive 403. This
-     * endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     * with org-wide repository access; repo-restricted tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:delete
      */
@@ -638,8 +777,11 @@ export interface paths {
      * List the custom rules of an alert policy in evaluation order (ascending
      * rank). Rules are evaluated before the policy baseline; the first matching
      * rule decides the alert action. Requires a token with org-wide repository
-     * access; repo-restricted tokens receive 403. This endpoint consumes 1 unit
-     * of your quota. This endpoint requires the following org token scopes:
+     * access; repo-restricted tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:list
      */
@@ -651,9 +793,11 @@ export interface paths {
      * order and the first matching rule decides the alert action. Provide at
      * most one of `position`, `rank`, `before_rule_id`, or `after_rule_id`; the
      * rule is placed first when no position is provided. Requires a token with
-     * org-wide repository access; repo-restricted tokens receive 403. This
-     * endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     * org-wide repository access; repo-restricted tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:create
      */
@@ -665,8 +809,11 @@ export interface paths {
      *
      * Fetch a single alert policy rule by UUID. Returns the same row shape as
      * the rules list endpoint. Requires a token with org-wide repository
-     * access; repo-restricted tokens receive 403. This endpoint consumes 1 unit
-     * of your quota. This endpoint requires the following org token scopes:
+     * access; repo-restricted tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:read
      */
@@ -677,8 +824,11 @@ export interface paths {
      * Update an alert policy rule. Only the provided fields change. To move the
      * rule, provide at most one of `position`, `rank`, `before_rule_id`, or
      * `after_rule_id`. Requires a token with org-wide repository access;
-     * repo-restricted tokens receive 403. This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes:
+     * repo-restricted tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:update
      */
@@ -689,8 +839,11 @@ export interface paths {
      * Delete an alert policy rule. Alerts previously matched by this rule are
      * re-evaluated against the remaining rules and baseline after the next org
      * snapshot. Requires a token with org-wide repository access;
-     * repo-restricted tokens receive 403. This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes:
+     * repo-restricted tokens receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:delete
      */
@@ -703,8 +856,11 @@ export interface paths {
      * Retrieve the alert policy migration status of an organization. This is
      * read-only and does not enroll organizations or start migration windows.
      * Requires a token with org-wide repository access; repo-restricted tokens
-     * receive 403. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * receive 403.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alert-policy:list
      */
@@ -722,9 +878,11 @@ export interface paths {
      * same body to `/alert-policies/{id}/rules` if the rule should apply there.
      * Entries that cannot be translated are returned in `untranslatable`; the
      * rest are in `translations`. Requires one of: `triage:alerts-update`,
-     * `alert-policy:read`, or `alert-resolution:create`. This endpoint consumes
-     * 1 unit of your quota. This endpoint requires the following org token
-     * scopes:
+     * `alert-policy:read`, or `alert-resolution:create`.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - No Scopes Required, but authentication is required
      */
@@ -735,7 +893,9 @@ export interface paths {
      * List repositories.
      *
      * Lists repositories for the specified organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Repo:list
@@ -744,9 +904,14 @@ export interface paths {
     /**
      * Create repository.
      *
-     * Create a repository. Repos collect Full scans and Diff scans and are
-     * typically associated with a git repo. This endpoint consumes 1 unit of
-     * your quota. This endpoint requires the following org token scopes:
+     * Create a repository.
+     *
+     * Repos collect Full scans and Diff scans and are typically associated with
+     * a git repo.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo:create
      */
@@ -757,7 +922,9 @@ export interface paths {
      * Get repository.
      *
      * Retrieve a repository associated with an organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Repo:list
@@ -767,7 +934,9 @@ export interface paths {
      * Update repository.
      *
      * Update details of an existing repository.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Repo:update
@@ -777,8 +946,11 @@ export interface paths {
      * Delete repository.
      *
      * Delete a single repository and all of its associated Full scans and Diff
-     * scans. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * scans.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo:delete
      */
@@ -788,10 +960,14 @@ export interface paths {
     /**
      * Associate repository label (beta)
      *
-     * Associate a repository label with a repository. Labels can be used to
-     * group and organize repositories and to apply security/license policies.
-     * This endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     * Associate a repository label with a repository.
+     *
+     * Labels can be used to group and organize repositories and to apply
+     * security/license policies.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo-label:update
      */
@@ -802,7 +978,9 @@ export interface paths {
      * List repository labels (beta)
      *
      * Lists repository labels for the specified organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Repo-label:list
@@ -811,10 +989,14 @@ export interface paths {
     /**
      * Create repository label (beta)
      *
-     * Create a repository label. Labels can be used to group and organize
-     * repositories and to apply security/license policies. This endpoint
-     * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes:
+     * Create a repository label.
+     *
+     * Labels can be used to group and organize repositories and to apply
+     * security/license policies.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo-label:create
      */
@@ -825,7 +1007,9 @@ export interface paths {
      * Get repository label (beta)
      *
      * Retrieve a repository label associated with an organization and label ID.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Repo-label:list
@@ -834,10 +1018,14 @@ export interface paths {
     /**
      * Update repository label (beta)
      *
-     * Update a repository label name. Labels can be used to group and organize
-     * repositories and to apply security/license policies. This endpoint
-     * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes:
+     * Update a repository label name.
+     *
+     * Labels can be used to group and organize repositories and to apply
+     * security/license policies.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo-label:update
      */
@@ -846,8 +1034,11 @@ export interface paths {
      * Delete repository label (beta)
      *
      * Delete a repository label and all of its associations (repositories,
-     * security policy, license policy, etc.). This endpoint consumes 1 unit of
-     * your quota. This endpoint requires the following org token scopes:
+     * security policy, license policy, etc.).
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo-label:delete
      */
@@ -858,13 +1049,18 @@ export interface paths {
      * Get repository label setting (beta)
      *
      * Retrieve the setting (e.g. security/license policy) for a repository
-     * label. Note that repository label settings currently only support
-     * `issueRules`, `issueRulesPolicyDefault`, `licensePolicy`, and
-     * `recentlyPublishedThresholdMs`. A policy is considered "active" for a
-     * given repository label if the `issueRulesPolicyDefault` is set, and
-     * inactive when not set. `issueRules` can be used to further refine the
-     * alert triage strategy. This endpoint consumes 1 unit of your quota. This
-     * endpoint requires the following org token scopes:
+     * label.
+     *
+     * Note that repository label settings currently only support `issueRules`,
+     * `issueRulesPolicyDefault`, `licensePolicy`, and
+     * `recentlyPublishedThresholdMs`. A policy is considered "active"
+     * for a given repository label if the `issueRulesPolicyDefault` is
+     * set, and inactive when not set. `issueRules` can be used to further
+     * refine the alert triage strategy.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo-label:list
      */
@@ -873,13 +1069,16 @@ export interface paths {
      * Update repository label setting (beta)
      *
      * Update the setting (e.g. security/license policy) for a repository label.
+     *
      * Note that repository label settings currently only support `issueRules`,
      * `issueRulesPolicyDefault`, `licensePolicy`, and
      * `recentlyPublishedThresholdMs`. A policy is considered "active"
      * for a given repository label if the `issueRulesPolicyDefault` is
      * set, and inactive when not set. `issueRules` can be used to further
      * refine the alert triage strategy.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Repo-label:update
@@ -889,13 +1088,16 @@ export interface paths {
      * Delete repository label setting (beta)
      *
      * Delete the setting (e.g. security/license policy) for a repository label.
+     *
      * Note that repository label settings currently only support `issueRules`,
      * `issueRulesPolicyDefault`, `licensePolicy`, and
      * `recentlyPublishedThresholdMs`. A policy is considered "active"
      * for a given repository label if the `issueRulesPolicyDefault` is
      * set, and inactive when not set. `issueRules` can be used to further
      * refine the alert triage strategy.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Repo-label:update
@@ -906,10 +1108,14 @@ export interface paths {
     /**
      * Disassociate repository label (beta)
      *
-     * Disassociate a repository label from a repository. Labels can be used to
-     * group and organize repositories and to apply security/license policies.
-     * This endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     * Disassociate a repository label from a repository.
+     *
+     * Labels can be used to group and organize repositories and to apply
+     * security/license policies.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo-label:update
      */
@@ -920,6 +1126,7 @@ export interface paths {
      * Get integration events.
      *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Integration:list
@@ -931,7 +1138,9 @@ export interface paths {
      * Get Organization Security Policy.
      *
      * Retrieve the security policy of an organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Security-policy:read
@@ -941,7 +1150,9 @@ export interface paths {
      * Update Security Policy.
      *
      * Update the security policy of an organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Security-policy:update
@@ -954,9 +1165,12 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/viewlicensepolicy) instead.
-     * Retrieve the license policy of an organization. This endpoint consumes 1
-     * unit of your quota. This endpoint requires the following org token
-     * scopes:
+     *
+     * Retrieve the license policy of an organization.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - License-policy:read
      *
@@ -968,13 +1182,13 @@ export interface paths {
      *
      * Set the organization's license policy.
      *
-     * ## License policy schema
+     *     ## License policy schema
      *
      * ```json
      * {
-     * allow?: Array<string>
-     * warn?: Array<string>
-     * options?: Array<string>
+     *   allow?: Array<string>
+     *   warn?: Array<string>
+     *   options?: Array<string>
      * }
      * ```
      *
@@ -997,8 +1211,9 @@ export interface paths {
      * (silver)', 'permissive (bronze)', 'permissive (lead)', 'copyleft',
      * 'maximal copyleft', 'network copyleft', 'strong copyleft', 'weak
      * copyleft', 'contributor license agreement', 'public domain', 'proprietary
-     * free', 'source available', 'proprietary', 'commercial', 'patent' Users
-     * can learn more about [copyleft
+     * free', 'source available', 'proprietary', 'commercial', 'patent'
+     *
+     * Users can learn more about [copyleft
      * tiers](https://blueoakcouncil.org/copyleft) and [permissive
      * tiers](https://blueoakcouncil.org/list) by reading the linked resources.
      *
@@ -1007,9 +1222,11 @@ export interface paths {
      * Users may also modify their license policy's allow and warn lists by
      * using [package URLs](https://github.com/package-url/purl-spec) (aka
      * PURLs), which support glob patterns to allow a range of versions, files
-     * and directories, etc. purl qualifiers which support globs are `filename`,
-     * `version_glob`, `artifact_id` and `license_provenance` (primarily used
-     * for allowing data from registry metadata).
+     * and directories, etc.
+     *
+     * Purl qualifiers which support globs are `filename`, `version_glob`,
+     * `artifact_id` and `license_provenance` (primarily used for allowing data
+     * from registry metadata).
      *
      * ### Examples:
      *
@@ -1026,14 +1243,18 @@ export interface paths {
      * `toplevelOnly`: only apply the license policy to "top level" license data
      * in a package, which includes registry metadata, LICENSE files, and
      * manifest files which are closest to the root of the package.
+     *
      * `applyToUnidentified`: Apply license policy to found but unidentified
      * license data. If enabled, the license policy will be applied to license
      * data which could not be affirmatively identified as a known license (this
      * will effectively merge the license policy violation and unidentified
      * license alerts). If disabled, license policy alerts will only be shown
      * for license data which is positively identified as something not allowed
-     * or set to warn by the license policy. This endpoint consumes 1 unit of
-     * your quota. This endpoint requires the following org token scopes:
+     * or set to warn by the license policy.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - License-policy:update
      */
@@ -1045,9 +1266,11 @@ export interface paths {
      *
      * Returns an organization's license policy including allow, warn, monitor,
      * and deny categories. The deny category contains all licenses that are not
-     * explicitly categorized as allow, warn, or monitor. This endpoint consumes
-     * 1 unit of your quota. This endpoint requires the following org token
-     * scopes:
+     * explicitly categorized as allow, warn, or monitor.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - License-policy:read
      */
@@ -1066,8 +1289,12 @@ export interface paths {
      * - **Secret Scanning** - Detected potentially leaked secrets and credentials
      *   within your code
      * - **Container Security** - Docker image and Dockerfile vulnerability
-     *   scanning This endpoint consumes 1 unit of your quota. This endpoint
-     *   requires the following org token scopes:
+     *   scanning
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Socket-basics:read
      */
     get: operations['getSocketBasicsConfig']
@@ -1076,13 +1303,17 @@ export interface paths {
     /**
      * List historical alerts (Beta)
      *
-     * List historical alerts. Pagination: keep requesting pages (passing the
-     * previous response's `endCursor` as `startAfterCursor`) until `endCursor`
-     * is `null`. Do not stop when `items` is empty — an empty page can be
-     * returned while more results still remain on later pages, so `endCursor`
-     * being `null` is the only reliable end-of-results signal. This endpoint
-     * consumes 10 units of your quota. This endpoint requires the following org
-     * token scopes:
+     * List historical alerts.
+     *
+     * Pagination: keep requesting pages (passing the previous response's
+     * `endCursor` as `startAfterCursor`) until `endCursor` is `null`. Do not
+     * stop when `items` is empty — an empty page can be returned while more
+     * results still remain on later pages, so `endCursor` being `null` is the
+     * only reliable end-of-results signal.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Historical:alerts-list
      */
@@ -1093,7 +1324,9 @@ export interface paths {
      * Trend of historical alerts (Beta)
      *
      * Trend analytics of historical alerts.
+     *
      * This endpoint consumes 10 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Historical:alerts-trend
@@ -1105,7 +1338,9 @@ export interface paths {
      * Trend of historical dependencies (Beta)
      *
      * Trend analytics of historical dependencies.
+     *
      * This endpoint consumes 10 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Historical:dependencies-trend
@@ -1121,19 +1356,26 @@ export interface paths {
      * historical snapshot record contains high-level overview metrics about the
      * data that was collected. Other [Historical Data
      * Endpoints](/reference/historical-data-endpoints) can be used to fetch the
-     * raw data associated with each snapshot. Historical snapshots contain
-     * details and raw data for the following resources:
+     * raw data associated with each snapshot.
+     *
+     * Historical snapshots contain details and raw data for the following
+     * resources:
      *
      * - Repositories
      * - Alerts
      * - Dependencies
      * - Artifacts
      * - Users
-     * - Settings Daily snapshot data is bucketed to the nearest day which is
-     *   described in more detail at: [Historical Data
-     *   Endpoints](/reference/historical-data-endpoints) This endpoint consumes
-     *   10 units of your quota. This endpoint requires the following org token
-     *   scopes:
+     * - Settings
+     *
+     * Daily snapshot data is bucketed to the nearest day which is described in
+     * more detail at: [Historical Data
+     * Endpoints](/reference/historical-data-endpoints)
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Historical:snapshots-list
      */
     get: operations['historicalSnapshotsList']
@@ -1144,19 +1386,26 @@ export interface paths {
      * snapshots are typically taken multiple times a day for paid plans and
      * once a day for free plans, this endpoint can be used to start an "on
      * demand" snapshot job to ensure the latest data is collected and stored
-     * for historical purposes. An historical snapshot will contain details and
-     * raw data for the following resources:
+     * for historical purposes.
+     *
+     * An historical snapshot will contain details and raw data for the
+     * following resources:
      *
      * - Repositories
      * - Alerts
      * - Dependencies
      * - Artifacts
      * - Users
-     * - Settings Historical snapshot data is bucketed to the nearest day which is
-     *   described in more detail at: [Historical Data
-     *   Endpoints](/reference/historical-data-endpoints) This endpoint consumes
-     *   10 units of your quota. This endpoint requires the following org token
-     *   scopes:
+     * - Settings
+     *
+     * Historical snapshot data is bucketed to the nearest day which is
+     * described in more detail at: [Historical Data
+     * Endpoints](/reference/historical-data-endpoints)
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - Historical:snapshots-start
      */
     post: operations['historicalSnapshotsStart']
@@ -1166,7 +1415,9 @@ export interface paths {
      * Get Audit Log Events.
      *
      * Paginated list of audit log events.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Audit-log:list
@@ -1178,7 +1429,9 @@ export interface paths {
      * List API Tokens.
      *
      * List all API Tokens.
+     *
      * This endpoint consumes 10 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Api-tokens:list
@@ -1188,8 +1441,11 @@ export interface paths {
      * Create API Token.
      *
      * Create an API Token. The API Token created must use a subset of
-     * permissions the API token creating them. This endpoint consumes 10 units
-     * of your quota. This endpoint requires the following org token scopes:
+     * permissions the API token creating them.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Api-tokens:create
      */
@@ -1200,8 +1456,11 @@ export interface paths {
      * Update API Token.
      *
      * Update an API Token. The API Token created must use a subset of
-     * permissions the API token creating them. This endpoint consumes 10 units
-     * of your quota. This endpoint requires the following org token scopes:
+     * permissions the API token creating them.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Api-tokens:create
      */
@@ -1211,8 +1470,10 @@ export interface paths {
     /**
      * Rotate API Token.
      *
-     * Rotate an API Token
+     * Rotate an API Token.
+     *
      * This endpoint consumes 10 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Api-tokens:rotate
@@ -1223,8 +1484,10 @@ export interface paths {
     /**
      * Revoke API Token.
      *
-     * Revoke an API Token
+     * Revoke an API Token.
+     *
      * This endpoint consumes 10 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Api-tokens:revoke
@@ -1236,12 +1499,15 @@ export interface paths {
      * Get supported file types.
      *
      * Get a list of supported files for full scan generation. Files are
-     * categorized first by environment (e.g. NPM or PyPI), then by name. Files
-     * whose names match the patterns returned by this endpoint can be uploaded
-     * for report generation. Examples of supported filenames include
-     * `package.json`, `package-lock.json`, and `yarn.lock`. This endpoint
-     * consumes 1 unit of your quota. This endpoint requires the following org
-     * token scopes:
+     * categorized first by environment (e.g. NPM or PyPI), then by name.
+     *
+     * Files whose names match the patterns returned by this endpoint can be
+     * uploaded for report generation. Examples of supported filenames include
+     * `package.json`, `package-lock.json`, and `yarn.lock`.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - No Scopes Required, but authentication is required
      */
@@ -1253,11 +1519,17 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/getorgthreatfeeditems)
-     * instead. Paginated list of threat feed items. This endpoint requires an
-     * Enterprise Plan with Threat Feed add-on.
+     * instead.
+     *
+     * Paginated list of threat feed items.
+     *
+     * This endpoint requires an Enterprise Plan with Threat Feed add-on.
      * [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking)
-     * our sales team for more details. This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes:
+     * our sales team for more details.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Threat-feed:list
      *
@@ -1271,11 +1543,15 @@ export interface paths {
      *
      * Paginated list of threats, sorted by updated_at by default. Set
      * updated_after to the unix timestamp of your last sync while sorting by
-     * updated_at to synchronize all new or updated threats in the feed. This
-     * endpoint requires an Enterprise Plan with Threat Feed add-on.
+     * updated_at to synchronize all new or updated threats in the feed.
+     *
+     * This endpoint requires an Enterprise Plan with Threat Feed add-on.
      * [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking)
-     * our sales team for more details. This endpoint consumes 1 unit of your
-     * quota. This endpoint requires the following org token scopes:
+     * our sales team for more details.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Threat-feed:list
      */
@@ -1286,46 +1562,60 @@ export interface paths {
      * Get Packages by PURL (Org Scoped)
      *
      * Batch retrieval of package metadata and alerts by PURL strings for a
-     * specific organization. Compatible with CycloneDX reports. Package URLs
-     * (PURLs) are an ecosystem agnostic way to identify packages. CycloneDX
-     * SBOMs use the purl format to identify components. This endpoint supports
-     * fetching metadata and alerts for multiple packages at once by passing an
-     * array of purl strings, or by passing an entire CycloneDX report.
+     * specific organization. Compatible with CycloneDX reports.
+     *
+     * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+     * CycloneDX SBOMs use the purl format to identify components. This endpoint
+     * supports fetching metadata and alerts for multiple packages at once by
+     * passing an array of purl strings, or by passing an entire CycloneDX
+     * report.
+     *
      * **Note:** This endpoint has a batch size limit (default: 1024 PURLs per
      * request). Requests exceeding this limit will return a 400 Bad Request
-     * error. More information on purl and CycloneDX:
+     * error.
+     *
+     * More information on purl and CycloneDX:
      *
      * - [`purl` Spec](https://github.com/package-url/purl-spec)
      * - [CycloneDX
-     *   Spec](https://cyclonedx.org/specification/overview/#components) This
-     *   endpoint returns the latest available alert data for artifacts in the
-     *   batch (stale while revalidate). Actively running analysis will be
-     *   returned when available on subsequent runs. When `alerts=true`, Socket
-     *   may synthesize two alert types to make partial results actionable:
+     *   Spec](https://cyclonedx.org/specification/overview/#components)
+     *
+     * This endpoint returns the latest available alert data for artifacts in
+     * the batch (stale while revalidate). Actively running analysis will be
+     * returned when available on subsequent runs.
+     *
+     * When `alerts=true`, Socket may synthesize two alert types to make partial
+     * results actionable:
+     *
      * - `pendingScan`: the package is known but analysis has not completed yet
-     * - `notFound`: Socket could not resolve the package/version metadata When
-     *   `purlErrors=true`, unresolved `notFound` inputs keep the legacy
-     *   `purlError` stream shape instead of emitting synthetic `notFound`
-     *   artifacts. Use `poll=false` (default) to fail open and return the
-     *   current known state quickly. Use `poll=true` to fail closed and wait up
-     *   to `timeoutSec` for pending analysis before returning. **Conda
-     *   (temporary compatibility):** `pkg:conda` inputs are served from the
-     *   already-scanned PyPI package with the same normalized name and version
-     *   when one exists; the response row keeps the original conda PURL in
-     *   `inputPurl` but reports `type: pypi`. Conda `build`, `subdir`, `type`,
-     *   and `channel` qualifiers are ignored, and conda packages without a
-     *   scanned PyPI counterpart return the normal `notFound` result. This
-     *   mapping will be replaced by native conda support.
+     * - `notFound`: Socket could not resolve the package/version metadata
+     *
+     * When `purlErrors=true`, unresolved `notFound` inputs keep the legacy
+     * `purlError` stream shape instead of emitting synthetic `notFound`
+     * artifacts.
+     *
+     * Use `poll=false` (default) to fail open and return the current known
+     * state quickly. Use `poll=true` to fail closed and wait up to `timeoutSec`
+     * for pending analysis before returning.
+     *
+     * **Conda (temporary compatibility):** `pkg:conda` inputs are served from
+     * the already-scanned PyPI package with the same normalized name and
+     * version when one exists; the response row keeps the original conda PURL
+     * in `inputPurl` but reports `type: pypi`. Conda `build`, `subdir`, `type`,
+     * and `channel` qualifiers are ignored, and conda packages without a
+     * scanned PyPI counterpart return the normal `notFound` result. This
+     * mapping will be replaced by native conda support.
      *
      * ## Query Parameters
      *
      * This endpoint supports all query parameters from `POST /v0/purl`
      * including: `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`,
      * `licensedetails`, `purlErrors`, `poll`, `cachedResultsOnly`, and
-     * `summary`. Additionally, you may provide a `labels` query parameter to
-     * apply a repository label's security policies. Pass the label slug as the
-     * value (e.g., `?labels=production`). Only one label is currently
-     * supported.
+     * `summary`.
+     *
+     * Additionally, you may provide a `labels` query parameter to apply a
+     * repository label's security policies. Pass the label slug as the value
+     * (e.g., `?labels=production`). Only one label is currently supported.
      *
      * ## Examples:
      *
@@ -1387,14 +1677,15 @@ export interface paths {
      *
      *     POST /v0/orgs/{org_slug}/purl?labels=production&alerts=true&compact=true
      *     {
-     *     "components": [
-     *     {
-     *     "purl": "pkg:npm/express@4.19.2"
-     *     }
-     *     ]
+     *       "components": [
+     *         {
+     *           "purl": "pkg:npm/express@4.19.2"
+     *         }
+     *       ]
      *     }
      *
      * This endpoint consumes 100 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Packages:list
@@ -1424,8 +1715,10 @@ export interface paths {
      *
      * - `type`: Discriminator field (one of: "fixFound", "partialFixFound",
      *   "noFixAvailable", "fixNotApplicable", "errorComputingFix")
-     * - `value`: Object containing the variant-specific data The `value` object
-     *   always contains:
+     * - `value`: Object containing the variant-specific data
+     *
+     * The `value` object always contains:
+     *
      * - `ghsa`: string | null - The GHSA ID
      * - `cve`: string | null - The CVE ID (if available)
      * - `advisoryDetails`: object | null - Advisory details (only if
@@ -1436,49 +1729,57 @@ export interface paths {
      * **fixFound**: A complete fix is available for all vulnerable packages.
      *
      * - `value.fixDetails.fixes`: Array of fix objects, each containing:
-     * - `purl`: Package URL to upgrade
-     * - `fixedVersion`: Version to upgrade to
-     * - `manifestFiles`: Array of manifest files containing the package
-     * - `updateType`: "patch" | "minor" | "major" | "unknown"
+     *
+     *   - `purl`: Package URL to upgrade
+     *   - `fixedVersion`: Version to upgrade to
+     *   - `manifestFiles`: Array of manifest files containing the package
+     *   - `updateType`: "patch" | "minor" | "major" | "unknown"
      * - `value.fixDetails.responsibleDirectDependencies`: (optional) Map of
      *   direct dependencies responsible for the vulnerability
-     *   **partialFixFound**: Fixes available for some but not all vulnerable
-     *   packages
+     *
+     * **partialFixFound**: Fixes available for some but not all vulnerable
+     * packages.
+     *
      * - Same as fixFound, plus:
      * - `value.fixDetails.unfixablePurls`: Array of packages that cannot be
      *   fixed, each containing:
-     * - `purl`: Package URL
-     * - `manifestFiles`: Array of manifest files
-     * - `reasons`: Human-readable explanations of why the package cannot be
-     *   upgraded. May contain multiple distinct entries when different
-     *   dependency chains are blocked for different causes (e.g. one chain has
-     *   no compatible upstream version; another would require a major version
-     *   bump skipped by `--no-major-updates`).
-     * - `dependencyChain`: (optional) Installed PURLs along the dependency chain
-     *   where the fix search was blocked, from the blocking package down to
-     *   this package. Present only when a chain was recorded; the first
-     *   `reasons` entry describes this chain.
-     * - `withheldFix`: (optional) Present when a fix exists but this request's
-     *   policy withheld it: `{ purl, version, reason }` where `purl` is the
-     *   package (without version), `version` the lowest safe version the policy
-     *   removed from the fix search, and `reason` one of `majorUpdate` (a major
-     *   update while `allow_major_updates=false`), `releaseAge` (younger than
-     *   `minimum_release_age`) or `publishDateUnknown` (publish date
-     *   unavailable, so `minimum_release_age` cannot be verified). Lifting the
-     *   policy is not guaranteed to make the fix applicable — other version
-     *   constraints in the dependency tree may still block this version.
-     *   **noFixAvailable**: No fix exists for this vulnerability (no patched
-     *   version published)
+     *
+     *   - `purl`: Package URL
+     *   - `manifestFiles`: Array of manifest files
+     *   - `reasons`: Human-readable explanations of why the package cannot be
+     *     upgraded. May contain multiple distinct entries when different
+     *     dependency chains are blocked for different causes (e.g. one chain has
+     *     no compatible upstream version; another would require a major version
+     *     bump skipped by `--no-major-updates`).
+     *   - `dependencyChain`: (optional) Installed PURLs along the dependency chain
+     *     where the fix search was blocked, from the blocking package down to
+     *     this package. Present only when a chain was recorded; the first
+     *     `reasons` entry describes this chain.
+     *   - `withheldFix`: (optional) Present when a fix exists but this request's
+     *     policy withheld it: `{ purl, version, reason }` where `purl` is the
+     *     package (without version), `version` the lowest safe version the policy
+     *     removed from the fix search, and `reason` one of `majorUpdate` (a major
+     *     update while `allow_major_updates=false`), `releaseAge` (younger than
+     *     `minimum_release_age`) or `publishDateUnknown` (publish date
+     *     unavailable, so `minimum_release_age` cannot be verified). Lifting the
+     *     policy is not guaranteed to make the fix applicable — other version
+     *     constraints in the dependency tree may still block this version.
+     *
+     * **noFixAvailable**: No fix exists for this vulnerability (no patched
+     * version published)
+     *
      * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
      *   manifest files; each carries a static `reasons` entry stating that no
-     *   patched version has been published **fixNotApplicable**: A patched
-     *   version of the vulnerable package exists but cannot be applied. The
-     *   most common cause is that there is no upgrade path through the
-     *   dependency tree — for example, given a chain `App → A@1.0.0 → B@1.0.0`
-     *   where `B < 2.0.0` is vulnerable, if no version of `A` accepts `B@2.0.0`
-     *   the fix cannot be applied without a manual override (e.g. `pnpm
-     *   overrides`). Other causes include callers passing `--no-major-updates`
-     *   when the only patched version is a major bump.
+     *   patched version has been published
+     *
+     * **fixNotApplicable**: A patched version of the vulnerable package exists
+     * but cannot be applied. The most common cause is that there is no upgrade
+     * path through the dependency tree — for example, given a chain `App →
+     * A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A`
+     * accepts `B@2.0.0` the fix cannot be applied without a manual override
+     * (e.g. `pnpm overrides`). Other causes include callers passing
+     * `--no-major-updates` when the only patched version is a major bump.
+     *
      * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
      *   manifest files, each with per-artifact `reasons` explaining why the fix
      *   could not be applied (always at least one entry; a static fallback when
@@ -1487,8 +1788,10 @@ export interface paths {
      *   upgrade down to the vulnerable package, present when a chain was
      *   recorded (the first `reasons` entry describes it), and an optional
      *   `withheldFix` — present when a fix exists but this request's policy
-     *   withheld it (see the partialFixFound field list) **errorComputingFix**:
-     *   An error occurred while computing fixes
+     *   withheld it (see the partialFixFound field list)
+     *
+     * **errorComputingFix**: An error occurred while computing fixes.
+     *
      * - `value.message`: Error description
      *
      * ### Fix version alignment
@@ -1521,20 +1824,25 @@ export interface paths {
      * returned by `/v0/orgs/{org_slug}/alerts`). The lookup is org-scoped, so
      * the same GHSA may map to multiple alert IDs when it appears in alerts
      * across different repos or branches. Callers that need a repo/branch
-     * filter should intersect this map with results from the alerts API. The
-     * lookup honors the same scan-type visibility as
+     * filter should intersect this map with results from the alerts API.
+     *
+     * The lookup honors the same scan-type visibility as
      * `/v0/orgs/{org_slug}/alerts` — when the `enableTier1OrgAlertApiRead`
      * feature flag is off for the org, only `socket` scans are visible (no
-     * `socket_tier1`). Note on scopes: this field surfaces identifiers that are
-     * otherwise reachable via `/v0/orgs/{org_slug}/alerts` (which requires
+     * `socket_tier1`).
+     *
+     * Note on scopes: this field surfaces identifiers that are otherwise
+     * reachable via `/v0/orgs/{org_slug}/alerts` (which requires
      * `alerts:list`). The fixes route is gated on `fixes:list` alone; the GHSAs
      * the alert IDs are keyed to are already part of every `/fixes` response,
      * and exposing the matching alert IDs through this opt-in flag is
      * intentional — it lets a caller with only `fixes:list` complete the
      * correlation back to /alerts on a token that already has that scope. If
-     * you require strict scope separation, do not enable this flag. This
-     * endpoint consumes 10 units of your quota. This endpoint requires the
-     * following org token scopes:
+     * you require strict scope separation, do not enable this flag.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Fixes:list
      */
@@ -1545,7 +1853,9 @@ export interface paths {
      * Get Organization Telemetry Config.
      *
      * Retrieve the telemetry config of an organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      */
     get: operations['getOrgTelemetryConfig']
@@ -1553,7 +1863,9 @@ export interface paths {
      * Update Telemetry Config.
      *
      * Update the telemetry config of an organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Telemetry-policy:update
@@ -1564,13 +1876,19 @@ export interface paths {
     /**
      * List organization events.
      *
-     * List events for an organization. Events are records of actions taken
-     * across Socket products, such as firewall decisions and CLI/SDK actions.
+     * List events for an organization.
+     *
+     * Events are records of actions taken across Socket products, such as
+     * firewall decisions and CLI/SDK actions.
+     *
      * The maximum date range per request is 365 days. When more results are
      * available, the response body's "endCursor" property contains the cursor
      * to pass as the "startAfterCursor" query parameter to retrieve the next
-     * page. This endpoint consumes 10 units of your quota. This endpoint
-     * requires the following org token scopes:
+     * page.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Telemetry-events:list
      */
@@ -1581,7 +1899,9 @@ export interface paths {
      * List all webhooks.
      *
      * List all webhooks in the specified organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Webhooks:list
@@ -1591,7 +1911,9 @@ export interface paths {
      * Create a webhook.
      *
      * Create a new webhook. Returns the created webhook details.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Webhooks:create
@@ -1603,7 +1925,9 @@ export interface paths {
      * Get webhook.
      *
      * Get a webhook for the specified organization.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Webhooks:list
@@ -1613,7 +1937,9 @@ export interface paths {
      * Update webhook.
      *
      * Update details of an existing webhook.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Webhooks:update
@@ -1623,8 +1949,11 @@ export interface paths {
      * Delete webhook.
      *
      * Delete a webhook. This will stop all future webhook deliveries to the
-     * webhook URL. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * webhook URL.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Webhooks:delete
      */
@@ -1634,13 +1963,17 @@ export interface paths {
     /**
      * List latest alerts (Beta)
      *
-     * List latest alerts. Pagination: keep requesting pages (passing the
-     * previous response's `endCursor` as `startAfterCursor`) until `endCursor`
-     * is `null`. Do not stop when `items` is empty — an empty page can be
-     * returned while more results still remain on later pages, so `endCursor`
-     * being `null` is the only reliable end-of-results signal. This endpoint
-     * consumes 10 units of your quota. This endpoint requires the following org
-     * token scopes:
+     * List latest alerts.
+     *
+     * Pagination: keep requesting pages (passing the previous response's
+     * `endCursor` as `startAfterCursor`) until `endCursor` is `null`. Do not
+     * stop when `items` is empty — an empty page can be returned while more
+     * results still remain on later pages, so `endCursor` being `null` is the
+     * only reliable end-of-results signal.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Alerts:list
      */
@@ -1651,7 +1984,9 @@ export interface paths {
      * List full scans associated with alert (Beta)
      *
      * List full scans associated with alert.
+     *
      * This endpoint consumes 10 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Alerts:list
@@ -1667,59 +2002,59 @@ export interface paths {
      * information about license data which does not comply with the license
      * allow list.
      *
-     * ## Example request body:
+     *     ## Example request body:
      *
-     * ```json
-     * {
-     *   "components": [
+     *     ```json
      *     {
-     *       "purl": "pkg:npm/lodash@4.17.21"
-     *     },
-     *     {
-     *       "purl": "pkg:npm/lodash@4.14.1"
+     *       "components": [
+     *         {
+     *           "purl": "pkg:npm/lodash@4.17.21"
+     *         },
+     *         {
+     *           "purl": "pkg:npm/lodash@4.14.1"
+     *         }
+     *       ],
+     *       "allow": [
+     *         "permissive",
+     *         "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+     *       ],
+     *       "warn": [
+     *         "copyleft",
+     *         "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+     *       ],
+     *       "options": ["toplevelOnly"]
      *     }
-     *   ],
-     *   "allow": [
-     *     "permissive",
-     *     "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
-     *   ],
-     *   "warn": [
-     *     "copyleft",
-     *     "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
-     *   ],
-     *   "options": ["toplevelOnly"]
-     * }
-     * ```
+     *     ```
      *
-     * ## Return value
      *
-     * For each requested PURL, an array is returned. Each array contains a list
-     * of license policy violations detected for the requested PURL. Violations
-     * are accompanied by a string identifying the offending license data as
-     * `spdxAtomOrExtraData`, a message describing why the license data is
-     * believed to be incompatible with the license policy, and a list of
-     * locations (by filepath or other provenance information) where the
-     * offending license data may be found.
+     *     ## Return value
      *
-     * ```json
-     * Array<
-     * Array<{
-     * filepathOrProvenance: Array<string>,
-     * level: "warning" | "violation",
-     * purl: string,
-     * spdxAtomOrExtraData: string,
-     * violationExplanation: string
-     * }>
-     * >
-     * ```
+     *     For each requested PURL, an array is returned. Each array contains a list of license policy violations
+     *     detected for the requested PURL.
      *
-     * ## License policy schema
+     *     Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+     *     a message describing why the license data is believed to be incompatible with the license policy, and a list
+     *     of locations (by filepath or other provenance information) where the offending license data may be found.
+     *
+     *     ```json
+     *     Array<
+     *       Array<{
+     *         filepathOrProvenance: Array<string>,
+     *         level: "warning" | "violation",
+     *         purl: string,
+     *         spdxAtomOrExtraData: string,
+     *         violationExplanation: string
+     *       }>
+     *     >
+     *     ```
+     *
+     *     ## License policy schema
      *
      * ```json
      * {
-     * allow?: Array<string>
-     * warn?: Array<string>
-     * options?: Array<string>
+     *   allow?: Array<string>
+     *   warn?: Array<string>
+     *   options?: Array<string>
      * }
      * ```
      *
@@ -1742,8 +2077,9 @@ export interface paths {
      * (silver)', 'permissive (bronze)', 'permissive (lead)', 'copyleft',
      * 'maximal copyleft', 'network copyleft', 'strong copyleft', 'weak
      * copyleft', 'contributor license agreement', 'public domain', 'proprietary
-     * free', 'source available', 'proprietary', 'commercial', 'patent' Users
-     * can learn more about [copyleft
+     * free', 'source available', 'proprietary', 'commercial', 'patent'
+     *
+     * Users can learn more about [copyleft
      * tiers](https://blueoakcouncil.org/copyleft) and [permissive
      * tiers](https://blueoakcouncil.org/list) by reading the linked resources.
      *
@@ -1752,9 +2088,11 @@ export interface paths {
      * Users may also modify their license policy's allow and warn lists by
      * using [package URLs](https://github.com/package-url/purl-spec) (aka
      * PURLs), which support glob patterns to allow a range of versions, files
-     * and directories, etc. purl qualifiers which support globs are `filename`,
-     * `version_glob`, `artifact_id` and `license_provenance` (primarily used
-     * for allowing data from registry metadata).
+     * and directories, etc.
+     *
+     * Purl qualifiers which support globs are `filename`, `version_glob`,
+     * `artifact_id` and `license_provenance` (primarily used for allowing data
+     * from registry metadata).
      *
      * ### Examples:
      *
@@ -1771,16 +2109,20 @@ export interface paths {
      * `toplevelOnly`: only apply the license policy to "top level" license data
      * in a package, which includes registry metadata, LICENSE files, and
      * manifest files which are closest to the root of the package.
+     *
      * `applyToUnidentified`: Apply license policy to found but unidentified
      * license data. If enabled, the license policy will be applied to license
      * data which could not be affirmatively identified as a known license (this
      * will effectively merge the license policy violation and unidentified
      * license alerts). If disabled, license policy alerts will only be shown
      * for license data which is positively identified as something not allowed
-     * or set to warn by the license policy. This endpoint consumes 100 units of
-     * your quota. This endpoint requires the following org token scopes:
+     * or set to warn by the license policy.
      *
-     * - Packages:list
+     * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     * - packages:list.
+     *
      * - License-policy:read
      */
     post: operations['licensePolicy']
@@ -1791,11 +2133,13 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/updateorglicensepolicy)
-     * instead. Get the "saturated" version of a license policy's allow list,
-     * filling in the entire set of allowed license data. For example, the
-     * saturated form of a license allow list which only specifies that licenses
-     * in the tier "maximal copyleft" are allowed is shown below (note the
-     * expanded `allowedStrings` property):
+     * instead.
+     *
+     * Get the "saturated" version of a license policy's allow list, filling in
+     * the entire set of allowed license data. For example, the saturated form
+     * of a license allow list which only specifies that licenses in the tier
+     * "maximal copyleft" are allowed is shown below (note the expanded
+     * `allowedStrings` property):
      *
      * ```json
      * {
@@ -1824,9 +2168,11 @@ export interface paths {
      * ```json
      * ```
      *
-     * Where PermissiveTier ::= "model permissive" | "gold" | "silver" |
-     * "bronze" | "lead" CopyleftTier ::= "maximal copyleft" | "network
-     * copyleft" | "strong copyleft" | "weak copyleft"
+     * Where.
+     *
+     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" |
+     * "lead" CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong
+     * copyleft" | "weak copyleft"
      *
      * ## Return Value
      *
@@ -1834,21 +2180,24 @@ export interface paths {
      *
      * ```json
      * {
-     * allowedApprovalSources?: Array<"fsf" | "osi">,
-     * allowedFamilies?: Array<"copyleft" | "permissive">,
-     * allowedTiers?: Array<PermissiveTier | CopyleftTier>,
-     * allowedStrings?: Array<string>
-     * allowedPURLs?: Array<string>
-     * focusAlertsHere?: boolean
+     *   allowedApprovalSources?: Array<"fsf" | "osi">,
+     *   allowedFamilies?: Array<"copyleft" | "permissive">,
+     *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
+     *   allowedStrings?: Array<string>
+     *   allowedPURLs?: Array<string>
+     *   focusAlertsHere?: boolean
      * }
      * ```
      *
-     * Where PermissiveTier ::= "model permissive" | "gold" | "silver" |
-     * "bronze" | "lead" CopyleftTier ::= "maximal copyleft" | "network
-     * copyleft" | "strong copyleft" | "weak copyleft" readers can learn more
-     * about [copyleft tiers](https://blueoakcouncil.org/copyleft) and
-     * [permissive tiers](https://blueoakcouncil.org/list) by reading the linked
-     * resources.
+     * Where.
+     *
+     * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" |
+     * "lead" CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong
+     * copyleft" | "weak copyleft"
+     *
+     * Readers can learn more about [copyleft
+     * tiers](https://blueoakcouncil.org/copyleft) and [permissive
+     * tiers](https://blueoakcouncil.org/list) by reading the linked resources.
      *
      * ### Example request bodies:
      *
@@ -1864,6 +2213,7 @@ export interface paths {
      * ```
      *
      * This endpoint consumes 100 units of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - Packages:list
@@ -1882,57 +2232,62 @@ export interface paths {
      * parameter `includetext=true` is set, the returned metadata will also
      * include the license text.
      *
-     * ## Example request body:
+     *     ## Example request body:
+     *
+     *     ```json
+     *     [
+     *       "Apache-2.0",
+     *       "BSD Zero Clause License"
+     *     ]
+     *     ```
+     *
+     *
+     *     ## Return value
+     *
+     *     ```json
+     *     // Response schema:
+     *     Array<{
+     *       licenseId: string,
+     *       name?: string,
+     *       deprecated?: string,
+     *       crossref?: string
+     *       classes: Array<string>
+     *       text?: string
+     *     }>
+     *
+     *     // Example response:
+     *     [
+     *       {
+     *         "licenseId": "Apache-2.0",
+     *         "name": "Apache License 2.0",
+     *         "deprecated": false,
+     *         "crossref": "https://spdx.org/licenses/Apache-2.0.html",
+     *         "classes": [
+     *           "fsf libre",
+     *           "osi approved",
+     *           "permissive (silver)"
+     *         ]
+     *       },
+     *       {
+     *         "licenseId": "0BSD",
+     *         "name": "BSD Zero Clause License",
+     *         "deprecated": false,
+     *         "crossref": "https://spdx.org/licenses/0BSD.html",
+     *         "classes": [
+     *           "osi approved",
+     *           "permissive (bronze)"
+     *         ]
+     *       }
+     *     ]
+     *     ```
+     *
+     *     ## License policy schema
      *
      * ```json
-     * ["Apache-2.0", "BSD Zero Clause License"]
-     * ```
-     *
-     * ## Return value
-     *
-     * ```json
-     * // Response schema:
-     * Array<{
-     * licenseId: string,
-     * name?: string,
-     * deprecated?: string,
-     * crossref?: string
-     * classes: Array<string>
-     * text?: string
-     * }>
-     * // Example response:
-     * [
      * {
-     * "licenseId": "Apache-2.0",
-     * "name": "Apache License 2.0",
-     * "deprecated": false,
-     * "crossref": "https://spdx.org/licenses/Apache-2.0.html",
-     * "classes": [
-     * "fsf libre",
-     * "osi approved",
-     * "permissive (silver)"
-     * ]
-     * },
-     * {
-     * "licenseId": "0BSD",
-     * "name": "BSD Zero Clause License",
-     * "deprecated": false,
-     * "crossref": "https://spdx.org/licenses/0BSD.html",
-     * "classes": [
-     * "osi approved",
-     * "permissive (bronze)"
-     * ]
-     * }
-     * ]
-     * ```
-     *
-     * ## License policy schema
-     *
-     * ```json
-     * {
-     * allow?: Array<string>
-     * warn?: Array<string>
-     * options?: Array<string>
+     *   allow?: Array<string>
+     *   warn?: Array<string>
+     *   options?: Array<string>
      * }
      * ```
      *
@@ -1955,8 +2310,9 @@ export interface paths {
      * (silver)', 'permissive (bronze)', 'permissive (lead)', 'copyleft',
      * 'maximal copyleft', 'network copyleft', 'strong copyleft', 'weak
      * copyleft', 'contributor license agreement', 'public domain', 'proprietary
-     * free', 'source available', 'proprietary', 'commercial', 'patent' Users
-     * can learn more about [copyleft
+     * free', 'source available', 'proprietary', 'commercial', 'patent'
+     *
+     * Users can learn more about [copyleft
      * tiers](https://blueoakcouncil.org/copyleft) and [permissive
      * tiers](https://blueoakcouncil.org/list) by reading the linked resources.
      *
@@ -1965,9 +2321,11 @@ export interface paths {
      * Users may also modify their license policy's allow and warn lists by
      * using [package URLs](https://github.com/package-url/purl-spec) (aka
      * PURLs), which support glob patterns to allow a range of versions, files
-     * and directories, etc. purl qualifiers which support globs are `filename`,
-     * `version_glob`, `artifact_id` and `license_provenance` (primarily used
-     * for allowing data from registry metadata).
+     * and directories, etc.
+     *
+     * Purl qualifiers which support globs are `filename`, `version_glob`,
+     * `artifact_id` and `license_provenance` (primarily used for allowing data
+     * from registry metadata).
      *
      * ### Examples:
      *
@@ -1984,14 +2342,18 @@ export interface paths {
      * `toplevelOnly`: only apply the license policy to "top level" license data
      * in a package, which includes registry metadata, LICENSE files, and
      * manifest files which are closest to the root of the package.
+     *
      * `applyToUnidentified`: Apply license policy to found but unidentified
      * license data. If enabled, the license policy will be applied to license
      * data which could not be affirmatively identified as a known license (this
      * will effectively merge the license policy violation and unidentified
      * license alerts). If disabled, license policy alerts will only be shown
      * for license data which is positively identified as something not allowed
-     * or set to warn by the license policy. This endpoint consumes 1 unit of
-     * your quota. This endpoint requires the following org token scopes:
+     * or set to warn by the license policy.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      */
     post: operations['licenseMetadata']
   }
@@ -2001,8 +2363,10 @@ export interface paths {
      *
      * For an array of alert type identifiers, returns metadata for each alert
      * type. Optionally, specify a language via the 'language' query parameter.
-     * This endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      */
     post: operations['alertTypes']
   }
@@ -2011,7 +2375,9 @@ export interface paths {
      * Returns the OpenAPI definition.
      *
      * Retrieve the API specification in an Openapi JSON format.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      */
     get: operations['getOpenAPI']
@@ -2021,7 +2387,9 @@ export interface paths {
      * Returns the OpenAPI definition.
      *
      * Retrieve the API specification in an Openapi JSON format.
+     *
      * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      */
     get: operations['getOpenAPIJSON']
@@ -2031,8 +2399,11 @@ export interface paths {
      * Get quota.
      *
      * Get your current API quota. You can use this endpoint to prevent doing
-     * requests that might spend all your quota. This endpoint consumes 0 units
-     * of your quota. This endpoint requires the following org token scopes:
+     * requests that might spend all your quota.
+     *
+     * This endpoint consumes 0 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - No Scopes Required, but authentication is required
      */
@@ -2043,8 +2414,11 @@ export interface paths {
      * List organizations.
      *
      * Get information on the current organizations associated with the API
-     * token. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * token.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - No Scopes Required, but authentication is required
      */
@@ -2056,8 +2430,13 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/updateorgsecuritypolicy)
-     * instead. Get current settings for the requested organizations and default
-     * settings to allow deferrals. This endpoint consumes 1 unit of your quota.
+     * instead.
+     *
+     * Get current settings for the requested organizations and default settings
+     * to allow deferrals.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
      * This endpoint requires the following org token scopes:
      *
      * - No Scopes Required, but authentication is required
@@ -2072,14 +2451,21 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Deprecated since 2023-01-15. Use the
      * [successor version](https://docs.socket.dev/reference/getsupportedfiles)
-     * instead. This route has been moved to the
-     * `orgs/{org_slug}/supported-files` endpoint. Get a list of supported files
-     * for project report generation. Files are categorized first by environment
-     * (e.g. NPM or PyPI), then by name. Files whose names match the patterns
-     * returned by this endpoint can be uploaded for report generation. Examples
-     * of supported filenames include `package.json`, `package-lock.json`, and
-     * `yarn.lock`. This endpoint consumes 1 unit of your quota. This endpoint
-     * requires the following org token scopes:
+     * instead.
+     *
+     * This route has been moved to the `orgs/{org_slug}/supported-files`
+     * endpoint.
+     *
+     * Get a list of supported files for project report generation. Files are
+     * categorized first by environment (e.g. NPM or PyPI), then by name.
+     *
+     * Files whose names match the patterns returned by this endpoint can be
+     * uploaded for report generation. Examples of supported filenames include
+     * `package.json`, `package-lock.json`, and `yarn.lock`.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * @deprecated
      */
@@ -2090,10 +2476,14 @@ export interface paths {
      * Delete a report.
      *
      * _This endpoint is deprecated._* Use the [successor
-     * version](https://docs.socket.dev/reference) instead. Deprecated: Use
-     * `/orgs/{org_slug}/full-scans` instead. Delete a specific project report
-     * generated with the GitHub app. This endpoint consumes 10 units of your
-     * quota. This endpoint requires the following org token scopes:
+     * version](https://docs.socket.dev/reference) instead.
+     *
+     * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific
+     * project report generated with the GitHub app.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Report:write
      *
@@ -2106,10 +2496,14 @@ export interface paths {
      * Get list of reports.
      *
      * _This endpoint is deprecated._* Use the [successor
-     * version](https://docs.socket.dev/reference) instead. Deprecated: Use
-     * `/orgs/{org_slug}/full-scans` instead. Get all your project reports
-     * generated with the GitHub app. This endpoint consumes 10 units of your
-     * quota. This endpoint requires the following org token scopes:
+     * version](https://docs.socket.dev/reference) instead.
+     *
+     * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your
+     * project reports generated with the GitHub app.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Report:list
      *
@@ -2123,13 +2517,21 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/createorgfullscan) instead.
-     * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Upload a lockfile
-     * to get your project analyzed by Socket. You can upload multiple lockfiles
-     * in the same request, but each filename must be unique. The name of the
-     * file must be in the supported list. For example, these are valid
-     * filenames: `package.json`, `folder/package.json` and
-     * `deep/nested/folder/package.json`. This endpoint consumes 100 units of
-     * your quota. This endpoint requires the following org token scopes:
+     *
+     * Deprecated: Use `/orgs/{org_slug}/full-scans` instead.
+     *
+     * Upload a lockfile to get your project analyzed by Socket. You can upload
+     * multiple lockfiles in the same request, but each filename must be
+     * unique.
+     *
+     * The name of the file must be in the supported list.
+     *
+     * For example, these are valid filenames: `package.json`,
+     * `folder/package.json` and `deep/nested/folder/package.json`.
+     *
+     * This endpoint consumes 100 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Report:write
      *
@@ -2143,10 +2545,13 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/getorgfullscan) instead.
+     *
      * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the
-     * issues, packages, and scores related to an specific project report. This
-     * endpoint consumes 10 units of your quota. This endpoint requires the
-     * following org token scopes:
+     * issues, packages, and scores related to an specific project report.
+     *
+     * This endpoint consumes 10 units of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Report:read
      *
@@ -2160,9 +2565,13 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/getorgrepolist) instead.
+     *
      * Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub
-     * repositories associated with a Socket org. This endpoint consumes 1 unit
-     * of your quota. This endpoint requires the following org token scopes:
+     * repositories associated with a Socket org.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Repo:list
      *
@@ -2175,12 +2584,17 @@ export interface paths {
      * Get issues by package.
      *
      * _This endpoint is deprecated._* Use the [successor
-     * version](https://docs.socket.dev/reference) instead. Get all the issues
-     * related with a particular npm package version. This endpoint returns the
-     * issue type, location, and additional details related to each issue in the
-     * `props` attribute. You can [see here](https://socket.dev/alerts) the full
-     * list of issues. This endpoint consumes 1 unit of your quota. This
-     * endpoint requires the following org token scopes:
+     * version](https://docs.socket.dev/reference) instead.
+     *
+     * Get all the issues related with a particular npm package version. This
+     * endpoint returns the issue type, location, and additional details related
+     * to each issue in the `props` attribute.
+     *
+     * You can [see here](https://socket.dev/alerts) the full list of issues.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - No Scopes Required, but authentication is required
      *
@@ -2194,6 +2608,7 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/batchpackagefetch) instead.
+     *
      * Get all the scores and metrics by category that are used to evaluate the
      * package version.
      *
@@ -2246,9 +2661,12 @@ export interface paths {
      * - VersionAuthorName/Email: The name and email of the version author.
      * - FileCount: The number of files in the package.
      * - ByteCount: The total size in bytes of the package.
-     * - TypeModule: Whether the package declares a "type": "module" field. This
-     *   endpoint consumes 1 unit of your quota. This endpoint requires the
-     *   following org token scopes:
+     * - TypeModule: Whether the package declares a "type": "module" field.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
+     *
      * - No Scopes Required, but authentication is required
      *
      * @deprecated
@@ -2261,12 +2679,18 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/historicalalertstrend)
-     * instead. Please implement against the [Historical
+     * instead.
+     *
+     * Please implement against the [Historical
      * dependencies](/reference/historicaldependenciestrend) or [Historical
-     * alerts](/reference/historicalalertstrend) endpoints. Get analytics data
-     * regarding the number of alerts found across all active repositories. This
-     * endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     * alerts](/reference/historicalalertstrend) endpoints.
+     *
+     * Get analytics data regarding the number of alerts found across all active
+     * repositories.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Report:write
      *
@@ -2280,12 +2704,18 @@ export interface paths {
      *
      * _This endpoint is deprecated._* Use the [successor
      * version](https://docs.socket.dev/reference/historicalalertstrend)
-     * instead. Please implement against the [Historical
+     * instead.
+     *
+     * Please implement against the [Historical
      * dependencies](/reference/historicaldependenciestrend) or [Historical
-     * alerts](/reference/historicalalertstrend) endpoints. Get analytics data
-     * regarding the number of alerts found in a single repository. This
-     * endpoint consumes 1 unit of your quota. This endpoint requires the
-     * following org token scopes:
+     * alerts](/reference/historicalalertstrend) endpoints.
+     *
+     * Get analytics data regarding the number of alerts found in a single
+     * repository.
+     *
+     * This endpoint consumes 1 unit of your quota.
+     *
+     * This endpoint requires the following org token scopes:
      *
      * - Report:write
      *
@@ -8148,37 +8578,51 @@ export interface operations {
   /**
    * Get Packages by PURL.
    *
-   * _This endpoint is deprecated._* Deprecated since 2026-01-05. Batch
-   * retrieval of package metadata and alerts by PURL strings. Compatible with
-   * CycloneDX reports. Package URLs (PURLs) are an ecosystem agnostic way to
-   * identify packages. CycloneDX SBOMs use the purl format to identify
-   * components. This endpoint supports fetching metadata and alerts for
-   * multiple packages at once by passing an array of purl strings, or by
-   * passing an entire CycloneDX report. **Note:** This endpoint has a batch
-   * size limit (default: 1024 PURLs per request). Requests exceeding this limit
-   * will return a 400 Bad Request error. More information on purl and
-   * CycloneDX:
+   * _This endpoint is deprecated._* Deprecated since 2026-01-05.
+   *
+   * Batch retrieval of package metadata and alerts by PURL strings. Compatible
+   * with CycloneDX reports.
+   *
+   * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+   * CycloneDX SBOMs use the purl format to identify components. This endpoint
+   * supports fetching metadata and alerts for multiple packages at once by
+   * passing an array of purl strings, or by passing an entire CycloneDX
+   * report.
+   *
+   * **Note:** This endpoint has a batch size limit (default: 1024 PURLs per
+   * request). Requests exceeding this limit will return a 400 Bad Request
+   * error.
+   *
+   * More information on purl and CycloneDX:
    *
    * - [`purl` Spec](https://github.com/package-url/purl-spec)
    * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
-   *   This endpoint returns the latest available alert data for artifacts in
-   *   the batch (stale while revalidate). Actively running analysis will be
-   *   returned when available on subsequent runs. When `alerts=true`, Socket
-   *   may synthesize two alert types to make partial results actionable:
+   *
+   * This endpoint returns the latest available alert data for artifacts in the
+   * batch (stale while revalidate). Actively running analysis will be returned
+   * when available on subsequent runs.
+   *
+   * When `alerts=true`, Socket may synthesize two alert types to make partial
+   * results actionable:
+   *
    * - `pendingScan`: the package is known but analysis has not completed yet
-   * - `notFound`: Socket could not resolve the package/version metadata When
-   *   `purlErrors=true`, unresolved `notFound` inputs keep the legacy
-   *   `purlError` stream shape instead of emitting synthetic `notFound`
-   *   artifacts. Use `poll=false` (default) to fail open and return the current
-   *   known state quickly. Use `poll=true` to fail closed and wait up to
-   *   `timeoutSec` for pending analysis before returning. **Conda (temporary
-   *   compatibility):** `pkg:conda` inputs are served from the already-scanned
-   *   PyPI package with the same normalized name and version when one exists;
-   *   the response row keeps the original conda PURL in `inputPurl` but reports
-   *   `type: pypi`. Conda `build`, `subdir`, `type`, and `channel` qualifiers
-   *   are ignored, and conda packages without a scanned PyPI counterpart return
-   *   the normal `notFound` result. This mapping will be replaced by native
-   *   conda support.
+   * - `notFound`: Socket could not resolve the package/version metadata
+   *
+   * When `purlErrors=true`, unresolved `notFound` inputs keep the legacy
+   * `purlError` stream shape instead of emitting synthetic `notFound`
+   * artifacts.
+   *
+   * Use `poll=false` (default) to fail open and return the current known state
+   * quickly. Use `poll=true` to fail closed and wait up to `timeoutSec` for
+   * pending analysis before returning.
+   *
+   * **Conda (temporary compatibility):** `pkg:conda` inputs are served from the
+   * already-scanned PyPI package with the same normalized name and version when
+   * one exists; the response row keeps the original conda PURL in `inputPurl`
+   * but reports `type: pypi`. Conda `build`, `subdir`, `type`, and `channel`
+   * qualifiers are ignored, and conda packages without a scanned PyPI
+   * counterpart return the normal `notFound` result. This mapping will be
+   * replaced by native conda support.
    *
    * ## Examples:
    *
@@ -8237,6 +8681,7 @@ export interface operations {
    * ```
    *
    * This endpoint consumes 100 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Packages:list
@@ -8336,7 +8781,9 @@ export interface operations {
    * Search dependencies.
    *
    * Search for any dependency that is being used in your organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - No Scopes Required, but authentication is required
@@ -8435,13 +8882,20 @@ export interface operations {
   /**
    * Create a snapshot of all dependencies from manifest information.
    *
-   * _This endpoint is deprecated._* Upload a set of manifest or lockfiles to
-   * get your dependency tree analyzed by Socket. You can upload multiple
-   * lockfiles in the same request, but each filename must be unique. The name
-   * of the file must be in the supported list. For example, these are valid
-   * filenames: "requirements.txt", "package.json", "folder/package.json", and
-   * "deep/nested/folder/package.json". This endpoint consumes 100 units of your
-   * quota. This endpoint requires the following org token scopes:
+   * _This endpoint is deprecated._*
+   *
+   * Upload a set of manifest or lockfiles to get your dependency tree analyzed
+   * by Socket. You can upload multiple lockfiles in the same request, but each
+   * filename must be unique.
+   *
+   * The name of the file must be in the supported list.
+   *
+   * For example, these are valid filenames: "requirements.txt", "package.json",
+   * "folder/package.json", and "deep/nested/folder/package.json".
+   *
+   * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Report:write
    *
@@ -8490,8 +8944,11 @@ export interface operations {
    * List full scans.
    *
    * Returns a paginated list of all full scans in an org, excluding SBOM
-   * artifacts. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * artifacts.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Full-scans:list
    */
@@ -8691,16 +9148,24 @@ export interface operations {
    * Create full scan.
    *
    * Create a full scan from a set of package manifest files. Returns a full
-   * scan including all SBOM artifacts. To get a list of supported filetypes
-   * that can be uploaded in a full-scan, see the [Get supported file
-   * types](/reference/getsupportedfiles) endpoint. The maximum number of files
-   * you can upload at a time is 10000 and each file can be no bigger than 268
-   * MB. **Query Parameters:**
+   * scan including all SBOM artifacts.
+   *
+   * To get a list of supported filetypes that can be uploaded in a full-scan,
+   * see the [Get supported file types](/reference/getsupportedfiles) endpoint.
+   *
+   * The maximum number of files you can upload at a time is 10000 and each file
+   * can be no bigger than 268 MB.
+   *
+   * **Query Parameters:**
    *
    * - `scan_type` (optional): The type of scan to perform. Defaults to 'socket'.
    *   Must be 32 characters or less. Used for categorizing multiple SBOM heads
-   *   per repository branch. This endpoint consumes 1 unit of your quota. This
-   *   endpoint requires the following org token scopes:
+   *   per repository branch.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Full-scans:create
    */
   CreateOrgFullScan: {
@@ -8912,11 +9377,15 @@ export interface operations {
   /**
    * Stream full scan.
    *
-   * Stream all SBOM artifacts for a full scan. This endpoint returns the
-   * latest, available alert data for artifacts in the full scan (stale while
-   * revalidate). Actively running analysis will be returned when available on
-   * subsequent runs. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * Stream all SBOM artifacts for a full scan.
+   *
+   * This endpoint returns the latest, available alert data for artifacts in the
+   * full scan (stale while revalidate). Actively running analysis will be
+   * returned when available on subsequent runs.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Full-scans:list
    */
@@ -9011,7 +9480,9 @@ export interface operations {
    * Delete full scan.
    *
    * Delete an existing full scan.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Full-scans:delete
@@ -9053,8 +9524,10 @@ export interface operations {
   /**
    * Get full scan metadata.
    *
-   * Get metadata for a single full scan
+   * Get metadata for a single full scan.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Full-scans:list
@@ -9189,10 +9662,14 @@ export interface operations {
   /**
    * Diff Full Scans.
    *
-   * _This endpoint is deprecated._* Get the immutable difference between two
-   * existing Full Scans. The result uses the policies active when it was
-   * computed and may be cached for reuse. This endpoint consumes 1 unit of your
-   * quota. This endpoint requires the following org token scopes:
+   * _This endpoint is deprecated._*
+   *
+   * Get the immutable difference between two existing Full Scans. The result
+   * uses the policies active when it was computed and may be cached for reuse.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Full-scans:list
    *
@@ -9410,10 +9887,14 @@ export interface operations {
   /**
    * SCM Comment for Scan Diff.
    *
-   * _This endpoint is deprecated._* Get the dependency overview and dependency
-   * alert comments in GitHub flavored markdown between the diff between two
-   * existing full scans. This endpoint consumes 1 unit of your quota. This
-   * endpoint requires the following org token scopes:
+   * _This endpoint is deprecated._*
+   *
+   * Get the dependency overview and dependency alert comments in GitHub
+   * flavored markdown between the diff between two existing full scans.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Full-scans:list
    *
@@ -9602,7 +10083,9 @@ export interface operations {
    * Download full scan files as tarball.
    *
    * Download all files associated with a full scan in tar format.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Full-scans:list
@@ -9640,15 +10123,20 @@ export interface operations {
    * Create full scan from archive.
    *
    * Create a full scan by uploading one or more archives. Supported archive
-   * formats include **.tar**, **.tar.gz/.tgz**, and **.zip**. Each uploaded
-   * archive is extracted server-side and any supported manifest files (like
-   * package.json, package-lock.json, pnpm-lock.yaml, etc.) are ingested for the
-   * scan. If you upload multiple archives in a single request, the manifests
-   * from every archive are merged into one full scan. The response includes any
-   * files that were ignored. The maximum combined number of files extracted
-   * from your upload is 10000 and each extracted file can be no bigger than 268
-   * MB. This endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * formats include **.tar**, **.tar.gz/.tgz**, and **.zip**.
+   *
+   * Each uploaded archive is extracted server-side and any supported manifest
+   * files (like package.json, package-lock.json, pnpm-lock.yaml, etc.) are
+   * ingested for the scan. If you upload multiple archives in a single request,
+   * the manifests from every archive are merged into one full scan. The
+   * response includes any files that were ignored.
+   *
+   * The maximum combined number of files extracted from your upload is 10000
+   * and each extracted file can be no bigger than 268 MB.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Full-scans:create
    */
@@ -9864,8 +10352,11 @@ export interface operations {
    * Create a new full scan by rescanning an existing scan. A "shallow" rescan
    * reapplies the latest policies to the previously cached dependency
    * resolution results. A "deep" rescan reruns dependency resolution and
-   * applies the latest policies to the results. This endpoint consumes 1 unit
-   * of your quota. This endpoint requires the following org token scopes:
+   * applies the latest policies to the results.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Full-scans:create
    */
@@ -9926,10 +10417,11 @@ export interface operations {
   /**
    * Export CSV of alerts for full scan.
    *
-   * Export a CSV file containing all alerts from a full scan. The CSV includes
-   * details about each alert and the affected packages. You can optionally
-   * filter using the request body "filters" array. Supported filter IDs
-   * include:
+   * Export a CSV file containing all alerts from a full scan.
+   *
+   * The CSV includes details about each alert and the affected packages. You
+   * can optionally filter using the request body "filters" array. Supported
+   * filter IDs include:
    *
    * - Alert.action (error|warn|monitor|ignore)
    * - Alert.type
@@ -9939,8 +10431,12 @@ export interface operations {
    * - Dependency.type (direct|transitive)
    * - Dependency.scope (dev|normal)
    * - Dependency.usage (used|unused)
-   * - Manifest.file This endpoint consumes 1 unit of your quota. This endpoint
-   *   requires the following org token scopes:
+   * - Manifest.file
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Full-scans:list
    */
   getOrgFullScanCsv: {
@@ -10001,9 +10497,12 @@ export interface operations {
   /**
    * Generate PDF report for full scan.
    *
-   * Generate a PDF report for all alerts in a full scan. This endpoint streams
-   * a PDF document containing all alerts found in the full scan, with optional
-   * filtering and grouping options. Supported request body filter IDs include:
+   * Generate a PDF report for all alerts in a full scan.
+   *
+   * This endpoint streams a PDF document containing all alerts found in the
+   * full scan, with optional filtering and grouping options.
+   *
+   * Supported request body filter IDs include:
    *
    * - Alert.action (error|warn|monitor|ignore)
    * - Alert.type
@@ -10013,8 +10512,12 @@ export interface operations {
    * - Dependency.type (direct|transitive)
    * - Dependency.scope (dev|normal)
    * - Dependency.usage (used|unused)
-   * - Manifest.file This endpoint consumes 1 unit of your quota. This endpoint
-   *   requires the following org token scopes:
+   * - Manifest.file
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Full-scans:list
    */
   getOrgFullScanPdf: {
@@ -10083,7 +10586,8 @@ export interface operations {
   /**
    * Export CycloneDX SBOM (Beta)
    *
-   * Export a Socket SBOM as a CycloneDX SBOM
+   * Export a Socket SBOM as a CycloneDX SBOM.
+   *
    * Supported ecosystems:
    *
    * - Crates
@@ -10094,9 +10598,14 @@ export interface operations {
    * - Pypi
    * - Rubygems
    * - Spdx
-   * - Cdx Unsupported ecosystems are filtered from the export. This endpoint
-   *   consumes 1 unit of your quota. This endpoint requires the following org
-   *   token scopes:
+   * - Cdx
+   *
+   * Unsupported ecosystems are filtered from the export.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Report:read
    */
   exportCDX: {
@@ -10164,6 +10673,7 @@ export interface operations {
    * Export OpenVEX Document (Beta)
    *
    * Export vulnerability exploitability data as an OpenVEX v0.2.0 document.
+   *
    * OpenVEX (Vulnerability Exploitability eXchange) documents communicate the
    * exploitability status of vulnerabilities in software products. This export
    * includes:
@@ -10174,10 +10684,15 @@ export interface operations {
    *   is exploitable:
    * - Unreachable code → "not_affected" with justification
    * - Reachable code → "affected"
-   * - Unknown/pending → "under_investigation" Each statement in the document
-   *   represents a single artifact-vulnerability pair for granular reachability
-   *   information. This endpoint consumes 1 unit of your quota. This endpoint
-   *   requires the following org token scopes:
+   * - Unknown/pending → "under_investigation"
+   *
+   * Each statement in the document represents a single artifact-vulnerability
+   * pair for granular reachability information.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Report:read
    */
   exportOpenVEX: {
@@ -10232,7 +10747,8 @@ export interface operations {
   /**
    * Export SPDX SBOM (Beta)
    *
-   * Export a Socket SBOM as a SPDX SBOM
+   * Export a Socket SBOM as a SPDX SBOM.
+   *
    * Supported ecosystems:
    *
    * - Crates
@@ -10243,9 +10759,14 @@ export interface operations {
    * - Pypi
    * - Rubygems
    * - Spdx
-   * - Cdx Unsupported ecosystems are filtered from the export. This endpoint
-   *   consumes 1 unit of your quota. This endpoint requires the following org
-   *   token scopes:
+   * - Cdx
+   *
+   * Unsupported ecosystems are filtered from the export.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Report:read
    */
   exportSPDX: {
@@ -10313,7 +10834,9 @@ export interface operations {
    * List diff scans.
    *
    * Returns a paginated list of all diff scans in an organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Diff-scans:list
@@ -10437,8 +10960,11 @@ export interface operations {
    * Get diff scan.
    *
    * Get the difference between two full scans from an existing diff scan
-   * resource. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * resource.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Diff-scans:list
    */
@@ -10726,7 +11252,9 @@ export interface operations {
    * Delete diff scan.
    *
    * Delete an existing diff scan.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Diff-scans:delete
@@ -10769,8 +11297,11 @@ export interface operations {
    * SCM Comment for Diff Scan.
    *
    * Get the dependency overview and dependency alert comments in GitHub
-   * flavored markdown for an existing diff scan. This endpoint consumes 1 unit
-   * of your quota. This endpoint requires the following org token scopes:
+   * flavored markdown for an existing diff scan.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Diff-scans:list
    */
@@ -11025,11 +11556,15 @@ export interface operations {
    * new full scan from uploaded manifest files. Returns metadata about the diff
    * scan. Once the diff scan is created, fetch the diff scan from the
    * [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
-   * The maximum number of files you can upload at a time is 10000 and each file
-   * can be no bigger than 268 MB. This endpoint consumes 1 unit of your quota.
-   * This endpoint requires the following org token scopes:
    *
-   * - Repo:list
+   * The maximum number of files you can upload at a time is 10000 and each file
+   * can be no bigger than 268 MB.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - repo:list.
+   *
    * - Diff-scans:create
    * - Full-scans:create
    */
@@ -11318,10 +11853,12 @@ export interface operations {
    * in the same repository. Returns metadata about the diff scan. Once the diff
    * scan is created, fetch the diff scan from the
    * [api_url](/reference/getDiffScanById) URL to get the contents of the diff.
-   * This endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
    *
-   * - Diff-scans:create
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - diff-scans:create.
+   *
    * - Full-scans:list
    */
   createOrgDiffScanFromIds: {
@@ -11935,8 +12472,11 @@ export interface operations {
    * List Org Alert Triage.
    *
    * List triage actions for an organization. Results are paginated and can be
-   * sorted by created_at or updated_at. This endpoint consumes 1 unit of your
-   * quota. This endpoint requires the following org token scopes:
+   * sorted by created_at or updated_at.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Triage:alerts-list
    */
@@ -12118,9 +12658,11 @@ export interface operations {
    * Create or update triage actions on organization alerts. Accepts a batch of
    * triage entries. Omit `uuid` to create a new entry; provide an existing
    * `uuid` to update it. Use `?force=true` for broad triages that lack a
-   * specific `alertKey` or granular package information. This endpoint consumes
-   * 1 unit of your quota. This endpoint requires the following org token
-   * scopes:
+   * specific `alertKey` or granular package information.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Triage:alerts-update
    */
@@ -12271,7 +12813,9 @@ export interface operations {
    * Delete Org Alert Triage.
    *
    * Delete a specific triage rule by UUID.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Triage:alerts-update
@@ -12319,8 +12863,11 @@ export interface operations {
    * anchor fields (alert_type, repo, repo_label, artifact_*) that describe the
    * resolution scope. Tokens restricted to specific repositories only see
    * org-wide resolutions and resolutions anchored to their granted
-   * repositories. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * repositories.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-resolution:list
    */
@@ -12489,9 +13036,11 @@ export interface operations {
    * snapshot. Returns the same row shape as the list endpoint. Tokens
    * restricted to specific repositories may only create resolutions anchored to
    * a single granted repository via `location.repo`; org-wide or
-   * multi-repository selectors require an org-wide token. This endpoint
-   * consumes 1 unit of your quota. This endpoint requires the following org
-   * token scopes:
+   * multi-repository selectors require an org-wide token.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-resolution:create
    */
@@ -12805,9 +13354,11 @@ export interface operations {
    *
    * Fetch a single active alert resolution by UUID. Returns the same row shape
    * as the list endpoint. Tokens restricted to specific repositories cannot
-   * read resolutions anchored to repositories outside their grants. This
-   * endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * read resolutions anchored to repositories outside their grants.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-resolution:read
    */
@@ -12952,8 +13503,11 @@ export interface operations {
    * Delete an alert resolution by UUID. Once deleted, alerts previously hidden
    * by this resolution will reappear after the next org snapshot. Tokens
    * restricted to specific repositories may only delete resolutions anchored to
-   * a granted repository. This endpoint consumes 1 unit of your quota. This
-   * endpoint requires the following org token scopes:
+   * a granted repository.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-resolution:delete
    */
@@ -12997,9 +13551,11 @@ export interface operations {
    * List the alert policies of an organization. The default policy (which
    * applies to all repositories without a policy label) is always first,
    * followed by custom policies ordered by creation time. Requires a token with
-   * org-wide repository access; repo-restricted tokens receive 403. This
-   * endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * org-wide repository access; repo-restricted tokens receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:list
    */
@@ -13114,8 +13670,11 @@ export interface operations {
    * Create an alert policy. A repo label with the same name is created to scope
    * the policy; repositories carrying that label are governed by the policy.
    * Requires a token with org-wide repository access; repo-restricted tokens
-   * receive 403. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:create
    */
@@ -13363,8 +13922,10 @@ export interface operations {
    * Fetch a single alert policy by ID. Use `default` as the ID for the default
    * policy, which applies to all repositories without a policy label. Requires
    * a token with org-wide repository access; repo-restricted tokens receive 403.
-   * This endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:read
    */
@@ -13480,9 +14041,11 @@ export interface operations {
    * Update an alert policy. Only the provided fields change; `repository_ids`
    * replaces the full set of repositories the policy scopes to. The default
    * policy cannot be renamed and its scope is implicit. Requires a token with
-   * org-wide repository access; repo-restricted tokens receive 403. This
-   * endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * org-wide repository access; repo-restricted tokens receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:update
    */
@@ -13648,9 +14211,11 @@ export interface operations {
    * Delete an alert policy along with its rules and repo label. Repositories
    * previously scoped to the policy fall back to the default policy after the
    * next org snapshot. The default policy cannot be deleted. Requires a token
-   * with org-wide repository access; repo-restricted tokens receive 403. This
-   * endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * with org-wide repository access; repo-restricted tokens receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:delete
    */
@@ -13715,8 +14280,11 @@ export interface operations {
    * List the custom rules of an alert policy in evaluation order (ascending
    * rank). Rules are evaluated before the policy baseline; the first matching
    * rule decides the alert action. Requires a token with org-wide repository
-   * access; repo-restricted tokens receive 403. This endpoint consumes 1 unit
-   * of your quota. This endpoint requires the following org token scopes:
+   * access; repo-restricted tokens receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:list
    */
@@ -13833,9 +14401,11 @@ export interface operations {
    * order and the first matching rule decides the alert action. Provide at most
    * one of `position`, `rank`, `before_rule_id`, or `after_rule_id`; the rule
    * is placed first when no position is provided. Requires a token with
-   * org-wide repository access; repo-restricted tokens receive 403. This
-   * endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * org-wide repository access; repo-restricted tokens receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:create
    */
@@ -14114,8 +14684,11 @@ export interface operations {
    *
    * Fetch a single alert policy rule by UUID. Returns the same row shape as the
    * rules list endpoint. Requires a token with org-wide repository access;
-   * repo-restricted tokens receive 403. This endpoint consumes 1 unit of your
-   * quota. This endpoint requires the following org token scopes:
+   * repo-restricted tokens receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:read
    */
@@ -14233,8 +14806,11 @@ export interface operations {
    * Update an alert policy rule. Only the provided fields change. To move the
    * rule, provide at most one of `position`, `rank`, `before_rule_id`, or
    * `after_rule_id`. Requires a token with org-wide repository access;
-   * repo-restricted tokens receive 403. This endpoint consumes 1 unit of your
-   * quota. This endpoint requires the following org token scopes:
+   * repo-restricted tokens receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:update
    */
@@ -14434,8 +15010,11 @@ export interface operations {
    * Delete an alert policy rule. Alerts previously matched by this rule are
    * re-evaluated against the remaining rules and baseline after the next org
    * snapshot. Requires a token with org-wide repository access; repo-restricted
-   * tokens receive 403. This endpoint consumes 1 unit of your quota. This
-   * endpoint requires the following org token scopes:
+   * tokens receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:delete
    */
@@ -14505,8 +15084,11 @@ export interface operations {
    * Retrieve the alert policy migration status of an organization. This is
    * read-only and does not enroll organizations or start migration windows.
    * Requires a token with org-wide repository access; repo-restricted tokens
-   * receive 403. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * receive 403.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alert-policy:list
    */
@@ -14601,8 +15183,11 @@ export interface operations {
    * body to `/alert-policies/{id}/rules` if the rule should apply there.
    * Entries that cannot be translated are returned in `untranslatable`; the
    * rest are in `translations`. Requires one of: `triage:alerts-update`,
-   * `alert-policy:read`, or `alert-resolution:create`. This endpoint consumes 1
-   * unit of your quota. This endpoint requires the following org token scopes:
+   * `alert-policy:read`, or `alert-resolution:create`.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - No Scopes Required, but authentication is required
    */
@@ -14811,7 +15396,9 @@ export interface operations {
    * List repositories.
    *
    * Lists repositories for the specified organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Repo:list
@@ -14987,9 +15574,14 @@ export interface operations {
   /**
    * Create repository.
    *
-   * Create a repository. Repos collect Full scans and Diff scans and are
-   * typically associated with a git repo. This endpoint consumes 1 unit of your
-   * quota. This endpoint requires the following org token scopes:
+   * Create a repository.
+   *
+   * Repos collect Full scans and Diff scans and are typically associated with a
+   * git repo.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Repo:create
    */
@@ -15331,7 +15923,9 @@ export interface operations {
    * Get repository.
    *
    * Retrieve a repository associated with an organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Repo:list
@@ -15498,7 +16092,9 @@ export interface operations {
    * Update repository.
    *
    * Update details of an existing repository.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Repo:update
@@ -15707,8 +16303,11 @@ export interface operations {
    * Delete repository.
    *
    * Delete a single repository and all of its associated Full scans and Diff
-   * scans. This endpoint consumes 1 unit of your quota. This endpoint requires
-   * the following org token scopes:
+   * scans.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Repo:delete
    */
@@ -15755,10 +16354,14 @@ export interface operations {
   /**
    * Associate repository label (beta)
    *
-   * Associate a repository label with a repository. Labels can be used to group
-   * and organize repositories and to apply security/license policies. This
-   * endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * Associate a repository label with a repository.
+   *
+   * Labels can be used to group and organize repositories and to apply
+   * security/license policies.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Repo-label:update
    */
@@ -15815,7 +16418,9 @@ export interface operations {
    * List repository labels (beta)
    *
    * Lists repository labels for the specified organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Repo-label:list
@@ -15888,10 +16493,14 @@ export interface operations {
   /**
    * Create repository label (beta)
    *
-   * Create a repository label. Labels can be used to group and organize
-   * repositories and to apply security/license policies. This endpoint consumes
-   * 1 unit of your quota. This endpoint requires the following org token
-   * scopes:
+   * Create a repository label.
+   *
+   * Labels can be used to group and organize repositories and to apply
+   * security/license policies.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Repo-label:create
    */
@@ -15986,7 +16595,9 @@ export interface operations {
    * Get repository label (beta)
    *
    * Retrieve a repository label associated with an organization and label ID.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Repo-label:list
@@ -16053,10 +16664,14 @@ export interface operations {
   /**
    * Update repository label (beta)
    *
-   * Update a repository label name. Labels can be used to group and organize
-   * repositories and to apply security/license policies. This endpoint consumes
-   * 1 unit of your quota. This endpoint requires the following org token
-   * scopes:
+   * Update a repository label name.
+   *
+   * Labels can be used to group and organize repositories and to apply
+   * security/license policies.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Repo-label:update
    */
@@ -16155,8 +16770,11 @@ export interface operations {
    * Delete repository label (beta)
    *
    * Delete a repository label and all of its associations (repositories,
-   * security policy, license policy, etc.). This endpoint consumes 1 unit of
-   * your quota. This endpoint requires the following org token scopes:
+   * security policy, license policy, etc.).
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Repo-label:delete
    */
@@ -16198,13 +16816,16 @@ export interface operations {
    * Get repository label setting (beta)
    *
    * Retrieve the setting (e.g. security/license policy) for a repository label.
+   *
    * Note that repository label settings currently only support `issueRules`,
    * `issueRulesPolicyDefault`, `licensePolicy`, and
    * `recentlyPublishedThresholdMs`. A policy is considered "active"
    * for a given repository label if the `issueRulesPolicyDefault` is
    * set, and inactive when not set. `issueRules` can be used to further
    * refine the alert triage strategy.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Repo-label:list
@@ -17431,13 +18052,16 @@ export interface operations {
    * Update repository label setting (beta)
    *
    * Update the setting (e.g. security/license policy) for a repository label.
+   *
    * Note that repository label settings currently only support `issueRules`,
    * `issueRulesPolicyDefault`, `licensePolicy`, and
    * `recentlyPublishedThresholdMs`. A policy is considered "active"
    * for a given repository label if the `issueRulesPolicyDefault` is
    * set, and inactive when not set. `issueRules` can be used to further
    * refine the alert triage strategy.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Repo-label:update
@@ -18658,13 +19282,16 @@ export interface operations {
    * Delete repository label setting (beta)
    *
    * Delete the setting (e.g. security/license policy) for a repository label.
+   *
    * Note that repository label settings currently only support `issueRules`,
    * `issueRulesPolicyDefault`, `licensePolicy`, and
    * `recentlyPublishedThresholdMs`. A policy is considered "active"
    * for a given repository label if the `issueRulesPolicyDefault` is
    * set, and inactive when not set. `issueRules` can be used to further
    * refine the alert triage strategy.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Repo-label:update
@@ -18715,10 +19342,14 @@ export interface operations {
   /**
    * Disassociate repository label (beta)
    *
-   * Disassociate a repository label from a repository. Labels can be used to
-   * group and organize repositories and to apply security/license policies.
-   * This endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * Disassociate a repository label from a repository.
+   *
+   * Labels can be used to group and organize repositories and to apply
+   * security/license policies.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Repo-label:update
    */
@@ -18775,6 +19406,7 @@ export interface operations {
    * Get integration events.
    *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Integration:list
@@ -18861,7 +19493,9 @@ export interface operations {
    * Get Organization Security Policy.
    *
    * Retrieve the security policy of an organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Security-policy:read
@@ -20065,7 +20699,9 @@ export interface operations {
    * Update Security Policy.
    *
    * Update the security policy of an organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Security-policy:update
@@ -22445,8 +23081,12 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Use the [successor
    * version](https://docs.socket.dev/reference/viewlicensepolicy) instead.
-   * Retrieve the license policy of an organization. This endpoint consumes 1
-   * unit of your quota. This endpoint requires the following org token scopes:
+   *
+   * Retrieve the license policy of an organization.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - License-policy:read
    *
@@ -22482,13 +23122,13 @@ export interface operations {
    *
    * Set the organization's license policy.
    *
-   * ## License policy schema
+   *     ## License policy schema
    *
    * ```json
    * {
-   * allow?: Array<string>
-   * warn?: Array<string>
-   * options?: Array<string>
+   *   allow?: Array<string>
+   *   warn?: Array<string>
+   *   options?: Array<string>
    * }
    * ```
    *
@@ -22510,17 +23150,20 @@ export interface operations {
    * (silver)', 'permissive (bronze)', 'permissive (lead)', 'copyleft', 'maximal
    * copyleft', 'network copyleft', 'strong copyleft', 'weak copyleft',
    * 'contributor license agreement', 'public domain', 'proprietary free',
-   * 'source available', 'proprietary', 'commercial', 'patent' Users can learn
-   * more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and
-   * [permissive tiers](https://blueoakcouncil.org/list) by reading the linked
-   * resources.
+   * 'source available', 'proprietary', 'commercial', 'patent'
+   *
+   * Users can learn more about [copyleft
+   * tiers](https://blueoakcouncil.org/copyleft) and [permissive
+   * tiers](https://blueoakcouncil.org/list) by reading the linked resources.
    *
    * ## PURLs
    *
    * Users may also modify their license policy's allow and warn lists by using
    * [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which
    * support glob patterns to allow a range of versions, files and directories,
-   * etc. purl qualifiers which support globs are `filename`, `version_glob`,
+   * etc.
+   *
+   * Purl qualifiers which support globs are `filename`, `version_glob`,
    * `artifact_id` and `license_provenance` (primarily used for allowing data
    * from registry metadata).
    *
@@ -22538,15 +23181,19 @@ export interface operations {
    *
    * `toplevelOnly`: only apply the license policy to "top level" license data
    * in a package, which includes registry metadata, LICENSE files, and manifest
-   * files which are closest to the root of the package. `applyToUnidentified`:
-   * Apply license policy to found but unidentified license data. If enabled,
-   * the license policy will be applied to license data which could not be
-   * affirmatively identified as a known license (this will effectively merge
-   * the license policy violation and unidentified license alerts). If disabled,
-   * license policy alerts will only be shown for license data which is
-   * positively identified as something not allowed or set to warn by the
-   * license policy. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * files which are closest to the root of the package.
+   *
+   * `applyToUnidentified`: Apply license policy to found but unidentified
+   * license data. If enabled, the license policy will be applied to license
+   * data which could not be affirmatively identified as a known license (this
+   * will effectively merge the license policy violation and unidentified
+   * license alerts). If disabled, license policy alerts will only be shown for
+   * license data which is positively identified as something not allowed or set
+   * to warn by the license policy.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - License-policy:update
    */
@@ -22592,8 +23239,11 @@ export interface operations {
    *
    * Returns an organization's license policy including allow, warn, monitor,
    * and deny categories. The deny category contains all licenses that are not
-   * explicitly categorized as allow, warn, or monitor. This endpoint consumes 1
-   * unit of your quota. This endpoint requires the following org token scopes:
+   * explicitly categorized as allow, warn, or monitor.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - License-policy:read
    */
@@ -22635,8 +23285,11 @@ export interface operations {
    * - **Secret Scanning** - Detected potentially leaked secrets and credentials
    *   within your code
    * - **Container Security** - Docker image and Dockerfile vulnerability scanning
-   *   This endpoint consumes 1 unit of your quota. This endpoint requires the
-   *   following org token scopes:
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Socket-basics:read
    */
   getSocketBasicsConfig: {
@@ -23188,12 +23841,17 @@ export interface operations {
   /**
    * List historical alerts (Beta)
    *
-   * List historical alerts. Pagination: keep requesting pages (passing the
-   * previous response's `endCursor` as `startAfterCursor`) until `endCursor` is
-   * `null`. Do not stop when `items` is empty — an empty page can be returned
-   * while more results still remain on later pages, so `endCursor` being `null`
-   * is the only reliable end-of-results signal. This endpoint consumes 10 units
-   * of your quota. This endpoint requires the following org token scopes:
+   * List historical alerts.
+   *
+   * Pagination: keep requesting pages (passing the previous response's
+   * `endCursor` as `startAfterCursor`) until `endCursor` is `null`. Do not stop
+   * when `items` is empty — an empty page can be returned while more results
+   * still remain on later pages, so `endCursor` being `null` is the only
+   * reliable end-of-results signal.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Historical:alerts-list
    */
@@ -23890,7 +24548,9 @@ export interface operations {
    * Trend of historical alerts (Beta)
    *
    * Trend analytics of historical alerts.
+   *
    * This endpoint consumes 10 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Historical:alerts-trend
@@ -24440,7 +25100,9 @@ export interface operations {
    * Trend of historical dependencies (Beta)
    *
    * Trend analytics of historical dependencies.
+   *
    * This endpoint consumes 10 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Historical:dependencies-trend
@@ -24715,19 +25377,26 @@ export interface operations {
    * snapshot record contains high-level overview metrics about the data that
    * was collected. Other [Historical Data
    * Endpoints](/reference/historical-data-endpoints) can be used to fetch the
-   * raw data associated with each snapshot. Historical snapshots contain
-   * details and raw data for the following resources:
+   * raw data associated with each snapshot.
+   *
+   * Historical snapshots contain details and raw data for the following
+   * resources:
    *
    * - Repositories
    * - Alerts
    * - Dependencies
    * - Artifacts
    * - Users
-   * - Settings Daily snapshot data is bucketed to the nearest day which is
-   *   described in more detail at: [Historical Data
-   *   Endpoints](/reference/historical-data-endpoints) This endpoint consumes
-   *   10 units of your quota. This endpoint requires the following org token
-   *   scopes:
+   * - Settings
+   *
+   * Daily snapshot data is bucketed to the nearest day which is described in
+   * more detail at: [Historical Data
+   * Endpoints](/reference/historical-data-endpoints)
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Historical:snapshots-list
    */
   historicalSnapshotsList: {
@@ -24898,19 +25567,26 @@ export interface operations {
    * snapshots are typically taken multiple times a day for paid plans and once
    * a day for free plans, this endpoint can be used to start an "on demand"
    * snapshot job to ensure the latest data is collected and stored for
-   * historical purposes. An historical snapshot will contain details and raw
-   * data for the following resources:
+   * historical purposes.
+   *
+   * An historical snapshot will contain details and raw data for the following
+   * resources:
    *
    * - Repositories
    * - Alerts
    * - Dependencies
    * - Artifacts
    * - Users
-   * - Settings Historical snapshot data is bucketed to the nearest day which is
-   *   described in more detail at: [Historical Data
-   *   Endpoints](/reference/historical-data-endpoints) This endpoint consumes
-   *   10 units of your quota. This endpoint requires the following org token
-   *   scopes:
+   * - Settings
+   *
+   * Historical snapshot data is bucketed to the nearest day which is described
+   * in more detail at: [Historical Data
+   * Endpoints](/reference/historical-data-endpoints)
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - Historical:snapshots-start
    */
   historicalSnapshotsStart: {
@@ -24955,7 +25631,9 @@ export interface operations {
    * Get Audit Log Events.
    *
    * Paginated list of audit log events.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Audit-log:list
@@ -25206,7 +25884,9 @@ export interface operations {
    * List API Tokens.
    *
    * List all API Tokens.
+   *
    * This endpoint consumes 10 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Api-tokens:list
@@ -25483,7 +26163,10 @@ export interface operations {
    * Create API Token.
    *
    * Create an API Token. The API Token created must use a subset of permissions
-   * the API token creating them. This endpoint consumes 10 units of your quota.
+   * the API token creating them.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Api-tokens:create
@@ -25737,7 +26420,10 @@ export interface operations {
    * Update API Token.
    *
    * Update an API Token. The API Token created must use a subset of permissions
-   * the API token creating them. This endpoint consumes 10 units of your quota.
+   * the API token creating them.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Api-tokens:create
@@ -25973,8 +26659,10 @@ export interface operations {
   /**
    * Rotate API Token.
    *
-   * Rotate an API Token
+   * Rotate an API Token.
+   *
    * This endpoint consumes 10 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Api-tokens:rotate
@@ -26070,8 +26758,10 @@ export interface operations {
   /**
    * Revoke API Token.
    *
-   * Revoke an API Token
+   * Revoke an API Token.
+   *
    * This endpoint consumes 10 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Api-tokens:revoke
@@ -26143,12 +26833,15 @@ export interface operations {
    * Get supported file types.
    *
    * Get a list of supported files for full scan generation. Files are
-   * categorized first by environment (e.g. NPM or PyPI), then by name. Files
-   * whose names match the patterns returned by this endpoint can be uploaded
-   * for report generation. Examples of supported filenames include
-   * `package.json`, `package-lock.json`, and `yarn.lock`. This endpoint
-   * consumes 1 unit of your quota. This endpoint requires the following org
-   * token scopes:
+   * categorized first by environment (e.g. NPM or PyPI), then by name.
+   *
+   * Files whose names match the patterns returned by this endpoint can be
+   * uploaded for report generation. Examples of supported filenames include
+   * `package.json`, `package-lock.json`, and `yarn.lock`.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - No Scopes Required, but authentication is required
    */
@@ -26189,11 +26882,16 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Use the [successor
    * version](https://docs.socket.dev/reference/getorgthreatfeeditems) instead.
-   * Paginated list of threat feed items. This endpoint requires an Enterprise
-   * Plan with Threat Feed add-on.
+   *
+   * Paginated list of threat feed items.
+   *
+   * This endpoint requires an Enterprise Plan with Threat Feed add-on.
    * [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking)
-   * our sales team for more details. This endpoint consumes 1 unit of your
-   * quota. This endpoint requires the following org token scopes:
+   * our sales team for more details.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Threat-feed:list
    *
@@ -26415,11 +27113,15 @@ export interface operations {
    *
    * Paginated list of threats, sorted by updated_at by default. Set
    * updated_after to the unix timestamp of your last sync while sorting by
-   * updated_at to synchronize all new or updated threats in the feed. This
-   * endpoint requires an Enterprise Plan with Threat Feed add-on.
+   * updated_at to synchronize all new or updated threats in the feed.
+   *
+   * This endpoint requires an Enterprise Plan with Threat Feed add-on.
    * [Contact](https://socket.dev/demo?utm_source=api-docs&utm_medium=referral&utm_campaign=tracking)
-   * our sales team for more details. This endpoint consumes 1 unit of your
-   * quota. This endpoint requires the following org token scopes:
+   * our sales team for more details.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Threat-feed:list
    */
@@ -26653,41 +27355,56 @@ export interface operations {
    * Get Packages by PURL (Org Scoped)
    *
    * Batch retrieval of package metadata and alerts by PURL strings for a
-   * specific organization. Compatible with CycloneDX reports. Package URLs
-   * (PURLs) are an ecosystem agnostic way to identify packages. CycloneDX SBOMs
-   * use the purl format to identify components. This endpoint supports fetching
-   * metadata and alerts for multiple packages at once by passing an array of
-   * purl strings, or by passing an entire CycloneDX report. **Note:** This
-   * endpoint has a batch size limit (default: 1024 PURLs per request). Requests
-   * exceeding this limit will return a 400 Bad Request error. More information
-   * on purl and CycloneDX:
+   * specific organization. Compatible with CycloneDX reports.
+   *
+   * Package URLs (PURLs) are an ecosystem agnostic way to identify packages.
+   * CycloneDX SBOMs use the purl format to identify components. This endpoint
+   * supports fetching metadata and alerts for multiple packages at once by
+   * passing an array of purl strings, or by passing an entire CycloneDX
+   * report.
+   *
+   * **Note:** This endpoint has a batch size limit (default: 1024 PURLs per
+   * request). Requests exceeding this limit will return a 400 Bad Request
+   * error.
+   *
+   * More information on purl and CycloneDX:
    *
    * - [`purl` Spec](https://github.com/package-url/purl-spec)
    * - [CycloneDX Spec](https://cyclonedx.org/specification/overview/#components)
-   *   This endpoint returns the latest available alert data for artifacts in
-   *   the batch (stale while revalidate). Actively running analysis will be
-   *   returned when available on subsequent runs. When `alerts=true`, Socket
-   *   may synthesize two alert types to make partial results actionable:
+   *
+   * This endpoint returns the latest available alert data for artifacts in the
+   * batch (stale while revalidate). Actively running analysis will be returned
+   * when available on subsequent runs.
+   *
+   * When `alerts=true`, Socket may synthesize two alert types to make partial
+   * results actionable:
+   *
    * - `pendingScan`: the package is known but analysis has not completed yet
-   * - `notFound`: Socket could not resolve the package/version metadata When
-   *   `purlErrors=true`, unresolved `notFound` inputs keep the legacy
-   *   `purlError` stream shape instead of emitting synthetic `notFound`
-   *   artifacts. Use `poll=false` (default) to fail open and return the current
-   *   known state quickly. Use `poll=true` to fail closed and wait up to
-   *   `timeoutSec` for pending analysis before returning. **Conda (temporary
-   *   compatibility):** `pkg:conda` inputs are served from the already-scanned
-   *   PyPI package with the same normalized name and version when one exists;
-   *   the response row keeps the original conda PURL in `inputPurl` but reports
-   *   `type: pypi`. Conda `build`, `subdir`, `type`, and `channel` qualifiers
-   *   are ignored, and conda packages without a scanned PyPI counterpart return
-   *   the normal `notFound` result. This mapping will be replaced by native
-   *   conda support.
+   * - `notFound`: Socket could not resolve the package/version metadata
+   *
+   * When `purlErrors=true`, unresolved `notFound` inputs keep the legacy
+   * `purlError` stream shape instead of emitting synthetic `notFound`
+   * artifacts.
+   *
+   * Use `poll=false` (default) to fail open and return the current known state
+   * quickly. Use `poll=true` to fail closed and wait up to `timeoutSec` for
+   * pending analysis before returning.
+   *
+   * **Conda (temporary compatibility):** `pkg:conda` inputs are served from the
+   * already-scanned PyPI package with the same normalized name and version when
+   * one exists; the response row keeps the original conda PURL in `inputPurl`
+   * but reports `type: pypi`. Conda `build`, `subdir`, `type`, and `channel`
+   * qualifiers are ignored, and conda packages without a scanned PyPI
+   * counterpart return the normal `notFound` result. This mapping will be
+   * replaced by native conda support.
    *
    * ## Query Parameters
    *
    * This endpoint supports all query parameters from `POST /v0/purl` including:
    * `alerts`, `actions`, `compact`, `fixable`, `licenseattrib`,
-   * `licensedetails`, `purlErrors`, `poll`, `cachedResultsOnly`, and `summary`.
+   * `licensedetails`, `purlErrors`, `poll`, `cachedResultsOnly`, and
+   * `summary`.
+   *
    * Additionally, you may provide a `labels` query parameter to apply a
    * repository label's security policies. Pass the label slug as the value
    * (e.g., `?labels=production`). Only one label is currently supported.
@@ -26752,14 +27469,15 @@ export interface operations {
    *
    *     POST /v0/orgs/{org_slug}/purl?labels=production&alerts=true&compact=true
    *     {
-   *     "components": [
-   *     {
-   *     "purl": "pkg:npm/express@4.19.2"
-   *     }
-   *     ]
+   *       "components": [
+   *         {
+   *           "purl": "pkg:npm/express@4.19.2"
+   *         }
+   *       ]
    *     }
    *
    * This endpoint consumes 100 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Packages:list
@@ -26886,8 +27604,10 @@ export interface operations {
    *
    * - `type`: Discriminator field (one of: "fixFound", "partialFixFound",
    *   "noFixAvailable", "fixNotApplicable", "errorComputingFix")
-   * - `value`: Object containing the variant-specific data The `value` object
-   *   always contains:
+   * - `value`: Object containing the variant-specific data
+   *
+   * The `value` object always contains:
+   *
    * - `ghsa`: string | null - The GHSA ID
    * - `cve`: string | null - The CVE ID (if available)
    * - `advisoryDetails`: object | null - Advisory details (only if
@@ -26898,47 +27618,57 @@ export interface operations {
    * **fixFound**: A complete fix is available for all vulnerable packages.
    *
    * - `value.fixDetails.fixes`: Array of fix objects, each containing:
-   * - `purl`: Package URL to upgrade
-   * - `fixedVersion`: Version to upgrade to
-   * - `manifestFiles`: Array of manifest files containing the package
-   * - `updateType`: "patch" | "minor" | "major" | "unknown"
+   *
+   *   - `purl`: Package URL to upgrade
+   *   - `fixedVersion`: Version to upgrade to
+   *   - `manifestFiles`: Array of manifest files containing the package
+   *   - `updateType`: "patch" | "minor" | "major" | "unknown"
    * - `value.fixDetails.responsibleDirectDependencies`: (optional) Map of direct
-   *   dependencies responsible for the vulnerability **partialFixFound**: Fixes
-   *   available for some but not all vulnerable packages
+   *   dependencies responsible for the vulnerability
+   *
+   * **partialFixFound**: Fixes available for some but not all vulnerable
+   * packages.
+   *
    * - Same as fixFound, plus:
    * - `value.fixDetails.unfixablePurls`: Array of packages that cannot be fixed,
    *   each containing:
-   * - `purl`: Package URL
-   * - `manifestFiles`: Array of manifest files
-   * - `reasons`: Human-readable explanations of why the package cannot be
-   *   upgraded. May contain multiple distinct entries when different dependency
-   *   chains are blocked for different causes (e.g. one chain has no compatible
-   *   upstream version; another would require a major version bump skipped by
-   *   `--no-major-updates`).
-   * - `dependencyChain`: (optional) Installed PURLs along the dependency chain
-   *   where the fix search was blocked, from the blocking package down to this
-   *   package. Present only when a chain was recorded; the first `reasons`
-   *   entry describes this chain.
-   * - `withheldFix`: (optional) Present when a fix exists but this request's
-   *   policy withheld it: `{ purl, version, reason }` where `purl` is the
-   *   package (without version), `version` the lowest safe version the policy
-   *   removed from the fix search, and `reason` one of `majorUpdate` (a major
-   *   update while `allow_major_updates=false`), `releaseAge` (younger than
-   *   `minimum_release_age`) or `publishDateUnknown` (publish date unavailable,
-   *   so `minimum_release_age` cannot be verified). Lifting the policy is not
-   *   guaranteed to make the fix applicable — other version constraints in the
-   *   dependency tree may still block this version. **noFixAvailable**: No fix
-   *   exists for this vulnerability (no patched version published)
+   *
+   *   - `purl`: Package URL
+   *   - `manifestFiles`: Array of manifest files
+   *   - `reasons`: Human-readable explanations of why the package cannot be
+   *     upgraded. May contain multiple distinct entries when different dependency
+   *     chains are blocked for different causes (e.g. one chain has no compatible
+   *     upstream version; another would require a major version bump skipped by
+   *     `--no-major-updates`).
+   *   - `dependencyChain`: (optional) Installed PURLs along the dependency chain
+   *     where the fix search was blocked, from the blocking package down to this
+   *     package. Present only when a chain was recorded; the first `reasons`
+   *     entry describes this chain.
+   *   - `withheldFix`: (optional) Present when a fix exists but this request's
+   *     policy withheld it: `{ purl, version, reason }` where `purl` is the
+   *     package (without version), `version` the lowest safe version the policy
+   *     removed from the fix search, and `reason` one of `majorUpdate` (a major
+   *     update while `allow_major_updates=false`), `releaseAge` (younger than
+   *     `minimum_release_age`) or `publishDateUnknown` (publish date unavailable,
+   *     so `minimum_release_age` cannot be verified). Lifting the policy is not
+   *     guaranteed to make the fix applicable — other version constraints in the
+   *     dependency tree may still block this version.
+   *
+   * **noFixAvailable**: No fix exists for this vulnerability (no patched
+   * version published)
+   *
    * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
    *   manifest files; each carries a static `reasons` entry stating that no
-   *   patched version has been published **fixNotApplicable**: A patched
-   *   version of the vulnerable package exists but cannot be applied. The most
-   *   common cause is that there is no upgrade path through the dependency tree
-   *   — for example, given a chain `App → A@1.0.0 → B@1.0.0` where `B < 2.0.0`
-   *   is vulnerable, if no version of `A` accepts `B@2.0.0` the fix cannot be
-   *   applied without a manual override (e.g. `pnpm overrides`). Other causes
-   *   include callers passing `--no-major-updates` when the only patched
-   *   version is a major bump.
+   *   patched version has been published
+   *
+   * **fixNotApplicable**: A patched version of the vulnerable package exists
+   * but cannot be applied. The most common cause is that there is no upgrade
+   * path through the dependency tree — for example, given a chain `App →
+   * A@1.0.0 → B@1.0.0` where `B < 2.0.0` is vulnerable, if no version of `A`
+   * accepts `B@2.0.0` the fix cannot be applied without a manual override (e.g.
+   * `pnpm overrides`). Other causes include callers passing
+   * `--no-major-updates` when the only patched version is a major bump.
+   *
    * - `value.vulnerableArtifacts`: Array of vulnerable packages with their
    *   manifest files, each with per-artifact `reasons` explaining why the fix
    *   could not be applied (always at least one entry; a static fallback when
@@ -26947,8 +27677,10 @@ export interface operations {
    *   upgrade down to the vulnerable package, present when a chain was recorded
    *   (the first `reasons` entry describes it), and an optional `withheldFix` —
    *   present when a fix exists but this request's policy withheld it (see the
-   *   partialFixFound field list) **errorComputingFix**: An error occurred
-   *   while computing fixes
+   *   partialFixFound field list)
+   *
+   * **errorComputingFix**: An error occurred while computing fixes.
+   *
    * - `value.message`: Error description
    *
    * ### Fix version alignment
@@ -26980,19 +27712,25 @@ export interface operations {
    * returned by `/v0/orgs/{org_slug}/alerts`). The lookup is org-scoped, so the
    * same GHSA may map to multiple alert IDs when it appears in alerts across
    * different repos or branches. Callers that need a repo/branch filter should
-   * intersect this map with results from the alerts API. The lookup honors the
-   * same scan-type visibility as `/v0/orgs/{org_slug}/alerts` — when the
-   * `enableTier1OrgAlertApiRead` feature flag is off for the org, only `socket`
-   * scans are visible (no `socket_tier1`). Note on scopes: this field surfaces
-   * identifiers that are otherwise reachable via `/v0/orgs/{org_slug}/alerts`
-   * (which requires `alerts:list`). The fixes route is gated on `fixes:list`
-   * alone; the GHSAs the alert IDs are keyed to are already part of every
-   * `/fixes` response, and exposing the matching alert IDs through this opt-in
-   * flag is intentional — it lets a caller with only `fixes:list` complete the
-   * correlation back to /alerts on a token that already has that scope. If you
-   * require strict scope separation, do not enable this flag. This endpoint
-   * consumes 10 units of your quota. This endpoint requires the following org
-   * token scopes:
+   * intersect this map with results from the alerts API.
+   *
+   * The lookup honors the same scan-type visibility as
+   * `/v0/orgs/{org_slug}/alerts` — when the `enableTier1OrgAlertApiRead`
+   * feature flag is off for the org, only `socket` scans are visible (no
+   * `socket_tier1`).
+   *
+   * Note on scopes: this field surfaces identifiers that are otherwise
+   * reachable via `/v0/orgs/{org_slug}/alerts` (which requires `alerts:list`).
+   * The fixes route is gated on `fixes:list` alone; the GHSAs the alert IDs are
+   * keyed to are already part of every `/fixes` response, and exposing the
+   * matching alert IDs through this opt-in flag is intentional — it lets a
+   * caller with only `fixes:list` complete the correlation back to /alerts on a
+   * token that already has that scope. If you require strict scope separation,
+   * do not enable this flag.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Fixes:list
    */
@@ -27115,7 +27853,9 @@ export interface operations {
    * Get Organization Telemetry Config.
    *
    * Retrieve the telemetry config of an organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    */
   getOrgTelemetryConfig: {
@@ -27159,7 +27899,9 @@ export interface operations {
    * Update Telemetry Config.
    *
    * Update the telemetry config of an organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Telemetry-policy:update
@@ -27216,13 +27958,18 @@ export interface operations {
   /**
    * List organization events.
    *
-   * List events for an organization. Events are records of actions taken across
-   * Socket products, such as firewall decisions and CLI/SDK actions. The
-   * maximum date range per request is 365 days. When more results are
+   * List events for an organization.
+   *
+   * Events are records of actions taken across Socket products, such as
+   * firewall decisions and CLI/SDK actions.
+   *
+   * The maximum date range per request is 365 days. When more results are
    * available, the response body's "endCursor" property contains the cursor to
    * pass as the "startAfterCursor" query parameter to retrieve the next page.
-   * This endpoint consumes 10 units of your quota. This endpoint requires the
-   * following org token scopes:
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Telemetry-events:list
    */
@@ -27793,7 +28540,9 @@ export interface operations {
    * List all webhooks.
    *
    * List all webhooks in the specified organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Webhooks:list
@@ -27898,7 +28647,9 @@ export interface operations {
    * Create a webhook.
    *
    * Create a new webhook. Returns the created webhook details.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Webhooks:create
@@ -28037,7 +28788,9 @@ export interface operations {
    * Get webhook.
    *
    * Get a webhook for the specified organization.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Webhooks:list
@@ -28134,7 +28887,9 @@ export interface operations {
    * Update webhook.
    *
    * Update details of an existing webhook.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Webhooks:update
@@ -28277,8 +29032,11 @@ export interface operations {
    * Delete webhook.
    *
    * Delete a webhook. This will stop all future webhook deliveries to the
-   * webhook URL. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * webhook URL.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Webhooks:delete
    */
@@ -28319,12 +29077,17 @@ export interface operations {
   /**
    * List latest alerts (Beta)
    *
-   * List latest alerts. Pagination: keep requesting pages (passing the previous
-   * response's `endCursor` as `startAfterCursor`) until `endCursor` is `null`.
-   * Do not stop when `items` is empty — an empty page can be returned while
-   * more results still remain on later pages, so `endCursor` being `null` is
-   * the only reliable end-of-results signal. This endpoint consumes 10 units of
-   * your quota. This endpoint requires the following org token scopes:
+   * List latest alerts.
+   *
+   * Pagination: keep requesting pages (passing the previous response's
+   * `endCursor` as `startAfterCursor`) until `endCursor` is `null`. Do not stop
+   * when `items` is empty — an empty page can be returned while more results
+   * still remain on later pages, so `endCursor` being `null` is the only
+   * reliable end-of-results signal.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Alerts:list
    */
@@ -29291,7 +30054,9 @@ export interface operations {
    * List full scans associated with alert (Beta)
    *
    * List full scans associated with alert.
+   *
    * This endpoint consumes 10 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Alerts:list
@@ -29420,59 +30185,59 @@ export interface operations {
    * information about license data which does not comply with the license allow
    * list.
    *
-   * ## Example request body:
+   *     ## Example request body:
    *
-   * ```json
-   * {
-   *   "components": [
+   *     ```json
    *     {
-   *       "purl": "pkg:npm/lodash@4.17.21"
-   *     },
-   *     {
-   *       "purl": "pkg:npm/lodash@4.14.1"
+   *       "components": [
+   *         {
+   *           "purl": "pkg:npm/lodash@4.17.21"
+   *         },
+   *         {
+   *           "purl": "pkg:npm/lodash@4.14.1"
+   *         }
+   *       ],
+   *       "allow": [
+   *         "permissive",
+   *         "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
+   *       ],
+   *       "warn": [
+   *         "copyleft",
+   *         "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
+   *       ],
+   *       "options": ["toplevelOnly"]
    *     }
-   *   ],
-   *   "allow": [
-   *     "permissive",
-   *     "pkg:npm/lodash?file_name=foo/test/*&version_glob=4.17.*"
-   *   ],
-   *   "warn": [
-   *     "copyleft",
-   *     "pkg:npm/lodash?file_name=foo/prod/*&version_glob=4.14.*"
-   *   ],
-   *   "options": ["toplevelOnly"]
-   * }
-   * ```
+   *     ```
    *
-   * ## Return value
    *
-   * For each requested PURL, an array is returned. Each array contains a list
-   * of license policy violations detected for the requested PURL. Violations
-   * are accompanied by a string identifying the offending license data as
-   * `spdxAtomOrExtraData`, a message describing why the license data is
-   * believed to be incompatible with the license policy, and a list of
-   * locations (by filepath or other provenance information) where the offending
-   * license data may be found.
+   *     ## Return value
    *
-   * ```json
-   * Array<
-   * Array<{
-   * filepathOrProvenance: Array<string>,
-   * level: "warning" | "violation",
-   * purl: string,
-   * spdxAtomOrExtraData: string,
-   * violationExplanation: string
-   * }>
-   * >
-   * ```
+   *     For each requested PURL, an array is returned. Each array contains a list of license policy violations
+   *     detected for the requested PURL.
    *
-   * ## License policy schema
+   *     Violations are accompanied by a string identifying the offending license data as `spdxAtomOrExtraData`,
+   *     a message describing why the license data is believed to be incompatible with the license policy, and a list
+   *     of locations (by filepath or other provenance information) where the offending license data may be found.
+   *
+   *     ```json
+   *     Array<
+   *       Array<{
+   *         filepathOrProvenance: Array<string>,
+   *         level: "warning" | "violation",
+   *         purl: string,
+   *         spdxAtomOrExtraData: string,
+   *         violationExplanation: string
+   *       }>
+   *     >
+   *     ```
+   *
+   *     ## License policy schema
    *
    * ```json
    * {
-   * allow?: Array<string>
-   * warn?: Array<string>
-   * options?: Array<string>
+   *   allow?: Array<string>
+   *   warn?: Array<string>
+   *   options?: Array<string>
    * }
    * ```
    *
@@ -29494,17 +30259,20 @@ export interface operations {
    * (silver)', 'permissive (bronze)', 'permissive (lead)', 'copyleft', 'maximal
    * copyleft', 'network copyleft', 'strong copyleft', 'weak copyleft',
    * 'contributor license agreement', 'public domain', 'proprietary free',
-   * 'source available', 'proprietary', 'commercial', 'patent' Users can learn
-   * more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and
-   * [permissive tiers](https://blueoakcouncil.org/list) by reading the linked
-   * resources.
+   * 'source available', 'proprietary', 'commercial', 'patent'
+   *
+   * Users can learn more about [copyleft
+   * tiers](https://blueoakcouncil.org/copyleft) and [permissive
+   * tiers](https://blueoakcouncil.org/list) by reading the linked resources.
    *
    * ## PURLs
    *
    * Users may also modify their license policy's allow and warn lists by using
    * [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which
    * support glob patterns to allow a range of versions, files and directories,
-   * etc. purl qualifiers which support globs are `filename`, `version_glob`,
+   * etc.
+   *
+   * Purl qualifiers which support globs are `filename`, `version_glob`,
    * `artifact_id` and `license_provenance` (primarily used for allowing data
    * from registry metadata).
    *
@@ -29522,17 +30290,21 @@ export interface operations {
    *
    * `toplevelOnly`: only apply the license policy to "top level" license data
    * in a package, which includes registry metadata, LICENSE files, and manifest
-   * files which are closest to the root of the package. `applyToUnidentified`:
-   * Apply license policy to found but unidentified license data. If enabled,
-   * the license policy will be applied to license data which could not be
-   * affirmatively identified as a known license (this will effectively merge
-   * the license policy violation and unidentified license alerts). If disabled,
-   * license policy alerts will only be shown for license data which is
-   * positively identified as something not allowed or set to warn by the
-   * license policy. This endpoint consumes 100 units of your quota. This
-   * endpoint requires the following org token scopes:
+   * files which are closest to the root of the package.
    *
-   * - Packages:list
+   * `applyToUnidentified`: Apply license policy to found but unidentified
+   * license data. If enabled, the license policy will be applied to license
+   * data which could not be affirmatively identified as a known license (this
+   * will effectively merge the license policy violation and unidentified
+   * license alerts). If disabled, license policy alerts will only be shown for
+   * license data which is positively identified as something not allowed or set
+   * to warn by the license policy.
+   *
+   * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   * - packages:list.
+   *
    * - License-policy:read
    */
   licensePolicy: {
@@ -29580,7 +30352,9 @@ export interface operations {
    * Saturate License Policy (Legacy)
    *
    * _This endpoint is deprecated._* Use the [successor
-   * version](https://docs.socket.dev/reference/updateorglicensepolicy) instead.
+   * version](https://docs.socket.dev/reference/updateorglicensepolicy)
+   * instead.
+   *
    * Get the "saturated" version of a license policy's allow list, filling in
    * the entire set of allowed license data. For example, the saturated form of
    * a license allow list which only specifies that licenses in the tier
@@ -29614,8 +30388,10 @@ export interface operations {
    * ```json
    * ```
    *
-   * Where PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze"
-   * | "lead" CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong
+   * Where.
+   *
+   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" |
+   * "lead" CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong
    * copyleft" | "weak copyleft"
    *
    * ## Return Value
@@ -29624,18 +30400,22 @@ export interface operations {
    *
    * ```json
    * {
-   * allowedApprovalSources?: Array<"fsf" | "osi">,
-   * allowedFamilies?: Array<"copyleft" | "permissive">,
-   * allowedTiers?: Array<PermissiveTier | CopyleftTier>,
-   * allowedStrings?: Array<string>
-   * allowedPURLs?: Array<string>
-   * focusAlertsHere?: boolean
+   *   allowedApprovalSources?: Array<"fsf" | "osi">,
+   *   allowedFamilies?: Array<"copyleft" | "permissive">,
+   *   allowedTiers?: Array<PermissiveTier | CopyleftTier>,
+   *   allowedStrings?: Array<string>
+   *   allowedPURLs?: Array<string>
+   *   focusAlertsHere?: boolean
    * }
    * ```
    *
-   * Where PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze"
-   * | "lead" CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong
-   * copyleft" | "weak copyleft" readers can learn more about [copyleft
+   * Where.
+   *
+   * PermissiveTier ::= "model permissive" | "gold" | "silver" | "bronze" |
+   * "lead" CopyleftTier ::= "maximal copyleft" | "network copyleft" | "strong
+   * copyleft" | "weak copyleft"
+   *
+   * Readers can learn more about [copyleft
    * tiers](https://blueoakcouncil.org/copyleft) and [permissive
    * tiers](https://blueoakcouncil.org/list) by reading the linked resources.
    *
@@ -29653,6 +30433,7 @@ export interface operations {
    * ```
    *
    * This endpoint consumes 100 units of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - Packages:list
@@ -29704,57 +30485,62 @@ export interface operations {
    * `includetext=true` is set, the returned metadata will also include the
    * license text.
    *
-   * ## Example request body:
+   *     ## Example request body:
+   *
+   *     ```json
+   *     [
+   *       "Apache-2.0",
+   *       "BSD Zero Clause License"
+   *     ]
+   *     ```
+   *
+   *
+   *     ## Return value
+   *
+   *     ```json
+   *     // Response schema:
+   *     Array<{
+   *       licenseId: string,
+   *       name?: string,
+   *       deprecated?: string,
+   *       crossref?: string
+   *       classes: Array<string>
+   *       text?: string
+   *     }>
+   *
+   *     // Example response:
+   *     [
+   *       {
+   *         "licenseId": "Apache-2.0",
+   *         "name": "Apache License 2.0",
+   *         "deprecated": false,
+   *         "crossref": "https://spdx.org/licenses/Apache-2.0.html",
+   *         "classes": [
+   *           "fsf libre",
+   *           "osi approved",
+   *           "permissive (silver)"
+   *         ]
+   *       },
+   *       {
+   *         "licenseId": "0BSD",
+   *         "name": "BSD Zero Clause License",
+   *         "deprecated": false,
+   *         "crossref": "https://spdx.org/licenses/0BSD.html",
+   *         "classes": [
+   *           "osi approved",
+   *           "permissive (bronze)"
+   *         ]
+   *       }
+   *     ]
+   *     ```
+   *
+   *     ## License policy schema
    *
    * ```json
-   * ["Apache-2.0", "BSD Zero Clause License"]
-   * ```
-   *
-   * ## Return value
-   *
-   * ```json
-   * // Response schema:
-   * Array<{
-   * licenseId: string,
-   * name?: string,
-   * deprecated?: string,
-   * crossref?: string
-   * classes: Array<string>
-   * text?: string
-   * }>
-   * // Example response:
-   * [
    * {
-   * "licenseId": "Apache-2.0",
-   * "name": "Apache License 2.0",
-   * "deprecated": false,
-   * "crossref": "https://spdx.org/licenses/Apache-2.0.html",
-   * "classes": [
-   * "fsf libre",
-   * "osi approved",
-   * "permissive (silver)"
-   * ]
-   * },
-   * {
-   * "licenseId": "0BSD",
-   * "name": "BSD Zero Clause License",
-   * "deprecated": false,
-   * "crossref": "https://spdx.org/licenses/0BSD.html",
-   * "classes": [
-   * "osi approved",
-   * "permissive (bronze)"
-   * ]
-   * }
-   * ]
-   * ```
-   *
-   * ## License policy schema
-   *
-   * ```json
-   * {
-   * allow?: Array<string>
-   * warn?: Array<string>
-   * options?: Array<string>
+   *   allow?: Array<string>
+   *   warn?: Array<string>
+   *   options?: Array<string>
    * }
    * ```
    *
@@ -29776,17 +30562,20 @@ export interface operations {
    * (silver)', 'permissive (bronze)', 'permissive (lead)', 'copyleft', 'maximal
    * copyleft', 'network copyleft', 'strong copyleft', 'weak copyleft',
    * 'contributor license agreement', 'public domain', 'proprietary free',
-   * 'source available', 'proprietary', 'commercial', 'patent' Users can learn
-   * more about [copyleft tiers](https://blueoakcouncil.org/copyleft) and
-   * [permissive tiers](https://blueoakcouncil.org/list) by reading the linked
-   * resources.
+   * 'source available', 'proprietary', 'commercial', 'patent'
+   *
+   * Users can learn more about [copyleft
+   * tiers](https://blueoakcouncil.org/copyleft) and [permissive
+   * tiers](https://blueoakcouncil.org/list) by reading the linked resources.
    *
    * ## PURLs
    *
    * Users may also modify their license policy's allow and warn lists by using
    * [package URLs](https://github.com/package-url/purl-spec) (aka PURLs), which
    * support glob patterns to allow a range of versions, files and directories,
-   * etc. purl qualifiers which support globs are `filename`, `version_glob`,
+   * etc.
+   *
+   * Purl qualifiers which support globs are `filename`, `version_glob`,
    * `artifact_id` and `license_provenance` (primarily used for allowing data
    * from registry metadata).
    *
@@ -29804,15 +30593,19 @@ export interface operations {
    *
    * `toplevelOnly`: only apply the license policy to "top level" license data
    * in a package, which includes registry metadata, LICENSE files, and manifest
-   * files which are closest to the root of the package. `applyToUnidentified`:
-   * Apply license policy to found but unidentified license data. If enabled,
-   * the license policy will be applied to license data which could not be
-   * affirmatively identified as a known license (this will effectively merge
-   * the license policy violation and unidentified license alerts). If disabled,
-   * license policy alerts will only be shown for license data which is
-   * positively identified as something not allowed or set to warn by the
-   * license policy. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * files which are closest to the root of the package.
+   *
+   * `applyToUnidentified`: Apply license policy to found but unidentified
+   * license data. If enabled, the license policy will be applied to license
+   * data which could not be affirmatively identified as a known license (this
+   * will effectively merge the license policy violation and unidentified
+   * license alerts). If disabled, license policy alerts will only be shown for
+   * license data which is positively identified as something not allowed or set
+   * to warn by the license policy.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    */
   licenseMetadata: {
     parameters: {
@@ -29846,8 +30639,10 @@ export interface operations {
    *
    * For an array of alert type identifiers, returns metadata for each alert
    * type. Optionally, specify a language via the 'language' query parameter.
-   * This endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    */
   alertTypes: {
     parameters: {
@@ -29907,7 +30702,9 @@ export interface operations {
    * Returns the OpenAPI definition.
    *
    * Retrieve the API specification in an Openapi JSON format.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    */
   getOpenAPI: {
@@ -29927,7 +30724,9 @@ export interface operations {
    * Returns the OpenAPI definition.
    *
    * Retrieve the API specification in an Openapi JSON format.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    */
   getOpenAPIJSON: {
@@ -29947,8 +30746,11 @@ export interface operations {
    * Get quota.
    *
    * Get your current API quota. You can use this endpoint to prevent doing
-   * requests that might spend all your quota. This endpoint consumes 0 units of
-   * your quota. This endpoint requires the following org token scopes:
+   * requests that might spend all your quota.
+   *
+   * This endpoint consumes 0 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - No Scopes Required, but authentication is required
    */
@@ -29984,7 +30786,9 @@ export interface operations {
    * List organizations.
    *
    * Get information on the current organizations associated with the API token.
+   *
    * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - No Scopes Required, but authentication is required
@@ -30034,8 +30838,13 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Use the [successor
    * version](https://docs.socket.dev/reference/updateorgsecuritypolicy)
-   * instead. Get current settings for the requested organizations and default
-   * settings to allow deferrals. This endpoint consumes 1 unit of your quota.
+   * instead.
+   *
+   * Get current settings for the requested organizations and default settings
+   * to allow deferrals.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
    * This endpoint requires the following org token scopes:
    *
    * - No Scopes Required, but authentication is required
@@ -30109,14 +30918,21 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Deprecated since 2023-01-15. Use the
    * [successor version](https://docs.socket.dev/reference/getsupportedfiles)
-   * instead. This route has been moved to the `orgs/{org_slug}/supported-files`
-   * endpoint. Get a list of supported files for project report generation.
-   * Files are categorized first by environment (e.g. NPM or PyPI), then by
-   * name. Files whose names match the patterns returned by this endpoint can be
+   * instead.
+   *
+   * This route has been moved to the `orgs/{org_slug}/supported-files`
+   * endpoint.
+   *
+   * Get a list of supported files for project report generation. Files are
+   * categorized first by environment (e.g. NPM or PyPI), then by name.
+   *
+   * Files whose names match the patterns returned by this endpoint can be
    * uploaded for report generation. Examples of supported filenames include
-   * `package.json`, `package-lock.json`, and `yarn.lock`. This endpoint
-   * consumes 1 unit of your quota. This endpoint requires the following org
-   * token scopes:
+   * `package.json`, `package-lock.json`, and `yarn.lock`.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * @deprecated
    */
@@ -30147,10 +30963,14 @@ export interface operations {
    * Delete a report.
    *
    * _This endpoint is deprecated._* Use the [successor
-   * version](https://docs.socket.dev/reference) instead. Deprecated: Use
-   * `/orgs/{org_slug}/full-scans` instead. Delete a specific project report
-   * generated with the GitHub app. This endpoint consumes 10 units of your
-   * quota. This endpoint requires the following org token scopes:
+   * version](https://docs.socket.dev/reference) instead.
+   *
+   * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Delete a specific
+   * project report generated with the GitHub app.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Report:write
    *
@@ -30187,10 +31007,14 @@ export interface operations {
    * Get list of reports.
    *
    * _This endpoint is deprecated._* Use the [successor
-   * version](https://docs.socket.dev/reference) instead. Deprecated: Use
-   * `/orgs/{org_slug}/full-scans` instead. Get all your project reports
-   * generated with the GitHub app. This endpoint consumes 10 units of your
-   * quota. This endpoint requires the following org token scopes:
+   * version](https://docs.socket.dev/reference) instead.
+   *
+   * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all your project
+   * reports generated with the GitHub app.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Report:list
    *
@@ -30264,13 +31088,20 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Use the [successor
    * version](https://docs.socket.dev/reference/createorgfullscan) instead.
-   * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Upload a lockfile to
-   * get your project analyzed by Socket. You can upload multiple lockfiles in
-   * the same request, but each filename must be unique. The name of the file
-   * must be in the supported list. For example, these are valid filenames:
-   * `package.json`, `folder/package.json` and
-   * `deep/nested/folder/package.json`. This endpoint consumes 100 units of your
-   * quota. This endpoint requires the following org token scopes:
+   *
+   * Deprecated: Use `/orgs/{org_slug}/full-scans` instead.
+   *
+   * Upload a lockfile to get your project analyzed by Socket. You can upload
+   * multiple lockfiles in the same request, but each filename must be unique.
+   *
+   * The name of the file must be in the supported list.
+   *
+   * For example, these are valid filenames: `package.json`,
+   * `folder/package.json` and `deep/nested/folder/package.json`.
+   *
+   * This endpoint consumes 100 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Report:write
    *
@@ -30332,10 +31163,13 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Use the [successor
    * version](https://docs.socket.dev/reference/getorgfullscan) instead.
+   *
    * Deprecated: Use `/orgs/{org_slug}/full-scans` instead. Get all the issues,
-   * packages, and scores related to an specific project report. This endpoint
-   * consumes 10 units of your quota. This endpoint requires the following org
-   * token scopes:
+   * packages, and scores related to an specific project report.
+   *
+   * This endpoint consumes 10 units of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Report:read
    *
@@ -30369,9 +31203,13 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Use the [successor
    * version](https://docs.socket.dev/reference/getorgrepolist) instead.
+   *
    * Deprecated: Use `/orgs/{org_slug}/repos` instead. Get all GitHub
-   * repositories associated with a Socket org. This endpoint consumes 1 unit of
-   * your quota. This endpoint requires the following org token scopes:
+   * repositories associated with a Socket org.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Repo:list
    *
@@ -30452,12 +31290,17 @@ export interface operations {
    * Get issues by package.
    *
    * _This endpoint is deprecated._* Use the [successor
-   * version](https://docs.socket.dev/reference) instead. Get all the issues
-   * related with a particular npm package version. This endpoint returns the
-   * issue type, location, and additional details related to each issue in the
-   * `props` attribute. You can [see here](https://socket.dev/alerts) the full
-   * list of issues. This endpoint consumes 1 unit of your quota. This endpoint
-   * requires the following org token scopes:
+   * version](https://docs.socket.dev/reference) instead.
+   *
+   * Get all the issues related with a particular npm package version. This
+   * endpoint returns the issue type, location, and additional details related
+   * to each issue in the `props` attribute.
+   *
+   * You can [see here](https://socket.dev/alerts) the full list of issues.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - No Scopes Required, but authentication is required
    *
@@ -30490,8 +31333,9 @@ export interface operations {
    * Get score by package.
    *
    * _This endpoint is deprecated._* Use the [successor
-   * version](https://docs.socket.dev/reference/batchpackagefetch) instead. Get
-   * all the scores and metrics by category that are used to evaluate the
+   * version](https://docs.socket.dev/reference/batchpackagefetch) instead.
+   *
+   * Get all the scores and metrics by category that are used to evaluate the
    * package version.
    *
    * - Depscore: The average of all score factors. (0-1)
@@ -30541,9 +31385,12 @@ export interface operations {
    * - VersionAuthorName/Email: The name and email of the version author.
    * - FileCount: The number of files in the package.
    * - ByteCount: The total size in bytes of the package.
-   * - TypeModule: Whether the package declares a "type": "module" field. This
-   *   endpoint consumes 1 unit of your quota. This endpoint requires the
-   *   following org token scopes:
+   * - TypeModule: Whether the package declares a "type": "module" field.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
+   *
    * - No Scopes Required, but authentication is required
    *
    * @deprecated
@@ -30576,12 +31423,17 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Use the [successor
    * version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+   *
    * Please implement against the [Historical
    * dependencies](/reference/historicaldependenciestrend) or [Historical
-   * alerts](/reference/historicalalertstrend) endpoints. Get analytics data
-   * regarding the number of alerts found across all active repositories. This
-   * endpoint consumes 1 unit of your quota. This endpoint requires the
-   * following org token scopes:
+   * alerts](/reference/historicalalertstrend) endpoints.
+   *
+   * Get analytics data regarding the number of alerts found across all active
+   * repositories.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Report:write
    *
@@ -30687,12 +31539,17 @@ export interface operations {
    *
    * _This endpoint is deprecated._* Use the [successor
    * version](https://docs.socket.dev/reference/historicalalertstrend) instead.
+   *
    * Please implement against the [Historical
    * dependencies](/reference/historicaldependenciestrend) or [Historical
-   * alerts](/reference/historicalalertstrend) endpoints. Get analytics data
-   * regarding the number of alerts found in a single repository. This endpoint
-   * consumes 1 unit of your quota. This endpoint requires the following org
-   * token scopes:
+   * alerts](/reference/historicalalertstrend) endpoints.
+   *
+   * Get analytics data regarding the number of alerts found in a single
+   * repository.
+   *
+   * This endpoint consumes 1 unit of your quota.
+   *
+   * This endpoint requires the following org token scopes:
    *
    * - Report:write
    *

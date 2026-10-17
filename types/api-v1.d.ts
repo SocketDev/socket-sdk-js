@@ -45,6 +45,7 @@ export interface paths {
      * Post organization events.
      *
      * Send events directly to Socket.
+     *
      * Authentication: Organization API token only.
      * Required token scopes: *
      */
@@ -219,9 +220,11 @@ export interface paths {
      * Given a package URL (PURL) *without* a version, returns every version
      * Socket knows about for that package along with its publish date, sorted
      * newest-first by publish date.
+     *
      * This lets you enforce version policies such as "N-1" (allow the previous
      * release, block the newest) without querying a package registry directly.
      * Versions with no known publish date are listed last.
+     *
      * **Ordering includes prereleases.** Sorting is by publish date only, so
      * index 0 is the most recently *published* version, not necessarily the
      * newest stable release. On npm in particular the newest publishes are
@@ -232,15 +235,19 @@ export interface paths {
      * version grammar has no canonical prerelease parser, or when the version
      * string itself does not parse — treat null according to your own policy
      * rather than as an error.
+     *
      * Pass `limit` to cap how many entries come back; it is applied after
      * sorting, so `limit=2` is all the N-1 use case needs. A `limit` that
      * is not a positive integer is rejected with a 400 rather than clamped.
+     *
      * The PURL must be percent-encoded as a single path segment
      * (`encodeURIComponent`); an unencoded `/` will not match this route.
      * Any version on the PURL is ignored — the full history always comes back.
      * The HuggingFace `type` qualifier (model, dataset, or space) is honored.
+     *
      * A well-formed PURL for an ecosystem that does not support version
      * listing returns a 400 rather than a server error.
+     *
      * Authentication: Organization API token, OAuth2, or NextAuth session.
      * Required token scope: `packages:list`. Costs 100 quota units.
      */
@@ -377,12 +384,16 @@ export interface paths {
      *
      * Returns a paginated list of supply chain attack campaigns. Supports
      * filtering by status, ecosystem, and an incremental sync parameter
-     * (`updated_after`). Package PURLs are not inlined on the campaign object —
-     * they are their own paginated resource. Fetch them per campaign from
-     * `/threat-campaigns/:campaign_id/packages`. Authentication: Organization
-     * API token, OAuth2, or NextAuth session. Required token scope:
-     * `threat-campaigns:list`. This endpoint requires an Enterprise Plan with
-     * the Threat Feed add-on.
+     * (`updated_after`).
+     *
+     * Package PURLs are not inlined on the campaign object — they are their own
+     * paginated resource. Fetch them per campaign from
+     * `/threat-campaigns/:campaign_id/packages`.
+     *
+     * Authentication: Organization API token, OAuth2, or NextAuth session.
+     * Required token scope: `threat-campaigns:list`.
+     *
+     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
      */
     get: {
       parameters: {
@@ -540,11 +551,15 @@ export interface paths {
      * Returns a single supply chain attack campaign by ID. Same shape as one
      * item from the campaigns list; package PURLs are not inlined — fetch them
      * from the paginated `/threat-campaigns/:campaign_id/packages` resource
-     * instead. Useful for filling in cached campaign metadata client-side when
-     * crawling the campaigns list or packages feed. Authentication:
-     * Organization API token, OAuth2, or NextAuth session. Required token
-     * scope: `threat-campaigns:list`. This endpoint requires an Enterprise Plan
-     * with the Threat Feed add-on.
+     * instead.
+     *
+     * Useful for filling in cached campaign metadata client-side when crawling
+     * the campaigns list or packages feed.
+     *
+     * Authentication: Organization API token, OAuth2, or NextAuth session.
+     * Required token scope: `threat-campaigns:list`.
+     *
+     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
      */
     get: {
       parameters: {
@@ -677,12 +692,16 @@ export interface paths {
      * Returns a cursor-paginated list of package PURLs affected by a single
      * supply chain attack campaign. This is the primary way to retrieve all
      * packages for a known campaign without an inline, unbounded list on the
-     * campaign object. Pagination follows the same `{ items, endCursor }`
-     * envelope as the campaigns list. Pass the `endCursor` value back as
-     * `cursor` to fetch the next page. Authentication: Organization API token,
-     * OAuth2, or NextAuth session. Required token scope:
-     * `threat-campaigns:list`. This endpoint requires an Enterprise Plan with
-     * the Threat Feed add-on.
+     * campaign object.
+     *
+     * Pagination follows the same `{ items, endCursor }` envelope as the
+     * campaigns list. Pass the `endCursor` value back as `cursor` to fetch the
+     * next page.
+     *
+     * Authentication: Organization API token, OAuth2, or NextAuth session.
+     * Required token scope: `threat-campaigns:list`.
+     *
+     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
      */
     get: {
       parameters: {
