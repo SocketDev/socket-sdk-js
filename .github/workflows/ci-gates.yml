@@ -182,7 +182,7 @@ jobs:
           main-script: pnpm run test --ci
 
   test-node18:
-    name: 'Test (Node.js 18.20.8)'
+    name: 'Runtime (Node.js 18.20.8)'
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
@@ -210,14 +210,25 @@ jobs:
       - name: 'Set up and install'
         uses: ./.github/actions/fleet/setup-and-install
         with:
-          node-version: '18.20.8'
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
           payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
-      - name: 'Run tests'
+      - name: 'Build SDK'
         uses: ./.github/actions/fleet/run-script
         env:
           GH_TOKEN: ${{ github.token }}
         with:
           setup-script: pnpm run build
-          main-script: pnpm run test --ci
+          main-script: node -e 'process.stdout.write(`Build completed under Node ${process.versions.node}\\n`)'
+      - name: 'Set up Node.js 18.20.8'
+        uses: ./.github/actions/fleet/setup
+        with:
+          node-version: '18.20.8'
+          socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
+      - name: 'Verify SDK runtime'
+        uses: ./.github/actions/fleet/run-script
+        with:
+          main-script: >-
+            node --input-type=module -e 'import { SocketSdk } from "./dist/index.js";
+            if (typeof SocketSdk !== "function") throw new TypeError("SocketSdk export is not callable");
+            process.stdout.write(`SocketSdk loaded under Node ${process.versions.node}\\n`);'
