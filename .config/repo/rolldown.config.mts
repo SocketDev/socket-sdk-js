@@ -174,5 +174,6 @@ export const buildConfig: RolldownOptions & { output: OutputOptions } = {
         process.env['NODE_ENV'] || 'production',
       ),
     },
+    target: 'node18',
   },
 }
