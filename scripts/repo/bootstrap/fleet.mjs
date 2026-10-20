@@ -13643,6 +13643,31 @@ function parseStringArray(value, field) {
     throw new Error(`MCP server ${field} must be an array of strings`)
   return [...value]
 }
+function appendCodexHttpMcpConfig(lines, name, key, server) {
+  lines.push(`url = ${tomlString(server.url)}`)
+  if (findMcpProviderForServer(name)?.auth === 'oauth')
+    lines.push(`auth = ${tomlString('oauth')}`)
+  if (server.bearerTokenEnv)
+    lines.push(`bearer_token_env_var = ${tomlString(server.bearerTokenEnv)}`)
+  const oauth = nativeMcpOAuth('codex', name, server)
+  if (!oauth?.clientId && !oauth?.callbackPort && !oauth?.callbackUrl) return
+  lines.push('', `[mcp_servers.${key}.oauth]`)
+  if (oauth.clientId) lines.push(`client_id = ${tomlString(oauth.clientId)}`)
+  if (oauth.callbackPort) lines.push(`callback_port = ${oauth.callbackPort}`)
+  if (oauth.callbackUrl)
+    lines.push(`callback_url = ${tomlString(oauth.callbackUrl)}`)
+}
+function appendCodexStdioMcpConfig(lines, key, server) {
+  lines.push(`command = ${tomlString(server.command)}`)
+  lines.push(...tomlStringArray(server.args))
+  lines.push('', `[mcp_servers.${key}.env]`)
+  const env = {
+    ...server.env,
+    FLEET_MCP_CLIENT: 'codex',
+  }
+  for (const [envName, value] of Object.entries(sortRecord(env)))
+    lines.push(`${tomlKey(envName)} = ${tomlString(value)}`)
+}
 /**
  * Render the trusted-project `.codex/config.toml` MCP section.
  */
@@ -13654,33 +13679,9 @@ function renderCodexMcpConfig(servers) {
   for (const [name, server] of clientMcpServers(servers, 'codex')) {
     const key = /^[\w-]+$/.test(name) ? name : tomlString(name)
     lines.push('', `[mcp_servers.${key}]`)
-    if (server.kind === 'http') {
-      lines.push(`url = ${tomlString(server.url)}`)
-      if (server.bearerTokenEnv)
-        lines.push(
-          `bearer_token_env_var = ${tomlString(server.bearerTokenEnv)}`,
-        )
-      const oauth = nativeMcpOAuth('codex', name, server)
-      if (oauth?.clientId || oauth?.callbackPort || oauth?.callbackUrl) {
-        lines.push('', `[mcp_servers.${key}.oauth]`)
-        if (oauth.clientId)
-          lines.push(`client_id = ${tomlString(oauth.clientId)}`)
-        if (oauth.callbackPort)
-          lines.push(`callback_port = ${oauth.callbackPort}`)
-        if (oauth.callbackUrl)
-          lines.push(`callback_url = ${tomlString(oauth.callbackUrl)}`)
-      }
-    } else {
-      lines.push(`command = ${tomlString(server.command)}`)
-      lines.push(...tomlStringArray(server.args))
-      lines.push('', `[mcp_servers.${key}.env]`)
-      const env = {
-        ...server.env,
-        FLEET_MCP_CLIENT: 'codex',
-      }
-      for (const [envName, value] of Object.entries(sortRecord(env)))
-        lines.push(`${tomlKey(envName)} = ${tomlString(value)}`)
-    }
+    if (server.kind === 'http')
+      appendCodexHttpMcpConfig(lines, name, key, server)
+    else appendCodexStdioMcpConfig(lines, key, server)
   }
   return `${lines.join('\n')}\n`
 }

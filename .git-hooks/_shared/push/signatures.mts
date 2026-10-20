@@ -4,6 +4,7 @@
 // against that allowlist.
 
 import { existsSync, readFileSync } from 'node:fs'
+import crypto from 'node:crypto'
 
 import process from 'node:process'
 
@@ -30,8 +31,7 @@ const logger = getDefaultLogger()
 
 // Parse the SSH allowed_signers file referenced by
 // `git config --get gpg.ssh.allowedSignersFile`. Returns the set of
-// public-key BLOBS (the same format `git log --format=%GK` emits for
-// SSH-signed commits — `<key-type> <base64-key>`).
+// SSH key fingerprints (the same format `git log --format=%GK` emits).
 //
 // Returns an empty set if:
 //   - gpg.format isn't 'ssh', allowed-signers only applies to SSH-format
@@ -40,46 +40,57 @@ const logger = getDefaultLogger()
 // An empty set means "don't enforce" — the %G? marker check alone
 // remains active. This degrades gracefully on first install before
 // the user has set up allowed_signers.
-export const readAllowedSignerKeys = (): Set<string> => {
+export function parseAllowedSignerFingerprints(contents: string): Set<string> {
   const out = new Set<string>()
+  const rawLines = contents.split(/\r?\n/)
+  for (let i = 0, { length } = rawLines; i < length; i += 1) {
+    const rawLine = rawLines[i]!
+    const line = rawLine.trim()
+    if (!line || line.startsWith('#')) {
+      continue
+    }
+    const tokens = line.split(/\s+/)
+    if (tokens.length < 3) {
+      continue
+    }
+    const keyBlob = tokens[tokens.length - 1]!
+    if (!/^[A-Za-z\d+/]+={0,2}$/u.test(keyBlob)) {
+      continue
+    }
+    const key = Buffer.from(keyBlob, 'base64')
+    if (
+      key.length === 0 ||
+      key.toString('base64').replace(/=+$/u, '') !== keyBlob.replace(/=+$/u, '')
+    ) {
+      continue
+    }
+    const digest = crypto.createHash('sha256').update(key).digest('base64')
+    out.add(`SHA256:${digest.replace(/=+$/u, '')}`)
+  }
+  return out
+}
+
+export const readAllowedSignerFingerprints = (): Set<string> => {
   try {
     const fmt = git('config', '--get', 'gpg.format').trim()
     if (fmt !== 'ssh') {
-      return out
+      return new Set()
     }
     const file = git('config', '--get', 'gpg.ssh.allowedSignersFile').trim()
     if (!file) {
-      return out
+      return new Set()
     }
     const expanded = file.startsWith('~')
       ? file.replace(/^~/, () => process.env['HOME'] ?? '')
       : file
     if (!existsSync(expanded)) {
-      return out
+      return new Set()
     }
-    // allowed_signers file format: `<principal> [<options>] <key-type> <base64-key>`
-    // %GK emits `<key-type> <base64-key>`, no principal. We extract
-    // the last two whitespace-separated tokens of each line.
-    const text = readFileSync(expanded, 'utf8')
-    const rawLines = text.split(/\r?\n/)
-    for (let i = 0, { length } = rawLines; i < length; i += 1) {
-      const rawLine = rawLines[i]!
-      const line = rawLine.trim()
-      if (!line || line.startsWith('#')) {
-        continue
-      }
-      const tokens = line.split(/\s+/)
-      if (tokens.length < 3) {
-        continue
-      }
-      const keyType = tokens[tokens.length - 2]!
-      const keyBlob = tokens[tokens.length - 1]!
-      out.add(`${keyType} ${keyBlob}`)
-    }
+    return parseAllowedSignerFingerprints(readFileSync(expanded, 'utf8'))
   } catch {
     // best-effort; absence of allowed-signers shouldn't crash the hook
+    return new Set()
   }
-  return out
 }
 
 interface SignatureVerdict {
@@ -88,7 +99,7 @@ interface SignatureVerdict {
 }
 
 // Sorts one `%H %G? %GK` line per commit into the two blocking buckets.
-function classifyCommitSignatures(
+export function classifyCommitSignatures(
   lines: string[],
   allowedSigners: Set<string>,
 ): SignatureVerdict {
@@ -115,6 +126,7 @@ function classifyCommitSignatures(
     // which keys we accept for the protected branch.
     if (
       allowedSigners.size > 0 &&
+      signerKey.startsWith('SHA256:') &&
       signerKey &&
       !allowedSigners.has(signerKey)
     ) {
@@ -173,7 +185,7 @@ export const scanSignedCommits = (range: string, remoteRef: string): number => {
   // threat model (the attacker would need to control the dev's
   // ~/.gnupg, at which point the local box is fully owned).
   const lines = gitLines('log', '--format=%H %G? %GK', range)
-  const allowedSigners = readAllowedSignerKeys()
+  const allowedSigners = readAllowedSignerFingerprints()
   const verdict = classifyCommitSignatures(lines, allowedSigners)
   const errors = verdict.unsigned.length + verdict.unauthorized.length
   if (errors === 0) {

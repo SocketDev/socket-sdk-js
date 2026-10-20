@@ -3311,16 +3311,6 @@ importers:
         specifier: 'catalog:'
         version: '@socketsecurity/lib@7.1.0(typescript@7.1.0-dev.20261008.1)'
 
-  .claude/hooks/fleet/setup-signing:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.1.0(typescript@7.1.0-dev.20261008.1)'
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.6.4
-
   .claude/hooks/fleet/shallow-clone-guard:
     devDependencies:
       '@types/node':
@@ -3591,16 +3581,6 @@ importers:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@7.1.0(typescript@7.1.0-dev.20261008.1)'
-      shell-quote:
-        specifier: 'catalog:'
-        version: 1.12.0
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.6.4
-
-  .claude/hooks/fleet/unbacked-claim-guard:
-    dependencies:
       shell-quote:
         specifier: 'catalog:'
         version: 1.12.0

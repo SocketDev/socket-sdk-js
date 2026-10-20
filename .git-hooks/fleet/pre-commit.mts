@@ -168,11 +168,8 @@ function checkSigningConfig(): number {
       logger.info('  git config --global commit.gpgsign true')
       logger.info('')
       logger.info('If you have not set up commit signing yet, run:')
-      logger.info('  node .claude/hooks/fleet/setup-security-tools/install.mts')
-      logger.info(
-        'which detects available signing methods (GPG, SSH, 1Password)',
-      )
-      logger.info('and walks you through the one-time setup.')
+      logger.info('  pnpm run setup:signing')
+      logger.info('It detects your active SSH agent, then SSH keys or GPG.')
       errors++
     } else if (!signingKey) {
       logger.fail('commit.gpgsign=true but user.signingkey is not set')
@@ -181,7 +178,7 @@ function checkSigningConfig(): number {
       logger.info('  git config --global user.signingkey <YOUR_KEY_ID>')
       logger.info('')
       logger.info('Or run the setup helper for guided configuration:')
-      logger.info('  node .claude/hooks/fleet/setup-security-tools/install.mts')
+      logger.info('  pnpm run setup:signing')
       errors++
     }
     if (errors > 0) {
