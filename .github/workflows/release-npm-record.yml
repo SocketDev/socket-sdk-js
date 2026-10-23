@@ -74,7 +74,7 @@ jobs:
         run: install -m 0600 "$RUNNER_TEMP/npm-release-record-run.mts" scripts/fleet/release/record/run.mts
       - name: Mint release token
         id: release-app
-        uses: ./.github/actions/fleet/github-release-app-token
+        uses: ./.github/actions/fleet/github-release-ledger-app-token
         with:
           client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
           private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
@@ -83,6 +83,7 @@ jobs:
       - name: Record abandoned version
         env:
           GH_TOKEN: ${{ steps.release-app.outputs.token }}
+          RELEASE_LEDGER_TOKEN: ${{ steps.release-app.outputs.token }}
           ALL_PACKAGES: ${{ inputs.all-packages }}
           PACKAGE_NAME: ${{ inputs.name }}
           RELEASE_REASON: ${{ inputs.reason }}

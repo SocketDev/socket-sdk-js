@@ -3,8 +3,8 @@
 // configured with an allowed_signers file — cross-checks each signing key
 // against that allowlist.
 
-import { existsSync, readFileSync } from 'node:fs'
 import crypto from 'node:crypto'
+import { existsSync, readFileSync } from 'node:fs'
 
 import process from 'node:process'
 
@@ -40,6 +40,28 @@ const logger = getDefaultLogger()
 // An empty set means "don't enforce" — the %G? marker check alone
 // remains active. This degrades gracefully on first install before
 // the user has set up allowed_signers.
+function decodeSignerKey(keyType: string, keyBlob: string): Buffer | undefined {
+  const key = Buffer.from(keyBlob, 'base64')
+  const canonicalBlob = key.toString('base64')
+  if (
+    key.length === 0 ||
+    (keyBlob !== canonicalBlob &&
+      keyBlob !== canonicalBlob.replace(/=+$/u, '')) ||
+    key.length < 4
+  ) {
+    return
+  }
+  const keyTypeLength = key.readUInt32BE(0)
+  if (
+    keyTypeLength === 0 ||
+    keyTypeLength > key.length - 4 ||
+    key.toString('utf8', 4, 4 + keyTypeLength) !== keyType
+  ) {
+    return
+  }
+  return key
+}
+
 export function parseAllowedSignerFingerprints(contents: string): Set<string> {
   const out = new Set<string>()
   const rawLines = contents.split(/\r?\n/)
@@ -49,19 +71,17 @@ export function parseAllowedSignerFingerprints(contents: string): Set<string> {
     if (!line || line.startsWith('#')) {
       continue
     }
-    const tokens = line.split(/\s+/)
-    if (tokens.length < 3) {
+    const fields =
+      /^(?<principal>\S+)\s+(?:(?<options>(?:[a-z][a-z-]*(?:=(?:"(?:[^"\\]|\\.)*"|[^,\s]+))?)(?:,(?:[a-z][a-z-]*(?:=(?:"(?:[^"\\]|\\.)*"|[^,\s]+))?))*)\s+)?(?<keyType>(?:ecdsa-|sk-|ssh-)[A-Za-z\d@._+-]+)\s+(?<keyBlob>[A-Za-z\d+/]+={0,2})(?:\s+.*)?$/u.exec(
+        line,
+      )
+    const keyType = fields?.groups?.['keyType']
+    const keyBlob = fields?.groups?.['keyBlob']
+    if (!keyType || !keyBlob) {
       continue
     }
-    const keyBlob = tokens[tokens.length - 1]!
-    if (!/^[A-Za-z\d+/]+={0,2}$/u.test(keyBlob)) {
-      continue
-    }
-    const key = Buffer.from(keyBlob, 'base64')
-    if (
-      key.length === 0 ||
-      key.toString('base64').replace(/=+$/u, '') !== keyBlob.replace(/=+$/u, '')
-    ) {
+    const key = decodeSignerKey(keyType, keyBlob)
+    if (!key) {
       continue
     }
     const digest = crypto.createHash('sha256').update(key).digest('base64')
@@ -70,7 +90,7 @@ export function parseAllowedSignerFingerprints(contents: string): Set<string> {
   return out
 }
 
-export const readAllowedSignerFingerprints = (): Set<string> => {
+export function readAllowedSignerFingerprints(): Set<string> {
   try {
     const fmt = git('config', '--get', 'gpg.format').trim()
     if (fmt !== 'ssh') {
@@ -167,7 +187,7 @@ function reportSignatureFailures(
   logger.info(`  git rebase --exec 'git commit --amend --no-edit -S' <base>`)
 }
 
-export const scanSignedCommits = (range: string, remoteRef: string): number => {
+export function scanSignedCommits(range: string, remoteRef: string): number {
   // Only enforce on default-branch refs (main / master). Feature
   // branches and topic branches can stay unsigned during development;
   // signing is required at the point of landing on the protected ref.
