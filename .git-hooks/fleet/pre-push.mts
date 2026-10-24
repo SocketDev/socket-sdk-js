@@ -49,6 +49,11 @@ import { isDurableBackupPush } from '../_shared/push/durable-ref.mts'
 import { verifyReleaseLedgerGenesisPush } from '../_shared/push/release-ledger.mts'
 import { isSquashHistoryRepo } from '../_shared/push/squash-history.mts'
 import { checkPrCommitCount } from '../_shared/push/pr-commit-count.mts'
+import {
+  isReleaseTagCreationOnly,
+  parsePushRefUpdates,
+  releaseTagMutationError,
+} from '../_shared/push/release-tag-push.mts'
 
 const logger = getDefaultLogger()
 
@@ -71,17 +76,26 @@ function resolvePushArguments(): { remote: string; destination: string } {
 
 const main = async (): Promise<number> => {
   debugCheck('Running mandatory pre-push validation…')
+  const { remote, destination } = resolvePushArguments()
+
+  const stdin = await readStdin()
+  let totalErrors = 0
+  const refLines = splitLines(stdin.trim()).filter(Boolean)
+  const refUpdates = parsePushRefUpdates(refLines)
+  const tagError = releaseTagMutationError(refUpdates)
+  if (tagError) {
+    logger.fail(tagError)
+    return 1
+  }
+  if (isReleaseTagCreationOnly(refUpdates)) {
+    return 0
+  }
 
   const submoduleErrors = checkSubmodules()
   if (submoduleErrors > 0) {
     return 1
   }
 
-  const { remote, destination } = resolvePushArguments()
-
-  const stdin = await readStdin()
-  let totalErrors = 0
-  const refLines = splitLines(stdin.trim()).filter(Boolean)
   if (
     await verifyReleaseLedgerGenesisPush(refLines, destination, process.cwd())
   ) {
@@ -105,10 +119,12 @@ const main = async (): Promise<number> => {
       continue
     }
     pushedRemoteRefs.push(remoteRef)
-    const prCommitError = checkPrCommitCount(remote, localSha, remoteRef)
-    if (prCommitError) {
-      logger.fail(prCommitError)
-      totalErrors += 1
+    if (!remoteRef.startsWith('refs/tags/')) {
+      const prCommitError = checkPrCommitCount(remote, localSha, remoteRef)
+      if (prCommitError) {
+        logger.fail(prCommitError)
+        totalErrors += 1
+      }
     }
     const range = computeRange(remote, localRef, localSha, remoteSha)
     // `computeRange` returns `undefined` for skip cases (tags and deletions);

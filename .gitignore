@@ -5646,6 +5646,7 @@ test-output.*
 !/.git-hooks/_shared/push/pr-commit-count.mts
 !/.git-hooks/_shared/push/range.mts
 !/.git-hooks/_shared/push/release-ledger.mts
+!/.git-hooks/_shared/push/release-tag-push.mts
 !/.git-hooks/_shared/push/release-tags.mts
 !/.git-hooks/_shared/push/repo-gates.mts
 !/.git-hooks/_shared/push/signatures.mts
