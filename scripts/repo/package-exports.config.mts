@@ -5,7 +5,11 @@
  *   can resolve imports from the root and testing declarations.
  */
 
-import type { ExportsConfig } from '../fleet/gen/package-exports.mts'
+interface ExportsConfig {
+  files: string[]
+  ignore: string[]
+  outDir: string
+}
 
 export const config: ExportsConfig = {
   files: ['dist/*.js', 'dist/*.d.mts', 'types/*.d.ts', 'package.json'],

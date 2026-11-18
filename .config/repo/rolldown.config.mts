@@ -10,7 +10,7 @@ import process from 'node:process'
 import { envAsBoolean } from '@socketsecurity/lib-stable/env/boolean'
 
 import { createLibStubPlugin } from './rolldown/lib-stub.mts'
-import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
+import { REPO_ROOT } from '../../scripts/repo/paths.mts'
 
 import type { OutputOptions, Plugin, RolldownOptions } from 'rolldown'
 

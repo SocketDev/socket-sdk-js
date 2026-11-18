@@ -8,11 +8,11 @@ import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/main/run.mts'
+import { isMainModule } from '../cli.mts'
+import { runMain } from '../cli.mts'
 import { generateSdkContracts } from '../generate-sdk.mts'
 
-import type { ScriptMeta } from '../../fleet/process/main/run.mts'
+import type { ScriptMeta } from '../cli.mts'
 
 const logger = getDefaultLogger()
 

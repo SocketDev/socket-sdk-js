@@ -2,12 +2,12 @@
 /**
  * @file `pnpm run test:fuzz` runner — the vitiate coverage-guided fuzz lane
  *   (Tier 2 of the property-and-fuzz-testing skill). Resolves the repo-root
- *   vitest binary directly (fleet `no-pm-exec-guard` bans `pnpm exec`) and runs
- *   `vitest run` with `VITIATE_FUZZ=1`, letting vitest AUTO-DISCOVER the
- *   repo-root `vitest.config.mts` (which loads the `vitiatePlugin`). We must
- *   NOT pass `--config`: vitiate's supervisor re-spawns a child `vitest run`
- *   for the coverage-guided pass without forwarding `--config`, so parent and
- *   child have to agree via auto-discovery on the same root config (see the
+ *   vitest binary directly (the test runner invokes the local Vitest binary)
+ *   and runs `vitest run` with `VITIATE_FUZZ=1`, letting vitest AUTO-DISCOVER
+ *   the repo-root `vitest.config.mts` (which loads the `vitiatePlugin`). We
+ *   must NOT pass `--config`: vitiate's supervisor re-spawns a child `vitest
+ *   run` for the coverage-guided pass without forwarding `--config`, so parent
+ *   and child have to agree via auto-discovery on the same root config (see the
  *   header of vitest.config.mts). The `fuzz()` targets (`test/**\/*.fuzz.mts`)
  *   are then coverage-fuzzed with mutated inputs; without `VITIATE_FUZZ` they
  *   replay the committed seed corpus as fast regression checks. Budget via
@@ -25,10 +25,10 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
 
-import { isMainModule } from '../fleet/process/is-main-module.mts'
-import type { ScriptMeta } from '../fleet/process/main/run.mts'
+import { isMainModule } from './cli.mts'
+import type { ScriptMeta } from './cli.mts'
 
-import { runMain } from '../fleet/process/main/run.mts'
+import { runMain } from './cli.mts'
 
 const logger = getDefaultLogger()
 

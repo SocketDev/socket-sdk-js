@@ -1,7 +1,7 @@
 import { rolldown } from 'rolldown'
 import { expect, it } from 'vitest'
 
-import { tolerantTimeout } from '../../fleet/_shared/lib/timing.mts'
+import { tolerantTimeout } from '../../utils/timing.mts'
 
 import { buildConfig } from '../../../.config/repo/rolldown.config.mts'
 import { buildInto } from '../../utils/build-output.mts'

@@ -21,7 +21,7 @@ import {
   getFormData,
 } from '../../../src/file-upload.mts'
 import { SocketSdk } from '../../../src/index.mts'
-import { tolerantSleep } from '../../fleet/_shared/lib/timing.mts'
+import { tolerantSleep } from '../../utils/timing.mts'
 import { setupNockEnvironment } from '../../utils/environment.mts'
 import { FAST_TEST_CONFIG } from '../../utils/fast-test-config.mts'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'

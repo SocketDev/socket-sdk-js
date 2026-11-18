@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url'
 
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
+import { format } from 'oxfmt'
 
 import {
   extractIndexDescription,
@@ -19,9 +19,10 @@ import {
 } from './api-doc/lib.mts'
 import { extractPackageExports } from './api-doc/exports.mts'
 import { packageExportTargets } from './api-doc/export-source.mts'
-import { isMainModule } from '../fleet/process/is-main-module.mts'
-import { runMain } from '../fleet/process/main/run.mts'
-import type { ScriptMeta } from '../fleet/process/main/run.mts'
+import { isMainModule } from './cli.mts'
+import { runMain } from './cli.mts'
+import type { ScriptMeta } from './cli.mts'
+import type { FormatConfig } from 'oxfmt'
 
 const logger = getDefaultLogger()
 const rootPackageJsonPath = findUpSync('package.json', {
@@ -78,27 +79,15 @@ export async function generateApiDocs(): Promise<void> {
 }
 
 async function formatApiDocs(rendered: string): Promise<string> {
-  const formatter = spawn(
-    process.execPath,
-    [
-      'scripts/fleet/format.mts',
-      '--stdin-filepath=docs/api.md',
-      `--stdin-byte-length=${Buffer.byteLength(rendered, 'utf8')}`,
-    ],
-    { cwd: rootPath, stdioString: false },
-  )
-  const stdin = formatter.process.stdin
-  if (!stdin) {
-    throw new Error('API documentation formatter stdin is unavailable.')
-  }
-  stdin.end(rendered)
-  const result = await formatter
-  if (result.code !== 0) {
+  const configPath = path.join(rootPath, '.config/repo/oxfmtrc.json')
+  const config = JSON.parse(readFileSync(configPath, 'utf8')) as FormatConfig
+  const result = await format(outPath, rendered, config)
+  if (result.errors.length > 0) {
     throw new Error(
-      `API documentation formatting failed with exit code ${result.code}.`,
+      'API documentation formatting failed because the generated output contains syntax errors.',
     )
   }
-  return result.stdout.toString('utf8')
+  return result.code
 }
 
 const SCRIPT_META: ScriptMeta = {

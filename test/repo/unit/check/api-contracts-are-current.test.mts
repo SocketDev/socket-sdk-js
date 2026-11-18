@@ -8,7 +8,7 @@ import path from 'node:path'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { runMain } from '../../../../scripts/fleet/process/main/run.mts'
+import type { runMain } from '../../../../scripts/repo/cli.mts'
 
 const logger = getDefaultLogger()
 
@@ -17,10 +17,8 @@ const mocks = vi.hoisted(() => ({
   runMain: vi.fn<typeof runMain>(),
 }))
 
-vi.mock(import('../../../../scripts/fleet/process/is-main-module.mts'), () => ({
+vi.mock(import('../../../../scripts/repo/cli.mts'), () => ({
   isMainModule: () => true,
-}))
-vi.mock(import('../../../../scripts/fleet/process/main/run.mts'), () => ({
   runMain: mocks.runMain,
 }))
 vi.mock(import('../../../../scripts/repo/generate-sdk.mts'), () => ({
