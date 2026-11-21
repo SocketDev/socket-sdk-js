@@ -12,10 +12,10 @@ import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { findUpPackageJson } from '@socketsecurity/lib-stable/packages/find'
-import { isMainModule } from '../fleet/process/is-main-module.mts'
-import type { ScriptMeta } from '../fleet/process/main/run.mts'
+import { isMainModule } from './cli.mts'
+import type { ScriptMeta } from './cli.mts'
 
-import { runMain } from '../fleet/process/main/run.mts'
+import { runMain } from './cli.mts'
 
 const logger = getDefaultLogger()
 

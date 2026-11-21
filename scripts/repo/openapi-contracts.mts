@@ -225,7 +225,7 @@ export async function formatOpenApiArtifact(
   content: string,
   rootPath: string,
 ): Promise<string> {
-  const configPath = path.join(rootPath, '.config/fleet/oxfmtrc.json')
+  const configPath = path.join(rootPath, '.config/repo/oxfmtrc.json')
   const config = JSON.parse(await readFile(configPath, 'utf8')) as FormatConfig
   const result = await format(filePath, content, config)
   if (result.errors.length > 0) {

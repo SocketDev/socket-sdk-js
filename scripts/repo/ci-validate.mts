@@ -9,11 +9,11 @@ import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
-import { REPO_ROOT } from '../fleet/paths.mts'
-import { isMainModule } from '../fleet/process/is-main-module.mts'
-import type { ScriptMeta } from '../fleet/process/main/run.mts'
+import { REPO_ROOT } from './paths.mts'
+import { isMainModule } from './cli.mts'
+import type { ScriptMeta } from './cli.mts'
 
-import { runMain } from '../fleet/process/main/run.mts'
+import { runMain } from './cli.mts'
 
 const logger = getDefaultLogger()
 

@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { runCommand } from '../../../scripts/repo/ci-validate.mts'
-import { REPO_ROOT } from '../../../scripts/fleet/paths.mts'
+import { REPO_ROOT } from '../../../scripts/repo/paths.mts'
 
 const state = vi.hoisted(() => ({ spawn: vi.fn<typeof spawn>() }))
 vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), () => ({

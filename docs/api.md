@@ -5836,19 +5836,19 @@ const scanFixtures = {
 
 #### `$defs` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8143).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8578).
 
 #### `components` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2300).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2730).
 
 #### `external` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8145).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8580).
 
 #### `operations` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L30799).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L31664).
 
 #### `paths` (type)
 
@@ -5858,7 +5858,7 @@ Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L6).
 
 #### `webhooks` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2298).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2728).
 
 </details>
 
@@ -5930,19 +5930,19 @@ type OpReturnType<Operation> = Operation extends {
 
 #### `$defs` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1298).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1317).
 
 #### `components` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1289).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1308).
 
 #### `external` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1300).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1319).
 
 #### `operations` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1302).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1321).
 
 #### `paths` (type)
 
@@ -5952,6 +5952,6 @@ Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L6
 
 #### `webhooks` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1287).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1306).
 
 </details>

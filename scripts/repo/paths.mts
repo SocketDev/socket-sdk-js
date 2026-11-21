@@ -3,14 +3,9 @@
  */
 
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-export * from '../fleet/paths.mts'
-
-import { REPO_ROOT } from '../fleet/paths.mts'
-
-export const SYNC_OPENAPI_WORKFLOW_PATH = path.join(
-  REPO_ROOT,
-  '.github',
-  'workflows',
-  'chore-sync-openapi.yml',
+export const REPO_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../..',
 )

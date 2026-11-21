@@ -15,15 +15,15 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { REPO_ROOT } from '../fleet/paths.mts'
+import { REPO_ROOT } from './paths.mts'
 import { buildConfig } from '../../.config/repo/rolldown.config.mts'
 import { browserBuildConfig } from '../../.config/repo/rolldown.browser.config.mts'
 import { externalsBuildConfig } from '../../.config/repo/rolldown.externals.config.mts'
 import { runSequence } from './run-command.mts'
-import { isMainModule } from '../fleet/process/is-main-module.mts'
-import type { ScriptMeta } from '../fleet/process/main/run.mts'
+import { isMainModule } from './cli.mts'
+import type { ScriptMeta } from './cli.mts'
 
-import { runMain } from '../fleet/process/main/run.mts'
+import { runMain } from './cli.mts'
 
 // Initialize logger
 const logger = getDefaultLogger()
