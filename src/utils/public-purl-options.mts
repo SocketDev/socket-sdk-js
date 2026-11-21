@@ -23,6 +23,7 @@ export const PUBLIC_PURL_BOOLEAN_KEYS = new Set([
   'fixable',
   'licenseattrib',
   'licensedetails',
+  'notFoundAlerts',
   'purlErrors',
 ])
 
