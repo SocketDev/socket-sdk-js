@@ -3,7 +3,11 @@
  *   callers.
  */
 
-import type { PublicOrgPurlQuery, PublicPurlQuery } from '../types/purl.mts'
+import type {
+  PublicOrgPurlQuery,
+  PublicPurlQuery,
+  PurlResponseMode,
+} from '../types/purl.mts'
 
 export const PUBLIC_PURL_ACTIONS = new Set([
   'error',
@@ -21,6 +25,9 @@ export const PUBLIC_PURL_BOOLEAN_KEYS = new Set([
   'licensedetails',
   'purlErrors',
 ])
+
+export const PUBLIC_PURL_RESPONSE_MODES: ReadonlySet<PurlResponseMode> =
+  new Set(['default', 'compact', 'firewall-check', 'registry-firewall'])
 
 export function assertPublicPurlOrganization(
   orgSlug: string,
@@ -46,6 +53,13 @@ export function assertPublicPurlQueryValue(
 ): void {
   const opts = { __proto__: null, ...options } as typeof options
   if (PUBLIC_PURL_BOOLEAN_KEYS.has(key) && typeof value === 'boolean') {
+    return
+  }
+  if (
+    key === 'mode' &&
+    typeof value === 'string' &&
+    PUBLIC_PURL_RESPONSE_MODES.has(value as PurlResponseMode)
+  ) {
     return
   }
   if (

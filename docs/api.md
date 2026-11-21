@@ -4049,6 +4049,8 @@ type PublicPurlQuery = {
   fixable?: boolean | undefined
   licenseattrib?: boolean | undefined
   licensedetails?: boolean | undefined
+  mode?: PurlResponseMode | undefined
+  notFoundAlerts?: boolean | undefined
   purlErrors?: boolean | undefined
 }
 ```
@@ -4098,6 +4100,18 @@ type PurlQuery = PublicPurlQuery & {
   summary?: boolean | undefined
   timeoutSec?: number | undefined
 }
+```
+
+#### `PurlResponseMode` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts).
+
+```typescript
+type PurlResponseMode =
+  | 'default'
+  | 'compact'
+  | 'firewall-check'
+  | 'registry-firewall'
 ```
 
 #### `PurlRecord` (type)
