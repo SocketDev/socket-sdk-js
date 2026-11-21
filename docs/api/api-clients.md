@@ -72,9 +72,12 @@ automatic telemetry.
 
 `SocketPurlClient` supports PURL lookup, buffered batches, streaming batches,
 and organization batches. Proxy query options include `alerts`, `actions`,
-`compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, and
-`cachedResultsOnly`. Organization calls also accept one `labels` string.
-Unsupported proxy options are rejected.
+`cachedResultsOnly`, `compact`, `fixable`, `licenseattrib`, `licensedetails`,
+`mode`, `notFoundAlerts`, and `purlErrors`. `mode` selects the response shape:
+`default`, `compact`, `firewall-check`, or `registry-firewall`.
+`notFoundAlerts` requests synthetic not-found artifacts when used with
+`alerts=true` and `purlErrors=true`. Organization calls also accept one
+`labels` string. Unsupported proxy options are rejected.
 
 Set `apiToken` for a static credential or `authProvider` to resolve a credential
 for each request. The provider returns a token and its `basic` or `bearer`

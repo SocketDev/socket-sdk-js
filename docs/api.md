@@ -3606,7 +3606,7 @@ type OrgFixesTarget =
 
 #### `OrgPurlQuery` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L54).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L62).
 
 ```typescript
 type OrgPurlQuery = PurlQuery & {
@@ -3867,7 +3867,7 @@ type PostOrgTelemetryResponse = Record<string, never>
 
 #### `PublicApiClientOptions` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L65).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L73).
 
 ```typescript
 type PublicApiClientOptions = Pick<
@@ -4028,7 +4028,7 @@ type PublicMalwareResult =
 
 #### `PublicOrgPurlQuery` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L44).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L52).
 
 ```typescript
 type PublicOrgPurlQuery = PublicPurlQuery & {
@@ -4038,7 +4038,7 @@ type PublicOrgPurlQuery = PublicPurlQuery & {
 
 #### `PublicPurlQuery` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L33).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L39).
 
 ```typescript
 type PublicPurlQuery = {
@@ -4049,6 +4049,8 @@ type PublicPurlQuery = {
   fixable?: boolean | undefined
   licenseattrib?: boolean | undefined
   licensedetails?: boolean | undefined
+  mode?: PurlResponseMode | undefined
+  notFoundAlerts?: boolean | undefined
   purlErrors?: boolean | undefined
 }
 ```
@@ -4090,7 +4092,7 @@ type PurlFetchResult = SocketSdkGenericResult<PurlRecord[]>
 
 #### `PurlQuery` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L48).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L56).
 
 ```typescript
 type PurlQuery = PublicPurlQuery & {
@@ -4108,9 +4110,21 @@ Declared in [src/types/purl.mts](../src/types/purl.mts#L27).
 type PurlRecord = PurlArtifact | PurlErrorRecord | PurlSummaryRecord
 ```
 
+#### `PurlResponseMode` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L33).
+
+```typescript
+type PurlResponseMode =
+  | 'default'
+  | 'compact'
+  | 'firewall-check'
+  | 'registry-firewall'
+```
+
 #### `PurlStreamOptions` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L58).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L66).
 
 ```typescript
 type PurlStreamOptions<Query = PurlQuery> = {
