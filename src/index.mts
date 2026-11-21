@@ -204,6 +204,11 @@ export type {
   PublicMalwareResult,
   SocketPublicMalwareClientOptions,
 } from './types/public-malware.mts'
+export type {
+  MalwareFilter,
+  MalwareFilterCheckResult,
+  MalwareFilterLoadResult,
+} from './types/malware-filter.mts'
 export type * from './types/alert-policies.mts'
 export type * from './types/fixes.mts'
 export type * from './types/full-scan-results-v1.mts'
