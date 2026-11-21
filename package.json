@@ -89,7 +89,7 @@
     "@sinclair/typebox": "catalog:",
     "@socketregistry/packageurl-js": "1.7.0",
     "@socketregistry/packageurl-js-stable": "catalog:",
-    "@socketsecurity/lib": "7.2.0",
+    "@socketsecurity/lib": "catalog:",
     "@socketsecurity/lib-stable": "catalog:",
     "@socketsecurity/registry-stable": "catalog:",
     "@socketsecurity/sdk": "catalog:",
