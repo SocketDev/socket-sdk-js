@@ -115,11 +115,25 @@ not read credentials from the environment or keychain. The production route
 must be deployed and available before applications adopt this client; a
 disabled route returns an unsuccessful 404 result.
 
+### Malware filtering
+
+`loadFilter()` downloads and caches the current malware filter. The filter
+currently supports npm package versions. Check a package by name and version,
+npm spec, or PURL. A `possible_match` is a candidate, not a malware verdict.
+Confirm possible matches with `checkPackages`.
+
 ```typescript
 const publicMalwareClient = new SocketPublicMalwareClient()
-const result = await publicMalwareClient.checkPackages({
-  packages: [{ purl: 'pkg:npm/example-package@1.0.0' }],
-})
+const loadedFilter = await publicMalwareClient.loadFilter()
+if (!loadedFilter.success) throw new Error(loadedFilter.error)
+
+const purl = 'pkg:npm/example-package@1.0.0'
+if (loadedFilter.data.checkPurl(purl) === 'possible_match') {
+  const result = await publicMalwareClient.checkPackages({
+    packages: [{ purl }],
+  })
+  if (result.success) console.log(result.data.results[0]?.status)
+}
 ```
 
 `checkMalware` uses public PURL analysis and returns one entry per input,

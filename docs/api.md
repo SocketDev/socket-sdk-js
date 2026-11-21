@@ -3478,6 +3478,41 @@ type MalwareCheckScore = {
 }
 ```
 
+#### `MalwareFilter` (type)
+
+Declared in [src/types/malware-filter.mts](../src/types/malware-filter.mts#L13).
+
+```typescript
+type MalwareFilter = {
+  readonly revision: number
+  readonly expiresAt: number
+  check(name: string, version: string): MalwareFilterCheckResult
+  checkSpec(spec: string): MalwareFilterCheckResult
+  checkPurl(purl: string): MalwareFilterCheckResult
+}
+```
+
+#### `MalwareFilterCheckResult` (type)
+
+Declared in [src/types/malware-filter.mts](../src/types/malware-filter.mts#L6).
+
+```typescript
+type MalwareFilterCheckResult =
+  | 'no_filter_match'
+  | 'possible_match'
+  | 'invalid_input'
+  | 'unsupported_ecosystem'
+  | 'filter_unavailable'
+```
+
+#### `MalwareFilterLoadResult` (type)
+
+Declared in [src/types/malware-filter.mts](../src/types/malware-filter.mts#L21).
+
+```typescript
+type MalwareFilterLoadResult = SocketSdkGenericResult<MalwareFilter>
+```
+
 #### `ManifestLocalEntry` (type)
 
 Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L108).
@@ -4634,7 +4669,7 @@ type SocketPatchClientOptions = Omit<
 
 #### `SocketPublicMalwareClient` (value)
 
-Declared in [src/public-malware-client.mts](../src/public-malware-client.mts#L66).
+Declared in [src/public-malware-client.mts](../src/public-malware-client.mts#L115).
 
 ```typescript
 class SocketPublicMalwareClient {
@@ -4642,6 +4677,7 @@ class SocketPublicMalwareClient {
   async checkPackages(
     request: PublicMalwareRequest,
   ): Promise<PublicMalwareClientResult>
+  loadFilter(): Promise<MalwareFilterLoadResult>
 }
 ```
 

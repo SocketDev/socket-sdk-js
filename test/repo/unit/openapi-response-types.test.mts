@@ -7,6 +7,9 @@ import { describe, expectTypeOf, it } from 'vitest'
 import type { OpErrorType, OpReturnType } from '../../../types/api-helpers.d.ts'
 import type { paths } from '../../../types/api-v1.d.ts'
 import type {
+  MalwareFilter,
+  MalwareFilterCheckResult,
+  MalwareFilterLoadResult,
   PostOrgPackageChecksBody,
   PostOrgPackageChecksData,
   PostOrgPackageSummariesBody,
@@ -28,6 +31,20 @@ interface ExampleOperation {
 }
 
 describe('OpenAPI response types', () => {
+  it('exports malware filter types from the SDK entrypoint', () => {
+    expectTypeOf<MalwareFilterCheckResult>().toEqualTypeOf<
+      | 'no_filter_match'
+      | 'possible_match'
+      | 'invalid_input'
+      | 'unsupported_ecosystem'
+      | 'filter_unavailable'
+    >()
+    expectTypeOf<MalwareFilter['checkPurl']>().toEqualTypeOf<
+      (purl: string) => MalwareFilterCheckResult
+    >()
+    expectTypeOf<MalwareFilterLoadResult['success']>().toEqualTypeOf<boolean>()
+  })
+
   it('represents generated empty content as an undefined body', () => {
     expectTypeOf<
       OpReturnType<{ responses: { 204: { content: never } } }>
