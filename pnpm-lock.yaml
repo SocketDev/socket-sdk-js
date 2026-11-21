@@ -416,6 +416,7 @@ overrides:
 
 patchedDependencies:
   '@polka/url@1.0.0-next.29': 60d82e95c5e67e66c41fe2987ddd4fc3f4992f12158e5c56838e7682e6ef72ea
+  '@socketsecurity/lib@7.1.0': b5431345634b33091778f54888327939b76c0f2f096f9e412cf2ff9d3a8ae1a3
   brace-expansion@5.0.12: c15cb4e3c78bc74448f2dd848dacc1d86afc3c91cc8e70d78ef52150b1d47b04
   minimatch@10.2.6: 83f1ea5b333d1b6fe1b36f93ccb222aa02e5dd468b2c646e285d7d53d234e174
   run-local-ci@0.18.1: a335253820e963c2659ec1b08ee143e865eb39ec80ca7d313fff50c33e157d99
@@ -460,10 +461,10 @@ importers:
         version: '@socketregistry/packageurl-js@1.6.0'
       '@socketsecurity/lib':
         specifier: 7.1.0
-        version: 7.1.0(typescript@7.1.0-dev.20261008.1)
+        version: 7.1.0(patch_hash=b5431345634b33091778f54888327939b76c0f2f096f9e412cf2ff9d3a8ae1a3)(typescript@7.1.0-dev.20261008.1)
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.1.0(typescript@7.1.0-dev.20261008.1)'
+        version: '@socketsecurity/lib@7.1.0(patch_hash=b5431345634b33091778f54888327939b76c0f2f096f9e412cf2ff9d3a8ae1a3)(typescript@7.1.0-dev.20261008.1)'
       '@socketsecurity/registry-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/registry@2.0.5(typescript@7.1.0-dev.20261008.1)'
@@ -4018,7 +4019,7 @@ snapshots:
 
   '@socketregistry/side-channel@1.0.10': {}
 
-  '@socketsecurity/lib@7.1.0(typescript@7.1.0-dev.20261008.1)':
+  '@socketsecurity/lib@7.1.0(patch_hash=b5431345634b33091778f54888327939b76c0f2f096f9e412cf2ff9d3a8ae1a3)(typescript@7.1.0-dev.20261008.1)':
     optionalDependencies:
       typescript: 7.1.0-dev.20261008.1
 
