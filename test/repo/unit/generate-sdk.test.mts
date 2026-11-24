@@ -184,7 +184,7 @@ describe('OpenAPI artifact freshness', () => {
   it('regenerates both recorded contracts and checks them without changing files', async () => {
     const rootPath = await createContractDirectory()
     const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url))
-    for (const directory of ['types', 'src/types', '.config/fleet']) {
+    for (const directory of ['types', 'src/types', '.config/repo']) {
       await mkdir(path.join(rootPath, directory), { recursive: true })
     }
     for (const contract of OPENAPI_CONTRACTS) {
@@ -193,7 +193,7 @@ describe('OpenAPI artifact freshness', () => {
         await readFile(path.join(repositoryRoot, contract.snapshot)),
       )
     }
-    await writeFile(path.join(rootPath, '.config/fleet/oxfmtrc.json'), '{}')
+    await writeFile(path.join(rootPath, '.config/repo/oxfmtrc.json'), '{}')
     await writeFile(
       path.join(rootPath, 'src/index.mts'),
       "export type { OrganizationsResult } from './types/strict.mts'\n",

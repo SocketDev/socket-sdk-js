@@ -554,8 +554,8 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - repo:list.
      *
+     * - Repo:list.
      * - Diff-scans:create
      * - Full-scans:create
      */
@@ -574,8 +574,8 @@ export interface paths {
      * This endpoint consumes 1 unit of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - diff-scans:create.
      *
+     * - Diff-scans:create.
      * - Full-scans:list
      */
     post: operations['createOrgDiffScanFromIds']
@@ -2121,8 +2121,8 @@ export interface paths {
      * This endpoint consumes 100 units of your quota.
      *
      * This endpoint requires the following org token scopes:
-     * - packages:list.
      *
+     * - Packages:list.
      * - License-policy:read
      */
     post: operations['licensePolicy']
@@ -3298,7 +3298,8 @@ export interface components {
        */
       supplyChain: number
       /**
-       * Score from 0.0 to 1.0 based on known vulnerabilities and their severity.
+       * Score from 0.0 to 1.0 based on known vulnerabilities and their
+       * severity.
        *
        * @default 0
        */
@@ -4555,7 +4556,8 @@ export interface components {
                      */
                     dateAdded: string
                     /**
-                     * Remediation deadline for federal agencies (ISO 8601 format)
+                     * Remediation deadline for federal agencies (ISO 8601
+                     * format)
                      *
                      * @default
                      */
@@ -4705,7 +4707,8 @@ export interface components {
                      */
                     dateAdded: string
                     /**
-                     * Remediation deadline for federal agencies (ISO 8601 format)
+                     * Remediation deadline for federal agencies (ISO 8601
+                     * format)
                      *
                      * @default
                      */
@@ -4855,7 +4858,8 @@ export interface components {
                      */
                     dateAdded: string
                     /**
-                     * Remediation deadline for federal agencies (ISO 8601 format)
+                     * Remediation deadline for federal agencies (ISO 8601
+                     * format)
                      *
                      * @default
                      */
@@ -5005,7 +5009,8 @@ export interface components {
                      */
                     dateAdded: string
                     /**
-                     * Remediation deadline for federal agencies (ISO 8601 format)
+                     * Remediation deadline for federal agencies (ISO 8601
+                     * format)
                      *
                      * @default
                      */
@@ -11563,8 +11568,8 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - repo:list.
    *
+   * - Repo:list.
    * - Diff-scans:create
    * - Full-scans:create
    */
@@ -11857,8 +11862,8 @@ export interface operations {
    * This endpoint consumes 1 unit of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - diff-scans:create.
    *
+   * - Diff-scans:create.
    * - Full-scans:list
    */
   createOrgDiffScanFromIds: {
@@ -27584,7 +27589,8 @@ export interface operations {
     }
   }
   /**
-   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded manifest.
+   * Fetch fixes for vulnerabilities in a repository, scan, or uploaded
+   * manifest.
    *
    * Fetches available fixes for vulnerabilities in a repository, scan, or
    * uploaded manifest. Requires exactly one of repo_slug, full_scan_id, or
@@ -28401,11 +28407,13 @@ export interface operations {
                  */
                 'clientAction.notIn'?: string[]
                 /**
-                 * Comma-separated list of client machine IDs for exact matching.
+                 * Comma-separated list of client machine IDs for exact
+                 * matching.
                  */
                 clientMachineId?: string[]
                 /**
-                 * Comma-separated list of client machine IDs for exact matching.
+                 * Comma-separated list of client machine IDs for exact
+                 * matching.
                  */
                 'clientMachineId.notIn'?: string[]
                 /**
@@ -30303,8 +30311,8 @@ export interface operations {
    * This endpoint consumes 100 units of your quota.
    *
    * This endpoint requires the following org token scopes:
-   * - packages:list.
    *
+   * - Packages:list.
    * - License-policy:read
    */
   licensePolicy: {

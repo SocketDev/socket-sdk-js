@@ -13,7 +13,7 @@ import { Parser } from 'acorn'
 import { findUpSync } from '@socketsecurity/lib-stable/fs/find'
 import { isPlainObject } from '@socketsecurity/lib-stable/objects/predicates'
 
-import { MAX_UNFOLDED_CODE_LINES } from '../../fleet/check/long-doc-sections-are-folded.mts'
+const MAX_UNFOLDED_CODE_LINES = 20
 import { GROUPS, QUOTA_LABELS } from './groups.mts'
 import { extractSdkClassMethods } from '../sdk-method-extraction.mts'
 import type { AstNode } from '../generate-strict-types-lib.mts'

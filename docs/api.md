@@ -3478,6 +3478,41 @@ type MalwareCheckScore = {
 }
 ```
 
+#### `MalwareFilter` (type)
+
+Declared in [src/types/malware-filter.mts](../src/types/malware-filter.mts#L13).
+
+```typescript
+type MalwareFilter = {
+  readonly revision: number
+  readonly expiresAt: number
+  check(name: string, version: string): MalwareFilterCheckResult
+  checkSpec(spec: string): MalwareFilterCheckResult
+  checkPurl(purl: string): MalwareFilterCheckResult
+}
+```
+
+#### `MalwareFilterCheckResult` (type)
+
+Declared in [src/types/malware-filter.mts](../src/types/malware-filter.mts#L6).
+
+```typescript
+type MalwareFilterCheckResult =
+  | 'no_filter_match'
+  | 'possible_match'
+  | 'invalid_input'
+  | 'unsupported_ecosystem'
+  | 'filter_unavailable'
+```
+
+#### `MalwareFilterLoadResult` (type)
+
+Declared in [src/types/malware-filter.mts](../src/types/malware-filter.mts#L21).
+
+```typescript
+type MalwareFilterLoadResult = SocketSdkGenericResult<MalwareFilter>
+```
+
 #### `ManifestLocalEntry` (type)
 
 Declared in [src/full-scans-v1.mts](../src/full-scans-v1.mts#L108).
@@ -3571,7 +3606,7 @@ type OrgFixesTarget =
 
 #### `OrgPurlQuery` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L54).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L62).
 
 ```typescript
 type OrgPurlQuery = PurlQuery & {
@@ -3832,7 +3867,7 @@ type PostOrgTelemetryResponse = Record<string, never>
 
 #### `PublicApiClientOptions` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L65).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L73).
 
 ```typescript
 type PublicApiClientOptions = Pick<
@@ -3993,7 +4028,7 @@ type PublicMalwareResult =
 
 #### `PublicOrgPurlQuery` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L44).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L52).
 
 ```typescript
 type PublicOrgPurlQuery = PublicPurlQuery & {
@@ -4003,7 +4038,7 @@ type PublicOrgPurlQuery = PublicPurlQuery & {
 
 #### `PublicPurlQuery` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L33).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L39).
 
 ```typescript
 type PublicPurlQuery = {
@@ -4014,6 +4049,8 @@ type PublicPurlQuery = {
   fixable?: boolean | undefined
   licenseattrib?: boolean | undefined
   licensedetails?: boolean | undefined
+  mode?: PurlResponseMode | undefined
+  notFoundAlerts?: boolean | undefined
   purlErrors?: boolean | undefined
 }
 ```
@@ -4055,7 +4092,7 @@ type PurlFetchResult = SocketSdkGenericResult<PurlRecord[]>
 
 #### `PurlQuery` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L48).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L56).
 
 ```typescript
 type PurlQuery = PublicPurlQuery & {
@@ -4073,9 +4110,21 @@ Declared in [src/types/purl.mts](../src/types/purl.mts#L27).
 type PurlRecord = PurlArtifact | PurlErrorRecord | PurlSummaryRecord
 ```
 
+#### `PurlResponseMode` (type)
+
+Declared in [src/types/purl.mts](../src/types/purl.mts#L33).
+
+```typescript
+type PurlResponseMode =
+  | 'default'
+  | 'compact'
+  | 'firewall-check'
+  | 'registry-firewall'
+```
+
 #### `PurlStreamOptions` (type)
 
-Declared in [src/types/purl.mts](../src/types/purl.mts#L58).
+Declared in [src/types/purl.mts](../src/types/purl.mts#L66).
 
 ```typescript
 type PurlStreamOptions<Query = PurlQuery> = {
@@ -4634,7 +4683,7 @@ type SocketPatchClientOptions = Omit<
 
 #### `SocketPublicMalwareClient` (value)
 
-Declared in [src/public-malware-client.mts](../src/public-malware-client.mts#L66).
+Declared in [src/public-malware-client.mts](../src/public-malware-client.mts#L115).
 
 ```typescript
 class SocketPublicMalwareClient {
@@ -4642,6 +4691,7 @@ class SocketPublicMalwareClient {
   async checkPackages(
     request: PublicMalwareRequest,
   ): Promise<PublicMalwareClientResult>
+  loadFilter(): Promise<MalwareFilterLoadResult>
 }
 ```
 
@@ -5836,19 +5886,19 @@ const scanFixtures = {
 
 #### `$defs` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8143).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8578).
 
 #### `components` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2300).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2730).
 
 #### `external` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8145).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8580).
 
 #### `operations` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L30799).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L31664).
 
 #### `paths` (type)
 
@@ -5858,7 +5908,7 @@ Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L6).
 
 #### `webhooks` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2298).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2728).
 
 </details>
 
@@ -5930,19 +5980,19 @@ type OpReturnType<Operation> = Operation extends {
 
 #### `$defs` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1298).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1317).
 
 #### `components` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1289).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1308).
 
 #### `external` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1300).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1319).
 
 #### `operations` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1302).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1321).
 
 #### `paths` (type)
 
@@ -5952,6 +6002,6 @@ Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L6
 
 #### `webhooks` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1287).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1306).
 
 </details>

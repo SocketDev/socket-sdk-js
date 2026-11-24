@@ -72,9 +72,12 @@ automatic telemetry.
 
 `SocketPurlClient` supports PURL lookup, buffered batches, streaming batches,
 and organization batches. Proxy query options include `alerts`, `actions`,
-`compact`, `fixable`, `licenseattrib`, `licensedetails`, `purlErrors`, and
-`cachedResultsOnly`. Organization calls also accept one `labels` string.
-Unsupported proxy options are rejected.
+`cachedResultsOnly`, `compact`, `fixable`, `licenseattrib`, `licensedetails`,
+`mode`, `notFoundAlerts`, and `purlErrors`. `mode` selects the response shape:
+`default`, `compact`, `firewall-check`, or `registry-firewall`.
+`notFoundAlerts` requests synthetic not-found artifacts when used with
+`alerts=true` and `purlErrors=true`. Organization calls also accept one
+`labels` string. Unsupported proxy options are rejected.
 
 Set `apiToken` for a static credential or `authProvider` to resolve a credential
 for each request. The provider returns a token and its `basic` or `bearer`
@@ -115,11 +118,25 @@ not read credentials from the environment or keychain. The production route
 must be deployed and available before applications adopt this client; a
 disabled route returns an unsuccessful 404 result.
 
+### Malware filtering
+
+`loadFilter()` downloads and caches the current malware filter. The filter
+currently supports npm package versions. Check a package by name and version,
+npm spec, or PURL. A `possible_match` is a candidate, not a malware verdict.
+Confirm possible matches with `checkPackages`.
+
 ```typescript
 const publicMalwareClient = new SocketPublicMalwareClient()
-const result = await publicMalwareClient.checkPackages({
-  packages: [{ purl: 'pkg:npm/example-package@1.0.0' }],
-})
+const loadedFilter = await publicMalwareClient.loadFilter()
+if (!loadedFilter.success) throw new Error(loadedFilter.error)
+
+const purl = 'pkg:npm/example-package@1.0.0'
+if (loadedFilter.data.checkPurl(purl) === 'possible_match') {
+  const result = await publicMalwareClient.checkPackages({
+    packages: [{ purl }],
+  })
+  if (result.success) console.log(result.data.results[0]?.status)
+}
 ```
 
 `checkMalware` uses public PURL analysis and returns one entry per input,
