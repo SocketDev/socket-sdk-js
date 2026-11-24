@@ -7,6 +7,7 @@ on:
       - '.github/workflows/chore-sync-openapi.yml'
       - 'scripts/repo/check/api-contracts-are-current.mts'
       - 'scripts/repo/generate-*.mts'
+      - 'scripts/repo/openapi-commit-request.mts'
       - 'scripts/repo/openapi-contracts.mts'
       - 'scripts/repo/package-artifact-is-complete.mts'
       - 'src/types/core.mts'
@@ -61,8 +62,6 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ steps.pr-app.outputs.token }}
-          BOT_GPG_PRIVATE_KEY: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
-          APP_SLUG: ${{ steps.pr-app.outputs.app-slug }}
         run: |
           node scripts/repo/generate-sdk.mts --list-artifacts | git add --pathspec-from-file=-
           git add -- docs/api.md
@@ -70,17 +69,21 @@ jobs:
             echo 'OpenAPI contracts are current.'
             exit 0
           fi
-          printf '%s' "$BOT_GPG_PRIVATE_KEY" | gpg --batch --import
-          FINGERPRINT="$(gpg --batch --with-colons --list-secret-keys | awk -F: '$1 == "fpr" { print $10; exit }')"
-          test -n "$FINGERPRINT"
-          git config user.name "${APP_SLUG}[bot]"
-          git config user.email "${APP_SLUG}[bot]@users.noreply.github.com"
-          git config user.signingkey "$FINGERPRINT"
-          git config commit.gpgsign true
-          git switch --create automated/open-api
-          git commit -S -m 'fix(openapi): sync API contracts'
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')" \
-            push --force origin HEAD:refs/heads/automated/open-api
+          target=refs/heads/automated/open-api
+          staging="automated/openapi-staging-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          gh_git() { git -c credential.helper= -c credential.helper='!gh auth git-credential' "$@"; }
+          previous=$(gh_git ls-remote origin "$target" | cut -f1)
+          # Sign on a temporary branch so a failed request leaves the current PR intact.
+          gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
+            -f "ref=refs/heads/$staging" -f "sha=$GITHUB_SHA" > /dev/null
+          trap 'gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$staging" > /dev/null' EXIT
+          signed=$(node scripts/repo/openapi-commit-request.mts "$GITHUB_REPOSITORY" "$staging" "$GITHUB_SHA" | \
+            gh api graphql --input - --jq '.data.createCommitOnBranch.commit.oid')
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$signed" --jq '.verification.verified')" = true
+          gh_git fetch --no-tags origin "refs/heads/$staging"
+          test "$(git rev-parse FETCH_HEAD)" = "$signed"
+          test "$(git rev-parse "$signed^{tree}")" = "$(git write-tree)"
+          gh_git push --force-with-lease="$target:$previous" origin "$signed:$target"
           BODY="$RUNNER_TEMP/openapi-pr-body.md"
           cat > "$BODY" <<'TEXT'
           Updates the generated OpenAPI contracts from the current API schema.
