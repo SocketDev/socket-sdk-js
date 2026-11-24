@@ -28,9 +28,9 @@ it('runs generation and validation from the default branch', async () => {
   expect(
     job?.steps.some(step => step.uses?.startsWith('./.github/actions/fleet/')),
   ).toBe(false)
-  expect(
-    job?.steps.some(step => step.run?.includes('pnpm run generate-sdk')),
-  ).toBe(true)
+  expect(job?.steps.some(step => step.run === 'pnpm run update:openapi')).toBe(
+    true,
+  )
   expect(
     job?.steps.some(step => step.run?.includes('pnpm run check:api-contracts')),
   ).toBe(true)

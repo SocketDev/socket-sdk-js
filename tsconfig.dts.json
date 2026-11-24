@@ -7,6 +7,7 @@
     "emitDeclarationOnly": true,
     "module": "esnext",
     "moduleResolution": "bundler",
+    "noEmit": false,
     "noPropertyAccessFromIndexSignature": false,
     "outDir": "./dist",
     "rootDir": "./src",

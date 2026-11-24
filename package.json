@@ -75,7 +75,8 @@
     "repo:type": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --config .config/repo/vitest.config.mts",
     "test:fuzz": "node scripts/repo/fuzz.mts",
-    "type": "pnpm run repo:type"
+    "type": "pnpm run repo:type",
+    "update:openapi": "pnpm run generate-sdk && pnpm run docs:api"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "catalog:",
