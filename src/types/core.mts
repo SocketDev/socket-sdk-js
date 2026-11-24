@@ -16,8 +16,17 @@ import type { RequestOptions as HttpsRequestOptions } from 'node:https'
 
 export type ALERT_ACTION = 'error' | 'monitor' | 'warn' | 'ignore'
 
-export type ALERT_TYPE = keyof NonNullable<
-  operations['getOrgSecurityPolicy']['responses']['200']['content']['application/json']['securityPolicyRules']
+// OpenAPI allows extra properties. Keep named fields when deriving SDK types.
+type DeclaredFields<T> = {
+  [
+    K in keyof T as string extends K ? never : number extends K ? never : K
+  ]: T[K]
+}
+
+export type ALERT_TYPE = keyof DeclaredFields<
+  NonNullable<
+    operations['getOrgSecurityPolicy']['responses']['200']['content']['application/json']['securityPolicyRules']
+  >
 >
 
 export type Entitlement = {
@@ -123,13 +132,16 @@ export type SendOptions = {
 }
 
 export type SocketArtifact = Remap<
-  Omit<components['schemas']['SocketArtifact'], 'alerts'> & {
+  Omit<DeclaredFields<components['schemas']['SocketArtifact']>, 'alerts'> & {
     alerts?: SocketArtifactAlert[] | undefined
   }
 >
 
 export type SocketArtifactAlert = Remap<
-  Omit<components['schemas']['SocketAlert'], 'action' | 'props' | 'type'> & {
+  Omit<
+    DeclaredFields<components['schemas']['SocketAlert']>,
+    'action' | 'props' | 'type'
+  > & {
     type: ALERT_TYPE
     action?: ALERT_ACTION | undefined
     props?: Record<string, unknown> | undefined

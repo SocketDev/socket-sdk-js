@@ -1,2 +1,9 @@
 * text=auto eol=lf
 *.patch whitespace=-blank-at-eol,-space-before-tab
+
+/docs/api.md linguist-generated=true
+/openapi-v1.json linguist-generated=true
+/openapi.json linguist-generated=true
+/src/types/strict.mts linguist-generated=true
+/types/api-v1.d.ts linguist-generated=true
+/types/api.d.ts linguist-generated=true

@@ -2337,11 +2337,13 @@ type ALERT_ACTION = 'error' | 'monitor' | 'warn' | 'ignore'
 
 #### `ALERT_TYPE` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L19).
+Declared in [src/types/core.mts](../src/types/core.mts#L26).
 
 ```typescript
-type ALERT_TYPE = keyof NonNullable<
-  operations['getOrgSecurityPolicy']['responses']['200']['content']['application/json']['securityPolicyRules']
+type ALERT_TYPE = keyof DeclaredFields<
+  NonNullable<
+    operations['getOrgSecurityPolicy']['responses']['200']['content']['application/json']['securityPolicyRules']
+  >
 >
 ```
 
@@ -2378,7 +2380,7 @@ type AssembledManifest = {
 
 #### `BatchPackageFetchResultType` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L420).
+Declared in [src/types/core.mts](../src/types/core.mts#L432).
 
 ```typescript
 type BatchPackageFetchResultType = PurlFetchResult
@@ -2386,7 +2388,7 @@ type BatchPackageFetchResultType = PurlFetchResult
 
 #### `BatchPackageStreamOptions` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L422).
+Declared in [src/types/core.mts](../src/types/core.mts#L434).
 
 ```typescript
 type BatchPackageStreamOptions = PurlStreamOptions
@@ -2458,7 +2460,7 @@ interface ChunkedFetchResult {
 
 #### `CompactSocketArtifact` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L56).
+Declared in [src/types/core.mts](../src/types/core.mts#L65).
 
 ```typescript
 type CompactSocketArtifact = Remap<
@@ -2485,7 +2487,7 @@ type CompactSocketArtifact = Remap<
 
 #### `CompactSocketArtifactAlert` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L49).
+Declared in [src/types/core.mts](../src/types/core.mts#L58).
 
 ```typescript
 type CompactSocketArtifactAlert = Remap<
@@ -2498,7 +2500,7 @@ type CompactSocketArtifactAlert = Remap<
 
 #### `CreateDependenciesSnapshotOptions` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L424).
+Declared in [src/types/core.mts](../src/types/core.mts#L436).
 
 ```typescript
 type CreateDependenciesSnapshotOptions = {
@@ -2622,7 +2624,7 @@ type CreateOrgRepoDiffOptions = NonNullable<
 
 #### `CustomResponseType` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L77).
+Declared in [src/types/core.mts](../src/types/core.mts#L86).
 
 ```typescript
 type CustomResponseType = 'response' | 'text' | 'json'
@@ -2662,7 +2664,7 @@ type DeleteResult = {
 
 #### `Entitlement` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L23).
+Declared in [src/types/core.mts](../src/types/core.mts#L32).
 
 ```typescript
 type Entitlement = {
@@ -2673,7 +2675,7 @@ type Entitlement = {
 
 #### `EntitlementsResponse` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L28).
+Declared in [src/types/core.mts](../src/types/core.mts#L37).
 
 ```typescript
 type EntitlementsResponse = {
@@ -2738,7 +2740,7 @@ type FileHashResult = {
 
 Callback invoked when file validation detects unreadable files. Gives consumers control over error messages and logging.
 
-Declared in [src/types/core.mts](../src/types/core.mts#L270).
+Declared in [src/types/core.mts](../src/types/core.mts#L282).
 
 ```typescript
 type FileValidationCallback = (
@@ -2759,7 +2761,7 @@ type FileValidationCallback = (
 
 Result from file validation callback. Allows consumers to customize error handling and logging.
 
-Declared in [src/types/core.mts](../src/types/core.mts#L239).
+Declared in [src/types/core.mts](../src/types/core.mts#L251).
 
 ```typescript
 interface FileValidationResult {
@@ -3179,7 +3181,7 @@ type FullScanV1TerminalResult = SocketSdkGenericResult<
 
 #### `GetOptions` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L79).
+Declared in [src/types/core.mts](../src/types/core.mts#L88).
 
 ```typescript
 type GetOptions = {
@@ -3252,7 +3254,7 @@ type GetThreatCampaignResult = {
 
 #### `HeadersRecord` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L86).
+Declared in [src/types/core.mts](../src/types/core.mts#L95).
 
 ```typescript
 type HeadersRecord = Record<string, string | string[]> | undefined
@@ -3414,7 +3416,7 @@ type LookupPatchPackageResponse = {
 
 #### `MalwareCheckAlert` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L204).
+Declared in [src/types/core.mts](../src/types/core.mts#L216).
 
 ```typescript
 type MalwareCheckAlert = {
@@ -3442,7 +3444,7 @@ type MalwareCheckEntry = MalwareCheckPackage & {
 
 #### `MalwareCheckPackage` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L213).
+Declared in [src/types/core.mts](../src/types/core.mts#L225).
 
 ```typescript
 type MalwareCheckPackage = {
@@ -3457,7 +3459,7 @@ type MalwareCheckPackage = {
 
 #### `MalwareCheckResult` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L222).
+Declared in [src/types/core.mts](../src/types/core.mts#L234).
 
 ```typescript
 type MalwareCheckResult = MalwareCheckEntry[]
@@ -3465,7 +3467,7 @@ type MalwareCheckResult = MalwareCheckEntry[]
 
 #### `MalwareCheckScore` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L224).
+Declared in [src/types/core.mts](../src/types/core.mts#L236).
 
 ```typescript
 type MalwareCheckScore = {
@@ -3851,7 +3853,7 @@ type PostOrgPackageSummariesResult =
 
 #### `PostOrgTelemetryPayload` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L433).
+Declared in [src/types/core.mts](../src/types/core.mts#L445).
 
 ```typescript
 type PostOrgTelemetryPayload = Record<string, unknown>
@@ -3859,7 +3861,7 @@ type PostOrgTelemetryPayload = Record<string, unknown>
 
 #### `PostOrgTelemetryResponse` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L435).
+Declared in [src/types/core.mts](../src/types/core.mts#L447).
 
 ```typescript
 type PostOrgTelemetryResponse = Record<string, never>
@@ -4181,7 +4183,7 @@ type PurlVersionsOptions = { limit?: number | undefined }
 
 #### `QueryParams` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L84).
+Declared in [src/types/core.mts](../src/types/core.mts#L93).
 
 ```typescript
 type QueryParams = Record<string, unknown>
@@ -4430,7 +4432,7 @@ type RepositoryResult = {
 
 #### `RequestInfo` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L32).
+Declared in [src/types/core.mts](../src/types/core.mts#L41).
 
 ```typescript
 interface RequestInfo {
@@ -4443,7 +4445,7 @@ interface RequestInfo {
 
 #### `RequestOptions` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L98).
+Declared in [src/types/core.mts](../src/types/core.mts#L107).
 
 ```typescript
 type RequestOptions = (
@@ -4458,7 +4460,7 @@ type RequestOptions = (
 
 #### `RequestOptionsWithHooks` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L107).
+Declared in [src/types/core.mts](../src/types/core.mts#L116).
 
 ```typescript
 type RequestOptionsWithHooks = RequestOptions & {
@@ -4486,7 +4488,7 @@ class ResponseError extends Error {
 
 #### `ResponseInfo` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L39).
+Declared in [src/types/core.mts](../src/types/core.mts#L48).
 
 ```typescript
 interface ResponseInfo {
@@ -4541,7 +4543,7 @@ type SecurityAlert = {
 
 #### `SendMethod` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L117).
+Declared in [src/types/core.mts](../src/types/core.mts#L126).
 
 ```typescript
 type SendMethod = 'POST' | 'PUT'
@@ -4549,7 +4551,7 @@ type SendMethod = 'POST' | 'PUT'
 
 #### `SendOptions` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L119).
+Declared in [src/types/core.mts](../src/types/core.mts#L128).
 
 ```typescript
 type SendOptions = {
@@ -4572,11 +4574,11 @@ type SkippedManifestPath = {
 
 #### `SocketArtifact` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L125).
+Declared in [src/types/core.mts](../src/types/core.mts#L134).
 
 ```typescript
 type SocketArtifact = Remap<
-  Omit<components['schemas']['SocketArtifact'], 'alerts'> & {
+  Omit<DeclaredFields<components['schemas']['SocketArtifact']>, 'alerts'> & {
     alerts?: SocketArtifactAlert[] | undefined
   }
 >
@@ -4584,11 +4586,14 @@ type SocketArtifact = Remap<
 
 #### `SocketArtifactAlert` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L131).
+Declared in [src/types/core.mts](../src/types/core.mts#L140).
 
 ```typescript
 type SocketArtifactAlert = Remap<
-  Omit<components['schemas']['SocketAlert'], 'action' | 'props' | 'type'> & {
+  Omit<
+    DeclaredFields<components['schemas']['SocketAlert']>,
+    'action' | 'props' | 'type'
+  > & {
     type: ALERT_TYPE
     action?: ALERT_ACTION | undefined
     props?: Record<string, unknown> | undefined
@@ -4598,7 +4603,7 @@ type SocketArtifactAlert = Remap<
 
 #### `SocketArtifactWithExtras` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L92).
+Declared in [src/types/core.mts](../src/types/core.mts#L101).
 
 ```typescript
 type SocketArtifactWithExtras = SocketArtifact & {
@@ -4628,7 +4633,7 @@ type SocketEvent = {
 
 #### `SocketId` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L90).
+Declared in [src/types/core.mts](../src/types/core.mts#L99).
 
 ```typescript
 type SocketId = components['schemas']['SocketId']
@@ -4636,7 +4641,7 @@ type SocketId = components['schemas']['SocketId']
 
 #### `SocketMetricSchema` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L88).
+Declared in [src/types/core.mts](../src/types/core.mts#L97).
 
 ```typescript
 type SocketMetricSchema = components['schemas']['SocketMetricSchema']
@@ -4754,7 +4759,7 @@ Example:
 type RepoItem = SocketSdkArrayElement<'getOrgRepoList', 'results'>
 ```
 
-Declared in [src/types/core.mts](../src/types/core.mts#L181).
+Declared in [src/types/core.mts](../src/types/core.mts#L193).
 
 ```typescript
 type SocketSdkArrayElement<
@@ -4765,7 +4770,7 @@ type SocketSdkArrayElement<
 
 #### `SocketSdkAuthProvider` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L283).
+Declared in [src/types/core.mts](../src/types/core.mts#L295).
 
 ```typescript
 type SocketSdkAuthProvider = () => Promise<{
@@ -4784,7 +4789,7 @@ Example:
 type RepoData = SocketSdkData<'getOrgRepoList'>
 ```
 
-Declared in [src/types/core.mts](../src/types/core.mts#L170).
+Declared in [src/types/core.mts](../src/types/core.mts#L182).
 
 ```typescript
 type SocketSdkData<T extends SocketSdkOperations> = OpReturnType<operations[T]>
@@ -4792,7 +4797,7 @@ type SocketSdkData<T extends SocketSdkOperations> = OpReturnType<operations[T]>
 
 #### `SocketSdkErrorResult` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L149).
+Declared in [src/types/core.mts](../src/types/core.mts#L161).
 
 ```typescript
 type SocketSdkErrorResult<T extends SocketSdkOperations> = {
@@ -4809,7 +4814,7 @@ type SocketSdkErrorResult<T extends SocketSdkOperations> = {
 
 #### `SocketSdkGenericResult` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L187).
+Declared in [src/types/core.mts](../src/types/core.mts#L199).
 
 ```typescript
 type SocketSdkGenericResult<T> =
@@ -4864,7 +4869,7 @@ type SocketSdkJsonValue =
 
 #### `SocketSdkOperations` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L139).
+Declared in [src/types/core.mts](../src/types/core.mts#L151).
 
 ```typescript
 type SocketSdkOperations = keyof operations
@@ -4874,7 +4879,7 @@ type SocketSdkOperations = keyof operations
 
 Configuration options for SocketSdk.
 
-Declared in [src/types/core.mts](../src/types/core.mts#L291).
+Declared in [src/types/core.mts](../src/types/core.mts#L303).
 
 ```typescript
 interface SocketSdkOptions {
@@ -4987,7 +4992,7 @@ interface SocketSdkOptions {
 
 #### `SocketSdkResult` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L160).
+Declared in [src/types/core.mts](../src/types/core.mts#L172).
 
 ```typescript
 type SocketSdkResult<T extends SocketSdkOperations> =
@@ -4997,7 +5002,7 @@ type SocketSdkResult<T extends SocketSdkOperations> =
 
 #### `SocketSdkSuccessResult` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L141).
+Declared in [src/types/core.mts](../src/types/core.mts#L153).
 
 ```typescript
 type SocketSdkSuccessResult<T extends SocketSdkOperations> = {
@@ -5034,7 +5039,7 @@ type StreamFullScanOptions = {
 
 #### `StreamOrgFullScanOptions` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L429).
+Declared in [src/types/core.mts](../src/types/core.mts#L441).
 
 ```typescript
 type StreamOrgFullScanOptions = {
@@ -5080,7 +5085,7 @@ type StrictResult<T> =
 
 Configuration for telemetry collection. Controls whether telemetry is enabled and how events are collected.
 
-Declared in [src/types/core.mts](../src/types/core.mts#L441).
+Declared in [src/types/core.mts](../src/types/core.mts#L453).
 
 ```typescript
 interface TelemetryConfig {
@@ -5199,7 +5204,7 @@ type UploadBlobsResult = {
 
 #### `UploadManifestFilesError` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L411).
+Declared in [src/types/core.mts](../src/types/core.mts#L423).
 
 ```typescript
 type UploadManifestFilesError = {
@@ -5213,7 +5218,7 @@ type UploadManifestFilesError = {
 
 #### `UploadManifestFilesOptions` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L447).
+Declared in [src/types/core.mts](../src/types/core.mts#L459).
 
 ```typescript
 type UploadManifestFilesOptions = {
@@ -5223,7 +5228,7 @@ type UploadManifestFilesOptions = {
 
 #### `UploadManifestFilesResponse` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L398).
+Declared in [src/types/core.mts](../src/types/core.mts#L410).
 
 ```typescript
 type UploadManifestFilesResponse = {
@@ -5234,7 +5239,7 @@ type UploadManifestFilesResponse = {
 
 #### `UploadManifestFilesReturnType` (type)
 
-Declared in [src/types/core.mts](../src/types/core.mts#L403).
+Declared in [src/types/core.mts](../src/types/core.mts#L415).
 
 ```typescript
 type UploadManifestFilesReturnType = {
