@@ -1,5 +1,5 @@
-name: 'chore: sync openapi'
-run-name: 'chore: sync v0 and v1 contracts'
+name: 'chore: sync OpenAPI'
+run-name: 'chore: sync OpenAPI'
 
 on:
   push:
@@ -18,139 +18,77 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions: {}
-
-defaults:
-  run:
-    shell: bash
+permissions:
+  actions: write
+  contents: read
 
 jobs:
-  fetch_and_update:
-    name: Sync v0 and v1 contracts
+  sync:
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-26.04
     permissions:
       actions: write
       contents: read
+      pull-requests: write
     steps:
-      - name: Bootstrap checkout
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          SERVER_URL: ${{ github.server_url }}
-          REPOSITORY: ${{ github.repository }}
-          TRIGGER_REF: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          git init -q
-          git config --local advice.detachedHead false
-          git remote remove origin 2>/dev/null || true
-          git remote add origin "${SERVER_URL}/${REPOSITORY}"
-          AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
-          git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" \
-            fetch --no-tags --prune --depth 1 origin "${TRIGGER_REF}"
-          git checkout -q --detach FETCH_HEAD
-          test "$(git rev-parse HEAD)" = "${TRIGGER_REF}"
-      - name: Set up and install
-        uses: ./.github/actions/fleet/setup-and-install
+      - uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
+        id: pr-app
         with:
-          checkout: 'false'
-          payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
-          socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
-      - name: Set up commit signing
-        uses: ./.github/actions/fleet/setup-git-signing
+          app-id: ${{ secrets.SOCKET_PR_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          gpg-private-key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
-
-      - name: Generate both contracts
-        run: |
-          pnpm --silent run generate-sdk --list-artifacts > "$RUNNER_TEMP/openapi-artifacts.txt"
-          pnpm run generate-sdk
-
+          fetch-depth: 0
+          persist-credentials: false
+          token: ${{ steps.pr-app.outputs.token }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+      - name: Install pnpm
+        run: npm install --global pnpm@12.14.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate contracts
+        run: pnpm run generate-sdk
       - name: Verify generated contracts
-        run: |
-          pnpm run check:api-contracts
-          pnpm run type
-          pnpm test test/repo/unit/generate-sdk.test.mts test/repo/unit/openapi-response-types.test.mts test/repo/integration/openapi-multipart.test.mts
-          pnpm run check:quota-sync
-          pnpm run build
+        run: >-
+          pnpm run check:api-contracts && pnpm run repo:type && pnpm run build &&
           pnpm run check:package-artifact
-
-      - name: Check generated artifacts for changes
-        id: check
-        run: |
-          mapfile -t artifact_paths < "$RUNNER_TEMP/openapi-artifacts.txt"
-          if [ -n "$(git status --porcelain -- "${artifact_paths[@]}")" ]; then
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Mint branch token
-        if: steps.check.outputs.has_changes == 'true'
-        id: openapi-branch
-        uses: ./.github/actions/fleet/github-pr-branch-app-token
-        with:
-          client-id: ${{ secrets.SOCKET_PR_CLIENT_ID || vars.SOCKET_PR_CLIENT_ID }}
-          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-          repositories: ${{ github.event.repository.name }}
-
-      - name: Commit and push generated artifacts
-        if: steps.check.outputs.has_changes == 'true'
+      - name: Create signed update pull request
         env:
-          GH_TOKEN: ${{ steps.openapi-branch.outputs.token }}
+          GH_TOKEN: ${{ steps.pr-app.outputs.token }}
+          BOT_GPG_PRIVATE_KEY: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
+          APP_SLUG: ${{ steps.pr-app.outputs.app-slug }}
         run: |
-          mapfile -t artifact_paths < "$RUNNER_TEMP/openapi-artifacts.txt"
+          if [ -z "$(git status --porcelain -- types openapi.json openapi-v1.json)" ]; then
+            echo 'OpenAPI contracts are current.'
+            exit 0
+          fi
+          printf '%s' "$BOT_GPG_PRIVATE_KEY" | gpg --batch --import
+          FINGERPRINT="$(gpg --batch --with-colons --list-secret-keys | awk -F: '$1 == "fpr" { print $10; exit }')"
+          test -n "$FINGERPRINT"
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${APP_SLUG}[bot]@users.noreply.github.com"
+          git config user.signingkey "$FINGERPRINT"
+          git config commit.gpgsign true
           git switch --create automated/open-api
-          git add -- "${artifact_paths[@]}"
-          git commit -m "fix(openapi): sync v0 and v1 contracts"
-          previous_head="$(git -c credential.helper='!gh auth git-credential' ls-remote origin refs/heads/automated/open-api | cut -f1)"
-          git -c credential.helper='!gh auth git-credential' push \
-            --force-with-lease="refs/heads/automated/open-api:$previous_head" \
-            origin HEAD:refs/heads/automated/open-api
+          git add -- types openapi.json openapi-v1.json
+          git commit -S -m 'fix(openapi): sync API contracts'
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')" \
+            push --force origin HEAD:refs/heads/automated/open-api
+          BODY="$RUNNER_TEMP/openapi-pr-body.md"
+          cat > "$BODY" <<'TEXT'
+          Updates the generated OpenAPI contracts from the current API schema.
 
-      - name: Mint PR token
-        if: steps.check.outputs.has_changes == 'true'
-        id: openapi-app
-        uses: ./.github/actions/fleet/github-pr-app-token
-        with:
-          client-id: ${{ secrets.SOCKET_PR_CLIENT_ID || vars.SOCKET_PR_CLIENT_ID }}
-          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-          repositories: ${{ github.event.repository.name }}
-
-      - name: Create or update pull request
-        if: steps.check.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ steps.openapi-app.outputs.token }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: |
-          cat > "$RUNNER_TEMP/openapi-pr-body.md" <<'BODY'
-          Synchronizes the v0 and v1 OpenAPI snapshots and generated TypeScript contracts.
-          The v0 strict types and strict type exports follow the same generation pass.
-
-          Validation: offline contract freshness, TypeScript, generator tests, quota synchronization, build, and packed declaration imports.
-          BODY
-          existing_pr="$(gh pr list --head automated/open-api --base "$DEFAULT_BRANCH" --json number --jq '.[0].number // empty')"
-          if [ -z "$existing_pr" ]; then
-            gh pr create \
-              --head automated/open-api \
-              --base "$DEFAULT_BRANCH" \
-              --title "fix(openapi): sync v0 and v1 contracts" \
-              --body-file "$RUNNER_TEMP/openapi-pr-body.md" \
-              --label dependencies \
-              --label automated
+          Verified with `pnpm run check:api-contracts`, `pnpm run repo:type`, `pnpm run build`, and `pnpm run check:package-artifact`.
+          TEXT
+          PR="$(gh pr list --head automated/open-api --base "$GITHUB_REF_NAME" --json number --jq '.[0].number // empty')"
+          if [ -z "$PR" ]; then
+            gh pr create --head automated/open-api --base "$GITHUB_REF_NAME" \
+              --title 'fix(openapi): sync API contracts' --body-file "$BODY" \
+              --label dependencies --label automated
           else
-            gh pr edit "$existing_pr" \
-              --title "fix(openapi): sync v0 and v1 contracts" \
-              --body-file "$RUNNER_TEMP/openapi-pr-body.md"
+            gh pr edit "$PR" --title 'fix(openapi): sync API contracts' --body-file "$BODY"
           fi
-
-      - name: Trigger CI checks
-        if: steps.check.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run ci-gates.yml --ref automated/open-api
-
-      - name: Clean up commit signing
-        uses: ./.github/actions/fleet/cleanup-git-signing
-        if: always()

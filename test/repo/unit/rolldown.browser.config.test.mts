@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 
-import { tolerantTimeout } from '../../fleet/_shared/lib/timing.mts'
+import { tolerantTimeout } from '../../utils/timing.mts'
 
 import { browserBuildConfig } from '../../../.config/repo/rolldown.browser.config.mts'
 import { buildInto } from '../../utils/build-output.mts'

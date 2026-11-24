@@ -16,7 +16,7 @@ import nock from 'nock'
 import { describe, expect, it } from 'vitest'
 
 import { SocketSdk } from '../../../src/index.mts'
-import { tolerantTimeout } from '../../fleet/_shared/lib/timing.mts'
+import { tolerantTimeout } from '../../utils/timing.mts'
 import { setupLocalHttpServer } from '../../utils/local-server.mts'
 
 import type { IncomingMessage, ServerResponse } from 'node:http'

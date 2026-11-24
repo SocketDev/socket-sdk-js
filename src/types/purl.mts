@@ -30,6 +30,12 @@ export type PurlFetchResult = SocketSdkGenericResult<PurlRecord[]>
 
 export type PurlStreamResult = SocketSdkGenericResult<PurlRecord>
 
+export type PurlResponseMode =
+  | 'default'
+  | 'compact'
+  | 'firewall-check'
+  | 'registry-firewall'
+
 export type PublicPurlQuery = {
   actions?: string | undefined
   alerts?: boolean | undefined
@@ -38,6 +44,8 @@ export type PublicPurlQuery = {
   fixable?: boolean | undefined
   licenseattrib?: boolean | undefined
   licensedetails?: boolean | undefined
+  mode?: PurlResponseMode | undefined
+  notFoundAlerts?: boolean | undefined
   purlErrors?: boolean | undefined
 }
 

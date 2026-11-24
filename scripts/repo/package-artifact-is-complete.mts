@@ -22,10 +22,10 @@ import {
 } from '@socketsecurity/lib-stable/packages/tarball'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
-import { isMainModule } from '../fleet/process/is-main-module.mts'
-import { runMain } from '../fleet/process/main/run.mts'
+import { isMainModule } from './cli.mts'
+import { runMain } from './cli.mts'
 
-import type { ScriptMeta } from '../fleet/process/main/run.mts'
+import type { ScriptMeta } from './cli.mts'
 
 const toolingRoot = path.resolve(import.meta.dirname, '../..')
 
