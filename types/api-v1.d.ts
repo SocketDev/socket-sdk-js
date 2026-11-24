@@ -3,6 +3,19 @@
  * Do not make direct changes to the file.
  */
 
+/**
+ * OneOf type helpers.
+ */
+type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
+type XOR<T, U> = T | U extends object
+  ? (Without<T, U> & U) | (Without<U, T> & T)
+  : T | U
+type OneOf<T extends any[]> = T extends [infer Only]
+  ? Only
+  : T extends [infer A, infer B, ...infer Rest]
+    ? OneOf<[XOR<A, B>, ...Rest]>
+    : never
+
 export interface paths {
   '/v1/openapi': {
     /**
@@ -39,6 +52,228 @@ export interface paths {
         }
       }
     }
+  }
+  '/v1/oauth2/device/authorize': {
+    post: {
+      requestBody: {
+        content: {
+          'application/x-www-form-urlencoded': {
+            client_id: string
+            scope?: string
+            [key: string]: unknown
+          }
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        200: {
+          content: {
+            'application/json': {
+              device_code: string
+              user_code: string
+              verification_uri: string
+              verification_uri_complete: string
+              expires_in: number
+              interval: number
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        400: {
+          content: {
+            'application/json': {
+              statusCode?: number
+              error: string
+              message?: string
+              error_description?: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        500: {
+          content: {
+            'application/json': {
+              statusCode?: number
+              error: string
+              message?: string
+              error_description?: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        503: {
+          content: {
+            'application/json': {
+              statusCode?: number
+              error: string
+              message?: string
+              error_description?: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
+  '/v1/oauth2/device/verify': {
+    post: {
+      requestBody: {
+        content: {
+          'application/x-www-form-urlencoded': {
+            user_code: string
+            organization_id?: string
+          }
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        302: {
+          content: never
+        }
+        /**
+         * Default Response.
+         */
+        401: {
+          content: {
+            'application/json': ''
+          }
+        }
+        /**
+         * Default Response.
+         */
+        403: {
+          content: {
+            'application/json': ''
+          }
+        }
+        /**
+         * Default Response.
+         */
+        503: {
+          content: {
+            'application/json': {
+              statusCode?: number
+              error: string
+              message?: string
+              error_description?: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
+  '/v1/orgs/{org_slug}/access-management/members/': {
+    /**
+     * Discover organization members and access restrictions.
+     *
+     * Requires access-policy:read and organization-wide visibility. Starts from
+     * organization membership, including members with zero grants.
+     * Custom-policy authoring is not required.
+     */
+    get: operations['listMemberAccess']
+  }
+  '/v1/orgs/{org_slug}/access-management/members/{membership_id}/grants': {
+    /**
+     * Manage owned member grant contributions.
+     *
+     * Requires access-policy:attach and organization-wide authority. Updates
+     * only the owning repository-access contributions, preserving member
+     * ceilings and revocations. Null resource_ids selects organization-wide
+     * grants; an empty array is a no-op. Null scopes removes selected
+     * contributions. remove_all removes contributions for the selected target
+     * type, retaining the principal and other target types. This does not
+     * promise effective revocation or reset. Supported independently of
+     * custom-policy authoring.
+     */
+    post: operations['changeMemberAccessGrants']
+  }
+  '/v1/orgs/{org_slug}/access-management/members/{membership_id}': {
+    /**
+     * Read member access configuration and effective access.
+     *
+     * Requires access-policy:read and organization-wide management visibility.
+     * Includes empty compatibility principals and saved unavailable selections.
+     * Effective decisions evaluate member web repo:list access across the
+     * current repository inventory using batched metadata reads. Independent
+     * credentials are unchanged.
+     */
+    get: operations['getMemberAccess']
+  }
+  '/v1/orgs/{org_slug}/access-management/members/{membership_id}/preview': {
+    /**
+     * Preview a member access operation.
+     *
+     * Requires access-policy:read and an enabled memberAccessLifecycle rollout.
+     * Binds the actor, member, kind, normalized command, evaluated web
+     * repository-list context, and access revisions for five minutes. Reset
+     * removal sets are computed by the server. No access changes are
+     * committed.
+     */
+    post: operations['previewMemberAccess']
+  }
+  '/v1/orgs/{org_slug}/access-management/members/{membership_id}/restrict': {
+    /**
+     * Restrict member access.
+     *
+     * Requires access-policy:attach and current semantic organization-wide
+     * management authority. New commands require an enabled
+     * memberAccessLifecycle rollout, a matching current preview, and
+     * Idempotency-Key. State, logical audit, and receipt commit atomically. An
+     * authorized exact retry returns its historical receipt without changing
+     * current state, including while rollout is paused; refresh the member
+     * after replay. Reset can still result in denied access. Protected
+     * Owner/Admin memberships cannot be restricted or revoked. Legacy authority
+     * and rollback-open cohorts return 409. Generic custom-policy authoring is
+     * not required.
+     */
+    post: operations['restrictMemberAccess']
+  }
+  '/v1/orgs/{org_slug}/access-management/members/{membership_id}/reset': {
+    /**
+     * Reset to inherited member access.
+     *
+     * Requires access-policy:attach and current semantic organization-wide
+     * management authority. New commands require an enabled
+     * memberAccessLifecycle rollout, a matching current preview, and
+     * Idempotency-Key. State, logical audit, and receipt commit atomically. An
+     * authorized exact retry returns its historical receipt without changing
+     * current state, including while rollout is paused; refresh the member
+     * after replay. Reset can still result in denied access. Protected
+     * Owner/Admin memberships cannot be restricted or revoked. Legacy authority
+     * and rollback-open cohorts return 409. Generic custom-policy authoring is
+     * not required.
+     */
+    post: operations['resetMemberAccess']
+  }
+  '/v1/orgs/{org_slug}/access-management/members/{membership_id}/revoke': {
+    /**
+     * Revoke member access.
+     *
+     * Requires access-policy:attach and current semantic organization-wide
+     * management authority. New commands require an enabled
+     * memberAccessLifecycle rollout, a matching current preview, and
+     * Idempotency-Key. State, logical audit, and receipt commit atomically. An
+     * authorized exact retry returns its historical receipt without changing
+     * current state, including while rollout is paused; refresh the member
+     * after replay. Reset can still result in denied access. Protected
+     * Owner/Admin memberships cannot be restricted or revoked. Legacy authority
+     * and rollback-open cohorts return 409. Generic custom-policy authoring is
+     * not required.
+     */
+    post: operations['revokeMemberAccess']
   }
   '/v1/orgs/{org_slug}/events/': {
     /**
@@ -201,604 +436,6 @@ export interface paths {
          * Default Response.
          */
         500: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-      }
-    }
-  }
-  '/v1/orgs/{org_slug}/purl/versions/{purl}': {
-    /**
-     * List published versions for a package by PURL.
-     *
-     * Given a package URL (PURL) *without* a version, returns every version
-     * Socket knows about for that package along with its publish date, sorted
-     * newest-first by publish date.
-     *
-     * This lets you enforce version policies such as "N-1" (allow the previous
-     * release, block the newest) without querying a package registry directly.
-     * Versions with no known publish date are listed last.
-     *
-     * **Ordering includes prereleases.** Sorting is by publish date only, so
-     * index 0 is the most recently *published* version, not necessarily the
-     * newest stable release. On npm in particular the newest publishes are
-     * often canaries or release candidates, so a consumer that reads index 1
-     * as "N-1" can land on a prerelease. Each entry carries a `prerelease`
-     * flag for this: filter out entries where `prerelease` is `true` before
-     * applying an N-1 rule. `prerelease` is `null` when the ecosystem's
-     * version grammar has no canonical prerelease parser, or when the version
-     * string itself does not parse — treat null according to your own policy
-     * rather than as an error.
-     *
-     * Pass `limit` to cap how many entries come back; it is applied after
-     * sorting, so `limit=2` is all the N-1 use case needs. A `limit` that
-     * is not a positive integer is rejected with a 400 rather than clamped.
-     *
-     * The PURL must be percent-encoded as a single path segment
-     * (`encodeURIComponent`); an unencoded `/` will not match this route.
-     * Any version on the PURL is ignored — the full history always comes back.
-     * The HuggingFace `type` qualifier (model, dataset, or space) is honored.
-     *
-     * A well-formed PURL for an ecosystem that does not support version
-     * listing returns a 400 rather than a server error.
-     *
-     * Authentication: Organization API token, OAuth2, or NextAuth session.
-     * Required token scope: `packages:list`. Costs 100 quota units.
-     */
-    get: {
-      parameters: {
-        query?: {
-          /**
-           * Maximum number of version entries to return, applied after sorting.
-           * Omit for the full history.
-           */
-          limit?: number
-        }
-        path: {
-          /**
-           * Organization slug.
-           */
-          org_slug: string
-          /**
-           * Package URL, percent-encoded as a single path segment. Example:
-           * pkg%3Anpm%2F%40babel%2Fcore.
-           */
-          purl: string
-        }
-      }
-      responses: {
-        /**
-         * Default Response.
-         */
-        200: {
-          content: {
-            'application/json': {
-              /**
-               * The PURL as received, echoed back.
-               */
-              purl: string
-              /**
-               * Known versions, newest-first by publish date. Ordering includes
-               * prereleases, so index 0 is the most recent publish rather than
-               * the newest stable release.
-               */
-              versions: {
-                /**
-                 * The version string as the ecosystem reports it.
-                 */
-                version: string
-                /**
-                 * ISO-8601 publish date, or null when the ecosystem reports
-                 * none. Undated versions are listed last.
-                 */
-                publishedAt: null | string
-                /**
-                 * True when this version is a prerelease (canary, release
-                 * candidate, dev, beta) according to the ecosystem's own
-                 * version grammar. Null means unknown — either the ecosystem
-                 * has no canonical prerelease parser, or this version string
-                 * does not parse. Null is not an error.
-                 */
-                prerelease: null | boolean
-              }[]
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        400: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        401: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        403: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        404: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        429: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-      }
-    }
-  }
-  '/v1/orgs/{org_slug}/threat-campaigns/': {
-    /**
-     * List threat campaigns.
-     *
-     * Returns a paginated list of supply chain attack campaigns. Supports
-     * filtering by status, ecosystem, and an incremental sync parameter
-     * (`updated_after`).
-     *
-     * Package PURLs are not inlined on the campaign object — they are their own
-     * paginated resource. Fetch them per campaign from
-     * `/threat-campaigns/:campaign_id/packages`.
-     *
-     * Authentication: Organization API token, OAuth2, or NextAuth session.
-     * Required token scope: `threat-campaigns:list`.
-     *
-     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
-     */
-    get: {
-      parameters: {
-        query?: {
-          /**
-           * Filter by campaign status. Defaults to ongoing.
-           */
-          status?: 'ongoing' | 'past'
-          /**
-           * Filter by ecosystem (e.g. npm, pypi, maven).
-           */
-          ecosystem?: string
-          /**
-           * Unix timestamp in seconds. Only return campaigns updated after this
-           * time. Omit to return all matching campaigns.
-           */
-          updated_after?: string
-          /**
-           * Number of campaigns per page. Default 30, max 100.
-           */
-          per_page?: number
-          /**
-           * Opaque cursor for pagination. Use the endCursor value from the
-           * previous response.
-           */
-          cursor?: string
-        }
-        path: {
-          /**
-           * Organization slug.
-           */
-          org_slug: string
-        }
-      }
-      responses: {
-        /**
-         * Default Response.
-         */
-        200: {
-          content: {
-            'application/json': {
-              items: {
-                id: string
-                name: string
-                description: string
-                /**
-                 * @enum {string}
-                 */
-                status: 'ongoing' | 'past'
-                ecosystem: null | string[]
-                firstDiscovered: null | string
-                lastActivity: null | string
-                blogUrls: string[]
-                /**
-                 * Number of threat feed entries linked to this campaign.
-                 */
-                linkedThreatCount: number
-                /**
-                 * Number of distinct package artifacts linked to this
-                 * campaign.
-                 */
-                linkedPackageArtifactsCount: number
-                /**
-                 * URL of the public campaign page on socket.dev, or null if
-                 * the campaign has no public page.
-                 */
-                htmlUrl: null | string
-                /**
-                 * Format: date-time.
-                 */
-                createdAt: string
-                /**
-                 * Format: date-time.
-                 */
-                updatedAt: string
-                [key: string]: unknown
-              }[]
-              endCursor?: null | string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        400: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        401: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        403: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        404: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        429: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-      }
-    }
-  }
-  '/v1/orgs/{org_slug}/threat-campaigns/{campaign_id}/': {
-    /**
-     * Get a threat campaign.
-     *
-     * Returns a single supply chain attack campaign by ID. Same shape as one
-     * item from the campaigns list; package PURLs are not inlined — fetch them
-     * from the paginated `/threat-campaigns/:campaign_id/packages` resource
-     * instead.
-     *
-     * Useful for filling in cached campaign metadata client-side when crawling
-     * the campaigns list or packages feed.
-     *
-     * Authentication: Organization API token, OAuth2, or NextAuth session.
-     * Required token scope: `threat-campaigns:list`.
-     *
-     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
-     */
-    get: {
-      parameters: {
-        path: {
-          /**
-           * Organization slug.
-           */
-          org_slug: string
-          /**
-           * Campaign ID.
-           */
-          campaign_id: string
-        }
-      }
-      responses: {
-        /**
-         * Default Response.
-         */
-        200: {
-          content: {
-            'application/json': {
-              id: string
-              name: string
-              description: string
-              /**
-               * @enum {string}
-               */
-              status: 'ongoing' | 'past'
-              ecosystem: null | string[]
-              firstDiscovered: null | string
-              lastActivity: null | string
-              blogUrls: string[]
-              /**
-               * Number of threat feed entries linked to this campaign.
-               */
-              linkedThreatCount: number
-              /**
-               * Number of distinct package artifacts linked to this campaign.
-               */
-              linkedPackageArtifactsCount: number
-              /**
-               * URL of the public campaign page on socket.dev, or null if the
-               * campaign has no public page.
-               */
-              htmlUrl: null | string
-              /**
-               * Format: date-time.
-               */
-              createdAt: string
-              /**
-               * Format: date-time.
-               */
-              updatedAt: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        400: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        401: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        403: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        404: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        429: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-      }
-    }
-  }
-  '/v1/orgs/{org_slug}/threat-campaigns/{campaign_id}/packages': {
-    /**
-     * List packages for a threat campaign.
-     *
-     * Returns a cursor-paginated list of package PURLs affected by a single
-     * supply chain attack campaign. This is the primary way to retrieve all
-     * packages for a known campaign without an inline, unbounded list on the
-     * campaign object.
-     *
-     * Pagination follows the same `{ items, endCursor }` envelope as the
-     * campaigns list. Pass the `endCursor` value back as `cursor` to fetch the
-     * next page.
-     *
-     * Authentication: Organization API token, OAuth2, or NextAuth session.
-     * Required token scope: `threat-campaigns:list`.
-     *
-     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
-     */
-    get: {
-      parameters: {
-        query?: {
-          /**
-           * Number of packages per page. Default 100, max 1000.
-           */
-          per_page?: number
-          /**
-           * Opaque cursor for pagination. Use the endCursor value from the
-           * previous response.
-           */
-          cursor?: string
-        }
-        path: {
-          /**
-           * Organization slug.
-           */
-          org_slug: string
-          /**
-           * Campaign ID.
-           */
-          campaign_id: string
-        }
-      }
-      responses: {
-        /**
-         * Default Response.
-         */
-        200: {
-          content: {
-            'application/json': {
-              /**
-               * Package PURLs associated with this campaign.
-               */
-              items: string[]
-              endCursor?: null | string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        400: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        401: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        403: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        404: {
-          content: {
-            'application/json': {
-              statusCode: number
-              error: string
-              message: string
-              [key: string]: unknown
-            }
-          }
-        }
-        /**
-         * Default Response.
-         */
-        429: {
           content: {
             'application/json': {
               statusCode: number
@@ -974,6 +611,11 @@ export interface paths {
               statusCode: number
               error: string
               message: string
+              /**
+               * @enum {string}
+               */
+              code?: 'missing_scope' | 'missing_capability'
+              requiredScopes?: string[]
               [key: string]: unknown
             }
           }
@@ -1242,6 +884,922 @@ export interface paths {
               statusCode: number
               error: string
               message: string
+              /**
+               * @enum {string}
+               */
+              code?: 'missing_scope' | 'missing_capability'
+              requiredScopes?: string[]
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        404: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        413: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        429: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        503: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
+  '/v1/orgs/{org_slug}/purl/versions/{purl}': {
+    /**
+     * List published versions for a package by PURL.
+     *
+     * Given a package URL (PURL) *without* a version, returns every version
+     * Socket knows about for that package along with its publish date, sorted
+     * newest-first by publish date.
+     *
+     * This lets you enforce version policies such as "N-1" (allow the previous
+     * release, block the newest) without querying a package registry directly.
+     * Versions with no known publish date are listed last.
+     *
+     * **Ordering includes prereleases.** Sorting is by publish date only, so
+     * index 0 is the most recently *published* version, not necessarily the
+     * newest stable release. On npm in particular the newest publishes are
+     * often canaries or release candidates, so a consumer that reads index 1
+     * as "N-1" can land on a prerelease. Each entry carries a `prerelease`
+     * flag for this: filter out entries where `prerelease` is `true` before
+     * applying an N-1 rule. `prerelease` is `null` when the ecosystem's
+     * version grammar has no canonical prerelease parser, or when the version
+     * string itself does not parse — treat null according to your own policy
+     * rather than as an error.
+     *
+     * Pass `limit` to cap how many entries come back; it is applied after
+     * sorting, so `limit=2` is all the N-1 use case needs. A `limit` that
+     * is not a positive integer is rejected with a 400 rather than clamped.
+     *
+     * The PURL must be percent-encoded as a single path segment
+     * (`encodeURIComponent`); an unencoded `/` will not match this route.
+     * Any version on the PURL is ignored — the full history always comes back.
+     * The HuggingFace `type` qualifier (model, dataset, or space) is honored.
+     *
+     * A well-formed PURL for an ecosystem that does not support version
+     * listing returns a 400 rather than a server error.
+     *
+     * Authentication: Organization API token, OAuth2, or NextAuth session.
+     * Required token scope: `packages:list`. Costs 100 quota units.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /**
+           * Maximum number of version entries to return, applied after sorting.
+           * Omit for the full history.
+           */
+          limit?: number
+        }
+        path: {
+          /**
+           * Organization slug.
+           */
+          org_slug: string
+          /**
+           * Package URL, percent-encoded as a single path segment. Example:
+           * pkg%3Anpm%2F%40babel%2Fcore.
+           */
+          purl: string
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        200: {
+          content: {
+            'application/json': {
+              /**
+               * The PURL as received, echoed back.
+               */
+              purl: string
+              /**
+               * Known versions, newest-first by publish date. Ordering includes
+               * prereleases, so index 0 is the most recent publish rather than
+               * the newest stable release.
+               */
+              versions: {
+                /**
+                 * The version string as the ecosystem reports it.
+                 */
+                version: string
+                /**
+                 * ISO-8601 publish date, or null when the ecosystem reports
+                 * none. Undated versions are listed last.
+                 */
+                publishedAt: null | string
+                /**
+                 * True when this version is a prerelease (canary, release
+                 * candidate, dev, beta) according to the ecosystem's own
+                 * version grammar. Null means unknown — either the ecosystem
+                 * has no canonical prerelease parser, or this version string
+                 * does not parse. Null is not an error.
+                 */
+                prerelease: null | boolean
+              }[]
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        400: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        401: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        403: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              /**
+               * @enum {string}
+               */
+              code?: 'missing_scope' | 'missing_capability'
+              requiredScopes?: string[]
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        404: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        429: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
+  '/v1/orgs/{org_slug}/threat-campaigns/': {
+    /**
+     * List threat campaigns.
+     *
+     * Returns a paginated list of supply chain attack campaigns. Supports
+     * filtering by status, ecosystem, and an incremental sync parameter
+     * (`updated_after`).
+     *
+     * Package PURLs are not inlined on the campaign object — they are their own
+     * paginated resource. Fetch them per campaign from
+     * `/threat-campaigns/:campaign_id/packages`.
+     *
+     * Authentication: Organization API token, OAuth2, or NextAuth session.
+     * Required token scope: `threat-campaigns:list`.
+     *
+     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /**
+           * Filter by campaign status. Defaults to ongoing.
+           */
+          status?: 'ongoing' | 'past'
+          /**
+           * Filter by ecosystem (e.g. npm, pypi, maven).
+           */
+          ecosystem?: string
+          /**
+           * Unix timestamp in seconds. Only return campaigns updated after this
+           * time. Omit to return all matching campaigns.
+           */
+          updated_after?: string
+          /**
+           * Number of campaigns per page. Default 30, max 100.
+           */
+          per_page?: number
+          /**
+           * Opaque cursor for pagination. Use the endCursor value from the
+           * previous response.
+           */
+          cursor?: string
+        }
+        path: {
+          /**
+           * Organization slug.
+           */
+          org_slug: string
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        200: {
+          content: {
+            'application/json': {
+              items: {
+                id: string
+                name: string
+                description: string
+                /**
+                 * @enum {string}
+                 */
+                status: 'ongoing' | 'past'
+                ecosystem: null | string[]
+                firstDiscovered: null | string
+                lastActivity: null | string
+                blogUrls: string[]
+                /**
+                 * Number of threat feed entries linked to this campaign.
+                 */
+                linkedThreatCount: number
+                /**
+                 * Number of distinct package artifacts linked to this
+                 * campaign.
+                 */
+                linkedPackageArtifactsCount: number
+                /**
+                 * URL of the public campaign page on socket.dev, or null if
+                 * the campaign has no public page.
+                 */
+                htmlUrl: null | string
+                /**
+                 * Format: date-time.
+                 */
+                createdAt: string
+                /**
+                 * Format: date-time.
+                 */
+                updatedAt: string
+                [key: string]: unknown
+              }[]
+              endCursor?: null | string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        400: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        401: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        403: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              /**
+               * @enum {string}
+               */
+              code?: 'missing_scope' | 'missing_capability'
+              requiredScopes?: string[]
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        404: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        429: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
+  '/v1/orgs/{org_slug}/threat-campaigns/{campaign_id}/': {
+    /**
+     * Get a threat campaign.
+     *
+     * Returns a single supply chain attack campaign by ID. Same shape as one
+     * item from the campaigns list; package PURLs are not inlined — fetch them
+     * from the paginated `/threat-campaigns/:campaign_id/packages` resource
+     * instead.
+     *
+     * Useful for filling in cached campaign metadata client-side when crawling
+     * the campaigns list or packages feed.
+     *
+     * Authentication: Organization API token, OAuth2, or NextAuth session.
+     * Required token scope: `threat-campaigns:list`.
+     *
+     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
+     */
+    get: {
+      parameters: {
+        path: {
+          /**
+           * Organization slug.
+           */
+          org_slug: string
+          /**
+           * Campaign ID.
+           */
+          campaign_id: string
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        200: {
+          content: {
+            'application/json': {
+              id: string
+              name: string
+              description: string
+              /**
+               * @enum {string}
+               */
+              status: 'ongoing' | 'past'
+              ecosystem: null | string[]
+              firstDiscovered: null | string
+              lastActivity: null | string
+              blogUrls: string[]
+              /**
+               * Number of threat feed entries linked to this campaign.
+               */
+              linkedThreatCount: number
+              /**
+               * Number of distinct package artifacts linked to this campaign.
+               */
+              linkedPackageArtifactsCount: number
+              /**
+               * URL of the public campaign page on socket.dev, or null if the
+               * campaign has no public page.
+               */
+              htmlUrl: null | string
+              /**
+               * Format: date-time.
+               */
+              createdAt: string
+              /**
+               * Format: date-time.
+               */
+              updatedAt: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        400: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        401: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        403: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              /**
+               * @enum {string}
+               */
+              code?: 'missing_scope' | 'missing_capability'
+              requiredScopes?: string[]
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        404: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        429: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
+  '/v1/orgs/{org_slug}/threat-campaigns/{campaign_id}/packages': {
+    /**
+     * List packages for a threat campaign.
+     *
+     * Returns a cursor-paginated list of package PURLs affected by a single
+     * supply chain attack campaign. This is the primary way to retrieve all
+     * packages for a known campaign without an inline, unbounded list on the
+     * campaign object.
+     *
+     * Pagination follows the same `{ items, endCursor }` envelope as the
+     * campaigns list. Pass the `endCursor` value back as `cursor` to fetch the
+     * next page.
+     *
+     * Authentication: Organization API token, OAuth2, or NextAuth session.
+     * Required token scope: `threat-campaigns:list`.
+     *
+     * This endpoint requires an Enterprise Plan with the Threat Feed add-on.
+     */
+    get: {
+      parameters: {
+        query?: {
+          /**
+           * Number of packages per page. Default 100, max 1000.
+           */
+          per_page?: number
+          /**
+           * Opaque cursor for pagination. Use the endCursor value from the
+           * previous response.
+           */
+          cursor?: string
+        }
+        path: {
+          /**
+           * Organization slug.
+           */
+          org_slug: string
+          /**
+           * Campaign ID.
+           */
+          campaign_id: string
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        200: {
+          content: {
+            'application/json': {
+              /**
+               * Package PURLs associated with this campaign.
+               */
+              items: string[]
+              endCursor?: null | string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        400: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        401: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        403: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              /**
+               * @enum {string}
+               */
+              code?: 'missing_scope' | 'missing_capability'
+              requiredScopes?: string[]
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        404: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        429: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
+              [key: string]: unknown
+            }
+          }
+        }
+      }
+    }
+  }
+  '/v1/packages/malware/checks': {
+    /**
+     * Check public npm packages for known malware.
+     *
+     * Returns bounded public malware observations for exact npm releases.
+     * Results are for this request only and are not cached.
+     */
+    post: {
+      requestBody: {
+        content: {
+          'application/json': {
+            packages: {
+              purl: string
+            }[]
+            candidateRevision?: string
+          }
+        }
+      }
+      responses: {
+        /**
+         * Default Response.
+         */
+        200: {
+          content: {
+            'application/json': {
+              context: {
+                /**
+                 * @enum {unknown}
+                 */
+                mode: 'public-malware'
+                /**
+                 * @enum {unknown}
+                 */
+                evaluatorVersion: 'public-malware-v1'
+                /**
+                 * @enum {unknown}
+                 */
+                consistency: 'request-observation'
+                intelligenceRevision: null
+                /**
+                 * Format: date-time.
+                 */
+                observedAt: string
+                /**
+                 * @enum {unknown}
+                 */
+                reuse: 'none'
+                expiresAt: null
+                sourceAsOf: null
+              }
+              results: OneOf<
+                [
+                  {
+                    index: number
+                    inputPurl: string
+                    canonicalPurl: string | null
+                    /**
+                     * @enum {unknown}
+                     */
+                    status: 'confirmed_malware'
+                    reasonCodes: unknown[]
+                    findings: {
+                      /**
+                       * @enum {unknown}
+                       */
+                      scope: 'version' | 'package' | 'author'
+                      /**
+                       * @enum {unknown}
+                       */
+                      code:
+                        | 'reviewed_malware'
+                        | 'package_bad_intent'
+                        | 'author_bad_intent'
+                      /**
+                       * Format: uri.
+                       */
+                      url: string
+                    }[]
+                    findingsTruncated: boolean
+                    coverage: {
+                      /**
+                       * @enum {unknown}
+                       */
+                      registry: 'https://registry.npmjs.org'
+                      /**
+                       * @enum {unknown}
+                       */
+                      reviewedThreats: 'complete' | 'unavailable'
+                      /**
+                       * @enum {unknown}
+                       */
+                      packageVerdicts: 'complete' | 'unavailable'
+                      /**
+                       * @enum {unknown}
+                       */
+                      authorVerdicts: 'complete' | 'unknown' | 'unavailable'
+                      /**
+                       * @enum {unknown}
+                       */
+                      identity: 'known' | 'unknown'
+                    }
+                  },
+                  {
+                    index: number
+                    inputPurl: string
+                    canonicalPurl: string | null
+                    /**
+                     * @enum {unknown}
+                     */
+                    status: 'no_known_malware'
+                    reasonCodes: unknown[]
+                    findings: unknown[]
+                    /**
+                     * @enum {unknown}
+                     */
+                    findingsTruncated: ''
+                    coverage: {
+                      /**
+                       * @enum {unknown}
+                       */
+                      registry: 'https://registry.npmjs.org'
+                      /**
+                       * @enum {unknown}
+                       */
+                      reviewedThreats: 'complete'
+                      /**
+                       * @enum {unknown}
+                       */
+                      packageVerdicts: 'complete'
+                      /**
+                       * @enum {unknown}
+                       */
+                      authorVerdicts: 'complete'
+                      /**
+                       * @enum {unknown}
+                       */
+                      identity: 'known'
+                    }
+                  },
+                  {
+                    index: number
+                    inputPurl: string
+                    canonicalPurl: string | null
+                    /**
+                     * @enum {unknown}
+                     */
+                    status: 'unknown'
+                    reasonCodes: (
+                      | 'identity_not_observed'
+                      | 'author_evidence_missing'
+                      | 'coverage_incomplete'
+                    )[]
+                    findings: unknown[]
+                    /**
+                     * @enum {unknown}
+                     */
+                    findingsTruncated: ''
+                    coverage: {
+                      /**
+                       * @enum {unknown}
+                       */
+                      registry: 'https://registry.npmjs.org'
+                      /**
+                       * @enum {unknown}
+                       */
+                      reviewedThreats: 'complete' | 'unavailable'
+                      /**
+                       * @enum {unknown}
+                       */
+                      packageVerdicts: 'complete' | 'unavailable'
+                      /**
+                       * @enum {unknown}
+                       */
+                      authorVerdicts: 'complete' | 'unknown' | 'unavailable'
+                      /**
+                       * @enum {unknown}
+                       */
+                      identity: 'known' | 'unknown'
+                    }
+                  },
+                  {
+                    index: number
+                    inputPurl: string
+                    canonicalPurl: string | null
+                    /**
+                     * @enum {unknown}
+                     */
+                    status: 'unsupported'
+                    reasonCodes: (
+                      | 'unsupported_ecosystem'
+                      | 'unsupported_identity'
+                    )[]
+                    findings: unknown[]
+                    /**
+                     * @enum {unknown}
+                     */
+                    findingsTruncated: ''
+                    coverage: null
+                  },
+                  {
+                    index: number
+                    inputPurl: string
+                    canonicalPurl: string | null
+                    /**
+                     * @enum {unknown}
+                     */
+                    status: 'error'
+                    reasonCodes: (
+                      | 'invalid_purl'
+                      | 'version_required'
+                      | 'lookup_failed'
+                      | 'deadline_exceeded'
+                    )[]
+                    findings: unknown[]
+                    /**
+                     * @enum {unknown}
+                     */
+                    findingsTruncated: ''
+                    coverage: null
+                  },
+                ]
+              >[]
+            }
+          }
+        }
+        /**
+         * Default Response.
+         */
+        400: {
+          content: {
+            'application/json': {
+              statusCode: number
+              error: string
+              message: string
               [key: string]: unknown
             }
           }
@@ -1318,4 +1876,2209 @@ export type $defs = Record<string, never>
 
 export type external = Record<string, never>
 
-export type operations = Record<string, never>
+export interface operations {
+  /**
+   * Discover organization members and access restrictions.
+   *
+   * Requires access-policy:read and organization-wide visibility. Starts from
+   * organization membership, including members with zero grants. Custom-policy
+   * authoring is not required.
+   */
+  listMemberAccess: {
+    parameters: {
+      query?: {
+        cursor?: string
+        limit?: number
+        query?: string
+      }
+      path: {
+        org_slug: string
+      }
+    }
+    responses: {
+      /**
+       * Default Response.
+       */
+      200: {
+        content: {
+          'application/json': {
+            items: {
+              id: string
+              userId: string
+              name: null | string
+              email: null | string
+              role: string
+              compatibilityRestricted: boolean
+              hasCeiling: boolean
+              hasRevocations: boolean
+            }[]
+            endCursor: null | string
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      400: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      401: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      403: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      404: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      409: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      429: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Manage owned member grant contributions.
+   *
+   * Requires access-policy:attach and organization-wide authority. Updates only
+   * the owning repository-access contributions, preserving member ceilings and
+   * revocations. Null resource_ids selects organization-wide grants; an empty
+   * array is a no-op. Null scopes removes selected contributions. remove_all
+   * removes contributions for the selected target type, retaining the principal
+   * and other target types. This does not promise effective revocation or
+   * reset. Supported independently of custom-policy authoring.
+   */
+  changeMemberAccessGrants: {
+    parameters: {
+      path: {
+        org_slug: string
+        membership_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @enum {string}
+           */
+          resource_type: 'repository' | 'workspace'
+          resource_ids: string[] | null
+          scopes: string[] | null
+          remove_all?: boolean
+        } & OneOf<
+          [
+            {
+              /**
+               * @enum {unknown}
+               */
+              resource_type?: 'repository'
+              resource_ids?: string[] | null
+            },
+            {
+              /**
+               * @enum {unknown}
+               */
+              resource_type?: 'workspace'
+              resource_ids?: string[] | null
+            },
+          ]
+        >
+      }
+    }
+    responses: {
+      /**
+       * Default Response.
+       */
+      200: {
+        content: {
+          'application/json': {
+            /**
+             * @enum {string}
+             */
+            status: 'ok'
+            deletedRules: number
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      400: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      401: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      403: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      404: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      409: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      429: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Read member access configuration and effective access.
+   *
+   * Requires access-policy:read and organization-wide management visibility.
+   * Includes empty compatibility principals and saved unavailable selections.
+   * Effective decisions evaluate member web repo:list access across the current
+   * repository inventory using batched metadata reads. Independent credentials
+   * are unchanged.
+   */
+  getMemberAccess: {
+    parameters: {
+      query: {
+        resource_kind: 'repository_access' | 'workspace_access'
+      }
+      path: {
+        org_slug: string
+        membership_id: string
+      }
+    }
+    responses: {
+      /**
+       * Default Response.
+       */
+      200: {
+        content: {
+          'application/json': {
+            organizationId: string
+            membershipId: string
+            /**
+             * @enum {string}
+             */
+            resourceKind: 'repository_access' | 'workspace_access'
+            revision: string
+            configuration: {
+              ceiling:
+                | ({
+                    /**
+                     * @enum {string}
+                     */
+                    scope: 'all' | 'selected'
+                    repositoryIds?: string[]
+                    workspaceIds?: string[]
+                  } & OneOf<
+                    [
+                      {
+                        /**
+                         * @enum {unknown}
+                         */
+                        scope?: 'all'
+                      },
+                      {
+                        /**
+                         * @enum {unknown}
+                         */
+                        scope?: 'selected'
+                      },
+                    ]
+                  >)
+                | null
+              revocations:
+                | ({
+                    /**
+                     * @enum {string}
+                     */
+                    scope: 'all' | 'selected'
+                    repositoryIds?: string[]
+                    workspaceIds?: string[]
+                  } & OneOf<
+                    [
+                      {
+                        /**
+                         * @enum {unknown}
+                         */
+                        scope?: 'all'
+                      },
+                      {
+                        /**
+                         * @enum {unknown}
+                         */
+                        scope?: 'selected'
+                      },
+                    ]
+                  >)
+                | null
+              compatibilityRestricted: boolean
+              principalId: null | string
+              contributions: {
+                id: string
+                /**
+                 * @enum {string}
+                 */
+                owner: 'legacy_repository_access' | 'native_repository_access'
+                repositoryId: null | string
+                workspaceId: null | string
+                scope: string
+              }[]
+              /**
+               * @enum {string}
+               */
+              state:
+                | 'inherited'
+                | 'restricted'
+                | 'revoked'
+                | 'restricted_and_revoked'
+                | 'no_direct_grants'
+            }
+            organizationMode: {
+              repositoryManaged: boolean
+              workspaceManaged: boolean
+            }
+            effective: {
+              /**
+               * @enum {string}
+               */
+              context: 'member_web_repository_list'
+              /**
+               * @enum {string}
+               */
+              independentCredentials: 'unchanged'
+              allowedRepositoryIds: string[]
+              deniedRepositoryIds: string[]
+              decisions: {
+                repositoryId: string
+                allowed: boolean
+                reasonCodes: string[]
+                matchingPolicyIds: string[]
+              }[]
+              capabilityScopes: string[]
+              policies: {
+                id: string
+                /**
+                 * @enum {string}
+                 */
+                kind: 'repository_access' | 'workspace_access'
+                /**
+                 * @enum {string}
+                 */
+                owner: 'custom' | 'repository_access'
+              }[]
+              evaluatedAt: string
+            }
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      400: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      401: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      403: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      404: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      409: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      429: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Preview a member access operation.
+   *
+   * Requires access-policy:read and an enabled memberAccessLifecycle rollout.
+   * Binds the actor, member, kind, normalized command, evaluated web
+   * repository-list context, and access revisions for five minutes. Reset
+   * removal sets are computed by the server. No access changes are committed.
+   */
+  previewMemberAccess: {
+    parameters: {
+      path: {
+        org_slug: string
+        membership_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @enum {string}
+           */
+          resource_kind: 'repository_access' | 'workspace_access'
+          /**
+           * @enum {string}
+           */
+          operation: 'restrict' | 'reset' | 'revoke'
+          selection?: {
+            /**
+             * @enum {string}
+             */
+            scope: 'all' | 'selected'
+            repositoryIds?: string[]
+            workspaceIds?: string[]
+          } & OneOf<
+            [
+              {
+                /**
+                 * @enum {unknown}
+                 */
+                scope?: 'all'
+              },
+              {
+                /**
+                 * @enum {unknown}
+                 */
+                scope?: 'selected'
+              },
+            ]
+          >
+        }
+      }
+    }
+    responses: {
+      /**
+       * Default Response.
+       */
+      200: {
+        content: {
+          'application/json': {
+            preview_id: string
+            expected_revision: string
+            expires_at: string
+            before: {
+              organizationId: string
+              membershipId: string
+              /**
+               * @enum {string}
+               */
+              resourceKind: 'repository_access' | 'workspace_access'
+              revision: string
+              configuration: {
+                ceiling:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                revocations:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                compatibilityRestricted: boolean
+                principalId: null | string
+                contributions: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'legacy_repository_access' | 'native_repository_access'
+                  repositoryId: null | string
+                  workspaceId: null | string
+                  scope: string
+                }[]
+                /**
+                 * @enum {string}
+                 */
+                state:
+                  | 'inherited'
+                  | 'restricted'
+                  | 'revoked'
+                  | 'restricted_and_revoked'
+                  | 'no_direct_grants'
+              }
+              organizationMode: {
+                repositoryManaged: boolean
+                workspaceManaged: boolean
+              }
+              effective: {
+                /**
+                 * @enum {string}
+                 */
+                context: 'member_web_repository_list'
+                /**
+                 * @enum {string}
+                 */
+                independentCredentials: 'unchanged'
+                allowedRepositoryIds: string[]
+                deniedRepositoryIds: string[]
+                decisions: {
+                  repositoryId: string
+                  allowed: boolean
+                  reasonCodes: string[]
+                  matchingPolicyIds: string[]
+                }[]
+                capabilityScopes: string[]
+                policies: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  kind: 'repository_access' | 'workspace_access'
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'custom' | 'repository_access'
+                }[]
+                evaluatedAt: string
+              }
+            }
+            after: {
+              organizationId: string
+              membershipId: string
+              /**
+               * @enum {string}
+               */
+              resourceKind: 'repository_access' | 'workspace_access'
+              revision: string
+              configuration: {
+                ceiling:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                revocations:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                compatibilityRestricted: boolean
+                principalId: null | string
+                contributions: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'legacy_repository_access' | 'native_repository_access'
+                  repositoryId: null | string
+                  workspaceId: null | string
+                  scope: string
+                }[]
+                /**
+                 * @enum {string}
+                 */
+                state:
+                  | 'inherited'
+                  | 'restricted'
+                  | 'revoked'
+                  | 'restricted_and_revoked'
+                  | 'no_direct_grants'
+              }
+              organizationMode: {
+                repositoryManaged: boolean
+                workspaceManaged: boolean
+              }
+              effective: {
+                /**
+                 * @enum {string}
+                 */
+                context: 'member_web_repository_list'
+                /**
+                 * @enum {string}
+                 */
+                independentCredentials: 'unchanged'
+                allowedRepositoryIds: string[]
+                deniedRepositoryIds: string[]
+                decisions: {
+                  repositoryId: string
+                  allowed: boolean
+                  reasonCodes: string[]
+                  matchingPolicyIds: string[]
+                }[]
+                capabilityScopes: string[]
+                policies: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  kind: 'repository_access' | 'workspace_access'
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'custom' | 'repository_access'
+                }[]
+                evaluatedAt: string
+              }
+            }
+            removedContributions: {
+              id: string
+              /**
+               * @enum {string}
+               */
+              owner: 'legacy_repository_access' | 'native_repository_access'
+              repositoryId: null | string
+              workspaceId: null | string
+              scope: string
+            }[]
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      400: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      401: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      403: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      404: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      409: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      429: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Restrict member access.
+   *
+   * Requires access-policy:attach and current semantic organization-wide
+   * management authority. New commands require an enabled memberAccessLifecycle
+   * rollout, a matching current preview, and Idempotency-Key. State, logical
+   * audit, and receipt commit atomically. An authorized exact retry returns its
+   * historical receipt without changing current state, including while rollout
+   * is paused; refresh the member after replay. Reset can still result in
+   * denied access. Protected Owner/Admin memberships cannot be restricted or
+   * revoked. Legacy authority and rollback-open cohorts return 409. Generic
+   * custom-policy authoring is not required.
+   */
+  restrictMemberAccess: {
+    parameters: {
+      header: {
+        'idempotency-key': string
+      }
+      path: {
+        org_slug: string
+        membership_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @enum {string}
+           */
+          resource_kind: 'repository_access' | 'workspace_access'
+          selection?: {
+            /**
+             * @enum {string}
+             */
+            scope: 'all' | 'selected'
+            repositoryIds?: string[]
+            workspaceIds?: string[]
+          } & OneOf<
+            [
+              {
+                /**
+                 * @enum {unknown}
+                 */
+                scope?: 'all'
+              },
+              {
+                /**
+                 * @enum {unknown}
+                 */
+                scope?: 'selected'
+              },
+            ]
+          >
+          /**
+           * Format: uuid.
+           */
+          preview_id: string
+          expected_revision: string
+        }
+      }
+    }
+    responses: {
+      /**
+       * Default Response.
+       */
+      200: {
+        content: {
+          'application/json': {
+            receiptId: string
+            /**
+             * @enum {string}
+             */
+            operation: 'restrict' | 'reset' | 'revoke'
+            changed: boolean
+            replayed: boolean
+            state: {
+              organizationId: string
+              membershipId: string
+              /**
+               * @enum {string}
+               */
+              resourceKind: 'repository_access' | 'workspace_access'
+              revision: string
+              configuration: {
+                ceiling:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                revocations:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                compatibilityRestricted: boolean
+                principalId: null | string
+                contributions: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'legacy_repository_access' | 'native_repository_access'
+                  repositoryId: null | string
+                  workspaceId: null | string
+                  scope: string
+                }[]
+                /**
+                 * @enum {string}
+                 */
+                state:
+                  | 'inherited'
+                  | 'restricted'
+                  | 'revoked'
+                  | 'restricted_and_revoked'
+                  | 'no_direct_grants'
+              }
+              organizationMode: {
+                repositoryManaged: boolean
+                workspaceManaged: boolean
+              }
+              effective: {
+                /**
+                 * @enum {string}
+                 */
+                context: 'member_web_repository_list'
+                /**
+                 * @enum {string}
+                 */
+                independentCredentials: 'unchanged'
+                allowedRepositoryIds: string[]
+                deniedRepositoryIds: string[]
+                decisions: {
+                  repositoryId: string
+                  allowed: boolean
+                  reasonCodes: string[]
+                  matchingPolicyIds: string[]
+                }[]
+                capabilityScopes: string[]
+                policies: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  kind: 'repository_access' | 'workspace_access'
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'custom' | 'repository_access'
+                }[]
+                evaluatedAt: string
+              }
+            }
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      400: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      401: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      403: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      404: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      409: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      429: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Reset to inherited member access.
+   *
+   * Requires access-policy:attach and current semantic organization-wide
+   * management authority. New commands require an enabled memberAccessLifecycle
+   * rollout, a matching current preview, and Idempotency-Key. State, logical
+   * audit, and receipt commit atomically. An authorized exact retry returns its
+   * historical receipt without changing current state, including while rollout
+   * is paused; refresh the member after replay. Reset can still result in
+   * denied access. Protected Owner/Admin memberships cannot be restricted or
+   * revoked. Legacy authority and rollback-open cohorts return 409. Generic
+   * custom-policy authoring is not required.
+   */
+  resetMemberAccess: {
+    parameters: {
+      header: {
+        'idempotency-key': string
+      }
+      path: {
+        org_slug: string
+        membership_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @enum {string}
+           */
+          resource_kind: 'repository_access' | 'workspace_access'
+          selection?: {
+            /**
+             * @enum {string}
+             */
+            scope: 'all' | 'selected'
+            repositoryIds?: string[]
+            workspaceIds?: string[]
+          } & OneOf<
+            [
+              {
+                /**
+                 * @enum {unknown}
+                 */
+                scope?: 'all'
+              },
+              {
+                /**
+                 * @enum {unknown}
+                 */
+                scope?: 'selected'
+              },
+            ]
+          >
+          /**
+           * Format: uuid.
+           */
+          preview_id: string
+          expected_revision: string
+        }
+      }
+    }
+    responses: {
+      /**
+       * Default Response.
+       */
+      200: {
+        content: {
+          'application/json': {
+            receiptId: string
+            /**
+             * @enum {string}
+             */
+            operation: 'restrict' | 'reset' | 'revoke'
+            changed: boolean
+            replayed: boolean
+            state: {
+              organizationId: string
+              membershipId: string
+              /**
+               * @enum {string}
+               */
+              resourceKind: 'repository_access' | 'workspace_access'
+              revision: string
+              configuration: {
+                ceiling:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                revocations:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                compatibilityRestricted: boolean
+                principalId: null | string
+                contributions: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'legacy_repository_access' | 'native_repository_access'
+                  repositoryId: null | string
+                  workspaceId: null | string
+                  scope: string
+                }[]
+                /**
+                 * @enum {string}
+                 */
+                state:
+                  | 'inherited'
+                  | 'restricted'
+                  | 'revoked'
+                  | 'restricted_and_revoked'
+                  | 'no_direct_grants'
+              }
+              organizationMode: {
+                repositoryManaged: boolean
+                workspaceManaged: boolean
+              }
+              effective: {
+                /**
+                 * @enum {string}
+                 */
+                context: 'member_web_repository_list'
+                /**
+                 * @enum {string}
+                 */
+                independentCredentials: 'unchanged'
+                allowedRepositoryIds: string[]
+                deniedRepositoryIds: string[]
+                decisions: {
+                  repositoryId: string
+                  allowed: boolean
+                  reasonCodes: string[]
+                  matchingPolicyIds: string[]
+                }[]
+                capabilityScopes: string[]
+                policies: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  kind: 'repository_access' | 'workspace_access'
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'custom' | 'repository_access'
+                }[]
+                evaluatedAt: string
+              }
+            }
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      400: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      401: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      403: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      404: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      409: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      429: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+    }
+  }
+  /**
+   * Revoke member access.
+   *
+   * Requires access-policy:attach and current semantic organization-wide
+   * management authority. New commands require an enabled memberAccessLifecycle
+   * rollout, a matching current preview, and Idempotency-Key. State, logical
+   * audit, and receipt commit atomically. An authorized exact retry returns its
+   * historical receipt without changing current state, including while rollout
+   * is paused; refresh the member after replay. Reset can still result in
+   * denied access. Protected Owner/Admin memberships cannot be restricted or
+   * revoked. Legacy authority and rollback-open cohorts return 409. Generic
+   * custom-policy authoring is not required.
+   */
+  revokeMemberAccess: {
+    parameters: {
+      header: {
+        'idempotency-key': string
+      }
+      path: {
+        org_slug: string
+        membership_id: string
+      }
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          /**
+           * @enum {string}
+           */
+          resource_kind: 'repository_access' | 'workspace_access'
+          selection?: {
+            /**
+             * @enum {string}
+             */
+            scope: 'all' | 'selected'
+            repositoryIds?: string[]
+            workspaceIds?: string[]
+          } & OneOf<
+            [
+              {
+                /**
+                 * @enum {unknown}
+                 */
+                scope?: 'all'
+              },
+              {
+                /**
+                 * @enum {unknown}
+                 */
+                scope?: 'selected'
+              },
+            ]
+          >
+          /**
+           * Format: uuid.
+           */
+          preview_id: string
+          expected_revision: string
+        }
+      }
+    }
+    responses: {
+      /**
+       * Default Response.
+       */
+      200: {
+        content: {
+          'application/json': {
+            receiptId: string
+            /**
+             * @enum {string}
+             */
+            operation: 'restrict' | 'reset' | 'revoke'
+            changed: boolean
+            replayed: boolean
+            state: {
+              organizationId: string
+              membershipId: string
+              /**
+               * @enum {string}
+               */
+              resourceKind: 'repository_access' | 'workspace_access'
+              revision: string
+              configuration: {
+                ceiling:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                revocations:
+                  | ({
+                      /**
+                       * @enum {string}
+                       */
+                      scope: 'all' | 'selected'
+                      repositoryIds?: string[]
+                      workspaceIds?: string[]
+                    } & OneOf<
+                      [
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'all'
+                        },
+                        {
+                          /**
+                           * @enum {unknown}
+                           */
+                          scope?: 'selected'
+                        },
+                      ]
+                    >)
+                  | null
+                compatibilityRestricted: boolean
+                principalId: null | string
+                contributions: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'legacy_repository_access' | 'native_repository_access'
+                  repositoryId: null | string
+                  workspaceId: null | string
+                  scope: string
+                }[]
+                /**
+                 * @enum {string}
+                 */
+                state:
+                  | 'inherited'
+                  | 'restricted'
+                  | 'revoked'
+                  | 'restricted_and_revoked'
+                  | 'no_direct_grants'
+              }
+              organizationMode: {
+                repositoryManaged: boolean
+                workspaceManaged: boolean
+              }
+              effective: {
+                /**
+                 * @enum {string}
+                 */
+                context: 'member_web_repository_list'
+                /**
+                 * @enum {string}
+                 */
+                independentCredentials: 'unchanged'
+                allowedRepositoryIds: string[]
+                deniedRepositoryIds: string[]
+                decisions: {
+                  repositoryId: string
+                  allowed: boolean
+                  reasonCodes: string[]
+                  matchingPolicyIds: string[]
+                }[]
+                capabilityScopes: string[]
+                policies: {
+                  id: string
+                  /**
+                   * @enum {string}
+                   */
+                  kind: 'repository_access' | 'workspace_access'
+                  /**
+                   * @enum {string}
+                   */
+                  owner: 'custom' | 'repository_access'
+                }[]
+                evaluatedAt: string
+              }
+            }
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      400: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      401: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      403: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      404: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      409: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+      /**
+       * Default Response.
+       */
+      429: {
+        content: {
+          'application/json': {
+            statusCode: number
+            error: string
+            message: string
+            /**
+             * @enum {string}
+             */
+            code?: 'missing_scope' | 'missing_capability'
+            requiredScopes?: string[]
+            details?: {
+              code?: string
+              field: string
+              message: string
+              suggestion?: string
+              [key: string]: unknown
+            }[]
+            [key: string]: unknown
+          }
+        }
+      }
+    }
+  }
+}
