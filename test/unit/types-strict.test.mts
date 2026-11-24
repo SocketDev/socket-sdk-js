@@ -1,0 +1,391 @@
+/**
+ * @file Tests for v3.0 strict type system. Validates that new strict types
+ *   properly reflect API responses.
+ */
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+
+import nock from 'nock'
+import { describe, expect, it } from 'vitest'
+
+import { setupTestClient } from '../utils/environment.mts'
+
+import type {
+  FullScanItem,
+  FullScanListResult,
+  FullScanResult,
+  OrganizationItem,
+  OrganizationsResult,
+} from '../../src/types/strict.mts'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+
+describe('Strict Types - v3.0', { concurrent: false }, () => {
+  const getClient = setupTestClient('test-token', { retries: 0 })
+
+  describe('FullScanListResult', () => {
+    it('should have guaranteed required fields', async () => {
+      const mockResponse = {
+        results: [
+          {
+            id: 'scan-123',
+            created_at: '2025-01-01T00:00:00Z',
+            updated_at: '2025-01-01T00:00:00Z',
+            organization_id: 'org-456',
+            organization_slug: 'test-org',
+            repository_id: 'repo-789',
+            repository_slug: 'test-repo',
+            repo: 'test-repo',
+            html_report_url: 'https://socket.dev/report/123',
+            api_url: 'https://api.socket.dev/v0/scans/123',
+            integration_type: 'github',
+            integration_repo_url: 'https://github.com/org/repo',
+            branch: 'main',
+            commit_message: 'Test commit',
+            commit_hash: 'abc123',
+            // oxlint-disable-next-line socket/prefer-undefined-over-null -- wire data: the API returns null for a scan with no associated pull request.
+            pull_request: null,
+            committers: [],
+            html_url: undefined,
+            integration_branch_url: undefined,
+            integration_commit_url: undefined,
+            integration_pull_request_url: undefined,
+            scan_state: 'pending',
+          },
+        ],
+        // Wire data: the API returns JSON null (not undefined) for absent
+        // pagination cursors, and JSON.stringify would drop undefined keys.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- API returns null for absent pagination cursors.
+        nextPage: null as number | null,
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- API returns null for absent pagination cursors.
+        nextPageCursor: null as string | null,
+      }
+
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans')
+        .query(true)
+        .reply(200, mockResponse)
+
+      const result = await getClient().listFullScans('test-org')
+
+      expect(result.success).toBe(true)
+
+      if (result.success) {
+        // Type assertion to verify TypeScript types
+        const typedResult: FullScanListResult = result
+
+        // Verify required fields are present and correctly typed
+        expect(typedResult.data.results).toHaveLength(1)
+
+        const scan = typedResult.data.results[0]
+        expect(scan).toBeDefined()
+        if (!scan) {
+          return
+        }
+
+        // Required string fields
+        expect(typeof scan.id).toBe('string')
+        expect(typeof scan.created_at).toBe('string')
+        expect(typeof scan.updated_at).toBe('string')
+        expect(typeof scan.organization_id).toBe('string')
+        expect(typeof scan.organization_slug).toBe('string')
+        expect(typeof scan.repository_id).toBe('string')
+        expect(typeof scan.repository_slug).toBe('string')
+        expect(typeof scan.repo).toBe('string')
+        expect(typeof scan.html_report_url).toBe('string')
+        expect(typeof scan.api_url).toBe('string')
+        expect(typeof scan.integration_type).toBe('string')
+        expect(typeof scan.integration_repo_url).toBe('string')
+
+        // Optional/nullable fields
+        expect(scan.branch === null || typeof scan.branch === 'string').toBe(
+          true,
+        )
+        expect(
+          scan.commit_message === null ||
+            typeof scan.commit_message === 'string',
+        ).toBe(true)
+        expect(
+          scan.commit_hash === null || typeof scan.commit_hash === 'string',
+        ).toBe(true)
+        expect(
+          scan.pull_request === null || typeof scan.pull_request === 'number',
+        ).toBe(true)
+
+        // Array fields
+        expect(Array.isArray(scan.committers)).toBe(true)
+
+        // Pagination fields
+        expect(
+          typedResult.data.nextPageCursor === null ||
+            typeof typedResult.data.nextPageCursor === 'string',
+        ).toBe(true)
+        expect(
+          typedResult.data.nextPage === null ||
+            typeof typedResult.data.nextPage === 'number',
+        ).toBe(true)
+      }
+    })
+  })
+
+  describe('FullScanResult', () => {
+    it('should have guaranteed required fields from createFullScan', async () => {
+      const mockResponse = {
+        id: 'scan-new',
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+        organization_id: 'org-456',
+        organization_slug: 'test-org',
+        repository_id: 'repo-789',
+        repository_slug: 'test-repo',
+        repo: 'test-repo',
+        html_report_url: 'https://socket.dev/report/new',
+        api_url: 'https://api.socket.dev/v0/scans/new',
+        integration_type: 'api',
+        integration_repo_url: 'https://github.com/org/repo',
+        branch: undefined,
+        commit_message: undefined,
+        commit_hash: undefined,
+        pull_request: undefined,
+        committers: [],
+        html_url: undefined,
+        integration_branch_url: undefined,
+        integration_commit_url: undefined,
+        integration_pull_request_url: undefined,
+        scan_state: 'pending',
+      }
+
+      // Create temporary directory and test file
+      const tempDir = mkdtempSync(path.join(os.tmpdir(), 'socket-sdk-test-'))
+      const testFile = path.join(tempDir, 'package.json')
+      writeFileSync(
+        testFile,
+        JSON.stringify({ name: 'test-pkg', version: '1.0.0' }),
+      )
+
+      nock('https://api.socket.dev')
+        .post('/v0/orgs/test-org/full-scans')
+        .query({ repo: 'test-repo' })
+        .reply(200, mockResponse)
+
+      try {
+        const result = await getClient().createFullScan(
+          'test-org',
+          [testFile],
+          {
+            pathsRelativeTo: tempDir,
+            repo: 'test-repo',
+          },
+        )
+
+        expect(result.success).toBe(true)
+
+        if (result.success) {
+          const typedResult: FullScanResult = result
+
+          // Verify all required fields exist
+          expect(typedResult.data.id).toBe('scan-new')
+          expect(typedResult.data.created_at).toBeTruthy()
+          expect(typedResult.data.organization_id).toBeTruthy()
+          expect(typedResult.data.repository_slug).toBeTruthy()
+        }
+      } finally {
+        // Clean up temporary directory
+        safeDeleteSync(tempDir)
+      }
+    })
+
+    it('should handle getFullScan response', async () => {
+      const mockResponse = {
+        id: 'scan-get',
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+        organization_id: 'org-456',
+        organization_slug: 'test-org',
+        repository_id: 'repo-789',
+        repository_slug: 'test-repo',
+        repo: 'test-repo',
+        html_report_url: 'https://socket.dev/report/get',
+        api_url: 'https://api.socket.dev/v0/scans/get',
+        integration_type: 'github',
+        integration_repo_url: 'https://github.com/org/repo',
+        branch: 'main',
+        commit_message: 'Test',
+        commit_hash: 'abc',
+        pull_request: 42,
+        committers: ['user@example.com'],
+        html_url: 'https://socket.dev',
+        integration_branch_url: 'https://github.com/org/repo/tree/main',
+        integration_commit_url: 'https://github.com/org/repo/commit/abc',
+        integration_pull_request_url: 'https://github.com/org/repo/pull/42',
+        scan_state: 'scan',
+      }
+
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans/scan-get')
+        .query(true)
+        .reply(200, mockResponse)
+
+      const result = await getClient().getFullScan('test-org', 'scan-get')
+
+      expect(result.success).toBe(true)
+
+      if (result.success) {
+        const typedResult: FullScanResult = result
+
+        // Verify scan has all required fields
+        expect(typedResult.data.id).toBe('scan-get')
+        expect(typedResult.data.branch).toBe('main')
+        expect(typedResult.data.pull_request).toBe(42)
+        expect(typedResult.data.scan_state).toBe('scan')
+      }
+    })
+  })
+
+  describe('OrganizationsResult', () => {
+    it('should have guaranteed organization fields', async () => {
+      // GET /v0/organizations returns `organizations` as a map keyed by org
+      // id (OpenAPI `additionalProperties`), not an array.
+      const mockResponse = {
+        organizations: {
+          'org-1': {
+            id: 'org-1',
+            name: 'Test Org',
+            slug: 'test-org',
+            // `plan` is an open-ended string; the API returns arbitrary plan
+            // identifiers beyond a fixed set.
+            plan: 'pro',
+          },
+          'org-2': {
+            id: 'org-2',
+            name: 'Another Org',
+            slug: 'another-org',
+            plan: 'enterprise-custom-2025',
+          },
+        },
+      }
+
+      nock('https://api.socket.dev')
+        .get('/v0/organizations')
+        .query(true)
+        .reply(200, mockResponse)
+
+      const result = await getClient().listOrganizations()
+
+      expect(result.success).toBe(true)
+
+      if (result.success) {
+        const typedResult: OrganizationsResult = result
+
+        // The result is a keyed map, so iterate its values (as consumers must).
+        const orgs = Object.values(typedResult.data.organizations)
+        expect(orgs).toHaveLength(2)
+        expect(Object.keys(typedResult.data.organizations)).toEqual([
+          'org-1',
+          'org-2',
+        ])
+
+        for (let i = 0, { length } = orgs; i < length; i += 1) {
+          const org = orgs[i]!
+          // All fields should be present and correctly typed
+          expect(typeof org.id).toBe('string')
+          expect(typeof org.name).toBe('string')
+          expect(typeof org.slug).toBe('string')
+          expect(typeof org.plan).toBe('string')
+        }
+
+        // Lookup by key, plus specific value checks.
+        const firstOrg = typedResult.data.organizations['org-1']
+        const secondOrg = typedResult.data.organizations['org-2']
+        expect(firstOrg).toBeDefined()
+        expect(secondOrg).toBeDefined()
+        if (firstOrg && secondOrg) {
+          expect(firstOrg.name).toBe('Test Org')
+          expect(secondOrg.slug).toBe('another-org')
+          // Open-ended plan strings are accepted, not just a fixed union.
+          expect(secondOrg.plan).toBe('enterprise-custom-2025')
+        }
+      }
+    })
+
+    it('types organizations as a keyed map and plan as an open string', () => {
+      // Compile-time lock: `organizations` must be a Record keyed by org id,
+      // and `plan` must accept any string (not a narrow union). This block is
+      // validated by the type checker, not at runtime.
+      const orgs: OrganizationsResult['data']['organizations'] = {
+        'org-1': {
+          id: 'org-1',
+          name: 'Test Org',
+          slug: 'test-org',
+          plan: 'some-brand-new-plan',
+        },
+      }
+
+      // Index access returns an OrganizationItem (map shape, not array).
+      const org: OrganizationItem | undefined = orgs['org-1']
+      expect(org?.plan).toBe('some-brand-new-plan')
+
+      // `plan` is `string`: an arbitrary runtime string is assignable.
+      const plan: OrganizationItem['plan'] = String(Date.now())
+      expect(typeof plan).toBe('string')
+    })
+  })
+
+  describe('Error Responses', () => {
+    it('should return StrictErrorResult on failure', async () => {
+      nock('https://api.socket.dev')
+        .get('/v0/orgs/test-org/full-scans')
+        .query(true)
+        .reply(404, {
+          error: 'Not Found',
+          message: 'Organization not found',
+        })
+
+      const result = await getClient().listFullScans('test-org')
+
+      expect(result.success).toBe(false)
+
+      if (!result.success) {
+        expect(typeof result.error).toBe('string')
+        expect(result.status).toBe(404)
+        expect(result.data).toBeUndefined()
+      }
+    })
+  })
+
+  describe('Type Safety', () => {
+    it('should enforce correct types at compile time', () => {
+      // This test validates TypeScript compilation, not runtime behavior
+      // If this compiles without errors, type safety is working
+
+      const mockFullScanItem: FullScanItem = {
+        id: 'test',
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+        organization_id: 'org',
+        organization_slug: 'org-slug',
+        repository_id: 'repo',
+        repository_slug: 'repo-slug',
+        repo: 'repo',
+        html_report_url: 'https://example.com',
+        api_url: 'https://api.example.com',
+        integration_type: 'api',
+        integration_repo_url: 'https://example.com',
+        branch: undefined,
+        commit_message: undefined,
+        commit_hash: undefined,
+        pull_request: undefined,
+        committers: [],
+        html_url: undefined,
+        integration_branch_url: undefined,
+        integration_commit_url: undefined,
+        integration_pull_request_url: undefined,
+        scan_state: undefined,
+      }
+
+      // TypeScript will catch if required fields are missing
+      expect(mockFullScanItem.id).toBeDefined()
+      expect(mockFullScanItem.created_at).toBeDefined()
+    })
+  })
+})

@@ -5,11 +5,11 @@ on:
   push:
     paths:
       - '.github/workflows/chore-sync-openapi.yml'
-      - 'scripts/repo/check/api-contracts-are-current.mts'
-      - 'scripts/repo/generate-*.mts'
-      - 'scripts/repo/openapi-commit-request.mts'
-      - 'scripts/repo/openapi-contracts.mts'
-      - 'scripts/repo/package-artifact-is-complete.mts'
+      - 'scripts/check/api-contracts-are-current.mts'
+      - 'scripts/generate-*.mts'
+      - 'scripts/openapi-commit-request.mts'
+      - 'scripts/openapi-contracts.mts'
+      - 'scripts/package-artifact-is-complete.mts'
       - 'src/types/core.mts'
       - 'types/api-helpers.d.ts'
   schedule:
@@ -63,7 +63,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.pr-app.outputs.token }}
         run: |
-          node scripts/repo/generate-sdk.mts --list-artifacts | git add --pathspec-from-file=-
+          node scripts/generate-sdk.mts --list-artifacts | git add --pathspec-from-file=-
           git add -- docs/api.md
           if git diff --cached --quiet; then
             echo 'OpenAPI contracts are current.'
@@ -77,7 +77,7 @@ jobs:
           gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
             -f "ref=refs/heads/$staging" -f "sha=$GITHUB_SHA" > /dev/null
           trap 'gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$staging" > /dev/null' EXIT
-          signed=$(node scripts/repo/openapi-commit-request.mts "$GITHUB_REPOSITORY" "$staging" "$GITHUB_SHA" | \
+          signed=$(node scripts/openapi-commit-request.mts "$GITHUB_REPOSITORY" "$staging" "$GITHUB_SHA" | \
             gh api graphql --input - --jq '.data.createCommitOnBranch.commit.oid')
           test "$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$signed" --jq '.verification.verified')" = true
           gh_git fetch --no-tags origin "refs/heads/$staging"

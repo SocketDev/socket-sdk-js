@@ -1,7 +1,7 @@
 # @socketsecurity/sdk
 
 <a href="https://socket.dev/npm/package/@socketsecurity/sdk"><img src="https://badge.socket.dev/npm/package/@socketsecurity/sdk" alt="Socket Badge" height="20"></a>
-<picture><img src="https://raw.githubusercontent.com/SocketDev/socket-sdk-js/HEAD/assets/repo/coverage.svg?v=fce8b9cdc6e7" height="20" alt="Coverage" /></picture>
+<picture><img src="https://raw.githubusercontent.com/SocketDev/socket-sdk-js/HEAD/assets/coverage.svg?v=e65f9d23a833" height="20" alt="Coverage" /></picture>
 
 [![Follow @SocketSecurity](https://img.shields.io/twitter/follow/SocketSecurity?style=social)](https://twitter.com/SocketSecurity)
 [![Follow @socket.dev on Bluesky](https://img.shields.io/badge/Follow-@socket.dev-1DA1F2?style=social&logo=bluesky)](https://bsky.app/profile/socket.dev)
