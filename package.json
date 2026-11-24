@@ -57,6 +57,7 @@
     "build": "node scripts/repo/build.mts",
     "check": "pnpm run fmt:check && pnpm run lint && pnpm run repo:type && pnpm run build",
     "check:api-contracts": "node scripts/repo/check/api-contracts-are-current.mts",
+    "check:openapi-pr": "node scripts/repo/check/openapi-pr.mts",
     "check:package-artifact": "node scripts/repo/package-artifact-is-complete.mts",
     "check:quota-sync": "node scripts/repo/validate-quota-sync.mts",
     "clean": "node scripts/repo/clean.mts",
