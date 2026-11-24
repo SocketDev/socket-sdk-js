@@ -53,4 +53,4 @@ export const mainCoverageThresholds = {
 // roster covers a narrow slice of src/ while the coverage denominator is all
 // of src/, so any tier-level global threshold fails whenever unrelated code
 // grows. The enforced gate is the merged main+isolated aggregate in
-// `.config/repo/cover.json`, checked by `scripts/fleet/cover.mts`.
+// `.config/cover.json`, checked by `scripts/fleet/cover.mts`.

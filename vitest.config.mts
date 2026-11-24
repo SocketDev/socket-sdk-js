@@ -2,7 +2,7 @@
  * @file ROOT vitest config that exists ONLY for the vitiate coverage-guided
  *   fuzz lane (Tier 2 of the property-and-fuzz-testing skill). It is NOT the
  *   config `pnpm test` uses — `pnpm test` passes `--config
- *   .config/repo/vitest.config.mts`, so the normal suite never loads this file
+ *   .config/vitest.config.mts`, so the normal suite never loads this file
  *   or the SWC-instrumenting `vitiatePlugin`. Why a ROOT config and not a
  *   custom-named one: vitiate's fuzz supervisor runs inside a vitest worker and
  *   re-spawns `vitest run <target>` for the coverage-guided child WITHOUT
@@ -14,7 +14,7 @@
  *   `globalThis.__vitiate_cov` map from the supervisor's `VITIATE_SHMEM` env)
  *   and the SWC instrument transform — without this file the child falls back
  *   to vitest defaults and dies with either "No test files found" or "coverage
- *   map not initialized". Run via `pnpm run test:fuzz` (scripts/repo/fuzz.mts),
+ *   map not initialized". Run via `pnpm run test:fuzz` (scripts/fuzz.mts),
  *   never `vitest` directly. In fuzzing mode (VITIATE_FUZZ=1, set by the
  *   runner) each `fuzz()` target (`test/**\/*.fuzz.ts`) is fed mutated Buffers;
  *   without it the targets replay the committed seed corpus as fast regression

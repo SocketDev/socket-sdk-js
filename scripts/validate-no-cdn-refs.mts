@@ -1,0 +1,242 @@
+#!/usr/bin/env node
+/*
+ * @file Fails on a hardcoded CDN URL, because the project takes its
+ *   dependencies from the registry for security and reliability.
+ */
+
+import { promises as fs } from 'node:fs'
+import path from 'node:path'
+import process from 'node:process'
+
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+import { findUpPackageJson } from '@socketsecurity/lib-stable/packages/find'
+import { isMainModule } from './cli.mts'
+import type { ScriptMeta } from './cli.mts'
+
+import { runMain } from './cli.mts'
+
+const logger = getDefaultLogger()
+
+const rootPath = path.dirname(findUpPackageJson(import.meta))
+
+// CDN domains to block
+const CDN_PATTERNS = [
+  /unpkg\.com/i,
+  /cdn\.jsdelivr\.net/i,
+  /esm\.sh/i,
+  /cdn\.skypack\.dev/i,
+  /ga\.jspm\.io/i,
+]
+
+// Directories to skip
+const SKIP_DIRS = new Set([
+  '.cache',
+  '.git',
+  '.next',
+  '.nuxt',
+  '.output',
+  '.turbo',
+  '.type-coverage',
+  '.yarn',
+  'build',
+  'coverage',
+  'dist',
+  'node_modules',
+])
+
+// File extensions to check
+const TEXT_EXTENSIONS = new Set([
+  '.bash',
+  '.cjs',
+  '.css',
+  '.cts',
+  '.htm',
+  '.html',
+  '.js',
+  '.json',
+  '.jsx',
+  '.md',
+  '.mjs',
+  '.mts',
+  '.sh',
+  '.svg',
+  '.ts',
+  '.tsx',
+  '.txt',
+  '.xml',
+  '.yaml',
+  '.yml',
+])
+
+async function main(): Promise<void> {
+  try {
+    const violations = await validateNoCdnRefs()
+
+    if (violations.length === 0) {
+      logger.success('No CDN references found')
+      process.exitCode = 0
+      return
+    }
+
+    logger.fail(`Found ${violations.length} CDN reference(s)`)
+    logger.log('')
+    logger.log('CDN URLs are not allowed in this codebase for security and')
+    logger.log('reliability reasons. Please use npm packages instead.')
+    logger.log('')
+    logger.log('Blocked CDN domains:')
+    logger.log('  - unpkg.com')
+    logger.log('  - cdn.jsdelivr.net')
+    logger.log('  - esm.sh')
+    logger.log('  - cdn.skypack.dev')
+    logger.log('  - ga.jspm.io')
+    logger.log('')
+    logger.log('Violations:')
+    logger.log('')
+
+    for (let i = 0, { length } = violations; i < length; i += 1) {
+      const violation = violations[i]!
+      logger.log(`  ${violation.file}:${violation.line}`)
+      logger.log(`    Domain: ${violation.cdnDomain}`)
+      logger.log(`    Content: ${violation.content}`)
+      logger.log('')
+    }
+
+    logger.log('Remove CDN references and use npm dependencies instead.')
+    logger.log('')
+
+    process.exitCode = 1
+  } catch (e) {
+    logger.fail(`Validation failed: ${errorMessage(e)}`)
+    process.exitCode = 1
+  }
+}
+
+const SCRIPT_META: ScriptMeta = {
+  describe: 'validate source files contain no CDN references',
+  help: `Usage: node scripts/validate-no-cdn-refs.mts\n\n--help, -h  show usage\n--describe  show purpose`,
+  json: 'result',
+}
+
+if (isMainModule(import.meta.url)) {
+  runMain(main, SCRIPT_META)
+}
+
+/**
+ * Check file contents for CDN references.
+ */
+export async function checkFileForCdnRefs(
+  filePath: string,
+): Promise<CdnViolation[]> {
+  const normalizedPath = normalizePath(filePath)
+  // Skip this validator script itself (it mentions CDN domains by necessity)
+  if (normalizedPath.endsWith('validate-no-cdn-refs.mts')) {
+    return []
+  }
+
+  try {
+    const content = await fs.readFile(normalizedPath, 'utf8')
+    const lines = content.split(/\r?\n/)
+    const violations = []
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]!
+      if (!line) {
+        continue
+      }
+      const lineNumber = i + 1
+
+      for (let j = 0, { length } = CDN_PATTERNS; j < length; j += 1) {
+        const pattern = CDN_PATTERNS[j]!
+        if (pattern.test(line)) {
+          const match = line.match(pattern)
+          if (match) {
+            violations.push({
+              file: normalizePath(path.relative(rootPath, normalizedPath)),
+              line: lineNumber,
+              content: line.trim(),
+              cdnDomain: match[0],
+            })
+          }
+        }
+      }
+    }
+
+    return violations
+  } catch (e) {
+    // Skip files we cannot read. A read failure here usually means the file is
+    // binary despite its extension.
+    const err = e as NodeJS.ErrnoException
+    if (err.code === 'EISDIR' || err.message.includes('ENOENT')) {
+      return []
+    }
+    // For other errors, try to continue
+    return []
+  }
+}
+
+/**
+ * Recursively find all text files to scan.
+ */
+export async function findTextFiles(
+  dir: string,
+  options: { files?: string[] | undefined } = {},
+): Promise<string[]> {
+  const { files = [] } = options
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true })
+
+    for (let i = 0, { length } = entries; i < length; i += 1) {
+      const entry = entries[i]!
+      const fullPath = path.join(dir, entry.name)
+
+      if (entry.isDirectory()) {
+        // Skip certain directories and hidden directories (except .github)
+        if (
+          !SKIP_DIRS.has(entry.name) &&
+          (!entry.name.startsWith('.') || entry.name === '.github')
+        ) {
+          await findTextFiles(fullPath, { files })
+        }
+      } else if (entry.isFile() && shouldScanFile(entry.name)) {
+        files.push(fullPath)
+      }
+    }
+  } catch {
+    // Skip directories we can't read
+  }
+
+  return files
+}
+
+interface CdnViolation {
+  file: string
+  line: number
+  content: string
+  cdnDomain: string
+}
+
+/**
+ * Check if file should be scanned.
+ */
+export function shouldScanFile(filename: string): boolean {
+  const ext = path.extname(filename).toLowerCase()
+  return TEXT_EXTENSIONS.has(ext)
+}
+
+/**
+ * Validate all files for CDN references.
+ */
+export async function validateNoCdnRefs(): Promise<CdnViolation[]> {
+  const files = await findTextFiles(rootPath)
+  const allViolations = []
+
+  for (let i = 0, { length } = files; i < length; i += 1) {
+    const file = files[i]!
+    const violations = await checkFileForCdnRefs(file)
+    allViolations.push(...violations)
+  }
+
+  return allViolations
+}

@@ -31,7 +31,7 @@ allowBuilds:
   # ship it, so the self-referential dep never needs build scripts.
   '@socketsecurity/sdk': false
   # @swc/core native binding — vitiate's coverage-guided fuzz lane
-  # (scripts/repo/fuzz.mts) SWC-instruments src for coverage feedback.
+  # (scripts/fuzz.mts) SWC-instruments src for coverage feedback.
   '@swc/core': true
   rolldown: true
 
