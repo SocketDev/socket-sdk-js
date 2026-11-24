@@ -9,7 +9,7 @@ import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
-import { REPO_ROOT } from './paths.mts'
+import { REPO_ROOT } from './paths/repo.mts'
 import { isMainModule } from './cli.mts'
 import type { ScriptMeta } from './cli.mts'
 

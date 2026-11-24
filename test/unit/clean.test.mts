@@ -3,16 +3,16 @@
  */
 
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { describe, expect, it } from 'vitest'
 
-import { selectCleanTasks } from '../../scripts/clean.mts'
+import { selectCleanTasks } from '../../scripts/clean/run.mts'
+import { REPO_ROOT } from '../../scripts/paths/repo.mts'
+import { CLEAN_RUNNER_PATH } from '../../scripts/paths/runners.mts'
 
-const scriptPath = fileURLToPath(
-  new URL('../../scripts/clean.mts', import.meta.url),
-)
+const scriptPath = path.join(REPO_ROOT, CLEAN_RUNNER_PATH)
 
 describe('clean CLI', () => {
   it.each([['--help'], ['--unknown-option', '--help']])(

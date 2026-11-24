@@ -1,5 +1,5 @@
 /**
- * @file Run build commands with explicit exit statuses.
+ * @file Run child commands with explicit exit statuses.
  */
 
 import type { SpawnOptions } from '@socketsecurity/lib-stable/process/spawn/types'
@@ -17,6 +17,21 @@ interface CommandSpec {
   options?: SpawnOptions | undefined
 }
 
+function getExitCode(result: unknown): number | undefined {
+  if (typeof result !== 'object' || result === null) {
+    return undefined
+  }
+  const signal = 'signal' in result ? result.signal : undefined
+  const code = 'code' in result ? result.code : undefined
+  if (signal != null) {
+    return 1
+  }
+  if (typeof code === 'number') {
+    return code
+  }
+  return 'code' in result && code == null ? 1 : undefined
+}
+
 /**
  * Run a command and return a promise that resolves with the exit code.
  */
@@ -31,12 +46,12 @@ export async function runCommand(
       shell: isWin32(),
       ...spawnOptions,
     })
-    return result.code
+    return getExitCode(result) ?? 1
   } catch (e) {
-    // spawn() from @socketsecurity/lib-stable throws on non-zero exit
-    // Return the exit code from the error
-    if (typeof e === 'object' && e !== null && 'code' in e) {
-      return e.code as number
+    // spawn() throws on a non-zero exit; signals may leave code null.
+    const exitCode = getExitCode(e)
+    if (exitCode !== undefined) {
+      return exitCode
     }
     throw e
   }

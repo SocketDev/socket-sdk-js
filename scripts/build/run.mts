@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * @file Build runner: rolldown for the bundle, tsgo for declarations.
  */
@@ -15,15 +16,16 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { REPO_ROOT } from './paths.mts'
-import { buildConfig } from '../.config/rolldown.config.mts'
-import { browserBuildConfig } from '../.config/rolldown.browser.config.mts'
-import { externalsBuildConfig } from '../.config/rolldown.externals.config.mts'
-import { runSequence } from './run-command.mts'
-import { isMainModule } from './cli.mts'
-import type { ScriptMeta } from './cli.mts'
+import { REPO_ROOT } from '../paths/repo.mts'
+import { CLEAN_RUNNER_PATH } from '../paths/runners.mts'
+import { buildConfig } from '../../.config/rolldown.config.mts'
+import { browserBuildConfig } from '../../.config/rolldown.browser.config.mts'
+import { externalsBuildConfig } from '../../.config/rolldown.externals.config.mts'
+import { runSequence } from '../run-command.mts'
+import { isMainModule } from '../cli.mts'
+import type { ScriptMeta } from '../cli.mts'
 
-import { runMain } from './cli.mts'
+import { runMain } from '../cli.mts'
 
 // Initialize logger
 const logger = getDefaultLogger()
@@ -53,7 +55,7 @@ export async function buildSource(
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/clean.mts', '--dist', '--quiet'],
+        args: [CLEAN_RUNNER_PATH, '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -146,7 +148,7 @@ export async function buildTypes(options: BuildOptions = {}): Promise<number> {
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/clean.mts', '--types', '--quiet'],
+      args: [CLEAN_RUNNER_PATH, '--types', '--quiet'],
       command: 'node',
     })
   }
@@ -252,7 +254,7 @@ export async function runFullBuild(options: BuildOptions): Promise<number> {
   const { quiet } = { __proto__: null, ...options } as typeof options
   const cleanExitCode = await runSequence([
     {
-      args: ['scripts/clean.mts', '--dist', '--types', '--quiet'],
+      args: [CLEAN_RUNNER_PATH, '--dist', '--types', '--quiet'],
       command: 'node',
     },
   ])

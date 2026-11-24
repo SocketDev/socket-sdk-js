@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * @file Unified clean runner with flag-based configuration. Removes build
  *   artifacts, caches, and other generated files.
@@ -12,11 +13,11 @@ import fastGlob from 'fast-glob'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { createSectionHeader } from '@socketsecurity/lib-stable/stdio/header'
-import { REPO_ROOT } from './paths.mts'
-import { isMainModule } from './cli.mts'
-import type { ScriptMeta } from './cli.mts'
+import { REPO_ROOT } from '../paths/repo.mts'
+import { isMainModule } from '../cli.mts'
+import type { ScriptMeta } from '../cli.mts'
 
-import { runMain } from './cli.mts'
+import { runMain } from '../cli.mts'
 
 // Initialize logger
 const logger = getDefaultLogger()

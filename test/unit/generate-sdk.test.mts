@@ -14,6 +14,7 @@ import { generateSdkContracts } from '../../scripts/generate-sdk.mts'
 import { renderOpenApiTypes } from '../../scripts/generate-types.mts'
 import {
   findOpenApiDrift,
+  formatOpenApiArtifact,
   normalizeOpenApiDocument,
   OPENAPI_CONTRACTS,
   readOpenApiInputs,
@@ -181,6 +182,23 @@ describe('Socket OpenAPI inputs', () => {
 })
 
 describe('OpenAPI artifact freshness', () => {
+  it('reports a normalized relative path when generated output is invalid', async () => {
+    const rootPath = await createContractDirectory()
+    await mkdir(path.join(rootPath, '.config'), { recursive: true })
+    await writeFile(
+      path.join(rootPath, '.config/oxfmtrc.json'),
+      JSON.stringify({}),
+    )
+
+    await expect(
+      formatOpenApiArtifact(
+        path.join(rootPath, 'types', 'api.d.ts'),
+        'type = ;',
+        rootPath,
+      ),
+    ).rejects.toThrow('File: types/api.d.ts')
+  })
+
   it('regenerates both recorded contracts and checks them without changing files', async () => {
     const rootPath = await createContractDirectory()
     const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url))
