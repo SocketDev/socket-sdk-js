@@ -11,7 +11,7 @@ import {
   MIME_DB_STUB,
   SDK_BUNDLE_COMMENTS,
 } from './rolldown.config.mts'
-import { REPO_ROOT } from '../scripts/paths.mts'
+import { REPO_ROOT } from '../scripts/paths/repo.mts'
 
 import type { OutputOptions, RolldownOptions } from 'rolldown'
 

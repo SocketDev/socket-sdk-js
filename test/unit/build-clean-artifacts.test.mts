@@ -11,8 +11,8 @@ import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import rootPkgJson from '../../package.json' with { type: 'json' }
-import { isBuildNeeded, selectBuildMode } from '../../scripts/build.mts'
-import { cleanDirectories, selectCleanTasks } from '../../scripts/clean.mts'
+import { isBuildNeeded, selectBuildMode } from '../../scripts/build/run.mts'
+import { cleanDirectories, selectCleanTasks } from '../../scripts/clean/run.mts'
 
 const fixtureDirectories: string[] = []
 

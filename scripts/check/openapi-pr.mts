@@ -14,10 +14,6 @@ import type { ScriptMeta } from '../cli.mts'
 async function main(): Promise<void> {
   const exitCode = await runSequence([
     {
-      args: ['run', 'check:api-contracts'],
-      command: 'pnpm',
-    },
-    {
       args: ['run', 'check'],
       command: 'pnpm',
     },

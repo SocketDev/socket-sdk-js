@@ -7,6 +7,7 @@ import { readFile, rename, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { httpJson } from '@socketsecurity/lib-stable/http-request'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { format } from 'oxfmt'
 
 import type { OpenAPI3 } from 'openapi-typescript'
@@ -39,6 +40,7 @@ export const OPENAPI_CONTRACTS: readonly OpenApiContract[] = [
 
 export const OPENAPI_STRICT_PATH = 'src/types/strict.mts'
 export const OPENAPI_INDEX_PATH = 'src/index.mts'
+export const OPENAPI_FORMAT_MAX_PASSES = 4
 
 export const OPENAPI_ARTIFACT_PATHS: readonly string[] = [
   ...OPENAPI_CONTRACTS.flatMap(contract => [contract.snapshot, contract.types]),
@@ -225,15 +227,41 @@ export async function formatOpenApiArtifact(
   content: string,
   rootPath: string,
 ): Promise<string> {
+  const displayPath = normalizePath(path.relative(rootPath, filePath))
   const configPath = path.join(rootPath, '.config/oxfmtrc.json')
   const config = JSON.parse(await readFile(configPath, 'utf8')) as FormatConfig
-  const result = await format(filePath, content, config)
-  if (result.errors.length > 0) {
-    throw new Error(
-      `OpenAPI generation failed in ${filePath}: output contains syntax errors. Repair the generator before writing artifacts.`,
-    )
+  let formatted = content
+  for (let pass = 0; pass < OPENAPI_FORMAT_MAX_PASSES; pass += 1) {
+    const result = await format(displayPath, formatted, config)
+    if (result.errors.length > 0) {
+      const diagnostics = result.errors.flatMap(error => {
+        const lines = error.codeframe
+          ? error.codeframe.trim().split('\n')
+          : [error.message, ...(error.helpMessage ? [error.helpMessage] : [])]
+        return lines.map(line => `  ${line}`)
+      })
+      throw new Error(
+        [
+          'OpenAPI generation failed.',
+          `  File: ${displayPath}`,
+          '  Output contains syntax errors:',
+          ...diagnostics,
+          '  Repair the generator before writing artifacts.',
+        ].join('\n'),
+      )
+    }
+    if (result.code === formatted) {
+      return formatted
+    }
+    formatted = result.code
   }
-  return result.code
+  throw new Error(
+    [
+      'OpenAPI generation failed.',
+      `  File: ${displayPath}`,
+      `  Formatting did not stabilize after ${OPENAPI_FORMAT_MAX_PASSES} passes.`,
+    ].join('\n'),
+  )
 }
 
 export async function findOpenApiDrift(
