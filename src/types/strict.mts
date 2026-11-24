@@ -14,7 +14,11 @@ export type CreateFullScanOptions = {
   commit_hash?: string | undefined
   commit_message?: string | undefined
   committers?: string | undefined
+  integration_branch_url?: string | undefined
+  integration_commit_url?: string | undefined
   integration_org_slug?: string | undefined
+  integration_pull_request_url?: string | undefined
+  integration_repo_url?: string | undefined
   integration_type?:
     | 'api'
     | 'github'
@@ -43,6 +47,7 @@ export type FullScanItem = {
   commit_message?: string | null | undefined
   committers?: string[] | undefined
   created_at: string
+  has_cached_result?: boolean | undefined
   html_report_url: string
   html_url?: string | null | undefined
   id: string
@@ -67,6 +72,7 @@ export type FullScanItem = {
  * Strict type for full scan list data.
  */
 export type FullScanListData = {
+  endCursor?: string | null | undefined
   nextPage?: number | null | undefined
   nextPageCursor?: string | null | undefined
   results: FullScanItem[]
@@ -76,6 +82,7 @@ export type FullScanListData = {
  * Strict type for get repository options.
  */
 export type GetRepositoryOptions = {
+  branch?: string | undefined
   workspace?: string | undefined
 }
 
@@ -87,6 +94,7 @@ export type ListFullScansOptions = {
   commit_hash?: string | undefined
   direction?: 'asc' | 'desc' | undefined
   from?: string | undefined
+  has_cached_result?: boolean | undefined
   page?: number | undefined
   per_page?: number | undefined
   pull_request?: string | undefined
@@ -134,6 +142,32 @@ export type RepositoriesListData = {
  */
 export type RepositoryItem = {
   archived: boolean
+  branch_tracking?:
+    | {
+        /**
+         * The branch name supplied in the branch query parameter.
+         *
+         * @default
+         */
+        branch: string
+        /**
+         * Whether the branch is the default branch or matches an
+         * effective tracked branch pattern.
+         *
+         * @default false
+         */
+        is_tracked: boolean
+        /**
+         * Whether the branch exactly matches the repository default
+         * branch.
+         *
+         * @default false
+         */
+        is_default: boolean
+        [key: string]: unknown
+      }
+    | null
+    | undefined
   created_at: string
   default_branch: string | null
   description: string | null
@@ -174,12 +208,32 @@ export type RepositoryItem = {
            * @default
            */
           repo_id: string | null
+          [key: string]: unknown
         }
       | undefined
+    [key: string]: unknown
   } | null
   name: string
   slig: string
   slug: string
+  tracked_branch_patterns?:
+    | {
+        /**
+         * A branch glob matched case-insensitively, including dot
+         * characters.
+         *
+         * @default
+         */
+        pattern: string
+        /**
+         * An optional description of the branch pattern.
+         *
+         * @default
+         */
+        description?: string | undefined
+        [key: string]: unknown
+      }[]
+    | undefined
   updated_at: string
   visibility: 'public' | 'private'
   workspace: string
@@ -250,8 +304,10 @@ export type RepositoryListItem = {
                * @default
                */
               repo_id: string | null
+              [key: string]: unknown
             }
           | undefined
+        [key: string]: unknown
       }
     | null
     | undefined

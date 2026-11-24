@@ -2563,7 +2563,11 @@ type CreateFullScanOptions = {
   commit_hash?: string | undefined
   commit_message?: string | undefined
   committers?: string | undefined
+  integration_branch_url?: string | undefined
+  integration_commit_url?: string | undefined
   integration_org_slug?: string | undefined
+  integration_pull_request_url?: string | undefined
+  integration_repo_url?: string | undefined
   integration_type?:
     | 'api'
     | 'github'
@@ -2634,7 +2638,7 @@ type CustomResponseType = 'response' | 'text' | 'json'
 
 Strict type for delete repository label result.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L393).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L449).
 
 ```typescript
 type DeleteRepositoryLabelResult = {
@@ -2650,7 +2654,7 @@ type DeleteRepositoryLabelResult = {
 
 Strict type for delete operation result.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L349).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L405).
 
 ```typescript
 type DeleteResult = {
@@ -2931,7 +2935,7 @@ type FixVersionUpdate = { version: string; updateType: FixUpdateType }
 
 Strict type for full scan item.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L39).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L43).
 
 ```typescript
 type FullScanItem = {
@@ -2941,6 +2945,7 @@ type FullScanItem = {
   commit_message?: string | null | undefined
   committers?: string[] | undefined
   created_at: string
+  has_cached_result?: boolean | undefined
   html_report_url: string
   html_url?: string | null | undefined
   id: string
@@ -2966,10 +2971,11 @@ type FullScanItem = {
 
 Strict type for full scan list data.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L69).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L74).
 
 ```typescript
 type FullScanListData = {
+  endCursor?: string | null | undefined
   nextPage?: number | null | undefined
   nextPageCursor?: string | null | undefined
   results: FullScanItem[]
@@ -2980,7 +2986,7 @@ type FullScanListData = {
 
 Strict type for full scan list result.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L292).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L348).
 
 ```typescript
 type FullScanListResult = {
@@ -3018,7 +3024,7 @@ type FullScanManifestEntry = {
 
 Strict type for single full scan result.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L303).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L359).
 
 ```typescript
 type FullScanResult = {
@@ -3230,10 +3236,11 @@ type GetPatchPackagesResponse = {
 
 Strict type for get repository options.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L78).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L84).
 
 ```typescript
 type GetRepositoryOptions = {
+  branch?: string | undefined
   workspace?: string | undefined
 }
 ```
@@ -3314,7 +3321,7 @@ type LicensePolicyViolations = NonNullable<
 
 Strict type for list full scans options.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L85).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L92).
 
 ```typescript
 type ListFullScansOptions = {
@@ -3322,6 +3329,7 @@ type ListFullScansOptions = {
   commit_hash?: string | undefined
   direction?: 'asc' | 'desc' | undefined
   from?: string | undefined
+  has_cached_result?: boolean | undefined
   page?: number | undefined
   per_page?: number | undefined
   pull_request?: string | undefined
@@ -3338,7 +3346,7 @@ type ListFullScansOptions = {
 
 Strict type for list repositories options.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L104).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L112).
 
 ```typescript
 type ListRepositoriesOptions = {
@@ -3620,7 +3628,7 @@ type OrgPurlQuery = PurlQuery & {
 
 Strict type for organization item.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L116).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L124).
 
 ```typescript
 type OrganizationItem = {
@@ -3636,7 +3644,7 @@ type OrganizationItem = {
 
 Strict type for organizations list result. The GET /organizations endpoint returns `organizations` as a map keyed by organization id (OpenAPI `additionalProperties`), not an array. Type it as a Record so consumers iterate with Object.values()/Object.entries().
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L325).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L381).
 
 ```typescript
 type OrganizationsResult = {
@@ -4204,7 +4212,7 @@ interface RawFetchResult {
 
 Strict type for repositories list data.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L127).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L135).
 
 ```typescript
 type RepositoriesListData = {
@@ -4217,7 +4225,7 @@ type RepositoriesListData = {
 
 Strict type for repositories list result.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L338).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L394).
 
 ```typescript
 type RepositoriesListResult = {
@@ -4233,11 +4241,37 @@ type RepositoriesListResult = {
 
 Strict type for repository item.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L135).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L143).
 
 ```typescript
 type RepositoryItem = {
   archived: boolean
+  branch_tracking?:
+    | {
+        /**
+         * The branch name supplied in the branch query parameter.
+         *
+         * @default
+         */
+        branch: string
+        /**
+         * Whether the branch is the default branch or matches an
+         * effective tracked branch pattern.
+         *
+         * @default false
+         */
+        is_tracked: boolean
+        /**
+         * Whether the branch exactly matches the repository default
+         * branch.
+         *
+         * @default false
+         */
+        is_default: boolean
+        [key: string]: unknown
+      }
+    | null
+    | undefined
   created_at: string
   default_branch: string | null
   description: string | null
@@ -4278,12 +4312,32 @@ type RepositoryItem = {
            * @default
            */
           repo_id: string | null
+          [key: string]: unknown
         }
       | undefined
+    [key: string]: unknown
   } | null
   name: string
   slig: string
   slug: string
+  tracked_branch_patterns?:
+    | {
+        /**
+         * A branch glob matched case-insensitively, including dot
+         * characters.
+         *
+         * @default
+         */
+        pattern: string
+        /**
+         * An optional description of the branch pattern.
+         *
+         * @default
+         */
+        description?: string | undefined
+        [key: string]: unknown
+      }[]
+    | undefined
   updated_at: string
   visibility: 'public' | 'private'
   workspace: string
@@ -4294,7 +4348,7 @@ type RepositoryItem = {
 
 Strict type for repository label item.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L191).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L245).
 
 ```typescript
 type RepositoryLabelItem = {
@@ -4310,7 +4364,7 @@ type RepositoryLabelItem = {
 
 Strict type for single repository label result.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L382).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L438).
 
 ```typescript
 type RepositoryLabelResult = {
@@ -4326,7 +4380,7 @@ type RepositoryLabelResult = {
 
 Strict type for repository labels list data.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L202).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L256).
 
 ```typescript
 type RepositoryLabelsListData = {
@@ -4339,7 +4393,7 @@ type RepositoryLabelsListData = {
 
 Strict type for repository labels list result.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L371).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L427).
 
 ```typescript
 type RepositoryLabelsListResult = {
@@ -4355,7 +4409,7 @@ type RepositoryLabelsListResult = {
 
 Strict type for repository list item.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L210).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L264).
 
 ```typescript
 type RepositoryListItem = {
@@ -4401,8 +4455,10 @@ type RepositoryListItem = {
                * @default
                */
               repo_id: string | null
+              [key: string]: unknown
             }
           | undefined
+        [key: string]: unknown
       }
     | null
     | undefined
@@ -4418,7 +4474,7 @@ type RepositoryListItem = {
 
 Strict type for single repository result.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L360).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L416).
 
 ```typescript
 type RepositoryResult = {
@@ -5029,7 +5085,7 @@ type StartOrgFixComputationData = {
 
 Options for streaming a full scan.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L314).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L370).
 
 ```typescript
 type StreamFullScanOptions = {
@@ -5051,7 +5107,7 @@ type StreamOrgFullScanOptions = {
 
 Error result type for all SDK operations.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L268).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L324).
 
 ```typescript
 type StrictErrorResult = {
@@ -5067,7 +5123,7 @@ type StrictErrorResult = {
 
 Generic strict result type combining success and error.
 
-Declared in [src/types/strict.mts](../src/types/strict.mts#L279).
+Declared in [src/types/strict.mts](../src/types/strict.mts#L335).
 
 ```typescript
 type StrictResult<T> =
@@ -5891,19 +5947,19 @@ const scanFixtures = {
 
 #### `$defs` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8578).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L9775).
 
 #### `components` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2730).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L3085).
 
 #### `external` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L8580).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L9777).
 
 #### `operations` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L31664).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L35238).
 
 #### `paths` (type)
 
@@ -5913,7 +5969,7 @@ Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L6).
 
 #### `webhooks` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L2728).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L3083).
 
 </details>
 
@@ -5985,28 +6041,26 @@ type OpReturnType<Operation> = Operation extends {
 
 #### `$defs` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1317).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1875).
 
 #### `components` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1308).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1866).
 
 #### `external` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1319).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1877).
 
 #### `operations` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1321).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1879).
 
 #### `paths` (type)
 
-This file was auto-generated by openapi-typescript. Do not make direct changes to the file.
-
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L6).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L19).
 
 #### `webhooks` (type)
 
-Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1306).
+Canonical generated API declaration: [types/api-v1.d.ts](../types/api-v1.d.ts#L1864).
 
 </details>
