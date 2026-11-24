@@ -5959,7 +5959,7 @@ Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L9777).
 
 #### `operations` (type)
 
-Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L35238).
+Canonical generated API declaration: [types/api.d.ts](../types/api.d.ts#L35256).
 
 #### `paths` (type)
 
