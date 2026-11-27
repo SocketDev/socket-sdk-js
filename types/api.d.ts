@@ -33733,6 +33733,7 @@ export interface operations {
           | 'OAuthClientSecretRotated'
           | 'OAuthClientDisabled'
           | 'OAuthClientEnabled'
+          | 'OAuthClientDeleted'
         /**
          * Number of events per page.
          */
