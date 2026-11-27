@@ -50281,7 +50281,8 @@
                 "OAuthClientConfigured",
                 "OAuthClientSecretRotated",
                 "OAuthClientDisabled",
-                "OAuthClientEnabled"
+                "OAuthClientEnabled",
+                "OAuthClientDeleted"
               ]
             }
           },
